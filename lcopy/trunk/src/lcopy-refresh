@@ -1,0 +1,270 @@
+#!/bin/sh
+#
+# set -x
+#
+########################################################################
+#
+# lcopy-refresh: sync local copy to repository of any version control system
+#
+# Copyright (C) 2007 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+LIBLCOPY=liblcopy.sh
+
+# Supported backedns
+VC="cvs git svn arch hg darcs bzr mtn mtn_lcopy"
+# TODO: svk?
+
+DIR=`pwd`
+LOG=/dev/stdout
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+
+function print_usage
+{
+    echo "Usage: "
+    echo "lcopy-refresh [--log=logfile|-l=logfile|--log logfile|-l logfile]"
+    echo "              [TOP_DIRECTORY]"
+}
+
+function abort
+{
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --log|-l)
+		if [ $# -gt 0 ]; then
+		    shift 1
+
+		    LOG=$1
+		    shift 1
+		else
+		    echo no option argument for "$1" 1>&1
+		    print_usage 1>&2
+		    abort
+		fi
+		;;
+	    --log=*)
+		LOG=`echo $1 | sed -e 's/--log=//'`
+		shift 1
+		;;
+	    -l=*)
+		LOG=`echo $1 | sed -e 's/--l=//'`
+		shift 1
+		;;
+	    -*)
+		echo unknown option: "$1" 1>&2
+		print_usage 1>&2
+		abort
+		;;
+	    *)
+		break
+		;;
+	esac
+    done
+
+    if test $# -gt 1; then
+	echo "too many arguments" 1>&2
+	print_usage 1>&2
+	abort
+    elif test $# = 1; then
+	DIR=$1
+	shift
+    fi
+}
+
+function refresh
+{
+    r=
+    tstamp=
+    cur_dir=
+
+    cd $1
+
+    for v in $VC; do
+	if eval lcopy_is_${v}; then
+
+	    cur_dir=`pwd`
+	    tstamp=`LANG=C date`
+	    es_print start-updating          \
+		--vcs=${v}                   \
+		--directory=\"${cur_dir}\"   \
+		--date=\"${tstamp}\"  >> $LOG
+
+	    eval update_${v}
+	    r=$?
+	   
+	    tstamp=`LANG=C date`
+	    if test $r == 0; then
+		es_print successful-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r
+	    else
+		es_print fail-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r
+	    fi  >> $LOG
+
+	    return $r
+	fi
+    done
+
+
+    for d in *; do
+	if test -d "${d}"; then
+	   (refresh "${d}")
+	fi
+    done
+}
+
+
+#
+# Darcs
+#
+function update_darcs
+{
+    which darcs > /dev/null 2>> $LOG && darcs pull -a 
+}
+
+#
+# Bazzar NG
+#
+function update_bzr
+{
+    which bzr > /dev/null 2>> $LOG && bzr update
+}
+
+#
+# Mercurial
+#
+function update_hg
+{
+    which hg > /dev/null 2>> $LOG && hg update
+} 
+
+#
+# Arch
+#
+function update_arch
+{
+    if which baz >/dev/null 2>/dev/null; then
+	baz replay
+    elif which tla > /dev/null 2>/dev/null; then
+	tla replay
+    else
+	echo "both tla and baz are not found" 2>$LOG 1>&2 
+	return 1
+    fi
+}
+
+#
+# Subversion
+#
+function update_svn
+{
+    which svn > /dev/null 2>> $LOG && svn update
+}
+
+#
+# git
+#
+function update_git
+{
+    which git > /dev/null 2>> $LOG && git pull
+}
+
+#
+# CVS
+#
+function update_cvs
+{
+    which cvs > /dev/null 2>> $LOG && cvs update -d
+}
+
+#
+# Monotone
+#
+# See http://www.openembedded.org/wiki/GettingStarted
+#
+
+function update_mtn
+{
+    r=
+    mtn_db=
+
+    
+    if ! which mtn > /dev/null 2>> $LOG; then
+	return 1
+    fi
+
+    for m in *.mtn; do
+	if test -f "${m}"; then
+	    mtn_db="`pwd`/${m}"
+	fi
+    done
+
+    if test x = "x${mtn_db}"; then
+	return 1
+    fi
+
+    mtn --db="${mtn_db}" pull
+    r=$?
+
+    if test $r != 0; then
+	return $r
+    fi
+
+    for d in *; do
+	if test -d "${d}"; then
+	    (refresh "${d}")
+	fi
+    done
+
+    return 0
+}
+
+function update_mtn_lcopy 
+{
+    which mtn > /dev/null 2>> $LOG && mtn update
+}
+
+function main
+{
+    parse_arguments "$@"
+    refresh ${DIR}
+}
+
+LANG=C
+
+try_source ${LIBLCOPY}
+main "$@"
+
+# lcopy-refresh ends here

@@ -1,0 +1,47 @@
+Summary: Scripts to update local copies gettting from vcs repositories 
+Name: lcopy
+Version: @PACKAGE_VERSION@
+Release: 0
+Source: lcopy-@PACKAGE_VERSION@.tar.bz2
+#Requires: 
+Buildarch: noarch
+
+Buildroot: %{_tmppath}/%{name}-root
+License: GPL
+
+Group: Development/Tools
+
+%description
+Scripts to update local copies getting from vcs  repositories 
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/lcopy-refresh.d
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.daily
+
+install -p -m 755 etc/lcopy-refresh.cron    $RPM_BUILD_ROOT%{_sysconfdir}/cron.daily/lcopy-refresh
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%{_bindir}/lcopy-rebirth
+%{_bindir}/lcopy-refresh
+%{_bindir}/liblcopy.sh
+
+%attr(0755, root, root) %{_sysconfdir}/cron.daily/lcopy-refresh
+%attr(0755, root, root) %dir %{_sysconfdir}/lcopy-refresh.d
+
+%changelog
+* Mon Aug 27 2007 Masatake YAMATO <yamato@redhat.com> 0.0.2-0
+- First RPM build.

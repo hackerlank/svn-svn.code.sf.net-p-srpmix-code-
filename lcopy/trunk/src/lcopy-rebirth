@@ -1,0 +1,224 @@
+#!/bin/sh
+#
+# set -x
+# 
+########################################################################
+#
+# lcopy-rebirth: regenerate command lines to retrieve local copies
+#
+# Copyright (C) 2007 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+# Supported backedns
+VC="hg cvs svn git darcs"
+
+LIBLCOPY=liblcopy.sh
+
+function generate_cmdline
+{
+    (cd $1;
+	for v in $VC; do
+	    if eval lcopy_is_${v}; then
+		eval generate_${v}_cmdline
+		return $?
+	    fi
+	done
+
+	report_unsupported_vc $1
+
+	return -1
+	)
+}
+
+function report_unsupported_vc
+{
+    echo "# [-1] $1"
+    echo "echo version control system used in $1 is not supported"
+}
+
+function report_no_vc
+{
+	echo "# [-2] $1"
+        echo "echo $1 may not be under any version control system"
+}
+
+#
+# CVS
+#
+function generate_cvs_cmdline
+{
+    cvs_root=
+    cvs_repo=
+    top_dir=`pwd`
+    cvs_dir=$(basename  ${top_dir})
+    
+    (cd CVS; 
+	if test -f Root; then
+	    cvs_root=`cat Root`
+	else
+	    echo "cannot find cvs Root file" 1>&2
+	    return 1
+	fi
+
+	if test -f Repository; then
+	    cvs_repo=`cat Repository`
+	else
+	    echo "cannot find cvs Repository file" 1>&2
+	    return 1
+	fi
+	
+	# TODO
+	# cvs login
+	# EXPECT is needed.
+	# echo '# 1'
+	# echo 'echo | ' cvs -d"${cvs_root}" login
+	
+	echo "# [0] ${top_dir}"
+	echo cvs -d"${cvs_root}" checkout -P -d ${cvs_dir} ${cvs_repo}
+	return 0
+	)
+}
+
+#
+# Darcs
+#
+function generate_darcs_cmdline
+{
+    darcs_defaultrepo_file="`pwd`/_darcs/prefs/defaultrepo"
+    darcs_defaultrepo=
+
+    if test ! -r "${darcs_defaultrepo_file}"; then
+	echo "canot read defaultrepo file: ${darcs_defaultrepo_file}" 1>&2
+	return 1
+    fi
+
+    darcs_defaultrepo=`cat ${darcs_defaultrepo_file}`
+
+    top_dir=`pwd`
+    echo "# [0] ${top_dir}"
+    echo "darcs get ${darcs_defaultrepo} `basename ${top_dir}`"
+    return 0
+}
+
+#
+# Git
+#
+function generate_git_cmdline
+{
+    git_remote_origin_proc="`git-config  --get remote.origin.url`"
+    git_branches_origin_file="`pwd`/.git/branches/origin"
+    git_remotes_origin_file="`pwd`/.git/remotes/origin"
+
+    git_origin=
+
+    if test -n "${git_remote_origin_proc}"; then
+	git_origin="${git_remote_origin_proc}"
+    elif test -r "${git_branches_origin_file}"; then
+	git_origin=`cat ${git_branches_origin_file}`
+    elif test -r "${git_remotes_origin_file}"; then
+	git_origin=`cat ${git_remotes_origin_file} | grep URL: | sed -e 's/URL: //'`
+    else
+	echo "cannot read origin file: ${git_branches_origin_file}" 1>&2
+	echo "cannot read origin file: ${git_remotes_origin_file}" 1>&2
+	echo "git-config for `remote.origin.url` returns nothing" 1>&2
+	return 1
+    fi
+
+    top_dir=`pwd`
+    echo "# [0] ${top_dir}"
+    echo "git-clone ${git_origin} `basename ${top_dir}`"
+    return 0
+}
+
+#
+# Subversion
+#
+function generate_svn_cmdline
+{
+    svn_info=`svn info`
+    if test $? != 0; then
+	echo "fail in 'svn info' invocation" 1>&2
+	return 1
+    fi
+
+    svn_url=`echo "$svn_info" | grep 'URL: ' |  sed -e 's/URL: //'`
+    if test "x${svn_url}" = x; then
+	echo "cannot find URL line in svn_info output" 1>&2
+	return 1
+    fi
+    
+    top_dir=`pwd`
+    svn_dir=$(basename ${top_dir})
+
+    echo "# [0] ${top_dir}"
+    echo "svn checkout ${svn_url} ${svn_dir}"
+    return 0
+}
+
+#
+# Mercurial
+#
+function generate_hg_cmdline
+{
+    hg_path=`hg showconfig -u paths.default 2> /dev/null`
+    if test $? != 0; then
+	echo "fail in 'hg showconfig' invocation" 1>&2
+	return 1
+    fi
+
+    top_dir=`pwd`
+    echo "# [0] ${top_dir}"
+    echo "hg clone ${hg_path} `basename ${top_dir}`"
+    return 0
+}
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+
+try_source ${LIBLCOPY}
+
+for d in "$@"; do
+    if test -d "${d}"; then
+    	generate_cmdline "${d}"
+    fi
+done
+
+# ;; just return, anoncvs, anonymous???
+# /1 :pserver:anonymous@cvs.freetype.org:2401/cvs/freetype Ay=0=a%0bZ
+# /1 :pserver:anonymous@cvs-mirror.mozilla.org:2401/cvsroot Ay=0=a%0bZ
+# /1 :pserver:anonymous@cvs.freetype.org:2401/cvsroot Ay=0=a%0bZ
+# /1 :pserver:anonymous@remotesensing.org:2401/cvs Ay=0=a%0bZ
+# /1 :pserver:anonymous@cvs.imagemagick.org:2401/pathos/cvs Ay=0=a%0bZ
+
+# /1 :pserver:anoncvs@anoncvs.netbsd.org:2401/cvsroot Ay=0=h<Z
+# /1 :pserver:anoncvs@sources.redhat.com:2401/cvs/glibc Ay=0=h<Z
+# /1 :pserver:anoncvs@oss.software.ibm.com:2401/usr/cvs/icu Ay=0=h<Z
+
+# /1 :pserver:guest@openlab.ring.gr.jp:2401/circus/cvsroot AIbdZ,
+# /1 :pserver:gnus@cvs.gnus.org:2401/usr/local/cvsroot AI=bZ
+
+# /1 :pserver:anoncvs@sources.redhat.com:2401/cvs/src A
+
+# vc-rebirth ends here
