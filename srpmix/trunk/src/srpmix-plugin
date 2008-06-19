@@ -1,0 +1,105 @@
+#!/bin/sh
+#
+########################################################################
+#
+# srpmix-plugin: Run plugin scripts
+#
+# Copyright (C) 2008 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+LIBSRPMIX=libsrpmix.sh
+ROOTDIR=
+PLUGINDIR=/usr/share/srpmix/plugins
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-plugin [--help|-h]"
+    echo "  srpmix-plugin ROOTDIR"
+    echo 
+}
+
+function abort
+{
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+function parse_arguments
+{
+    status=
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test "x$1" = "x"; then
+        print_usage
+        abort
+    fi
+
+    ROOTDIR=$(cd $1; pwd)
+
+}
+
+function verify_commands
+{
+    while [ $# -gt 0 ]; do
+	if which $1 > /dev/null 2>&1; then
+	    :
+	else
+	    echo "cannot find $1" 1>&2
+	    abort
+	fi
+	shift 
+    done
+}
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        abort "cannot find $1"
+	exit 1
+    fi
+}
+
+function main
+{
+    parse_arguments "$@"
+
+    find $PLUGINDIR -perm +0100 -type f | sort | while read plugin
+    do
+        $plugin $ROOTDIR
+    done
+
+}
+
+try_source ${LIBSRPMIX}
+es_time main "$@"
+exit $?
