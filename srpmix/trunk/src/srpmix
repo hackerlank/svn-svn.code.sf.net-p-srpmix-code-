@@ -28,7 +28,7 @@
 # Constatns
 #
 DIR_MAJOR=3
-DIR_MINOR=0
+DIR_MINOR=99
 DIR_MICRO=0
 DIR_VERSION="${DIR_MAJOR}.${DIR_MINOR}.${DIR_MICRO}"
 
@@ -38,10 +38,10 @@ MOUNTPOINT_TEMPLATE="srpmix.iso.XXXXXXXXXX"
 
 PROFILE=SRPMIX
 LOGDIR=srpmix-LOG
-SPEC0DIR=srpmix-SPECS0
+SPEC0DIR=specs
 SPECDIR=srpmix-SPECS
-SOURCEDIR=srpmix-SOURCES
-BUILDDIR=srpmix-BUILD
+SOURCEDIR=archives
+BUILDDIR=pre-build
 SUBDIRS="${LOGDIR} SPECS ${BUILDDIR} ${SPEC0DIR} ${SPECDIR} ${SOURCEDIR}"
 GLOBAL_LOGFILE=srpmix-log.es
 LIBSRPMIX=libsrpmix.sh
@@ -266,7 +266,10 @@ function parse_arguments
     shift
 
     SRCFILES="$@"
-
+    BUILDNAME=""
+    if test "x$2" = "x"; then
+        BUILDNAME=.
+    fi
  
     verbose varset --ROOTDIR=\""${ROOTDIR}"\"
     verbose varset --SRCFILES=\""${SRCFILES}"\"
@@ -636,6 +639,9 @@ function srpm_deploy
     rootdir=$1
 
     srpm_file=$2
+
+    build_name=$3
+
     srpm_name=`basename ${srpm_file} .src.rpm`
 
     spec_file=`spec_file_get ${srpm_file}`
@@ -643,7 +649,10 @@ function srpm_deploy
 
     xspec_file="${srpm_name}.spec"
 
-    build_name="${srpm_name}"
+    if test "x$build_name" = "x"; then
+        build_name="${srpm_name}"
+    fi
+    archive_name=$build_name
     targets=
 
     status=
@@ -664,7 +673,7 @@ function srpm_deploy
     fi
 
     message install-start --srpm-file=\""${srpm_file}\""
-    srpm_install "${rootdir}" "${srpm_file}" > "${log_file_install}" 2>&1
+    srpm_install "${rootdir}" "${srpm_file}" $archive_name > "${log_file_install}" 2>&1
     status=$?
     message install-end --srpm-file=\""${srpm_file}"\" --status="${status}"
     log_freeze ${log_file_install}
@@ -687,7 +696,7 @@ function srpm_deploy
 	fi
     fi
     srpm_rearrange_spec "${rootdir}" \
-	${srpm_name} ${build_name} ${spec_file}  \
+	${archive_name} ${build_name} ${spec_file}  \
 	> "${rootdir}/${SPECDIR}/${xspec_file}"
 
     
@@ -753,9 +762,8 @@ function srpm_install
 {
     rootdir=$1
     srpm_file=$2
-    srpm_name=`basename ${srpm_file} .src.rpm`
+    srpm_name=$3
     status=
-
 
     # It seems that ${source_dir} is automatically created.
     # mkdir "${source_dir}"
@@ -793,7 +801,6 @@ function srpm_rearrange_spec
     build_name=$3
     spec_file=$4
 
-
     spec_file_header "${rootdir}" "${srpm_name}" "${build_name}" \
 	| spec_file_hack "${rootdir}" "${spec_file}"
 }
@@ -821,7 +828,6 @@ function srpm_build
     build_name=$3
     arch=$4
     status=
-
 
     verbose rpmbuild-bp				                \
 	--build-name="\"${rootdir}/${BUILDDIR}/${build_name}\"" \
@@ -1007,7 +1013,7 @@ function main
     for x in ${SRCFILES}; do
 	case "${x}" in
 	    *.rpm)
-		srpm_deploy ${ROOTDIR} ${x}
+		srpm_deploy ${ROOTDIR} ${x} $BUILDNAME
 		update_count $?
 		;;
 	    *.iso)

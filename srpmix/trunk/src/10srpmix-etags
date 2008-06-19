@@ -30,6 +30,7 @@ BUILDDIR=
 ETAGSDIR=
 LOGDIR=
 LOGFILE=
+PLUGINDIR=
 LIBSRPMIX=libsrpmix.sh
 
 BLACKLIST='.*\.bib$\|unic-005\.tex$\|.*\.srpmix$'
@@ -75,23 +76,13 @@ function parse_arguments
     ROOTDIR=$(cd $1;pwd)
     shift
 
-    BUILDDIR=${ROOTDIR}/srpmix-BUILD
-    ETAGSDIR=${ROOTDIR}/etags-TAGS
+    BUILDDIR=${ROOTDIR}/pre-build
     LOGDIR=${ROOTDIR}/srpmix-LOG
     LOGFILE=${ROOTDIR}/srpmix-LOG/etags-log.es
+    PLUGINDIR=${ROOTDIR}/plugins/etags
 
-
-    if test ! -e ${ETAGSDIR}; then
-	mkdir ${ETAGSDIR}
-	status=$?
-
-	if test $status != 0; then
-	    echo "fail to create: ${ETAGSDIR}" 1>&2
-	    abort
-	fi
-    elif test ! -d ${ETAGSDIR}; then
-	echo "${ETAGSDIR} is not directory" 1>&2
-	abort
+    if ! test -d "$PLUGINDIR"; then
+        mkdir -p $PLUGINDIR
     fi
 }
 
@@ -103,12 +94,12 @@ function run_etags
 
 
     es_print etags-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
-    find $d -type f \
+    (cd $d && find */ -type f \
 	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
 	| grep -v .bz2           \
 	| grep -v .gz            \
 	| grep -v "${BLACKLIST}" \
-	| ${ETAGS} -o $o -
+	| ${ETAGS} -o $o - )
     es_print etags-end --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
@@ -136,15 +127,10 @@ function try_source
 
 function main
 {
-    o= 
-
     verify_commands "${ETAGS}"
     parse_arguments "$@"
 
-    for d in ${BUILDDIR}/*; do
-	o=${ETAGSDIR}/`echo ${d} | sed -e 's!'"${BUILDDIR}/"'!!'`.etags
-	run_etags $d $o $LOGFILE
-    done 
+    run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
 }
 
 

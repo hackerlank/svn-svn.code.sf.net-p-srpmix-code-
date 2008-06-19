@@ -118,10 +118,10 @@ function run_gonzui
 	--output-directory=\"${output_dir}\"    \
 	| tee -a "${log}"
 
-    "${GONZUI}"                                 \
+    ( cd $(dirname $target_dir) && "${GONZUI}"  \
 	--db-dir="${output_dir}"                \
 	--exclude="${EXCLUDE}"                  \
-	${target_dir}
+	$(basename ${target_dir}) )
 
     es_print gonzui-end				\
 	--status=$?				\

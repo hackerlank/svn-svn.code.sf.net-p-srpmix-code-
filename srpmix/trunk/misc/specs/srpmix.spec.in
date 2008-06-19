@@ -12,7 +12,7 @@ License: GPL
 Group: Development/Tools
 
 %description
-Scripts to install and expand src.rpm.
+Scripts to expand src.rpm.
 
 %prep
 %setup -q
@@ -33,16 +33,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/srpmix
 %{_bindir}/libsrpmix.sh
 
-%{_bindir}/srpmix-etags
-%{_bindir}/srpmix-ctags
-%{_bindir}/srpmix-cscope
-%{_bindir}/srpmix-gonzui
-
-%{_bindir}/srpmix-vanilla
-
-%{_bindir}/srpmix-spider
-
 %{_bindir}/srpmix-meta-hardlink
+%{_bindir}/build-sources.sh
+%{_bindir}/srpmix-dist
+%{_bindir}/srpmix-plugin
+
+%{_datadir}/srpmix/plugins
 
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0

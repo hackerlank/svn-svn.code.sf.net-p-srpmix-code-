@@ -2,17 +2,26 @@ dist_bin_SCRIPTS =           \
 	srpmix               \
         libsrpmix.sh         \
 	\
-        srpmix-etags         \
-        srpmix-ctags         \
-        srpmix-cscope        \
-        srpmix-gonzui        \
-	\
-	srpmix-vanilla       \
-	\
-	srpmix-spider        \
-	\
 	srpmix-meta-hardlink \
 	\
 	build-sources.sh     \
+	\
+	srpmix-dist          \
+	srpmix-plugin        \
+	\
+        $(NULL)
+
+plugindir = $(pkgdatadir)/plugins
+dist_plugin_SCRIPTS =        \
+        10srpmix-etags       \
+	\
+        $(NULL)
+
+EXTRA_DIST=                \
+        srpmix-ctags       \
+        srpmix-cscope      \
+        srpmix-gonzui      \
+	\
+	srpmix-vanilla     \
 	\
         $(NULL)

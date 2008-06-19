@@ -114,8 +114,8 @@ function run_cscope
 
 
     es_print cscope-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output-dir=\"$o\" | tee -a $l
-    find "$d" -type f -name '*.[ch]' \
-	| ${CSCOPE} -k -b -q -R -v -f "$o" -i-
+    ( cd $d && find */ -type f -name '*.[ch]' \
+	| ${CSCOPE} -k -b -q -R -v -f "$o" -i- )
     es_print cscope-end --status=$? --timestamp=\"`LANG=C date`\" --output-dir=\"$o\" | tee -a $l
 }
 

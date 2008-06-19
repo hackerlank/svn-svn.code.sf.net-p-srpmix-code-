@@ -1,0 +1,189 @@
+#!/bin/sh
+#
+########################################################################
+#
+# srpmix-dist: Create src.rpm to build srpmixed package
+#
+# Copyright (C) 2008 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+RPMBUILD=rpmbuild
+LIBSRPMIX=libsrpmix.sh
+TMPDIR=
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-dist [--help|-h]"
+    echo "  srpmix-dist SRPMS..."
+    echo 
+}
+
+function cleanup
+{
+    if test -d "$TMPDIR"; then
+        rm -rf $TMPDIR || true
+    fi
+}
+
+function abort
+{
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+function parse_arguments
+{
+    status=
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test "x$1" = "x"; then
+        print_usage
+        abort
+    fi
+
+}
+
+function verify_commands
+{
+    while [ $# -gt 0 ]; do
+	if which $1 > /dev/null 2>&1; then
+	    :
+	else
+	    echo "cannot find $1" 1>&2
+	    abort
+	fi
+	shift 
+    done
+}
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        abort "cannot find $1"
+	exit 1
+    fi
+}
+
+function create_srpm
+{
+    srpm=$1
+
+    package=$(rpm -qp --queryformat "%{NAME}" $1)
+    version=$(rpm -qp --queryformat "%{VERSION}" $1)
+    release=$(rpm -qp --queryformat "%{RELEASE}" $1)
+    description=$(rpm -qp --queryformat "%{Description}" $1)
+    group=$(rpm -qp --queryformat "%{Group}" $1)
+    license=$(rpm -qp --queryformat "%{License}" $1)
+    changelog=$(LANG=C rpm -qp --changelog $1 | sed 's/%/%%/g')
+
+    srcdir=/usr/share/srpmix/sources/$(echo $package | sed  's/\(^.\).*/\1/')
+    srcdir=$srcdir/$package/$version-$release
+
+    cat > $TMPDIR/SPECS/$package-$version-$release-srpmix.spec <<EOF
+Summary: Source Information for package $package ($version-$release)
+Name: $package-$version-$release-srpmix
+Version: $SRPMIX_VERSION
+Release: $SRPMIX_RELEASE
+Source: `basename $srpm`
+Autoreq: 0
+BuildRequires: srpmix
+BuildRequires: rsync
+Buildarch: noarch
+
+Buildroot: %{_tmppath}/%{name}-root
+Group: $group
+License: $license
+
+%define __os_install_post true
+
+%description
+$description
+
+%prep
+rm -rf %{_builddir}/$package-$version-srpmix
+
+%build
+srpmix -f %{_builddir}/$package-$version-srpmix \
+    %{_sourcedir}/`basename $srpm`
+srpmix-plugin %{_builddir}/$package-$version-srpmix
+
+%install
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$srcdir
+
+rsync -a  \$(/bin/ls -d %{_builddir}/$package-$version-srpmix/* | grep -v LOG | grep -v SPECS\$) \$RPM_BUILD_ROOT/$srcdir
+
+%clean
+rm -rf \$RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+/
+
+%changelog
+$changelog
+
+EOF
+
+    cp $srpm $TMPDIR/SOURCES/
+    $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs $TMPDIR/SPECS/$package-$version-$release-srpmix.spec > /dev/null
+    mv $TMPDIR/SRPMS/$package-$version-$release-srpmix-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm .
+    rm $TMPDIR/SOURCES/`basename $srpm`
+
+}
+
+function main
+{
+    verify_commands "${RPMBUILD}"
+    parse_arguments "$@"
+    trap cleanup 0
+
+    TMPDIR=`mktemp -d`
+    install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+
+    for srpm in $*
+    do
+        if test -f "$srpm"; then
+            es_print dist-start --file=`basename $srpm` --timestamp="`LANG=C date`"
+            create_srpm $srpm
+            es_print dist-end --file=`basename $srpm` --timestamp="`LANG=C date`"
+        else
+            abort "No such file: $srpm"
+        fi
+    done
+
+}
+
+try_source ${LIBSRPMIX}
+es_time main "$@"
+exit $?
