@@ -1,7 +1,7 @@
 Summary: Scripts to update local copies gettting from vcs repositories 
 Name: lcopy
 Version: @PACKAGE_VERSION@
-Release: 0
+Release: 1
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 #Requires: 
 Buildarch: noarch
@@ -13,6 +13,14 @@ Group: Development/Tools
 
 %description
 Scripts to update local copies getting from vcs  repositories 
+
+
+%package sources
+Summary: Well known sources lcopy directory configuration.
+Group: Development/Tools
+Requires: lcopy
+%description sources
+Typical configuration for lcopy-refresh which is run by cron.
 
 %prep
 %setup -q
@@ -28,7 +36,7 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/lcopy-refresh.d
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.daily
 
 install -p -m 755 etc/lcopy-refresh.cron    $RPM_BUILD_ROOT%{_sysconfdir}/cron.daily/lcopy-refresh
-
+install -p -m 644 etc/sources.lcopy-refresh $RPM_BUILD_ROOT%{_sysconfdir}/lcopy-refresh.d/sources.lcopy-refresh
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -42,6 +50,15 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0755, root, root) %{_sysconfdir}/cron.daily/lcopy-refresh
 %attr(0755, root, root) %dir %{_sysconfdir}/lcopy-refresh.d
 
+# TODO user account 'source' must be introduced.
+%files sources
+%defattr(-,root,root)
+%{_sysconfdir}/lcopy-refresh.d/sources.lcopy-refresh
+
+
 %changelog
-* Mon Aug 27 2007 Masatake YAMATO <yamato@redhat.com> 0.0.2-0
+* Sat Jul  5 2008 Masatake YAMATO <yamato@redhat.com> - 0.0.2-1
+- Added lcopy-sources package.
+
+* Mon Aug 27 2007 Masatake YAMATO <yamato@redhat.com> - 0.0.2-0
 - First RPM build.

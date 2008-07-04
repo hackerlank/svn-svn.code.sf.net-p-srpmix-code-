@@ -7,6 +7,10 @@ for x in /etc/lcopy-refresh.d/*; do
 	LCOPY_DIR=.
 	source "${x}"
 
+	if test ! -f "${LCOPY_LOG}"; then
+	    LCOPY_LOG=/dev/null
+	fi
+
 	if test -d ${LCOPY_DIR}; then
 	    su  \
 		-c "lcopy-refresh --log=${LCOPY_LOG} ${LCOPY_DIR}" \
