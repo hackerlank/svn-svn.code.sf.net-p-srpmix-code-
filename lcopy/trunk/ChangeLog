@@ -1,0 +1,7 @@
+2008-07-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac (pkg_version): version 0.0.8.
+
+	* lcopy-refresh.cron: Check whether LCOPY_LOG file 
+	exits or not.
+
