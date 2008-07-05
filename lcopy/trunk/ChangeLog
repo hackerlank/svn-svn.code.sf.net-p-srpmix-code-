@@ -1,3 +1,9 @@
+2008-07-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* lcopy-refresh.cron: Check whether a directory
+	holding LCOPY_LOG file exits or not.
+	
+
 2008-07-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac (pkg_version): version 0.0.8.

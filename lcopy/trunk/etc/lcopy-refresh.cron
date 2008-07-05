@@ -7,7 +7,7 @@ for x in /etc/lcopy-refresh.d/*; do
 	LCOPY_DIR=.
 	source "${x}"
 
-	if test ! -f "${LCOPY_LOG}"; then
+	if test ! -d "`dirname ${LCOPY_LOG}`"; then
 	    LCOPY_LOG=/dev/null
 	fi
 
