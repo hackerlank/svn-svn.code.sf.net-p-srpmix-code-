@@ -103,6 +103,10 @@ function parse_arguments
 	DIR=$1
 	shift
     fi
+
+    if test ! -w $LOG; then
+	LOG=/dev/null
+    fi
 }
 
 function refresh

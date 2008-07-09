@@ -1,3 +1,8 @@
+2008-07-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/lcopy-refresh (parse_arguments): If $LOG is not writable,
+	use /dev/null as $LOG instead.
+
 2008-07-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* lcopy-refresh.cron: Check whether a directory
