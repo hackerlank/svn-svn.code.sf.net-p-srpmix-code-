@@ -31,6 +31,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-plugin [--help|-h]"
+    echo "  srpmix-plugin [--list-plugins|-l]"
     echo "  srpmix-plugin ROOTDIR"
     echo 
 }
@@ -51,6 +52,9 @@ function parse_arguments
 		print_usage
 		exit 0
 		;;
+            --list-plugins|-l)
+		list_plugins
+		exit 0
 	    *)
 		break
 		;;
@@ -87,6 +91,14 @@ function try_source
         abort "cannot find $1"
 	exit 1
     fi
+}
+
+function list_plugins
+{
+    find $PLUGINDIR -perm +0100 -type f | sort | while read plugin
+    do
+        echo $plugin
+    done
 }
 
 function main
