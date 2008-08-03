@@ -47,6 +47,7 @@ function print_usage
     echo "Usage: "
     echo "lcopy-refresh [--log=logfile|-l=logfile|--log logfile|-l logfile]"
     echo "              [TOP_DIRECTORY]"
+    echo "lcopy-refresh --help"
 }
 
 function abort

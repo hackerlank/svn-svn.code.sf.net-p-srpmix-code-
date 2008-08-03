@@ -1,0 +1,56 @@
+.TH LCOPY-REFRESH 1 "August 29, 2008"
+
+.SH NAME
+lcopy-refresh \- updates files checked out from repository of any VCS
+
+.SH SYNOPSIS
+lcopy-refresh [\-\-log=\fIlogfile\fP|-l=\fIlogfile\fP] [\fITOP_DIRECTORY\fP]
+.PP
+lcopy-refresh \-\-help|\-h
+
+.SH DESCRIPTION
+lcopy-refresh updates files under \fITOP_DIRECTORY\fP which is checked
+out from a repository of version control systems(VCS) like
+CVS. Generally in order to update files you must know which VCS was
+used to check out them. In other hand lcopy-refresh guesses the type
+of VCS system then it uses proper command to update the files.
+
+lcopy-refresh can guess the following type of VCS from a given
+directory:
+.PP
+* cvs
+.PP
+* git
+.PP
+* subversion(svn)
+.PP
+* arch
+.PP
+* mercurial(hg)
+.PP
+* darcs
+.PP
+* bzr
+.PP
+* monotone(mtn)
+
+The idea behind lcopy-refresh is \fIsource code subscription\fP.
+
+.BR
+monotone is special. It seems that monotone does not provide the
+way to check out a copy from a remote repository. 
+
+.SH AUTHOR
+Written by Masatake YAMATO (yamato@redhat.com)
+
+.SH "SEE ALSO"
+\fBcvs\fR(1), 
+\fBgit\fR(1), 
+\fBsvn\fR(1), 
+\fBbaz\fR(1), 
+\fBhg\fR(1), 
+\fBdarcs\fR(1), 
+\fBbzr\fR(1), 
+\fBmtn\fR(1),
+\fBcron\fR(1)
+
