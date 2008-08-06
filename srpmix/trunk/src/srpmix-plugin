@@ -31,7 +31,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-plugin [--help|-h]"
-    echo "  srpmix-plugin [--list-plugins|-l]"
+    echo "  srpmix-plugin [--list-plugins|-L]"
     echo "  srpmix-plugin ROOTDIR"
     echo 
 }
@@ -52,7 +52,7 @@ function parse_arguments
 		print_usage
 		exit 0
 		;;
-            --list-plugins|-l)
+            --list-plugins|-L)
 		list_plugins
 		exit 0
 	    *)
