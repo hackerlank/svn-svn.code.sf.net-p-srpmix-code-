@@ -32,6 +32,8 @@ VC="cvs git svn arch hg darcs bzr mtn mtn_lcopy"
 
 DIR=`pwd`
 LOG=/dev/stdout
+PREFIX=/usr/libexec
+PLUGINDIR=${PREFIX}/lcopy/plugins
 
 function try_source
 {
@@ -47,7 +49,31 @@ function print_usage
     echo "Usage: "
     echo "lcopy-refresh [--log=logfile|-l=logfile|--log logfile|-l logfile]"
     echo "              [TOP_DIRECTORY]"
+    echo "lcopy-refresh --list-plugins|-L"
     echo "lcopy-refresh --help"
+}
+
+function list_plugins
+{
+    test -d $PLUGINDIR && \
+	find $PLUGINDIR -perm +0100 -type f | sort | while read plugin
+    do
+        echo $plugin
+    done
+}
+
+function run_plugins
+{
+    LOG=$1;
+    shift
+
+    test -d $PLUGINDIR && \
+	find $PLUGINDIR -perm +0100 -type f | sort |  while read plugin
+    do
+	es_print start-running-plugin "\"$plugin\"" >> $LOG
+        $plugin "$@"
+	es_print end-running-plugin "\"$plugin\"" --status $? >> $LOG
+    done
 }
 
 function abort
@@ -85,6 +111,10 @@ function parse_arguments
 		LOG=`echo $1 | sed -e 's/--l=//'`
 		shift 1
 		;;
+	    --list-plugins|-L)
+	        list_plugins
+	        exit 0
+	        ;;
 	    -*)
 		echo unknown option: "$1" 1>&2
 		print_usage 1>&2
@@ -132,11 +162,15 @@ function refresh
 	    r=$?
 	   
 	    tstamp=`LANG=C date`
-	    if test $r == 0; then
+	    if test $r = 0; then
 		es_print successful-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r
 	    else
 		es_print fail-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r
 	    fi  >> $LOG
+
+	    if test $r = 0; then
+		run_plugins "$LOG" "${v}" "${cur_dir}" "${tstamp}"
+	    fi
 
 	    return $r
 	fi

@@ -5,3 +5,9 @@ dist_bin_SCRIPTS =    \
         lcopy-refresh  \
 	\
         $(NULL)
+
+plugindir = $(libexecdir)/plugins
+dist_plugin_SCRIPTS = \
+	10lcopy-etags \
+        \
+        $(NULL)
