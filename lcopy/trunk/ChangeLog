@@ -1,3 +1,11 @@
+2008-08-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac(pkg_version): 0.0.9.
+
+	* src/lcopy-refresh: Copyed plugin mechanism from srpmix.
+
+	* src/Makefile.am (dist_plugin_SCRIPTS): Added 10lcopy-etags.
+
 2008-08-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* doc/lcopy-refresh.1: Added man page.
