@@ -6,7 +6,7 @@ dist_bin_SCRIPTS =    \
 	\
         $(NULL)
 
-plugindir = $(libexecdir)/plugins
+plugindir = $(libexecdir)/lcopy/plugins
 dist_plugin_SCRIPTS = \
 	10lcopy-etags \
         \
