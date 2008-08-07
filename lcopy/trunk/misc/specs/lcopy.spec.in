@@ -46,6 +46,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lcopy-rebirth
 %{_bindir}/lcopy-refresh
 %{_bindir}/liblcopy.sh
+%{_libexecdir}/lcopy/plugins/10lcopy-ctags
 %{_libexecdir}/lcopy/plugins/10lcopy-etags
 
 %attr(0755, root, root) %{_sysconfdir}/cron.daily/lcopy-refresh
@@ -58,6 +59,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Aug  7 2008 Masatake YAMATO <yamato@redhat.com> - 0.0.9-3
+- Added files entry for 10lcopy-ctags.
+
 * Thu Aug  7 2008 Masatake YAMATO <yamato@redhat.com> - 0.0.9-2
 - Added files entry for 101copy-etags.
 

@@ -1,5 +1,7 @@
 2008-08-07  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/10lcopy-ctags: Added new plugin.
+
 	* configure.ac(pkg_version): 0.0.9.
 
 	* src/lcopy-refresh: Copyed plugin mechanism from srpmix.
@@ -30,3 +32,7 @@
 	* lcopy-refresh.cron: Check whether LCOPY_LOG file 
 	exits or not.
 
+2008-07-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* lcopy-rebirth (generate_cvs_cmdline): Pick 
+	password entry from .cvspass.
