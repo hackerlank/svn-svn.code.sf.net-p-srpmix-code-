@@ -72,7 +72,7 @@ function run_plugins
     do
 	es_print start-running-plugin "\"$plugin\"" >> $LOG
         $plugin "$@"
-	es_print end-running-plugin "\"$plugin\"" --status $? >> $LOG
+	es_print end-running-plugin "\"$plugin\"" --status=$? >> $LOG
     done
 }
 
