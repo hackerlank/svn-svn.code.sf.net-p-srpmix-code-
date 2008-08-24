@@ -85,6 +85,8 @@ function print_usage
     echo 
     echo
     echo "  --force: create ROOTDIR if it doesn't exist."
+    echo "           If --force given and ROOTDIR exists"
+    echo "           existance of SRPMIX profile file is expected."
     echo "  --sudo: use sudo in doing chown, mount and umount. "      
     echo "  FILES are .iso or .src.rpm"
     echo 
