@@ -114,7 +114,7 @@ function abort
 
 function update_count
 {
-    status=$1
+    local status=$1
 
     TOTAL_COUNT=`expr 1 + $TOTAL_COUNT`
     if ! test $status = 0; then
@@ -124,7 +124,7 @@ function update_count
 
 function trap_handler
 {
-    mountpoint=$1
+    local mountpoint=$1
 
     # May be this doesn't work
     verbose signaled --mountpoint=$mountpoint
@@ -267,8 +267,8 @@ IS_ROOTDIR_CREATED=no
 
 function create_subdirs
 {
-    rootdir=$1
-    subdir=
+    local rootdir=$1
+    local subdir=
 
 
     for d in ${SUBDIRS}; do
@@ -284,8 +284,8 @@ function create_subdirs
 
 function delete_subdirs
 {
-    rootdir=$1
-    subdir=
+    local rootdir=$1
+    local subdir=
 
 
     for d in ${SUBDIRS}; do
@@ -300,7 +300,7 @@ function delete_subdirs
 
 function create_rootdir
 {
-    rootdir=$1
+    local rootdir=$1
 
     
     if mkdir "${rootdir}"; then
@@ -337,7 +337,7 @@ function create_rootdir
 
 function delete_rootdir
 {
-    rootdir=$1
+    local rootdir=$1
 
 
     if test "${IS_ROOTDIR_CREATED}" = yes; then
@@ -351,8 +351,8 @@ function delete_rootdir
 
 function verify_rootdir
 {
-    rootdir=$1
-    create_rootdir=$2
+    local rootdir=$1
+    local create_rootdir=$2
 
     if test -d "${rootdir}"; then
 	if test -f "${rootdir}/${PROFILE}"; then
@@ -379,8 +379,8 @@ function verify_rootdir
 }
 function verify_subdirs
 {
-    rootdir=$1
-    is_create_rootdir=$2
+    local rootdir=$1
+    local is_create_rootdir=$2
 
     if test "${is_create_rootdir}" = yes; then
 	create_subdirs "${rootdir}"
@@ -426,8 +426,8 @@ IS_MOUNTPOINT_CREATED=no
 
 function create_mountpoint
 {
-    template=$1
-    dirname=
+    local template=$1
+    local dirname=
 
 
     dirname=`mktemp -t -d "${template}"`
@@ -443,7 +443,7 @@ function create_mountpoint
 
 function delete_mountpoint
 {
-    mountpoint=$1
+    local local mountpoint=$1
 
     if test "${IS_MOUNTPOINT_CREATED}" = yes; then
 	rmdir "${mountpoint}"
@@ -454,7 +454,7 @@ function delete_mountpoint
 
 function verify_mountpoint
 {
-    iso_p=no
+    local iso_p=no
     
 
     for f in "$@"; do
@@ -495,7 +495,7 @@ function verify_commands
 
 function verify_target
 {
-    target=$1
+    local target=$1
 
     if test "x${target}" != x; then
 	case "${target}" in
@@ -540,7 +540,7 @@ function clean
 
 function spec_file_get
 {
-    srpm_file=$1
+    local srpm_file=$1
     
     
     rpm2cpio ${srpm_file} \
@@ -560,9 +560,9 @@ function spec_comment
 
 function spec_file_header
 {
-    rootdir=$1
-    srpm_name=$2
-    build_name=$3
+    local rootdir=$1
+    local srpm_name=$2
+    local build_name=$3
 
     spec_comment "########################################################################"
     spec_comment "macro injected by srpmix"
@@ -577,8 +577,8 @@ function spec_file_header
 
 function spec_file_hack
 {
-    rootdir=$1
-    spec_file=$2
+    local rootdir=$1
+    local spec_file=$2
 
     cat - "${rootdir}/SPECS/${spec_file}"          \
     | sed					   \
@@ -591,11 +591,11 @@ function spec_file_hack
 
 function srpm_deploy
 {
-    rootdir=$1
+    local rootdir=$1
 
-    srpm_file=$2
+    local srpm_file=$2
 
-    build_name=$3
+    local build_name=$3
 
     srpm_name=`basename ${srpm_file} .src.rpm`
 
@@ -677,10 +677,10 @@ function srpm_deploy
 
 function srpm_install
 {
-    rootdir=$1
-    srpm_file=$2
-    srpm_name=$3
-    status=
+    local rootdir=$1
+    local srpm_file=$2
+    local srpm_name=$3
+    local status=
 
     # It seems that ${source_dir} is automatically created.
     # mkdir "${source_dir}"
@@ -713,10 +713,10 @@ function srpm_install
 
 function srpm_rearrange_spec
 {
-    rootdir=$1
-    srpm_name=$2
-    build_name=$3
-    spec_file=$4
+    local rootdir=$1
+    local srpm_name=$2
+    local build_name=$3
+    local spec_file=$4
 
     spec_file_header "${rootdir}" "${srpm_name}" "${build_name}" \
 	| spec_file_hack "${rootdir}" "${spec_file}"
@@ -724,9 +724,9 @@ function srpm_rearrange_spec
 
 function srpm_save_spec
 {
-    rootdir=$1
-    spec_file=$2
-    xspec_file=$3
+    local rootdir=$1
+    local spec_file=$2
+    local xspec_file=$3
 
     if test ${CREATE_ROOTDIR} = yes; then
 	if test -e "${rootdir}/${xspec_file}"; then
@@ -740,11 +740,11 @@ function srpm_save_spec
 
 function srpm_build
 {
-    rootdir=$1
-    spec_file=$2
-    build_name=$3
-    arch=$4
-    status=
+    local rootdir=$1
+    local spec_file=$2
+    local build_name=$3
+    local arch=$4
+    local status=
 
     verbose rpmbuild-bp				                \
 	--build-name="\"${rootdir}/${BUILDDIR}/${build_name}\"" \
@@ -773,13 +773,13 @@ function srpm_build
 
 function srpm_freeze
 {
-    rootdir=$1
-    srpm_name=$2
-    build_name=$3
-    xspec_file=$4
-    spec_name=$5
-    sudo=
-    self=
+    local rootdir=$1
+    local srpm_name=$2
+    local build_name=$3
+    local xspec_file=$4
+    local spec_name=$5
+    local sudo=
+    local self=
 
     if test "x$FREEZE" = "xyes"; then
       verbose hardlink-start --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
@@ -840,9 +840,9 @@ function srpm_freeze
 #
 function iso_deploy
 {
-    rootdir=$1
-    iso_file=$2
-    mountpoint=$3
+    local rootdir=$1
+    local iso_file=$2
+    local mountpoint=$3
 
     iso_mount   "${iso_file}" "${mountpoint}" || {
 	return $?
@@ -866,9 +866,9 @@ function iso_deploy
 
 function iso_mount
 {
-    iso_file=$1
-    mountpoint=$2
-    sudo=
+    local iso_file=$1
+    local mountpoint=$2
+    local sudo=
 
 
     if test "${USE_SUDO}" = yes; then
@@ -881,7 +881,7 @@ function iso_mount
 
 function iso_umount
 {
-    mountpoint=$1
+    local mountpoint=$1
 
     if test "${USE_SUDO}" = yes; then
 	sudo=sudo
