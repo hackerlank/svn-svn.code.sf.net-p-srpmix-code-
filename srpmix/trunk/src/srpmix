@@ -38,11 +38,10 @@ MOUNTPOINT_TEMPLATE="srpmix.iso.XXXXXXXXXX"
 
 PROFILE=SRPMIX
 LOGDIR=srpmix-LOG
-SPEC0DIR=specs
 SPECDIR=srpmix-SPECS
 SOURCEDIR=archives
 BUILDDIR=pre-build
-SUBDIRS="${LOGDIR} SPECS ${BUILDDIR} ${SPEC0DIR} ${SPECDIR} ${SOURCEDIR}"
+SUBDIRS="${LOGDIR} SPECS ${BUILDDIR} ${SPECDIR} ${SOURCEDIR}"
 GLOBAL_LOGFILE=srpmix-log.es
 LIBSRPMIX=libsrpmix.sh
 #
@@ -658,7 +657,7 @@ function srpm_deploy
     spec_file=`spec_file_get ${srpm_file}`
     spec_name=`basename ${spec_file} .spec`
 
-    xspec_file="${srpm_name}.spec"
+    xspec_file="${spec_name}.spec"
 
     if test "x$build_name" = "x"; then
         build_name="${srpm_name}"
@@ -823,13 +822,13 @@ function srpm_save_spec
     xspec_file=$3
 
     if test ${CREATE_ROOTDIR} = yes; then
-	if test -e "${rootdir}/${SPEC0DIR}/${xspec_file}"; then
-	    chmod -R u+w "${rootdir}/${SPEC0DIR}/${xspec_file}"
+	if test -e "${rootdir}/${xspec_file}"; then
+	    chmod u+w "${rootdir}/${xspec_file}"
 	fi
     fi
 
     cp "${rootdir}/SPECS/${spec_file}" \
-	"${rootdir}/${SPEC0DIR}/${xspec_file}"
+	"${rootdir}/${xspec_file}"
 }
 
 function srpm_build
@@ -910,9 +909,8 @@ function srpm_freeze
 	verbose chmod --mode=\"ug+w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
     fi
 
-      chmod a-w "${rootdir}/${SPEC0DIR}/${xspec_file}"
-      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SPEC0DIR}/${xspec_file}"\"
-
+      chmod a-w "${rootdir}/${xspec_file}"
+      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${xspec_file}"\"
       chmod a-w "${rootdir}/${SPECDIR}/${xspec_file}"
       verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SPECDIR}/${xspec_file}"\"
 
