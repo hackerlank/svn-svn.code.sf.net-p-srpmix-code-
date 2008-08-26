@@ -26,12 +26,13 @@
 RPMBUILD=rpmbuild
 LIBSRPMIX=libsrpmix.sh
 TMPDIR=
+NAME=
 
 function print_usage
 {
     echo "Usage: "
     echo "  srpmix-dist [--help|-h]"
-    echo "  srpmix-dist SRPMS..."
+    echo "  srpmix-dist [--name=NAME] SRPMS..."
     echo 
 }
 
@@ -58,6 +59,9 @@ function parse_arguments
 		print_usage
 		exit 0
 		;;
+            --name=*)
+                NAME=$(echo $1 | sed 's/--name=//')
+                ;;
 	    *)
 		break
 		;;
@@ -70,6 +74,7 @@ function parse_arguments
         abort
     fi
 
+    srpms=$@
 }
 
 function verify_commands
@@ -94,17 +99,113 @@ function try_source
     fi
 }
 
+# createmetasrpm <name> [<packages>...
+function create_meta_srpm
+{
+    name=$1
+    shift
+
+    spec=$TMPDIR/SPECS/srpmix-dist-$name.spec
+    distdir=/usr/share/srpmix/dists
+
+    cat > $spec <<EOF
+Summary: Sources for distribution $name
+Name: srpmix-dist-$name
+Version: $SRPMIX_VERSION
+Release: $SRPMIX_RELEASE
+Autoreq: 0
+Buildarch: noarch
+EOF
+
+for p in $@
+do
+    echo "BuildRequires: $p" >> $spec
+done
+for p in $@
+do
+    echo "Requires: $p" >> $spec
+done
+
+cat >> $spec <<EOF
+
+Buildroot: %{_tmppath}/%{name}-root
+Group: System/Daemon
+License: Unknown
+
+%define __os_install_post true
+
+%description
+Sources for distribution $name
+
+%prep
+rm -rf %{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION
+
+%build
+
+builddistdir=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/$distdir
+mkdir -p \$builddistdir \$builddistdir/pre-build \$builddistdir/srpmix-LOG
+
+for p in $@
+do
+  origp=\$(echo \$p | sed 's/-srpmix.*//')
+  d=\$(rpm -ql \$p | grep pre-build | sort | head -1 | xargs -n1 dirname)
+  ln -sf \$d/pre-build \$builddistdir/pre-build/\$origp
+done
+
+srpmix-plugin \$builddistdir
+
+%install
+builddistdir=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/$distdir
+
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$distdir
+
+rsync -va \$builddistdir \$RPM_BUILD_ROOT/$distdir
+
+%clean
+rm -rf \$RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+/
+
+%changelog
+
+EOF
+
+    $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs $spec > /dev/null
+    rm -rf %{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION
+    mv $TMPDIR/SRPMS/srpmix-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm .
+}
+
 function create_srpm
 {
     srpm=$1
 
-    package=$(rpm -qp --queryformat "%{NAME}" $1)
-    version=$(rpm -qp --queryformat "%{VERSION}" $1)
-    release=$(rpm -qp --queryformat "%{RELEASE}" $1)
-    description=$(rpm -qp --queryformat "%{Description}" $1)
+    pvrd=$(rpm -qp --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $1)
+    package=$(echo $pvrd | cut -d' ' -f1)
+    version=$(echo $pvrd | cut -d' ' -f2)
+    release=$(echo $pvrd | cut -d' ' -f3)
+    description=$(echo $pvrd | cut -d' ' -f4)
+    if test "x$package" = "x"; then
+        echo "warning: failed to parse $1: ignored" 1>&2
+        return
+    fi
+    if test -f "$package-$version-$release-srpmix-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm"; then
+        echo "$package-$version-$release-srpmix-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm already exists" 1>&2
+        echo "$package-$version-$release-srpmix"
+        return
+    fi
     group=$(rpm -qp --queryformat "%{Group}" $1)
     license=$(rpm -qp --queryformat "%{License}" $1)
     changelog=$(LANG=C rpm -qp --changelog $1 | sed 's/%/%%/g')
+    if test "x$changelog" = "x(none)"; then
+        changelog=""
+    fi
+    buildarch=$(rpm -qp --queryformat "%{BUILDARCHS}" $1)
+    if test "x$buildarch" = "x(none)"; then
+        buildarch="noarch"
+    fi
 
     srcdir=/usr/share/srpmix/sources/$(echo $package | sed  's/\(^.\).*/\1/')
     srcdir=$srcdir/$package/$version-$release
@@ -118,7 +219,7 @@ Source: `basename $srpm`
 Autoreq: 0
 BuildRequires: srpmix
 BuildRequires: rsync
-Buildarch: noarch
+Buildarch: $buildarch
 
 Buildroot: %{_tmppath}/%{name}-root
 Group: $group
@@ -159,28 +260,35 @@ EOF
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs $TMPDIR/SPECS/$package-$version-$release-srpmix.spec > /dev/null
     mv $TMPDIR/SRPMS/$package-$version-$release-srpmix-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm .
     rm $TMPDIR/SOURCES/`basename $srpm`
-
+    echo "$package-$version-$release-srpmix"
 }
 
 function main
 {
     verify_commands "${RPMBUILD}"
     parse_arguments "$@"
-    trap cleanup 0
+    #trap cleanup 0
+
+    if test "x$NAME" = "x"; then
+        NAME=$(basename $(dirname $1))
+    fi
 
     TMPDIR=`mktemp -d`
     install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
 
-    for srpm in $*
+    packages=""
+    for srpm in $srpms
     do
         if test -f "$srpm"; then
             es_print dist-start --file=`basename $srpm` --timestamp="`LANG=C date`"
-            create_srpm $srpm
+            packages="$packages $(create_srpm $srpm)"
             es_print dist-end --file=`basename $srpm` --timestamp="`LANG=C date`"
         else
             abort "No such file: $srpm"
         fi
     done
+
+    create_meta_srpm $NAME $packages
 
 }
 

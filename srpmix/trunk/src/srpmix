@@ -79,6 +79,7 @@ function print_usage
     echo "         [--verbose|-v]"
     echo "         [--trace|-x]"
     echo "         [--sudo|-s]"
+    echo "         [--freeze|-F]"
     echo "         [--target=target|-t=target|--target target|-t target]"
     echo "         [--set-group=group|-g=group|--set-group group|-g group]"
     echo "         ROOTDIR FILES..."
@@ -88,6 +89,7 @@ function print_usage
     echo "           If --force given and ROOTDIR exists"
     echo "           existance of SRPMIX profile file is expected."
     echo "  --sudo: use sudo in doing chown, mount and umount. "      
+    echo "  --freeze: freeze expanded files. "      
     echo "  FILES are .iso or .src.rpm"
     echo 
 }
@@ -205,6 +207,10 @@ function parse_arguments
 		;;
 	    --sudo|-s)
 		USE_SUDO=yes
+		shift 1
+		;;
+	    --freeze|-F)
+		FREEZE=yes
 		shift 1
 		;;
             --set-group|-g)
@@ -335,8 +341,9 @@ function create_rootdir
         IS_ROOTDIR_CREATED=yes
 
 	echo ${DIR_VERSION} > "${rootdir}/${PROFILE}"
-	chmod a-w "${rootdir}/${PROFILE}"
-
+	if test "x$FREEZE" = "xyes"; then
+          chmod a-w "${rootdir}/${PROFILE}"
+        fi
 	verbose mkdir \""${rootdir}"\" --type=rootdir
     else
 	echo "fail to create directory: ${rootdir}" 1>&2
@@ -354,7 +361,7 @@ function create_rootdir
 	    --group=\"${GROUP}\"				\
 	    --file=\"${rootdir}\"
 
-	chmod o-w ${rootdir}
+  	chmod o-w ${rootdir}
 	verbose chmod --mode=\"o-w\" --file=\""${rootdir}"\"
 
 	chmod ug+w ${rootdir}
@@ -581,8 +588,10 @@ function log_unfreeze
 
 function log_freeze
 {
-    log_file=$1
-    chmod -R a-w "${log_file}"
+    if test "x$FREEZE" = "xyes"; then
+      log_file=$1
+      chmod -R a-w "${log_file}"
+    fi
 }
 
 function spec_file_get
@@ -866,23 +875,24 @@ function srpm_freeze
     sudo=
     self=
 
-    verbose hardlink-start --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
-    ${HARDLINK} -c "${rootdir}/${SOURCEDIR}/${srpm_name}" \
+    if test "x$FREEZE" = "xyes"; then
+      verbose hardlink-start --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
+      ${HARDLINK} -c "${rootdir}/${SOURCEDIR}/${srpm_name}" \
 	"${rootdir}/${BUILDDIR}/${build_name}"/*
-    verbose hardlink-end --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
+      verbose hardlink-end --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
 
-    chmod -R a-w "${rootdir}/${SOURCEDIR}/${srpm_name}"
-    verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SOURCEDIR}/${srpm_name}"\"
+      chmod -R a-w "${rootdir}/${SOURCEDIR}/${srpm_name}"
+      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SOURCEDIR}/${srpm_name}"\"
 
 
-    for x in "${rootdir}/${BUILDDIR}/${build_name}"/*; do
-	if test -e "${x}"; then
+      for x in "${rootdir}/${BUILDDIR}/${build_name}"/*; do
+  	if test -e "${x}"; then
 	    chmod -R a-w "${x}"
 	    verbose chmod --mode=\"a-w\" --file=\""${x}"\"
 	fi
-    done
+      done
 
-    if test x${GROUP} != x; then
+      if test x${GROUP} != x; then
 	self=`id -u -n`
 	if test "${USE_SUDO}" = yes; then
 	    sudo=sudo
@@ -900,12 +910,13 @@ function srpm_freeze
 	verbose chmod --mode=\"ug+w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
     fi
 
-    chmod a-w "${rootdir}/${SPEC0DIR}/${xspec_file}"
-    verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SPEC0DIR}/${xspec_file}"\"
+      chmod a-w "${rootdir}/${SPEC0DIR}/${xspec_file}"
+      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SPEC0DIR}/${xspec_file}"\"
 
-    chmod a-w "${rootdir}/${SPECDIR}/${xspec_file}"
-    verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SPECDIR}/${xspec_file}"\"
+      chmod a-w "${rootdir}/${SPECDIR}/${xspec_file}"
+      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SPECDIR}/${xspec_file}"\"
 
+    fi
 
     verbose map                         \
 	--srpm-name=\"${srpm_name}\"    \
