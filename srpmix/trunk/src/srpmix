@@ -37,12 +37,10 @@ REQUIRED_COMMANDS="mktemp rpm2cpio cpio ${HARDLINK} id"
 MOUNTPOINT_TEMPLATE="srpmix.iso.XXXXXXXXXX"
 
 PROFILE=SRPMIX
-LOGDIR=srpmix-LOG
 SPECDIR=srpmix-SPECS
 SOURCEDIR=archives
 BUILDDIR=pre-build
-SUBDIRS="${LOGDIR} SPECS ${BUILDDIR} ${SPECDIR} ${SOURCEDIR}"
-GLOBAL_LOGFILE=srpmix-log.es
+SUBDIRS="SPECS ${BUILDDIR} ${SPECDIR} ${SOURCEDIR}"
 LIBSRPMIX=libsrpmix.sh
 #
 ########################################################################
@@ -95,46 +93,15 @@ function print_usage
 
 function verbose
 {
-    log_dir=
-    global_log_file=
-
     if test x"${VERBOSE}" = xyes; then
 	es_print "$@"
     fi
-    log_global_log "$@" 
 }
 
 
 function message
 {
-    log_dir=
-    global_log_file=
-
     es_print "$@" 
-    log_global_log "$@" 
-}
-
-function log_global_log
-{
-    if test x${ROOTDIR} != x; then
-	log_dir="${ROOTDIR}/${LOGDIR}"
-	global_log_file="${log_dir}/${GLOBAL_LOGFILE}"
-	if test '(' -d ${log_dir} -a ! -f ${global_log_file} ')' \
-	    -o '(' -d ${log_dir} -a -w ${global_log_file} ')'; then
-	    es_print "$@" --timestamp=\"`LANG=C date`\" >> "${global_log_file}"
-	fi
-    fi
-}
-
-function unfreeze_global_log
-{
-    log_unfreeze "${ROOTDIR}/${LOGDIR}/${GLOBAL_LOGFILE}"
-    return $?
-}
-
-function freeze_global_log
-{
-    log_freeze "${ROOTDIR}/${LOGDIR}/${GLOBAL_LOGFILE}"
 }
 
 function abort
@@ -570,28 +537,6 @@ function clean
 
 ########################################################################
 #
-function log_unfreeze
-{
-    log_file=$1
-
-    if test ! -f "${log_file}"; then
-	return 0
-    elif test -w "${log_file}"; then
-	return 0
-    elif test ${CREATE_ROOTDIR} = yes; then
-	chmod u+w ${log_file}
-    else
-	return 1
-    fi
-}
-
-function log_freeze
-{
-    if test "x$FREEZE" = "xyes"; then
-      log_file=$1
-      chmod -R a-w "${log_file}"
-    fi
-}
 
 function spec_file_get
 {
@@ -667,34 +612,17 @@ function srpm_deploy
 
     status=
 
-    log_name=${srpm_name}
-    log_file_install=
-
-
-    log_file_install="${rootdir}/${LOGDIR}/srpmix-install--${log_name}.log"
-    log_unfreeze ${log_file_install}
-    status=$?
-    if test ${status} != 0; then
-	verbose abort				\
-	    --stage=unfreeze-log                \
-	    --verified-log-file="\"${log_file_install}\""
-	echo "*** log file: ${log_file_install} is not writable" 1>&2
-	return -1
-    fi
 
     message install-start --srpm-file=\""${srpm_file}\""
-    srpm_install "${rootdir}" "${srpm_file}" $archive_name > "${log_file_install}" 2>&1
+    srpm_install "${rootdir}" "${srpm_file}" $archive_name
     status=$?
     message install-end --srpm-file=\""${srpm_file}"\" --status="${status}"
-    log_freeze ${log_file_install}
     
     if test ${status} != 0; then
 	verbose abort				\
 	    --stage=install			\
 	    --srpm-file="\"${srpm_file}\""	\
-	    --log="\"${log_file_install}\""
-	echo "*** abort to deploy ${srpm_file} to ${rootdir} in install stage" 1>&2
-	echo "*** see ${log_file_install} for detail" 1>&2
+	echo ";;; abort to deploy ${srpm_file} to ${rootdir} in install stage" 1>&2
 	return -1
     fi
 
@@ -716,31 +644,12 @@ function srpm_deploy
 	targets="${TARGET}"
     fi
 
-
     for arch in ${targets}; do
-	log_file_build="${rootdir}/${LOGDIR}/srpmix-build--${arch}--${log_name}.log"
-	log_unfreeze ${log_file_build}
-	status=$?
-	if test ${status} != 0; then
-	    verbose abort				\
-		--stage=unfreeze-log                    \
-		--verified-log-file="\"${log_file_build}\""
-	echo "*** log file: ${log_file_build} is not writable" 1>&2
-	return -1
-    fi
-
-    done
-
-    for arch in ${targets}; do
-	log_file_build="${rootdir}/${LOGDIR}/srpmix-build--${arch}--${log_name}.log"
 	message build-start --target=${arch} --spec-file=\""${xspec_file}\""
-	srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}" \
-	    > "${log_file_build}" 2>&1
+	srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
 	status=$?
 	message build-end --target=${arch} --spec-file=\""${xspec_file}\"" \
 	    --status="${status}"
-	log_freeze ${log_file_build}
-
 	if test "${status}" = 0; then
 	    break;
 	fi
@@ -749,10 +658,8 @@ function srpm_deploy
     if test ${status} != 0; then
     	verbose abort				\
 	    --stage=build			\
-	    --srpm-file="\"${srpm_file}\""	\
-	    --log="\"${log_file_build}\""
-	echo "*** abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
-	echo "*** see ${log_file_build} for detail" 1>&2
+	    --srpm-file="\"${srpm_file}\""
+	echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
 	return -1
     fi
 
@@ -992,7 +899,7 @@ function try_source
 {
     source $1
     if test $? != 0; then
-	echo "*** ABORT...cannot find $1" 1>&2
+	echo ";;; ABORT...cannot find $1" 1>&2
 	exit 1
     fi
 }
@@ -1005,12 +912,6 @@ function main
     verify_commands ${REQUIRED_COMMANDS}
     verify_srcfiles ${SRCFILES}
     verify_rootdir "${ROOTDIR}" "${CREATE_ROOTDIR}"
-
-    unfreeze_global_log
-    if test $? != 0; then
-	echo "log file: ${GLOBAL_LOGFILE} is not writable" 1>&2
-	abort 
-    fi
 
     verify_subdirs "${ROOTDIR}" "${IS_ROOTDIR_CREATED}"
     verify_mountpoint ${SRCFILES}
@@ -1037,8 +938,6 @@ function main
 
     message main-end --total=${TOTAL_COUNT} --abort=${ABORT_COUNT}
 
-
-    freeze_global_log
     return 0
 }
 #
