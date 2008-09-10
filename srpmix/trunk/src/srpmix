@@ -823,6 +823,9 @@ function srpm_freeze
 
     fi
 
+    chmod a+r "${rootdir}/${BUILDDIR}/${build_name}"
+    verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
+
     verbose map                         \
 	--srpm-name=\"${srpm_name}\"    \
 	--spec-name=\"${spec_name}\"    \

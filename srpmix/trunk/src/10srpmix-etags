@@ -130,6 +130,7 @@ function main
     verify_commands "${ETAGS}"
     parse_arguments "$@"
 
+    install -d $LOGDIR
     run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
 }
 
