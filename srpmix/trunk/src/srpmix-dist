@@ -297,9 +297,9 @@ function main
     for srpm in $srpms
     do
         if test -f "$srpm"; then
-            es_print dist-start --file=`basename $srpm` --timestamp="`LANG=C date`"
+            es_print dist-start --file=`basename $srpm` --timestamp="\"`LANG=C date`\""
             packages="$packages $(create_srpm $srpm)"
-            es_print dist-end --file=`basename $srpm` --timestamp="`LANG=C date`"
+            es_print dist-end --file=`basename $srpm` --timestamp="\"`LANG=C date`"\"
         else
             abort "No such file: $srpm"
         fi
