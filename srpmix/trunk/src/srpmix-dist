@@ -72,15 +72,11 @@ function parse_arguments
     done
 
     if test "x$1" = "x"; then
-        print_usage
-        abort
-    fi
-
-    srpms=$@
-    if [ "x${srpms}" = "x" ]; then
-	while read tmp; do
+        while read tmp; do
 	  srpms="${srpms} ${tmp}"
 	done
+    else
+	srpms=$@	
     fi
 }
 
