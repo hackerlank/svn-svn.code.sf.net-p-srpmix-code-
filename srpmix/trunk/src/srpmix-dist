@@ -176,7 +176,7 @@ rm -rf \$RPM_BUILD_ROOT
 
 EOF
 
-    $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs $spec > /dev/null
+    $RPMBUILD --nodeps --quiet --define "_topdir $TMPDIR" -bs $spec > /dev/null
     rm -rf %{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION
     mv $TMPDIR/SRPMS/srpmix-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm .
 }
