@@ -32,7 +32,9 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-dist [--help|-h]"
-    echo "  srpmix-dist [--name=NAME] SRPMS..."
+    echo "  srpmix-dist [--name=NAME] [SRPMS...]"
+    echo "  If SRPMS is not given, standard input is"
+    echo "  used for the list of source packages."
     echo 
 }
 
@@ -75,6 +77,11 @@ function parse_arguments
     fi
 
     srpms=$@
+    if [ "x${srpms}" = "x" ]; then
+	while read tmp; do
+	  srpms="${srpms} ${tmp}"
+	done
+    fi
 }
 
 function verify_commands
