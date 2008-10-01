@@ -109,6 +109,7 @@ function create_meta_srpm
     shift
 
     spec=$TMPDIR/SPECS/srpmix-dist-$name.spec
+    rootdir=/usr/share/srpmix
     distdir=/usr/share/srpmix/dists
 
     cat > $spec <<EOF
@@ -154,15 +155,19 @@ do
 
   d=\$(rpm -ql \$p | grep pre-build | sort | head -1 | xargs -n1 dirname)
   ln -sf \$d \$builddistdir/members/\$origp
+  
+  partof=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/\$d/partof/
+  mkdir -p \$partof
+  ln -sf \$builddistdir \$partof
 done
 
 %install
 builddistdir=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/$distdir/$name
 
 rm -rf \$RPM_BUILD_ROOT
-mkdir -p \$RPM_BUILD_ROOT/$distdir
+mkdir -p \$RPM_BUILD_ROOT/$rootdir
 
-rsync -va \$builddistdir \$RPM_BUILD_ROOT/$distdir
+rsync -va %{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/$rootdir/ \$RPM_BUILD_ROOT/$rootdir
 
 %clean
 rm -rf \$RPM_BUILD_ROOT
@@ -252,6 +257,8 @@ rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$srcdir
 
 rsync -a  \$(/bin/ls -d %{_builddir}/$package-$version-srpmix/* | grep -v LOG | grep -v SPECS\$) \$RPM_BUILD_ROOT/$srcdir
+mv \$RPM_BUILD_ROOT/$srcdir/*.spec \$RPM_BUILD_ROOT/$srcdir/specs.spec
+mkdir -p \$RPM_BUILD_ROOT/$srcdir/partof
 
 %clean
 rm -rf \$RPM_BUILD_ROOT
@@ -261,7 +268,8 @@ rm -rf \$RPM_BUILD_ROOT
 /usr/share/srpmix/sources/*/*/*/SRPMIX
 /usr/share/srpmix/sources/*/*/*/pre-build
 /usr/share/srpmix/sources/*/*/*/plugins
-/usr/share/srpmix/sources/*/*/*/*.spec
+/usr/share/srpmix/sources/*/*/*/specs.spec
+/usr/share/srpmix/sources/*/*/*/partof
 
 %files archives
 %defattr(-,root,root)
