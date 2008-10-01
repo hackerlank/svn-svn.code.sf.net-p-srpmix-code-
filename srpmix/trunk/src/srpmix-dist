@@ -146,13 +146,14 @@ rm -rf %{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION
 %build
 
 builddistdir=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/$distdir/$name
-mkdir -p \$builddistdir \$builddistdir/pre-build \$builddistdir/srpmix-LOG
+mkdir -p \$builddistdir/members
 
 echo "$@" | tr ' ' '\n' | while read p
 do
   origp=\$(echo \$p | sed 's/-srpmix.*//')
+
   d=\$(rpm -ql \$p | grep pre-build | sort | head -1 | xargs -n1 dirname)
-  ln -sf \$d/pre-build \$builddistdir/pre-build/\$origp
+  ln -sf \$d \$builddistdir/members/\$origp
 done
 
 %install
@@ -161,7 +162,7 @@ builddistdir=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/$distdir/$name
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$distdir
 
-rsync -va --exclude srpmix-LOG \$builddistdir \$RPM_BUILD_ROOT/$distdir
+rsync -va \$builddistdir \$RPM_BUILD_ROOT/$distdir
 
 %clean
 rm -rf \$RPM_BUILD_ROOT
@@ -284,10 +285,6 @@ function main
     parse_arguments "$@"
     #trap cleanup 0
 
-    if test "x$NAME" = "x"; then
-        NAME=$(basename $(dirname $1))
-    fi
-
     TMPDIR=`mktemp -d`
     install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
 
@@ -303,7 +300,10 @@ function main
         fi
     done
 
-    create_meta_srpm $NAME $packages
+    # If NAME is not given, sprmix-dist is not created.
+    if test "x$NAME" != "x"; then
+	create_meta_srpm $NAME $packages
+    fi
 
 }
 
