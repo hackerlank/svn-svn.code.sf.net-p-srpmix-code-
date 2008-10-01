@@ -189,7 +189,7 @@ function create_srpm
 {
     srpm=$1
 
-    pvrd=$(rpm -qp --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $1)
+    pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $1)
     package=$(echo $pvrd | cut -d' ' -f1)
     version=$(echo $pvrd | cut -d' ' -f2)
     release=$(echo $pvrd | cut -d' ' -f3)
@@ -203,13 +203,13 @@ function create_srpm
         echo "$package-$version-$release-srpmix"
         return
     fi
-    group=$(rpm -qp --queryformat "%{Group}" $1)
-    license=$(rpm -qp --queryformat "%{License}" $1)
-    changelog=$(LANG=C rpm -qp --changelog $1 | sed 's/%/%%/g')
+    group=$(rpm -qp --nosignature --queryformat "%{Group}" $1)
+    license=$(rpm -qp --nosignature --queryformat "%{License}" $1)
+    changelog=$(LANG=C rpm -qp --nosignature --changelog $1 | sed 's/%/%%/g')
     if test "x$changelog" = "x(none)"; then
         changelog=""
     fi
-    buildarch=$(rpm -qp --queryformat "%{BUILDARCHS}" $1)
+    buildarch=$(rpm -qp --nosignature --queryformat "%{BUILDARCHS}" $1)
     if test "x$buildarch" = "x(none)"; then
         buildarch="noarch"
     fi
@@ -300,9 +300,9 @@ function main
     for srpm in $srpms
     do
         if test -f "$srpm"; then
-            es_print dist-start --file=`basename $srpm` --timestamp="\"`LANG=C date`\""
+            es_print dist-start --file=\"`basename $srpm`\" --timestamp="\"`LANG=C date`\""
             packages="$packages $(create_srpm $srpm)"
-            es_print dist-end --file=`basename $srpm` --timestamp="\"`LANG=C date`"\"
+            es_print dist-end --file=\"`basename $srpm`\" --timestamp="\"`LANG=C date`"\"
         else
             abort "No such file: $srpm"
         fi
