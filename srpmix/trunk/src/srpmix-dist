@@ -147,18 +147,17 @@ rm -rf %{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION
 %build
 
 builddistdir=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/$distdir/$name
-mkdir -p \$builddistdir/members
+mkdir -p \$builddistdir/packages
 
 echo "$@" | tr ' ' '\n' | while read p
 do
-  origp=\$(echo \$p | sed 's/-srpmix.*//')
-
   d=\$(rpm -ql \$p | grep pre-build | sort | head -1 | xargs -n1 dirname)
-  ln -sf \$d \$builddistdir/members/\$origp
+  pname=\$(dirname \$d | xargs -n1 basename)
+  ln -sf \$d \$builddistdir/packages/\$pname
   
-  partof=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/\$d/partof/
-  mkdir -p \$partof
-  ln -sf \$builddistdir \$partof
+  dists=%{_builddir}/srpmix-dist-$name-$SRPMIX_VERSION/\$d/dists/
+  mkdir -p \$dists
+  ln -sf \$builddistdir \$dists
 done
 
 %install
@@ -258,7 +257,7 @@ mkdir -p \$RPM_BUILD_ROOT/$srcdir
 
 rsync -a  \$(/bin/ls -d %{_builddir}/$package-$version-srpmix/* | grep -v LOG | grep -v SPECS\$) \$RPM_BUILD_ROOT/$srcdir
 mv \$RPM_BUILD_ROOT/$srcdir/*.spec \$RPM_BUILD_ROOT/$srcdir/specs.spec
-mkdir -p \$RPM_BUILD_ROOT/$srcdir/partof
+mkdir -p \$RPM_BUILD_ROOT/$srcdir/dists
 
 %clean
 rm -rf \$RPM_BUILD_ROOT
@@ -269,7 +268,7 @@ rm -rf \$RPM_BUILD_ROOT
 /usr/share/srpmix/sources/*/*/*/pre-build
 /usr/share/srpmix/sources/*/*/*/plugins
 /usr/share/srpmix/sources/*/*/*/specs.spec
-/usr/share/srpmix/sources/*/*/*/partof
+/usr/share/srpmix/sources/*/*/*/dists
 
 %files archives
 %defattr(-,root,root)
