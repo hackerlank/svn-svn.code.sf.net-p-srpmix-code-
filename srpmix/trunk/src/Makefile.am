@@ -1,6 +1,8 @@
+bin_SCRIPTS=libsrpmix.sh
+CLEANFILES = $(bin_SCRIPTS)
+
 dist_bin_SCRIPTS =           \
 	srpmix               \
-        libsrpmix.sh         \
 	\
 	srpmix-meta-hardlink \
 	\

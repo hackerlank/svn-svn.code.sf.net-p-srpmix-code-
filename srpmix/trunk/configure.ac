@@ -18,6 +18,7 @@ AC_OUTPUT([
            misc/specs/Makefile
            misc/specs/srpmix.spec
            src/Makefile
+           src/libsrpmix.sh
            doc/Makefile
           ])
 
