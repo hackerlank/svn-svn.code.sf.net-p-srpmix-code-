@@ -75,6 +75,7 @@ function generate_cvs_cmdline
 	    cvs_root=`cat Root`
 	else
 	    echo "cannot find cvs Root file" 1>&2
+	    pwd 1>&2
 	    return 1
 	fi
 
@@ -82,6 +83,7 @@ function generate_cvs_cmdline
 	    cvs_repo=`cat Repository`
 	else
 	    echo "cannot find cvs Repository file" 1>&2
+	    pwd 1>&2
 	    return 1
 	fi
 
@@ -114,6 +116,7 @@ function generate_darcs_cmdline
 
     if test ! -r "${darcs_defaultrepo_file}"; then
 	echo "canot read defaultrepo file: ${darcs_defaultrepo_file}" 1>&2
+	pwd 1>&2	
 	return 1
     fi
 
@@ -146,6 +149,7 @@ function generate_git_cmdline
 	echo "cannot read origin file: ${git_branches_origin_file}" 1>&2
 	echo "cannot read origin file: ${git_remotes_origin_file}" 1>&2
 	echo "git-config for `remote.origin.url` returns nothing" 1>&2
+	pwd 1>&2
 	return 1
     fi
 
@@ -163,12 +167,14 @@ function generate_svn_cmdline
     svn_info=`svn info`
     if test $? != 0; then
 	echo "fail in 'svn info' invocation" 1>&2
+	pwd 1>&2
 	return 1
     fi
 
     svn_url=`echo "$svn_info" | grep 'URL: ' |  sed -e 's/URL: //'`
     if test "x${svn_url}" = x; then
 	echo "cannot find URL line in svn_info output" 1>&2
+	pwd 1>&2
 	return 1
     fi
     
@@ -188,6 +194,7 @@ function generate_hg_cmdline
     hg_path=`hg showconfig -u paths.default 2> /dev/null`
     if test $? != 0; then
 	echo "fail in 'hg showconfig' invocation" 1>&2
+	pwd 1>&2
 	return 1
     fi
 
@@ -202,6 +209,7 @@ function try_source
     source $1
     if test $? != 0; then
 	echo "*** ABORT...cannot find $1" 1>&2
+	pwd 1>&2
 	exit 1
     fi
 }
