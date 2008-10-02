@@ -142,8 +142,14 @@ function try_source
     fi
 }
 
-# create_dist_view <name> <packages>...
-function create_dist_view
+#
+# A view is defined in this function.
+# => A creator of the view based on this definition is created by rpmbuild.
+# ==> A view is created by the view creator.
+#
+# define_dist_view <name> <packages>...
+#
+function define_dist_view
 {
     name=$1
     shift
@@ -220,7 +226,14 @@ EOF
     mv $TMPDIR/SRPMS/srpmix-dist-$name-$WRAPPING_VERSION-$SRPMIX_RELEASE*.src.rpm "${DISTOUTPUTDIR}"
 }
 
+# A src.rpm is.
+# => src.rpm for Foo is wrapped to srpmixed src.rpm by this function.
+# ==> srpmixed rpm is created from srpmixed src.rpm by rpmbuild.
+# ===> By Installing srpmixed rpm source files of Foo are deployed as if src.rpm for Foo is deployed 
+#      by srpmix command.
+#
 # wrap_srpm srpm-file
+#
 function wrap_srpm
 {
     srpm=$1
@@ -346,9 +359,9 @@ function main
 
     # If NAME is not given, sprmix-dist is not created.
     if test "x$NAME" != "x"; then
-	es_print srpmix-create-dist-view-start --name=\"${NAME}\" --timestamp="\"`LANG=C date`\""
-	create_dist_view $NAME $packages
-	es_print srpmix-create-dist-view-end --timestamp="\"`LANG=C date`"\"
+	es_print srpmix-define-dist-view-start --name=\"${NAME}\" --timestamp="\"`LANG=C date`\""
+	define_dist_view $NAME $packages
+	es_print srpmix-define-dist-view-end --timestamp="\"`LANG=C date`"\"
     fi
 
 }
