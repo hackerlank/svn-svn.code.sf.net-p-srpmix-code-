@@ -25,6 +25,16 @@
 SRPMIX_VERSION=@VERSION@
 SRPMIX_RELEASE=0
 
+function srpmix_build_wrapped_name
+{
+    local package=$1
+    local version=$2
+    local release=$3
+
+    wrapped_name="$package-$version-$release-srpmix"
+    echo ${wrapped_name}
+}
+
 ########################################################################
 #
 function es_echo_n
@@ -40,8 +50,8 @@ function es_echo_n
 #
 function es_time
 {
-    TIMEFORMAT=$'(time :real %R :user %U :sys %S)' 
-    time $@
+    TIMEFORMAT=$'(es-time :real %R :user %U :sys %S)' 
+    time "$@"
     return $?
 }
 #
@@ -54,70 +64,148 @@ function es_time
 #
 function es_print
 {
+    es_print_sans_newline "$@"
+    printf "\n"
+}
+
+function es_print_tail_p
+{
+    if [ "x$1" = "x" ]; then
+	return 0
+    fi
+
+    case "$1" in
+	-s=*)
+            return 1
+	    ;;
+	-S=*)
+            return 1
+	    ;;
+	-[tf])
+	    return 1
+	    ;;
+	-[)
+	    return 1
+	    ;;
+	-])
+	    return 0
+	    ;;
+	-\\[\\])
+	    return 0
+	    ;;
+	-*)
+	    if [ "$2" = yes ]; then
+		return 0
+	    else
+		return 1
+	    fi
+	    ;;
+	*)
+	    return 1
+	    ;;
+    esac
+}
+
+function es_print_sans_newline
+{
     es_print_value=no
 
 
-    es_echo_n "("
+    printf "("
 
     while [ $# -gt 0 ]; do
 	case "$1" in 
 	    --*=*)
-                if test ${es_print_value} = yes; then
-		    es_echo_n ") "
+                if [ ${es_print_value} = yes ]; then
+		    printf ") "
 		fi
 
-                es_echo_n "`echo $1 | sed -e 's/^--\([^=]*\)=\(.*\)$/:\1 \2/'` "
+                printf "%s" "`echo $1 | sed -e 's/^--\([^=]*\)=\(.*\)$/:\1 \2/'`"
 		es_print_value=no
+
+		if ! es_print_tail_p "$2" "${es_print_value}"; then
+			printf " "
+		fi
 
 		shift
 		;;
 	    --*)
-		if test ${es_print_value} = yes; then
-		    es_echo_n ") "
+		if [ ${es_print_value} = yes ]; then
+		    printf ") "
 		    es_print_value=no
 		fi
 		
-		es_echo_n "`echo $1 | sed -e 's/^--/:/'` "
+		printf "%s" "`echo $1 | sed -e 's/^--/:/'`"
 		es_print_value=yes
-		es_echo_n "("
+		printf " ("
 
 		shift
 		;;
-	    -*=*)
-                if test ${es_print_value} = yes; then
-		    es_echo_n ") "
+	    -[])
+	        printf "()"
+		if ! es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
 		fi
-
-                es_echo_n "`echo $1 | sed -e 's/^-\([^=]*\)=\(.*\)$/:\1 \2/'` "
-		es_print_value=no
-
 		shift
 		;;
-	    -*)
-		if test ${es_print_value} = yes; then
-		    es_echo_n ") "
-		    es_print_value=no
+	    -[)
+	        printf "("
+		shift
+		;;
+            -])
+	        printf ")"
+                if ! es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
 		fi
-		
-		es_echo_n "`echo $1 | sed -e 's/^-/:/'` "
-		es_print_value=yes
-		es_echo_n "("
-
+		shift
+		;;
+	    -S=*)
+                printf "%s" "`echo $1 | sed -e 's/^-\([^=]*\)=\(.*\)$/\|\2\|/'`"
+		if ! es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
+		shift
+		;;
+	    -s=*)
+                printf "%s" "`echo $1 | sed -e 's/^-\([^=]*\)=\(.*\)$/\"\2\"/'`"
+		if ! es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
+		shift
+		;;
+	    -[tf])
+	        printf "%s" "`echo $1 | sed -e 's/^-\([tf]\)$/#\1/'`"
+		if ! es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
 		shift
 		;;
 	    *)
-		es_echo_n "$1 "
+		printf "%s" "$1"
+		if ! es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
 		shift
 		;;
 	    esac
     done
     
-    if test ${es_print_value} = yes; then
-	    es_echo_n ")"
-	    es_print_value=no
+    if [ ${es_print_value} = yes ]; then
+		    printf ")"
+		    es_print_value=no
     fi
-    echo ")"
+
+    printf ")"
 }
+
+#
+# (Test
+#
+#   $ ./es-lang-sh-print  a b c --d --e f -t -f --g h i -z f --j=a -f=f a b c -f a b c --z
+#    (a b c :d () :e (f) #t #f :g (h i) :z (f) :j a :f f a b c #f a b c :z ())
+#
+# )
+#
 #
 ########################################################################
 : libsrpmix.sh ends here

@@ -24,6 +24,7 @@
 ########################################################################
 
 RPMBUILD=rpmbuild
+GOSH=gosh
 LIBSRPMIX=libsrpmix.sh
 OUTPUTDIR=
 DISTOUTPUTDIR=
@@ -337,6 +338,7 @@ EOF
 function main
 {
     verify_commands "${RPMBUILD}"
+    verify_commands "${GOSH}"
     parse_arguments "$@"
     #trap cleanup 0
 

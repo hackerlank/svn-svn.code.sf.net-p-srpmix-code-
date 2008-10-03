@@ -9,6 +9,8 @@ dist_bin_SCRIPTS =           \
 	build-sources.sh     \
 	\
 	srpmix-dist          \
+	srpmix-wrap          \
+	srpmix-view-dist     \
 	srpmix-plugin        \
 	\
         $(NULL)

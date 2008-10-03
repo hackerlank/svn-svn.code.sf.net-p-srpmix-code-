@@ -765,7 +765,7 @@ function srpm_build
 
     LANG=C rpmbuild --target=${arch} -bp --nodeps "${rootdir}/${SPECDIR}/${spec_file}"
     status=$?
-
+    echo ${status} > "${rootdir}/STATUS"
     chmod -R a+r "${rootdir}/${BUILDDIR}/${build_name}"
 
     return $status

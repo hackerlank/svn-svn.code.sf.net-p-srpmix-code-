@@ -28,18 +28,16 @@ LIBSRPMIX=libsrpmix.sh
 OUTPUTDIR=
 TMPDIR=
 RELEASE=0
-PRINT_WRAPPED_NAME_ONLY=
+JUST_PRINT=
 DUMP_SPEC=
 
 function print_usage
 {
     echo "Usage: "
     echo "  srpmix-dist [--help|-h]"
-    echo "  srpmix-dist [--print-wrapped-name-only]"
-    echo "              [--dump-spec] "
-    echo "              [--output-dir=OUTPUTDIR] "
-    echo "              [--release=RELEASE]"
-    echo "              [SRPMS...]"
+    echo "  srpmix-dist [--dump-spec|--just-print] [SRPMS...]"
+    echo "  srpmix-dist [--output-dir=OUTPUTDIR] [--release=RELEASE] [SRPMS...]"
+    echo ""
     echo "  If SRPMS is not given, standard input is"
     echo "  used for the list of source packages."
     echo 
@@ -72,8 +70,8 @@ function parse_arguments
             --release=*)
 	        RELEASE=$(echo $1 | sed 's/--release=//')
 		;;
-	    --print-wrapped-name-only)
-	        PRINT_WRAPPED_NAME_ONLY=1
+	    --just-print)
+	        JUST_PRINT=1
 		;;
 	    --dump-spec)
 	        DUMP_SPEC=1
@@ -92,6 +90,13 @@ function parse_arguments
     else
 	srpms=$@	
     fi
+
+    if test "x${JUST_PRINT}" != "x" \
+	-a "x${DUMP_SPEC}" != "x"; then
+	print_usage 1>&2
+	abort "Specify either --just-print or --dump-spec"
+    fi
+
     
     if test "x$OUTPUTDIR" = "x"; then
 	OUTPUTDIR=.
@@ -133,45 +138,59 @@ function try_source
 #
 function wrap_srpm
 {
-    srpm=$1
+    target_srpm=$1
     spec=
     wrapped_name=
+    es_name=
 
-    pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $1)
+    pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_srpm)
     package=$(echo $pvrd | cut -d' ' -f1)
     version=$(echo $pvrd | cut -d' ' -f2)
     release=$(echo $pvrd | cut -d' ' -f3)
     description=$(echo $pvrd | cut -d' ' -f4)
     if test "x$package" = "x"; then
-        echo "warning: failed to parse $1: ignored" 1>&2
+        echo "warning: failed to parse $target_srpm: ignored" 1>&2
         return
     fi
-
-    wrapped_name="$package-$version-$release-srpmix"
-    if test "x$PRINT_WRAPPED_NAME_ONLY" != "x"; then
-	# echo "${wrapped_name}"
+    
+    wrapped_name=$(srpmix_build_wrapped_name "$package" "$version" "$release")
+    es_name=$(es_print srpmix-wrap name\
+	--target-srpm="\"$(basename $target_srpm)\"" \
+	--package="\"${package}\"" \
+	--version="\"${version}\"" \
+	--release="\"${release}\"" \
+	--wrapped-name="\"${wrapped_name}\"")
+    if test "x$JUST_PRINT" != "x"; then
+	echo "$es_name"
 	return
     fi
     
     if test -f "${OUTPUTDIR}/$package-$version-$release-srpmix-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm"; then
         echo "${OUTPUTDIR}/$package-$version-$release-srpmix-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm already exists" 1>&2
-	echo "${wrapped_name}"
+	echo "$es_name"
         return
     fi
     
-    group=$(rpm -qp --nosignature --queryformat "%{Group}" $1)
-    license=$(rpm -qp --nosignature --queryformat "%{License}" $1)
-    changelog=$(LANG=C rpm -qp --nosignature --changelog $1 | sed 's/%/%%/g')
-    if test "x$changelog" = "x(none)"; then
-        changelog=""
-    fi
-    buildarch=$(rpm -qp --nosignature --queryformat "%{BUILDARCHS}" $1)
+    group=$(rpm -qp --nosignature --queryformat "%{Group}" $target_srpm)
+    license=$(rpm -qp --nosignature --queryformat "%{License}" $target_srpm)
+#    changelog=$(LANG=C rpm -qp --nosignature --changelog $target_srpm | sed 's/%/%%/g')
+#    if test "x$changelog" = "x(none)"; then
+#        changelog=""
+#    fi
+    buildarch=$(rpm -qp --nosignature --queryformat "%{BUILDARCHS}" $target_srpm)
     if test "x$buildarch" = "x(none)"; then
         buildarch="noarch"
     fi
 
-    srcdir=/usr/share/srpmix/sources/$(echo $package | sed  's/\(^.\).*/\1/')
-    srcdir=$srcdir/$package/$version-$release
+#
+# TODO: Following variables must be exported to view generators.
+#
+    srpmix_root=/usr/share/srpmix
+    srpmix_sources=${srpmix_root}/sources
+    pkg_hash=$(echo $package | sed  's/\(^.\).*/\1/')
+    pkg_root="${srpmix_sources}"/"${pkg_hash}"/"$package"
+    
+    srcdir="${pkg_root}"/"$version-$release"
 
     if test "x${DUMP_SPEC}" = "x"; then
 	spec="$TMPDIR/SPECS/$package-$version-$release-srpmix.spec"
@@ -188,7 +207,7 @@ Summary: Source Information for package $package ($version-$release)
 Name: $package-$version-$release-srpmix
 Version: $SRPMIX_VERSION
 Release: $SRPMIX_RELEASE%{?dist}
-Source: `basename $srpm`
+Source: `basename $target_srpm`
 Autoreq: 0
 BuildRequires: srpmix
 BuildRequires: rsync
@@ -215,7 +234,7 @@ rm -rf %{_builddir}/$package-$version-srpmix
 
 %build
 srpmix -f -v %{_builddir}/$package-$version-srpmix \
-    %{_sourcedir}/`basename $srpm`
+    %{_sourcedir}/`basename $target_srpm`
 srpmix-plugin %{_builddir}/$package-$version-srpmix
 
 %install
@@ -231,6 +250,7 @@ rm -rf \$RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 /usr/share/srpmix/sources/*/*/*/SRPMIX
+/usr/share/srpmix/sources/*/*/*/STATUS
 /usr/share/srpmix/sources/*/*/*/pre-build
 /usr/share/srpmix/sources/*/*/*/plugins
 /usr/share/srpmix/sources/*/*/*/specs.spec
@@ -240,43 +260,43 @@ rm -rf \$RPM_BUILD_ROOT
 /usr/share/srpmix/sources/*/*/*/archives
 
 %changelog
-$changelog
+* Sat Jun  2 2007 SRPMIX WRAP <consulting-jp@redhat.com> $package-$version-$release
+- Automatically generated.
 
 EOF
 
-    if test "x${DUMP_SPEC}" = "x"; then
-	echo "${wrapped_name}"
+    if test "x${DUMP_SPEC}" != "x"; then
+	printf "# "
+	echo "$es_name"
 	return
     fi
 
-    cp $srpm $TMPDIR/SOURCES/
+    cp $target_srpm $TMPDIR/SOURCES/
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
     mv $TMPDIR/SRPMS/$package-$version-$release-srpmix-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm "${OUTPUTDIR}"
-    rm $TMPDIR/SOURCES/`basename $srpm`
-    echo "${wrapped_name}"
+    rm $TMPDIR/SOURCES/`basename $target_srpm`
+    echo "$es_name"
+
+    es_print srpmix-wrap done \
+	--file="\"$(ls ${OUTPUTDIR}/$package-$version-$release-srpmix-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm)\""
 }
 
 function main
 {
     verify_commands "${RPMBUILD}"
     parse_arguments "$@"
-    #trap cleanup 0
+    trap cleanup 0
 
-    if test "x${PRINT_WRAPPED_NAME_ONLY}" = "x" \
+    if test "x${JUST_PRINT}" = "x" \
 	-o "x${DUMP_SPEC}" = "x"; then
 	TMPDIR=`mktemp -d`
 	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 
-    packages=""
     for srpm in $srpms
     do
         if test -f "$srpm"; then
-	    p=""
-            es_print srpmix-wrap-start --target-srpm=\"`basename $srpm`\" --timestamp="\"`LANG=C date`\""
-	    p=$(wrap_srpm $srpm)
-            es_print srpmix-wrap-end --wrapped-name=\"$p\" --timestamp="\"`LANG=C date`"\"
-            packages="$packages $p"
+	    wrap_srpm "$srpm"
         else
             abort "No such file: $srpm"
         fi
@@ -284,5 +304,11 @@ function main
 }
 
 try_source ${LIBSRPMIX}
-es_time main "$@"
+
+RUN=
+if test "x${DUMP_SPEC}" = "x"; then
+    RUN=es_time
+fi
+${RUN} main "$@"
+
 exit $?
