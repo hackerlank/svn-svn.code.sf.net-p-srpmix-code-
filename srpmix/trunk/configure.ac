@@ -1,5 +1,5 @@
 m4_define([pkg_name],    [srpmix])
-m4_define([pkg_version], [3.99.0])
+m4_define([pkg_version], [3.99.1])
 
 
 
