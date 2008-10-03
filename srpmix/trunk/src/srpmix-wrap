@@ -230,18 +230,18 @@ Summary: Source Archives for package $package ($version-$release)
 $description
 
 %prep
-rm -rf %{_builddir}/$package-$version-srpmix
+rm -rf %{_builddir}/$package-$version-$release-srpmix
 
 %build
-srpmix -f -v %{_builddir}/$package-$version-srpmix \
+srpmix -f -v %{_builddir}/$package-$version-$release-srpmix \
     %{_sourcedir}/`basename $target_srpm`
-srpmix-plugin %{_builddir}/$package-$version-srpmix
+srpmix-plugin %{_builddir}/$package-$version-$release-srpmix
 
 %install
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$srcdir
 
-rsync -a  \$(/bin/ls -d %{_builddir}/$package-$version-srpmix/* | grep -v LOG | grep -v SPECS\$) \$RPM_BUILD_ROOT/$srcdir
+rsync -a  \$(/bin/ls -d %{_builddir}/$package-$version-$release-srpmix/* | grep -v LOG | grep -v SPECS\$) \$RPM_BUILD_ROOT/$srcdir
 mv \$RPM_BUILD_ROOT/$srcdir/*.spec \$RPM_BUILD_ROOT/$srcdir/specs.spec
 
 %clean
