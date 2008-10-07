@@ -24,12 +24,10 @@
 ########################################################################
 
 RPMBUILD=rpmbuild
-GOSH=gosh
 LIBSRPMIX=libsrpmix.sh
 NAME=
 OUTPUTDIR=
 TMPDIR=
-RELEASE=0
 DUMP_SPEC=
 
 # TODO: --srpm
@@ -49,12 +47,6 @@ function cleanup
     fi
 }
 
-function abort
-{
-    echo "*** ABORT..." "$@" 1>&2
-    exit 1
-}
-
 function parse_arguments
 {
     while [ $# -gt 0 ]; do
@@ -70,7 +62,7 @@ function parse_arguments
 	        OUTPUTDIR=$(echo $1 | sed 's/--output-dir=//')
 		;;
             --release=*)
-	        RELEASE=$(echo $1 | sed 's/--release=//')
+	        SRPMIX_RELEASE=$(echo $1 | sed 's/--release=//')
 		;;
 	    --dump-spec)
 	        DUMP_SPEC=1
@@ -83,60 +75,30 @@ function parse_arguments
     done
 
     if test "x$NAME" = "x"; then
-	abort "No name for the weakview"
+	srpmix_abort "No name for the weakview"
     fi
 
     if test "x$1" != "x"; then
 	print_usage 1>&2
-	abort "Too many arguments"
+	srpmix_abort "Too many arguments"
     fi
 
     if test "x$OUTPUTDIR" = "x"; then
 	OUTPUTDIR=.
     fi
     if test ! -d "${OUTPUTDIR}"; then
-	abort "No such directory: ${OUTPUTDIR}"
+	srpmix_abort "No such directory: ${OUTPUTDIR}"
     fi
-}
-
-function verify_commands
-{
-    while [ $# -gt 0 ]; do
-	if which $1 > /dev/null 2>&1; then
-	    :
-	else
-	    echo "cannot find $1" 1>&2
-	    abort
-	fi
-	shift 
-    done
 }
 
 function try_source
 {
     source $1
     if test $? != 0; then
-        abort "cannot find $1"
+        echo "*** ABORT..." "cannot find $1" 1>&2
 	exit 1
     fi
 }
-
-SCM='(begin 
- (define (kget kl ky) 
-   (cond ((null? kl) #f)
-	 ((eq? (car kl) ky) (cadr kl))
-	 (else (kget (cdr kl) ky))))
- (let loop ((r (read)))
-      (unless (eof-object? r)
-	(when (and (list? r)
-		   (eq? (car r) `srpmix-wrap)
-		   (not (null? (cdr r)))
-		   (eq? (cadr r) `name))
-	  (format #t "~a ~a ~a\n" 
-		  (kget r :package)
-		  (kget r :version)
-		  (kget r :release)))
-	(loop (read)))))'
 
 function create_dist_weakview
 {
@@ -154,7 +116,7 @@ function create_dist_weakview
 	
     rootdir=${SRPMIX_ROOT_DIR}
     distdir=${SRPMIX_ROOT_DIR}/dists
-
+    builddistdir_body="srpmix-weakview-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE/$distdir/$name"
 
     cat > $spec <<EOF
 Summary: Srpmix weakview for $name distribution
@@ -175,29 +137,31 @@ License: Unknown
 Srpmix weakview for $name distribution.
 
 %prep
-rm -rf %{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE/$distdir/$name
+builddistdir=%{_builddir}/$builddistdir_body
+rm -rf \$builddistdir
 
 %build
-source libsrpmix.sh
-
-builddistdir=%{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE/$distdir/$name
+builddistdir=%{_builddir}/$builddistdir_body
 mkdir -p \$builddistdir/packages
+
 EOF
 
-${GOSH} -e "${SCM}" | while read package version release; do
+# in %build
+srpmix_distmap_to_pvr | while read package version release; do
   # Make link relative
   d="../../.."$(srpmix_srcdir $package $version $release | sed -e "s;$rootdir;;")
   echo "ln -sf $d \$builddistdir/packages/$package"
 done >> $spec
 
+
     cat >> $spec <<EOF
 %install
-builddistdir=%{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE/$distdir/$name
+builddistdir=%{_builddir}/$builddistdir_body
 
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$distdir/$name
 
-rsync -va %{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE/$distdir/$name \$RPM_BUILD_ROOT/$distdir
+rsync -va \$builddistdir \$RPM_BUILD_ROOT/$distdir
 
 %files
 %defattr(-,root,root)
@@ -218,13 +182,12 @@ EOF
 
 function main
 {
-    verify_commands "${RPMBUILD}"
-    verify_commands "${GOSH}"
+    srpmix_verify_commands "${RPMBUILD}" "${GOSH}"
     parse_arguments "$@"
-    trap cleanup 0
 
     if test "x${DUMP_SPEC}" = "x"; then
 	TMPDIR=`mktemp -d`
+	trap cleanup 0
 	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 

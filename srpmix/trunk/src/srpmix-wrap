@@ -27,16 +27,15 @@ RPMBUILD=rpmbuild
 LIBSRPMIX=libsrpmix.sh
 OUTPUTDIR=
 TMPDIR=
-RELEASE=0
 JUST_PRINT=
 DUMP_SPEC=
 
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-dist [--help|-h]"
-    echo "  srpmix-dist [--dump-spec|--just-print] [SRPMS...]"
-    echo "  srpmix-dist [--output-dir=OUTPUTDIR] [--release=RELEASE] [SRPMS...]"
+    echo "  srpmix-wrap [--help|-h]"
+    echo "  srpmix-wrap [--dump-spec|--just-print] [SRPMS...]"
+    echo "  srpmix-wrap [--output-dir=OUTPUTDIR] [--release=RELEASE] [SRPMS...]"
     echo ""
     echo "  If SRPMS is not given, standard input is"
     echo "  used for the list of source packages."
@@ -48,12 +47,6 @@ function cleanup
     if test -d "$TMPDIR"; then
         rm -rf $TMPDIR || true
     fi
-}
-
-function abort
-{
-    echo "*** ABORT..." "$@" 1>&2
-    exit 1
 }
 
 function parse_arguments
@@ -68,7 +61,7 @@ function parse_arguments
 	        OUTPUTDIR=$(echo $1 | sed 's/--output-dir=//')
 		;;
             --release=*)
-	        RELEASE=$(echo $1 | sed 's/--release=//')
+	        SRPMIX_RELEASE=$(echo $1 | sed 's/--release=//')
 		;;
 	    --just-print)
 	        JUST_PRINT=1
@@ -94,7 +87,7 @@ function parse_arguments
     if test "x${JUST_PRINT}" != "x" \
 	-a "x${DUMP_SPEC}" != "x"; then
 	print_usage 1>&2
-	abort "Specify either --just-print or --dump-spec"
+	srpmix_abort "Specify either --just-print or --dump-spec"
     fi
 
     
@@ -102,28 +95,15 @@ function parse_arguments
 	OUTPUTDIR=.
     fi
     if test ! -d "${OUTPUTDIR}"; then
-	abort "No such directory: ${OUTPUTDIR}"
+	srpmix_abort "No such directory: ${OUTPUTDIR}"
     fi
-}
-
-function verify_commands
-{
-    while [ $# -gt 0 ]; do
-	if which $1 > /dev/null 2>&1; then
-	    :
-	else
-	    echo "cannot find $1" 1>&2
-	    abort
-	fi
-	shift 
-    done
 }
 
 function try_source
 {
     source $1
     if test $? != 0; then
-        abort "cannot find $1"
+        echo "*** ABORT..." "cannot find $1" 1>&2
 	exit 1
     fi
 }
@@ -275,13 +255,13 @@ EOF
 
 function main
 {
-    verify_commands "${RPMBUILD}"
+    srpmix_verify_commands "${RPMBUILD}"
     parse_arguments "$@"
-    trap cleanup 0
 
     if test "x${JUST_PRINT}" = "x" \
 	-o "x${DUMP_SPEC}" = "x"; then
 	TMPDIR=`mktemp -d`
+	trap cleanup 0
 	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 
@@ -290,7 +270,7 @@ function main
         if test -f "$srpm"; then
 	    wrap_srpm "$srpm"
         else
-            abort "No such file: $srpm"
+            srpmix_abort "No such file: $srpm"
         fi
     done
 }
