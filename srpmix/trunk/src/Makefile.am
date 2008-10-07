@@ -11,6 +11,7 @@ dist_bin_SCRIPTS =           \
 	srpmix-dist          \
 	srpmix-wrap          \
 	srpmix-view-dist     \
+	srpmix-weakview-dist \
 	srpmix-plugin        \
 	\
         $(NULL)

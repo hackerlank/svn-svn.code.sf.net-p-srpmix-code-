@@ -182,15 +182,7 @@ function wrap_srpm
         buildarch="noarch"
     fi
 
-#
-# TODO: Following variables must be exported to view generators.
-#
-    srpmix_root=/usr/share/srpmix
-    srpmix_sources=${srpmix_root}/sources
-    pkg_hash=$(echo $package | sed  's/\(^.\).*/\1/')
-    pkg_root="${srpmix_sources}"/"${pkg_hash}"/"$package"
-    
-    srcdir="${pkg_root}"/"$version-$release"
+    srcdir=$(srpmix_srcdir $package $version $release)
 
     if test "x${DUMP_SPEC}" = "x"; then
 	spec="$TMPDIR/SPECS/$package-$version-$release-srpmix.spec"
