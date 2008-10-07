@@ -24,6 +24,7 @@
 ########################################################################
 
 RPMBUILD=rpmbuild
+GOSH=gosh
 LIBSRPMIX=libsrpmix.sh
 NAME=
 OUTPUTDIR=
@@ -183,7 +184,7 @@ builddistdir=%{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_VERSION-$SRPMIX_REL
 mkdir -p \$builddistdir/packages
 EOF
 
-gosh -e "${SCM}" | while read package version release; do
+${GOSH} -e "${SCM}" | while read package version release; do
   # Make link relative
   d="../../.."$(srpmix_srcdir $package $version $release | sed -e "s;$rootdir;;")
   echo "ln -sf $d \$builddistdir/packages/$package"
@@ -218,6 +219,7 @@ EOF
 function main
 {
     verify_commands "${RPMBUILD}"
+    verify_commands "${GOSH}"
     parse_arguments "$@"
     trap cleanup 0
 
