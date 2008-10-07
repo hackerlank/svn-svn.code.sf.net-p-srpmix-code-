@@ -152,7 +152,7 @@ function create_dist_weakview
     fi
 	
     rootdir=${SRPMIX_ROOT_DIR}
-    distdir=${SRPMIX_ROOT_DIR}/dists
+    distdir=${SRPMIX_ROOT_DIR}/dists-weak
 
 
     cat > $spec <<EOF
