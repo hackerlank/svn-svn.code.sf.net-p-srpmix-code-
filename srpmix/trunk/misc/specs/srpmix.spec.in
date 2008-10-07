@@ -33,11 +33,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/srpmix
 %{_bindir}/libsrpmix.sh
 
-%{_bindir}/srpmix-meta-hardlink
-%{_bindir}/build-sources.sh
-%{_bindir}/srpmix-dist
 %{_bindir}/srpmix-wrap
-%{_bindir}/srpmix-view-dist
 %{_bindir}/srpmix-weakview-dist
 %{_bindir}/srpmix-plugin
 

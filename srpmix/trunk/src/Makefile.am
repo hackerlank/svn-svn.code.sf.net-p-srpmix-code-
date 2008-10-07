@@ -4,13 +4,7 @@ CLEANFILES = $(bin_SCRIPTS)
 dist_bin_SCRIPTS =           \
 	srpmix               \
 	\
-	srpmix-meta-hardlink \
-	\
-	build-sources.sh     \
-	\
-	srpmix-dist          \
 	srpmix-wrap          \
-	srpmix-view-dist     \
 	srpmix-weakview-dist \
 	srpmix-plugin        \
 	\
