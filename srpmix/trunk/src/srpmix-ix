@@ -1,0 +1,956 @@
+#!/bin/sh --posix
+#
+########################################################################
+#
+# srpmix-ix: Install and eXpand source rpms
+#
+# Copyright (C) 2007 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+########################################################################
+#
+# Constatns
+#
+DIR_MAJOR=3
+DIR_MINOR=99
+DIR_MICRO=0
+DIR_VERSION="${DIR_MAJOR}.${DIR_MINOR}.${DIR_MICRO}"
+
+HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
+REQUIRED_COMMANDS="mktemp rpm2cpio cpio ${HARDLINK} id"
+MOUNTPOINT_TEMPLATE="srpmix.iso.XXXXXXXXXX"
+
+PROFILE=SRPMIX
+SPECDIR=srpmix-SPECS
+SOURCEDIR=archives
+BUILDDIR=pre-build
+SUBDIRS="SPECS ${BUILDDIR} ${SPECDIR} ${SOURCEDIR}"
+LIBSRPMIX=libsrpmix.sh
+#
+########################################################################
+
+########################################################################
+#
+# Variables
+#
+ROOTDIR=
+SRCFILES=
+MOUNTPOINT=
+CREATE_ROOTDIR=no
+VERBOSE=no
+USE_SUDO=no
+GROUP=
+TARGET=
+ABORT_COUNT=0
+TOTAL_COUNT=0
+
+#
+########################################################################
+
+
+########################################################################
+#
+# Functions
+#
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-ix [--help|-h]"
+    echo "  srpmix-ix [--force|-f]"
+    echo "            [--verbose|-v]"
+    echo "            [--trace|-x]"
+    echo "            [--sudo|-s]"
+    echo "            [--freeze|-F]"
+    echo "            [--target=target|-t=target|--target target|-t target]"
+    echo "            [--set-group=group|-g=group|--set-group group|-g group]"
+    echo "            ROOTDIR FILES..."
+    echo 
+    echo
+    echo "  --force: create ROOTDIR if it doesn't exist."
+    echo "           If --force given and ROOTDIR exists"
+    echo "           existance of SRPMIX profile file is expected."
+    echo "  --sudo: use sudo in doing chown, mount and umount. "      
+    echo "  --freeze: freeze expanded files. "      
+    echo "  FILES are .iso or .src.rpm"
+    echo 
+}
+
+function verbose
+{
+    if test x"${VERBOSE}" = xyes; then
+	es_print "$@"
+    fi
+}
+
+
+function message
+{
+    es_print "$@" 
+}
+
+function abort
+{
+    unwind
+
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+function update_count
+{
+    local status=$1
+
+    TOTAL_COUNT=`expr 1 + $TOTAL_COUNT`
+    if ! test $status = 0; then
+	ABORT_COUNT=`expr 1 + $ABORT_COUNT`
+    fi
+}
+
+function trap_handler
+{
+    local mountpoint=$1
+
+    # May be this doesn't work
+    verbose signaled --mountpoint=$mountpoint
+
+    echo 1>&2
+    iso_umount ${mountpoint}
+    echo 1>&2
+
+    echo 1>&2
+    rmdir ${mountpoint}
+    echo 1>&2
+
+    echo 1>&2
+    echo 1>&2
+    echo '*** ABORT...signaled' 1>&2
+    echo 1>&2
+    echo 1>&2
+
+    exit -1
+}
+#
+########################################################################
+
+
+########################################################################
+#
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --force|-f)
+		CREATE_ROOTDIR=yes
+		shift 1
+		;;
+	    --verbose|-v)
+		VERBOSE=yes
+		shift 1
+		;;
+	    --trace|-x)
+		set -o xtrace
+		shift 1
+		;;
+	    --sudo|-s)
+		USE_SUDO=yes
+		shift 1
+		;;
+	    --freeze|-F)
+		FREEZE=yes
+		shift 1
+		;;
+            --set-group|-g)
+		if [ $# -gt 0 ]; then
+	            shift 1
+		    
+		    GROUP=$1
+		    shift 1
+		else
+		    echo no option argument for "$1" 1>&2
+		    print_usage 1>&2
+		    abort
+		fi
+		;;
+            -g=*)
+                GROUP=`echo $1 | sed -e 's/-g=//'`
+                shift 1
+                ;;
+	    --set-group=*)
+                GROUP=`echo $1 | sed -e 's/--set-group=//'`
+                shift 1
+		;;
+            --target|-target|-t)
+		if [ $# -gt 0 ]; then
+	            shift 1
+		    
+		    TARGET=$1
+		    shift 1
+		else
+		    echo no option argument for "$1" 1>&2
+		    print_usage 1>&2
+		    abort
+		fi
+		;;
+            -t=*)
+                TARGET=`echo $1 | sed -e 's/-t=//'`
+                shift 1
+                ;;
+	    --target=*)
+                TARGET=`echo $1 | sed -e 's/--target=//'`
+                shift 1
+		;;
+	    -*)
+		echo unknown option: "$1" 1>&2
+		print_usage 1>&2
+		abort
+		;;
+	    *)
+		break
+		;;
+	esac
+    done
+
+    if test $# -lt 2; then
+	echo "too few argument" 1>&2
+	print_usage 1>&2
+	abort
+    fi
+
+    ROOTDIR=$(if cd $1 2>/dev/null; then pwd; else echo $1; fi)
+    shift
+
+    SRCFILES="$@"
+    BUILDNAME=""
+    if test "x$2" = "x"; then
+        BUILDNAME=.
+    fi
+ 
+    verbose varset --ROOTDIR=\""${ROOTDIR}"\"
+    verbose varset --SRCFILES=\""${SRCFILES}"\"
+    verbose varset --MOUNTPOINT=\""${MOUNTPOINT}"\"
+    verbose varset --CREATE_ROOTDIR=\""${CREATE_ROOTDIR}"\"
+    verbose varset --USE-SUDO=\""${USE_SUDO}"\"
+
+    if test x"${TARGET}" != x; then
+	verbose varset --TARGET=\""${TARGET}"\"
+    fi
+}
+#
+########################################################################
+
+
+
+########################################################################
+#
+IS_ROOTDIR_CREATED=no
+
+
+function create_subdirs
+{
+    local rootdir=$1
+    local subdir=
+
+
+    for d in ${SUBDIRS}; do
+	subdir="${rootdir}/${d}"
+	if mkdir ${subdir}; then
+	    verbose mkdir \""${subdir}"\" --type=subdir
+	else
+	    echo "fail to create directory: ${subdir}" 1>&2
+	    abort
+	fi
+    done
+}
+
+function delete_subdirs
+{
+    local rootdir=$1
+    local subdir=
+
+
+    for d in ${SUBDIRS}; do
+	subdir="${rootdir}/${d}"
+	if test -d "${subdir}"; then
+	    rm -rf "${subdir}"
+
+	    verbose rmdir \""${subdir}"\" --type=subdir
+	fi
+    done
+}
+
+function create_rootdir
+{
+    local rootdir=$1
+
+    
+    if mkdir "${rootdir}"; then
+        IS_ROOTDIR_CREATED=yes
+
+	echo ${DIR_VERSION} > "${rootdir}/${PROFILE}"
+	if test "x$FREEZE" = "xyes"; then
+          chmod a-w "${rootdir}/${PROFILE}"
+        fi
+	verbose mkdir \""${rootdir}"\" --type=rootdir
+    else
+	echo "fail to create directory: ${rootdir}" 1>&2
+	abort
+    fi
+
+    if test x${GROUP} != x; then
+	self=`id -u -n`
+	if test "${USE_SUDO}" = yes; then
+	    sudo=sudo
+	fi
+	${sudo} chown ${self}.${GROUP} ${rootdir}
+	verbose chown						\
+	    --user=\"${self}\"					\
+	    --group=\"${GROUP}\"				\
+	    --file=\"${rootdir}\"
+
+  	chmod o-w ${rootdir}
+	verbose chmod --mode=\"o-w\" --file=\""${rootdir}"\"
+
+	chmod ug+w ${rootdir}
+	verbose chmod --mode=\"ug+w\" --file=\""${rootdir}"\"
+    fi
+}
+
+function delete_rootdir
+{
+    local rootdir=$1
+
+
+    if test "${IS_ROOTDIR_CREATED}" = yes; then
+	delete_subdirs "${rootdir}"
+	rm -f "${rootdir}/${PROFILE}"
+	rmdir "${rootdir}"
+
+	verbose rmdir "\"${rootdir}\"" --type=rootdir
+    fi
+}
+
+function verify_rootdir
+{
+    local rootdir=$1
+    local create_rootdir=$2
+
+    if test -d "${rootdir}"; then
+	if test -f "${rootdir}/${PROFILE}"; then
+	    if test `cat "${rootdir}/${PROFILE}"` = ${DIR_VERSION}; then
+		verbose use-rootdir "\"${rootdir}\"" `cat "${rootdir}/${PROFILE}"`
+	    else
+		echo "directory version mismatch" 1>&2
+		echo "expected: ${DIR_VERSION}, existing: `cat ${rootdir}/${PROFILE}`" 1>&2
+		abort
+	    fi
+	else
+	    echo "cannot find profile file: ${rootdir}/${PROFILE}" 1>&2
+	    abort
+	fi
+    else
+	if test "${create_rootdir}" = yes; then
+	    create_rootdir "${rootdir}"
+	else
+	    echo "root directory: ${rootdir} doesn't exist" 1>&2
+	    print_usage 1>&2
+	    abort
+	fi
+    fi
+}
+function verify_subdirs
+{
+    local rootdir=$1
+    local is_create_rootdir=$2
+
+    if test "${is_create_rootdir}" = yes; then
+	create_subdirs "${rootdir}"
+    fi
+}
+#
+########################################################################
+
+
+########################################################################
+#
+function verify_srcfiles
+{
+    for f in "$@"; do
+	if ! test -r "${f}"; then
+	    echo "cannot read ${f}" 1>&2
+	    abort
+	fi
+
+	verbose readable? "\"${f}\"" "#t"
+
+	case "${f}" in
+	    *.src.rpm)
+		verbose srpm? "\"${f}\"" "#t"
+		;;
+	    *.iso)
+	    	verbose iso? "\"${f}\"" "#t"
+		;;
+	    *)
+		echo "unknown file type: ${f}" 1>&2
+		abort
+		;;
+	esac
+    done
+}
+#
+########################################################################
+
+
+########################################################################
+#
+IS_MOUNTPOINT_CREATED=no
+
+function create_mountpoint
+{
+    local template=$1
+    local dirname=
+
+
+    dirname=`mktemp -t -d "${template}"`
+    if test $? != 0; then
+	echo "fail to create ... read ${f}" 1>&2
+	abort
+    fi
+
+    echo "${dirname}"
+
+    return $?
+}
+
+function delete_mountpoint
+{
+    local local mountpoint=$1
+
+    if test "${IS_MOUNTPOINT_CREATED}" = yes; then
+	rmdir "${mountpoint}"
+
+	verbose rmdir "\"${mountpoint}\"" --type=mountpoint
+    fi
+}
+
+function verify_mountpoint
+{
+    local iso_p=no
+    
+
+    for f in "$@"; do
+	case "${f}" in
+	    *.iso)
+		iso_p=yes
+
+		verbose iso? "\"${f}\"" "#t"
+		;;
+	    *)
+		;;
+	esac
+    done
+
+    # TODO: Check capabilities.
+
+    if test $iso_p = yes; then
+	MOUNTPOINT=`create_mountpoint "${MOUNTPOINT_TEMPLATE}"`
+	if test $? = 0; then
+	    IS_MOUNTPOINT_CREATED=yes
+	    verbose mkdir "\"${MOUNTPOINT}\"" --type=mountpoint
+	fi
+    fi
+}
+
+function verify_commands
+{
+    while [ $# -gt 0 ]; do
+	if which $1 > /dev/null 2>&1; then
+	    verbose command-exist? "\"${1}\"" "#t"
+	else
+	    echo "cannot find $1" 1>&2
+	    abort
+	fi
+	shift 
+    done
+}
+
+function verify_target
+{
+    local target=$1
+
+    if test "x${target}" != x; then
+	case "${target}" in
+	    i386|i586|i686)
+		:
+		;;
+	    x86_64)
+		:
+		;;
+	    ia64)
+		:
+		;;
+	    ppc)
+		:
+		;;
+	    *)
+		echo "unknown target: ${target}" 1>&2
+		abort
+		;;
+	esac
+    fi
+}
+
+#
+########################################################################
+function unwind
+{
+    clean
+    delete_rootdir "${ROOTDIR}"
+}
+
+function clean
+{
+    delete_mountpoint "${MOUNTPOINT}"
+}
+#
+########################################################################
+
+
+########################################################################
+#
+
+function spec_file_get
+{
+    local srpm_file=$1
+    
+    
+    rpm2cpio ${srpm_file} \
+	| cpio --list 2>/dev/null \
+	| grep '\.spec$'
+}
+
+function spec_define
+{
+    echo "%define $1 $2"
+}
+
+function spec_comment
+{
+    echo "# " "$@"
+}
+
+function spec_file_header
+{
+    local rootdir=$1
+    local srpm_name=$2
+    local build_name=$3
+
+    spec_comment "########################################################################"
+    spec_comment "macro injected by srpmix-ix"
+    spec_comment "########################################################################"
+    spec_define  "_topdir"    "${rootdir}"
+    spec_define  "_sourcedir" "%{_topdir}/${SOURCEDIR}/${srpm_name}"
+    spec_define  "_builddir"  "%{_topdir}/${BUILDDIR}/${build_name}"
+    spec_comment "dogcat is a hack for redhat-ds-7.1SP3-5.RHEL4.src.rpm. "
+    spec_define  "_requireslist"  "dogcat"
+    spec_comment "########################################################################"
+}
+
+function spec_file_hack
+{
+    local rootdir=$1
+    local spec_file=$2
+
+    cat - "${rootdir}/SPECS/${spec_file}"          \
+    | sed					   \
+	-e '/^%patch/s/-b \([^ ]\+\)//'            \
+	-e 's/^Copyright:/License:/'		   \
+	-e 's/^Serial:.*//'			   \
+	\
+	${NULL} 
+}
+
+function srpm_deploy
+{
+    local rootdir=$1
+
+    local srpm_file=$2
+
+    local build_name=$3
+
+    srpm_name=`basename ${srpm_file} .src.rpm`
+
+    spec_file=`spec_file_get ${srpm_file}`
+    spec_name=`basename ${spec_file} .spec`
+
+    xspec_file="${spec_name}.spec"
+
+    if test "x$build_name" = "x"; then
+        build_name="${srpm_name}"
+    fi
+    archive_name=$build_name
+    targets=
+
+    status=
+
+
+    message install-start --srpm-file=\""${srpm_file}\""
+    srpm_install "${rootdir}" "${srpm_file}" $archive_name
+    status=$?
+    message install-end --srpm-file=\""${srpm_file}"\" --status="${status}"
+    
+    if test ${status} != 0; then
+	verbose abort				\
+	    --stage=install			\
+	    --srpm-file="\"${srpm_file}\""	\
+	echo ";;; abort to deploy ${srpm_file} to ${rootdir} in install stage" 1>&2
+	return -1
+    fi
+
+    srpm_save_spec "${rootdir}" "${spec_file}" "${xspec_file}"
+
+    if test ${CREATE_ROOTDIR} = yes; then
+	if test -e "${rootdir}/${SPECDIR}/${xspec_file}"; then
+	    chmod -R u+w "${rootdir}/${SPECDIR}/${xspec_file}"
+	fi
+    fi
+    srpm_rearrange_spec "${rootdir}" \
+	${archive_name} ${build_name} ${spec_file}  \
+	> "${rootdir}/${SPECDIR}/${xspec_file}"
+
+    
+    if test "x${TARGET}" = x; then
+	targets="i386 i686 x86_64 ia64 ppc"
+    else
+	targets="${TARGET}"
+    fi
+
+    for arch in ${targets}; do
+	message build-start --target=${arch} --spec-file=\""${xspec_file}\""
+	srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
+	status=$?
+	message build-end --target=${arch} --spec-file=\""${xspec_file}\"" \
+	    --status="${status}"
+	if test "${status}" = 0; then
+	    break;
+	fi
+    done
+    
+    if test ${status} != 0; then
+    	verbose abort				\
+	    --stage=build			\
+	    --srpm-file="\"${srpm_file}\""
+	echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
+	return -1
+    fi
+
+    srpm_freeze         \
+	"${rootdir}"    \
+	"${srpm_name}"  \
+	"${build_name}" \
+	"${xspec_file}" \
+        "${spec_name}"  \
+	\
+	${NULL}
+
+    return 0
+}
+
+function srpm_install
+{
+    local rootdir=$1
+    local srpm_file=$2
+    local srpm_name=$3
+    local status=
+
+    # It seems that ${source_dir} is automatically created.
+    # mkdir "${source_dir}"
+
+    if test ${CREATE_ROOTDIR} = yes; then
+	if test -e "${rootdir}/${SOURCEDIR}/${srpm_name}"; then
+	    chmod -R u+w "${rootdir}/${SOURCEDIR}/${srpm_name}"
+	fi
+    fi
+
+    verbose rpm-ivh							\
+        --sourece-dir="\"${rootdir}/${SOURCEDIR}/${srpm_name}\""        \
+	\
+	${NULL}
+    
+    # dogcat is a hack for redhat-ds-7.1SP3-5.RHEL4.src.rpm.
+    LANG=C rpm								\
+        --define="_topdir ${rootdir}"					\
+        --define="_sourcedir ${rootdir}/${SOURCEDIR}/${srpm_name}"	\
+        --define="_requireslist dogcat"					\
+        -ivh "${srpm_file}"                                             \
+        \
+	${NULL}
+
+    status=$?
+
+
+    return $status
+}
+
+function srpm_rearrange_spec
+{
+    local rootdir=$1
+    local srpm_name=$2
+    local build_name=$3
+    local spec_file=$4
+
+    spec_file_header "${rootdir}" "${srpm_name}" "${build_name}" \
+	| spec_file_hack "${rootdir}" "${spec_file}"
+}
+
+function srpm_save_spec
+{
+    local rootdir=$1
+    local spec_file=$2
+    local xspec_file=$3
+
+    if test ${CREATE_ROOTDIR} = yes; then
+	if test -e "${rootdir}/${xspec_file}"; then
+	    chmod u+w "${rootdir}/${xspec_file}"
+	fi
+    fi
+
+    cp "${rootdir}/SPECS/${spec_file}" \
+	"${rootdir}/${xspec_file}"
+}
+
+function srpm_build
+{
+    local rootdir=$1
+    local spec_file=$2
+    local build_name=$3
+    local arch=$4
+    local status=
+
+    verbose rpmbuild-bp				                \
+	--build-name="\"${rootdir}/${BUILDDIR}/${build_name}\"" \
+	\
+	${NULL}
+
+    if test -d "${rootdir}/${BUILDDIR}/${build_name}"; then
+	if test ${CREATE_ROOTDIR} = yes; then
+	    for x in "${rootdir}/${BUILDDIR}/${build_name}"/*; do
+		if test -e "${x}"; then
+		    chmod -R u+w "${x}"
+		fi
+	    done
+	fi
+    else
+	mkdir "${rootdir}/${BUILDDIR}/${build_name}"
+    fi
+
+    LANG=C rpmbuild --target=${arch} -bp --nodeps "${rootdir}/${SPECDIR}/${spec_file}"
+    status=$?
+    echo ${status} > "${rootdir}/STATUS"
+    chmod -R a+r "${rootdir}/${BUILDDIR}/${build_name}"
+
+    return $status
+}
+
+function srpm_freeze
+{
+    local rootdir=$1
+    local srpm_name=$2
+    local build_name=$3
+    local xspec_file=$4
+    local spec_name=$5
+    local sudo=
+    local self=
+
+    if test "x$FREEZE" = "xyes"; then
+      verbose hardlink-start --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
+      ${HARDLINK} -c "${rootdir}/${SOURCEDIR}/${srpm_name}" \
+	"${rootdir}/${BUILDDIR}/${build_name}"/*
+      verbose hardlink-end --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
+
+      chmod -R a-w "${rootdir}/${SOURCEDIR}/${srpm_name}"
+      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SOURCEDIR}/${srpm_name}"\"
+
+
+      for x in "${rootdir}/${BUILDDIR}/${build_name}"/*; do
+  	if test -e "${x}"; then
+	    chmod -R a-w "${x}"
+	    verbose chmod --mode=\"a-w\" --file=\""${x}"\"
+	fi
+      done
+
+      if test x${GROUP} != x; then
+	self=`id -u -n`
+	if test "${USE_SUDO}" = yes; then
+	    sudo=sudo
+	fi
+	${sudo} chown ${self}.${GROUP} ${rootdir}/${BUILDDIR}/${build_name}
+	verbose chown						\
+	    --user=\"${self}\"					\
+	    --group=\"${GROUP}\"				\
+	    --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
+
+	chmod o-w ${rootdir}/${BUILDDIR}/${build_name}
+	verbose chmod --mode=\"o-w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
+
+	chmod ug+w ${rootdir}/${BUILDDIR}/${build_name}
+	verbose chmod --mode=\"ug+w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
+    fi
+
+      chmod a-w "${rootdir}/${xspec_file}"
+      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${xspec_file}"\"
+      chmod a-w "${rootdir}/${SPECDIR}/${xspec_file}"
+      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SPECDIR}/${xspec_file}"\"
+
+    fi
+
+    chmod a+r "${rootdir}/${BUILDDIR}/${build_name}"
+    verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
+
+    verbose map                         \
+	--srpm-name=\"${srpm_name}\"    \
+	--spec-name=\"${spec_name}\"    \
+	--xspec-file=\"${xspec_file}\"  \
+	--build-name=\"${build_name}\"  \
+	\
+	${NULL}
+
+}
+#
+########################################################################
+
+
+########################################################################
+#
+function iso_deploy
+{
+    local rootdir=$1
+    local iso_file=$2
+    local mountpoint=$3
+
+    iso_mount   "${iso_file}" "${mountpoint}" || {
+	return $?
+    }
+    verbose mount --iso-file=\""${iso_file}"\" \
+	--mountpoint=\""${mountpoint}"\"
+    
+    for x in "${mountpoint}"/RedHat/SRPMS/*.src.rpm "${mountpoint}"/SRPMS/*.src.rpm "${mountpoint}"/*.src.rpm ; do
+	if test -r "${x}"; then
+	   srpm_deploy "${rootdir}" ${x}
+	   update_count $?
+	fi
+    done
+    
+    iso_umount "${mountpoint}" || {
+	return $?
+    }
+    verbose umount --iso-file=\""${iso_file}"\" \
+	--mountpoint=\""${mountpoint}"\"
+}
+
+function iso_mount
+{
+    local iso_file=$1
+    local mountpoint=$2
+    local sudo=
+
+
+    if test "${USE_SUDO}" = yes; then
+	sudo=sudo
+    fi
+
+    trap "trap_handler ${mountpoint}" HUP INT PIPE QUIT TERM
+    ${sudo} mount -o loop ${iso_file} ${mountpoint}
+}
+
+function iso_umount
+{
+    local mountpoint=$1
+
+    if test "${USE_SUDO}" = yes; then
+	sudo=sudo
+    fi
+
+    ${sudo} umount ${mountpoint}
+}
+#
+########################################################################
+
+
+########################################################################
+#
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo ";;; ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+
+function main
+{
+    parse_arguments "$@"
+    
+    verify_target ${TARGET}
+    verify_commands ${REQUIRED_COMMANDS}
+    verify_srcfiles ${SRCFILES}
+    verify_rootdir "${ROOTDIR}" "${CREATE_ROOTDIR}"
+
+    verify_subdirs "${ROOTDIR}" "${IS_ROOTDIR_CREATED}"
+    verify_mountpoint ${SRCFILES}
+
+
+    message main-start           \
+	--version=${DIR_VERSION} \
+	\
+	${NULL}
+
+    for x in ${SRCFILES}; do
+	case "${x}" in
+	    *.rpm)
+		srpm_deploy ${ROOTDIR} ${x} $BUILDNAME
+		update_count $?
+		;;
+	    *.iso)
+		iso_deploy ${ROOTDIR} ${x} ${MOUNTPOINT} 
+		;;
+	esac
+    done
+
+    clean
+
+    message main-end --total=${TOTAL_COUNT} --abort=${ABORT_COUNT}
+
+    return 0
+}
+#
+########################################################################
+########################################################################
+#
+# RUN
+#
+try_source ${LIBSRPMIX}
+es_time main "$@"
+exit $?
+#
+########################################################################

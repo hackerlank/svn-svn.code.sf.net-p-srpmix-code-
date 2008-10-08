@@ -2,7 +2,9 @@ bin_SCRIPTS=libsrpmix.sh
 CLEANFILES = $(bin_SCRIPTS)
 
 dist_bin_SCRIPTS =           \
-	srpmix               \
+        srpmix               \
+	\
+	srpmix-ix            \
 	\
 	srpmix-wrap          \
 	srpmix-weakview-dist \
@@ -16,11 +18,3 @@ dist_plugin_SCRIPTS =        \
 	\
         $(NULL)
 
-EXTRA_DIST=                \
-        srpmix-ctags       \
-        srpmix-cscope      \
-        srpmix-gonzui      \
-	\
-	srpmix-vanilla     \
-	\
-        $(NULL)

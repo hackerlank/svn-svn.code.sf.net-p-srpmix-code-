@@ -205,7 +205,7 @@ $description
 rm -rf %{_builddir}/$package-$version-$release-srpmix
 
 %build
-srpmix -f -v %{_builddir}/$package-$version-$release-srpmix \
+srpmix-ix -f -v %{_builddir}/$package-$version-$release-srpmix \
     %{_sourcedir}/`basename $target_srpm`
 srpmix-plugin %{_builddir}/$package-$version-$release-srpmix
 
