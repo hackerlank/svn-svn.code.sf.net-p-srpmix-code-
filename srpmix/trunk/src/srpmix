@@ -5,6 +5,7 @@ TARGET_SRPM=
 
 LIBSRPMIX=libsrpmix.sh
 TMPDIR=
+WRAP_OPTS=""
 
 set -e
 
@@ -12,7 +13,7 @@ set -e
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix --name=PACKAGE|--srpm=SRPM"
+    echo "  srpmix [--release=RELEASE] --name=PACKAGE|--srpm=SRPM"
 #    TODO: URL support
 #    echo ""
 #    echo "As SRPM a url like http://... is acceptable."
@@ -38,6 +39,9 @@ function parse_arguments
 	    --srpm=*)
 	        TARGET_SRPM=$(echo $1 | sed 's/--srpm=//')
 		;;
+	    --release=*)
+	        WRAP_OPTS="$WRAP_OPTS --release=$(echo $1 | sed 's/--release=//')"
+	        ;;
 	    *)
 	       break
 	       ;;
@@ -94,7 +98,7 @@ function main
 
     for srpm in $TARGET_SRPM; do
 	pvr=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
-	srpmix-wrap $srpm
+	srpmix-wrap $WRAP_OPTS $srpm
 	rpmbuild --define "_rpmdir $TMPDIR/RPMS"     \
 	         --define "_srcrpmdir $TMPDIR/SRPMS" \
 	         --define "_builddir $TMPDIR/BUILD"  \
