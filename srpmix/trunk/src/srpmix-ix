@@ -27,10 +27,6 @@
 #
 # Constatns
 #
-DIR_MAJOR=3
-DIR_MINOR=99
-DIR_MICRO=0
-DIR_VERSION="${DIR_MAJOR}.${DIR_MINOR}.${DIR_MICRO}"
 
 HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
 REQUIRED_COMMANDS="mktemp rpm2cpio cpio ${HARDLINK} id"
@@ -306,7 +302,7 @@ function create_rootdir
     if mkdir "${rootdir}"; then
         IS_ROOTDIR_CREATED=yes
 
-	echo ${DIR_VERSION} > "${rootdir}/${PROFILE}"
+	echo ${SRPMIX_VERSION} > "${rootdir}/${PROFILE}"
 	if test "x$FREEZE" = "xyes"; then
           chmod a-w "${rootdir}/${PROFILE}"
         fi
@@ -356,11 +352,11 @@ function verify_rootdir
 
     if test -d "${rootdir}"; then
 	if test -f "${rootdir}/${PROFILE}"; then
-	    if test `cat "${rootdir}/${PROFILE}"` = ${DIR_VERSION}; then
+	    if test `cat "${rootdir}/${PROFILE}"` = ${SRPMIX_VERSION}; then
 		verbose use-rootdir "\"${rootdir}\"" `cat "${rootdir}/${PROFILE}"`
 	    else
 		echo "directory version mismatch" 1>&2
-		echo "expected: ${DIR_VERSION}, existing: `cat ${rootdir}/${PROFILE}`" 1>&2
+		echo "expected: ${SRPMIX_VERSION}, existing: `cat ${rootdir}/${PROFILE}`" 1>&2
 		abort
 	    fi
 	else
@@ -921,7 +917,7 @@ function main
 
 
     message main-start           \
-	--version=${DIR_VERSION} \
+	--version=${SRPMIX_VERSION} \
 	\
 	${NULL}
 
