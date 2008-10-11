@@ -6,9 +6,12 @@ dist_bin_SCRIPTS =           \
 	\
 	srpmix-ix            \
 	\
-	srpmix-wrap          \
-	srpmix-weakview-dist \
-	srpmix-plugin        \
+	srpmix-wrap				\
+        \
+	srpmix-weakview-dist			\
+	srpmix-weakview-packages		\
+	\
+	srpmix-plugin                           \
 	\
         $(NULL)
 
