@@ -110,15 +110,6 @@ function srpmix_distmap_to_pvr
 
 ########################################################################
 #
-function es_echo_n
-{
-    printf "%s" "$*"
-}
-#
-########################################################################
-
-########################################################################
-#
 # es_time
 #
 function es_time
@@ -130,10 +121,44 @@ function es_time
 #
 ########################################################################
 
-
+#!/bin/sh
+#
 ########################################################################
 #
-# es_print is taken from es-lang-sh-print. 
+# es-lang-sh-print: Es printer for sh
+#
+# Author: Masatake YAMATO <jet@gyve.org>
+#
+# Copyright (C) 2007 Masatake YAMATO
+#
+#
+# Permission to use, copy, modify, distribute, and sell this software and its
+# documentation for any purpose is hereby granted without fee, provided that
+# the above copyright notice appear in all copies and that both that
+# copyright notice and this permission notice appear in supporting
+# documentation.
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+# AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+# Except as contained in this notice, the name of the author shall not be
+# used in advertising or otherwise to promote the sale, use or other dealings
+# in this Software without prior written authorization from the author.
+#
+########################################################################
+
+#
+# To use this code in your script as a shell function,
+# Do like:
+#
+# source `which es-lang-sh-print` > /dev/null
 #
 function es_print
 {
@@ -141,7 +166,7 @@ function es_print
     printf "\n"
 }
 
-function es_print_tail_p
+function __es_print_tail_p
 {
     if [ "x$1" = "x" ]; then
 	return 0
@@ -193,10 +218,12 @@ function es_print_sans_newline
 		    printf ") "
 		fi
 
-                printf "%s" "`echo $1 | sed -e 's/^--\([^=]*\)=\(.*\)$/:\1 \2/'`"
+		__es_echo_n :"`echo $1 | sed -e 's/^--\([^=]*\)=.*$/\1/'`"
+		printf " "
+		__es_echo_n "`echo $1 | sed -e 's/^[^=]*=\(.*\)$/\1/'`"
 		es_print_value=no
 
-		if ! es_print_tail_p "$2" "${es_print_value}"; then
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
 			printf " "
 		fi
 
@@ -208,7 +235,7 @@ function es_print_sans_newline
 		    es_print_value=no
 		fi
 		
-		printf "%s" "`echo $1 | sed -e 's/^--/:/'`"
+		printf "%s" ":${1/--/}"
 		es_print_value=yes
 		printf " ("
 
@@ -216,7 +243,7 @@ function es_print_sans_newline
 		;;
 	    -[])
 	        printf "()"
-		if ! es_print_tail_p "$2" "${es_print_value}"; then
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
 		    printf " "
 		fi
 		shift
@@ -227,35 +254,37 @@ function es_print_sans_newline
 		;;
             -])
 	        printf ")"
-                if ! es_print_tail_p "$2" "${es_print_value}"; then
+                if ! __es_print_tail_p "$2" "${es_print_value}"; then
 		    printf " "
 		fi
 		shift
 		;;
 	    -S=*)
-                printf "%s" "`echo $1 | sed -e 's/^-\([^=]*\)=\(.*\)$/\|\2\|/'`"
-		if ! es_print_tail_p "$2" "${es_print_value}"; then
+	    # symbol
+                __es_echo_n \|${1/-s=/}\|
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
 		    printf " "
 		fi
 		shift
 		;;
 	    -s=*)
-                printf "%s" "`echo $1 | sed -e 's/^-\([^=]*\)=\(.*\)$/\"\2\"/'`"
-		if ! es_print_tail_p "$2" "${es_print_value}"; then
+	    # string
+                __es_echo_n \"${1/-s=/}\"
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
 		    printf " "
 		fi
 		shift
 		;;
 	    -[tf])
-	        printf "%s" "`echo $1 | sed -e 's/^-\([tf]\)$/#\1/'`"
-		if ! es_print_tail_p "$2" "${es_print_value}"; then
+	        printf "%s" "#${1:1}"
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
 		    printf " "
 		fi
 		shift
 		;;
 	    *)
-		printf "%s" "$1"
-		if ! es_print_tail_p "$2" "${es_print_value}"; then
+		__es_echo_n "$1"
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
 		    printf " "
 		fi
 		shift
@@ -271,14 +300,50 @@ function es_print_sans_newline
     printf ")"
 }
 
+function __es_echo_n
+{
+    local i
+    local c
+    local str
+    local len
+
+
+    len=${#1}
+    if (( $len == 0 )); then
+	return
+    fi
+
+
+    if (( $len == 1 )); then
+	printf "%s" "$1"
+	return
+    fi
+
+    
+    if [[ ${1:0:1} == '"' && ${1:$(($len - 1)):1} == '"' ]]; then
+	str=${1:1:$(($len - 2))}
+	printf "\""
+	for ((i = 0; i < ${#str}; i++)); do
+	    c=${str:i:1}
+	    if [[ $c == '"' || $c == '\' ]]; then
+		printf "\\"
+	    fi
+	    printf "%s" $c
+	done
+	printf "\""
+    else
+	printf "%s" $1
+    fi
+	
+}
+
+
 #
 # (Test
 #
-#   $ ./es-lang-sh-print  a b c --d --e f -t -f --g h i -z f --j=a -f=f a b c -f a b c --z
-#    (a b c :d () :e (f) #t #f :g (h i) :z (f) :j a :f f a b c #f a b c :z ())
+#   $ ./es-lang-sh-print  a b c --d --e f -t -f --g h i --z f --j=a --f=f a b c -f a b c --z
+#    (a b c :d () :e (f #t #f) :g (h i) :z (f) :j a :f f a b c #f a b c :z ())
 #
 # )
 #
-#
-########################################################################
 : libsrpmix.sh ends here
