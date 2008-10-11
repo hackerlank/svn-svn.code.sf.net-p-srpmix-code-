@@ -1,0 +1,208 @@
+#!/bin/sh
+#
+########################################################################
+#
+# srpmix-weakview-packages: Make packages->dist weak view
+#
+# Copyright (C) 2008 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+RPMBUILD=rpmbuild
+LIBSRPMIX=libsrpmix.sh
+NAME=
+OUTPUTDIR=
+TMPDIR=
+DUMP_SPEC=
+
+# TODO: --srpm
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-weakview-packages [--help|-h]"
+    echo "  srpmix-weakview-packages --name=NAME [--dump-spec]"
+    echo "  srpmix-weakview-packages --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE]"
+    echo 
+}
+
+function cleanup
+{
+    if test -d "$TMPDIR"; then
+        rm -rf $TMPDIR || true
+    fi
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name=*)
+                NAME="${1/--name=/}"
+		;;
+	    --output-dir=*)
+	        OUTPUTDIR="${1/--output-dir=/}"
+		;;
+            --release=*)
+	        SRPMIX_RELEASE="${1/--release=/}"
+		;;
+	    --dump-spec)
+	        DUMP_SPEC=1
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test -z "$NAME"; then
+	srpmix_abort "No name for the weakview"
+    fi
+
+    if test -n "$1"; then
+	print_usage 1>&2
+	srpmix_abort "Too many arguments"
+    fi
+
+    if test -z "$OUTPUTDIR"; then
+	OUTPUTDIR=.
+    fi
+    if test ! -d "${OUTPUTDIR}"; then
+	srpmix_abort "No such directory: ${OUTPUTDIR}"
+    fi
+}
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+
+function create_packages_weakview
+{
+    name=$1
+    shift
+
+    spec=$TMPDIR/SPECS/srpmix-weakview-packages-$name.spec
+    if test "x${DUMP_SPEC}" != "x"; then
+	spec="/dev/stdout"
+	if test ! -w "${spec}"; then
+	    # ???
+	    spec="/dev/tty"
+	fi
+    fi
+	
+    rootdir=${SRPMIX_ROOT_DIR}
+    packagesdir=${SRPMIX_ROOT_DIR}/packages
+
+    cat > $spec <<EOF
+Summary: Srpmix weakview $name label to specfied version of packages
+Name: srpmix-weakview-packages-$name
+Version: $SRPMIX_VERSION
+Release: $SRPMIX_RELEASE%{?dist}
+Autoreq: 0
+BuildRequires: srpmix
+Buildarch: noarch
+
+Buildroot: %{_tmppath}/%{name}-root
+Group: System/Daemon
+License: Unknown
+
+%define __os_install_post true
+
+%description
+Srpmix weakview from packages to $name
+
+%prep
+rm -rf %{_builddir}/%{name}
+
+%build
+buildpackagesdir=%{_builddir}/%{name}${packagesdir}
+mkdir -p \${buildpackagesdir}
+
+EOF
+
+# in %build
+srpmix_distmap_to_pvr | while read package version release; do
+  # Make link relative
+  #seed=$(srpmix_srcdir $package $version $release | sed -e "s;$rootdir;;")
+  seed=$(srpmix_srcdir $package $version $release)
+  seed="${seed/$rootdir/}"
+  d="../../../..$seed"
+  sdir="$(dirname $seed)"
+  slink="$sdir/$name"
+  echo "mkdir -p \${buildpackagesdir}${sdir}"
+  echo "ln -sf $d \${buildpackagesdir}${slink}"
+done >> $spec
+
+
+    cat >> $spec <<EOF
+
+%install
+buildpackagesdir=%{_builddir}/%{name}${packagesdir}
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$packagesdir
+rsync -va \$buildpackagesdir \$RPM_BUILD_ROOT/$packagesdir
+
+%files
+%defattr(-,root,root)
+/
+
+%changelog
+
+EOF
+    if test "x${DUMP_SPEC}" != "x"; then
+	return
+    fi
+
+    $RPMBUILD --nodeps --quiet --define "_topdir $TMPDIR" -bs $spec > /dev/null
+    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-packages-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE
+    mv $TMPDIR/SRPMS/srpmix-weakview-packages-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm "${OUTPUTDIR}"
+}
+
+
+function main
+{
+    srpmix_verify_commands "${RPMBUILD}" "${GOSH}"
+    parse_arguments "$@"
+
+    if test "x${DUMP_SPEC}" = "x"; then
+	TMPDIR=`mktemp -d`
+	trap cleanup 0
+	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+    fi
+
+    create_packages_weakview $NAME
+}
+
+try_source ${LIBSRPMIX}
+
+RUN=
+if test -z "${DUMP_SPEC}"; then
+    RUN=es_time
+fi
+${RUN} main "$@"
+
+exit $?

@@ -68,14 +68,14 @@ function srpmix_srcdir
     local version=$2
     local release=$3
 
-    local pkg_hash=$(echo $package | sed  's/\(^.\).*/\1/')
+    local pkg_hash=${package:0:1}
     local pkg_root="${SRPMIX_SOURCES_DIR}"/"${pkg_hash}"/"$package"
     
     echo "${pkg_root}"/"$version-$release"
 }
 
 srpmix_distmap_to_pvr_script='
-(let ((kget (lambda (kl ky)
+(letrec ((kget (lambda (kl ky)
 	      (cond ((null? kl) #f)
 		    ((eq? (car kl) ky) (cadr kl))
 		    (else (kget (cdr kl) ky))))

@@ -127,7 +127,7 @@ function wrap_srpm
     package=$(echo $pvrd | cut -d' ' -f1)
     version=$(echo $pvrd | cut -d' ' -f2)
     release=$(echo $pvrd | cut -d' ' -f3)
-    description=$(echo $pvrd | cut -d' ' -f4)
+    description="$(echo $pvrd | cut -d' ' -f4-)"
     if test "x$package" = "x"; then
         echo "warning: failed to parse $target_srpm: ignored" 1>&2
         return
