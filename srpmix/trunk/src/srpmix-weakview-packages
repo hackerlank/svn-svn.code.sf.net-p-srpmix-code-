@@ -152,6 +152,7 @@ srpmix_distmap_to_pvr | while read package version release; do
   seed="${seed/$rootdir/}"
   d="../../../..$seed"
   sdir="$(dirname $seed)"
+  #sdir=${seed%/*}
   slink="$sdir/$name"
   echo "mkdir -p \${buildpackagesdir}${sdir}"
   echo "ln -sf $d \${buildpackagesdir}${slink}"
