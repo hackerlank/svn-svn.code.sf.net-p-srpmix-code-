@@ -115,7 +115,8 @@ function create_packages_weakview
     fi
 	
     rootdir=${SRPMIX_ROOT_DIR}
-    packagesdir=${SRPMIX_ROOT_DIR}/packages
+    sourcesdir=${rootdir}/sources
+    packagesdir=${rootdir}/packages
 
     cat > $spec <<EOF
 Summary: Srpmix weakview $name label to specfied version of packages
@@ -147,11 +148,10 @@ EOF
 # in %build
 srpmix_distmap_to_pvr | while read package version release; do
   # Make link relative
-  #seed=$(srpmix_srcdir $package $version $release | sed -e "s;$rootdir;;")
+  #seed=$(srpmix_srcdir $package $version $release | sed -e "s;$sourcesdir;;")
   seed=$(srpmix_srcdir $package $version $release)
-  seed="${seed/$rootdir/}"
-  d="../../../..$seed"
-  sdir="$(dirname $seed)"
+  d="../../..${seed/$rootdir/}"
+  sdir="$(dirname ${seed/$sourcesdir})"
   #sdir=${seed%/*}
   slink="$sdir/$name"
   echo "mkdir -p \${buildpackagesdir}${sdir}"
@@ -165,7 +165,7 @@ done >> $spec
 buildpackagesdir=%{_builddir}/%{name}${packagesdir}
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$packagesdir
-rsync -va \$buildpackagesdir \$RPM_BUILD_ROOT/$packagesdir
+rsync -va \$buildpackagesdir/* \$RPM_BUILD_ROOT/$packagesdir
 
 %files
 %defattr(-,root,root)

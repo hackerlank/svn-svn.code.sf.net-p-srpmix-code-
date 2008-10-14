@@ -74,6 +74,11 @@ function srpmix_srcdir
     echo "${pkg_root}"/"$version-$release"
 }
 
+function srpmix_srchash
+{
+    echo ${1:0:1}
+}
+
 srpmix_distmap_to_pvr_script='
 (letrec ((kget (lambda (kl ky)
 	      (cond ((null? kl) #f)
