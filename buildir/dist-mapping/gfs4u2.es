@@ -1,5 +1,0 @@
-(srpmix-wrap name :target-srpm "GFS-6.1.2-0.src.rpm" :package "GFS" :version "6.1.2" :release "0" :wrapped-name "GFS-6.1.2-0-srpmix")
-(srpmix-wrap name :target-srpm "GFS-kernel-2.6.9-42.1.src.rpm" :package "GFS-kernel" :version "2.6.9" :release "42.1" :wrapped-name "GFS-kernel-2.6.9-42.1-srpmix")
-(srpmix-wrap name :target-srpm "gnbd-1.0.1-1.src.rpm" :package "gnbd" :version "1.0.1" :release "1" :wrapped-name "gnbd-1.0.1-1-srpmix")
-(srpmix-wrap name :target-srpm "gnbd-kernel-2.6.9-9.12.src.rpm" :package "gnbd-kernel" :version "2.6.9" :release "9.12" :wrapped-name "gnbd-kernel-2.6.9-9.12-srpmix")
-(srpmix-wrap name :target-srpm "lvm2-cluster-2.01.14-1.0.RHEL4.src.rpm" :package "lvm2-cluster" :version "2.01.14" :release "1.0.RHEL4" :wrapped-name "lvm2-cluster-2.01.14-1.0.RHEL4-srpmix")
