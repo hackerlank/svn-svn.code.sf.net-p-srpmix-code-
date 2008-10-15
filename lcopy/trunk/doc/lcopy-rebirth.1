@@ -1,0 +1,48 @@
+.TH LCOPY-REBIRTH 1 "August 29, 2008"
+
+.SH NAME
+lcopy-rebirth \- regenerate command lines to retrieve a local copy
+
+.SH SYNOPSIS
+lcopy-rebirth DIRECTORY...
+.PP
+lcopy-rebirth \-\-help|\-h
+
+.SH DESCRIPTION
+lcopy-rebirth regenerate command lines to retrieve a local copy from VCS
+repository. lcopy-rebirth inspects DIRECTORY and guesses which VCS was
+used to get DIRECTORY. Then regenerate command lines to check out the 
+same contents of DIRECTORY from the VCS repository.
+
+lcopy-rebirth can guess the following type of VCS from a given
+directory:
+.PP
+* cvs(incomplete)
+.PP
+* git
+.PP
+* subversion(svn)
+.PP
+* mercurial(hg)
+.PP
+* darcs
+
+.SH KNOWN BUGS
+cvs repository which needs password needs special care.
+arch, bzr, monotone are not supported yet.
+
+.SH AUTHOR
+Written by Masatake YAMATO (yamato@redhat.com)
+
+.SH "SEE ALSO"
+\fBlcopy-refresh\fR(1), 
+\fBcvs\fR(1), 
+\fBgit\fR(1), 
+\fBsvn\fR(1), 
+\fBbaz\fR(1), 
+\fBhg\fR(1), 
+\fBdarcs\fR(1), 
+\fBbzr\fR(1), 
+\fBmtn\fR(1),
+\fBcron\fR(1)
+

@@ -4,6 +4,7 @@ Version: @PACKAGE_VERSION@
 Release: 3
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 #Requires: 
+Prereq: /usr/sbin/useradd
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root
@@ -35,8 +36,17 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/lcopy-refresh.d
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.daily
 
+install -p -m 777 src/lcopy-sandbox $RPM_BUILD_ROOT%{_bindir}/lcopy-sandbox
 install -p -m 755 etc/lcopy-refresh.cron    $RPM_BUILD_ROOT%{_sysconfdir}/cron.daily/lcopy-refresh
 install -p -m 644 etc/sources.lcopy-refresh $RPM_BUILD_ROOT%{_sysconfdir}/lcopy-refresh.d/sources.lcopy-refresh
+
+
+mkdir -p $RPM_BUILD_ROOT/var/lib/lcopy
+mkdir -p $RPM_BUILD_ROOT/var/lib/lcopy/sources
+mkdir -p $RPM_BUILD_ROOT/var/lib/lcopy/log
+
+%pre sources
+/usr/sbin/useradd -c "Lcopy" lcopy 2>/dev/null || :
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -48,6 +58,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/liblcopy.sh
 %{_libexecdir}/lcopy/plugins/10lcopy-ctags
 %{_libexecdir}/lcopy/plugins/10lcopy-etags
+%{_mandir}/man?/*
 
 %attr(0755, root, root) %{_sysconfdir}/cron.daily/lcopy-refresh
 %attr(0755, root, root) %dir %{_sysconfdir}/lcopy-refresh.d
@@ -56,6 +67,12 @@ rm -rf $RPM_BUILD_ROOT
 %files sources
 %defattr(-,root,root)
 %{_sysconfdir}/lcopy-refresh.d/sources.lcopy-refresh
+%{_bindir}/lcopy-sandbox
+
+
+%attr(0755, lcopy, lcopy) /var/lib/lcopy
+%attr(0755, lcopy, lcopy) /var/lib/lcopy/sources
+%attr(0755, lcopy, lcopy) /var/lib/lcopy/log
 
 
 %changelog

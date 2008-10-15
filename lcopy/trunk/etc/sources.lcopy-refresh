@@ -1,4 +1,4 @@
-LCOPY_USER=sources
-_LCOPY_PREFIX=/srv/sources/src-upstream
-LCOPY_DIR=${_LCOPY_PREFIX}/lcopy-SOURCES
-LCOPY_LOG=${_LCOPY_PREFIX}/lcopy-LOG/lcopy-refresh.es 
+LCOPY_USER=lcopy
+_LCOPY_PREFIX=/var/lib/lcopy
+LCOPY_DIR=${_LCOPY_PREFIX}/sources
+LCOPY_LOG=${_LCOPY_PREFIX}/log/lcopy-refresh.es 

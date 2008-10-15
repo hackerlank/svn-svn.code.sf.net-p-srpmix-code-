@@ -1,3 +1,16 @@
+2008-10-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac(pkg_version): 0.0.10.
+
+	* src/lcopy-sandbox: New file.
+
+	* src/lcopy-refresh (parse_arguments): Use /dev/null
+	only if /dev/stdout is not writable.
+
+	* doc/lcopy-rebirth.1: New file.
+
+	* Introduce newer sources directly.
+
 2008-08-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/lcopy-refresh (run_plugins): Don't use list to

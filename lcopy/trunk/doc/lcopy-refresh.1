@@ -32,18 +32,31 @@ directory:
 .PP
 * bzr
 .PP
-* monotone(mtn)
+* monotone database(mtn)
+.PP
+* monotone local copy(mnt_lcopy)
 
-The idea behind lcopy-refresh is \fIsource code subscription\fP.
+
+.\" The idea behind lcopy-refresh is \fIsource code subscription\fP.
 
 .BR
-monotone is special. It seems that monotone does not provide the
-way to check out a copy from a remote repository. 
+monotone is special. It seems that monotone does not provide the way
+to check out a copy from a remote repository(database). Therefore
+lcopy-refresh must update a local database from its parent remote
+database.  Then lcopy-refresh updates a local copy from the local
+data. lcopy-refresh guesses a file matching to a pattern *.mtn 
+is a monotone database.
+
+.SH KNOWN BUGS
+lcopy-refresh assumes no password is needed to update a directory.
+If input password interactively is needed to update, lcopy-refresh
+may be hung.
 
 .SH AUTHOR
 Written by Masatake YAMATO (yamato@redhat.com)
 
 .SH "SEE ALSO"
+\fBlcopy-rebirth\fR(1), 
 \fBcvs\fR(1), 
 \fBgit\fR(1), 
 \fBsvn\fR(1), 

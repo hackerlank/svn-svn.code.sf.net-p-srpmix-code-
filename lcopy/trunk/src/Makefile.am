@@ -12,3 +12,5 @@ dist_plugin_SCRIPTS = \
 	10lcopy-etags \
         \
         $(NULL)
+
+EXTRA_DIST=lcopy-sandbox

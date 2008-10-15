@@ -136,7 +136,9 @@ function parse_arguments
     fi
 
     if test ! -w $LOG; then
-	LOG=/dev/null
+	if test x"$LOG" = x/dev/null; then
+	    LOG=/dev/null
+	fi 
     fi
 }
 
