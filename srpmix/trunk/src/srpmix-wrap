@@ -29,13 +29,14 @@ OUTPUTDIR=
 TMPDIR=
 JUST_PRINT=
 DUMP_SPEC=
+ALLOW_OVERWRITE=
 
 function print_usage
 {
     echo "Usage: "
     echo "  srpmix-wrap [--help|-h]"
     echo "  srpmix-wrap [--dump-spec|--just-print] [SRPMS...]"
-    echo "  srpmix-wrap [--output-dir=OUTPUTDIR] [--release=RELEASE] [SRPMS...]"
+    echo "  srpmix-wrap [--output-dir=OUTPUTDIR] [--release=RELEASE] [--allow-overwrite] [SRPMS...]"
     echo ""
     echo "  If SRPMS is not given, standard input is"
     echo "  used for the list of source packages."
@@ -68,6 +69,9 @@ function parse_arguments
 		;;
 	    --dump-spec)
 	        DUMP_SPEC=1
+		;;
+	    --allow-overwrite)
+	        ALLOW_OVERWRITE=1
 		;;
 	    *)
 		break
@@ -145,10 +149,12 @@ function wrap_srpm
 	return
     fi
     
-    if test -f "${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm"; then
-        echo "${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm already exists" 1>&2
-	echo "$es_name"
-        return
+    if test -f ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm; then
+	if test -z "$ALLOW_OVERWRITE"; then
+            echo \;\; ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm already exists 1>&2
+	    echo "$es_name"
+            return
+	fi
     fi
     
     group=$(rpm -qp --nosignature --queryformat "%{Group}" $target_srpm)
