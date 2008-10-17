@@ -1,0 +1,354 @@
+#!/bin/bash
+# 
+# - fork
+# - info
+# verify
+# - diff
+# - specdiff
+# - pedigree
+# - record
+# * build
+# reduce
+# help
+#
+
+
+function twig_p
+{
+    test -d $1/twig
+}
+
+
+#
+#
+# twig form name from [dir]
+#
+#
+function twig_fork
+{
+    local name=$1
+    local from=$2
+    local dir=$3
+
+    if test -z "${dir}"; then
+	dir=./${name}
+    fi
+
+    if twig_p "${from}"; then
+	twig_fork_from_twig "${name}" "${from}" "${dir}"
+    else
+	twig_fork_from_sources "${name}" "${from}" "${dir}"
+    fi
+}
+
+function twig_fork_from_twig
+{
+    twig_fork_generic $1 $2 $3 twig
+}
+
+function twig_fork_from_sources
+{
+    twig_fork_generic $1 $2 $3 sources
+}
+
+function twig_fork_generic
+{
+    local name=$1
+    local from=$2
+    local ln_from
+    local dir=$3
+    local type=$4
+
+    if ! twig_verify_soruces "$from"; then
+	echo "Broken sources directory: $from" 1>&2
+	exit 1
+    fi
+
+    if ! mkdir $dir; then
+	echo "Cannot mkdir: $dir" 1>&2
+	exit 1
+    fi
+
+    if ! cp -r $from/* $dir/; then
+	echo "Cannot cp: $from/* $dir" 1>&2
+	exit 1
+    fi
+
+    if test $type = twig; then
+	rm -rf $dir/twig
+    fi
+    
+    if ! mkdir $dir/twig; then
+	echo "Cannot mkdir $dir/twig" 1>&2
+	exit 1
+    fi
+	
+    if test "${from:0:1}" != /; then
+	ln_from=$(pwd)/$from;
+    else
+	ln_from=$from
+    fi
+    
+    if ! ln -s $ln_from $dir/twig/from; then
+	echo "Cannot ln $from $dir/twig/from" 1>&2
+	exit 1
+    fi
+	
+    if ! echo $name > $dir/twig/name; then
+	echo "Cannot record name to $dir/twig/name" 1>&2
+	exit 1
+    fi
+
+
+    if ! twig_hack_release $dir/specs.spec $name > $dir/twig.spec; then
+	echo "Failed to modify Release line in $dir/specs.spec" 1>&2
+	exit 1
+    else
+	mv $dir/twig.spec $dir/specs.spec
+    fi
+    
+    if ! twig_hack_patch_decl $dir/specs.spec $name > $dir/twig.spec; then
+	echo "Failed to add patch decl line to $dir/specs.spec" 1>&2
+	exit 1
+    else
+	mv $dir/twig.spec $dir/specs.spec
+    fi
+
+    if ! twig_hack_patch_apply $dir/specs.spec $name > $dir/twig.spec; then
+	echo "Failed to add patch apply line to $dir/specs.spec" 1>&2
+	exit 1
+    else
+	mv $dir/twig.spec $dir/specs.spec
+    fi
+    
+
+    if ! twig_install_stub ${dir} ${name}; then
+	echo "Failed to install stub patch" 1>&2
+	exit 1
+    fi
+}
+
+function twig_hack_release
+{
+    local spec=$1
+    local name=$2
+
+    sed -e "s/^Release:.*/\0__${name}%{twig_buildid}/" < ${spec}
+}
+
+function twig_hack_patch_decl
+{
+# TODO: twig own Release number should be supported.
+    local spec=$1
+    local name=$2
+    local patch_decl
+    local patch_line
+    local patch_num
+
+    patch_decl=$(grep -E -n -e "^Patch[0-9]+:" "${spec}" | tail -1)
+    if test -n "${patch_decl}"; then
+	patch_line=$(echo $patch_decl | sed -e 's/:Patch.*//')
+	patch_num=$(echo $patch_decl | sed -e 's/.*:Patch\([0-9]*\).*/\1/')
+	
+	head -${patch_line} ${spec}
+	echo \#
+	echo \# twig ${name} patch decl
+	echo \#
+	echo Patch$(( ${patch_num} + 1 )): twig-${name}.patch
+	echo \#
+	tail -n +$(( ${patch_line} + 1 )) ${spec}
+    else
+	echo "INTERNAL ERROR"
+	exit 1
+    fi
+}
+
+function twig_hack_patch_apply
+{
+# TODO: twig own Release number should be supported.
+    local spec=$1
+    local name=$2
+    local patch_decl
+    local patch_line
+    local patch_num
+    local patch_appy
+
+    patch_decl=$(grep -E -n -e "^Patch[0-9]+:" "${spec}" | tail -1)
+    if test -n "${patch_decl}"; then
+	patch_num=$(( $(echo $patch_decl | sed -e 's/.*:Patch\([0-9]*\).*/\1/') - 1 ))
+	patch_apply=$(grep -E -n -e "%patch${patch_num}.*" "${spec}")
+	if test -z "${patch_apply}"; then
+	    echo "Cannot find patch apply line: %patch${patch_num}" 1>&2
+	    return 1
+	fi
+	patch_line=$(echo $patch_apply | sed -e 's/:%patch.*//')
+	
+	head -${patch_line} ${spec}
+	echo \#
+	echo \# twig ${name} patch apply
+	echo \#
+	echo %patch$(( ${patch_num} + 1 )) -p2 -b .${name}
+	echo \#
+	tail -n +$(( ${patch_line} + 1 )) ${spec}
+    else
+	echo "INTERNAL ERROR"
+	exit 1
+    fi
+}
+
+function twig_install_stub
+{
+    dir=$1
+    name=$2
+    touch $1/archives/twig-${name}.patch
+}
+
+
+function twig_verify_soruces
+{
+    test -d "$1"                 -a \
+	-f "$1/SRPMIX"           -a \
+	-f "$1/STATUS"           -a \
+	-f "$1/specs.spec"       -a \
+	-d "$1/pre-build"        -a \
+	-d "$1/archives"         -a \
+	"$(cat $1/STATUS)" = "0" &&
+    [[ 	"$(cat $1/SRPMIX)" =~ "3.99.[[:digit:]]" ]]
+    
+
+}
+
+#
+#
+# twig diff [with]
+#
+#
+function twig_diff
+{
+    if ! twig_p . ; then
+	echo "$(pwd) is not twig dir" 1>&2
+	exit 1
+    fi
+
+    if ! test -d ./twig/from/archives; then
+	echo "Cannot access $(pwd)/twig/from/pre-build"
+	exit 1
+    fi
+
+    diff -ruN twig/from/pre-build ./pre-build
+}
+
+function twig_specdiff
+{
+    if ! twig_p . ; then
+	echo "$(pwd) is not twig dir" 1>&2
+	exit 1
+    fi
+
+    if ! test -r ./twig/from/specs.spec; then
+	echo "Cannot access $(pwd)/twig/from/specs.spec"
+	exit 1
+    fi
+
+    diff -uN twig/from/specs.spec ./specs.spec
+}
+
+#
+#
+# twig record
+#
+#
+function twig_record
+{
+    local name
+    
+    twig_diff > \#twig.patch\#
+    name=$(cat twig/name)
+    mv \#twig.patch\# archives/twig-${name}.patch
+}
+
+#
+#
+# twig info
+#
+#
+function twig_info
+{
+    local form
+    local status
+
+    if ! twig_p .; then
+	echo "$(pwd) is not twig dir" 1>&2
+	exit 1
+    fi
+
+    
+    echo Name: $(cat twig/name)
+
+    from=$(readlink -n twig/from)
+    if test -d ${from}; then
+	status="valid"
+	if twig_p ${from}; then
+	    status="$status,twig"
+	else
+	    status="$status,sources"
+	fi
+    else
+	status="broken"
+    fi
+    
+    echo From: $from "["$status"]"
+}
+
+#
+#
+# twig pedigree
+#
+#
+function twig_pedigree
+{
+    twig_pedigree_full 0
+}
+
+function twig_pedigree_full
+{
+    local num=$1
+
+    if twig_p .; then
+	twig_info | sed -e 's/.*/'"<$num> "'\0/'
+    else
+	exit 0
+    fi
+
+    from=$(readlink -n twig/from)
+    if test -d "${from}"; then
+	(cd ${from}; 
+	 twig_pedigree_full $(( $num + 1 )))
+    fi
+}
+
+#
+#
+# twig build
+#
+#
+function twig_build
+{
+    if ! twig_p .; then
+	echo "not twig dir" 1>&2
+	exit 1
+    fi
+
+    mkdir -p twig/rpms
+    mkdir -p twig/srpms
+    mkdir -p twig/build
+    rpmbuild --define "_rpmdir `pwd`/twig/rpms"     \
+	     --define "_srcrpmdir `pwd`/twig/srpms" \
+	     --define "_builddir `pwd`/twig/build"  \
+	     --define "_sourcedir `pwd`/archives"   \
+	     --bp specs.spec
+}
+
+cmd=$1
+shift 1
+eval twig_${cmd} "$@"
