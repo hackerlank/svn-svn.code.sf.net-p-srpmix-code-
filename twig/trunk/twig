@@ -1,21 +1,36 @@
 #!/bin/bash
-# 
-# - fork
-# - info
-# verify
-# - diff
-# - specdiff
-# - pedigree
-# - record
-# * build
-# reduce
-# help
+########################################################################
 #
+# twig: Make a temporary branch for a package 
+#
+# Copyright (C) 2008 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
 
+
+# verify
+# reduce/fold
+
+twig_commands="fork info diff specdiff pedigree record build help"
 
 function twig_p
 {
-    test -d $1/twig
+    test -d $1/TWIG
 }
 
 
@@ -24,6 +39,11 @@ function twig_p
 # twig form name from [dir]
 #
 #
+function twig_fork_help
+{
+    echo "    " fork NAME FROM [DIR]
+}
+
 function twig_fork
 {
     local name=$1
@@ -69,17 +89,13 @@ function twig_fork_generic
 	exit 1
     fi
 
-    if ! cp -r $from/* $dir/; then
+    if ! cp -r $from/{SRPMIX,STATUS,archives,plugins,pre-build,specs.spec} $dir/; then
 	echo "Cannot cp: $from/* $dir" 1>&2
 	exit 1
     fi
-
-    if test $type = twig; then
-	rm -rf $dir/twig
-    fi
     
-    if ! mkdir $dir/twig; then
-	echo "Cannot mkdir $dir/twig" 1>&2
+    if ! mkdir $dir/TWIG; then
+	echo "Cannot mkdir $dir/TWIG" 1>&2
 	exit 1
     fi
 	
@@ -89,13 +105,13 @@ function twig_fork_generic
 	ln_from=$from
     fi
     
-    if ! ln -s $ln_from $dir/twig/from; then
-	echo "Cannot ln $from $dir/twig/from" 1>&2
+    if ! ln -s $ln_from $dir/TWIG/from; then
+	echo "Cannot ln $from $dir/TWIG/from" 1>&2
 	exit 1
     fi
 	
-    if ! echo $name > $dir/twig/name; then
-	echo "Cannot record name to $dir/twig/name" 1>&2
+    if ! echo $name > $dir/TWIG/name; then
+	echo "Cannot record name to $dir/TWIG/name" 1>&2
 	exit 1
     fi
 
@@ -122,7 +138,7 @@ function twig_fork_generic
     fi
     
 
-    if ! twig_install_stub ${dir} ${name}; then
+    if ! twig_install_stub_patch ${dir} ${name}; then
 	echo "Failed to install stub patch" 1>&2
 	exit 1
     fi
@@ -138,7 +154,6 @@ function twig_hack_release
 
 function twig_hack_patch_decl
 {
-# TODO: twig own Release number should be supported.
     local spec=$1
     local name=$2
     local patch_decl
@@ -151,11 +166,7 @@ function twig_hack_patch_decl
 	patch_num=$(echo $patch_decl | sed -e 's/.*:Patch\([0-9]*\).*/\1/')
 	
 	head -${patch_line} ${spec}
-	echo \#
-	echo \# twig ${name} patch decl
-	echo \#
 	echo Patch$(( ${patch_num} + 1 )): twig-${name}.patch
-	echo \#
 	tail -n +$(( ${patch_line} + 1 )) ${spec}
     else
 	echo "INTERNAL ERROR"
@@ -165,7 +176,6 @@ function twig_hack_patch_decl
 
 function twig_hack_patch_apply
 {
-# TODO: twig own Release number should be supported.
     local spec=$1
     local name=$2
     local patch_decl
@@ -184,23 +194,19 @@ function twig_hack_patch_apply
 	patch_line=$(echo $patch_apply | sed -e 's/:%patch.*//')
 	
 	head -${patch_line} ${spec}
-	echo \#
-	echo \# twig ${name} patch apply
-	echo \#
-	echo %patch$(( ${patch_num} + 1 )) -p2 -b .${name}
-	echo \#
+	echo %patch$(( ${patch_num} + 1 )) -p3 -b .${name}
 	tail -n +$(( ${patch_line} + 1 )) ${spec}
     else
-	echo "INTERNAL ERROR"
+	echo "INTERNAL ERROR: NOT IMPLEMENTED"
 	exit 1
     fi
 }
 
-function twig_install_stub
+function twig_install_stub_patch
 {
-    dir=$1
-    name=$2
-    touch $1/archives/twig-${name}.patch
+    local dir=$1
+    local name=$2
+    touch $dir/archives/twig-${name}.patch
 }
 
 
@@ -223,6 +229,11 @@ function twig_verify_soruces
 # twig diff [with]
 #
 #
+function twig_diff_help
+{
+    echo "    " diff [WITH]
+}
+
 function twig_diff
 {
     if ! twig_p . ; then
@@ -230,13 +241,24 @@ function twig_diff
 	exit 1
     fi
 
-    if ! test -d ./twig/from/archives; then
-	echo "Cannot access $(pwd)/twig/from/pre-build"
+    if ! test -d ./TWIG/from/archives; then
+	echo "Cannot access $(pwd)/TWIG/from/pre-build"
 	exit 1
     fi
 
-    diff -ruN twig/from/pre-build ./pre-build
+    diff -ruN -x '*~' TWIG/from/pre-build ./pre-build
 }
+
+#
+#
+# twig specdiff [with]
+#
+#
+function twig_specdiff_help
+{
+    echo "    " specdiff [WITH]
+}
+
 
 function twig_specdiff
 {
@@ -245,12 +267,12 @@ function twig_specdiff
 	exit 1
     fi
 
-    if ! test -r ./twig/from/specs.spec; then
-	echo "Cannot access $(pwd)/twig/from/specs.spec"
+    if ! test -r ./TWIG/from/specs.spec; then
+	echo "Cannot access $(pwd)/TWIG/from/specs.spec"
 	exit 1
     fi
 
-    diff -uN twig/from/specs.spec ./specs.spec
+    diff -uN TWIG/from/specs.spec ./specs.spec
 }
 
 #
@@ -258,12 +280,17 @@ function twig_specdiff
 # twig record
 #
 #
+function twig_record_help
+{
+    echo "    " record
+}
+
 function twig_record
 {
     local name
     
     twig_diff > \#twig.patch\#
-    name=$(cat twig/name)
+    name=$(cat TWIG/name)
     mv \#twig.patch\# archives/twig-${name}.patch
 }
 
@@ -272,20 +299,25 @@ function twig_record
 # twig info
 #
 #
+function twig_info_help
+{
+    echo "    " info
+}
+
 function twig_info
 {
     local form
     local status
 
     if ! twig_p .; then
-	echo "$(pwd) is not twig dir" 1>&2
+	echo "$(pwd) is not TWIG dir" 1>&2
 	exit 1
     fi
 
     
-    echo Name: $(cat twig/name)
+    echo Name: $(cat TWIG/name)
 
-    from=$(readlink -n twig/from)
+    from=$(readlink -n TWIG/from)
     if test -d ${from}; then
 	status="valid"
 	if twig_p ${from}; then
@@ -305,6 +337,11 @@ function twig_info
 # twig pedigree
 #
 #
+function twig_pedigree_help
+{
+    echo "    " pedigree
+}
+
 function twig_pedigree
 {
     twig_pedigree_full 0
@@ -320,7 +357,7 @@ function twig_pedigree_full
 	exit 0
     fi
 
-    from=$(readlink -n twig/from)
+    from=$(readlink -n TWIG/from)
     if test -d "${from}"; then
 	(cd ${from}; 
 	 twig_pedigree_full $(( $num + 1 )))
@@ -332,8 +369,20 @@ function twig_pedigree_full
 # twig build
 #
 #
+# TODO: BUILD ID
+#
+function twig_build_help
+{
+    echo "    " build "[-ba|-bb|-bp|-bc|-bi|-bl|-bs]"
+}
+
 function twig_build
 {
+    local stage
+
+    stage=${1:-"--ba"}
+
+
     if ! twig_p .; then
 	echo "not twig dir" 1>&2
 	exit 1
@@ -346,9 +395,50 @@ function twig_build
 	     --define "_srcrpmdir `pwd`/twig/srpms" \
 	     --define "_builddir `pwd`/twig/build"  \
 	     --define "_sourcedir `pwd`/archives"   \
-	     --bp specs.spec
+	     $stage specs.spec
 }
 
-cmd=$1
-shift 1
-eval twig_${cmd} "$@"
+
+#
+#
+# twig help
+#
+#
+function twig_help_help
+{
+    echo "    " help
+}
+function twig_help
+{
+    echo Usage: twig COMMAND ARGS...
+    echo
+    echo COMMAND:
+
+    for c in ${twig_commands}; do
+	eval twig_${c}_help
+    done
+}
+
+#
+#
+# main
+#
+#
+function main
+{
+    cmd=$1
+    shift 1
+
+    for c in ${twig_commands}; do
+	if test x"$c" = x"$cmd"; then
+	    eval twig_${cmd} "$@"
+	    exit $?
+	fi
+    done
+
+    twig_help 2>&1
+    exit 1
+}
+
+main "$@"
+
