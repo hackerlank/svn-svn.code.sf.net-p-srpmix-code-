@@ -29,8 +29,7 @@
 #
 
 HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
-REQUIRED_COMMANDS="mktemp rpm2cpio cpio ${HARDLINK} id"
-MOUNTPOINT_TEMPLATE="srpmix.iso.XXXXXXXXXX"
+REQUIRED_COMMANDS="rpm2cpio cpio ${HARDLINK} id"
 
 PROFILE=SRPMIX
 SPECDIR=srpmix-SPECS
@@ -47,7 +46,6 @@ LIBSRPMIX=libsrpmix.sh
 #
 ROOTDIR=
 SRCFILES=
-MOUNTPOINT=
 CREATE_ROOTDIR=no
 VERBOSE=no
 USE_SUDO=no
@@ -75,15 +73,14 @@ function print_usage
     echo "            [--freeze|-F]"
     echo "            [--target=target|-t=target|--target target|-t target]"
     echo "            [--set-group=group|-g=group|--set-group group|-g group]"
-    echo "            ROOTDIR FILES..."
+    echo "            ROOTDIR SRPM_FILES..."
     echo 
     echo
     echo "  --force: create ROOTDIR if it doesn't exist."
     echo "           If --force given and ROOTDIR exists"
     echo "           existance of SRPMIX profile file is expected."
-    echo "  --sudo: use sudo in doing chown, mount and umount. "      
+    echo "  --sudo: use sudo in doing chown. "      
     echo "  --freeze: freeze expanded files. "      
-    echo "  FILES are .iso or .src.rpm"
     echo 
 }
 
@@ -118,29 +115,6 @@ function update_count
     fi
 }
 
-function trap_handler
-{
-    local mountpoint=$1
-
-    # May be this doesn't work
-    verbose signaled --mountpoint=$mountpoint
-
-    echo 1>&2
-    iso_umount ${mountpoint}
-    echo 1>&2
-
-    echo 1>&2
-    rmdir ${mountpoint}
-    echo 1>&2
-
-    echo 1>&2
-    echo 1>&2
-    echo '*** ABORT...signaled' 1>&2
-    echo 1>&2
-    echo 1>&2
-
-    exit -1
-}
 #
 ########################################################################
 
@@ -243,7 +217,6 @@ function parse_arguments
  
     verbose varset --ROOTDIR=\""${ROOTDIR}"\"
     verbose varset --SRCFILES=\""${SRCFILES}"\"
-    verbose varset --MOUNTPOINT=\""${MOUNTPOINT}"\"
     verbose varset --CREATE_ROOTDIR=\""${CREATE_ROOTDIR}"\"
     verbose varset --USE-SUDO=\""${USE_SUDO}"\"
 
@@ -402,9 +375,6 @@ function verify_srcfiles
 	    *.src.rpm)
 		verbose srpm? "\"${f}\"" "#t"
 		;;
-	    *.iso)
-	    	verbose iso? "\"${f}\"" "#t"
-		;;
 	    *)
 		echo "unknown file type: ${f}" 1>&2
 		abort
@@ -418,64 +388,6 @@ function verify_srcfiles
 
 ########################################################################
 #
-IS_MOUNTPOINT_CREATED=no
-
-function create_mountpoint
-{
-    local template=$1
-    local dirname=
-
-
-    dirname=`mktemp -t -d "${template}"`
-    if test $? != 0; then
-	echo "fail to create ... read ${f}" 1>&2
-	abort
-    fi
-
-    echo "${dirname}"
-
-    return $?
-}
-
-function delete_mountpoint
-{
-    local local mountpoint=$1
-
-    if test "${IS_MOUNTPOINT_CREATED}" = yes; then
-	rmdir "${mountpoint}"
-
-	verbose rmdir "\"${mountpoint}\"" --type=mountpoint
-    fi
-}
-
-function verify_mountpoint
-{
-    local iso_p=no
-    
-
-    for f in "$@"; do
-	case "${f}" in
-	    *.iso)
-		iso_p=yes
-
-		verbose iso? "\"${f}\"" "#t"
-		;;
-	    *)
-		;;
-	esac
-    done
-
-    # TODO: Check capabilities.
-
-    if test $iso_p = yes; then
-	MOUNTPOINT=`create_mountpoint "${MOUNTPOINT_TEMPLATE}"`
-	if test $? = 0; then
-	    IS_MOUNTPOINT_CREATED=yes
-	    verbose mkdir "\"${MOUNTPOINT}\"" --type=mountpoint
-	fi
-    fi
-}
-
 function verify_commands
 {
     while [ $# -gt 0 ]; do
@@ -525,7 +437,7 @@ function unwind
 
 function clean
 {
-    delete_mountpoint "${MOUNTPOINT}"
+    :
 }
 #
 ########################################################################
@@ -571,6 +483,11 @@ function spec_file_header
     spec_comment "########################################################################"
 }
 
+#
+# rhel5su2 kernel needs this.
+#
+no_hack__p_xen='\.p\.xen$'
+
 function spec_file_hack
 {
     local rootdir=$1
@@ -578,6 +495,11 @@ function spec_file_hack
 
     cat - "${rootdir}/SPECS/${spec_file}"          \
     | sed					   \
+	\
+	\
+        -e /'^%patch.* '"$no_hack__p_xen"/b        \
+	\
+	\
 	-e '/^%patch/s/-b \([^ ]\+\)//'            \
 	-e 's/^Copyright:/License:/'		   \
 	-e 's/^Serial:.*//'			   \
@@ -834,64 +756,6 @@ function srpm_freeze
 #
 ########################################################################
 
-
-########################################################################
-#
-function iso_deploy
-{
-    local rootdir=$1
-    local iso_file=$2
-    local mountpoint=$3
-
-    iso_mount   "${iso_file}" "${mountpoint}" || {
-	return $?
-    }
-    verbose mount --iso-file=\""${iso_file}"\" \
-	--mountpoint=\""${mountpoint}"\"
-    
-    for x in "${mountpoint}"/RedHat/SRPMS/*.src.rpm "${mountpoint}"/SRPMS/*.src.rpm "${mountpoint}"/*.src.rpm ; do
-	if test -r "${x}"; then
-	   srpm_deploy "${rootdir}" ${x}
-	   update_count $?
-	fi
-    done
-    
-    iso_umount "${mountpoint}" || {
-	return $?
-    }
-    verbose umount --iso-file=\""${iso_file}"\" \
-	--mountpoint=\""${mountpoint}"\"
-}
-
-function iso_mount
-{
-    local iso_file=$1
-    local mountpoint=$2
-    local sudo=
-
-
-    if test "${USE_SUDO}" = yes; then
-	sudo=sudo
-    fi
-
-    trap "trap_handler ${mountpoint}" HUP INT PIPE QUIT TERM
-    ${sudo} mount -o loop ${iso_file} ${mountpoint}
-}
-
-function iso_umount
-{
-    local mountpoint=$1
-
-    if test "${USE_SUDO}" = yes; then
-	sudo=sudo
-    fi
-
-    ${sudo} umount ${mountpoint}
-}
-#
-########################################################################
-
-
 ########################################################################
 #
 function try_source
@@ -913,7 +777,6 @@ function main
     verify_rootdir "${ROOTDIR}" "${CREATE_ROOTDIR}"
 
     verify_subdirs "${ROOTDIR}" "${IS_ROOTDIR_CREATED}"
-    verify_mountpoint ${SRCFILES}
 
 
     message main-start           \
@@ -926,9 +789,6 @@ function main
 	    *.rpm)
 		srpm_deploy ${ROOTDIR} ${x} $BUILDNAME
 		update_count $?
-		;;
-	    *.iso)
-		iso_deploy ${ROOTDIR} ${x} ${MOUNTPOINT} 
 		;;
 	esac
     done
