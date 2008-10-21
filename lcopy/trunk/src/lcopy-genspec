@@ -25,10 +25,11 @@
 #
 ########################################################################
 LCOPY_VERSION=0.0.9
-SUPPORTED_VCSs="svn git"
+SUPPORTED_VCSs="svn git cvs"
 PACKAGE=
 BRANCH=
 REPO=
+MODULE=
 VCS=
 CMDLINE=
 SPEC_TYPE=
@@ -46,7 +47,7 @@ function print_usage
     echo "Usage: "
     echo "lcopy-genspec --spec-type=subscription"
     echo "              --package=PACKAGE [--branch=BRANCH]"
-    echo "              --repo=REPO"
+    echo "              --repo=REPO [--module=MODULE]"
     echo "              --vcs=VCS"
     echo "              [--release=RELEASE]"
     echo "              [--output-dir=OUTPUT_DIR]"
@@ -58,6 +59,7 @@ function print_usage
     echo ""
     echo "lcopy-genspec --help"
     echo "Supported VCS: $SUPPORTED_VCSs"
+    echo "MODULE moust be given when cvs is used as vcs."
 }
 
 function abort
@@ -116,6 +118,10 @@ function parse_arguments
 	         OUTPUT_DIR=${1/--output-dir=/}
 		 shift 1
 		 ;;
+            --module=*)
+	         MODULE=${1/--module=/}
+		 shift 1
+		 ;;
 	    *)
 	       break
 	       ;;
@@ -123,7 +129,7 @@ function parse_arguments
     done
 
     if test $# -gt 1; then
-	echo "too many arguments" 1>&2
+	echo "too many arguments: $@" 1>&2
 	print_usage 1>&2
 	abort
     fi 
@@ -139,7 +145,7 @@ function verify_arguments
 {
     case "$SPEC_TYPE" in
 	link|subscription)
-	    eval ${SPEC_TYPE}_verify_arguments
+	    ${SPEC_TYPE}_verify_arguments
 	    ;;
 	*)
 	    echo "Unknown spec type: $SPEC_TYPE"
@@ -151,12 +157,12 @@ function verify_arguments
 
 function vcs_to_vcs_pkg
 {
-    eval ${1}_to_pkg
+    ${1}_to_pkg
 }
 
 function generate
 {
-    eval "$SPEC_TYPE"_generate
+    "$SPEC_TYPE"_generate
 }
 
 function make_pb_name
@@ -181,7 +187,7 @@ function make_checkout_cmdline
     vcs=$1
 
     shift 1
-    eval "${vcs}_make_checkout_cmdline" "$@"
+    "${vcs}_make_checkout_cmdline" "$@"
     
 }
 
@@ -196,7 +202,7 @@ function subscription_generate
     local date
 
     vcs_pkg="$(vcs_to_vcs_pkg $VCS)"
-    cmdline="$(make_checkout_cmdline $VCS $REPO $PACKAGE $BRANCH)"
+    cmdline=$(make_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "$BRANCH" "$MODULE")
     date=$(date "+%a %b %e %Y")
 
     cat >"${OUTPUT_DIR}/$(make_pb_name $PACKAGE $BRANCH)-lcopy-subscription.spec" <<EOF
@@ -280,6 +286,12 @@ function subscription_verify_arguments
 
     if ! is_member "$VCS" $SUPPORTED_VCSs; then
 	echo "Unsupported vcs: $VCS" 1>&2
+	print_usage 1>&2
+	abort
+    fi
+
+    if test "$VCS" = cvs -a -z "$MODULE"; then
+	echo "No module for $VCS is given"  1>&2
 	print_usage 1>&2
 	abort
     fi
@@ -418,6 +430,25 @@ function git_make_checkout_cmdline
 function git_to_pkg
 {
     echo git
+}
+
+#
+# cvs
+#
+function cvs_make_checkout_cmdline
+{
+
+    local repo=$1
+    local package=$2
+    local branch=$3
+    local module=$4
+    
+    echo cvs -d${repo} checkout -P ${module} -d $(make_pb_name "${package}" "${branch}")
+    
+}
+function cvs_to_pkg
+{
+    echo cvs
 }
 
 function main

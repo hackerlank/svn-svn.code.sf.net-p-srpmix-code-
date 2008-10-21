@@ -151,7 +151,7 @@ function refresh
     cd $1
 
     for v in $VC; do
-	if eval lcopy_is_${v}; then
+	if lcopy_is_${v}; then
 
 	    cur_dir=`pwd`
 	    tstamp=`LANG=C date`
@@ -160,7 +160,7 @@ function refresh
 		--directory=\"${cur_dir}\"   \
 		--date=\"${tstamp}\"  >> $LOG
 
-	    eval update_${v}
+	    update_${v}
 	    r=$?
 	   
 	    tstamp=`LANG=C date`

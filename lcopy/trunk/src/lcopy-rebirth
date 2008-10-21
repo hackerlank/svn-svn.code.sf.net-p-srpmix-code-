@@ -34,8 +34,8 @@ function generate_cmdline
 {
     (cd $1;
 	for v in $VC; do
-	    if eval lcopy_is_${v}; then
-		eval generate_${v}_cmdline
+	    if lcopy_is_${v}; then
+		generate_${v}_cmdline
 		return $?
 	    fi
 	done
