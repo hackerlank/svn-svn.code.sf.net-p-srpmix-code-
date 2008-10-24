@@ -1,8 +1,11 @@
-dist_bin_SCRIPTS =    \
-        liblcopy.sh  \
+dist_bin_SCRIPTS =     \
+        liblcopy.sh    \
+	\
+	lcopy          \
 	\
         lcopy-rebirth  \
         lcopy-refresh  \
+        lcopy-genspec  \
 	\
         $(NULL)
 
@@ -12,5 +15,3 @@ dist_plugin_SCRIPTS = \
 	10lcopy-etags \
         \
         $(NULL)
-
-EXTRA_DIST=lcopy-sandbox

@@ -53,7 +53,7 @@ function print_usage
     echo "lcopy-refresh --help"
 }
 
-function list_plugins
+function lcopy_list_plugins
 {
     test -d $PLUGINDIR && \
 	find $PLUGINDIR -perm +0100 -type f | sort | while read plugin
@@ -62,7 +62,7 @@ function list_plugins
     done
 }
 
-function run_plugins
+function lcopy_run_plugins
 {
     LOG=$1;
     shift
@@ -70,9 +70,9 @@ function run_plugins
     test -d $PLUGINDIR && \
 	find $PLUGINDIR -perm +0100 -type f | sort |  while read plugin
     do
-	es_print start-running-plugin "\"$plugin\"" >> $LOG
+	es_print lcopy start-running-plugin "\"$plugin\"" >> $LOG
         $plugin "$@"
-	es_print end-running-plugin "\"$plugin\"" --status=$? >> $LOG
+	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? >> $LOG
     done
 }
 
@@ -112,7 +112,7 @@ function parse_arguments
 		shift 1
 		;;
 	    --list-plugins|-L)
-	        list_plugins
+	        lcopy_list_plugins
 	        exit 0
 	        ;;
 	    -*)
@@ -155,7 +155,7 @@ function refresh
 
 	    cur_dir=`pwd`
 	    tstamp=`LANG=C date`
-	    es_print start-updating          \
+	    es_print lcopy start-updating    \
 		--vcs=${v}                   \
 		--directory=\"${cur_dir}\"   \
 		--date=\"${tstamp}\"  >> $LOG
@@ -165,13 +165,13 @@ function refresh
 	   
 	    tstamp=`LANG=C date`
 	    if test $r = 0; then
-		es_print successful-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r
+		es_print lcopy successful-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r
 	    else
-		es_print fail-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r
+		es_print lcopy fail-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r
 	    fi  >> $LOG
 
 	    if test $r = 0; then
-		run_plugins "$LOG" "${v}" "${cur_dir}" "${tstamp}"
+		lcopy_run_plugins "$LOG" "${v}" "${cur_dir}" "${tstamp}"
 	    fi
 
 	    return $r

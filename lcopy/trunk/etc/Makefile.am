@@ -1,2 +1,2 @@
-EXTRA_DIST=lcopy-refresh.cron sources.lcopy-refresh
+EXTRA_DIST=lcopy-refresh.cron default.lcopy-refresh
 

@@ -1,7 +1,7 @@
 Summary: Scripts to update local copies gettting from vcs repositories 
 Name: lcopy
 Version: @PACKAGE_VERSION@
-Release: 3
+Release: 4
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 #Requires: 
 Prereq: /usr/sbin/useradd
@@ -16,13 +16,6 @@ Group: Development/Tools
 Scripts to update local copies getting from vcs  repositories 
 
 
-%package sources
-Summary: Well known sources lcopy directory configuration.
-Group: Development/Tools
-Requires: lcopy
-%description sources
-Typical configuration for lcopy-refresh which is run by cron.
-
 %prep
 %setup -q
 
@@ -36,16 +29,16 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/lcopy-refresh.d
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.daily
 
-install -p -m 777 src/lcopy-sandbox $RPM_BUILD_ROOT%{_bindir}/lcopy-sandbox
 install -p -m 755 etc/lcopy-refresh.cron    $RPM_BUILD_ROOT%{_sysconfdir}/cron.daily/lcopy-refresh
-install -p -m 644 etc/sources.lcopy-refresh $RPM_BUILD_ROOT%{_sysconfdir}/lcopy-refresh.d/sources.lcopy-refresh
+install -p -m 644 etc/default.lcopy-refresh $RPM_BUILD_ROOT%{_sysconfdir}/lcopy-refresh.d/default.lcopy-refresh
 
 
 mkdir -p $RPM_BUILD_ROOT/var/lib/lcopy
 mkdir -p $RPM_BUILD_ROOT/var/lib/lcopy/sources
 mkdir -p $RPM_BUILD_ROOT/var/lib/lcopy/log
+mkdir -p $RPM_BUILD_ROOT/var/lib/lcopy/specs
 
-%pre sources
+%pre
 /usr/sbin/useradd -c "Lcopy" lcopy 2>/dev/null || :
 
 %clean
@@ -53,8 +46,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
+%{_bindir}/lcopy
 %{_bindir}/lcopy-rebirth
 %{_bindir}/lcopy-refresh
+%{_bindir}/lcopy-genspec
 %{_bindir}/liblcopy.sh
 %{_libexecdir}/lcopy/plugins/10lcopy-ctags
 %{_libexecdir}/lcopy/plugins/10lcopy-etags
@@ -63,16 +58,12 @@ rm -rf $RPM_BUILD_ROOT
 %attr(0755, root, root) %{_sysconfdir}/cron.daily/lcopy-refresh
 %attr(0755, root, root) %dir %{_sysconfdir}/lcopy-refresh.d
 
-# TODO user account 'sources' must be introduced.
-%files sources
-%defattr(-,root,root)
-%{_sysconfdir}/lcopy-refresh.d/sources.lcopy-refresh
-%{_bindir}/lcopy-sandbox
-
+%{_sysconfdir}/lcopy-refresh.d/default.lcopy-refresh
 
 %attr(0755, lcopy, lcopy) /var/lib/lcopy
 %attr(0755, lcopy, lcopy) /var/lib/lcopy/sources
 %attr(0755, lcopy, lcopy) /var/lib/lcopy/log
+%attr(0755, lcopy, lcopy) /var/lib/lcopy/specs
 
 
 %changelog

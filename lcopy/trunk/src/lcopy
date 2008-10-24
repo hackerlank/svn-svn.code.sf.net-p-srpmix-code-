@@ -1,0 +1,258 @@
+#!/bin/bash
+
+#
+# bash is really needed.
+#
+
+ROOT_DIR=/var/lib/lcopy
+SOURCES_DIR=${ROOT_DIR}/sources
+SPECS_DIR=${ROOT_DIR}/specs
+LOG_DIR=${ROOT_DIR}/log
+
+
+PACKAGE=
+BRANCH=
+REPO=
+MODULE=
+VCS=
+RELEASE=0
+
+NO_SPEC=
+ONLY_SPEC=
+
+SUPPORTED_VCSs="cvs git git-clone"
+function print_usage
+{
+    echo "Usage: "
+    echo "lcopy [--release] [--no-spec|--only-spec] vcs commands..."
+    echo ""
+    echo "lcopy [--help|-h]"
+    echo ""
+    echo "Expected commands line for each vcs:"
+    for vcs in ${SUPPORTED_VCSs}; do
+	${vcs}_print_usage
+    done
+}
+
+#
+# plugin
+# 
+PREFIX=/usr/libexec
+PLUGINDIR=${PREFIX}/lcopy/plugins
+
+function lcopy_run_plugins
+{
+    LOG=$1;
+    shift
+
+    test -d $PLUGINDIR && \
+	find $PLUGINDIR -perm +0100 -type f | sort |  while read plugin
+    do
+	es_print lcopy start-running-plugin "\"$plugin\"" >> $LOG
+        $plugin "$@"
+	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? >> $LOG
+    done
+}
+
+function main
+{
+    local tstamp
+
+    cd ${SOURCES_DIR}
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --release)
+		RELEASE=${1/--release/}
+		shift 1
+		;;
+	    --no-spec)
+		NO_SPEC=1
+		shift 1
+		;;
+	    --only-spec)
+		ONLY_SPEC=1
+		shift 1
+		;;
+	    *)
+		break
+		;;
+	esac
+    done
+
+    if test -z "$1"; then
+	echo "Too few arguments" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test -z "$NO_SPEC"; then
+	${1}_parse "$@"
+	make_specs
+    fi
+
+    if test -z "$ONLY_SPEC"; then
+	if sudo -H -u lcopy "$@"; then
+	    tstamp=`LANG=C date`
+	    es_print lcopy checkout \
+		:cmdline \""$*"\"   \
+		:status ${status}   \
+		:date \""${tstamp}"\" | \
+		sudo -H -u lcopy tee -a ${LOG_DIR}/lcopy-checkout.es > /dev/null
+	    if test -z "$NO_SPEC"; then
+		:
+# TODO: plugin		
+#		cd ${PACKAGE} &&
+#		lcopy_run_plugins ${LOG_DIR}/lcopy-refresh.es \
+#		    "${VCS}" "$(pwd)" "${tstamp}"
+	    fi
+	fi
+    fi
+}
+
+
+#
+# git
+#
+function git-clone_parse
+{
+    shift 1
+    git_parse git clone "$@"
+}
+
+function git-clone_print_usage
+{
+    git_print_usage
+}
+
+function git_parse
+{
+    VCS=$1
+    CMD=$2
+    REPO=$3
+    PACKAGE=$4
+
+    if test "x$VCS" != xgit; then
+	echo "wrong vcs: $VCS" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test \( -z "$CMD"          \) -a    \
+            \( "$CMD" != clone \) ; then
+	echo "broken cvs command line: $@" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+ 
+# TODO
+#    if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
+#	echo "broken repo specification: $REPO" 2>&1
+#	print_usage 2>&1
+#	exit 1
+#    fi
+
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+}
+
+#
+# CVS
+#
+function cvs_parse
+{
+    VCS=$1
+    REPO=${2/-d/}
+    CMD=$3
+    DFLAGS=$4
+    PACKAGE=$5
+    MODULE=$6
+
+    if test "x$VCS" != xcvs; then
+	echo "wrong vcs: $VCS" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test \( -z "$CMD"          \) -a    \
+	    \( "$CMD" != co       \) -a    \
+            \( "$CMD" != checkout \) ; then
+	echo "broken cvs command line: $@" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test \( -z "${DFLAGS}" \) -a \( "${DFLAGS}" != "-d" \); then
+	echo "broken cvs command line: $@" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
+	echo "broken repo specification: $REPO" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test -z "$MODULE"; then
+	echo "no module" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+}
+
+function cvs_print_usage
+{
+    echo cvs -d:pserver:USER:PASSWD@HOST checkout -d PACKAGEDIR MODULE 
+    echo '(adds -P automatically)'
+}
+
+
+function make_specs
+{
+    sudo -H -u lcopy \
+    lcopy-genspec --spec-type=subscription	\
+        --package=$PACKAGE			\
+        --branch=$BRANCH			\
+        --repo=$REPO				\
+        --module=$MODULE			\
+        --vcs=$VCS				\
+        --release=$RELEASE			\
+        --output-dir=$SPECS_DIR			
+
+    sudo -H -u lcopy \
+    lcopy-genspec --spec-type=link		\
+        --package=$PACKAGE			\
+        --branch=$BRANCH			\
+        --release=$RELEASE			\
+        --output-dir=$SPECS_DIR
+}
+
+source liblcopy.sh
+main "$@"
