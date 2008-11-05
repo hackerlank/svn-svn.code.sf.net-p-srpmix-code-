@@ -170,6 +170,11 @@ function git_parse
     fi
 }
 
+function git_print_usage
+{
+    echo git clone REPOS PACKAGEDIR
+}
+
 #
 # CVS
 #
