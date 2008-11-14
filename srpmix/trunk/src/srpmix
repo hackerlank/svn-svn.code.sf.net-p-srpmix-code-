@@ -61,9 +61,21 @@ function parse_arguments
 
     if test -n "${TARGET_SRPM}"; then
 	if test ! -f "${TARGET_SRPM}"; then
-	    srpmix_abort "No such file: ${TARGET_SRPM}"
+	    case "${TARGET_SRPM}" in
+		http://*|ftp://*)
+		    wget -O ${TMPDIR}/$(basename ${TARGET_SRPM}) ${TARGET_SRPM}
+		    if test $? = 0; then
+			TARGET_SRPM="${TMPDIR}/$(basename ${TARGET_SRPM})"
+		    else
+			srpmix_abort "Failed in download ${TARGET_SRPM}" 
+		    fi
+		    ;;
+		*)
+		    srpmix_abort "No way to retrieve ${TARGET_SRPM}"
+		    ;;
+	    esac
 	else
-	    TARGET_SRPM="$(pwd)/${TARGET_SRPM}"
+	    TARGET_SRPM="${TMPDIR}/${TARGET_SRPM}"
 	fi
     fi
 }
@@ -82,11 +94,12 @@ function main
     if test "`whoami`" != "root"; then
 	srpmix_abort "You must be root to run this program"
     fi
-    
-    parse_arguments "$@"
 
     TMPDIR=`mktemp -d`
     trap "/bin/rm -rf $TMPDIR" 0
+    
+    parse_arguments "$@"
+
     cd $TMPDIR
     mkdir -p RPMS SRPMS BUILD
     
