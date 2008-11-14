@@ -1,0 +1,37 @@
+Summary: Tool to make a temporary branch for a package
+Name: twig
+Version: @PACKAGE_VERSION@
+Release: 0
+Source: twig-@PACKAGE_VERSION@.tar.bz2
+Requires: rpm-build
+Buildarch: noarch
+
+Buildroot: %{_tmppath}/%{name}-root
+License: GPL
+
+Group: Development/Tools
+
+%description
+Tool to make a temporary branch for a package.
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%{_bindir}/twig
+
+%changelog
+* Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 0.0.0-0
+- First RPM build.
