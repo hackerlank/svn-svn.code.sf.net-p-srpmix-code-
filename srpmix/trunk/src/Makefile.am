@@ -8,6 +8,8 @@ dist_bin_SCRIPTS =           \
 	\
 	srpmix-wrap				\
         \
+	srpmix-db            \
+	\
 	srpmix-weakview-dist			\
 	srpmix-weakview-packages		\
 	\

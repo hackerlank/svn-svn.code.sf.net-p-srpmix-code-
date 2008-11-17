@@ -35,6 +35,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/libsrpmix.sh
 
 %{_bindir}/srpmix-wrap
+
+%{_bindir}/srpmix-db
+
 %{_bindir}/srpmix-weakview-dist
 %{_bindir}/srpmix-weakview-packages
 %{_bindir}/srpmix-plugin

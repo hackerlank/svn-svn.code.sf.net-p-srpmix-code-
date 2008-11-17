@@ -1,0 +1,152 @@
+#!/bin/bash
+
+
+RPM_PACKAGES=
+COMMAND=
+QUIET=
+
+
+LIBSRPMIX=libsrpmix.sh
+HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
+
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-db --help|-h"
+    echo "  srpmix-db --install|-i [--quite|-q] SRPMIX-RPM-PACKAGE..."
+    echo "  srpmix-db --list-packages"
+    echo
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    -h|--help)
+		print_usage
+		exit 0
+		;;
+	    -q|--quiet)
+		QUIET=yes
+		shift 1
+		;;
+	    -i|--install)
+		if test -z "$COMMAND"; then
+		    COMMAND=install
+		else
+		    echo "COMMAND $COMMAND is already set" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		shift 1
+		;;
+	    --list-packages)
+		if test -z "$COMMAND"; then
+		    COMMAND=list-packages
+		else
+		    echo "COMMAND $COMMAND is already set" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		shift 1
+		;;
+	    *)
+		break
+		;;
+	esac
+    done
+
+    if test -z "$COMMAND"; then
+	echo "no command is given" 1>&2
+	print_usage 1>&2
+	exit 1
+    elif test x"$COMMAND" = xinstall; then
+	RPM_PACKAGES="$@"
+    elif test x"$COMMAND" = xlist-packages; then
+	:
+    else
+	:
+    fi
+}
+
+
+SRPMIX_DB_DIR=/var/lib/srpmix
+function srpmix_db
+{
+    local package
+    local name
+    local hash
+
+    if test ! -d "${SRPMIX_DB_DIR}"; then
+	:
+    fi
+
+    package=$1
+    name="$(rpm -qp --queryformat %{NAME} $package)"
+    hash="$(srpmix_srchash "$name")"
+    echo "${SRPMIX_DB_DIR}/$hash/$name"
+}
+
+function do_install
+{
+    local db
+    local count
+    local max
+    local pkgdir
+    
+
+    srpmix_verify_commands ${HARDLINK}
+
+
+    count=0
+    RPM_PACKAGES=$(echo "$RPM_PACKAGES" | tr ' ' '\n')
+    max=$(echo "$RPM_PACKAGES" | wc -l)
+
+
+    echo "$RPM_PACKAGES" | while read package; do
+	db=$(srpmix_db $package)
+	if test x"$QUIET" != xyes; then
+	    echo "($count/$max) Installing...$(basename $package)"
+	fi
+	# 
+	rpm --nodeps -Uvh --dbpath "$db" "$package"
+	pkgdir=$(dirname $(rpm -qpl "$package"  | head -1))
+	if test "x$pkgdir" != "x"; then
+	    if test x"$QUIET" != xyes; then
+		echo "($count/$max) Hardlink...$pkgdir/.."
+	    fi
+	    ${HARDLINK} $pkgdir/..
+	fi
+	count=$(expr $count + 1)
+    done
+    
+}
+
+function do_list-packages
+{
+    local dir
+
+    ls ${SRPMIX_DB_DIR} | while read dir; do
+	ls "${SRPMIX_DB_DIR}/$dir"
+    done
+}
+
+function main
+{
+    parse_arguments "$@"
+    do_$COMMAND
+}
+
+try_source ${LIBSRPMIX}
+main "$@"
+exit $?
