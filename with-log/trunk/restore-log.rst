@@ -1,0 +1,1 @@
+.. dump/restoreのrestoreコマンドは-vをつけると余分に情報が出る。
