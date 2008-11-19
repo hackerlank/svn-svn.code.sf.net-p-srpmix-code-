@@ -142,6 +142,8 @@ function twig_fork_generic
 	echo "Failed to install stub patch" 1>&2
 	exit 1
     fi
+
+    (cd ${dir}; twig_addlog "twigged from ${from}")
 }
 
 function twig_hack_release
@@ -149,7 +151,7 @@ function twig_hack_release
     local spec=$1
     local name=$2
 
-    sed -e "s/^Release:.*/\0.${name}%{?twig_buildid}/" < ${spec}
+    sed -e "s/^Release:.*/\0.${name}%{?twig_${name}_buildid}/" < ${spec}
 }
 
 function twig_hack_patch_decl
@@ -383,7 +385,7 @@ function twig_build
 
     
     stage=${1:-"--ba"}
-    buildid=${2:-"0"}
+    buildid=${2:-".0"}
 
     if ! twig_p .; then
 	echo "not twig dir" 1>&2
@@ -397,7 +399,7 @@ function twig_build
 	     --define "_srcrpmdir `pwd`/twig/srpms" \
 	     --define "_builddir `pwd`/twig/build"  \
 	     --define "_sourcedir `pwd`/archives"   \
-             --define "twig_buildid ${buildid}"     \
+             --define "twig_$(cat TWIG/name)_buildid ${buildid}" \
 	     $stage specs.spec
 }
 
