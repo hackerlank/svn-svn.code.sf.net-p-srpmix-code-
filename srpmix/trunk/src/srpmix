@@ -6,6 +6,7 @@ TARGET_SRPM=
 LIBSRPMIX=libsrpmix.sh
 TMPDIR=
 WRAP_OPTS=""
+DEBUG=""
 
 set -e
 
@@ -13,7 +14,8 @@ set -e
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix [--release=RELEASE] --name=PACKAGE|--srpm=SRPM"
+    echo "  srpmix [--release=RELEASE] [--debug]  --name=PACKAGE|--srpm=SRPM"
+#    TODO: Multi targets
 #    TODO: URL support
 #    echo ""
 #    echo "As SRPM a url like http://... is acceptable."
@@ -34,14 +36,17 @@ function parse_arguments
 		exit 0
 		;;
 	    --name=*)
-                TARGET_NAME=$(echo $1 | sed 's/--name=//')
+                TARGET_NAME="$(echo $1 | sed 's/--name=//')"
                 ;;
 	    --srpm=*)
-	        TARGET_SRPM=$(echo $1 | sed 's/--srpm=//')
+	        TARGET_SRPM="$(echo $1 | sed 's/--srpm=//')"
 		;;
 	    --release=*)
 	        WRAP_OPTS="$WRAP_OPTS --release=$(echo $1 | sed 's/--release=//')"
 	        ;;
+	    --debug)
+	        DEBUG=yes
+		;;
 	    *)
 	       break
 	       ;;
@@ -96,9 +101,14 @@ function main
     fi
 
     TMPDIR=`mktemp -d`
-    trap "/bin/rm -rf $TMPDIR" 0
+    trap "/bin/rm -rf $TMPDIR" 0    
+
     
     parse_arguments "$@"
+    if test -n "$DEBUG"; then
+	trap 0
+	echo Using $TMPDIR as temporary directory
+    fi
 
     cd $TMPDIR
     mkdir -p RPMS SRPMS BUILD
@@ -120,6 +130,21 @@ function main
     done
     
     find RPMS/noarch -name '*noarch.rpm' | xargs yum localinstall -y --nogpgcheck
+
+    #
+    # TODO
+    # 1. rename noarch.rpm -> swrf
+    # 2. srpmix-envelop swrf
+    # 3. rpmbuild
+    # 4. yum localinstll
+    #
+
+    # find RPMS/noarch -name '*noarch.rpm' | xargs rpm -Uvh
+    if test -n "$DEBUG"; then
+	echo installed files are:
+	find RPMS/noarch -name '*noarch.rpm'
+    fi
+    
 }
 try_source ${LIBSRPMIX}
 main "$@"

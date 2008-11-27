@@ -1,6 +1,7 @@
 #!/bin/bash
-
-
+#
+# srpmix-db --- Install SWRF, source codes wrapped in RPM Format 
+#
 RPM_PACKAGES=
 COMMAND=
 QUIET=
@@ -23,7 +24,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db --help|-h"
-    echo "  srpmix-db --install|-i [--quite|-q] SRPMIX-RPM-PACKAGE..."
+    echo "  srpmix-db --install|-i [--quite|-q] SWRF..."
     echo "  srpmix-db --list-packages"
     echo
 }
