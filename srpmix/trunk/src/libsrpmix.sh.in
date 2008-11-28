@@ -24,6 +24,7 @@
 #variable
 SRPMIX_ROOT_DIR=/usr/share/srpmix
 SRPMIX_SOURCES_DIR="${SRPMIX_ROOT_DIR}/sources"
+SRPMIX_SWRFS_DIR="${SRPMIX_ROOT_DIR}/swrfs"
 
 SRPMIX_VERSION=@VERSION@
 SRPMIX_MAJOR_VERSION=@SRPMIX_MAJOR_VERSION@
@@ -48,6 +49,11 @@ function srpmix_verify_commands
 	fi
 	shift 
     done
+}
+
+function srpmix_build_enveloped_name
+{
+    echo $@
 }
 
 function srpmix_build_wrapped_name

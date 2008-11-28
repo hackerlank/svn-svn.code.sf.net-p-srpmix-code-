@@ -149,9 +149,9 @@ function wrap_srpm
 	return
     fi
     
-    if test -f ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm; then
+    if test -f ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.swrf.src.rpm; then
 	if test -z "$ALLOW_OVERWRITE"; then
-            echo \;\; ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm already exists 1>&2
+            echo \;\; ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.swrf.src.rpm already exists 1>&2
 	    echo "$es_name"
             return
 	fi
@@ -184,7 +184,7 @@ function wrap_srpm
 Summary: Source Information for package $package ($version-$release)
 Name: ${wrapped_name}
 Version: $SRPMIX_VERSION
-Release: $SRPMIX_RELEASE%{?dist}
+Release: $SRPMIX_RELEASE%{?dist}.swrf
 Source: `basename $target_srpm`
 Autoreq: 0
 BuildRequires: srpmix
@@ -265,12 +265,12 @@ EOF
 
     cp $target_srpm $TMPDIR/SOURCES/
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
-    mv $TMPDIR/SRPMS/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm "${OUTPUTDIR}"
+    mv $TMPDIR/SRPMS/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.swrf.src.rpm "${OUTPUTDIR}"
     rm $TMPDIR/SOURCES/`basename $target_srpm`
     echo "$es_name"
 
     es_print srpmix-wrap done \
-	--file="\"$(ls ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm)\""
+	--file="\"$(ls ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.swrf.src.rpm)\""
 }
 
 function main

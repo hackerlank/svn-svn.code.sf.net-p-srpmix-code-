@@ -125,11 +125,11 @@ function main
 	rpmbuild --define "_rpmdir $TMPDIR/RPMS"     \
 	         --define "_srcrpmdir $TMPDIR/SRPMS" \
 	         --define "_builddir $TMPDIR/BUILD"  \
-	         --rebuild -ba $pvr-srpmix-*.src.rpm \
+	         --rebuild -ba $pvr-srpmix-*.swrf.src.rpm \
         || exit 2
     done
     
-    find RPMS/noarch -name '*noarch.rpm' | xargs yum localinstall -y --nogpgcheck
+    find RPMS/noarch -name '*swrf.noarch.rpm' | xargs yum localinstall -y --nogpgcheck
 
     #
     # TODO

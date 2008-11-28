@@ -11,6 +11,11 @@ LIBSRPMIX=libsrpmix.sh
 HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
 
 
+
+SRPMIX_DB_DIR=/var/lib/srpmix
+
+
+
 function try_source
 {
     source $1
@@ -25,6 +30,7 @@ function print_usage
     echo "Usage: "
     echo "  srpmix-db --help|-h"
     echo "  srpmix-db --install|-i [--quite|-q] SWRF..."
+    echo "  srpmix-db --erase|-d [--quite|-q] SWRF..."
     echo "  srpmix-db --list-packages"
     echo
 }
@@ -61,6 +67,16 @@ function parse_arguments
 		fi
 		shift 1
 		;;
+            -d|--erase)
+		if test -z "$COMMAND"; then
+		    COMMAND=erase
+		else
+		    echo "COMMAND $COMMAND is already set" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		shift 1
+		;;
 	    *)
 		break
 		;;
@@ -73,6 +89,8 @@ function parse_arguments
 	exit 1
     elif test x"$COMMAND" = xinstall; then
 	RPM_PACKAGES="$@"
+    elif test x"$COMMAND" = xerase; then
+	RPM_PACKAGES="$@"
     elif test x"$COMMAND" = xlist-packages; then
 	:
     else
@@ -80,8 +98,6 @@ function parse_arguments
     fi
 }
 
-
-SRPMIX_DB_DIR=/var/lib/srpmix
 function srpmix_db
 {
     local package
@@ -140,6 +156,12 @@ function do_list-packages
     ls ${SRPMIX_DB_DIR} | while read dir; do
 	ls "${SRPMIX_DB_DIR}/$dir"
     done
+}
+
+function do_erase
+{
+    echo NOT IMPLEMENTED YET
+    echo $@
 }
 
 function main

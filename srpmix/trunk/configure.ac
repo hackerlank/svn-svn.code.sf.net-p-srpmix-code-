@@ -1,6 +1,6 @@
 m4_define([pkg_major_version],[3])
-m4_define([pkg_minor_version],[99])
-m4_define([pkg_micro_version],[1])
+m4_define([pkg_minor_version],[100])
+m4_define([pkg_micro_version],[0])
 m4_define([pkg_name],    [srpmix])
 m4_define([pkg_version], pkg_major_version.pkg_minor_version.pkg_micro_version)
 
