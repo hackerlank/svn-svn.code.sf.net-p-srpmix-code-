@@ -67,7 +67,7 @@ function parse_arguments
 		fi
 		shift 1
 		;;
-            -d|--erase)
+            -e|--erase)
 		if test -z "$COMMAND"; then
 		    COMMAND=erase
 		else
@@ -109,7 +109,12 @@ function srpmix_db
     fi
 
     package=$1
-    name="$(rpm -qp --queryformat %{NAME} $package)"
+
+    if test -f "$package"; then
+	name="$(rpm -qp --queryformat %{NAME} $package)"
+    else
+	name=$package
+    fi
     hash="$(srpmix_srchash "$name")"
     echo "${SRPMIX_DB_DIR}/$hash/$name"
 }
@@ -151,17 +156,32 @@ function do_install
 
 function do_list-packages
 {
-    local dir
-
-    ls ${SRPMIX_DB_DIR} | while read dir; do
-	ls "${SRPMIX_DB_DIR}/$dir"
-    done
+    ls ${SRPMIX_DB_DIR}/[a-zA-Z0-9]
 }
 
 function do_erase
 {
-    echo NOT IMPLEMENTED YET
-    echo $@
+    local db
+    local count
+    local max
+    
+    count=0
+    RPM_PACKAGES=$(echo "$RPM_PACKAGES" | tr ' ' '\n')
+    max=$(echo "$RPM_PACKAGES" | wc -l)
+    
+    echo "$RPM_PACKAGES" | while read package; do
+	db=$(srpmix_db $package)
+	if test x"$QUIET" != xyes; then
+	    echo "($count/$max) Deleting...$package"
+	fi
+	#
+	if rpm --nodeps -e -dbpath "$db" "$package"; then
+	    rm -rf "$db"
+	else
+	    :
+	fi
+	count=$(expr $count + 1)
+    done
 }
 
 function main

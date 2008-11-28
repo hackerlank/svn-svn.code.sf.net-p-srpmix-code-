@@ -43,9 +43,11 @@ function parse_arguments
 		;;
 	    --release=*)
 	        WRAP_OPTS="$WRAP_OPTS --release=$(echo $1 | sed 's/--release=//')"
+		ENVELOP_OPTS="$ENVELOP_OPTS --release=$(echo $1 | sed 's/--release=//')"
 	        ;;
 	    --debug)
 	        DEBUG=yes
+		set -x
 		;;
 	    *)
 	       break
@@ -129,23 +131,19 @@ function main
         || exit 2
     done
     
-    find RPMS/noarch -name '*swrf.noarch.rpm' | xargs yum localinstall -y --nogpgcheck
-
-    #
-    # TODO
-    # 1. rename noarch.rpm -> swrf
-    # 2. srpmix-envelop swrf
-    # 3. rpmbuild
-    # 4. yum localinstll
-    #
-
-    # find RPMS/noarch -name '*noarch.rpm' | xargs rpm -Uvh
-    if test -n "$DEBUG"; then
-	echo installed files are:
-	find RPMS/noarch -name '*noarch.rpm'
-    fi
-    
+    for swrf in `find RPMS/noarch -name '*swrf.noarch.rpm'`; do
+	p=$(rpm -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
+	enveloped_name=$(srpmix_build_enveloped_name "$p")
+	srpmix-envelop $ENVELOP_OPTS $swrf
+	rpmbuild --define "_rpmdir $TMPDIR/RPMS"     \
+	         --define "_srcrpmdir $TMPDIR/SRPMS" \
+	         --define "_builddir $TMPDIR/BUILD"  \
+	         --rebuild -ba ${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm \
+	    || exit 2
+    done
+    find RPMS/noarch -name '*noarch.rpm' | grep -v '\.swrf\.' | xargs yum localinstall -y --nogpgcheck
 }
+
 try_source ${LIBSRPMIX}
 main "$@"
 exit $?

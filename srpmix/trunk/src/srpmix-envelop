@@ -110,6 +110,7 @@ function envelop_srpm
     enveloped_name=
     es_name=
 
+
     pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_swrf)
     package=$(echo $pvrd | cut -d' ' -f1)
     description="$(echo $pvrd | cut -d' ' -f4-)"
@@ -123,9 +124,9 @@ function envelop_srpm
 	--target-swrf="\"$(basename $target_swrf)\"" \
 	--enveloped-name="\"${enveloped_name}\"")
 
-    if test -f ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm; then
+    if test -f ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm; then
 	if test -z "$ALLOW_OVERWRITE"; then
-            echo \;\; ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm already exists 1>&2
+            echo \;\; ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm already exists 1>&2
 	    echo "$es_name"
             return
 	fi
@@ -147,7 +148,7 @@ function envelop_srpm
 Summary: rpm package envelops $package
 Name: ${enveloped_name}
 Version: $SRPMIX_VERSION
-Release: $SRPMIX_RELEASE%{?dist}
+Release: $SRPMIX_RELEASE
 Source: `basename $target_swrf`
 Autoreq: 0
 Requires: srpmix
@@ -189,7 +190,7 @@ rm -rf \$RPM_BUILD_ROOT
 srpmix-db --install ${SRPMIX_SWRFS_DIR}/`basename $target_swrf`
 
 %postun
-echo srpmix-db --erase `basename $target_swrf`
+srpmix-db --erase ${enveloped_name}
 
 %files
 %defattr(-,root,root)
@@ -209,12 +210,12 @@ EOF
 
     cp $target_swrf $TMPDIR/SOURCES/
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
-    mv $TMPDIR/SRPMS/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm "${OUTPUTDIR}"
+    mv $TMPDIR/SRPMS/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm "${OUTPUTDIR}"
     rm $TMPDIR/SOURCES/`basename $target_swrf`
     echo "$es_name"
 
     es_print srpmix-envelop done \
-	--file="\"$(ls ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE*.src.rpm)\""
+	--file="\"$(ls ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm)\""
 }
 
 function main
