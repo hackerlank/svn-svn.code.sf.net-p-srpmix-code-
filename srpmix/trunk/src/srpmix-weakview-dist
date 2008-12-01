@@ -114,8 +114,8 @@ function create_dist_weakview
 	fi
     fi
 	
-    rootdir=${SRPMIX_ROOT_DIR}
-    distdir=${SRPMIX_ROOT_DIR}/dists
+    rootdir=${SRPMIX_USR_DIR}
+    distdir=${rootdir}/dists
     builddistdir_body="srpmix-weakview-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE/$distdir/$name"
 
     cat > $spec <<EOF

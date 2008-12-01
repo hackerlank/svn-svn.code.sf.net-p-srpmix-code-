@@ -22,9 +22,13 @@
 ########################################################################
 
 #variable
-SRPMIX_ROOT_DIR=/usr/share/srpmix
-SRPMIX_SOURCES_DIR="${SRPMIX_ROOT_DIR}/sources"
-SRPMIX_SWRFS_DIR="${SRPMIX_ROOT_DIR}/swrfs"
+SRPMIX_USR_DIR=/usr/share/srpmix
+SRPMIX_SWRFS_DIR="${SRPMIX_USR_DIR}/swrfs"
+SRPMIX_PLUGIN_DIR="${SRPMIX_USR_DIR}/plugins"
+
+SRPMIX_VAR_DIR=/var/lib/srpmix
+SRPMIX_SOURCES_DIR="${SRPMIX_VAR_DIR}/sources"
+SRPMIX_DB_DIR="${SRPMIX_VAR_DIR}/db"
 
 SRPMIX_VERSION=@VERSION@
 SRPMIX_MAJOR_VERSION=@SRPMIX_MAJOR_VERSION@

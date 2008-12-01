@@ -235,21 +235,20 @@ rm -rf \$RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-# TODO: Use SRPMIX_SOURCES_DIR defined in  libsrpmix.sh.in.
-#/usr/share/srpmix
-#/usr/share/srpmix/sources/
-#/usr/share/srpmix/sources/*
-#/usr/share/srpmix/sources/*/*
-#/usr/share/srpmix/sources/*/*/*/
-/usr/share/srpmix/sources/*/*/*/SRPMIX
-/usr/share/srpmix/sources/*/*/*/STATUS
-/usr/share/srpmix/sources/*/*/*/pre-build
-/usr/share/srpmix/sources/*/*/*/plugins
-/usr/share/srpmix/sources/*/*/*/specs.spec
+# ${SRPMIX_VAR_DIR}
+# ${SRPMIX_SOURCES_DIR}/
+# ${SRPMIX_SOURCES_DIR}/*
+# ${SRPMIX_SOURCES_DIR}/*/*
+# ${SRPMIX_SOURCES_DIR}/*/*/*/
+${SRPMIX_SOURCES_DIR}/*/*/*/SRPMIX
+${SRPMIX_SOURCES_DIR}/*/*/*/STATUS
+${SRPMIX_SOURCES_DIR}/*/*/*/pre-build
+${SRPMIX_SOURCES_DIR}/*/*/*/plugins
+${SRPMIX_SOURCES_DIR}/*/*/*/specs.spec
 
 %files archives
 %defattr(-,root,root)
-/usr/share/srpmix/sources/*/*/*/archives
+${SRPMIX_SOURCES_DIR}/*/*/*/archives
 
 %changelog
 * Sat Jun  2 2007 SRPMIX WRAP <consulting-jp@redhat.com> $package-$version-$release

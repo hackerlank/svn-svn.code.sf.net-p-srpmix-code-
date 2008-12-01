@@ -25,7 +25,6 @@
 
 LIBSRPMIX=libsrpmix.sh
 ROOTDIR=
-PLUGINDIR=/usr/share/srpmix/plugins
 
 function print_usage
 {
@@ -96,7 +95,7 @@ function try_source
 
 function list_plugins
 {
-    find $PLUGINDIR -perm +0100 -type f | sort | while read plugin
+    find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort | while read plugin
     do
         echo $plugin
     done
@@ -106,7 +105,7 @@ function main
 {
     parse_arguments "$@"
 
-    find $PLUGINDIR -perm +0100 -type f | sort | while read plugin
+    find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort | while read plugin
     do
         $plugin $ROOTDIR
     done

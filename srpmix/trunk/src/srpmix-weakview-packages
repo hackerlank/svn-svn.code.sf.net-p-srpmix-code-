@@ -114,7 +114,7 @@ function create_packages_weakview
 	fi
     fi
 	
-    rootdir=${SRPMIX_ROOT_DIR}
+    rootdir=${SRPMIX_USR_DIR}
     sourcesdir=${rootdir}/sources
     packagesdir=${rootdir}/packages
 
