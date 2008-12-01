@@ -22,10 +22,10 @@ function try_source
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-db --help|-h"
-    echo "  srpmix-db --install|-i [--quite|-q] SWRF..."
-    echo "  srpmix-db --erase|-d [--quite|-q] SWRF..."
-    echo "  srpmix-db --list-packages"
+    echo "  srpmix-db -h|--help"
+    echo "  srpmix-db -i|--install [--quite|-q] SWRF..."
+    echo "  srpmix-db -e|--erase|-d [--quite|-q] SWRF..."
+    echo "  srpmix-db -l|--list"
     echo
 }
 
@@ -51,9 +51,9 @@ function parse_arguments
 		fi
 		shift 1
 		;;
-	    --list-packages)
+	    -l|--list)
 		if test -z "$COMMAND"; then
-		    COMMAND=list-packages
+		    COMMAND=list
 		else
 		    echo "COMMAND $COMMAND is already set" 1>&2
 		    print_usage 1>&2
@@ -85,7 +85,7 @@ function parse_arguments
 	RPM_PACKAGES="$@"
     elif test x"$COMMAND" = xerase; then
 	RPM_PACKAGES="$@"
-    elif test x"$COMMAND" = xlist-packages; then
+    elif test x"$COMMAND" = xlist; then
 	:
     else
 	:
@@ -148,7 +148,7 @@ function do_install
     
 }
 
-function do_list-packages
+function do_list
 {
     ls ${SRPMIX_DB_DIR}/[a-zA-Z0-9]
 }

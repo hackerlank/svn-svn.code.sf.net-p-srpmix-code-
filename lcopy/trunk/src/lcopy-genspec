@@ -41,7 +41,6 @@ OUTPUT_DIR=.
 source libsrpmix.sh
 
 
-
 function print_usage
 {
     echo "Usage: "
@@ -314,17 +313,15 @@ function link_generate
 
     local date
     local rootdir
-    local lcopy_rootdir
     local sourcesdir
     local branch_suffix
 
     date=$(date "+%a %b %e %Y")
 
 
-    rootdir=${SRPMIX_ROOT_DIR}
+    rootdir=${SRPMIX_VAR_DIR}
     
-    lcopy_rootdir=${rootdir}/lcopy
-    sourcesdir=${rootdir}/sources
+    sourcesdir=${SRPMIX_SOURCES_DIR}
 
     if test -n "${BRANCH}"; then
 	branch_suffix="--${BRANCH}"
