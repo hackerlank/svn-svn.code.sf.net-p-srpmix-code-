@@ -189,7 +189,7 @@ rm -rf \$RPM_BUILD_ROOT
 %post
 srpmix-db --install ${SRPMIX_SWRFS_DIR}/`basename $target_swrf`
 
-%postun
+%preun
 srpmix-db --erase ${enveloped_name}
 
 %files
