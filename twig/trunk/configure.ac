@@ -19,5 +19,6 @@ AC_OUTPUT([
            misc/specs/Makefile
            misc/specs/twig.spec
            src/Makefile
+	   doc/Makefile
           ])
 

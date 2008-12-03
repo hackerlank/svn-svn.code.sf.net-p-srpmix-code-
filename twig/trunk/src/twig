@@ -1,7 +1,7 @@
 #!/bin/bash
 ########################################################################
 #
-# twig: Make a temporary branch for a package
+# twig: Manage a temporary branch for a package
 #
 # Copyright (C) 2008 Masatake YAMATO
 #
@@ -26,7 +26,7 @@
 # verify
 # reduce/fold
 
-twig_commands="fork info diff specdiff pedigree record build help addlog"
+twig_commands="fork info diff specdiff pedigree record build addlog help"
 
 function twig_p
 {
@@ -444,7 +444,7 @@ function twig_addlog
 
 function twig_addlog_help
 {
-    echo "	" addlog MESSAGE [USER] [MAIL_ADDRESS]
+    echo "    " addlog MESSAGE [USER] [MAIL_ADDRESS]
 }
 
 #
