@@ -82,7 +82,7 @@ function parse_arguments
 		    ;;
 	    esac
 	else
-	    TARGET_SRPM="${TMPDIR}/${TARGET_SRPM}"
+	    TARGET_SRPM="${TARGET_SRPM}"
 	fi
     fi
 }
