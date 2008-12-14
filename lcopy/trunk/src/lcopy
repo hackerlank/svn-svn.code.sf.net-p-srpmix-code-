@@ -20,11 +20,11 @@ RELEASE=0
 NO_SPEC=
 ONLY_SPEC=
 
-SUPPORTED_VCSs="cvs git git-clone"
+SUPPORTED_VCSs="cvs git git-clone svn hg"
 function print_usage
 {
     echo "Usage: "
-    echo "lcopy [--release] [--no-spec|--only-spec] vcs commands..."
+    echo "lcopy [--release=RELEASE] [--branch=BRANCH] [--no-spec|--only-spec] vcs commands..."
     echo ""
     echo "lcopy [--help|-h]"
     echo ""
@@ -70,6 +70,10 @@ function main
 		RELEASE=${1/--release/}
 		shift 1
 		;;
+	    --branch)
+		BRANCH=${1/--branch/}
+		shift 1
+		;;
 	    --no-spec)
 		NO_SPEC=1
 		shift 1
@@ -105,15 +109,65 @@ function main
 		sudo -H -u lcopy tee -a ${LOG_DIR}/lcopy-checkout.es > /dev/null
 	    if test -z "$NO_SPEC"; then
 		:
-# TODO: plugin		
-#		cd ${PACKAGE} &&
-#		lcopy_run_plugins ${LOG_DIR}/lcopy-refresh.es \
-#		    "${VCS}" "$(pwd)" "${tstamp}"
+# TODO: plugin directory
+		cd ${PACKAGE} &&
+		lcopy_run_plugins ${LOG_DIR}/lcopy-refresh.es \
+		    "${VCS}" "$(pwd)" "${tstamp}"
 	    fi
 	fi
     fi
 }
 
+
+#
+# svn
+#
+function svn_parse
+{
+    VCS=$1
+    CMD=$2
+    REPO=$3
+    PACKAGE=$4
+    
+    if test "x$VCS" != xsvn; then
+	echo "Wrong vcs: $VCS" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test \( "x$CMD" != "xcheckout" \) -a \
+	    \( "x$CMD" != "xco"    \); then
+	echo "broken svn command line: $@" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if echo "$REPO" | grep -E -e "^http[s]?://" > /dev/null 2>&1; then
+	:
+    else
+	echo "unknown repository specification: $REPO" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+    
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi    
+}
+
+function svn_print_usage
+{
+    echo svn "checkout|co" REPOS PACKAGEDIR
+    echo "REPOS => http://... or https://..."
+}
 
 #
 # git
@@ -144,7 +198,7 @@ function git_parse
 
     if test \( -z "$CMD"          \) -a    \
             \( "$CMD" != clone \) ; then
-	echo "broken cvs command line: $@" 2>&1
+	echo "broken git command line: $@" 2>&1
 	print_usage 2>&1
 	exit 1
     fi
@@ -173,6 +227,62 @@ function git_parse
 function git_print_usage
 {
     echo git clone REPOS PACKAGEDIR
+}
+
+#
+# hg
+#
+function hg_parse
+{
+    VCS=$1
+    CMD=$2
+    REPO=$3
+    PACKAGE=$4
+
+    if test "x$VCS" != xhg; then
+	echo "wrong vcs: $VCS" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test \( -z "$CMD"          \) -a    \
+            \( "$CMD" != clone \) ; then
+	echo "broken hg command line: $@" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if echo "$REPO" | grep -E -e "^http[s]?://" > /dev/null 2>&1; then
+	:
+    else
+	echo "unknown repository specification: $REPO" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+ 
+# TODO
+#    if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
+#	echo "broken repo specification: $REPO" 2>&1
+#	print_usage 2>&1
+#	exit 1
+#    fi
+
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+}
+
+function hg_print_usage
+{
+    echo hg clone REPOS PACKAGEDIR
 }
 
 #

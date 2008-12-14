@@ -38,7 +38,12 @@ OUTPUT_DIR=.
 
 
 
-source libsrpmix.sh
+if source libsrpmix.sh; then
+    :
+else
+    echo "Cannot find libsrpmix.sh" 1>&2
+    exit 1
+fi
 
 
 function print_usage
@@ -202,7 +207,7 @@ function subscription_generate
 
     vcs_pkg="$(vcs_to_vcs_pkg $VCS)"
     cmdline=$(make_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "$BRANCH" "$MODULE")
-    date=$(date "+%a %b %e %Y")
+    date=$(LANG=C date "+%a %b %e %Y")
 
     cat >"${OUTPUT_DIR}/$(make_pb_name $PACKAGE $BRANCH)-lcopy-subscription.spec" <<EOF
 %define lcopy_x_pkg $PACKAGE
@@ -315,8 +320,9 @@ function link_generate
     local rootdir
     local sourcesdir
     local branch_suffix
+    local link_name
 
-    date=$(date "+%a %b %e %Y")
+    date=$(LANG=C date "+%a %b %e %Y")
 
 
     rootdir=${SRPMIX_VAR_DIR}
@@ -325,10 +331,12 @@ function link_generate
 
     if test -n "${BRANCH}"; then
 	branch_suffix="--${BRANCH}"
+	link_name="${BRANCH}"
     else
 	branch_suffix=""
+	link_name=CURRENT
     fi
-
+    
     cat >"${OUTPUT_DIR}/$(make_pb_name $PACKAGE $BRANCH)-lcopy-link.spec" <<EOF
 Summary: A link from ${PACKAGE} srpmix sources directory to $(make_pb_name $PACKAGE $BRANCH) locpy directory
 Name: $(make_pb_name $PACKAGE $BRANCH)-lcopy-link
@@ -351,15 +359,10 @@ builddistdir=%{_builddir}/%{name}
 rm -rf \$builddistdir
 
 %build
-linkto=../../../lcopy/sources/$(make_pb_name $PACKAGE $BRANCH)
+linkto=../../../../lcopy/sources/$(make_pb_name $PACKAGE $BRANCH)
 builddistdir=%{_builddir}/%{name}$sourcesdir/$(srpmix_srchash "$PACKAGE")/$PACKAGE
 mkdir -p \${builddistdir}
-
-if test -n "$BRANCH"; then
-   ln -sf \$linkto \${builddistdir}/\%"$BRANCH"
-else
-   ln -sf \$linkto \${builddistdir}/\%CURRENT
-fi
+ln -sf \$linkto \${builddistdir}/\%${link_name}
 
 %install
 builddistdir=%{_builddir}/%{name}$sourcesdir/$(srpmix_srchash "$PACKAGE")/$PACKAGE
@@ -375,7 +378,7 @@ rm -rf \$RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-/
+$sourcesdir/$(srpmix_srchash "$PACKAGE")/$PACKAGE/*
 
 %changelog
 * $date lcopy genspec <yamato@redhat.com> - lcopy-link
@@ -439,7 +442,7 @@ function hg_make_checkout_cmdline
     local package=$2
     local branch=$3
     
-    echo git clone "$repo" $(make_pb_name "${package}" "${branch}")
+    echo hg clone "$repo" $(make_pb_name "${package}" "${branch}")
 }
 function hg_to_pkg
 {
