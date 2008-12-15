@@ -507,6 +507,21 @@ function spec_file_hack
 	${NULL} 
 }
 
+function make_targets
+{
+    local current=`rpm --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'`
+    local targets=${current}
+    
+    for x in i386 i686 x86_64 ia64 ppc; do
+	if test "$x" = "$current"; then
+	    :
+	else
+	    targets="${targets} $x"
+	fi
+    done
+    echo $targets
+}
+
 function srpm_deploy
 {
     local rootdir=$1
@@ -557,7 +572,7 @@ function srpm_deploy
 
     
     if test "x${TARGET}" = x; then
-	targets="i386 i686 x86_64 ia64 ppc"
+	targets=$(make_targets)
     else
 	targets="${TARGET}"
     fi
