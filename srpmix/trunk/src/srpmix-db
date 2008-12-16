@@ -23,8 +23,8 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db -h|--help"
-    echo "  srpmix-db -i|--install [--quite|-q] SWRF..."
-    echo "  srpmix-db -e|--erase|-d [--quite|-q] SWRF..."
+    echo "  srpmix-db [--root=ROOT] [--quite|-q] -i|--install SWRF..."
+    echo "  srpmix-db [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
     echo "  srpmix-db -l|--list"
     echo
 }
@@ -36,6 +36,9 @@ function parse_arguments
 	    -h|--help)
 		print_usage
 		exit 0
+		;;
+	    --root=*)
+                srpmix_reset_var_dir ${1/--root=}
 		;;
 	    -q|--quiet)
 		QUIET=yes

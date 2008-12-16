@@ -208,7 +208,8 @@ function twig_install_stub_patch
 {
     local dir=$1
     local name=$2
-    touch $dir/archives/twig-${name}.patch
+    echo "Hack for \"error: File PATCH is smaller than 13 bytes\"" > $dir/archives/twig-${name}.patch
+    
 }
 
 
@@ -221,9 +222,9 @@ function twig_verify_soruces
 	-d "$1/pre-build"        -a \
 	-d "$1/archives"         -a \
 	"$(cat $1/STATUS)" = "0" &&
-    [[	"$(cat $1/SRPMIX)" =~ "3.99.[[:digit:]]" ]]
-
-
+    [[	"$(cat $1/SRPMIX)" =~ "3.99.[[:digit:]]"  || \
+	"$(cat $1/SRPMIX)" =~ "3.100.[[:digit:]]"    \
+    ]]
 }
 
 #
@@ -290,10 +291,16 @@ function twig_record_help
 function twig_record
 {
     local name
+    local size
 
     twig_diff > \#twig.patch\#
     name=$(cat TWIG/name)
     mv \#twig.patch\# archives/twig-${name}.patch
+
+    if test ! -s archives/twig-${name}.patch; then
+	echo "Hack for \"error: File PATCH is smaller than 13 bytes\"" \
+	    > archives/twig-${name}.patch
+    fi
 }
 
 #

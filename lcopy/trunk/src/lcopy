@@ -20,7 +20,11 @@ RELEASE=0
 NO_SPEC=
 ONLY_SPEC=
 
+<<<<<<< .mine
+SUPPORTED_VCSs="cvs svn git git-clone"
+=======
 SUPPORTED_VCSs="cvs git git-clone svn hg"
+>>>>>>> .r105
 function print_usage
 {
     echo "Usage: "
@@ -180,7 +184,7 @@ function git-clone_parse
 
 function git-clone_print_usage
 {
-    git_print_usage
+    echo git-clone REPOS PACKAGEDIR
 }
 
 function git_parse
