@@ -28,12 +28,14 @@ SRPMIX_PLUGIN_DIR="${SRPMIX_USR_DIR}/plugins"
 
 SRPMIX_VAR_DIR=
 SRPMIX_SOURCES_DIR=
+SRPMIX_SOURCES_RDIR=sources
 SRPMIX_DB_DIR=
+SRPMIX_DB_RDIR=db
 function srpmix_reset_var_dir
 {
     SRPMIX_VAR_DIR=$1
-    SRPMIX_SOURCES_DIR="${SRPMIX_VAR_DIR}/sources"
-    SRPMIX_DB_DIR="${SRPMIX_VAR_DIR}/db"
+    SRPMIX_SOURCES_DIR="${SRPMIX_VAR_DIR}/${SRPMIX_SOURCES_RDIR}"
+    SRPMIX_DB_DIR="${SRPMIX_VAR_DIR}/${SRPMIX_DB_RDIR}"
 }
 srpmix_reset_var_dir /var/lib/srpmix
 
@@ -87,6 +89,18 @@ function srpmix_srcdir
 
     local pkg_hash=${package:0:1}
     local pkg_root="${SRPMIX_SOURCES_DIR}"/"${pkg_hash}"/"$package"
+    
+    echo "${pkg_root}"/"$version-$release"
+}
+
+function srpmix_installdir
+{
+    local package=$1
+    local version=$2
+    local release=$3
+
+    local pkg_hash=${package:0:1}
+    local pkg_root=${SRPMIX_SOURCES_RDIR}/"${pkg_hash}"/"$package"
     
     echo "${pkg_root}"/"$version-$release"
 }
