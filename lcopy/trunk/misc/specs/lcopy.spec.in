@@ -1,10 +1,11 @@
 Summary: Scripts to update local copies gettting from vcs repositories 
 Name: lcopy
 Version: @PACKAGE_VERSION@
-Release: 4
+Release: 0
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 #Requires: 
 Prereq: /usr/sbin/useradd
+Requires: cvs subversion git mercurial
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root

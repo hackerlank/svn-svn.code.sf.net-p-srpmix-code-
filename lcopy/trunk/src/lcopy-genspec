@@ -169,33 +169,6 @@ function generate
     "$SPEC_TYPE"_generate
 }
 
-function make_pb_name
-{
-    local package
-    local branch
-
-    package=$1
-    branch=$2
-
-    if test -z "$branch"; then
-	echo "$package"
-    else
-	echo "${package}--${branch}"
-    fi
-}
-
-function make_checkout_cmdline
-{
-    local vcs
-
-    vcs=$1
-
-    shift 1
-    "${vcs}_make_checkout_cmdline" "$@"
-    
-}
-
-
 #
 # Subscription
 #
@@ -206,10 +179,10 @@ function subscription_generate
     local date
 
     vcs_pkg="$(vcs_to_vcs_pkg $VCS)"
-    cmdline=$(make_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "$BRANCH" "$MODULE")
+    cmdline=$(lcopy_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "-" "$MODULE")
     date=$(LANG=C date "+%a %b %e %Y")
 
-    cat >"${OUTPUT_DIR}/$(make_pb_name $PACKAGE $BRANCH)-lcopy-subscription.spec" <<EOF
+    cat >"${OUTPUT_DIR}/$(lcopy_make_pb_name $PACKAGE $BRANCH)-lcopy-subscription.spec" <<EOF
 %define lcopy_x_pkg $PACKAGE
 %define lcopy_x_branch $BRANCH
 %define lcopy_x_vcs $VCS
@@ -256,7 +229,7 @@ rm -rf \$RPM_BUILD_ROOT
 
 %post
 cd %{lcopy_srcdir}
-test -d %{lcopy_x_pkg}%{lcopy_branch_suffix} || lcopy --no-spec %{lcopy_x_cmdline}
+test -d %{lcopy_x_pkg}%{lcopy_branch_suffix} || lcopy --branch=$BRANCH --no-spec %{lcopy_x_cmdline}
 
 %postun
 rm -rf %{lcopy_srcdir}/%{lcopy_x_pkg}%{lcopy_branch_suffix}
@@ -337,9 +310,9 @@ function link_generate
 	link_name=CURRENT
     fi
     
-    cat >"${OUTPUT_DIR}/$(make_pb_name $PACKAGE $BRANCH)-lcopy-link.spec" <<EOF
-Summary: A link from ${PACKAGE} srpmix sources directory to $(make_pb_name $PACKAGE $BRANCH) locpy directory
-Name: $(make_pb_name $PACKAGE $BRANCH)-lcopy-link
+    cat >"${OUTPUT_DIR}/$(lcopy_make_pb_name $PACKAGE $BRANCH)-lcopy-link.spec" <<EOF
+Summary: A link from ${PACKAGE} srpmix sources directory to $(lcopy_make_pb_name $PACKAGE $BRANCH) locpy directory
+Name: $(lcopy_make_pb_name $PACKAGE $BRANCH)-lcopy-link
 Version: $LCOPY_VERSION
 Release: $RELEASE
 License: GPL
@@ -352,14 +325,14 @@ Autoreq: 0
 
 %description
 A link from ${PACKAGE} srpmix sources directory to 
-$(make_pb_name $PACKAGE $BRANCH) locpy directory.
+$(lcopy_make_pb_name $PACKAGE $BRANCH) locpy directory.
 
 %prep
 builddistdir=%{_builddir}/%{name}
 rm -rf \$builddistdir
 
 %build
-linkto=../../../../lcopy/sources/$(make_pb_name $PACKAGE $BRANCH)
+linkto=../../../../lcopy/sources/$(lcopy_make_pb_name $PACKAGE $BRANCH)
 builddistdir=%{_builddir}/%{name}$sourcesdir/$(srpmix_srchash "$PACKAGE")/$PACKAGE
 mkdir -p \${builddistdir}
 ln -sf \$linkto \${builddistdir}/\%${link_name}
@@ -400,16 +373,6 @@ function link_verify_arguments
 #
 # Subversion
 #
-function svn_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    
-    echo svn checkout "$repo" $(make_pb_name "${package}" "${branch}")
-}
 function svn_to_pkg
 {
     echo subversion
@@ -418,15 +381,6 @@ function svn_to_pkg
 #
 # Git
 #
-function git_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    echo git clone "$repo" $(make_pb_name "${package}" "${branch}")
-}
 function git_to_pkg
 {
     echo git
@@ -435,15 +389,6 @@ function git_to_pkg
 #
 # hg
 #
-function hg_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    echo hg clone "$repo" $(make_pb_name "${package}" "${branch}")
-}
 function hg_to_pkg
 {
     echo mercurial
@@ -452,17 +397,6 @@ function hg_to_pkg
 #
 # cvs
 #
-function cvs_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    local module=$4
-    
-    echo cvs -d${repo} checkout -P -d $(make_pb_name "${package}" "${branch}") ${module} 
-    
-}
 function cvs_to_pkg
 {
     echo cvs
@@ -475,4 +409,5 @@ function main
     generate
 }
 
+source liblcopy.sh
 main "$@"

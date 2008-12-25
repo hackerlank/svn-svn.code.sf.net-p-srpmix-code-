@@ -76,6 +76,78 @@ function lcopy_is_svn
 }
 
 
+function lcopy_checkout_cmdline
+{
+    local vcs
+
+    vcs=$1
+
+    shift 1
+    "${vcs}_make_checkout_cmdline" "$@"
+    
+}
+
+
+function lcopy_make_pb_name
+{
+    local package
+    local branch
+
+    package=$1
+    branch=$2
+
+    if test -z "$branch"; then
+	echo "$package"
+    elif test "$branch" = "-"; then
+	echo "$package"
+    else
+	echo "${package}--${branch}"
+    fi
+}
+
+function svn_make_checkout_cmdline
+{
+
+    local repo=$1
+    local package=$2
+    local branch=$3
+    
+    
+    echo svn checkout "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
+}
+
+function git_make_checkout_cmdline
+{
+
+    local repo=$1
+    local package=$2
+    local branch=$3
+    
+    echo git clone "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
+}
+
+function hg_make_checkout_cmdline
+{
+
+    local repo=$1
+    local package=$2
+    local branch=$3
+    
+    echo hg clone "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
+}
+
+function cvs_make_checkout_cmdline
+{
+
+    local repo=$1
+    local package=$2
+    local branch=$3
+    local module=$4
+    
+    echo cvs -d${repo} checkout -P -d $(lcopy_make_pb_name "${package}" "${branch}") ${module} 
+    
+}
+
 ########################################################################
 #
 function es_echo_n
