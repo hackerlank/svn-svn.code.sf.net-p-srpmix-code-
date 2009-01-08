@@ -563,7 +563,8 @@ function srpm_deploy
 
     if test ${CREATE_ROOTDIR} = yes; then
 	if test -e "${rootdir}/${SPECDIR}/${xspec_file}"; then
-	    chmod -R u+w "${rootdir}/${SPECDIR}/${xspec_file}"
+	    chmod a+r "${rootdir}/${SPECDIR}/${xspec_file}"
+	    chmod u+w "${rootdir}/${SPECDIR}/${xspec_file}"
 	fi
     fi
     srpm_rearrange_spec "${rootdir}" \
@@ -620,6 +621,9 @@ function srpm_install
 
     if test ${CREATE_ROOTDIR} = yes; then
 	if test -e "${rootdir}/${SOURCEDIR}/${srpm_name}"; then
+	    chmod -R a+r "${rootdir}/${SOURCEDIR}/${srpm_name}"
+	    find "${rootdir}/${SOURCEDIR}/${srpm_name}" -type d -print0 | \
+		xargs -0 -e chmod a+x
 	    chmod -R u+w "${rootdir}/${SOURCEDIR}/${srpm_name}"
 	fi
     fi
@@ -663,11 +667,13 @@ function srpm_save_spec
 
     if test ${CREATE_ROOTDIR} = yes; then
 	if test -e "${rootdir}/${xspec_file}"; then
+	    chmod a+r "${rootdir}/${xspec_file}"
 	    chmod u+w "${rootdir}/${xspec_file}"
 	fi
     fi
 
-    cp "${rootdir}/SPECS/${spec_file}" \
+    chmod a+r "${rootdir}/SPECS/${spec_file}"
+    cat "${rootdir}/SPECS/${spec_file}" > \
 	"${rootdir}/${xspec_file}"
 }
 
@@ -696,10 +702,12 @@ function srpm_build
 	mkdir "${rootdir}/${BUILDDIR}/${build_name}"
     fi
 
-    LANG=C rpmbuild --target=${arch} -bp --nodeps "${rootdir}/${SPECDIR}/${spec_file}"
+    LANG=C rpmbuild --define "_default_patch_fuzz 2" --target=${arch} -bp --nodeps "${rootdir}/${SPECDIR}/${spec_file}"
     status=$?
     echo ${status} > "${rootdir}/STATUS"
     chmod -R a+r "${rootdir}/${BUILDDIR}/${build_name}"
+    find "${rootdir}/${BUILDDIR}/${build_name}" -type d -print0 | \
+	xargs -0 -e chmod a+x
 
     return $status
 }
@@ -756,8 +764,9 @@ function srpm_freeze
 
     fi
 
-    chmod a+r "${rootdir}/${BUILDDIR}/${build_name}"
+    chmod a-w "${rootdir}/${BUILDDIR}/${build_name}"
     verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
+#    ls -lR "${rootdir}/${BUILDDIR}/${build_name}"
 
     verbose map                         \
 	--srpm-name=\"${srpm_name}\"    \

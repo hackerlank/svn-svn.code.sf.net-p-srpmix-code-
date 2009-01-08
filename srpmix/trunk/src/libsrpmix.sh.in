@@ -144,6 +144,12 @@ function srpmix_distmap_to_pvr
     ${GOSH} -e "${srpmix_distmap_to_pvr_script}"
 }
 
+function srpmix_can_ln
+{
+    test $(stat --format="%D" $1) = $(stat --format="%D" $2)
+}
+
+
 ########################################################################
 #
 # es_time

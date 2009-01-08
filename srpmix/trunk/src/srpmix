@@ -82,7 +82,11 @@ function parse_arguments
 		    ;;
 	    esac
 	else
-	    ln ${TARGET_SRPM} ${TMPDIR}/$(basename ${TARGET_SRPM})
+	    if srpmix_can_ln "${TARGET_SRPM}" ${TMPDIR}; then
+		ln ${TARGET_SRPM} ${TMPDIR}/$(basename ${TARGET_SRPM})
+	    else
+		cp ${TARGET_SRPM} ${TMPDIR}/$(basename ${TARGET_SRPM})
+	    fi
 	    TARGET_SRPM=${TMPDIR}/$(basename ${TARGET_SRPM})
 	fi
     fi

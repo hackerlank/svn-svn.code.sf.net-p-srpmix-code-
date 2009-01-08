@@ -138,7 +138,7 @@ function do_install
 	if test x"$QUIET" != xyes; then
 	    echo "($count/$max) Installing...$(basename $package)"
 	fi
-	rpm --nodeps -Uvh --dbpath "$db" --relocate /="$SRPMIX_VAR_DIR" --root "$SRPMIX_VAR_DIR" "$package"
+	rpm --nodeps -Uvh --dbpath "$SRPMIX_VAR_DIR"/"$db" --relocate /="$SRPMIX_VAR_DIR" "$package"
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $(rpm -qpl "$package"  | head -1))
 	if test "x$pkgdir" != "x"; then
 	    if test x"$QUIET" != xyes; then
@@ -180,7 +180,7 @@ function do_erase
 	    echo "($count/$max) Deleting...$package"
 	fi
 	#
-	if rpm --nodeps -e -dbpath "$db" --root "$SRPMIX_VAR_DIR" "$package"; then
+	if rpm --nodeps -e -dbpath "$SRPMIX_VAR_DIR"/"$db" "$package"; then
 	    rm -rf "$db"
 	else
 	    :
