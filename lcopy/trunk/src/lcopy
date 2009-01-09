@@ -24,13 +24,17 @@ SUPPORTED_VCSs="cvs git git-clone svn hg"
 function print_usage
 {
     echo "Usage: "
-    echo "lcopy [--release=RELEASE] [--branch=BRANCH] [--no-spec|--only-spec] vcs commands..."
+    echo "lcopy [--release=RELEASE] [--branch=BRANCH] [--no-spec|--only-spec|] vcs commands..."
     echo ""
     echo "lcopy [--help|-h]"
     echo ""
     echo "Expected commands line for each vcs:"
     for vcs in ${SUPPORTED_VCSs}; do
+
+	echo ${vcs}:
 	${vcs}_print_usage
+	echo
+
     done
 }
 
@@ -171,8 +175,8 @@ function svn_parse
 
 function svn_print_usage
 {
-    echo svn "checkout|co" REPOS PACKAGEDIR
-    echo "	REPOS => http://... or https://..."
+    echo "	" svn "checkout|co" REPOS PACKAGEDIR
+    echo "	" "REPOS => http://... or https://..."
 }
 
 #
@@ -186,7 +190,7 @@ function git-clone_parse
 
 function git-clone_print_usage
 {
-    echo git-clone REPOS PACKAGEDIR
+    echo "	" git-clone REPOS PACKAGEDIR
 }
 
 function git_parse
@@ -232,7 +236,7 @@ function git_parse
 
 function git_print_usage
 {
-    echo git clone REPOS PACKAGEDIR
+    echo "	" git clone REPOS PACKAGEDIR
 }
 
 #
@@ -288,7 +292,7 @@ function hg_parse
 
 function hg_print_usage
 {
-    echo hg clone REPOS PACKAGEDIR
+    echo "	" hg clone REPOS PACKAGEDIR
 }
 
 #
@@ -362,8 +366,8 @@ function cvs_parse
 
 function cvs_print_usage
 {
-    echo cvs -d:pserver:USER:PASSWD@HOST checkout -d PACKAGEDIR MODULE 
-    echo '(adds -P automatically)'
+    echo "	" cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' -d PACKAGEDIR MODULE 
+    echo "	" '(adds -P automatically)'
 }
 
 function do_checkout
