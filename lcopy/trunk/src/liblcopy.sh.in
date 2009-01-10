@@ -21,7 +21,7 @@
 #
 ########################################################################
 
-LCOPY_VERSION=0.0.11
+LCOPY_VERSION=@VERSION@
 
 
 function lcopy_is_arch
