@@ -1,5 +1,7 @@
+bin_SCRIPTS=liblcopy.sh
+CLEANFILES = $(bin_SCRIPTS)
+
 dist_bin_SCRIPTS =     \
-        liblcopy.sh    \
 	\
 	lcopy          \
 	\

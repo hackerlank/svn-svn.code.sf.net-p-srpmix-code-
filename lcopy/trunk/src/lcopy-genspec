@@ -24,7 +24,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
-LCOPY_VERSION=0.0.9
 SUPPORTED_VCSs="svn git cvs hg"
 PACKAGE=
 BRANCH=
@@ -44,6 +43,14 @@ else
     echo "Cannot find libsrpmix.sh" 1>&2
     exit 1
 fi
+
+if source liblcopy.sh; then
+    :
+else
+    echo "Cannot find liblcopy.sh" 1>&2
+    exit 1
+fi
+
 
 
 function print_usage

@@ -1,5 +1,5 @@
 m4_define([pkg_name],    [lcopy])
-m4_define([pkg_version], [0.0.10])
+m4_define([pkg_version], [0.0.11])
 
 
 
@@ -18,6 +18,7 @@ AC_OUTPUT([
            misc/specs/Makefile
            misc/specs/lcopy.spec
            src/Makefile
+           src/liblcopy.sh
            etc/Makefile
            doc/Makefile
           ])
