@@ -148,6 +148,20 @@ function cvs_make_checkout_cmdline
     
 }
 
+function lcopy_is_member
+{
+    local target=$1
+    shift 1
+
+    for v in "$@"; do
+	if test "$target" = "$v"; then
+	    return 0
+	fi
+    done
+    
+    return 1
+}
+
 ########################################################################
 #
 function es_echo_n

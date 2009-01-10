@@ -61,10 +61,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_sysconfdir}/lcopy-refresh.d/default.lcopy-refresh
 
-%attr(0755, lcopy, lcopy) /var/lib/lcopy
-%attr(0755, lcopy, lcopy) /var/lib/lcopy/sources
-%attr(0755, lcopy, lcopy) /var/lib/lcopy/log
-%attr(0755, lcopy, lcopy) /var/lib/lcopy/specs
+%attr(0755, lcopy, lcopy) %dir /var/lib/lcopy
+%attr(0755, lcopy, lcopy) %dir /var/lib/lcopy/sources
+%attr(0755, lcopy, lcopy) %dir /var/lib/lcopy/log
+%attr(0755, lcopy, lcopy) %dir /var/lib/lcopy/specs
 
 
 %changelog

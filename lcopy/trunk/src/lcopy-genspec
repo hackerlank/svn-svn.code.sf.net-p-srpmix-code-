@@ -72,20 +72,6 @@ function abort
     exit 1
 }
 
-function is_member
-{
-    local target=$1
-    shift 1
-
-    for v in "$@"; do
-	if test "$target" = "$v"; then
-	    return 0
-	fi
-    done
-    
-    return 1
-}
-
 function parse_arguments
 {
     while [ $# -gt 0 ]; do
@@ -261,7 +247,7 @@ function subscription_verify_arguments
 	abort
     fi
 
-    if ! is_member "$VCS" $SUPPORTED_VCSs; then
+    if ! lcopy_is_member "$VCS" $SUPPORTED_VCSs; then
 	echo "Unsupported vcs: $VCS" 1>&2
 	print_usage 1>&2
 	abort

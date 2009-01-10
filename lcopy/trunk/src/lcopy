@@ -98,7 +98,18 @@ function main
 	exit 1
     fi
 
-    ${1}_parse "$@"
+    if ! lcopy_is_member "${1}" $SUPPORTED_VCSs; then
+	echo "unknown vcs: ${1}" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if ! ${1}_parse "$@"; then
+	echo "failed in the command line for ${1}" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
     if test -z "$NO_SPEC"; then
 	make_specs
     fi
@@ -171,6 +182,8 @@ function svn_parse
 	print_usage 2>&1
 	exit 1
     fi    
+
+    return 0
 }
 
 function svn_print_usage
@@ -232,6 +245,8 @@ function git_parse
 	print_usage 2>&1
 	exit 1
     fi
+
+    return 0
 }
 
 function git_print_usage
@@ -288,6 +303,8 @@ function hg_parse
 	print_usage 2>&1
 	exit 1
     fi
+
+    return 0
 }
 
 function hg_print_usage
@@ -362,6 +379,8 @@ function cvs_parse
 	print_usage 2>&1
 	exit 1
     fi
+
+    return 0
 }
 
 function cvs_print_usage
