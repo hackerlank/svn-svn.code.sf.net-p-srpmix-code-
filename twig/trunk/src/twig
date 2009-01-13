@@ -437,7 +437,7 @@ function twig_addlog
 
 	{
 	    head -${changelog_line} ${spec}
-	    date +"* %a %b %e %Y ${user} <${maddr}> $(cat TWIG/name)"
+	    LANG=C date +"* %a %b %e %Y ${user} <${maddr}> $(cat TWIG/name)"
 	    echo "- ${message}"
 	    echo
 	    tail -n +$(( ${changelog_line} + 1 )) ${spec}
