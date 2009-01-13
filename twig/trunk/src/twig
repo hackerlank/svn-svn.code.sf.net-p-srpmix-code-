@@ -208,8 +208,10 @@ function twig_install_stub_patch
 {
     local dir=$1
     local name=$2
-    echo "Hack for \"error: File PATCH is smaller than 13 bytes\"" > $dir/archives/twig-${name}.patch
-    
+    rm $dir/archives/twig-${name}.patch
+    touch $dir/archives/twig-${name}.patch
+#    echo "Hack for \"error: File PATCH is smaller than 13 bytes\"" \
+          > $dir/archives/twig-${name}.patch
 }
 
 
