@@ -202,6 +202,7 @@ License: GPL
 Group: Development/Tools
 URL: http://srpmix.org
 Requires: %{lcopy_x_vcs_pkg}
+Requires: lcopy
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Buildarch: noarch
 Autoreq: 0
