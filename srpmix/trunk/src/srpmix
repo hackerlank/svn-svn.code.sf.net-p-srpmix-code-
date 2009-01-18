@@ -101,11 +101,28 @@ function try_source
     fi
 }
 
+function is_memeber
+{
+    target="$1"
+    shift
+
+    for x in "$@"; do
+	if test x"$target" =  x"$x"; then
+	    return 0
+	fi
+    done
+
+    return 1
+}
+
 function main
 {
     if test "`whoami`" != "root"; then
 	srpmix_abort "You must be root to run this program"
     fi
+
+    all=`bash ~/workspace/srpmix/srpmix/trunk/src/srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
+
 
     TMPDIR=`mktemp -d`
     trap "/bin/rm -rf $TMPDIR" 0    
@@ -128,6 +145,12 @@ function main
 
     for srpm in $TARGET_SRPM; do
 	pvr=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
+
+	if is_memeber "$pvr" $all; then
+	    echo "*** Source code for $pvr is alread installed ***" 1>&2
+	    continue
+	fi
+
 	srpmix-wrap $WRAP_OPTS $srpm
 	rpmbuild --define "_rpmdir $TMPDIR/RPMS"     \
 	         --define "_srcrpmdir $TMPDIR/SRPMS" \
@@ -135,7 +158,11 @@ function main
 	         --rebuild -ba $pvr-srpmix-*.swrf.src.rpm \
         || exit 2
     done
-    
+
+    if test ! -d RPMS/noarch; then
+	exit 1
+    fi
+
     for swrf in `find RPMS/noarch -name '*swrf.noarch.rpm'`; do
 	p=$(rpm -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
 	enveloped_name=$(srpmix_build_enveloped_name "$p")
