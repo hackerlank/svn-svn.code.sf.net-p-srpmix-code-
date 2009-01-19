@@ -15,6 +15,9 @@ for x in /etc/lcopy-refresh.d/*; do
 	    su  \
 		-c "lcopy-refresh --log=${LCOPY_LOG} ${LCOPY_DIR}" \
 		- ${LCOPY_USER} > /dev/null 2>&1
+	    if test -n "${LCOPY_SRC}" -a -n "${LCOPY_DEST}"; then
+		rsync -az "${LCOPY_SRC}" "${LCOPY_DEST}"
+	    fi
 	fi
     fi
 done
