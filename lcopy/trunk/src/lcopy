@@ -125,11 +125,7 @@ function main
 	    if test -z "$NO_SPEC"; then
 		:
 # TODO: plugin directory
-		if test -z "$BRANCH"; then
-		    cd ${PACKAGE}
-		else 
-		    cd ${PACKAGE}--${BRANCH}
-		fi
+		cd $(lcopy_make_pb_name "$PACKAGE" "$BRANCH")
 		if test "$?" = 0; then
 		    lcopy_run_plugins ${LOG_DIR}/lcopy-refresh.es \
 			"${VCS}" "$(pwd)" "${tstamp}"
@@ -383,7 +379,7 @@ function cvs_parse
 	exit 1
     fi
 
-    exit 0
+    return 0
 }
 
 function cvs_print_usage
@@ -401,7 +397,12 @@ function do_checkout
     else
 	branch=$BRANCH
     fi
-    sudo -H -u lcopy $(lcopy_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "$branch" "$MODULE")
+
+    sudo -H -u lcopy mkdir -p $(lcopy_hash ${PACKAGE})/${PACKAGE}
+    (
+	cd $(lcopy_hash ${PACKAGE})/${PACKAGE}
+	sudo -H -u lcopy $(lcopy_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "$branch" "$MODULE")
+    )
 }
 
 function make_specs
