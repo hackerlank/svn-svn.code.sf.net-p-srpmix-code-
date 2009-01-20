@@ -172,14 +172,12 @@ function subscription_generate
     local date
 
     vcs_pkg="$(vcs_to_vcs_pkg $VCS)"
-
     cmdline=$(lcopy_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "-" "$MODULE")
     date=$(LANG=C date "+%a %b %e %Y")
 
-    cat >"${OUTPUT_DIR}/lcopy-subscription-$PACKAGE--$(lcopy_make_b_name $BRANCH).spec" <<EOF
+    cat >"${OUTPUT_DIR}/$(lcopy_make_pb_name $PACKAGE $BRANCH)-lcopy-subscription.spec" <<EOF
 %define lcopy_x_pkg $PACKAGE
-%define lcopy_x_hash $(lcopy_hash $PACKAGE)
-%define lcopy_x_branch $(lcopy_make_b_name $BRANCH)
+%define lcopy_x_branch $BRANCH
 %define lcopy_x_vcs $VCS
 %define lcopy_x_vcs_pkg $vcs_pkg
 %define lcopy_x_repo $REPO
@@ -197,7 +195,7 @@ function subscription_generate
 
 
 Summary: Subscribing %{lcopy_x_pkg}%{lcopy_branch_doc} source code via %{lcopy_x_vcs}
-Name: lcopy-subscription-%{lcopy_x_pkg}--%{lcopy_branch_suffix}
+Name: %{lcopy_x_pkg}%{lcopy_branch_suffix}-lcopy-subscription
 Version: %{lcopy_version}
 Release: %{lcopy_release}
 License: GPL
@@ -328,7 +326,7 @@ builddistdir=%{_builddir}/%{name}
 rm -rf \$builddistdir
 
 %build
-linkto=../../../../../../lcopy/sources/$(lcopy_make_pb_name $PACKAGE $BRANCH)
+linkto=../../../../lcopy/sources/$(lcopy_make_pb_name $PACKAGE $BRANCH)
 builddistdir=%{_builddir}/%{name}$sourcesdir/$(srpmix_srchash "$PACKAGE")/$PACKAGE
 mkdir -p \${builddistdir}
 ln -sf \$linkto \${builddistdir}/\%${link_name}
