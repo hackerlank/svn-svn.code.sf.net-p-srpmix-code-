@@ -633,9 +633,11 @@
 
 (defface stitch-auto-annotation
   '((((background light)) 
-     (:foreground "gray70" :italic t :underline nil))
+     (:foreground "gray45" :background "gray96"
+		  :italic t :underline nil))
     (((background dark)) 
-     (:foreground "gray30" :italic t :underline nil)))
+     (:foreground "gray30" 
+		  :italic t :underline nil)))
   ""
   :group 'stitch)
 
