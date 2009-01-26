@@ -26,7 +26,7 @@
 ########################################################################
 SUPPORTED_VCSs="svn git cvs hg"
 PACKAGE=
-BRANCH=
+BRANCH=trunk
 REPO=
 MODULE=
 VCS=
@@ -170,13 +170,16 @@ function subscription_generate
     local vcs_pkg
     local cmdline
     local date
+    local phash
 
     vcs_pkg="$(vcs_to_vcs_pkg $VCS)"
     cmdline=$(lcopy_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "-" "$MODULE")
     date=$(LANG=C date "+%a %b %e %Y")
-
+    phash=$(lcopy_package_hash $PACKAGE)
+    
     cat >"${OUTPUT_DIR}/$(lcopy_make_pb_name $PACKAGE $BRANCH)-lcopy-subscription.spec" <<EOF
-%define lcopy_x_pkg $PACKAGE
+%define lcopy_x_pkg   $PACKAGE
+%define lcopy_x_phash $phash
 %define lcopy_x_branch $BRANCH
 %define lcopy_x_vcs $VCS
 %define lcopy_x_vcs_pkg $vcs_pkg
@@ -191,8 +194,6 @@ function subscription_generate
 %define lcopy_release $RELEASE
 %define lcopy_rootdir /var/lib/lcopy
 %define lcopy_srcdir %{lcopy_rootdir}/sources
-
-
 
 Summary: Subscribing %{lcopy_x_pkg}%{lcopy_branch_doc} source code via %{lcopy_x_vcs}
 Name: %{lcopy_x_pkg}%{lcopy_branch_suffix}-lcopy-subscription
@@ -223,10 +224,10 @@ rm -rf \$RPM_BUILD_ROOT
 
 %post
 cd %{lcopy_srcdir}
-test -d %{lcopy_x_pkg}%{lcopy_branch_suffix} || lcopy --branch=$BRANCH --no-spec %{lcopy_x_cmdline}
+test -d %{lcopy_x_phash}/%{lcopy_x_pkg}/%{lcopy_x_branch} || lcopy --branch=$BRANCH --no-spec %{lcopy_x_cmdline}
 
 %postun
-rm -rf %{lcopy_srcdir}/%{lcopy_x_pkg}%{lcopy_branch_suffix}
+rm -rf %{lcopy_srcdir}/%{lcopy_x_phash}/%{lcopy_x_pkg}/%{lcopy_x_branch}
 
 %files
 %defattr(-,root,root,-)
@@ -326,7 +327,7 @@ builddistdir=%{_builddir}/%{name}
 rm -rf \$builddistdir
 
 %build
-linkto=../../../../lcopy/sources/$(lcopy_make_pb_name $PACKAGE $BRANCH)
+linkto=../../../../lcopy/sources/$(lcopy_package_hash $PACKAGE)/$PACKAGE/$BRANCH
 builddistdir=%{_builddir}/%{name}$sourcesdir/$(srpmix_srchash "$PACKAGE")/$PACKAGE
 mkdir -p \${builddistdir}
 ln -sf \$linkto \${builddistdir}/\%${link_name}

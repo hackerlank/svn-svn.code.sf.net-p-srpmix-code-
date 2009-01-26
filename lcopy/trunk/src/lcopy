@@ -11,7 +11,8 @@ LOG_DIR=${ROOT_DIR}/log
 
 
 PACKAGE=
-BRANCH=
+PHASH=
+BRANCH=trunk
 REPO=
 MODULE=
 VCS=
@@ -24,7 +25,7 @@ SUPPORTED_VCSs="cvs git git-clone svn hg"
 function print_usage
 {
     echo "Usage: "
-    echo "lcopy [--release=RELEASE] [--branch=BRANCH] [--no-spec|--only-spec|] vcs commands..."
+    echo "lcopy [--release=RELEASE] [--branch=BRANCH] [--no-spec|--only-spec] vcs commands..."
     echo ""
     echo "lcopy [--help|-h]"
     echo ""
@@ -109,12 +110,15 @@ function main
 	print_usage 2>&1
 	exit 1
     fi
+    PHASH=$(lcopy_package_hash $PACKAGE)
 
     if test -z "$NO_SPEC"; then
 	make_specs
     fi
 
     if test -z "$ONLY_SPEC"; then
+	sudo -H -u lcopy mkdir -p ${PHASH}/${PACKAGE}
+	cd ${PHASH}/${PACKAGE}
 	if do_checkout; then
 	    tstamp=`LANG=C date`
 	    es_print lcopy checkout \
@@ -122,18 +126,14 @@ function main
 		:status ${status}   \
 		:date \""${tstamp}"\" | \
 		sudo -H -u lcopy tee -a ${LOG_DIR}/lcopy-checkout.es > /dev/null
-	    if test -z "$NO_SPEC"; then
+#	    if test -z "$NO_SPEC"; then
 		:
+		cd ${BRANCH}
 # TODO: plugin directory
-		if test -z "$BRANCH"; then
-		    cd ${PACKAGE}
-		else 
-		    cd ${PACKAGE}--${BRANCH}
-		fi
 		if test "$?" = 0; then
 		    lcopy_run_plugins ${LOG_DIR}/lcopy-refresh.es \
 			"${VCS}" "$(pwd)" "${tstamp}"
-		fi
+#		fi
 	    fi
 	fi
     fi
@@ -394,14 +394,7 @@ function cvs_print_usage
 
 function do_checkout
 {
-    local branch
-
-    if test -z $BRANCH; then
-	branch=-
-    else
-	branch=$BRANCH
-    fi
-    sudo -H -u lcopy $(lcopy_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "$branch" "$MODULE")
+    sudo -H -u lcopy $(lcopy_checkout "$VCS" "$REPO" "$BRANCH" "$MODULE")
 }
 
 function make_specs

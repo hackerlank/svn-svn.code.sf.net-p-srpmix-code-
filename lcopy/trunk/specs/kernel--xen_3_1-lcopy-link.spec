@@ -1,6 +1,6 @@
 Summary: A link from kernel srpmix sources directory to kernel--xen_3_1 locpy directory
 Name: kernel--xen_3_1-lcopy-link
-Version: 0.0.11
+Version: 0.0.12
 Release: 0
 License: GPL
 Group: Development/Tools
@@ -19,7 +19,7 @@ builddistdir=%{_builddir}/%{name}
 rm -rf $builddistdir
 
 %build
-linkto=../../../../lcopy/sources/kernel--xen_3_1
+linkto=../../../../lcopy/sources/k/kernel/xen_3_1
 builddistdir=%{_builddir}/%{name}/var/lib/srpmix/sources/k/kernel
 mkdir -p ${builddistdir}
 ln -sf $linkto ${builddistdir}/\%xen_3_1
@@ -41,7 +41,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/srpmix/sources/k/kernel/*
 
 %changelog
-* Fri Jan 16 2009 lcopy genspec <yamato@redhat.com> - lcopy-link
+* Mon Jan 26 2009 lcopy genspec <yamato@redhat.com> - lcopy-link
 - Built automatically.
 
  

@@ -41,7 +41,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/srpmix/sources/s/skk/*
 
 %changelog
-* Sun Jan 11 2009 lcopy genspec <yamato@redhat.com> - lcopy-link
+* Thu Dec 18 2008 lcopy genspec <yamato@redhat.com> - lcopy-link
 - Built automatically.
 
  

@@ -44,7 +44,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %post
 cd %{lcopy_srcdir}
-test -d %{lcopy_x_pkg}%{lcopy_branch_suffix} || lcopy --branch= --no-spec %{lcopy_x_cmdline}
+test -d %{lcopy_x_pkg}%{lcopy_branch_suffix} || lcopy --no-spec %{lcopy_x_cmdline}
 
 %postun
 rm -rf %{lcopy_srcdir}/%{lcopy_x_pkg}%{lcopy_branch_suffix}
@@ -55,7 +55,7 @@ rm -rf %{lcopy_srcdir}/%{lcopy_x_pkg}%{lcopy_branch_suffix}
 
 
 %changelog
-* Sun Jan 11 2009 lcopy genspec <yamato@redhat.com> - lcopy-subscription
+* Thu Dec 18 2008 lcopy genspec <yamato@redhat.com> - lcopy-subscription
 - Built automatically.
 
  

@@ -1,6 +1,6 @@
 Summary: A link from kernel srpmix sources directory to kernel--dlm locpy directory
 Name: kernel--dlm-lcopy-link
-Version: 0.0.9
+Version: 0.0.12
 Release: 0
 License: GPL
 Group: Development/Tools
@@ -19,7 +19,7 @@ builddistdir=%{_builddir}/%{name}
 rm -rf $builddistdir
 
 %build
-linkto=../../../../lcopy/sources/kernel--dlm
+linkto=../../../../lcopy/sources/k/kernel/dlm
 builddistdir=%{_builddir}/%{name}/var/lib/srpmix/sources/k/kernel
 mkdir -p ${builddistdir}
 ln -sf $linkto ${builddistdir}/\%dlm
@@ -41,7 +41,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/srpmix/sources/k/kernel/*
 
 %changelog
-* Mon Dec 22 2008 lcopy genspec <yamato@redhat.com> - lcopy-link
+* Mon Jan 26 2009 lcopy genspec <yamato@redhat.com> - lcopy-link
 - Built automatically.
 
  

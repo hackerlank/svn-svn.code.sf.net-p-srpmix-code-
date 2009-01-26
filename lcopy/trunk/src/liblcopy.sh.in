@@ -79,6 +79,16 @@ function lcopy_is_svn
 }
 
 
+function lcopy_checkout
+{
+    local vcs
+
+    vcs=$1
+
+    shift 1
+    "${vcs}_checkout" "$@"
+}
+
 function lcopy_checkout_cmdline
 {
     local vcs
@@ -90,6 +100,26 @@ function lcopy_checkout_cmdline
     
 }
 
+function lcopy_package_hash
+{
+    echo ${1:0:1}
+}
+
+function lcopy_package_name
+{
+    echo ${1}
+}
+
+function lcopy_branch_name
+{
+    if test -z "$1"; then
+	echo "trunk"
+    elif test "$1" = "-"; then
+	echo "$trunk"
+    else
+	echo "$1"
+    fi
+}
 
 function lcopy_make_pb_name
 {
@@ -119,6 +149,16 @@ function svn_make_checkout_cmdline
     echo svn checkout "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
 }
 
+function svn_checkout
+{
+
+    local repo=$1
+    local dir=$2
+    
+    
+    echo svn checkout "$repo" "$dir"
+}
+
 function git_make_checkout_cmdline
 {
 
@@ -127,6 +167,15 @@ function git_make_checkout_cmdline
     local branch=$3
     
     echo git clone "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
+}
+
+function git_checkout
+{
+
+    local repo=$1
+    local dir=$2
+    
+    echo git clone "$repo" "$dir"
 }
 
 function hg_make_checkout_cmdline
@@ -139,6 +188,15 @@ function hg_make_checkout_cmdline
     echo hg clone "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
 }
 
+function hg_checkout
+{
+
+    local repo=$1
+    local dir=$2
+    
+    echo hg clone "$repo" "$dir"
+}
+
 function cvs_make_checkout_cmdline
 {
 
@@ -149,6 +207,15 @@ function cvs_make_checkout_cmdline
     
     echo cvs -d${repo} checkout -P -d $(lcopy_make_pb_name "${package}" "${branch}") ${module} 
     
+}
+
+function cvs_checkout
+{
+    local repo=$1
+    local dir=$2
+    local module=$3
+
+    echo cvs -d${repo} checkout -P -d ${dir} ${module} 
 }
 
 function lcopy_is_member
