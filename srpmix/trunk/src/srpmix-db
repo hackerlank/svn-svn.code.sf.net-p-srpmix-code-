@@ -181,7 +181,7 @@ function do_erase
 	fi
 	#
 	if rpm --nodeps -e -dbpath "$SRPMIX_VAR_DIR"/"$db" "$package"; then
-	    rm -rf "$db"
+	    rm -rf "$SRPMIX_VAR_DIR/$db"
 	else
 	    :
 	fi

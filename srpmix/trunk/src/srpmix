@@ -4,7 +4,7 @@ TARGET_NAME=
 TARGET_SRPM=
 
 LIBSRPMIX=libsrpmix.sh
-TMPDIR=
+MY_TMPDIR=
 WRAP_OPTS=""
 DEBUG=""
 
@@ -70,9 +70,9 @@ function parse_arguments
 	if test ! -f "${TARGET_SRPM}"; then
 	    case "${TARGET_SRPM}" in
 		http://*|ftp://*)
-		    wget -O ${TMPDIR}/$(basename ${TARGET_SRPM}) ${TARGET_SRPM}
+		    wget -O ${MY_TMPDIR}/$(basename ${TARGET_SRPM}) ${TARGET_SRPM}
 		    if test $? = 0; then
-			TARGET_SRPM="${TMPDIR}/$(basename ${TARGET_SRPM})"
+			TARGET_SRPM="${MY_TMPDIR}/$(basename ${TARGET_SRPM})"
 		    else
 			srpmix_abort "Failed in download ${TARGET_SRPM}" 
 		    fi
@@ -82,12 +82,12 @@ function parse_arguments
 		    ;;
 	    esac
 	else
-	    if srpmix_can_ln "${TARGET_SRPM}" ${TMPDIR}; then
-		ln ${TARGET_SRPM} ${TMPDIR}/$(basename ${TARGET_SRPM})
+	    if srpmix_can_ln "${TARGET_SRPM}" ${MY_TMPDIR}; then
+		ln ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
 	    else
-		cp ${TARGET_SRPM} ${TMPDIR}/$(basename ${TARGET_SRPM})
+		cp ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
 	    fi
-	    TARGET_SRPM=${TMPDIR}/$(basename ${TARGET_SRPM})
+	    TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
 	fi
     fi
 }
@@ -124,17 +124,17 @@ function main
     all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
 
 
-    TMPDIR=`mktemp -d`
-    trap "/bin/rm -rf $TMPDIR" 0    
+    MY_TMPDIR=`mktemp -d`
+    trap "/bin/rm -rf $MY_TMPDIR" 0    
 
     
     parse_arguments "$@"
     if test -n "$DEBUG"; then
 	trap 0
-	echo Using $TMPDIR as temporary directory
+	echo Using $MY_TMPDIR as temporary directory
     fi
 
-    cd $TMPDIR
+    cd $MY_TMPDIR
     mkdir -p RPMS SRPMS BUILD BUILDROOT
     
     
@@ -147,15 +147,15 @@ function main
 	pvr=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
 
 	if is_memeber "$pvr" $all; then
-	    echo "*** Source code for $pvr is alread installed ***" 1>&2
+	    echo "*** Source code for $pvr is already installed ***" 1>&2
 	    continue
 	fi
 
 	srpmix-wrap $WRAP_OPTS $srpm
-	rpmbuild --define "_rpmdir $TMPDIR/RPMS"     \
-	         --define "_srcrpmdir $TMPDIR/SRPMS" \
-	         --define "_builddir $TMPDIR/BUILD"  \
-		 --define "_buildrootdir $TMPDIR/BUILDROOT" \
+	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"     \
+	         --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
+	         --define "_builddir $MY_TMPDIR/BUILD"  \
+		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
 	         --rebuild -ba $pvr-srpmix-*.swrf.src.rpm \
         || exit 2
     done
@@ -168,10 +168,10 @@ function main
 	p=$(rpm -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
 	enveloped_name=$(srpmix_build_enveloped_name "$p")
 	srpmix-envelop $ENVELOP_OPTS $swrf
-	rpmbuild --define "_rpmdir $TMPDIR/RPMS"     \
-	         --define "_srcrpmdir $TMPDIR/SRPMS" \
-	         --define "_builddir $TMPDIR/BUILD"  \
-		 --define "_buildrootdir $TMPDIR/BUILDROOT" \
+	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"     \
+	         --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
+	         --define "_builddir $MY_TMPDIR/BUILD"  \
+		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
 	         --rebuild -ba ${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm \
 	    || exit 2
     done
