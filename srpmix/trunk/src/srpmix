@@ -121,7 +121,7 @@ function main
 	srpmix_abort "You must be root to run this program"
     fi
 
-    all=`bash ~/workspace/srpmix/srpmix/trunk/src/srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
+    all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
 
 
     TMPDIR=`mktemp -d`
@@ -135,7 +135,7 @@ function main
     fi
 
     cd $TMPDIR
-    mkdir -p RPMS SRPMS BUILD
+    mkdir -p RPMS SRPMS BUILD BUILDROOT
     
     
     if test -n "${TARGET_NAME}"; then
@@ -155,6 +155,7 @@ function main
 	rpmbuild --define "_rpmdir $TMPDIR/RPMS"     \
 	         --define "_srcrpmdir $TMPDIR/SRPMS" \
 	         --define "_builddir $TMPDIR/BUILD"  \
+		 --define "_buildrootdir $TMPDIR/BUILDROOT" \
 	         --rebuild -ba $pvr-srpmix-*.swrf.src.rpm \
         || exit 2
     done
@@ -170,6 +171,7 @@ function main
 	rpmbuild --define "_rpmdir $TMPDIR/RPMS"     \
 	         --define "_srcrpmdir $TMPDIR/SRPMS" \
 	         --define "_builddir $TMPDIR/BUILD"  \
+		 --define "_buildrootdir $TMPDIR/BUILDROOT" \
 	         --rebuild -ba ${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm \
 	    || exit 2
     done
