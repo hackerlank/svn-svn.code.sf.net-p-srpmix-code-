@@ -120,6 +120,7 @@ function main
 	sudo -H -u lcopy mkdir -p ${PHASH}/${PACKAGE}
 	cd ${PHASH}/${PACKAGE}
 	if do_checkout; then
+	    status=$?
 	    tstamp=`LANG=C date`
 	    es_print lcopy checkout \
 		:cmdline \""$*"\"   \
