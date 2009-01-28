@@ -37,7 +37,7 @@ if test "$VCS" = mtn; then
     return 0;
 fi
 
-cd $DIR && find */ -type f \
+cd $DIR && find * -type f \! -regex ".*/\..*" \
 	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
         | egrep -v '/\.'         \
 	| grep -v .bz2           \
