@@ -61,6 +61,11 @@ function parse_arguments
 	srpmix_abort "too many arguments"
     fi
 
+    if test -z "${TARGET_NAME}" -a -z "${TARGET_SRPM}"; then
+	print_usage 1>&2
+	srpmix_abort "Specify either --name or --srpm"
+    fi
+
     if test -n "${TARGET_NAME}" -a -n "${TARGET_SRPM}"; then
 	print_usage 1>&2
 	srpmix_abort "Specify either --name or --srpm"
