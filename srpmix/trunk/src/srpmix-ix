@@ -556,7 +556,7 @@ function srpm_deploy
 	    --stage=install			\
 	    --srpm-file="\"${srpm_file}\""	\
 	echo ";;; abort to deploy ${srpm_file} to ${rootdir} in install stage" 1>&2
-	return -1
+	return 1
     fi
 
     srpm_save_spec "${rootdir}" "${spec_file}" "${xspec_file}"
@@ -594,7 +594,7 @@ function srpm_deploy
 	    --stage=build			\
 	    --srpm-file="\"${srpm_file}\""
 	echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
-	return -1
+	return 1
     fi
 
     srpm_freeze         \
@@ -821,7 +821,7 @@ function main
 
     message main-end --total=${TOTAL_COUNT} --abort=${ABORT_COUNT}
 
-    return 0
+    return ${ABORT_COUNT}
 }
 #
 ########################################################################
