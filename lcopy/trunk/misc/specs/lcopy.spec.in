@@ -5,7 +5,7 @@ Release: 0
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 #Requires: 
 Prereq: /usr/sbin/useradd
-Requires: emacs-common ctags cvs subversion git mercurial
+Requires: emacs-common ctags cvs subversion git mercurial bzr
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root

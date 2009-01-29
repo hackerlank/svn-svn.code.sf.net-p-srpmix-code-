@@ -21,7 +21,7 @@ RELEASE=0
 NO_SPEC=
 ONLY_SPEC=
 
-SUPPORTED_VCSs="cvs git git-clone svn hg"
+SUPPORTED_VCSs="cvs git git-clone svn hg bzr"
 function print_usage
 {
     echo "Usage: "
@@ -391,6 +391,57 @@ function cvs_print_usage
 {
     echo "	" cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' -d PACKAGEDIR MODULE 
     echo "	" '(adds -P automatically)'
+}
+
+#
+# Bzr
+# 
+function bzr_parse
+{
+    VCS=$1
+    CMD=$2
+    REPO=$3
+    PACKAGE=$4
+
+    if test "x$VCS" != xbzr; then
+	echo "wrong vcs: $VCS" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test \( -z "$CMD"          \) -a    \
+            \( "$CMD" != branch \) ; then
+	echo "broken bzr command line: $@" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    if echo "$REPO" | grep -E -e "^http[s]?://" > /dev/null 2>&1; then
+	:
+    else
+	echo "unknown repository specification: $REPO" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+ 
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	print_usage 2>&1
+	exit 1
+    fi
+
+    return 0
+}
+
+function bzr_print_udage
+{
+    echo "	" bar branch LOCATION PACKAGEDIR
 }
 
 function do_checkout

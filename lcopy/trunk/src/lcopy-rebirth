@@ -26,7 +26,7 @@
 ########################################################################
 
 # Supported backedns
-VC="hg cvs svn git darcs"
+VC="hg cvs svn git darcs bzr"
 
 LIBLCOPY=liblcopy.sh
 
@@ -126,6 +126,15 @@ function generate_darcs_cmdline
     echo "# [0] ${top_dir}"
     echo "darcs get ${darcs_defaultrepo} `basename ${top_dir}`"
     return 0
+}
+
+#
+# Bzr
+#
+function generate_bzr_cmdline
+{
+    bzr_location=`bzr info | grep -e 'parent branch:' | sed -e 's/  parent branch: //'`
+    echo bzr branch ${bzr_location} `pwd`
 }
 
 #

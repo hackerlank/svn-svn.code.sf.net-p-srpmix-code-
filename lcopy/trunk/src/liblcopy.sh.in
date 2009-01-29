@@ -159,6 +159,24 @@ function svn_checkout
     echo svn checkout "$repo" "$dir"
 }
 
+function bzr_make_checkout_cmdline
+{
+
+    local repo=$1
+    local package=$2
+    local branch=$3
+    
+    bzr_checkout "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
+}
+
+function bzr_checkout
+{
+    local repo=$1
+    local dir=$2
+
+    echo bzr branch "$repo" "$dir"
+}
+
 function git_make_checkout_cmdline
 {
 

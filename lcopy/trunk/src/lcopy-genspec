@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
-SUPPORTED_VCSs="svn git cvs hg"
+SUPPORTED_VCSs="svn git cvs hg bzr"
 PACKAGE=
 BRANCH=trunk
 REPO=
@@ -379,6 +379,14 @@ function svn_to_pkg
 function git_to_pkg
 {
     echo git
+}
+
+#
+# Bzr
+#
+function bzr_to_pkg
+{
+    echo bar
 }
 
 #
