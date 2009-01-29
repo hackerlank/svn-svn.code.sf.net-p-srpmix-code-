@@ -14,7 +14,7 @@ set -e
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix [--release=RELEASE] [--debug]  --name=PACKAGE|--srpm=SRPM"
+    echo "  srpmix [--dont-hardlink] [--release=RELEASE] [--debug]  --name=PACKAGE|--srpm=SRPM"
 #    TODO: Multi targets
 #    TODO: URL support
 #    echo ""
@@ -44,6 +44,9 @@ function parse_arguments
 	    --release=*)
 	        WRAP_OPTS="$WRAP_OPTS --release=$(echo $1 | sed 's/--release=//')"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$(echo $1 | sed 's/--release=//')"
+	        ;;
+	    --dont-hardlink)
+	        export SRPMIX_DONT_HARDLINK=yes
 	        ;;
 	    --debug)
 	        DEBUG=yes

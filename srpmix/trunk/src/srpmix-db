@@ -125,7 +125,9 @@ function do_install
     local pkgdir
     
 
-    srpmix_verify_commands ${HARDLINK}
+    if test "x${SRPMIX_DONT_HARDLINK}" != xyes; then
+	srpmix_verify_commands ${HARDLINK}
+    fi
 
 
     count=0
@@ -141,10 +143,12 @@ function do_install
 	rpm --nodeps -Uvh --dbpath "$SRPMIX_VAR_DIR"/"$db" --relocate /="$SRPMIX_VAR_DIR" "$package"
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $(rpm -qpl "$package"  | head -1))
 	if test "x$pkgdir" != "x"; then
-	    if test x"$QUIET" != xyes; then
-		echo "($count/$max) Hardlink...$pkgdir/.."
+	    if test "x${SRPMIX_DONT_HARDLINK}" != xyes; then
+		if test x"$QUIET" != xyes; then
+		    echo "($count/$max) Hardlink...$pkgdir/.."
+		fi
+		${HARDLINK} $pkgdir/..
 	    fi
-	    ${HARDLINK} $pkgdir/..
 	fi
 	count=$(expr $count + 1)
     done
