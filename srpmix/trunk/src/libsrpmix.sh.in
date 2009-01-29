@@ -112,23 +112,27 @@ function srpmix_srchash
 
 srpmix_distmap_to_pvr_script='
 (letrec ((kget (lambda (kl ky)
-	      (cond ((null? kl) #f)
-		    ((eq? (car kl) ky) (cadr kl))
-		    (else (kget (cdr kl) ky))))
-	    ))
+		 (cond ((null? kl) #f)
+		       ((eq? (car kl) ky) (cadr kl))
+		       (else (kget (cdr kl) ky))))
+	       ))
+  (read-set! keywords `prefix)  
   (let loop ((r (read)))
-       (unless (eof-object? r)
-	 (when (and (list? r)
-		    (eq? (car r) `srpmix-wrap)
-		    (not (null? (cdr r)))
-		    (eq? (cadr r) `name))
-	   (format #t "~a ~a ~a\n" 
-		   (kget r :package)
-		   (kget r :version)
-		   (kget r :release)))
-	 (loop (read)))))'
+    (if (eof-object? r)
+	#f
+	(begin
+	  (if (and (list? r)
+		 (eq? (car r) `srpmix-wrap)
+		 (not (null? (cdr r)))
+		 (eq? (cadr r) `name))
+	    (format #t "~a ~a ~a\n" 
+		    (kget r #:package)
+		    (kget r #:version)
+		    (kget r #:release))
+	    #f)
+	  (loop (read))))))'
 
-GOSH=gosh
+GUILE=guile
 # Print :package, :version, and :release field of dist-mapping es espression.
 # Example Input:
 # (srpmix-wrap name :target-srpm "ElectricFence-2.2.2-20.2.src.rpm" 
@@ -141,7 +145,7 @@ GOSH=gosh
 #
 function srpmix_distmap_to_pvr
 {
-    ${GOSH} -e "${srpmix_distmap_to_pvr_script}"
+    ${GUILE} -c "${srpmix_distmap_to_pvr_script}"
 }
 
 function srpmix_can_ln
