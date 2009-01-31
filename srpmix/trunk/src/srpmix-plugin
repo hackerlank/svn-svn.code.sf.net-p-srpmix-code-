@@ -109,7 +109,7 @@ function main
     do
         $plugin $ROOTDIR
     done
-
+# TODO: return status, see srpmix-wrap
 }
 
 try_source ${LIBSRPMIX}

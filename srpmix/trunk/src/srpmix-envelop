@@ -229,8 +229,7 @@ function main
 	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 
-    for swrf in $swrfs
-    do
+    for swrf in $swrfs; do
         if test -f "$swrf"; then
 	    envelop_srpm "$swrf"
         else

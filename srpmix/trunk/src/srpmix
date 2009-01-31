@@ -52,6 +52,10 @@ function parse_arguments
 	        DEBUG=yes
 		set -x
 		;;
+	    --*)
+	        print_usage 1>&2
+		srpmix_abort "Unknow option: $1"
+		;;
 	    *)
 	       break
 	       ;;
@@ -109,28 +113,11 @@ function try_source
     fi
 }
 
-function is_memeber
-{
-    target="$1"
-    shift
-
-    for x in "$@"; do
-	if test x"$target" =  x"$x"; then
-	    return 0
-	fi
-    done
-
-    return 1
-}
-
 function main
 {
     if test "`whoami`" != "root"; then
 	srpmix_abort "You must be root to run this program"
     fi
-
-    all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
-
 
     MY_TMPDIR=`mktemp -d`
     trap "/bin/rm -rf $MY_TMPDIR" 0    
@@ -154,34 +141,39 @@ function main
     for srpm in $TARGET_SRPM; do
 	pvr=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
 
-	if is_memeber "$pvr" $all; then
-	    echo "*** Source code for $pvr is already installed ***" 1>&2
-	    continue
+	count=`rpm -qa "^$pvr-srpmix-"'*' | wc -l`
+	if test $count != 0; then
+		echo "*** Source code for $pvr is already installed ***" 1>&2
+		exit 0
 	fi
 
-	srpmix-wrap $WRAP_OPTS $srpm
+	srpmix-wrap $WRAP_OPTS $srpm \
+	    || exit 1
+
 	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"     \
 	         --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
 	         --define "_builddir $MY_TMPDIR/BUILD"  \
 		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
 	         --rebuild -ba $pvr-srpmix-*.swrf.src.rpm \
-        || exit 2
+            || exit 2
     done
 
     if test ! -d RPMS/noarch; then
-	exit 1
+	exit 3
     fi
 
     for swrf in `find RPMS/noarch -name '*swrf.noarch.rpm'`; do
 	p=$(rpm -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
 	enveloped_name=$(srpmix_build_enveloped_name "$p")
+
+	# TODO: Return status
 	srpmix-envelop $ENVELOP_OPTS $swrf
 	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"     \
 	         --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
 	         --define "_builddir $MY_TMPDIR/BUILD"  \
 		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
 	         --rebuild -ba ${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm \
-	    || exit 2
+	    || exit 4
     done
     find RPMS/noarch -name '*noarch.rpm' | grep -v '\.swrf\.' | xargs yum localinstall -y --nogpgcheck
 }
