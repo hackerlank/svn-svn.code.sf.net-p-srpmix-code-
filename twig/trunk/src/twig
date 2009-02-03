@@ -50,6 +50,11 @@ function twig_fork
     local from=$2
     local dir=$3
 
+    if test -z "${name}" -o -z "${from}"; then
+	    twig_help 2>&1
+	    exit 1
+    fi
+    
     if test -z "${dir}"; then
 	dir=./${name}
     fi
@@ -208,8 +213,11 @@ function twig_install_stub_patch
 {
     local dir=$1
     local name=$2
-    rm $dir/archives/twig-${name}.patch
-    touch $dir/archives/twig-${name}.patch
+    local file
+
+    file=$dir/archives/twig-${name}.patch
+    test -f $file && rm $file
+    touch $file
 #    echo "Hack for \"error: File PATCH is smaller than 13 bytes\"" \
           > $dir/archives/twig-${name}.patch
 }
