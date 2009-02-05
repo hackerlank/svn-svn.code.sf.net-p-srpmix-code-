@@ -439,7 +439,7 @@ function bzr_parse
     return 0
 }
 
-function bzr_print_udage
+function bzr_print_usage
 {
     echo "	" bar branch LOCATION PACKAGEDIR
 }
