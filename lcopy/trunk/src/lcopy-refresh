@@ -34,6 +34,7 @@ DIR=`pwd`
 LOG=/dev/stdout
 PREFIX=/usr/libexec
 PLUGINDIR=${PREFIX}/lcopy/plugins
+PRIVATE_DIR=.lcopy
 
 function try_source
 {
@@ -162,7 +163,10 @@ function refresh
 
 	    update_${v}
 	    r=$?
-	   
+
+	    mkdir -p "${PRIVATE_DIR}"
+	    echo $r > "${PRIVATE_DIR}"/STATUS
+
 	    tstamp=`LANG=C date`
 	    if test $r = 0; then
 		es_print lcopy successful-in-updating --directory=\"${cur_dir}\"  --date=\"${tstamp}\" --status=$r

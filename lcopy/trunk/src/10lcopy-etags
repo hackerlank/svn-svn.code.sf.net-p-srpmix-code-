@@ -26,7 +26,7 @@
 VCS="$1"
 DIR="$2"
 TSTAMP="$3"
-OFILE=.__TAGS_LCOPY__
+OFILE=.lcopy/TAGS
 
 ETAGS=etags
 BLACKLIST='.*\.bib$\|unic-005\.tex$\|.*\.srpmix$'
