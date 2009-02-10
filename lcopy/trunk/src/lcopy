@@ -130,8 +130,10 @@ function main
 #	    if test -z "$NO_SPEC"; then
 		:
 		cd ${BRANCH}
+		status=$?
+		sudo -H -u lcopy mkdir -p .lcopy
 # TODO: plugin directory
-		if test "$?" = 0; then
+		if test "$status" = 0; then
 		    lcopy_run_plugins ${LOG_DIR}/lcopy-refresh.es \
 			"${VCS}" "$(pwd)" "${tstamp}"
 #		fi
