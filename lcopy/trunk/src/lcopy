@@ -172,6 +172,8 @@ function svn_parse
 	exit 1
     fi
 
+    # TODO: Handle
+    # svn co svn://svn@svn.a-k-r.org/akr/wfo/trunk wfo
     if echo "$REPO" | grep -E -e "^http[s]?://" > /dev/null 2>&1; then
 	:
     else
