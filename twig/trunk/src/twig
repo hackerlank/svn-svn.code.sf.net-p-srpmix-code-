@@ -232,8 +232,8 @@ function twig_verify_soruces
 	-d "$1/pre-build"        -a \
 	-d "$1/archives"         -a \
 	"$(cat $1/STATUS)" = "0" &&
-    [[	"$(cat $1/SRPMIX)" =~ "3.99.[[:digit:]]"  || \
-	"$(cat $1/SRPMIX)" =~ "3.100.[[:digit:]]"    \
+    [[	"$(cat $1/SRPMIX)" =~ "3.99.[[:digit:]]"  ||           \
+	"$(cat $1/SRPMIX)" =~ "3.10[[:digit:]].[[:digit:]]"    \
     ]]
 }
 
@@ -412,9 +412,11 @@ function twig_build
     mkdir -p twig/rpms
     mkdir -p twig/srpms
     mkdir -p twig/build
+    mkdir -p twig/buildroot
     rpmbuild --define "_rpmdir `pwd`/twig/rpms"     \
 	     --define "_srcrpmdir `pwd`/twig/srpms" \
 	     --define "_builddir `pwd`/twig/build"  \
+	     --define "_buildrootdir `pwd`/twig/buildroot" \
 	     --define "_sourcedir `pwd`/archives"   \
              --define "twig_$(cat TWIG/name)_buildid ${buildid}" \
 	     $stage specs.spec
