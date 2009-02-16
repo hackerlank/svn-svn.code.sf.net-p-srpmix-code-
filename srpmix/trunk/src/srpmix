@@ -241,5 +241,5 @@ function main
 }
 
 try_source ${LIBSRPMIX}
-main "$@"
+{ main "$@" ; } < /dev/null
 exit $?
