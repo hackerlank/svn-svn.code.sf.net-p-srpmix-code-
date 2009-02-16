@@ -6,6 +6,7 @@ TARGET_SRPM=
 LIBSRPMIX=libsrpmix.sh
 MY_TMPDIR=
 WRAP_OPTS=""
+OUTPUT_DIR=
 DEBUG=""
 
 set -e
@@ -14,7 +15,7 @@ set -e
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix [--dont-hardlink] [--release=RELEASE] [--debug]  --name=PACKAGE|--srpm=SRPM"
+    echo "  srpmix [--dont-hardlink] [--output-dir=DIR] [--release=RELEASE] [--debug] --name=PACKAGE|--srpm=SRPM"
 #    TODO: Multi targets
 #    TODO: URL support
 #    echo ""
@@ -48,6 +49,12 @@ function parse_arguments
 	    --dont-hardlink)
 	        export SRPMIX_DONT_HARDLINK=yes
 	        ;;
+	    --output-dir=*)
+	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
+		if test ! -d "${OUTPUT_DIR}"; then
+		    srpmix_abort "No such directory: ${OUTPUT_DIR}"
+		fi
+		;;
 	    --debug)
 	        DEBUG=yes
 		set -x
@@ -67,6 +74,12 @@ function parse_arguments
 	print_usage 1>&2
 	srpmix_abort "too many arguments"
     fi
+
+    #if test -z "${OUTPUT_DIR}"; then
+	if test "`whoami`" != "root"; then
+	    srpmix_abort "You must be root to run this program"
+	fi
+    #fi
 
     if test -z "${TARGET_NAME}" -a -z "${TARGET_SRPM}"; then
 	print_usage 1>&2
@@ -113,11 +126,39 @@ function try_source
     fi
 }
 
+function check_pvr_rpm
+{
+    pvr=$1
+    count=
+
+#	if is_memeber "${pvr}" $all; then
+#	    echo "*** Source code for ${pvr} is already installed ***" 1>&2
+#	    exit 0
+#	fi
+
+    count=`rpm -qa "^${pvr}-srpmix-"'*' | wc -l`
+    if test $count != 0; then
+	echo "*** Source code for ${pvr} is already installed ***" 1>&2
+	exit 0
+    fi    
+}
+
+function check_pvr_output_dir
+{
+    p0=
+    p=
+
+    p0=$(srpmix_srchash $srpm)
+    p=$(echo "${OUTPUT_DIR}/$p0/${pvr}-srpmix-"[0-9]* | head -1)
+    if test -f "$p"; then
+	echo "*** Source code for ${pvr} exists at ${OUTPUT_DIR}/$p0 ***" 1>&2
+	exit 0
+    fi
+}
+
 function main
 {
-    if test "`whoami`" != "root"; then
-	srpmix_abort "You must be root to run this program"
-    fi
+#   all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
 
     MY_TMPDIR=`mktemp -d`
     trap "/bin/rm -rf $MY_TMPDIR" 0    
@@ -130,7 +171,7 @@ function main
     fi
 
     cd $MY_TMPDIR
-    mkdir -p RPMS SRPMS BUILD BUILDROOT
+    mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES
     
     
     if test -n "${TARGET_NAME}"; then
@@ -141,20 +182,28 @@ function main
     for srpm in $TARGET_SRPM; do
 	pvr=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
 
-	count=`rpm -qa "^$pvr-srpmix-"'*' | wc -l`
-	if test $count != 0; then
-		echo "*** Source code for $pvr is already installed ***" 1>&2
-		exit 0
+	# TEMPORARY code: true --- srpmix1 requires this.
+	if true; then
+	    check_pvr_rpm "${pvr}"
+	    check_pvr_output_dir "${pvr}"
+	else
+	    if test -z "${OUTPUT_DIR}"; then
+		check_pvr_rpm "${pvr}"
+	    else
+		check_pvr_output_dir "${pvr}"
+	    fi
 	fi
-
+	
 	srpmix-wrap $WRAP_OPTS $srpm \
 	    || exit 1
 
-	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"     \
-	         --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
-	         --define "_builddir $MY_TMPDIR/BUILD"  \
+	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"       \
+	         --define "_srcrpmdir $MY_TMPDIR/SRPMS"   \
+	         --define "_builddir $MY_TMPDIR/BUILD"    \
 		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
-	         --rebuild -ba $pvr-srpmix-*.swrf.src.rpm \
+                 --define "_specdir $MY_TMPDIR/SPECS"     \
+	         --define "_sourcedir $MY_TMPDIR/SOURCES" \
+	         --rebuild -ba ${pvr}-srpmix-*.swrf.src.rpm \
             || exit 2
     done
 
@@ -172,10 +221,23 @@ function main
 	         --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
 	         --define "_builddir $MY_TMPDIR/BUILD"  \
 		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
+                 --define "_specdir $MY_TMPDIR/SPECS"   \
+	         --define "_sourcedir $MY_TMPDIR/SOURCES" \
 	         --rebuild -ba ${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm \
 	    || exit 4
     done
-    find RPMS/noarch -name '*noarch.rpm' | grep -v '\.swrf\.' | xargs yum localinstall -y --nogpgcheck
+
+    find RPMS/noarch -name '*noarch.rpm' | grep -v '\.swrf\.' \
+    | if test -n "${OUTPUT_DIR}"; then
+	while read p; do
+	    p0=$(basename $p)
+	    p00=`srpmix_srchash $p0`
+	    mkdir -p "${OUTPUT_DIR}/${p00}"
+	    mv $p "${OUTPUT_DIR}/${p00}/"
+	done
+    else
+	xargs yum localinstall -y --nogpgcheck
+    fi
 }
 
 try_source ${LIBSRPMIX}
