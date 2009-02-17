@@ -87,7 +87,7 @@ function srpmix_srcdir
     local version=$2
     local release=$3
 
-    local pkg_hash=${package:0:1}
+    local pkg_hash=$(srpmix_srchash ${package})
     local pkg_root="${SRPMIX_SOURCES_DIR}"/"${pkg_hash}"/"$package"
     
     echo "${pkg_root}"/"$version-$release"
@@ -99,10 +99,17 @@ function srpmix_installdir
     local version=$2
     local release=$3
 
-    local pkg_hash=${package:0:1}
+    local pkg_hash=$(srpmix_srchash ${package})
     local pkg_root=${SRPMIX_SOURCES_RDIR}/"${pkg_hash}"/"$package"
     
     echo "${pkg_root}"/"$version-$release"
+}
+
+function srpmix_swrfdir
+{
+    local file=$1
+
+    echo "${SRPMIX_SWRFS_DIR}/$(srpmix_srchash `basename $file`)"
 }
 
 function srpmix_srchash

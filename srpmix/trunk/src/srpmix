@@ -183,16 +183,12 @@ function main
 	pvr=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
 
 	# TEMPORARY code: true --- srpmix1 requires this.
-	if true; then
-	    check_pvr_rpm "${pvr}"
-	    check_pvr_output_dir "${pvr}"
-	else
-	    if test -z "${OUTPUT_DIR}"; then
+	if test -z "${OUTPUT_DIR}"; then
 		check_pvr_rpm "${pvr}"
-	    else
+	else
 		check_pvr_output_dir "${pvr}"
-	    fi
 	fi
+	
 	
 	srpmix-wrap $WRAP_OPTS $srpm \
 	    || exit 1

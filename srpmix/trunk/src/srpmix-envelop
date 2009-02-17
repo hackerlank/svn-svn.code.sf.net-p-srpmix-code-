@@ -111,7 +111,9 @@ function envelop_srpm
     es_name=
 
 
-    pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_swrf)
+    pvrd=$(rpm -qp --nosignature --queryformat \
+	"%{NAME} %{VERSION} %{RELEASE} %{Description}" \
+	$target_swrf)
     package=$(echo $pvrd | cut -d' ' -f1)
     description="$(echo $pvrd | cut -d' ' -f4-)"
     if test "x$package" = "x"; then
@@ -124,9 +126,12 @@ function envelop_srpm
 	--target-swrf="\"$(basename $target_swrf)\"" \
 	--enveloped-name="\"${enveloped_name}\"")
 
-    if test -f ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm; then
+    if test -f \
+	${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm; \
+	then
 	if test -z "$ALLOW_OVERWRITE"; then
-            echo \;\; ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm already exists 1>&2
+	    filename="${OUTPUTDIR}/${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm"
+            echo \;\; "$filename already exists" 1>&2
 	    echo "$es_name"
             return
 	fi
@@ -172,7 +177,7 @@ $description
 rm -rf \$RPM_BUILD_ROOT
 
 from=\$RPM_SOURCE_DIR/`basename $target_swrf`
-to=\$RPM_BUILD_ROOT${SRPMIX_SWRFS_DIR}
+to=\$RPM_BUILD_ROOT$(srpmix_swrfdir $target_swrf)
 mkdir -p \$to
 
 if test \$(stat --format="%D" \$from) = \$(stat --format="%D" \$to); then
@@ -187,14 +192,14 @@ fi
 rm -rf \$RPM_BUILD_ROOT
 
 %post
-srpmix-db --install ${SRPMIX_SWRFS_DIR}/$(basename $target_swrf .noarch.rpm)
+srpmix-db --install $(srpmix_swrfdir $target_swrf)/$(basename $target_swrf .noarch.rpm)
 
 %preun
 srpmix-db --erase ${enveloped_name}
 
 %files
 %defattr(-,root,root)
-${SRPMIX_SWRFS_DIR}/*
+$(srpmix_swrfdir $target_swrf)/*
 
 %changelog
 * Sat Jun  2 2007 SRPMIX ENVELOP <consulting-jp@redhat.com> $package
