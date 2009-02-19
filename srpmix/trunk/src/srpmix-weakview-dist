@@ -114,7 +114,7 @@ function create_dist_weakview
 	fi
     fi
 	
-    rootdir=${SRPMIX_USR_DIR}
+    rootdir=${SRPMIX_VAR_DIR}
     distdir=${rootdir}/dists
     builddistdir_body="srpmix-weakview-dist-$name-$SRPMIX_VERSION-$SRPMIX_RELEASE/$distdir/$name"
 
@@ -188,7 +188,7 @@ EOF
 
 function main
 {
-    srpmix_verify_commands "${RPMBUILD}" "${GOSH}"
+    srpmix_verify_commands "${RPMBUILD}" "${GUILE}"
     parse_arguments "$@"
 
     if test "x${DUMP_SPEC}" = "x"; then

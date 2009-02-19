@@ -81,7 +81,8 @@ function parse_arguments
     done
 
     if test "x$1" = "x"; then
-        while read tmp; do
+
+            while read tmp; do
 	  srpms="${srpms} ${tmp}"
 	done
     else
