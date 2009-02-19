@@ -75,6 +75,7 @@ function parse_arguments
     done
 
     if test "x$NAME" = "x"; then
+	print_usage 1>&2
 	srpmix_abort "No name for the weakview"
     fi
 
@@ -154,11 +155,15 @@ tee "$DISTMAP" | srpmix_distmap_to_pvr | while read package version release; do
   p=$(srpmix_srchash "$package")
   echo "mkdir -p \$builddistdir/packages/$p"
   echo "ln -sf $d \$builddistdir/packages/$p/$package"
-  echo "cat > \$builddistdir/dist-mapping.es <<\"EOF\""
-  cat  "$DISTMAP"
-  echo "EOF"
 done >> $spec
+
+
+    cat >> $spec <<EOF
+echo "cat > \$builddistdir/dist-mapping.es <<\"EOF\""
+cat  "$DISTMAP"
+echo "EOF"
 rm "$DISTMAP"
+EOF
 
     cat >> $spec <<EOF
 %install

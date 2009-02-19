@@ -75,6 +75,7 @@ function parse_arguments
     done
 
     if test -z "$NAME"; then
+	print_usage 1>&2
 	srpmix_abort "No name for the weakview"
     fi
 
