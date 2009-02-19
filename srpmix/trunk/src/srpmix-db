@@ -23,7 +23,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db -h|--help"
-    echo "  srpmix-db [--root=ROOT] [--quite|-q] -i|--install SWRF..."
+    echo "  srpmix-db [--dont-hardlink] [--root=ROOT] [--quite|-q] -i|--install SWRF..."
     echo "  srpmix-db [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
     echo "  srpmix-db -l|--list"
     echo
@@ -73,6 +73,10 @@ function parse_arguments
 		    print_usage 1>&2
 		    exit 1
 		fi
+		shift 1
+		;;
+	    --dont-hardlink)
+	        SRPMIX_DONT_HARDLINK=yes
 		shift 1
 		;;
 	    *)
