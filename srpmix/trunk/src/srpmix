@@ -145,10 +145,11 @@ function check_pvr_rpm
 
 function check_pvr_output_dir
 {
+    pvr=$1
     p0=
     p=
 
-    p0=$(srpmix_srchash $srpm)
+    p0=$(srpmix_srchash $pvr)
     p=$(echo "${OUTPUT_DIR}/$p0/${pvr}-srpmix-"[0-9]* | head -1)
     if test -f "$p"; then
 	echo "*** Source code for ${pvr} exists at ${OUTPUT_DIR}/$p0 ***" 1>&2

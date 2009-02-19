@@ -27,6 +27,7 @@
 #
 # Constatns
 #
+# TODO:....SOURCES, SPECS, BUILDROOT
 
 HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
 REQUIRED_COMMANDS="rpm2cpio cpio ${HARDLINK} id"
