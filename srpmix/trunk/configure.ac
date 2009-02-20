@@ -1,6 +1,12 @@
+dnl major and minor are reflected to SRPMIX file.
+dnl If the directory structure is changed incompatibly, update the major version.
+dnl If the directory structure is changed compatibly, update the minor version.
+dnl If the source code of srpmix is changed but the directory is not changed,
+dnl just increment micro version.
+
 m4_define([pkg_major_version],[3])
 m4_define([pkg_minor_version],[102])
-m4_define([pkg_micro_version],[0])
+m4_define([pkg_micro_version],[1])
 m4_define([pkg_name],    [srpmix])
 m4_define([pkg_version], pkg_major_version.pkg_minor_version.pkg_micro_version)
 

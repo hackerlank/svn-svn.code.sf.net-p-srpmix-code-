@@ -276,7 +276,7 @@ function create_rootdir
     if mkdir "${rootdir}"; then
         IS_ROOTDIR_CREATED=yes
 
-	echo ${SRPMIX_VERSION} > "${rootdir}/${PROFILE}"
+	echo "${SRPMIX_MAJOR_VERSION}.${SRPMIX_MINOR_VERSION}.0" > "${rootdir}/${PROFILE}"
 	if test "x$FREEZE" = "xyes"; then
           chmod a-w "${rootdir}/${PROFILE}"
         fi
