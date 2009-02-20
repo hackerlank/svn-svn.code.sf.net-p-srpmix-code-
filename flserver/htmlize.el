@@ -1702,7 +1702,13 @@ does not name a directory, it will be used as output file name."
 	(font-lock-support-mode nil))
     (with-temp-buffer
       ;; Insert FILE into the temporary buffer.
-      (insert-file-contents file)
+      (if (file-directory-p file)
+	  (insert (save-excursion
+		    (let* ((b (dired file)))
+		      (prog1 (buffer-string)
+			(setq file (directory-file-name file))
+			(kill-buffer b)))))
+	(insert-file-contents file))
       ;; Set the file name so normal-mode and htmlize-buffer-1 pick it
       ;; up.  Restore it afterwards so with-temp-buffer's kill-buffer
       ;; doesn't complain about killing a modified buffer.
