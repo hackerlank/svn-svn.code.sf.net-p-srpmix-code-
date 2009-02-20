@@ -1,1 +1,12 @@
 #!/bin/sh
+SOCKET_DIR=~
+OUTPUT_DIR=~
+if emacsclient \
+    --socket-name=${SOCKET_DIR}/.flserver \
+    --eval "(flserver-htmlize "\"$1\"" "\"${OUTPUT_DIR}\"")" \
+    > /dev/null 2>&1; then
+    cat ${OUTPUT_DIR}/$(basename $1).html
+    rm ${OUTPUT_DIR}/$(basename $1).html
+else
+    cat $1
+fi

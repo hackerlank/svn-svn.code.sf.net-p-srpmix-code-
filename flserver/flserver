@@ -1,1 +1,3 @@
 #!/bin/sh
+#emacs [--batch] -Q -l htmlize.el -l flserver.el
+emacs -Q -l htmlize.el -l flserver.el
