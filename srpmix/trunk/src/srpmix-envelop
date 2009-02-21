@@ -148,9 +148,11 @@ function envelop_srpm
 	    spec="/dev/tty"
 	fi
     fi
-    
+
+# About %pre, %post and %preun, See
+# http://www.vinelinux.org/manuals/making-rpm-9.html
     cat > "$spec" <<EOF
-Summary: rpm package envelops $package
+Summary: Source code for $package with canonical directory layout
 Name: ${enveloped_name}
 Version: $SRPMIX_VERSION
 Release: $SRPMIX_RELEASE
@@ -191,11 +193,21 @@ fi
 %clean
 rm -rf \$RPM_BUILD_ROOT
 
+%pre
+if [ $1 = 2 ]; then
+# Install stage of rpm -U
+  srpmix-db --erase ${enveloped_name}
+fi
+
 %post
 srpmix-db --install $(srpmix_swrfdir $target_swrf)/$(basename $target_swrf .noarch.rpm)
 
+
 %preun
-srpmix-db --erase ${enveloped_name}
+if [ $1 = 0 ]; then
+# rpm -e
+  srpmix-db --erase ${enveloped_name}
+fi
 
 %files
 %defattr(-,root,root)
