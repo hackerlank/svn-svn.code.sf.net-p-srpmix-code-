@@ -15,7 +15,12 @@ set -e
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix [--dont-hardlink] [--output-dir=DIR] [--release=RELEASE] [--debug] --name=PACKAGE|--srpm=SRPM"
+    echo "  srpmix [--dont-hardlink]"
+    echo "         [--output-dir=DIR]"
+    echo "         [--release=RELEASE]"
+    echo "         [--debug]"
+    echo "         [--ignore-error]"
+    echo "          --name=PACKAGE|--srpm=SRPM"
 #    TODO: Multi targets
 #    TODO: URL support
 #    echo ""
@@ -49,6 +54,9 @@ function parse_arguments
 	    --dont-hardlink)
 	        export SRPMIX_DONT_HARDLINK=yes
 	        ;;
+	    --ignore-error)
+	        export SRPMIX_IGNORE_ERROR=yes
+		;;
 	    --output-dir=*)
 	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
 		if test ! -d "${OUTPUT_DIR}"; then

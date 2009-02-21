@@ -1,0 +1,4 @@
+2009-02-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* srpmix-envelop, srpmix-ix: Added --ignore-error option.
+

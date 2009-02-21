@@ -50,10 +50,13 @@ SRCFILES=
 CREATE_ROOTDIR=no
 VERBOSE=no
 USE_SUDO=no
+FREEZE=no
 GROUP=
 TARGET=
 ABORT_COUNT=0
 TOTAL_COUNT=0
+DONT_HARDLINK=${SRPMIX_DONT_HARDLINK}
+IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
 
 #
 ########################################################################
@@ -74,6 +77,7 @@ function print_usage
     echo "            [--freeze|-F]"
     echo "            [--target=target|-t=target|--target target|-t target]"
     echo "            [--set-group=group|-g=group|--set-group group|-g group]"
+    echo "            [--dont-hardlink] [--ignore-error]"
     echo "            ROOTDIR SRPM_FILES..."
     echo 
     echo
@@ -189,6 +193,14 @@ function parse_arguments
 	    --target=*)
                 TARGET=`echo $1 | sed -e 's/--target=//'`
                 shift 1
+		;;
+	    --dont-hardlink)
+	        DONT_HARDLINK=yes
+		shift 1
+		;;
+            --ignore-error)
+	        IGNORE_ERROR=yes
+		shift 1;
 		;;
 	    -*)
 		echo unknown option: "$1" 1>&2
@@ -591,11 +603,13 @@ function srpm_deploy
     done
     
     if test ${status} != 0; then
-    	verbose abort				\
-	    --stage=build			\
-	    --srpm-file="\"${srpm_file}\""
-	echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
-	return 1
+	if test "x${IGNORE_ERROR}" = xyes; then
+    	    verbose abort				\
+		--stage=build			\
+		--srpm-file="\"${srpm_file}\""
+	    echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
+	    return 1
+	fi
     fi
 
     srpm_freeze         \
@@ -725,7 +739,7 @@ function srpm_freeze
 
     if test "x$FREEZE" = "xyes"; then
 
-      if test "x${SRPMIX_DONT_HARDLINK}" != xyes; then
+      if test "x${DONT_HARDLINK}" != xyes; then
 	  verbose hardlink-start --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
 	  ${HARDLINK} -c "${rootdir}/${SOURCEDIR}/${srpm_name}" \
 	      "${rootdir}/${BUILDDIR}/${build_name}"/*
