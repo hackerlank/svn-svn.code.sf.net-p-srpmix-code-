@@ -6,6 +6,7 @@ TARGET_SRPM=
 LIBSRPMIX=libsrpmix.sh
 MY_TMPDIR=
 WRAP_OPTS=""
+RELEASE=
 OUTPUT_DIR=
 DEBUG=""
 
@@ -48,8 +49,10 @@ function parse_arguments
 	        TARGET_SRPM="$(echo $1 | sed 's/--srpm=//')"
 		;;
 	    --release=*)
-	        WRAP_OPTS="$WRAP_OPTS --release=$(echo $1 | sed 's/--release=//')"
-		ENVELOP_OPTS="$ENVELOP_OPTS --release=$(echo $1 | sed 's/--release=//')"
+		RELEASE="$(echo $1 | sed 's/--release=//')"
+		SRPMIX_RELEASE=$RELEASE
+	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
+		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
 	        ;;
 	    --dont-hardlink)
 	        export SRPMIX_DONT_HARDLINK=yes

@@ -1,4 +1,6 @@
 2009-02-22  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix: Reflect --relase argument to SRPMIX_RELEASE variable.
+
 	* srpmix-envelop, srpmix-ix: Added --ignore-error option.
 
