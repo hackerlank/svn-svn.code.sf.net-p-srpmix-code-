@@ -57,7 +57,6 @@ ABORT_COUNT=0
 TOTAL_COUNT=0
 DONT_HARDLINK=${SRPMIX_DONT_HARDLINK}
 IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
-
 #
 ########################################################################
 
@@ -75,6 +74,7 @@ function print_usage
     echo "            [--trace|-x]"
     echo "            [--sudo|-s]"
     echo "            [--freeze|-F]"
+    echo "            [--current-target-only]"
     echo "            [--target=target|-t=target|--target target|-t target]"
     echo "            [--set-group=group|-g=group|--set-group group|-g group]"
     echo "            [--dont-hardlink] [--ignore-error]"
@@ -86,6 +86,11 @@ function print_usage
     echo "           existance of SRPMIX profile file is expected."
     echo "  --sudo: use sudo in doing chown. "      
     echo "  --freeze: freeze expanded files. "      
+    echo ""
+    echo "environment variables:"
+    echo "SRPMIX_DONT_HARDLINK=yes|no"
+    echo "SRPMIX_IGNORE_ERROR=yes|no"
+    echo "SRPMIX_CURRENT_TARGET_ONLY=yes|no"
     echo 
 }
 
@@ -174,6 +179,10 @@ function parse_arguments
                 GROUP=`echo $1 | sed -e 's/--set-group=//'`
                 shift 1
 		;;
+	    --current-target-only)
+	        TARGET=`get_current_target`
+		shift 1
+		;;
             --target|-target|-t)
 		if [ $# -gt 0 ]; then
 	            shift 1
@@ -233,6 +242,10 @@ function parse_arguments
     verbose varset --CREATE_ROOTDIR=\""${CREATE_ROOTDIR}"\"
     verbose varset --USE-SUDO=\""${USE_SUDO}"\"
 
+
+    if test x"${SRPMIX_CURRENT_TARGET_ONLY}" = xyes; then
+	TARGET=`get_current_target`
+    fi
     if test x"${TARGET}" != x; then
 	verbose varset --TARGET=\""${TARGET}"\"
     fi
@@ -520,9 +533,13 @@ function spec_file_hack
 	${NULL} 
 }
 
+function get_current_target
+{
+    rpm --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
+}
 function make_targets
 {
-    local current=`rpm --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'`
+    local current=`get_current_target`
     local targets=${current}
     
     for x in i386 i686 x86_64 ia64 ppc; do

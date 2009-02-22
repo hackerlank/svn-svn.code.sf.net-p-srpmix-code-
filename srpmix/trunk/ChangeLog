@@ -1,5 +1,20 @@
 2009-02-22  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 3.102.2.
+
+	* src/srpmix:
+	* src/srpmix-in: New option --current-target-only.
+	
+	* src/srpmix-ix:
+	* src/srpmix-wrap:
+	* src/srpmix-envelop:
+	* src/libsrpmix.in: Separate SRPMIX_VERSION and SRPMIX_PKG_VERSION.
+	SRPMIX_VERSION is for this software itself. SRPMIX_PKG_VERSION
+	is for the generated rpm packages.
+	
+
+	* src/srpmix (OUTPUT_DIR): Convert to absolute path.
+
 	* src/srpmix-envelop(%preun, %post, %pre): fix a bug: all files were
 	removed when updating with -U.
 

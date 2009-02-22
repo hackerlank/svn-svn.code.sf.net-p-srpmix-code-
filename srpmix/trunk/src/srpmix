@@ -21,6 +21,7 @@ function print_usage
     echo "         [--release=RELEASE]"
     echo "         [--debug]"
     echo "         [--ignore-error]"
+    echo "         [--current-target-only]"
     echo "          --name=PACKAGE|--srpm=SRPM"
 #    TODO: Multi targets
 #    TODO: URL support
@@ -59,6 +60,9 @@ function parse_arguments
 	        ;;
 	    --ignore-error)
 	        export SRPMIX_IGNORE_ERROR=yes
+		;;
+	    --current-target-only)
+	        export SRPMIX_CURRENT_TARGET_ONLY=yes
 		;;
 	    --output-dir=*)
 	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
