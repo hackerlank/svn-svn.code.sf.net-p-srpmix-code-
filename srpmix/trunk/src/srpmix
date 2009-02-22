@@ -62,7 +62,9 @@ function parse_arguments
 		;;
 	    --output-dir=*)
 	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
-		if test ! -d "${OUTPUT_DIR}"; then
+		if test -d "${OUTPUT_DIR}"; then
+		    OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
+		else
 		    srpmix_abort "No such directory: ${OUTPUT_DIR}"
 		fi
 		;;
