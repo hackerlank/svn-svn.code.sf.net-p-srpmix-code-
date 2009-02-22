@@ -288,7 +288,7 @@ function create_rootdir
     if mkdir "${rootdir}"; then
         IS_ROOTDIR_CREATED=yes
 
-	echo "${SRPMIX_MAJOR_VERSION}.${SRPMIX_MINOR_VERSION}.0" > "${rootdir}/${PROFILE}"
+	echo "${SRPMIX_PKG_VERSION}" > "${rootdir}/${PROFILE}"
 	if test "x$FREEZE" = "xyes"; then
           chmod a-w "${rootdir}/${PROFILE}"
         fi
@@ -338,11 +338,11 @@ function verify_rootdir
 
     if test -d "${rootdir}"; then
 	if test -f "${rootdir}/${PROFILE}"; then
-	    if test `cat "${rootdir}/${PROFILE}"` = ${SRPMIX_VERSION}; then
+	    if test `cat "${rootdir}/${PROFILE}"` = ${SRPMIX_PKG_VERSION}; then
 		verbose use-rootdir "\"${rootdir}\"" `cat "${rootdir}/${PROFILE}"`
 	    else
 		echo "directory version mismatch" 1>&2
-		echo "expected: ${SRPMIX_VERSION}, existing: `cat ${rootdir}/${PROFILE}`" 1>&2
+		echo "expected: ${SRPMIX_PKG_VERSION}, existing: `cat ${rootdir}/${PROFILE}`" 1>&2
 		abort
 	    fi
 	else
@@ -822,7 +822,7 @@ function main
 
 
     message main-start           \
-	--version=${SRPMIX_VERSION} \
+	--version=${SRPMIX_PKG_VERSION} \
 	\
 	${NULL}
 

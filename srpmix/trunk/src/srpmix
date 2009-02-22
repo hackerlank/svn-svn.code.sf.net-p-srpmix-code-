@@ -50,7 +50,7 @@ function parse_arguments
 		;;
 	    --release=*)
 		RELEASE="$(echo $1 | sed 's/--release=//')"
-		SRPMIX_RELEASE=$RELEASE
+		SRPMIX_PKG_RELEASE=$RELEASE
 	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
 	        ;;
@@ -233,7 +233,7 @@ function main
 		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
                  --define "_specdir $MY_TMPDIR/SPECS"   \
 	         --define "_sourcedir $MY_TMPDIR/SOURCES" \
-	         --rebuild -ba ${enveloped_name}-$SRPMIX_VERSION-$SRPMIX_RELEASE.src.rpm \
+	         --rebuild -ba ${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE.src.rpm \
 	    || exit 4
     done
 
