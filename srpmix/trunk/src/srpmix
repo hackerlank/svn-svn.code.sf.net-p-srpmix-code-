@@ -104,11 +104,11 @@ function parse_arguments
 	srpmix_abort "too many arguments"
     fi
 
-    #if test -z "${OUTPUT_DIR}"; then
+    if test -z "${OUTPUT_DIR}"; then
 	if test "`whoami`" != "root"; then
 	    srpmix_abort "You must be root to run this program"
 	fi
-    #fi
+    fi
 
     if test -z "${TARGET_NAME}" -a -z "${TARGET_SRPM}"; then
 	print_usage 1>&2
@@ -182,7 +182,7 @@ function main
 #   all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
 
     MY_TMPDIR=`mktemp -d`
-    trap "/bin/rm -rf $MY_TMPDIR" 0    
+    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
 
     
     parse_arguments "$@"

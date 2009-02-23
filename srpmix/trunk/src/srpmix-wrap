@@ -213,7 +213,10 @@ Summary: Source Archives for package $package ($version-$release)
 $description
 
 %prep
-rm -rf %{_builddir}/%{name}
+if test -d %{_builddir}/%{name}; then 
+  chmod -R u+w  %{_builddir}/%{name}
+  rm -rf %{_builddir}/%{name}
+fi
 
 %build
 srpmix-ix -f -v %{_builddir}/%{name} \
@@ -236,6 +239,7 @@ fi
 mv \$RPM_BUILD_ROOT/$installdir/*.spec \$RPM_BUILD_ROOT/$installdir/specs.spec
 
 %clean
+chmod -R u+w \$RPM_BUILD_ROOT
 rm -rf \$RPM_BUILD_ROOT
 
 %files
