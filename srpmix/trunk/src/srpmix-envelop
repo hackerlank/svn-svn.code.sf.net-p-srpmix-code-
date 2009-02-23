@@ -128,10 +128,10 @@ function envelop_srpm
 	--enveloped-name="\"${enveloped_name}\"")
 
     if test -f \
-	${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE.src.rpm; \
+	${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm; \
 	then
 	if test -z "$ALLOW_OVERWRITE"; then
-	    filename="${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE.src.rpm"
+	    filename="${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm"
             echo \;\; "$filename already exists" 1>&2
 	    echo "$es_name"
             return
@@ -228,12 +228,12 @@ EOF
 
     cp $target_swrf $TMPDIR/SOURCES/
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
-    mv $TMPDIR/SRPMS/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE.src.rpm "${OUTPUTDIR}"
+    mv $TMPDIR/SRPMS/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm "${OUTPUTDIR}"
     rm $TMPDIR/SOURCES/`basename $target_swrf`
     echo "$es_name"
 
     es_print srpmix-envelop done \
-	--file="\"$(ls ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE.src.rpm)\""
+	--file="\"$(ls ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm)\""
 }
 
 function main

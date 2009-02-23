@@ -188,7 +188,7 @@ EOF
     fi
 
     $RPMBUILD --nodeps --quiet --define "_topdir $TMPDIR" -bs $spec > /dev/null
-    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE
+    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*
     mv $TMPDIR/SRPMS/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm "${OUTPUTDIR}"
 }
 
