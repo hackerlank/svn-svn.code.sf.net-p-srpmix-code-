@@ -31,7 +31,18 @@ ETAGSDIR=
 LOGDIR=
 LOGFILE=
 PLUGINDIR=
+
 LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
 
 BLACKLIST='.*\.bib$\|unic-005\.tex$\|.*\.srpmix$'
 
@@ -116,15 +127,6 @@ function verify_commands
     done
 }
 
-function try_source
-{
-    source $1
-    if test $? != 0; then
-	echo "*** ABORT...cannot find $1" 1>&2
-	exit 1
-    fi
-}
-
 function main
 {
     verify_commands "${ETAGS}"
@@ -134,7 +136,5 @@ function main
     run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
 }
 
-
-try_source ${LIBSRPMIX}
 es_time main "$@"
 exit $?

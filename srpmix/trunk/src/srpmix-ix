@@ -37,7 +37,18 @@ SPECDIR=srpmix-SPECS
 SOURCEDIR=archives
 BUILDDIR=pre-build
 SUBDIRS="SPECS ${BUILDDIR} ${SPECDIR} ${SOURCEDIR}"
+
+########################################################################
 LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo ";;; ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
 #
 ########################################################################
 
@@ -55,7 +66,7 @@ GROUP=
 TARGET=
 ABORT_COUNT=0
 TOTAL_COUNT=0
-DONT_HARDLINK=${SRPMIX_DONT_HARDLINK}
+DO_HARDLINK=${SRPMIX_DO_HARDLINK}
 IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
 #
 ########################################################################
@@ -74,10 +85,10 @@ function print_usage
     echo "            [--trace|-x]"
     echo "            [--sudo|-s]"
     echo "            [--freeze|-F]"
-    echo "            [--current-target-only]"
+    echo "            [--multi-targets]"
     echo "            [--target=target|-t=target|--target target|-t target]"
     echo "            [--set-group=group|-g=group|--set-group group|-g group]"
-    echo "            [--dont-hardlink] [--ignore-error]"
+    echo "            [--hardlink] [--ignore-error]"
     echo "            ROOTDIR SRPM_FILES..."
     echo 
     echo
@@ -88,9 +99,9 @@ function print_usage
     echo "  --freeze: freeze expanded files. "      
     echo ""
     echo "environment variables:"
-    echo "SRPMIX_DONT_HARDLINK=yes|no"
+    echo "SRPMIX_DO_HARDLINK=yes|no"
     echo "SRPMIX_IGNORE_ERROR=yes|no"
-    echo "SRPMIX_CURRENT_TARGET_ONLY=yes|no"
+    echo "SRPMIX_MULTI_TARGETS=yes|no"
     echo 
 }
 
@@ -131,8 +142,32 @@ function update_count
 
 ########################################################################
 #
+function get_current_target
+{
+    rpm --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
+}
+
+function make_targets
+{
+    local current=`get_current_target`
+    local targets=${current}
+    
+    for x in i386 i686 x86_64 ia64 ppc; do
+	if test "$x" = "$current"; then
+	    :
+	else
+	    targets="${targets} $x"
+	fi
+    done
+    echo $targets
+}
+
 function parse_arguments
 {
+    if test x"${SRPMIX_MULTI_TARGETS}" = xyes; then
+	TARGET=$(make_targets)
+    fi
+
     while [ $# -gt 0 ]; do
 	case "$1" in
 	    --help|-h)
@@ -179,8 +214,8 @@ function parse_arguments
                 GROUP=`echo $1 | sed -e 's/--set-group=//'`
                 shift 1
 		;;
-	    --current-target-only)
-	        TARGET=`get_current_target`
+	    --multi-targets)
+	        TARGET=$(make_targets)
 		shift 1
 		;;
             --target|-target|-t)
@@ -188,6 +223,7 @@ function parse_arguments
 	            shift 1
 		    
 		    TARGET=$1
+		    verify_target ${TARGET}
 		    shift 1
 		else
 		    echo no option argument for "$1" 1>&2
@@ -197,14 +233,16 @@ function parse_arguments
 		;;
             -t=*)
                 TARGET=`echo $1 | sed -e 's/-t=//'`
+		verify_target ${TARGET}
                 shift 1
                 ;;
 	    --target=*)
                 TARGET=`echo $1 | sed -e 's/--target=//'`
+		verify_target ${TARGET}
                 shift 1
 		;;
-	    --dont-hardlink)
-	        DONT_HARDLINK=yes
+	    --hardlink)
+	        DO_HARDLINK=yes
 		shift 1
 		;;
             --ignore-error)
@@ -242,13 +280,10 @@ function parse_arguments
     verbose varset --CREATE_ROOTDIR=\""${CREATE_ROOTDIR}"\"
     verbose varset --USE-SUDO=\""${USE_SUDO}"\"
 
-
-    if test x"${SRPMIX_CURRENT_TARGET_ONLY}" = xyes; then
-	TARGET=`get_current_target`
+    if test x${TARGET} = x; then
+	TARGET=$(get_current_target)
     fi
-    if test x"${TARGET}" != x; then
-	verbose varset --TARGET=\""${TARGET}"\"
-    fi
+    verbose varset --TARGET=\""${TARGET}"\"
 }
 #
 ########################################################################
@@ -533,25 +568,6 @@ function spec_file_hack
 	${NULL} 
 }
 
-function get_current_target
-{
-    rpm --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
-}
-function make_targets
-{
-    local current=`get_current_target`
-    local targets=${current}
-    
-    for x in i386 i686 x86_64 ia64 ppc; do
-	if test "$x" = "$current"; then
-	    :
-	else
-	    targets="${targets} $x"
-	fi
-    done
-    echo $targets
-}
-
 function srpm_deploy
 {
     local rootdir=$1
@@ -602,12 +618,8 @@ function srpm_deploy
 	> "${rootdir}/${SPECDIR}/${xspec_file}"
 
     
-    if test "x${TARGET}" = x; then
-	targets=$(make_targets)
-    else
-	targets="${TARGET}"
-    fi
 
+    targets="${TARGET}"
     for arch in ${targets}; do
 	message build-start --target=${arch} --spec-file=\""${xspec_file}\""
 	srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
@@ -620,12 +632,14 @@ function srpm_deploy
     done
     
     if test ${status} != 0; then
-	if test "x${IGNORE_ERROR}" = xyes; then
+	if test "x${IGNORE_ERROR}" != xyes; then
     	    verbose abort				\
 		--stage=build			\
 		--srpm-file="\"${srpm_file}\""
 	    echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
 	    return 1
+	else
+	    status=0
 	fi
     fi
 
@@ -638,7 +652,7 @@ function srpm_deploy
 	\
 	${NULL}
 
-    return 0
+    return ${status}
 }
 
 function srpm_install
@@ -756,7 +770,7 @@ function srpm_freeze
 
     if test "x$FREEZE" = "xyes"; then
 
-      if test "x${DONT_HARDLINK}" != xyes; then
+      if test "x${DO_HARDLINK}" == xyes; then
 	  verbose hardlink-start --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
 	  ${HARDLINK} -c "${rootdir}/${SOURCEDIR}/${srpm_name}" \
 	      "${rootdir}/${BUILDDIR}/${build_name}"/*
@@ -817,20 +831,10 @@ function srpm_freeze
 
 ########################################################################
 #
-function try_source
-{
-    source $1
-    if test $? != 0; then
-	echo ";;; ABORT...cannot find $1" 1>&2
-	exit 1
-    fi
-}
-
 function main
 {
     parse_arguments "$@"
-    
-    verify_target ${TARGET}
+
     verify_commands ${REQUIRED_COMMANDS}
     verify_srcfiles ${SRCFILES}
     verify_rootdir "${ROOTDIR}" "${CREATE_ROOTDIR}"
@@ -864,7 +868,6 @@ function main
 #
 # RUN
 #
-try_source ${LIBSRPMIX}
 es_time main "$@"
 exit $?
 #

@@ -4,6 +4,18 @@ TARGET_NAME=
 TARGET_SRPM=
 
 LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
+
 MY_TMPDIR=
 WRAP_OPTS=""
 RELEASE=
@@ -16,12 +28,12 @@ set -e
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix [--dont-hardlink]"
+    echo "  srpmix [--hardlink]"
     echo "         [--output-dir=DIR]"
     echo "         [--release=RELEASE]"
     echo "         [--debug]"
     echo "         [--ignore-error]"
-    echo "         [--current-target-only]"
+    echo "         [--multi-targets]"
     echo "          --name=PACKAGE|--srpm=SRPM"
 #    TODO: Multi targets
 #    TODO: URL support
@@ -55,14 +67,14 @@ function parse_arguments
 	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
 	        ;;
-	    --dont-hardlink)
-	        export SRPMIX_DONT_HARDLINK=yes
+	    --hardlink)
+	        export SRPMIX_DO_HARDLINK=yes
 	        ;;
 	    --ignore-error)
 	        export SRPMIX_IGNORE_ERROR=yes
 		;;
-	    --current-target-only)
-	        export SRPMIX_CURRENT_TARGET_ONLY=yes
+	    --multi-targets)
+	        export SRPMIX_MULTIE_TARGETS=yes
 		;;
 	    --output-dir=*)
 	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
@@ -131,15 +143,6 @@ function parse_arguments
 	    fi
 	    TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
 	fi
-    fi
-}
-
-function try_source
-{
-    source $1
-    if test $? != 0; then
-        echo "*** ABORT..." "cannot find $1" 1>&2
-	exit 1
     fi
 }
 
@@ -254,6 +257,5 @@ function main
     fi
 }
 
-try_source ${LIBSRPMIX}
 { main "$@" ; } < /dev/null
 exit $?

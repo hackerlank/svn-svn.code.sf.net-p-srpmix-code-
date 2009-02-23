@@ -8,8 +8,6 @@ QUIET=
 
 
 LIBSRPMIX=libsrpmix.sh
-HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
-
 function try_source
 {
     source $1
@@ -18,12 +16,17 @@ function try_source
 	exit 1
     fi
 }
+try_source ${LIBSRPMIX}
+
+HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
+
+
 
 function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db -h|--help"
-    echo "  srpmix-db [--dont-hardlink] [--root=ROOT] [--quite|-q] -i|--install SWRF..."
+    echo "  srpmix-db [--hardlink] [--root=ROOT] [--quite|-q] -i|--install SWRF..."
     echo "  srpmix-db [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
     echo "  srpmix-db -l|--list"
     echo
@@ -203,6 +206,5 @@ function main
     do_$COMMAND
 }
 
-try_source ${LIBSRPMIX}
 main "$@"
 exit $?

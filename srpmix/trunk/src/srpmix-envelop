@@ -23,12 +23,24 @@
 #
 ########################################################################
 
-RPMBUILD=rpmbuild
 LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
+RPMBUILD=rpmbuild
 OUTPUTDIR=
 TMPDIR=
 DUMP_SPEC=
 ALLOW_OVERWRITE=
+
 
 function print_usage
 {
@@ -92,17 +104,6 @@ function parse_arguments
     fi
 }
 
-
-function try_source
-{
-    source $1
-    if test $? != 0; then
-        echo "*** ABORT..." "cannot find $1" 1>&2
-	exit 1
-    fi
-}
-
-
 function envelop_srpm
 {
     target_swrf=$1
@@ -155,7 +156,7 @@ function envelop_srpm
 Summary: Source code for $package with canonical directory layout
 Name: ${enveloped_name}
 Version: $SRPMIX_PKG_VERSION
-Release: $SRPMIX_PKG_RELEASE
+Release: $SRPMIX_PKG_RELEASE%{?dist}
 Source: `basename $target_swrf`
 Autoreq: 0
 Requires: srpmix
@@ -254,8 +255,6 @@ function main
         fi
     done
 }
-
-try_source ${LIBSRPMIX}
 
 RUN=
 if test "x${DUMP_SPEC}" = "x"; then

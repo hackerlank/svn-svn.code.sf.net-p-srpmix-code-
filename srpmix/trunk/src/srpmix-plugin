@@ -24,6 +24,17 @@
 ########################################################################
 
 LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        abort "cannot find $1"
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
 ROOTDIR=
 
 function print_usage
@@ -84,15 +95,6 @@ function verify_commands
     done
 }
 
-function try_source
-{
-    source $1
-    if test $? != 0; then
-        abort "cannot find $1"
-	exit 1
-    fi
-}
-
 function list_plugins
 {
     find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort | while read plugin
@@ -112,6 +114,6 @@ function main
 # TODO: return status, see srpmix-wrap
 }
 
-try_source ${LIBSRPMIX}
+
 es_time main "$@"
 exit $?

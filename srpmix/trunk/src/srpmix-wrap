@@ -24,7 +24,19 @@
 ########################################################################
 
 RPMBUILD=rpmbuild
+
 LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
 OUTPUTDIR=
 TMPDIR=
 JUST_PRINT=
@@ -101,15 +113,6 @@ function parse_arguments
     fi
     if test ! -d "${OUTPUTDIR}"; then
 	srpmix_abort "No such directory: ${OUTPUTDIR}"
-    fi
-}
-
-function try_source
-{
-    source $1
-    if test $? != 0; then
-        echo "*** ABORT..." "cannot find $1" 1>&2
-	exit 1
     fi
 }
 
@@ -296,8 +299,6 @@ function main
         fi
     done
 }
-
-try_source ${LIBSRPMIX}
 
 RUN=
 if test "x${DUMP_SPEC}" = "x"; then
