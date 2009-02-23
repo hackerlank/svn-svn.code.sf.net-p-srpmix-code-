@@ -22,9 +22,11 @@
 ########################################################################
 
 #variable
-SRPMIX_USR_DIR=/usr/share/srpmix
+prefix="@prefix@"
+SRPMIX_USR_DIR="@datadir@/@PACKAGE@"
 SRPMIX_SWRFS_DIR="${SRPMIX_USR_DIR}/swrfs"
 SRPMIX_PLUGIN_DIR="${SRPMIX_USR_DIR}/plugins"
+SRPMIX_SYSCONF_DIR="@sysconfdir@"
 
 SRPMIX_VAR_DIR=
 SRPMIX_SOURCES_DIR=
@@ -37,7 +39,7 @@ function srpmix_reset_var_dir
     SRPMIX_SOURCES_DIR="${SRPMIX_VAR_DIR}/${SRPMIX_SOURCES_RDIR}"
     SRPMIX_DB_DIR="${SRPMIX_VAR_DIR}/${SRPMIX_DB_RDIR}"
 }
-srpmix_reset_var_dir /var/lib/srpmix
+srpmix_reset_var_dir @localstatedir@/lib/srpmix
 
 SRPMIX_VERSION=@VERSION@
 SRPMIX_MAJOR_VERSION=@SRPMIX_MAJOR_VERSION@
@@ -50,6 +52,14 @@ SRPMIX_PKG_MICRO_VERSION=0
 
 SRPMIX_PKG_VERSION=${SRPMIX_PKG_MAJOR_VERSION}.${SRPMIX_PKG_MINOR_VERSION}.${SRPMIX_PKG_MICRO_VERSION}
 SRPMIX_PKG_RELEASE=0
+
+SRPMIX_SYSCONF="$SRPMIX_SYSCONF_DIR/srpmix.cf"
+
+if test -f "$SRPMIX_SYSCONF"; then
+  . "$SRPMIX_SYSCONF"
+fi
+srpmix_reset_var_dir "$SRPMIX_VAR_DIR"
+
 
 function srpmix_abort
 {

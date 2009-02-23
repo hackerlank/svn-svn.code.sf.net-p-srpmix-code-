@@ -46,6 +46,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_datadir}/srpmix/plugins
 
+%{_sysconfdir}/srpmix.cf
+%{_sysconfdir}/cron.daily/srpmix.daily
+
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0
 - First RPM build.

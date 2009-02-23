@@ -25,3 +25,8 @@ dist_plugin_SCRIPTS =        \
 	\
         $(NULL)
 
+dist_sysconf_DATA = srpmix.cf
+
+crondailydir=$(sysconfdir)/cron.daily
+dist_crondaily_SCRIPTS = srpmix.daily
+
