@@ -1,0 +1,5 @@
+#!/bin/sh
+
+source libsrpmix.sh
+/bin/ls -d $SRPMIX_SOURCES_DIR/*/* | xargs -n1 --verbose hardlink
+

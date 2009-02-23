@@ -1,0 +1,7 @@
+#
+## SRPMix Configuration
+#
+
+# SRPMIX_VAR_DIR="/var/lib/srpmix"
+# SRPMIX_DO_HARDLINK=no
+
