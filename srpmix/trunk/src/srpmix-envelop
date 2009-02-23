@@ -127,12 +127,15 @@ function envelop_srpm
 	--target-swrf="\"$(basename $target_swrf)\"" \
 	--enveloped-name="\"${enveloped_name}\"")
 
-    if test -f \
-	${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm; \
-	then
+    filename="${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm"
+    n_filenames=$(find ${OUTPUTDIR} -name "${filename}" \
+	| grep -v 'swrf\.src\.rpm' \
+	| wc -l)
+    if test $n_filenames != 0; then
 	if test -z "$ALLOW_OVERWRITE"; then
 	    filename="${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm"
-            echo \;\; "$filename already exists" 1>&2
+            echo ";; fille matching to \"$filename\" already exists" 1>&2
+	    find ${OUTPUTDIR} -name "${filename}" 1>&2
 	    echo "$es_name"
             return
 	fi
