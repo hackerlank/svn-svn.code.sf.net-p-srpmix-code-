@@ -6,12 +6,15 @@
 
 (require 'server)
 (setq server-raise-frame  nil)
-(setq server-socket-dir   "~/")
+(setq server-socket-dir   "/home/masatake/tmp")
 (setq server-name         ".flserver")
 
 (defun flserver-htmlize (input output-dir)
   (htmlize-file input output-dir)
   )
+
+;; DANGER, we should avoid this.
+(defun server-ensure-safe-dir (dir))
 (server-start)
 
 (while t
