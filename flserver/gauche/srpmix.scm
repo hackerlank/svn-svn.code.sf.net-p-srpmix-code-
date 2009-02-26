@@ -12,6 +12,8 @@
 
   (use util.match)
 
+  (use gauche.process)
+
   (use srpmix.emacs)
   (use srpmix.dired)
   (use srpmix.config)
@@ -44,7 +46,6 @@
 
 (define socket-dir "/home/masatake/tmp")
 (define output-dir "/home/masatake/tmp/flcache")
-(define emacsclient "/home/masatake/tools/bin/emacsclient")
 
 (define defined-stages  '(pre-build specs))
 (define defined-file-displays '(raw font-lock))

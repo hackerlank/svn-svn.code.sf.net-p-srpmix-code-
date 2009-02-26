@@ -7,6 +7,7 @@
   )
 (select-module srpmix.emacs)
 
+(define emacsclient "/home/masatake/tools/bin/emacsclient")
 
 (define (script-htmlize path output-file range)
   (list 'flserver-htmlize 
