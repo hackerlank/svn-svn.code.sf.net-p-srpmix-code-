@@ -31,12 +31,13 @@
         text-decoration: inherit;                                                                                                                                                                                  
       }                                                                                                                                                                                                            
       a:hover {                                                                                                                                                                                                    
-        text-decoration: underline;                                                                                                                                                                                
+        /* text-decoration: underline; */
+        background-color: darkolivegreen;
       }                     
 
       .dired-header {
         /* dired-header */
-        color: green;
+        color: palegreen;
       }
       .dired-directory {
         /* dired-directory */
