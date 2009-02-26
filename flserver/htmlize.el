@@ -1663,7 +1663,7 @@ overload this function to do it and htmlize will comply."
 ;      (concat sans-extension ".html"))))
 
 ;;;###autoload
-(defun htmlize-file (file &optional target)
+(defun htmlize-file (file &optional target beg end)
   "Load FILE, fontify it, convert it to HTML, and save the result.
 
 Contents of FILE are inserted into a temporary buffer, whose major mode
@@ -1721,7 +1721,15 @@ does not name a directory, it will be used as output file name."
 	  ;; contrary to the documentation.  This seems to work.
 	  (font-lock-fontify-buffer))
 	;; htmlize the buffer and save the HTML.
-	(with-current-buffer (htmlize-buffer-1)
+	(with-current-buffer 
+	    (if beg 
+		(htmlize-region (save-excursion (goto-line beg)
+						(line-beginning-position))
+				(save-excursion (goto-line end)
+						(line-beginning-position)))
+						
+		(htmlize-buffer-1))
+	      
 	  (unwind-protect
 	      (progn
 		(run-hooks 'htmlize-file-hook)
