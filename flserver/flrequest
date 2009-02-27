@@ -1,6 +1,6 @@
 #!/bin/sh
 SOCKET_DIR=~/tmp
-OUTPUT_DIR=~/tmp
+OUTPUT_DIR=/tmp
 if emacsclient \
     --socket-name=${SOCKET_DIR}/.flserver \
     --eval "(flserver-htmlize "\"$1\"" "\"${OUTPUT_DIR}\"")" \
