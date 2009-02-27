@@ -1798,17 +1798,25 @@
 	(symbol-function 'visit-tags-table)))
 
 (defun stitch-search-tags-file (base)
-  (unless (equal base "/")
-    (let ((upper (file-name-directory base)))
-      (if (file-exists-p (concat upper "plugins/etags/TAGS"))
-	  (concat upper "plugins/etags")
-	(stitch-search-tags-file (directory-file-name upper))))))
+    (unless (equal base "/")
+      (let ((upper (file-name-directory base)))
+	(cond
+	 ((not upper)
+	  nil)
+	 ((file-exists-p (concat upper "plugins/etags/TAGS"))
+	  (concat upper "plugins/etags"))
+	 ((file-exists-p (concat upper ".lcopy/TAGS"))
+	  (concat upper ".lcopy"))
+	 (t
+	  (stitch-search-tags-file (directory-file-name upper)))))))
     
-(defun stitch-visit-tags-table ()
+(defun stitch-visit-tags-table (file)
   (interactive)
-  (let ((in-stitch (stitch-search-tags-file default-directory)))
-	(let ((default-directory (or in-stitch default-directory)))
-	  (call-interactively 'stitch-original-visit-tags-table))))
+  (if file
+      (stitch-original-visit-tags-table file)
+    (let ((in-stitch (stitch-search-tags-file default-directory)))
+      (let ((default-directory (or in-stitch default-directory)))
+	(call-interactively 'stitch-original-visit-tags-table)))))
 
 (fset 'visit-tags-table (symbol-function 'stitch-visit-tags-table))
   
