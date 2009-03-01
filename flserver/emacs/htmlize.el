@@ -395,6 +395,43 @@ output.")
 	      (> res limit))
 	  limit
 	res)))))
+
+;; NEW CODE
+(defun htmlize-fold (proc list result)
+  (if (null list)
+      result
+    (htmlize-fold proc (cdr list) 
+		  (funcall proc (car list) result))))
+
+(defun htmlize-overlays-at (p)
+  (htmlize-fold (lambda (kar kdr)
+		  (if (htmlize-acceptable-overlayp kar)
+		      (cons kar kdr)
+		    kdr))
+		(overlays-in p (let ((e0 (1+ p)))
+			   (if (< (point-max) e0)
+			       p
+			     e0)))
+		(list)))
+
+(defun htmlize-acceptable-overlayp (o)
+  (or (overlay-get o 'linum-str)))
+
+(defun htmlize-next-change (pos prop &optional limit)
+  (let ((r0 (next-char-property-change pos limit))
+	(r1 (next-single-char-property-change pos prop nil limit)))
+    (if (< r0 r1)
+	(let ((ovs (htmlize-overlays-at r0)))
+	  (let ((r00 (some (lambda (o) 
+			     (and (htmlize-acceptable-overlayp o)
+				  (overlay-start o))
+			     )
+			   ovs)))
+	    (or r00 r1)))
+      r1)))
+	  
+      
+    
  
 ;;; Transformation of buffer text: HTML escapes, untabification, etc.
 
@@ -862,16 +899,61 @@ If no rgb.txt file is found, return nil."
     (:strike-through
      (setf (htmlize-fstruct-strikep fstruct) value))))
 
+;(defun htmlize-face-size (face)
+;  ;; The size (height) of FACE, taking inheritance into account.
+;  ;; Only works in Emacs 21 and later.
+;  (let ((size-list
+;	 (loop
+;	  for f = face then (face-attribute f :inherit)
+;	  until (or (not f) (eq f 'unspecified))
+;	  for h = (if (symbolp f)
+;		      (face-attribute f :height) 
+;		    (mapcar (lambda (f0)
+;			      (face-attribute f0 :height))
+;			    f))
+;	  collect (if (eq h 'unspecified) nil h))))
+;    (reduce 'htmlize-merge-size (cons nil size-list))))
+
+;; NEW CODE for linum
+(defun htmlize-util-uniq (input output)
+  (cond
+   ((null input)
+    output)
+   (t
+    (htmlize-util-uniq (cdr input)
+		       (if (memq (car input) output)
+			   output
+			 (cons (car input) output))))))
+
+;; NEW CODE for linum
+(defun htmlize-face-all-ancestors (face)
+  (reverse
+   (htmlize-util-uniq
+    (delete nil (let ((parents (face-attribute face :inherit)))
+		  (cond 
+		   ((or (not parents) (eq parents 'unspecified))
+		    (list face))
+		   ((symbolp parents)
+		    (cons face (cons parents (htmlize-face-all-ancestors parents))))
+		   ((listp parents)
+		    (apply 'append (cons face parents)
+			   (mapcar 'htmlize-face-all-ancestors
+				   parents)))
+		   (t
+		    (list 'default)))))
+    (list))))
+
+;; NEW CODE for linum
 (defun htmlize-face-size (face)
-  ;; The size (height) of FACE, taking inheritance into account.
-  ;; Only works in Emacs 21 and later.
-  (let ((size-list
-	 (loop
-	  for f = face then (face-attribute f :inherit)
-	  until (or (not f) (eq f 'unspecified))
-	  for h = (face-attribute f :height)
-	  collect (if (eq h 'unspecified) nil h))))
-    (reduce 'htmlize-merge-size (cons nil size-list))))
+  (reduce 'htmlize-merge-size
+	  (cons nil
+		(delete nil (mapcar
+			     (lambda (f)
+			       (let ((h (face-attribute f :height)))
+				 (if (or (not h) (eq h 'unspecified))
+				     nil
+				   h)))
+			     (htmlize-face-all-ancestors face))))))
 
 (defun htmlize-face-to-fstruct (face)
   "Convert Emacs face FACE to fstruct."
@@ -1450,7 +1532,8 @@ it's called with the same value of KEY.  All other times, the cached
 	(insert (htmlize-method doctype) ?\n
 		(format "<!-- Created by htmlize-%s in %s mode. -->\n"
 			htmlize-version htmlize-output-type)
-		"<html>\n  ")
+		"<html>\n  "
+		)
 	(plist-put places 'head-start (point-marker))
 	(insert "<head>\n"
 		"    <title>" (htmlize-protect-string title) "</title>\n"
@@ -1486,6 +1569,12 @@ it's called with the same value of KEY.  All other times, the cached
 	;; require buffer switches, which are slow in Emacs.
 	(goto-char (point-min))
 	(while (not (eobp))
+	  ;; NEW CODE
+	  (mapc (lambda (o)
+		  (htmlize-zero-width-overlay o)
+		  )
+		(htmlize-overlays-at (point)))
+	  
 	  (setq next-change (htmlize-next-change (point) 'face))
 	  ;; Get faces in use between (point) and NEXT-CHANGE, and
 	  ;; convert them to fstructs.
@@ -1545,6 +1634,62 @@ it's called with the same value of KEY.  All other times, the cached
 	(run-hooks 'htmlize-after-hook)
 	(buffer-enable-undo))
       htmlbuf)))
+
+(defvar htmlize-zero-width-overlay-temp-buffer (let  ((b (get-buffer-create
+							  " *zero-width-overlay-htmlize*")))
+						 (with-current-buffer b
+						   (buffer-disable-undo))
+						 b))
+						 
+
+;; insert-text-method fstruct-list htmlbuf
+(defun htmlize-zero-width-overlay (o)
+  (cond
+   ((overlay-get o 'linum-str)
+    (with-current-buffer htmlize-zero-width-overlay-temp-buffer
+      (htmlize-linum-prepare-buffer o)
+      (htmlize-buffer-0)))))
+
+(defun htmlize-linum-prepare-buffer (o)
+  (erase-buffer) 
+  (insert (overlay-get o 'linum-str)) 
+  (insert " "))
+
+(defun htmlize-buffer-0 ()
+  (let (next-change fstruct-list text trailing-ellipsis)
+    (goto-char (point-min))
+    (while (not (eobp))
+      (setq next-change (htmlize-next-change (point) 'face))
+      (setq face-list (htmlize-faces-at-point)
+	    fstruct-list (delq nil (mapcar (lambda (f)
+					     (gethash f face-map))
+					   face-list)))
+      (setq text (htmlize-buffer-substring-no-invisible
+		  (point) next-change))
+      
+;;      (when trailing-ellipsis
+;;	(setq text (htmlize-trim-ellipsis text)))
+;;      (when (> (length text) 0)
+;;	(setq trailing-ellipsis
+;;	      (get-text-property (1- (length text))
+;;				 'htmlize-ellipsis text)))
+      (setq text (htmlize-untabify text (current-column)))
+      (setq text (htmlize-protect-string text))
+      (when (> (length text) 0)
+	;; Insert the text, along with the necessary markup to
+	;; represent faces in FSTRUCT-LIST.
+	(funcall insert-text-method text fstruct-list htmlbuf))
+      (goto-char next-change))
+    ))
+
+(add-hook 'htmlize-before-hook
+	  'htmlize-linum-update-buffer)
+(defun htmlize-linum-update-buffer ()
+  (flet ((window-start (win) (point-min))
+	 (window-end (win &optional update) (point-max))
+	 (set-window-margins (win width)))
+    (linum-update-window nil)))
+
 
 ;; Utility functions.
 
@@ -1663,7 +1808,9 @@ overload this function to do it and htmlize will comply."
 ;      (concat sans-extension ".html"))))
 
 ;;;###autoload
-(defun htmlize-file (file &optional target beg end)
+(defun htmlize-file (file &optional target 
+			  ;; NEW CODE
+			  beg end)
   "Load FILE, fontify it, convert it to HTML, and save the result.
 
 Contents of FILE are inserted into a temporary buffer, whose major mode
@@ -1703,6 +1850,7 @@ does not name a directory, it will be used as output file name."
     (with-temp-buffer
       ;; Insert FILE into the temporary buffer.
       (if (file-directory-p file)
+	  ;; NEW CODE: Use dired.
 	  (insert (save-excursion
 		    (let* ((b (dired file)))
 		      (prog1 (buffer-string)
@@ -1723,13 +1871,13 @@ does not name a directory, it will be used as output file name."
 	;; htmlize the buffer and save the HTML.
 	(with-current-buffer 
 	    (if beg 
+		;; NEW CODE
 		(htmlize-region (save-excursion (goto-line beg)
 						(line-beginning-position))
 				(save-excursion (goto-line end)
 						(line-beginning-position)))
 						
-		(htmlize-buffer-1))
-	      
+	      (htmlize-buffer-1))
 	  (unwind-protect
 	      (progn
 		(run-hooks 'htmlize-file-hook)

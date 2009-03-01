@@ -26,9 +26,11 @@
 (defun server-ensure-safe-dir (dir))
 
 
+(require 'linum)
 
 (require 'htmlize)
 (defun flserver-htmlize (input output &optional range)
+  (linum-mode)
   (let ((start (current-time)))
     (flserver-log (format "(start :time \"%s\" :input \"%s\" output: \"%s\" :range %s)\n" 
 			  (current-time-string start) input output range))
@@ -42,7 +44,11 @@
 (progn 
   (set-background-color "black")
   (set-foreground-color "white")
-  (set-face-foreground 'font-lock-comment-face "red1"))
+  (set-face-foreground 'font-lock-comment-face "red1")
+  (set-face-foreground 'linum "gray")
+;  (set-face-background 'linum "white")
+  (set-face-underline 'linum t)
+  )
 
 
 (autoload 'rpm-spec-mode "rpm-spec-mode.el" "RPM spec mode." t)

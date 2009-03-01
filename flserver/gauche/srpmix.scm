@@ -6,15 +6,9 @@
   (use srfi-13)
 
   (use file.util)
-
-  (use util.digest)
-  (use rfc.md5)
-
   (use util.match)
 
-  (use gauche.process)
-
-  (use srpmix.emacs)
+  (use srpmix.font-lock)
   (use srpmix.dired)
   (use srpmix.config)
 
@@ -259,29 +253,11 @@
 	 (file->html-as-font-lock path range err-return)))
     ('dir
      (dir->html-as-font-lock path err-return))))
-     
-
-(define (make-cache-file-name path range)
-  (let1 path (digest-hexify (md5-digest-string path))
-    (if range
-	(format "~a:~a-~a" path (car range) (last range))
-	path)))
 
 (define (file->html-as-font-lock path range err-return)
-  (let1 output-file (build-path output-dir 
-				(make-cache-file-name path range))
-    (when (file-is-readable? output-file)
-      (touch-file output-file))
-    (unless (file-is-readable? output-file)
-      (let1 p (run-emacs (build-path socket-dir ".flserver")
-			 (script-htmlize path output-file range)
-			 #t)
-	(unless (eq? (process-exit-status p) 0)
-	  (err-return "failed in font-lock" ))))
-
-    (let1 r (list (cgi-header) (call-with-input-file output-file port->string))
-      ;;(sys-unlink output-file)
-      r)))
+  (let1 s (font-lock path err-return)
+    (list (cgi-header) s)
+    ))
 
 (define (dir->html-as-font-lock path err-return)
   (run-dired path err-return))

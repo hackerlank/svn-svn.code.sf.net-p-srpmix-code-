@@ -157,7 +157,10 @@ and you have to scroll or press C-l to update the numbers."
         (setq width (max width (length str)))
         (unless visited
           (let ((ov (if (null linum-available)
-                        (make-overlay (point) (point))
+			;; NEW CODE
+                        (let ((o (make-overlay (point) (point))))
+			  (overlay-put o 'face 'linum)
+			  o)
                       (move-overlay (pop linum-available) (point) (point)))))
             (push ov linum-overlays)
             (overlay-put ov 'before-string

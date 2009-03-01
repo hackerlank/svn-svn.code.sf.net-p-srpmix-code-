@@ -1,22 +1,13 @@
 (define-module srpmix.emacs
   (use srfi-1)
+
   (use gauche.process)
+  (use srpmix.config)
     
-  (export run-emacs
-	  script-htmlize)
+  (export run-emacs)
   )
+
 (select-module srpmix.emacs)
-
-(define emacsclient "/home/masatake/tools/bin/emacsclient")
-
-(define (script-htmlize path output-file range)
-  (list 'flserver-htmlize 
-	path
-	output-file
-	(list 'quote (if range 
-			 (list (car range)
-			       (last range))
-			 'nil))))
 
 (define (run-emacs socket-path es-script wait?)
   (run-process (list emacsclient
