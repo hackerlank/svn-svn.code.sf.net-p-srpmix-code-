@@ -4,6 +4,8 @@
 
   (use util.digest)
   (use rfc.md5)
+
+  (use www.cgi)
   
   (use srpmix.config)
   (use srpmix.emacs)
@@ -28,8 +30,13 @@
 			 'nil))))
 
 (define (font-lock input err-return)
-  (let1 output (make-cache-file-name input)
-    (when (file-is-readable? output)
+  ;; INPUT as OUTPUT if the file is too large.
+  (let1 output (if (< max-font-lock-size
+		      (file-size input))
+		   input
+		   (make-cache-file-name input))
+    (when (and (not (eq? input output))
+	       (file-is-readable? output))
       (touch-file output))
     (unless (file-is-readable? output)
       (let1 p (run-emacs (build-path socket-dir ".flserver")
@@ -37,6 +44,8 @@
 			 #t)
 	(unless (eq? (process-exit-status p) 0)
 	  (err-return "failed in font-lock"))))
-    (call-with-input-file output port->string)))
+    (list 
+     (cgi-header :content-type (if (eq? input output) "text/plain" "text/html"))
+     (call-with-input-file output port->string))))
 
 (provide "srpmix/font-lock")

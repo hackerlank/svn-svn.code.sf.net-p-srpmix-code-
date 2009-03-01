@@ -255,9 +255,7 @@
      (dir->html-as-font-lock path err-return))))
 
 (define (file->html-as-font-lock path range err-return)
-  (let1 s (font-lock path err-return)
-    (list (cgi-header) s)
-    ))
+  (font-lock path err-return))
 
 (define (dir->html-as-font-lock path err-return)
   (run-dired path err-return))
