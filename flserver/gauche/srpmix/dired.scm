@@ -8,6 +8,7 @@
 
   (use text.html-lite)
   (use www.cgi)
+  (use rfc.uri)
 
   (use srpmix.config)
 
@@ -80,7 +81,8 @@
 	(prefix-length (string-length prefix)))
     (cond
      ((string-prefix? prefix path)
-      (html-escape-string (format "http://srpmix.org/api/browse.cgi?path=~a&display=~a"
+      (uri-compose :scheme "http" :host "srpmix.org"
+		   :path  (format "/api/browse.cgi?path=~a&display=~a"
 				  (wash-path (string-drop path prefix-length))
 				  display)))
      (else
@@ -101,29 +103,32 @@
     (cond
      (marker
       (html:span :class "dired-marked"
-		   (list
-		    (format "~a ~a------rwx n sources srpmix 4096  1974-01-01 00:00 "
-			    marker
-			    (if dir? "d" "-"))
-		    (html:a :href href ee)
-		    "\n")))
+		 (list
+		  (format "~a ~a------rwx n sources srpmix 4096  1974-01-01 00:00 "
+			  marker
+			  (if dir? "d" "-"))
+		  (if href
+		      (html:a :href href ee)
+		      ee)
+		  "\n")))
      (else
       (list
        (format "  ~a------rwx n sources srpmix 4096  1974-01-01 00:00 "
 	       (if dir? "d" "-"))
-       (html:a :href href
-	       (cond
-		(symlink? (html:span 
-			   :class "dired-symlink" 
-			   (string-append ee " -> " (html-escape-string symlink?))))
-		(dir? (html:span 
-		       :class "dired-directory"
-		       ee))
-		(else ee))
-	       "\n"))))))
+       (let1 line (cond
+		   (symlink? (html:span 
+			      :class "dired-symlink" 
+			      (string-append ee " -> " (html-escape-string symlink?))))
+		   (dir? (html:span 
+			  :class "dired-directory"
+			  ee))
+		   (else ee))
+	 (if href
+	     (html:a :href href line)
+	     line))
+       "\n")))))
 
 (define (run-dired path err-return)
-  
   (let ((files (directory-list path :add-path? #f :children? #t
 			       :filter  (lambda (e) 
 					  (and (not (equal? e ".htaccess"))
@@ -161,15 +166,16 @@
 					     "D")))
 				     (href-for path e "font-lock" err-return) #f)
 			 )
-			
+			((not (file-is-readable? epath))
+			 (build-line e dir? "D" #f #f))
 			(else
 			 (let1 symlink (symlink-for path e)
-			     (build-line e dir? #f (href-for path e 
-							     (if (< max-font-lock-size 
-								    (file-size epath))
-								 "raw"
-								 "font-lock")
-							     err-return) symlink))
+			   (build-line e dir? #f (href-for path e 
+							   (if (< max-font-lock-size 
+								  (file-size epath))
+							       "raw"
+							       "font-lock")
+							   err-return) symlink))
 			 ))))
 		   files))))))))
 

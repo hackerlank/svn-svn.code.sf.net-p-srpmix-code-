@@ -6,16 +6,18 @@
 (select-module srpmix.browse)
 
 ;; ---------------------------------------------------------------------
+(debug-print-width #f)
 (define (srpmix-browse-main)
   (cgi-main
    (lambda (params)
      (let/cc return
        (let* ((report-error (make-reporter return))
-	      (dir     (cgi-get-parameter "path" params :default ""))
+	      (path     (cgi-get-parameter "path" params :default ""))
 	      (display (check-dir-display (cgi-get-parameter "display" params :default "font-lock") 
 					  report-error)))
+	 ;(debug-print path)
 	 (call-with-values (cute
-			    params->path dir report-error)
+			    params->path path report-error)
 	   (cute
 	    path->html <> <> display report-error)))))))
 

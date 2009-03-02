@@ -123,12 +123,18 @@
 ;;
 ;; Parameters -> Path
 ;;
+(define (cgi-encode path)
+  (if (string? path)
+      (regexp-replace-all #/ / path "+")
+      path))
 (define params->path (match-lambda*
-			((dist version package stage file err-return)
+		      ((dist version package stage file err-return)
+		       (let1 file (cgi-encode file)
 			 (if dist
 			     (params->path-via-dists dist package stage file err-return)
-			     (params->path-via-sources package version stage file err-return)))
-			((dir err-return)
+			     (params->path-via-sources package version stage file err-return))))
+		      ((dir err-return)
+		       (let1 dir (debug-print (cgi-encode dir))
 			 (let1 path (check-dir dir err-return)
 			   (cond
 			    ((not (file-is-readable? path))
@@ -138,7 +144,7 @@
 			    ((file-is-regular? path)
 			     (values path 'file))
 			    (else
-			     (err-return (format "No handler for: ~s" dir))))))))
+			     (err-return (format "No handler for: ~s" dir)))))))))
 
 
 (define (params->path-via-package package-dir stage file err-return)
@@ -255,9 +261,11 @@
      (dir->html-as-font-lock path err-return))))
 
 (define (file->html-as-font-lock path range err-return)
+  ;(debug-print 'file->html-as-font-lock)
   (font-lock path err-return))
 
 (define (dir->html-as-font-lock path err-return)
+  ;(debug-print 'dir->html-as-font-lock)
   (run-dired path err-return))
 
 
