@@ -390,24 +390,70 @@ function twig_pedigree_full
 #
 # TODO: BUILD ID
 #
+BUILD_ID=
+BUILD_ID_SET_VIA_CMDLINE=
+BUILD_STAGE=-ba
+
 function twig_build_help
 {
-    echo "    " build "[-ba|-bb|-bp|-bc|-bi|-bl|-bs]" [BUILDID]
+    echo "    " build "-h"
+    echo "    " build "[-ba|-bb|-bp|-bc|-bi|-bl|-bs]" [BUILD_ID]
+    echo 
+    echo "            If No BUILD_ID is given, use twig internal"
+    echo "            counter as BUILD_ID"
+    echo
+}
+
+function twig_parse
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		twig_build_help 1>&2
+		exit 0
+		;;
+	    -ba|-bb|-bp|-bc|-bi|-bl|-bs)
+		BUILD_STAGE="$1"
+		shift 1
+		;;
+	    -*)
+		echo unknown option: "$1" 1>&2
+		twig_build_help 1>&2
+		exit 1
+		;;
+	    *)
+		break;
+		;;
+	esac
+    done
+
+    if [ $# -gt 0 ]; then
+	BUILD_ID=$1
+	BUILD_ID_SET_VIA_CMDLINE=yes
+	shift 1
+    fi
+
+    if [ "x$BUILD_ID" = "x" ]; then
+	if [ ! -e ./TWIG/build_id ]; then
+	    echo 0 > ./TWIG/build_id
+	fi
+	read BUILD_ID < ./TWIG/build_id
+	BUILD_ID=$(expr $BUILD_ID + 1)
+	BUILD_ID_SET_VIA_CMDLINE=no
+    fi
 }
 
 function twig_build
 {
-    local stage
-    local buildid
-
-    
-    stage=${1:-"--ba"}
-    buildid=${2:-".0"}
+    local status
 
     if ! twig_p .; then
 	echo "not twig dir" 1>&2
 	exit 1
     fi
+
+    twig_parse "$@"
+    
 
     mkdir -p twig/rpms
     mkdir -p twig/srpms
@@ -418,9 +464,15 @@ function twig_build
 	     --define "_builddir `pwd`/twig/build"			\
 	     --define "_buildrootdir `pwd`/twig/buildroot"		\
 	     --define "_sourcedir `pwd`/archives"			\
-             --define "twig_$(cat TWIG/name)_buildid ${buildid}"	\
+             --define "twig_$(cat TWIG/name)_buildid ${BUILD_ID}"	\
              --define "_default_patch_fuzz 2"				\
-	     $stage specs.spec
+	     $BUILD_STAGE specs.spec
+    status=$?
+
+    if [ $status = "0" -a "$BUILD_ID_SET_VIA_CMDLINE" = "no" ]; then
+	echo $BUILD_ID > ./TWIG/build_id
+    fi
+    
 }
 
 #
