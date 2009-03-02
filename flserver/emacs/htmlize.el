@@ -403,16 +403,24 @@ output.")
     (htmlize-fold proc (cdr list) 
 		  (funcall proc (car list) result))))
 
+
+
 (defun htmlize-overlays-at (p)
-  (htmlize-fold (lambda (kar kdr)
-		  (if (htmlize-acceptable-overlayp kar)
-		      (cons kar kdr)
-		    kdr))
-		(overlays-in p (let ((e0 (1+ p)))
-			   (if (< (point-max) e0)
-			       p
-			     e0)))
-		(list)))
+  (htmlize-overlays-between p
+			    (let ((e0 (1+ p)))
+			      (if (< (point-max) e0)
+				  p
+				e0))))
+
+(defun htmlize-overlays-between (p q)
+  (sort (htmlize-fold (lambda (kar kdr)
+			(if (htmlize-acceptable-overlayp kar)
+			    (cons kar kdr)
+			  kdr))
+		(overlays-in p q)
+		(list))
+	(lambda (o0 o1)
+	  (< (overlay-start o0) (overlay-start o1)))))
 
 (defun htmlize-acceptable-overlayp (o)
   (or (overlay-get o 'linum-str)))
@@ -421,7 +429,7 @@ output.")
   (let ((r0 (next-char-property-change pos limit))
 	(r1 (next-single-char-property-change pos prop nil limit)))
     (if (< r0 r1)
-	(let ((ovs (htmlize-overlays-at r0)))
+	(let ((ovs (htmlize-overlays-between r0 r1)))
 	  (let ((r00 (some (lambda (o) 
 			     (and (htmlize-acceptable-overlayp o)
 				  (overlay-start o))
