@@ -120,7 +120,6 @@ function twig_fork_generic
 	exit 1
     fi
 
-
     if ! twig_hack_release $dir/specs.spec $name > $dir/twig.spec; then
 	echo "Failed to modify Release line in $dir/specs.spec" 1>&2
 	exit 1
@@ -149,6 +148,13 @@ function twig_fork_generic
     fi
 
     (cd ${dir}; twig_addlog "twigged from ${from}")
+
+
+    sleep 1
+    if ! echo 0 > $dir/TWIG/build_id; then
+	echo "Cannot record initial build_id to $dir/TWIG/build_id" 1>&2
+	exit 1
+    fi
 }
 
 function twig_hack_release
@@ -393,11 +399,13 @@ function twig_pedigree_full
 BUILD_ID=
 BUILD_ID_SET_VIA_CMDLINE=
 BUILD_STAGE=-ba
+BUILD_IGNORE_MODIFICATION_TIME=
 
 function twig_build_help
 {
     echo "    " build "-h"
-    echo "    " build "[-ba|-bb|-bp|-bc|-bi|-bl|-bs]" [BUILD_ID]
+    echo "    " build "[-ba|-bb|-bp|-bc|-bi|-bl|-bs] \\" 
+    echo "           [--ignore-modification-time|-i]" [BUILD_ID]
     echo 
     echo "            If No BUILD_ID is given, use twig internal"
     echo "            counter as BUILD_ID"
@@ -414,6 +422,10 @@ function twig_parse
 		;;
 	    -ba|-bb|-bp|-bc|-bi|-bl|-bs)
 		BUILD_STAGE="$1"
+		shift 1
+		;;
+            --ignore-modification-time|-i)
+		BUILD_IGNORE_MODIFICATION_TIME=yes
 		shift 1
 		;;
 	    -*)
@@ -443,9 +455,23 @@ function twig_parse
     fi
 }
 
+function twig_warning
+{
+    local old_file
+
+
+    old_file=$1
+
+    echo "*** $old_file is older than ./TWIG/build_id"
+    echo "*** You may forget to run \"twig record\"."
+    echo "*** To ignore the modification time use --ignore-modification-time"
+    
+}
 function twig_build
 {
     local status
+    local name
+
 
     if ! twig_p .; then
 	echo "not twig dir" 1>&2
@@ -453,7 +479,19 @@ function twig_build
     fi
 
     twig_parse "$@"
-    
+
+    # if build_id is newer than the patch...
+    name=$(cat ./TWIG/name)
+    if test "x$BUILD_IGNORE_MODIFICATION_TIME" != xyes; then
+	if test ./archives/twig-${name}.patch -ot ./TWIG/build_id; then
+	    if test ./specs.spec -ot ./TWIG/build_id ; then
+		twig_warning "./archives/twig-${name}.patch" 1>&2
+		exit 1
+	    fi
+	fi
+    fi
+	
+
 
     mkdir -p twig/rpms
     mkdir -p twig/srpms
