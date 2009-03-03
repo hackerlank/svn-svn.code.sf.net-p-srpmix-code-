@@ -492,6 +492,7 @@ function twig_build
     fi
 	
 
+    touch ./TWIG/build_id
 
     mkdir -p twig/rpms
     mkdir -p twig/srpms
