@@ -188,7 +188,7 @@ function main
     parse_arguments "$@"
     if test -n "$DEBUG"; then
 	trap 0
-	echo Using $MY_TMPDIR as temporary directory
+	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
 
     cd $MY_TMPDIR
@@ -255,6 +255,15 @@ function main
     else
 	xargs yum localinstall -y --nogpgcheck
     fi
+
+    status=$?
+
+    # Notify again
+    if test -n "$DEBUG"; then
+	echo "*** Using $MY_TMPDIR as temporary directory"
+    fi
+    
+    return $status
 }
 
 { main "$@" ; } < /dev/null

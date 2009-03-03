@@ -632,14 +632,14 @@ function srpm_deploy
     done
     
     if test ${status} != 0; then
-	if test "x${IGNORE_ERROR}" != xyes; then
+	if test "x${IGNORE_ERROR}" = xyes; then
+	    status=0
+	else
     	    verbose abort				\
 		--stage=build			\
 		--srpm-file="\"${srpm_file}\""
 	    echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
 	    return 1
-	else
-	    status=0
 	fi
     fi
 
