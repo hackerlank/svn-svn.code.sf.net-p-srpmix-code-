@@ -34,6 +34,7 @@ function print_usage
     echo "         [--debug]"
     echo "         [--ignore-error]"
     echo "         [--multi-targets]"
+    echo "         [--keep-original]"
     echo "          --name=PACKAGE|--srpm=SRPM"
 #    TODO: Multi targets
 #    TODO: URL support
@@ -75,6 +76,9 @@ function parse_arguments
 		;;
 	    --multi-targets)
 	        export SRPMIX_MULTIE_TARGETS=yes
+		;;
+            --keep-original)
+	        export SRPMIX_KEEP_ORIGINAL=yes
 		;;
 	    --output-dir=*)
 	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
