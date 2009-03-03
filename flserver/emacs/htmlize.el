@@ -1365,7 +1365,10 @@ it's called with the same value of KEY.  All other times, the cached
   ;; you have a problem with that, use the `css' engine designed to
   ;; create fully conforming HTML.
 
-  "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">"
+  ;;"<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">"
+  (concat "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+	  "<!DOCTYPE html\n    PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n"
+	  "    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">")
 
   ;; Now-abandoned HTML Pro declaration.
   ;"<!DOCTYPE HTML PUBLIC \"+//Silmaril//DTD HTML Pro v0r11 19970101//EN\">"
@@ -1406,7 +1409,8 @@ it's called with the same value of KEY.  All other times, the cached
     (nreverse result)))
 
 (defun htmlize-css-insert-head (buffer-faces face-map)
-  (insert "    <style type=\"text/css\">\n    <!--\n")
+  ;;(insert "    <style type=\"text/css\">\n    <!--\n")
+  (insert "    <style type=\"text/css\">\n    <![CDATA[\n")
   (insert "      body {\n        "
 	  (mapconcat #'identity
 		     (htmlize-css-specs (gethash 'default face-map))
@@ -1436,7 +1440,9 @@ it's called with the same value of KEY.  All other times, the cached
 		(mapconcat #'identity specs "\n        ")))
       (insert "\n      }\n")))
   (insert htmlize-hyperlink-style
-	  "    -->\n    </style>\n"))
+	  ;;"    -->\n    </style>\n"
+	  "]]>\n    </style>\n"
+	  ))
 
 (defun htmlize-css-insert-text (text fstruct-list buffer)
   ;; Insert TEXT colored with FACES into BUFFER.  In CSS mode, this is
@@ -1540,7 +1546,8 @@ it's called with the same value of KEY.  All other times, the cached
 	(insert (htmlize-method doctype) ?\n
 		(format "<!-- Created by htmlize-%s in %s mode. -->\n"
 			htmlize-version htmlize-output-type)
-		"<html>\n  "
+		;"<html>\n  "
+		"<html xmlns=\"http://www.w3.org/TR/xhtml1\" xml:lang=\"en\" lang=\"en\">"
 		)
 	(plist-put places 'head-start (point-marker))
 	(insert "<head>\n"
