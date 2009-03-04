@@ -573,6 +573,10 @@ function spec_file_hack
 	\
         "$dont_keep_original"                      \
 	\
+	\
+	-e '/^%patch \+-P.*/b'                     \
+	\
+	\
 	-e 's/^Patch:/Patch0:/'                    \
         -e 's/^%patch /%patch0 /'                  \
         \
