@@ -245,7 +245,9 @@ function twig_verify_soruces
 
 #
 #
-# twig diff [with]
+# twig diff [with] 
+#
+# TODO: twig diff FILE
 #
 #
 function twig_diff_help
@@ -405,7 +407,7 @@ function twig_build_help
 {
     echo "    " build "-h"
     echo "    " build "[-ba|-bb|-bp|-bc|-bi|-bl|-bs] \\" 
-    echo "           [--ignore-modification-time|-i]" [BUILD_ID]
+    echo "           [--ignore-modification-time|-i] [--touch]" [BUILD_ID]
     echo 
     echo "            If No BUILD_ID is given, use twig internal"
     echo "            counter as BUILD_ID"
@@ -426,6 +428,10 @@ function twig_parse
 		;;
             --ignore-modification-time|-i)
 		BUILD_IGNORE_MODIFICATION_TIME=yes
+		shift 1
+		;;
+	    --touch)
+		touch ./specs.spec
 		shift 1
 		;;
 	    -*)
