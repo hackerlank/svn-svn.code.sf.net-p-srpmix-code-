@@ -156,6 +156,30 @@ srpmix_distmap_to_pvr_script='
 	    #f)
 	  (loop (read))))))'
 
+srpmix_distmap_to_json_script='
+(letrec ((kget (lambda (kl ky)
+		 (cond ((null? kl) #f)
+		       ((eq? (car kl) ky) (cadr kl))
+		       (else (kget (cdr kl) ky))))
+	       ))
+  (display "[")
+  (read-set! keywords `prefix)  
+  (let loop ((r (read)))
+    (if (eof-object? r)
+	#f
+	(begin
+	  (if (and (list? r)
+		 (eq? (car r) `srpmix-wrap)
+		 (not (null? (cdr r)))
+		 (eq? (cadr r) `name))
+	    (format #t "{\"package\": ~s, \"version\": ~s, \"release\": ~s}," 
+		    (kget r #:package)
+		    (kget r #:version)
+		    (kget r #:release))
+	    #f)
+	  (loop (read)))))
+  (display "]"))'
+
 GUILE=guile
 # Print :package, :version, and :release field of dist-mapping es espression.
 # Example Input:
@@ -171,6 +195,12 @@ function srpmix_distmap_to_pvr
 {
     ${GUILE} -c "${srpmix_distmap_to_pvr_script}"
 }
+
+function srpmix_distmap_to_json
+{
+    ${GUILE} -c "${srpmix_distmap_to_json_script}"
+}
+
 
 function srpmix_can_ln
 {
