@@ -1451,8 +1451,14 @@ it's called with the same value of KEY.  All other times, the cached
   (dolist (fstruct fstruct-list)
     (princ "<span class=\"" buffer)
     (princ (htmlize-fstruct-css-name fstruct) buffer)
+    (unless (stringp text)
+      (princ "\" id=\"" buffer)
+      (princ (format "l%sc%d" 
+		     (car (split-string (cadr text)))
+		     (caddr text)) buffer)
+      )
     (princ "\">" buffer))
-  (princ text buffer)
+  (princ (if (stringp text) text (car text)) buffer)
   (dolist (fstruct fstruct-list)
     (ignore fstruct)			; shut up the byte-compiler
     (princ "</span>" buffer)))
@@ -1663,15 +1669,15 @@ it's called with the same value of KEY.  All other times, the cached
    ((overlay-get o 'linum-str)
     (with-current-buffer htmlize-zero-width-overlay-temp-buffer
       (htmlize-linum-prepare-buffer o)
-      (htmlize-buffer-0)))))
+      (htmlize-buffer-0 o)))))
 
 (defun htmlize-linum-prepare-buffer (o)
   (erase-buffer) 
   (insert (overlay-get o 'linum-str)) 
   (insert " "))
 
-(defun htmlize-buffer-0 ()
-  (let (next-change fstruct-list text trailing-ellipsis)
+(defun htmlize-buffer-0 (o)
+  (let (next-change face-list fstruct-list text trailing-ellipsis)
     (goto-char (point-min))
     (while (not (eobp))
       (setq next-change (htmlize-next-change (point) 'face))
@@ -1693,7 +1699,11 @@ it's called with the same value of KEY.  All other times, the cached
       (when (> (length text) 0)
 	;; Insert the text, along with the necessary markup to
 	;; represent faces in FSTRUCT-LIST.
-	(funcall insert-text-method text fstruct-list htmlbuf))
+	(if (equal face-list '(linum))
+	    (funcall insert-text-method 
+		     (list text (overlay-get o 'linum-str) (overlay-start o))
+		     fstruct-list htmlbuf)
+	    (funcall insert-text-method text fstruct-list htmlbuf)))
       (goto-char next-change))
     ))
 
