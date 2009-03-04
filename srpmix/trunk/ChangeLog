@@ -2,6 +2,9 @@
 
 	* configure.ac: version 3.103.0.
 
+	* src/srpmix: Avoid duplicated building when
+	running rpmbuild after srpmix-envelop.
+
 	* src/srpmix-ix (dont_keep_original): Handle -P in %patch 
 	of spec file.
 
