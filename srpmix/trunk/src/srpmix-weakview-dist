@@ -159,13 +159,17 @@ tee "$DISTMAP" | srpmix_distmap_to_pvr | while read package version release; do
   echo "ln -sf $d \$builddistdir/packages/$p/$package"
 done >> $spec
 
-
-    cat >> $spec <<EOF
-echo "cat > \$builddistdir/dist-mapping.es <<\"EOF\""
-cat  "$DISTMAP"
-echo "EOF"
+{
+    echo
+    echo
+    echo "cat > \$builddistdir/dist-mapping.es <<\"EOF\""
+    echo ';; -*- scheme -*-'
+    cat  "$DISTMAP"
+    echo "EOF"
+    echo
+    echo
+} >> $spec
 rm "$DISTMAP"
-EOF
 
     cat >> $spec <<EOF
 %install

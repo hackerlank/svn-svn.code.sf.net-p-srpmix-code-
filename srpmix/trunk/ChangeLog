@@ -1,3 +1,8 @@
+2009-03-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist (create_dist_weakview%build): 
+	Include dist-mapping.es.
+
 2009-03-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 3.102.6.

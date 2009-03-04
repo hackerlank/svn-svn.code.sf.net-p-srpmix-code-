@@ -172,10 +172,12 @@ srpmix_distmap_to_json_script='
 		 (eq? (car r) `srpmix-wrap)
 		 (not (null? (cdr r)))
 		 (eq? (cadr r) `name))
-	    (format #t "{\"package\": ~s, \"version\": ~s, \"release\": ~s}," 
+	    (format #t "{\"target-srpm\": ~s, \"package\": ~s, \"version\": ~s, \"release\": ~s, \"wrapped-name\": ~s}," 
+                    (kget r #:target-srpm)
 		    (kget r #:package)
 		    (kget r #:version)
-		    (kget r #:release))
+		    (kget r #:release)
+                    (kget r #:wrapped-name))
 	    #f)
 	  (loop (read)))))
   (display "]"))'
