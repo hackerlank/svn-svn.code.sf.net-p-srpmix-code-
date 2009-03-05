@@ -34,7 +34,7 @@ function generate_cmdline
 {
     (cd $1;
 	for v in $VC; do
-	    if lcopy_is_${v}; then
+	    if ${v}_p; then
 		generate_${v}_cmdline
 		return $?
 	    fi

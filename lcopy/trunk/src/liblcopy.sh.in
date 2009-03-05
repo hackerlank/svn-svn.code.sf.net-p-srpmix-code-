@@ -24,32 +24,39 @@
 LCOPY_VERSION=@VERSION@
 
 
-function lcopy_is_arch
+# Expected function for each vcs
+#
+# - *_p
+# - *_make_checkout_cmdline
+# - *_checkout
+# - *_update
+#
+function arch_p
 {
     test -d '{arch}'
 }
 
-function lcopy_is_bzr
+function bzr_p
 {
     test -d .bzr
 }
 
-function lcopy_is_cvs
+function cvs_p
 {
     test -d CVS
 }
 
-function lcopy_is_darcs
+function darcs_p
 {
     test -d _darcs
 }
 
-function lcopy_is_git
+function git_p
 {
     test -d .git
 }
 
-function lcopy_is_hg
+function hg_p
 {
     test -d .hg
 }
@@ -57,7 +64,7 @@ function lcopy_is_hg
 #
 # See http://www.openembedded.org/wiki/GettingStarted
 #
-function lcopy_is_mtn
+function mtn_p
 {
     for m in *.mtn; do
 	if test -f "${m}"; then
@@ -68,12 +75,12 @@ function lcopy_is_mtn
     return 1
 }
 
-function lcopy_is_mtn_lcopy
+function mtn_lcopy_p
 {
     test -d _MTN
 }
 
-function lcopy_is_svn
+function svn_p
 {
     test -d .svn
 }
@@ -236,7 +243,119 @@ function cvs_checkout
     echo cvs -d${repo} checkout -P -d ${dir} ${module} 
 }
 
-function lcopy_is_member
+#
+# Darcs
+#
+function darcs_update
+{
+    which darcs > /dev/null 2>> $LOG && darcs pull -a 
+}
+
+#
+# Bazzar NG
+#
+function bzr_update
+{
+    which bzr > /dev/null 2>> $LOG && bzr update
+}
+
+#
+# Mercurial
+#
+function hg_update
+{
+    which hg > /dev/null 2>> $LOG && hg update
+} 
+
+#
+# Arch
+#
+function arch_update
+{
+    if which baz >/dev/null 2>/dev/null; then
+	baz replay
+    elif which tla > /dev/null 2>/dev/null; then
+	tla replay
+    else
+	echo "both tla and baz are not found" 2>$LOG 1>&2 
+	return 1
+    fi
+}
+
+#
+# Subversion
+#
+function svn_update
+{
+    which svn > /dev/null 2>> $LOG && svn update
+}
+
+#
+# git
+#
+function git_update
+{
+    which git > /dev/null 2>> $LOG && git pull
+}
+
+#
+# CVS
+#
+function cvs_update
+{
+    which cvs > /dev/null 2>> $LOG && cvs update -d
+}
+
+#
+# Monotone
+#
+# See http://www.openembedded.org/wiki/GettingStarted
+#
+
+function mtn_update
+{
+    r=
+    mtn_db=
+
+    
+    if ! which mtn > /dev/null 2>> $LOG; then
+	return 1
+    fi
+
+    for m in *.mtn; do
+	if test -f "${m}"; then
+	    mtn_db="`pwd`/${m}"
+	fi
+    done
+
+    if test x = "x${mtn_db}"; then
+	return 1
+    fi
+
+    mtn --db="${mtn_db}" pull
+    r=$?
+
+    if test $r != 0; then
+	return $r
+    fi
+
+    for d in *; do
+	if test -d "${d}"; then
+	    (refresh "${d}")
+	fi
+    done
+
+    return 0
+}
+
+function mtn_lcopy_update
+{
+    which mtn > /dev/null 2>> $LOG && mtn update
+}
+
+
+
+function is_member
 {
     local target=$1
     shift 1

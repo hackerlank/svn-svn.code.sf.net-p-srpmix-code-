@@ -152,7 +152,7 @@ function refresh
     cd $1
 
     for v in $VC; do
-	if lcopy_is_${v}; then
+	if ${v}_p; then
 
 	    cur_dir=`pwd`
 	    tstamp=`LANG=C date`
@@ -161,7 +161,7 @@ function refresh
 		--directory=\"${cur_dir}\"   \
 		--date=\"${tstamp}\"  >> $LOG
 
-	    update_${v}
+	    ${v}_update
 	    r=$?
 
 	    mkdir -p "${PRIVATE_DIR}"
@@ -191,115 +191,6 @@ function refresh
 }
 
 
-#
-# Darcs
-#
-function update_darcs
-{
-    which darcs > /dev/null 2>> $LOG && darcs pull -a 
-}
-
-#
-# Bazzar NG
-#
-function update_bzr
-{
-    which bzr > /dev/null 2>> $LOG && bzr update
-}
-
-#
-# Mercurial
-#
-function update_hg
-{
-    which hg > /dev/null 2>> $LOG && hg update
-} 
-
-#
-# Arch
-#
-function update_arch
-{
-    if which baz >/dev/null 2>/dev/null; then
-	baz replay
-    elif which tla > /dev/null 2>/dev/null; then
-	tla replay
-    else
-	echo "both tla and baz are not found" 2>$LOG 1>&2 
-	return 1
-    fi
-}
-
-#
-# Subversion
-#
-function update_svn
-{
-    which svn > /dev/null 2>> $LOG && svn update
-}
-
-#
-# git
-#
-function update_git
-{
-    which git > /dev/null 2>> $LOG && git pull
-}
-
-#
-# CVS
-#
-function update_cvs
-{
-    which cvs > /dev/null 2>> $LOG && cvs update -d
-}
-
-#
-# Monotone
-#
-# See http://www.openembedded.org/wiki/GettingStarted
-#
-
-function update_mtn
-{
-    r=
-    mtn_db=
-
-    
-    if ! which mtn > /dev/null 2>> $LOG; then
-	return 1
-    fi
-
-    for m in *.mtn; do
-	if test -f "${m}"; then
-	    mtn_db="`pwd`/${m}"
-	fi
-    done
-
-    if test x = "x${mtn_db}"; then
-	return 1
-    fi
-
-    mtn --db="${mtn_db}" pull
-    r=$?
-
-    if test $r != 0; then
-	return $r
-    fi
-
-    for d in *; do
-	if test -d "${d}"; then
-	    (refresh "${d}")
-	fi
-    done
-
-    return 0
-}
-
-function update_mtn_lcopy 
-{
-    which mtn > /dev/null 2>> $LOG && mtn update
-}
 
 function main
 {
