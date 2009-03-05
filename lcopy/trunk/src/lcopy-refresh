@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # set -x
 #
@@ -26,14 +26,13 @@
 ########################################################################
 LIBLCOPY=liblcopy.sh
 
-# Supported backedns
+# Supported backends
 VC="cvs git svn arch hg darcs bzr mtn mtn_lcopy"
 # TODO: svk?
 
 DIR=`pwd`
 LOG=/dev/stdout
-PREFIX=/usr/libexec
-PLUGINDIR=${PREFIX}/lcopy/plugins
+
 PRIVATE_DIR=.lcopy
 
 function try_source
@@ -52,29 +51,6 @@ function print_usage
     echo "              [TOP_DIRECTORY]"
     echo "lcopy-refresh --list-plugins|-L"
     echo "lcopy-refresh --help"
-}
-
-function lcopy_list_plugins
-{
-    test -d $PLUGINDIR && \
-	find $PLUGINDIR -perm +0100 -type f | sort | while read plugin
-    do
-        echo $plugin
-    done
-}
-
-function lcopy_run_plugins
-{
-    LOG=$1;
-    shift
-
-    test -d $PLUGINDIR && \
-	find $PLUGINDIR -perm +0100 -type f | sort |  while read plugin
-    do
-	es_print lcopy start-running-plugin "\"$plugin\"" >> $LOG
-        $plugin "$@"
-	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? >> $LOG
-    done
 }
 
 function abort
@@ -161,7 +137,7 @@ function refresh
 		--directory=\"${cur_dir}\"   \
 		--date=\"${tstamp}\"  >> $LOG
 
-	    ${v}_update
+	    ${v}_update $LOG
 	    r=$?
 
 	    mkdir -p "${PRIVATE_DIR}"

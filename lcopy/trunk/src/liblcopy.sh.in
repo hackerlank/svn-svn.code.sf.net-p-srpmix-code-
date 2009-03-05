@@ -23,67 +23,15 @@
 
 LCOPY_VERSION=@VERSION@
 
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libexecdir=@libexecdir@
 
-# Expected function for each vcs
-#
-# - *_p
-# - *_make_checkout_cmdline
-# - *_checkout
-# - *_update
-#
-function arch_p
-{
-    test -d '{arch}'
-}
 
-function bzr_p
-{
-    test -d .bzr
-}
+LCOPY_LIBEXECDIR=${LCOPY_LIBEXECDIR:-"${libexecdir}/lcopy}"}
+LCOPY_BACKENDDIR=${LCOPY_BACKENDDIR:-"${LCOPY_LIBEXECDIR}/backends"}
 
-function cvs_p
-{
-    test -d CVS
-}
-
-function darcs_p
-{
-    test -d _darcs
-}
-
-function git_p
-{
-    test -d .git
-}
-
-function hg_p
-{
-    test -d .hg
-}
-
-#
-# See http://www.openembedded.org/wiki/GettingStarted
-#
-function mtn_p
-{
-    for m in *.mtn; do
-	if test -f "${m}"; then
-	    return 0
-	fi
-    done
-
-    return 1
-}
-
-function mtn_lcopy_p
-{
-    test -d _MTN
-}
-
-function svn_p
-{
-    test -d .svn
-}
+LCOPY_PLUGINDIR=${LCOPY_PLUGINDIR:-"${LCOPY_LIBEXECDIR}/plugins"}
 
 
 function lcopy_checkout
@@ -145,217 +93,7 @@ function lcopy_make_pb_name
     fi
 }
 
-function svn_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    
-    echo svn checkout "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
-}
-
-function svn_checkout
-{
-
-    local repo=$1
-    local dir=$2
-    
-    
-    echo svn checkout "$repo" "$dir"
-}
-
-function bzr_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    bzr_checkout "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
-}
-
-function bzr_checkout
-{
-    local repo=$1
-    local dir=$2
-
-    echo bzr branch "$repo" "$dir"
-}
-
-function git_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    echo git clone "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
-}
-
-function git_checkout
-{
-
-    local repo=$1
-    local dir=$2
-    
-    echo git clone "$repo" "$dir"
-}
-
-function hg_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    echo hg clone "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
-}
-
-function hg_checkout
-{
-
-    local repo=$1
-    local dir=$2
-    
-    echo hg clone "$repo" "$dir"
-}
-
-function cvs_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    local module=$4
-    
-    echo cvs -d${repo} checkout -P -d $(lcopy_make_pb_name "${package}" "${branch}") ${module} 
-    
-}
-
-function cvs_checkout
-{
-    local repo=$1
-    local dir=$2
-    local module=$3
-
-    echo cvs -d${repo} checkout -P -d ${dir} ${module} 
-}
-
-#
-# Darcs
-#
-function darcs_update
-{
-    which darcs > /dev/null 2>> $LOG && darcs pull -a 
-}
-
-#
-# Bazzar NG
-#
-function bzr_update
-{
-    which bzr > /dev/null 2>> $LOG && bzr update
-}
-
-#
-# Mercurial
-#
-function hg_update
-{
-    which hg > /dev/null 2>> $LOG && hg update
-} 
-
-#
-# Arch
-#
-function arch_update
-{
-    if which baz >/dev/null 2>/dev/null; then
-	baz replay
-    elif which tla > /dev/null 2>/dev/null; then
-	tla replay
-    else
-	echo "both tla and baz are not found" 2>$LOG 1>&2 
-	return 1
-    fi
-}
-
-#
-# Subversion
-#
-function svn_update
-{
-    which svn > /dev/null 2>> $LOG && svn update
-}
-
-#
-# git
-#
-function git_update
-{
-    which git > /dev/null 2>> $LOG && git pull
-}
-
-#
-# CVS
-#
-function cvs_update
-{
-    which cvs > /dev/null 2>> $LOG && cvs update -d
-}
-
-#
-# Monotone
-#
-# See http://www.openembedded.org/wiki/GettingStarted
-#
-
-function mtn_update
-{
-    r=
-    mtn_db=
-
-    
-    if ! which mtn > /dev/null 2>> $LOG; then
-	return 1
-    fi
-
-    for m in *.mtn; do
-	if test -f "${m}"; then
-	    mtn_db="`pwd`/${m}"
-	fi
-    done
-
-    if test x = "x${mtn_db}"; then
-	return 1
-    fi
-
-    mtn --db="${mtn_db}" pull
-    r=$?
-
-    if test $r != 0; then
-	return $r
-    fi
-
-    for d in *; do
-	if test -d "${d}"; then
-	    (refresh "${d}")
-	fi
-    done
-
-    return 0
-}
-
-function mtn_lcopy_update
-{
-    which mtn > /dev/null 2>> $LOG && mtn update
-}
-
-
-
-function is_member
+function lcopy_is_member
 {
     local target=$1
     shift 1
@@ -367,6 +105,53 @@ function is_member
     done
     
     return 1
+}
+
+
+
+#
+# Load backends
+#
+# Expected function for each backends
+#
+# - *_p
+# - *_update
+#
+# - *_make_checkout_cmdline
+# - *_checkout
+#
+
+for b in ${LCOPY_BACKENDDIR}/lcopy-*.*sh; do
+    if test -r $b; then
+	source $b
+    fi
+done
+
+
+#
+# Plugins
+#
+function lcopy_list_plugins
+{
+    test -d $LCOPY_PLUGINDIR && \
+	find $LCOPY_PLUGINDIR -perm +0100 -type f | sort | while read plugin
+    do
+        echo $plugin
+    done
+}
+
+function lcopy_run_plugins
+{
+    LOG=$1;
+    shift
+
+    test -d $LCOPY_PLUGINDIR && \
+	find $LCOPY_PLUGINDIR -perm +0100 -type f | sort |  while read plugin
+    do
+	es_print lcopy start-running-plugin "\"$plugin\"" >> $LOG
+        $plugin "$@"
+	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? >> $LOG
+    done
 }
 
 ########################################################################

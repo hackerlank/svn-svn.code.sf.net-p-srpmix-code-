@@ -25,17 +25,17 @@
 #
 ########################################################################
 
-# Supported backedns
+# Supported backends
 VC="hg cvs svn git darcs bzr"
 
 LIBLCOPY=liblcopy.sh
 
-function generate_cmdline
+function generate_rebirth_cmdline
 {
     (cd $1;
 	for v in $VC; do
 	    if ${v}_p; then
-		generate_${v}_cmdline
+		${v}_generate_rebirth_cmdline
 		return $?
 	    fi
 	done
@@ -58,161 +58,6 @@ function report_no_vc
         echo "echo $1 may not be under any version control system"
 }
 
-#
-# CVS
-#
-function generate_cvs_cmdline
-{
-    cvs_root=
-    cvs_repo=
-    top_dir=`pwd`
-    cvs_dir=$(basename  ${top_dir})
-    cvs_root_rx=
-    cvs_pass=
-
-    (cd CVS; 
-	if test -f Root; then
-	    cvs_root=`cat Root`
-	else
-	    echo "cannot find cvs Root file" 1>&2
-	    pwd 1>&2
-	    return 1
-	fi
-
-	if test -f Repository; then
-	    cvs_repo=`cat Repository`
-	else
-	    echo "cannot find cvs Repository file" 1>&2
-	    pwd 1>&2
-	    return 1
-	fi
-
-
-	echo "# [0] ${top_dir}"
-	
-	cvs_root_rx=`echo ${cvs_root} | sed -e 's|\(.*\):/\(.*\)|\1:[0-9]*/\2|'`
-	cvs_pass=`grep "${cvs_root_rx}" ~/.cvspass 2>/dev/null`
-	if [ $? == 0 ]; then
-            cat <<EOF
-fgrep '${cvs_pass}' ~/.cvspass > /dev/null 2>&1 \\
-|| echo '${cvs_pass}' >> ~/.cvspass
-EOF
-        else
-	    echo "# [1] cannot find password entry for ${top_dir}"
-	fi
-
-	echo cvs -d"${cvs_root}" checkout -P -d ${cvs_dir} ${cvs_repo}
-	return 0
-	)
-}
-
-#
-# Darcs
-#
-function generate_darcs_cmdline
-{
-    darcs_defaultrepo_file="`pwd`/_darcs/prefs/defaultrepo"
-    darcs_defaultrepo=
-
-    if test ! -r "${darcs_defaultrepo_file}"; then
-	echo "canot read defaultrepo file: ${darcs_defaultrepo_file}" 1>&2
-	pwd 1>&2	
-	return 1
-    fi
-
-    darcs_defaultrepo=`cat ${darcs_defaultrepo_file}`
-
-    top_dir=`pwd`
-    echo "# [0] ${top_dir}"
-    echo "darcs get ${darcs_defaultrepo} `basename ${top_dir}`"
-    return 0
-}
-
-#
-# Bzr
-#
-function generate_bzr_cmdline
-{
-    bzr_location=`bzr info | grep -e 'parent branch:' | sed -e 's/  parent branch: //'`
-    echo bzr branch ${bzr_location} `pwd`
-}
-
-#
-# Git
-#
-function generate_git_cmdline
-{
-    git_remote_origin_proc="`git-config  --get remote.origin.url`"
-    git_branches_origin_file="`pwd`/.git/branches/origin"
-    git_remotes_origin_file="`pwd`/.git/remotes/origin"
-
-    git_origin=
-
-    if test -n "${git_remote_origin_proc}"; then
-	git_origin="${git_remote_origin_proc}"
-    elif test -r "${git_branches_origin_file}"; then
-	git_origin=`cat ${git_branches_origin_file}`
-    elif test -r "${git_remotes_origin_file}"; then
-	git_origin=`cat ${git_remotes_origin_file} | grep URL: | sed -e 's/URL: //'`
-    else
-	echo "cannot read origin file: ${git_branches_origin_file}" 1>&2
-	echo "cannot read origin file: ${git_remotes_origin_file}" 1>&2
-	echo "git-config for `remote.origin.url` returns nothing" 1>&2
-	pwd 1>&2
-	return 1
-    fi
-
-    top_dir=`pwd`
-    echo "# [0] ${top_dir}"
-    echo "git-clone ${git_origin} `basename ${top_dir}`"
-    return 0
-}
-
-#
-# Subversion
-#
-function generate_svn_cmdline
-{
-    svn_info=`svn info`
-    if test $? != 0; then
-	echo "fail in 'svn info' invocation" 1>&2
-	pwd 1>&2
-	return 1
-    fi
-
-    svn_url=`echo "$svn_info" | grep 'URL: ' |  sed -e 's/URL: //'`
-    if test "x${svn_url}" = x; then
-	echo "cannot find URL line in svn_info output" 1>&2
-	pwd 1>&2
-	return 1
-    fi
-    
-    top_dir=`pwd`
-    svn_dir=$(basename ${top_dir})
-
-    echo "# [0] ${top_dir}"
-    echo "svn checkout ${svn_url} ${svn_dir}"
-    return 0
-}
-
-#
-# Mercurial
-#
-function generate_hg_cmdline
-{
-    hg_path=`hg showconfig -u paths.default 2> /dev/null`
-    if test $? != 0; then
-	echo "fail in 'hg showconfig' invocation" 1>&2
-	pwd 1>&2
-	return 1
-    fi
-
-    top_dir=`pwd`
-    echo "# [0] ${top_dir}"
-    echo "hg clone ${hg_path} `basename ${top_dir}`"
-    return 0
-}
-
 function try_source
 {
     source $1
@@ -227,7 +72,7 @@ try_source ${LIBLCOPY}
 
 for d in "$@"; do
     if test -d "${d}"; then
-    	generate_cmdline "${d}"
+    	generate_rebirth_cmdline "${d}"
     fi
 done
 

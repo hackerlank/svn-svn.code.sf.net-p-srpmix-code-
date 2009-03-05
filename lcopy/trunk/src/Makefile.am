@@ -1,3 +1,6 @@
+SUBDIRS  = .
+SUBDIRS += backends
+
 bin_SCRIPTS=liblcopy.sh
 CLEANFILES = $(bin_SCRIPTS)
 

@@ -35,8 +35,6 @@ SPEC_TYPE=
 RELEASE=0
 OUTPUT_DIR=.
 
-
-
 if source libsrpmix.sh; then
     :
 else
@@ -363,46 +361,6 @@ function link_verify_arguments
 	print_usage 1>&2
 	abort
     fi
-}
-
-#
-# Subversion
-#
-function svn_to_pkg
-{
-    echo subversion
-}
-
-#
-# Git
-#
-function git_to_pkg
-{
-    echo git
-}
-
-#
-# Bzr
-#
-function bzr_to_pkg
-{
-    echo bar
-}
-
-#
-# hg
-#
-function hg_to_pkg
-{
-    echo mercurial
-}
-
-#
-# cvs
-#
-function cvs_to_pkg
-{
-    echo cvs
 }
 
 function main
