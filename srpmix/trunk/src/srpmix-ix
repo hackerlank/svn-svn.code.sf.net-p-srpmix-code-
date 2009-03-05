@@ -712,6 +712,36 @@ function srpm_install
     return $status
 }
 
+
+##
+## KEEP_ORIGINAL guessing
+## ----------------------
+##
+
+# patch_on_backup_p
+# -----------------
+# INPUT:
+# $1: path to patch file 
+# 
+# OUTPUT:
+# return: 0 if the patch may be applied on backup files.
+# stdout: backup suffixes
+function patch_on_backup_p
+{
+    local f
+    cat $1 | grep -e '^---' | sed -e 's/--- \([^ \t]*\).*$/\1/' | while read f; do
+	local lines=$(basename $f | tr '.' '\n')
+	local c=$(echo "$lines" | wc -l)
+	local backup=$(echo "$lines" | tail -1)
+
+	if [ "$c" -gt  2 ]; then
+	    echo $backup
+	    return 0
+	fi
+   done
+   return 1
+}
+
 function srpm_rearrange_spec
 {
     local rootdir=$1
