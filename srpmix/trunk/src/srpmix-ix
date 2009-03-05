@@ -745,6 +745,9 @@ function patch_on_backup_p
    return 1
 }
 
+# TODO
+# touch -r 
+
 function srpm_rearrange_spec
 {
     local rootdir=$1
