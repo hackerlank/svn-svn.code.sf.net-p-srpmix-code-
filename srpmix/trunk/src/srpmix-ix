@@ -717,6 +717,9 @@ function srpm_install
 ## KEEP_ORIGINAL guessing
 ## ----------------------
 ##
+## TEST: ~/rpmbuild/SRPMIX/images/f10/perl-CGI-SpeedyCGI-2.22-4.fc10.src.rpm
+##       ~/rpmbuild/SRPMIX/images/f10/easytag-2.1-5.fc9.src.rpm
+##
 
 # patch_on_backup_p
 # -----------------
