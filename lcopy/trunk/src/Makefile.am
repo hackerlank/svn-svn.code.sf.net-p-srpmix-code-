@@ -1,5 +1,6 @@
 SUBDIRS  = .
 SUBDIRS += backends
+SUBDIRS += plugins
 
 bin_SCRIPTS=liblcopy.sh
 CLEANFILES = $(bin_SCRIPTS)
@@ -14,9 +15,3 @@ dist_bin_SCRIPTS =     \
 	\
         $(NULL)
 
-plugindir = $(libexecdir)/lcopy/plugins
-dist_plugin_SCRIPTS = \
-	10lcopy-ctags \
-	10lcopy-etags \
-        \
-        $(NULL)
