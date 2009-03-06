@@ -46,6 +46,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_datadir}/srpmix/plugins
 
+%{_datadir}/srpmix/utils
+
 %{_sysconfdir}/srpmix.cf
 %{_sysconfdir}/cron.daily/srpmix.daily
 

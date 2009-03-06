@@ -31,5 +31,6 @@ AC_OUTPUT([
            src/libsrpmix.sh
            src/Makefile
            doc/Makefile
+           utils/Makefile
           ])
 
