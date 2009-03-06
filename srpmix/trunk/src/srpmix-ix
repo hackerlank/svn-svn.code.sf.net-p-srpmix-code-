@@ -145,7 +145,7 @@ function update_count
 #
 function get_current_target
 {
-    rpm --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
+    rpm --showrc | grep ' _host_cpu' | sed -e 's/.*_host_cpu	//'
 }
 
 function make_targets

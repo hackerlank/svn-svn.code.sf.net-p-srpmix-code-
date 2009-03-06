@@ -1,3 +1,8 @@
+2009-03-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* srpmix-ix (get_current_target): Use _host_cpu
+	instead of _target_cpu.
+
 2009-03-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 3.103.0.
@@ -42,3 +47,7 @@
 
 	* srpmix-envelop, srpmix-ix: Added --ignore-error option.
 
+2008-08-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* srpmix-plugin (PLUGINDIR): Added --list-plugins
+	but not tested yet.
