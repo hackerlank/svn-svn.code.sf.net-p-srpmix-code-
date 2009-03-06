@@ -1,3 +1,10 @@
+2009-03-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins: new directory.
+
+	* src/srpmix (parse_arguments): Fix a typo
+	SRPMIX_MULTIE_TARGETS => SRPMIX_MULTI_TARGETS.
+
 2009-03-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* srpmix-ix (get_current_target): Use _host_cpu

@@ -30,6 +30,7 @@ AC_OUTPUT([
            misc/specs/srpmix.spec
            src/libsrpmix.sh
            src/Makefile
+           src/plugins/Makefile
            doc/Makefile
            utils/Makefile
           ])

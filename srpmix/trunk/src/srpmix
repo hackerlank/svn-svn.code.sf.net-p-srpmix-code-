@@ -75,7 +75,7 @@ function parse_arguments
 	        export SRPMIX_IGNORE_ERROR=yes
 		;;
 	    --multi-targets)
-	        export SRPMIX_MULTIE_TARGETS=yes
+	        export SRPMIX_MULTI_TARGETS=yes
 		;;
             --keep-original)
 	        export SRPMIX_KEEP_ORIGINAL=yes

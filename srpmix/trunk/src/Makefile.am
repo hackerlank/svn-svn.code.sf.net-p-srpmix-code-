@@ -19,13 +19,6 @@ dist_bin_SCRIPTS =           \
 	\
         $(NULL)
 
-plugindir = $(pkgdatadir)/plugins
-dist_plugin_SCRIPTS =        \
-        10srpmix-etags       \
-	90srpmix-file        \
-	\
-        $(NULL)
-
 dist_sysconf_DATA = srpmix.cf
 
 crondailydir=$(sysconfdir)/cron.daily

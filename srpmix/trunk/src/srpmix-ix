@@ -69,6 +69,7 @@ TOTAL_COUNT=0
 DO_HARDLINK=${SRPMIX_DO_HARDLINK}
 IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
 KEEP_ORIGINAL=${SRPMIX_KEEP_ORIGINAL}
+MULTI_TARGETS=${SRPMIX_MULTI_TARGETS}
 #
 ########################################################################
 
@@ -103,6 +104,7 @@ function print_usage
     echo "SRPMIX_DO_HARDLINK=yes|no"
     echo "SRPMIX_IGNORE_ERROR=yes|no"
     echo "SRPMIX_MULTI_TARGETS=yes|no"
+    echo "SRPMIX_KEEP_ORIGINAL=yes|no"
     echo 
 }
 
@@ -165,7 +167,7 @@ function make_targets
 
 function parse_arguments
 {
-    if test x"${SRPMIX_MULTI_TARGETS}" = xyes; then
+    if test x"${MULTI_TARGETS}" = xyes; then
 	TARGET=$(make_targets)
     fi
 
