@@ -44,6 +44,19 @@ function lcopy_checkout
     "${vcs}_checkout" "$@"
 }
 
+function lcopy_checkout_after
+{
+    local vcs
+
+    vcs=$1
+
+    shift 1
+
+    if lcopy_has_func "${vcs}_checkout"; then
+	"${vcs}_checkout" "$@"
+    fi
+}
+
 function lcopy_checkout_cmdline
 {
     local vcs
@@ -140,18 +153,25 @@ function lcopy_list_plugins
     done
 }
 
+# lcopy_run_plugins LOGFILE VCS PWD TSTAMP
 function lcopy_run_plugins
 {
-    LOG=$1;
+    local log=$1;
     shift
 
     test -d $LCOPY_PLUGINDIR && \
 	find $LCOPY_PLUGINDIR -perm +0100 -type f | sort |  while read plugin
     do
-	es_print lcopy start-running-plugin "\"$plugin\"" >> $LOG
+	es_print lcopy start-running-plugin "\"$plugin\"" | sudo -H -u lcopy tee -a $log > /dev/null
         $plugin "$@"
-	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? >> $LOG
+	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? | sudo -H -u lcopy tee -a $log > /dev/null
     done
+}
+
+
+function lcopy_has_func
+{
+    type $1 > /dev/null 2>&1 
 }
 
 ########################################################################

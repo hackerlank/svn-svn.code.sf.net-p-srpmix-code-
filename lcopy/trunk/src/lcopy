@@ -33,7 +33,7 @@ function print_usage
     for vcs in ${SUPPORTED_VCSs}; do
 
 	echo ${vcs}:
-	${vcs}_print_usage
+	${vcs}_checkout_print_usage
 	echo
 
     done
@@ -45,19 +45,6 @@ function print_usage
 PREFIX=/usr/libexec
 PLUGINDIR=${PREFIX}/lcopy/plugins
 
-function lcopy_run_plugins
-{
-    LOG=$1;
-    shift
-
-    test -d $PLUGINDIR && \
-	find $PLUGINDIR -perm +0100 -type f | sort |  while read plugin
-    do
-	es_print lcopy start-running-plugin "\"$plugin\"" | sudo -H -u lcopy tee -a $LOG > /dev/null
-        sudo -H -u lcopy $plugin "$@"
-	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? | sudo -H -u lcopy tee -a $LOG > /dev/null
-    done
-}
 
 function main
 {
@@ -105,7 +92,7 @@ function main
 	exit 1
     fi
 
-    if ! ${1}_parse "$@"; then
+    if ! ${1}_checkout_parse_cmdline "$@"; then
 	echo "failed in the command line for ${1}" 2>&1
 	print_usage 2>&1
 	exit 1
@@ -127,16 +114,15 @@ function main
 		:status ${status}   \
 		:date \""${tstamp}"\" | \
 		sudo -H -u lcopy tee -a ${LOG_DIR}/lcopy-checkout.es > /dev/null
-#	    if test -z "$NO_SPEC"; then
-		:
-		cd ${BRANCH}
-		status=$?
-		sudo -H -u lcopy mkdir -p .lcopy
+	    
+	    cd ${BRANCH}
+	    status=$?
+	    sudo -H -u lcopy mkdir -p .lcopy
 # TODO: plugin directory
-		if test "$status" = 0; then
-		    lcopy_run_plugins ${LOG_DIR}/lcopy-refresh.es \
-			"${VCS}" "$(pwd)" "${tstamp}"
-#		fi
+	    if test "$status" = 0; then
+		do_checkout_after
+		lcopy_run_plugins ${LOG_DIR}/lcopy-refresh.es \
+		    "${VCS}" "$(pwd)" "${tstamp}"
 	    fi
 	fi
     fi
@@ -146,7 +132,7 @@ function main
 #
 # svn
 #
-function svn_parse
+function svn_checkout_parse_cmdline
 {
     VCS=$1
     CMD=$2
@@ -191,7 +177,7 @@ function svn_parse
     return 0
 }
 
-function svn_print_usage
+function svn_checkout_print_usage
 {
     echo "	" svn "checkout|co" REPOS PACKAGEDIR
     echo "	" "REPOS => http://... or https://..."
@@ -200,18 +186,18 @@ function svn_print_usage
 #
 # git
 #
-function git-clone_parse
+function git-clone_checkout_parse_cmdline
 {
     shift 1
-    git_parse git clone "$@"
+    git_checkout_parse_cmdline git clone "$@"
 }
 
-function git-clone_print_usage
+function git-clone_checkout_print_usage
 {
     echo "	" git-clone REPOS PACKAGEDIR
 }
 
-function git_parse
+function git_checkout_parse_cmdline
 {
     VCS=$1
     CMD=$2
@@ -254,7 +240,7 @@ function git_parse
     return 0
 }
 
-function git_print_usage
+function git_checkout_print_usage
 {
     echo "	" git clone REPOS PACKAGEDIR
 }
@@ -262,7 +248,7 @@ function git_print_usage
 #
 # hg
 #
-function hg_parse
+function hg_checkout_parse_cmdline
 {
     VCS=$1
     CMD=$2
@@ -312,95 +298,15 @@ function hg_parse
     return 0
 }
 
-function hg_print_usage
+function hg_checkout_print_usage
 {
     echo "	" hg clone REPOS PACKAGEDIR
 }
 
 #
-# CVS
-#
-function cvs_parse
-{
-    local original=$@
-    VCS=$1
-    REPO=${2/-d/}
-    CMD=$3
-    shift 3
-
-    if test "x$VCS" != xcvs; then
-	echo "wrong vcs: $VCS" 2>&1
-	print_usage 2>&1
-	exit 1
-    fi
-
-    if test \( -z "$CMD"          \) -o       \
-	    \(                                \
-               \( "$CMD" != co       \) -a    \
-               \( "$CMD" != checkout \)       \
-            \) ; then
-	echo "broken cvs command line about cvs comamnd(checkout: $CMD)): $original" 2>&1
-	print_usage 2>&1
-	exit 1
-    fi
-
-    if test -z "$REPO"; then
-	echo "no repository" 2>&1
-	print_usage 2>&1
-	exit 1
-    fi
-
-    if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
-	echo "broken repo specification: $REPO" 2>&1
-	print_usage 2>&1
-	exit 1
-    fi
-
-
-    if test "x$1" = "x-P"; then
-	shift 1
-    fi
-
-    local dflags=$1
-    PACKAGE=$2
-    shift 2
-
-    if test \( -n "${dflags}" \) -a \( "${dflags}" != "-d" \); then
-	echo "broken cvs command line about directory specification(-d: ${dflags}): $original" 2>&1
-	print_usage 2>&1
-	exit 1
-    fi
-
-    if test -z "$PACKAGE"; then
-	echo "no packagedir" 2>&1
-	print_usage 2>&1
-	exit 1
-    fi
-
-    if test "x$1" = "x-P"; then
-	shift 1
-    fi
-
-    MODULE=$1
-    if test -z "$MODULE"; then
-	echo "no module" 2>&1
-	print_usage 2>&1
-	exit 1
-    fi
-
-    return 0
-}
-
-function cvs_print_usage
-{
-    echo "	" cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' -d PACKAGEDIR MODULE 
-    echo "	" '(adds -P automatically)'
-}
-
-#
 # Bzr
 # 
-function bzr_parse
+function bzr_checkout_parse_cmdline
 {
     VCS=$1
     CMD=$2
@@ -443,7 +349,7 @@ function bzr_parse
     return 0
 }
 
-function bzr_print_usage
+function bzr_checkout_print_usage
 {
     echo "	" bar branch LOCATION PACKAGEDIR
 }
@@ -451,6 +357,11 @@ function bzr_print_usage
 function do_checkout
 {
     sudo -H -u lcopy $(lcopy_checkout "$VCS" "$REPO" "$BRANCH" "$MODULE")
+}
+
+function do_checkout_after
+{
+    sudo -H -u lcopy $(lcopy_checkout_after "$VCS" "$REPO" "$BRANCH" "$MODULE")
 }
 
 function make_specs

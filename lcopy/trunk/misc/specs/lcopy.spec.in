@@ -5,7 +5,7 @@ Release: 0
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 #Requires: 
 Prereq: /usr/sbin/useradd
-Requires: emacs-common ctags cvs subversion git mercurial bzr
+Requires: srpmix emacs-common ctags cvs subversion git mercurial bzr 
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root
@@ -52,8 +52,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lcopy-refresh
 %{_bindir}/lcopy-genspec
 %{_bindir}/liblcopy.sh
-%{_libexecdir}/lcopy/plugins/10lcopy-ctags
-%{_libexecdir}/lcopy/plugins/10lcopy-etags
+%{_libexecdir}/lcopy/plugins/*
+%{_libexecdir}/lcopy/backends/*
 %{_mandir}/man?/*
 
 %attr(0755, root, root) %{_sysconfdir}/cron.daily/lcopy-refresh

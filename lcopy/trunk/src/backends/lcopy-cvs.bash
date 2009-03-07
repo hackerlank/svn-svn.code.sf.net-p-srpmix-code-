@@ -10,9 +10,10 @@ function cvs_make_checkout_cmdline
     local package=$2
     local branch=$3
     local module=$4
-    
-    echo cvs -d${repo} checkout -P -d $(lcopy_make_pb_name "${package}" "${branch}") ${module} 
-    
+
+    cvs_checkout ${repo} \
+	$(lcopy_make_pb_name "${package}" "${branch}") \
+	${module} 
 }
 
 function cvs_checkout
@@ -24,15 +25,89 @@ function cvs_checkout
     echo cvs -d${repo} checkout -P -d ${dir} ${module} 
 }
 
+function cvs_checkout_print_usage
+{
+    echo "	" cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' -d PACKAGEDIR MODULE 
+    echo "	" '(adds -P automatically)'
+}
+
+function cvs_checkout_parse_cmdline
+{
+    local original=$@
+    VCS=$1
+    REPO=${2/-d/}
+    CMD=$3
+    shift 3
+
+    if test "x$VCS" != xcvs; then
+	echo "wrong vcs: $VCS" 2>&1
+	print_usage 2>&1
+	return 1
+    fi
+
+    if test \( -z "$CMD"          \) -o       \
+	    \(                                \
+               \( "$CMD" != co       \) -a    \
+               \( "$CMD" != checkout \)       \
+            \) ; then
+	echo "broken cvs command line about cvs comamnd(checkout: $CMD)): $original" 2>&1
+	print_usage 2>&1
+	return 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	print_usage 2>&1
+	return 1
+    fi
+
+    if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
+	echo "broken repo specification: $REPO" 2>&1
+	print_usage 2>&1
+	return 1
+    fi
+
+    
+    if test "x$1" = "x-P"; then
+	shift 1
+    fi
+
+    local dflags=$1
+    PACKAGE=$2
+    shift 2
+
+    if test \( -n "${dflags}" \) -a \( "${dflags}" != "-d" \); then
+	echo "broken cvs command line about directory specification(-d: ${dflags}): $original" 2>&1
+	print_usage 2>&1
+	return 1
+    fi
+
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	print_usage 2>&1
+	return 1
+    fi
+
+    if test "x$1" = "x-P"; then
+	shift 1
+    fi
+
+    MODULE=$1
+    if test -z "$MODULE"; then
+	echo "no module" 2>&1
+	print_usage 2>&1
+	return 1
+    fi
+
+    return 0
+}
+
 function cvs_update
 {
     local log=$1
     which cvs > /dev/null 2>> "$log" && cvs update -d
 }
 
-#
-# CVS
-#
 function cvs_generate_rebirth_cmdline
 {
     local cvs_root=
@@ -61,16 +136,20 @@ function cvs_generate_rebirth_cmdline
 
 
 	echo "# [0] ${top_dir}"
-	
-	cvs_root_rx=`echo ${cvs_root} | sed -e 's|\(.*\):/\(.*\)|\1:[0-9]*/\2|'`
-	cvs_pass=`grep "${cvs_root_rx}" ~/.cvspass 2>/dev/null`
-	if [ $? == 0 ]; then
-            cat <<EOF
+
+	cvs_pass=$(echo $cvs_repo | sed -n -e 's/.*:\([^:]\+\)@.*/\1/p')
+
+	if test -z "$cvs_pass"; then
+	    cvs_root_rx=`echo ${cvs_root} | sed -e 's|\(.*\):/\(.*\)|\1:[0-9]*/\2|'`
+	    cvs_pass=`grep "${cvs_root_rx}" ~/.cvspass 2>/dev/null`
+	    if [ $? == 0 ]; then
+		cat <<EOF
 fgrep '${cvs_pass}' ~/.cvspass > /dev/null 2>&1 \\
 || echo '${cvs_pass}' >> ~/.cvspass
 EOF
-        else
-	    echo "# [1] cannot find password entry for ${top_dir}"
+            else
+		echo "# [1] cannot find password entry for ${top_dir}"
+	    fi
 	fi
 
 	echo cvs -d"${cvs_root}" checkout -P -d ${cvs_dir} ${cvs_repo}
