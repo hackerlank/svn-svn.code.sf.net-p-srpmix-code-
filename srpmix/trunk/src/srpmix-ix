@@ -749,6 +749,8 @@ function patch_on_backup_p
 
 # TODO
 # touch -r 
+# e.g.
+# touch -c -r ./hdf/src/hdfi.h.ppc ./hdf/src/hdfi.h
 
 function srpm_rearrange_spec
 {
