@@ -1,5 +1,10 @@
 2009-03-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 3.104.0.
+
+	* src/srpmix-ix (patch_on_backup_p): New function.
+	(spec_file_hack): Use `patch_on_backup_p'.
+	
 	* configure.ac (AC_RPM_RELEASE): add --with-rpm-release=R
 	option.
 

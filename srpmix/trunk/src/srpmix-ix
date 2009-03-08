@@ -70,6 +70,12 @@ DO_HARDLINK=${SRPMIX_DO_HARDLINK}
 IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
 KEEP_ORIGINAL=${SRPMIX_KEEP_ORIGINAL}
 MULTI_TARGETS=${SRPMIX_MULTI_TARGETS}
+
+if test "x${SRPMIX_IX_DEBUG}" = xyes; then
+    set -x
+    VERBOSE=yes
+fi
+
 #
 ########################################################################
 
@@ -84,7 +90,7 @@ function print_usage
     echo "  srpmix-ix [--help|-h]"
     echo "  srpmix-ix [--force|-f]"
     echo "            [--verbose|-v]"
-    echo "            [--trace|-x]"
+    echo "            [--debug]"
     echo "            [--sudo|-s]"
     echo "            [--freeze|-F]"
     echo "            [--multi-targets]"
@@ -105,6 +111,7 @@ function print_usage
     echo "SRPMIX_IGNORE_ERROR=yes|no"
     echo "SRPMIX_MULTI_TARGETS=yes|no"
     echo "SRPMIX_KEEP_ORIGINAL=yes|no"
+    echo "SRPMIX_IX_DEBUG=yes|no"
     echo 
 }
 
@@ -185,8 +192,9 @@ function parse_arguments
 		VERBOSE=yes
 		shift 1
 		;;
-	    --trace|-x)
+	    --debug)
 		set -o xtrace
+		VERBOSE=yes
 		shift 1
 		;;
 	    --sudo|-s)
@@ -559,14 +567,19 @@ dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
 function spec_file_hack
 {
     local rootdir=$1
-    local spec_file=$2
+    local spec_file="${rootdir}/SPECS/${spec_file}"
 
+
+    if patch_on_backup_p "$spec_file" > /dev/null 2>&1 ; then
+#	message turn-on --keep-original=auto
+	KEEP_ORIGINAL=yes
+    fi
 
     if test "x${KEEP_ORIGINAL}" = xyes; then
 	dont_keep_original="-e s/a/a/"
     fi
 
-    cat - "${rootdir}/SPECS/${spec_file}"          \
+    cat - "${spec_file}"                           \
     | sed					   \
 	\
 	\
@@ -574,6 +587,10 @@ function spec_file_hack
 	\
 	\
         "$dont_keep_original"                      \
+	\
+	\
+	-e "s+\.\./\.\./SOURCES/+../../${SOURCEDIR}/+" \
+	-e "s+\.\./\.\./BUILD/+../../${BUILDDIR}/+"    \
 	\
 	\
 	-e '/^%patch \+-P.*/b'                     \
@@ -731,26 +748,39 @@ function srpm_install
 # OUTPUT:
 # return: 0 if the patch may be applied on backup files.
 # stdout: backup suffixes
-function patch_on_backup_p
-{
-    local f
-    cat $1 | grep -e '^---' | sed -e 's/--- \([^ \t]*\).*$/\1/' | while read f; do
-	local lines=$(basename $f | tr '.' '\n')
-	local c=$(echo "$lines" | wc -l)
-	local backup=$(echo "$lines" | tail -1)
-
-	if [ "$c" -gt  2 ]; then
-	    echo $backup
-	    return 0
-	fi
-   done
-   return 1
-}
 
 # TODO
 # touch -r 
 # e.g.
 # touch -c -r ./hdf/src/hdfi.h.ppc ./hdf/src/hdfi.h
+
+function patch_on_backup_p
+{
+    local spec_file=$1
+    local f
+
+    if grep -e '^touch.* -r ' $spec_file > /dev/null 2>&1; then
+#	message patch-on-backup --reason=touch
+# TODO	
+# print $backup	
+	return 0
+	
+    fi
+    
+    cat $spec_file | grep -e '^---' | sed -e 's/--- \([^ \t]*\).*$/\1/' | while read f; do
+	local lines=$(basename $f | tr '.' '\n')
+	local c=$(echo "$lines" | wc -l)
+	local backup=$(echo "$lines" | tail -1)
+
+	if [ "$c" -gt  2 ]; then
+#	    message patch-on-backup --reason=touch
+	    echo $backup
+	    return 0
+	fi
+   done
+
+   return 1
+}
 
 function srpm_rearrange_spec
 {
