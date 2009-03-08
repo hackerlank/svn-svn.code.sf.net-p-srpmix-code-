@@ -1,3 +1,5 @@
+SUBDIRS = plugins
+
 bin_SCRIPTS=libsrpmix.sh
 CLEANFILES = $(bin_SCRIPTS)
 
