@@ -109,9 +109,9 @@ function main
 {
     parse_arguments "$@"
 
-    list_plugins | while read plugin
+    for d in $ROOTDIRS
     do
-        for d in $ROOTDIRS
+        list_plugins | while read plugin
         do
             $plugin $d
         done

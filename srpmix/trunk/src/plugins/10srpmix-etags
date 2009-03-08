@@ -132,7 +132,8 @@ function main
     verify_commands "${ETAGS}"
     parse_arguments "$@"
 
-    if test "${BUILDDIR}" -nt "${PLUGINDIR}/TAGS"; then
+    if ! test -e "${PLUGINDIR}/TAGS" ||
+      test "${BUILDDIR}/STATUS" -nt "${PLUGINDIR}/TAGS"; then
       install -d $LOGDIR
       run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
     fi

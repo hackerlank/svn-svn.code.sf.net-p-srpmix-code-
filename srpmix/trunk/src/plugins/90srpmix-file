@@ -144,9 +144,16 @@ function main
     verify_commands "${FILE}"
     parse_arguments "$@"
 
-    install -d $LOGDIR
-    run_file "${ROOTDIR}" "${PLUGINDIR}/file" $LOGFILE
-    run_file_i "${ROOTDIR}" "${PLUGINDIR}/file-i" $LOGFILE
+    if ! test -e "${PLUGINDIR}/file" ||
+      test "${BUILDDIR}/STATUS" -nt "${PLUGINDIR}/file"; then
+        install -d $LOGDIR
+        run_file "${ROOTDIR}" "${PLUGINDIR}/file" $LOGFILE
+    fi
+    if ! test -e "${PLUGINDIR}/file-i" ||
+      test "${BUILDDIR}/STATUS" -nt "${PLUGINDIR}/file-i"; then
+        install -d $LOGDIR
+        run_file_i "${ROOTDIR}" "${PLUGINDIR}/file-i" $LOGFILE
+    fi
 }
 
 es_time main "$@"
