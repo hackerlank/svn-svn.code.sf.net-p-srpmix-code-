@@ -2,7 +2,7 @@
 %define lcopy_x_phash g
 %define lcopy_x_branch trunk
 %define lcopy_x_vcs bzr
-%define lcopy_x_vcs_pkg bar
+%define lcopy_x_vcs_pkg bzr
 %define lcopy_x_repo http://bzr.savannah.gnu.org/r/gnash/trunk
 
 %define lcopy_branch_suffix %{?lcopy_x_branch:--%{lcopy_x_branch}}

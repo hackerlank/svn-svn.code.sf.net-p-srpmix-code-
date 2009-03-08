@@ -33,8 +33,6 @@ VC="cvs git svn arch hg darcs bzr mtn mtn_lcopy"
 DIR=`pwd`
 LOG=/dev/stdout
 
-PRIVATE_DIR=.lcopy
-
 function try_source
 {
     source $1
@@ -85,7 +83,7 @@ function parse_arguments
 		shift 1
 		;;
 	    -l=*)
-		LOG=`echo $1 | sed -e 's/--l=//'`
+		LOG=`echo $1 | sed -e 's/-l=//'`
 		shift 1
 		;;
 	    --list-plugins|-L)
@@ -137,11 +135,11 @@ function refresh
 		--directory=\"${cur_dir}\"   \
 		--date=\"${tstamp}\"  >> $LOG
 
-	    ${v}_update $LOG
+	    ${v}_update >> $LOG
 	    r=$?
 
-	    mkdir -p "${PRIVATE_DIR}"
-	    echo $r > "${PRIVATE_DIR}"/STATUS
+	    mkdir -p "${LCOPY_PRIVATEDIR}"
+	    echo $r > "${LCOPY_PRIVATEDIR}"/STATUS
 
 	    tstamp=`LANG=C date`
 	    if test $r = 0; then

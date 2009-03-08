@@ -1,4 +1,5 @@
-########################################################################
+#!/bin/bash
+# 
 #
 # liblcopy.sh: support shell functions for lcopy
 #
@@ -28,11 +29,12 @@ exec_prefix=@exec_prefix@
 libexecdir=@libexecdir@
 
 
-LCOPY_LIBEXECDIR=${LCOPY_LIBEXECDIR:-"${libexecdir}/lcopy}"}
+LCOPY_LIBEXECDIR=${LCOPY_LIBEXECDIR:-"${libexecdir}/lcopy"}
 LCOPY_BACKENDDIR=${LCOPY_BACKENDDIR:-"${LCOPY_LIBEXECDIR}/backends"}
 
 LCOPY_PLUGINDIR=${LCOPY_PLUGINDIR:-"${LCOPY_LIBEXECDIR}/plugins"}
 
+LCOPY_PRIVATEDIR=.lcopy
 
 function lcopy_checkout
 {
@@ -41,7 +43,12 @@ function lcopy_checkout
     vcs=$1
 
     shift 1
-    "${vcs}_checkout" "$@"
+
+    local repo=$1
+    local dir=$2
+    local module=$3
+
+    "${vcs}_checkout" "${repo}" "${dir}" "${module}"
 }
 
 function lcopy_checkout_after
@@ -52,20 +59,9 @@ function lcopy_checkout_after
 
     shift 1
 
-    if lcopy_has_func "${vcs}_checkout"; then
-	"${vcs}_checkout" "$@"
+    if lcopy_has_func "${vcs}_checkout_after"; then
+	"${vcs}_checkout_after" "$@"
     fi
-}
-
-function lcopy_checkout_cmdline
-{
-    local vcs
-
-    vcs=$1
-
-    shift 1
-    "${vcs}_make_checkout_cmdline" "$@"
-    
 }
 
 function lcopy_package_hash
@@ -121,7 +117,6 @@ function lcopy_is_member
 }
 
 
-
 #
 # Load backends
 #
@@ -130,7 +125,6 @@ function lcopy_is_member
 # - *_p
 # - *_update
 #
-# - *_make_checkout_cmdline
 # - *_checkout
 #
 
@@ -163,16 +157,34 @@ function lcopy_run_plugins
 	find $LCOPY_PLUGINDIR -perm +0100 -type f | sort |  while read plugin
     do
 	es_print lcopy start-running-plugin "\"$plugin\"" | sudo -H -u lcopy tee -a $log > /dev/null
-        $plugin "$@"
+	if test "x$(id -u -n)" = xlcopy; then
+	    lcopy $plugin "$@"
+	else
+	    sudo -H -u lcopy $plugin "$@"
+	fi
+
 	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? | sudo -H -u lcopy tee -a $log > /dev/null
     done
 }
 
+function lcopy_vcs_to_pkg
+{
+    local vcs
+
+    vcs=$1
+
+    if lcopy_has_func "${vcs}_to_pkg"; then
+	${vcs}_to_pkg
+    else
+	echo ${vcs}
+    fi
+}
 
 function lcopy_has_func
 {
     type $1 > /dev/null 2>&1 
 }
+
 
 ########################################################################
 #

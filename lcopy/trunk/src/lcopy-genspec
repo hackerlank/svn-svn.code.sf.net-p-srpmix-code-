@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # set -x
 #
@@ -24,7 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
-SUPPORTED_VCSs="svn git cvs hg bzr"
+SUPPORTED_VCSs="svn git cvs hg bzr darcs"
 PACKAGE=
 BRANCH=trunk
 REPO=
@@ -150,11 +150,6 @@ function verify_arguments
     esac
 }
 
-function vcs_to_vcs_pkg
-{
-    ${1}_to_pkg
-}
-
 function generate
 {
     "$SPEC_TYPE"_generate
@@ -170,8 +165,8 @@ function subscription_generate
     local date
     local phash
 
-    vcs_pkg="$(vcs_to_vcs_pkg $VCS)"
-    cmdline=$(lcopy_checkout_cmdline "$VCS" "$REPO" "$PACKAGE" "-" "$MODULE")
+    vcs_pkg="$(lcopy_vcs_to_pkg $VCS)"
+    cmdline=$(lcopy_checkout "$VCS" "$REPO" "$PACKAGE" "$MODULE")
     date=$(LANG=C date "+%a %b %e %Y")
     phash=$(lcopy_package_hash $PACKAGE)
     
@@ -201,7 +196,7 @@ License: GPL
 Group: Development/Tools
 URL: http://srpmix.org
 Requires: %{lcopy_x_vcs_pkg}
-Requires: lcopy
+Requires: lcopy bash
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Buildarch: noarch
 Autoreq: 0

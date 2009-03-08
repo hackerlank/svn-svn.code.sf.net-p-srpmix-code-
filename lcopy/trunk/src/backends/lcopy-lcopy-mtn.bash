@@ -6,7 +6,7 @@ function mtn_lcopy_p
 function mtn_lcopy_update
 {
     local log=$1
-    which mtn > /dev/null 2>> $log && mtn update
+    which mtn > /dev/null && mtn update
 }
 
 : lcopy-lcopy-mtn.bash ends here

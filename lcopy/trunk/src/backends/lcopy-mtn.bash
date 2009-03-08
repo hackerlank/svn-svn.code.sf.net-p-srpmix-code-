@@ -22,12 +22,11 @@ function mtn_p
 
 function mtn_update
 {
-    local log=$1
     local r=
     local mtn_db=
 
     
-    if ! which mtn > /dev/null 2>> $log; then
+    if ! which mtn > /dev/null; then
 	return 1
     fi
 

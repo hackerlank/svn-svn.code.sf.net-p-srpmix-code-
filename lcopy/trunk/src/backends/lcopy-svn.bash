@@ -3,17 +3,6 @@ function svn_p
     test -d .svn
 }
 
-function svn_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    
-    echo svn checkout "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
-}
-
 function svn_checkout
 {
 
@@ -24,13 +13,59 @@ function svn_checkout
     echo svn checkout "$repo" "$dir"
 }
 
-function svn_update
+function svn_checkout_parse_cmdline
 {
-    local log=$1
-    which svn > /dev/null 2>> "$log" && svn update
+    VCS=$1
+    CMD=$2
+    REPO=$3
+    PACKAGE=$4
+    
+    if test "x$VCS" != xsvn; then
+	echo "Wrong vcs: $VCS" 2>&1
+	return 1
+    fi
+
+    if test \( "x$CMD" != "xcheckout" \) -a \
+	    \( "x$CMD" != "xco"    \); then
+	echo "broken svn command line: $@" 2>&1
+	return 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	return 1
+    fi
+
+    # TODO: Handle
+    # svn co svn://svn@svn.a-k-r.org/akr/wfo/trunk wfo
+    if echo "$REPO" | grep -E -e "^http[s]?://" > /dev/null 2>&1; then
+	:
+    else
+	echo "unknown repository specification: $REPO" 2>&1
+	return 1
+    fi
+    
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	return 1
+    fi    
+
+    return 0
 }
 
-function svn_generate_rebirth_cmdline
+function svn_checkout_print_usage
+{
+    echo "	" svn "checkout|co" REPOS PACKAGEDIR
+    echo "	" "REPOS => http://... or https://..."
+}
+
+function svn_update
+{
+    which svn > /dev/null && svn update
+}
+
+
+function svn_rebirth
 {
     local svn_info=`svn info`
     if test $? != 0; then

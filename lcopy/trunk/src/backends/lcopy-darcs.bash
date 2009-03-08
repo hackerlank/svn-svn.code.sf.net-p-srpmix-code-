@@ -3,13 +3,56 @@ function darcs_p
     test -d _darcs
 }
 
-function darcs_update
+function darcs_checkout
 {
-    local log=$1
-    which darcs > /dev/null 2>> "$log" && darcs pull -a 
+    local repo=$1
+    local dir=$2
+
+    echo darcs get "$repo" "$dir"
 }
 
-function darcs_generate_rebirth_cmdline
+function darcs_checkout_parse_cmdline
+{
+    VCS=$1
+    CMD=$2
+    REPO=$3
+    PACKAGE=$4
+
+    if test "x$VCS" != xdarcs; then
+	echo "wrong vcs: $VCS" 2>&1
+	return 1
+    fi
+    
+    if test \( -z "$CMD"          \) -a    \
+        \( "$CMD" != get \) ; then
+	echo "broken darcs command line: $@" 2>&1
+	return 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	return 1
+    fi
+
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	return 1
+    fi
+
+    return 0
+}
+
+function darcs_checkout_print_usage
+{
+    echo "	" darcs get REPOS PACKAGEDIR
+}
+
+function darcs_update
+{
+    which darcs > /dev/null && darcs pull -a 
+}
+
+function darcs_rebirth
 {
     local darcs_defaultrepo_file="`pwd`/_darcs/prefs/defaultrepo"
     local darcs_defaultrepo=
@@ -28,4 +71,4 @@ function darcs_generate_rebirth_cmdline
     return 0
 }
 
-:lcopy-darcs.bash ends here
+: lcopy-darcs.bash ends here

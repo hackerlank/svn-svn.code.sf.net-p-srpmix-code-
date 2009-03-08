@@ -1,5 +1,5 @@
 m4_define([pkg_name],    [lcopy])
-m4_define([pkg_version], [0.0.14])
+m4_define([pkg_version], [0.0.15])
 
 
 

@@ -3,19 +3,6 @@ function cvs_p
     test -d CVS
 }
 
-function cvs_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    local module=$4
-
-    cvs_checkout ${repo} \
-	$(lcopy_make_pb_name "${package}" "${branch}") \
-	${module} 
-}
-
 function cvs_checkout
 {
     local repo=$1
@@ -41,7 +28,6 @@ function cvs_checkout_parse_cmdline
 
     if test "x$VCS" != xcvs; then
 	echo "wrong vcs: $VCS" 2>&1
-	print_usage 2>&1
 	return 1
     fi
 
@@ -51,19 +37,16 @@ function cvs_checkout_parse_cmdline
                \( "$CMD" != checkout \)       \
             \) ; then
 	echo "broken cvs command line about cvs comamnd(checkout: $CMD)): $original" 2>&1
-	print_usage 2>&1
 	return 1
     fi
 
     if test -z "$REPO"; then
 	echo "no repository" 2>&1
-	print_usage 2>&1
 	return 1
     fi
 
     if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
 	echo "broken repo specification: $REPO" 2>&1
-	print_usage 2>&1
 	return 1
     fi
 
@@ -78,13 +61,11 @@ function cvs_checkout_parse_cmdline
 
     if test \( -n "${dflags}" \) -a \( "${dflags}" != "-d" \); then
 	echo "broken cvs command line about directory specification(-d: ${dflags}): $original" 2>&1
-	print_usage 2>&1
 	return 1
     fi
 
     if test -z "$PACKAGE"; then
 	echo "no packagedir" 2>&1
-	print_usage 2>&1
 	return 1
     fi
 
@@ -95,7 +76,6 @@ function cvs_checkout_parse_cmdline
     MODULE=$1
     if test -z "$MODULE"; then
 	echo "no module" 2>&1
-	print_usage 2>&1
 	return 1
     fi
 
@@ -104,11 +84,10 @@ function cvs_checkout_parse_cmdline
 
 function cvs_update
 {
-    local log=$1
-    which cvs > /dev/null 2>> "$log" && cvs update -d
+    which cvs > /dev/null && cvs update -d
 }
 
-function cvs_generate_rebirth_cmdline
+function cvs_rebirth
 {
     local cvs_root=
     local cvs_repo=
@@ -155,11 +134,6 @@ EOF
 	echo cvs -d"${cvs_root}" checkout -P -d ${cvs_dir} ${cvs_repo}
 	return 0
 	)
-}
-
-function cvs_to_pkg
-{
-    echo cvs
 }
 
 : lcopy-cvs.bash ends here

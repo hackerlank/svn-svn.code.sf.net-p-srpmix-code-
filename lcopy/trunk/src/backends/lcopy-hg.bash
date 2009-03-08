@@ -3,15 +3,6 @@ function hg_p
     test -d .hg
 }
 
-function hg_make_checkout_cmdline
-{
-
-    local repo=$1
-    local package=$2
-    local branch=$3
-    
-    echo hg clone "$repo" $(lcopy_make_pb_name "${package}" "${branch}")
-}
 
 function hg_checkout
 {
@@ -22,13 +13,62 @@ function hg_checkout
     echo hg clone "$repo" "$dir"
 }
 
+function hg_checkout_print_usage
+{
+    echo "	" hg clone REPOS PACKAGEDIR
+}
+
+function hg_checkout_parse_cmdline
+{
+    VCS=$1
+    CMD=$2
+    REPO=$3
+    PACKAGE=$4
+
+    if test "x$VCS" != xhg; then
+	echo "wrong vcs: $VCS" 2>&1
+	return 1
+    fi
+
+    if test \( -z "$CMD"          \) -a    \
+            \( "$CMD" != clone \) ; then
+	echo "broken hg command line: $@" 2>&1
+	return 1
+    fi
+
+    if test -z "$REPO"; then
+	echo "no repository" 2>&1
+	return 1
+    fi
+
+    if echo "$REPO" | grep -E -e "^http[s]?://" > /dev/null 2>&1; then
+	:
+    else
+	echo "unknown repository specification: $REPO" 2>&1
+	return 1
+    fi
+ 
+# TODO
+#    if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
+#	echo "broken repo specification: $REPO" 2>&1
+#	return 1
+#    fi
+
+    if test -z "$PACKAGE"; then
+	echo "no packagedir" 2>&1
+	return 1
+    fi
+
+    return 0
+}
+
+
 function hg_update
 {
-    local log=$1
-    which hg > /dev/null 2>> $log && hg update
+    which hg > /dev/null && hg update
 } 
 
-function hg_generate_rebirth_cmdline
+function hg_rebirth
 {
     local hg_path=`hg showconfig -u paths.default 2> /dev/null`
     if test $? != 0; then

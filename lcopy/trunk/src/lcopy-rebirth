@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # set -x
 # 
@@ -35,7 +35,7 @@ function generate_rebirth_cmdline
     (cd $1;
 	for v in $VC; do
 	    if ${v}_p; then
-		${v}_generate_rebirth_cmdline
+		${v}_rebirth
 		return $?
 	    fi
 	done
