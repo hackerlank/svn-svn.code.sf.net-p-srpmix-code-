@@ -42,7 +42,7 @@ function print_usage
     echo "Usage: "
     echo "  srpmix-plugin [--help|-h]"
     echo "  srpmix-plugin [--list-plugins|-L]"
-    echo "  srpmix-plugin [<ROOTDIR> ...]"
+    echo "  srpmix-plugin [--enable=<plugins>] [--disable=<plugins>] [<ROOTDIR> ...]"
     echo 
 }
 
@@ -66,6 +66,14 @@ function parse_arguments
 	    --help|-h)
 		print_usage
 		exit 0
+		;;
+            --enable=*)
+                arg="$(echo $1 | sed 's/--enable=//' | tr , ' ')"
+                ENABLE_PLUGIN="$ENABLE_PLUGIN $arg"
+		;;
+            --disable=*)
+                arg="$(echo $1 | sed 's/--disable=//' | tr , ' ')"
+                DISABLE_PLUGIN="$DISABLE_PLUGIN $arg"
 		;;
             --list-plugins|-L)
 		list_plugins
@@ -97,15 +105,40 @@ function verify_commands
     done
 }
 
+function is_enabled_plugin
+{
+    local p
+
+    for p in $ENABLE_PLUGIN; do
+        if test "x$p" = "x$1"; then
+            return 0
+        fi
+    done
+
+    for p in $DISABLE_PLUGIN; do
+        if test "x$p" = "x$1"; then
+            return 1
+        fi
+    done
+
+    if test "x$ENABLE_PLUGIN" = "x"; then
+        return 0
+    fi
+
+    return 1
+}
+
 function list_plugin_candidates
 {
+    local p
+
     find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort | while read plugin
     do
-        echo $(basename $plugin) $plugin
+        is_enabled_plugin $(basename $plugin) && echo $(basename $plugin) $plugin
     done
     for p in $SRPMIX_EXTRA_PLUGINS
     do
-        echo $(basename $p) $p
+        is_enabled_plugin $(basename $p) && echo $(basename $p) $p
     done
 }
 
