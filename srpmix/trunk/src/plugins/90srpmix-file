@@ -109,6 +109,7 @@ function run_file_cmd
 	| grep -v ^./SRPMIX \
 	| grep -v ^.\$ \
 	| grep -v ^./plugins \
+	| grep -v ^./archives \
 	| grep -v ^./srpmix-LOG \
 	| grep -v ^./srpmix-SPECS \
 	| grep -v ^./SPECS \
@@ -150,7 +151,7 @@ function main
         run_file "${ROOTDIR}" "${PLUGINDIR}/file" $LOGFILE
     fi
     if ! test -e "${PLUGINDIR}/file-i" ||
-      test "${BUILDDIR}/STATUS" -nt "${PLUGINDIR}/file-i"; then
+      test "${BUILDDIR}" -nt "${PLUGINDIR}/file-i"; then
         install -d $LOGDIR
         run_file_i "${ROOTDIR}" "${PLUGINDIR}/file-i" $LOGFILE
     fi

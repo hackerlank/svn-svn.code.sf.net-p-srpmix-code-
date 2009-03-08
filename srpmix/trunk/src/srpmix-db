@@ -162,7 +162,7 @@ function do_install
 	fi
 
 	if test x"$QUIET" != xyes; then
-	    echo "($count/$max) Running plugin for $pkgdir"
+	  echo "($count/$max) Running plugin for $pkgdir"
 	fi
         srpmix-plugin "$pkgdir"
 
@@ -200,11 +200,6 @@ function do_erase
 	    echo "($count/$max) Deleting...$package"
 	fi
 	#
-
-        # TODO remove plugin files by calling plugin?
-        dbpath="$SRPMIX_VAR_DIR"/"$db"
-	pkgdir=$(dirname $(rpm -ql -dbpath "$dbpath" "$package" | head -1))
-        if test "x$pkgdir" != "x"; then rm -rf "$pkgdir"; fi
 
 	if rpm --nodeps -e -dbpath "$SRPMIX_VAR_DIR"/"$db" "$package"; then
 	    rm -rf "$SRPMIX_VAR_DIR/$db"

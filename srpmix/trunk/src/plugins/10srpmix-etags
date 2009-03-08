@@ -133,7 +133,7 @@ function main
     parse_arguments "$@"
 
     if ! test -e "${PLUGINDIR}/TAGS" ||
-      test "${BUILDDIR}/STATUS" -nt "${PLUGINDIR}/TAGS"; then
+      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/TAGS"; then
       install -d $LOGDIR
       run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
     fi

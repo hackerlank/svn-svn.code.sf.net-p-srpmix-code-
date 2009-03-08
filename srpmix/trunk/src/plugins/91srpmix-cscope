@@ -126,7 +126,7 @@ function main
     parse_arguments "$@"
 
     if ! test -e "${PLUGINDIR}/cscope.out" ||
-      test "${BUILDDIR}/STATUS" -nt "${PLUGINDIR}/cscope.out"; then
+      test "${BUILDDIR}" -nt "${PLUGINDIR}/cscope.out"; then
         install -d $LOGDIR
         run_cscope "${ROOTDIR}" "${PLUGINDIR}/cscope.out" $LOGFILE
     fi
