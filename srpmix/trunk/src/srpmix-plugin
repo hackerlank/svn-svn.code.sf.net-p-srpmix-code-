@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 #
 ########################################################################
 #
@@ -42,7 +42,7 @@ function print_usage
     echo "Usage: "
     echo "  srpmix-plugin [--help|-h]"
     echo "  srpmix-plugin [--list-plugins|-L]"
-    echo "  srpmix-plugin ROOTDIR"
+    echo "  srpmix-plugin [<ROOTDIR> ...]"
     echo 
 }
 
@@ -50,6 +50,11 @@ function abort
 {
     echo "*** ABORT..." "$@" 1>&2
     exit 1
+}
+
+function list_source_dirs
+{
+    find $SRPMIX_SOURCES_DIR/*/*/ -maxdepth 1 | grep -v "/$"
 }
 
 function parse_arguments
@@ -73,13 +78,10 @@ function parse_arguments
 	shift
     done
 
-    if test "x$1" = "x"; then
-        print_usage
-        abort
+    ROOTDIRS="$@"
+    if test "x$ROOTDIRS" = "x"; then
+        ROOTDIRS=$(list_source_dirs)
     fi
-
-    ROOTDIR=$(cd $1; pwd)
-
 }
 
 function verify_commands
@@ -107,9 +109,12 @@ function main
 {
     parse_arguments "$@"
 
-    find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort | while read plugin
+    list_plugins | while read plugin
     do
-        $plugin $ROOTDIR
+        for d in $ROOTDIRS
+        do
+            $plugin $d
+        done
     done
 # TODO: return status, see srpmix-wrap
 }
