@@ -97,9 +97,21 @@ function verify_commands
     done
 }
 
-function list_plugins
+function list_plugin_candidates
 {
     find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort | while read plugin
+    do
+        echo $(basename $plugin) $plugin
+    done
+    for p in $SRPMIX_EXTRA_PLUGINS
+    do
+        echo $(basename $p) $p
+    done
+}
+
+function list_plugins
+{
+    list_plugin_candidates | sort | while read base plugin
     do
         echo $plugin
     done
