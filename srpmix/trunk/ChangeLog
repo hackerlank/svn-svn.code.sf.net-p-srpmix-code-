@@ -1,3 +1,13 @@
+2009-03-08  Masato Taruishi  <taruishi@redhat.com>
+
+	* src/srpmix-plugin: add --enable|--disable option.
+	add SRPMIX_EXTRA_PLUGINS configuration.
+	run all the each source root directory by default.
+
+	* src/srpmix-db: invoke srpmix-plugin for each development.
+
+	* src/plugins/91srpmix-cscope: add cscope plugin.
+
 2009-03-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins: new directory.
