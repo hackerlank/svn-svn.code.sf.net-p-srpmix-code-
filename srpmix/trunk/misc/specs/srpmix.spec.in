@@ -1,7 +1,7 @@
 Summary: Scripts to install and expand src.rpm
 Name: srpmix
 Version: @PACKAGE_VERSION@
-Release: 0
+Release: @RPM_RELEASE@
 Source: srpmix-@PACKAGE_VERSION@.tar.bz2
 Requires: hardlink cpio rpm coreutils emacs-common guile file
 Buildarch: noarch

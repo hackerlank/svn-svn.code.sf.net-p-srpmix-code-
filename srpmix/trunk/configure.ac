@@ -20,6 +20,8 @@ AC_SUBST(SRPMIX_MAJOR_VERSION, pkg_major_version)
 AC_SUBST(SRPMIX_MINOR_VERSION, pkg_minor_version)
 AC_SUBST(SRPMIX_MICRO_VERSION, pkg_micro_version)
 
+AC_RPM_RELEASE
+
 AC_OUTPUT([
            Makefile
            misc/Makefile

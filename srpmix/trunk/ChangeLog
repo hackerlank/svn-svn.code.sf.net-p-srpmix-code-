@@ -1,3 +1,10 @@
+2009-03-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac (AC_RPM_RELEASE): add --with-rpm-release=R
+	option.
+
+	* misc/m4/rpm.m4: New file.
+
 2009-03-08  Masato Taruishi  <taruishi@redhat.com>
 
 	* src/srpmix-plugin: add --enable|--disable option.
