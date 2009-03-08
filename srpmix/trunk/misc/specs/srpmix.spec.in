@@ -14,6 +14,13 @@ Group: Development/Tools
 %description
 Scripts to expand src.rpm.
 
+%package plugin-cscope
+Summary: SRPMix Plugin for creating cscope indexes.
+Requires: srpmix cscope
+
+%description plugin-cscope
+SRPMix Plugin for creating cscope indexes.
+
 %prep
 %setup -q
 
@@ -44,12 +51,16 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/srpmix-weakview-packages
 %{_bindir}/srpmix-plugin
 
-%{_datadir}/srpmix/plugins
+%{_datadir}/srpmix/plugins/10srpmix-etags
+%{_datadir}/srpmix/plugins/90srpmix-file
 
 %{_datadir}/srpmix/utils
 
 %{_sysconfdir}/srpmix.cf
 %{_sysconfdir}/cron.daily/srpmix.daily
+
+%files plugin-cscope
+%{_datadir}/srpmix/plugins/91srpmix-cscope
 
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0

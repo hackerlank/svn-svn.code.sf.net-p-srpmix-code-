@@ -1,0 +1,136 @@
+#!/bin/sh
+#
+########################################################################
+#
+# srpmix-cscope: Create CScope Index
+#
+# Copyright (C) 2009 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+ROOTDIR=
+CSCOPE=cscope
+
+BUILDDIR=
+ETAGSDIR=
+LOGDIR=
+LOGFILE=
+PLUGINDIR=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  $0 [--help|-h]"
+    echo "  $0 ROOTDIR"
+    echo 
+}
+
+function abort
+{
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+function parse_arguments
+{
+    status=
+
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test $# -ne 1; then
+	echo "wrong number of argument" 1>&2
+	print_usage 1>&2
+	abort
+    fi
+
+    ROOTDIR=$(cd $1;pwd)
+    shift
+
+    BUILDDIR=${ROOTDIR}/pre-build
+    LOGDIR=${ROOTDIR}/srpmix-LOG
+    LOGFILE=${ROOTDIR}/srpmix-LOG/cscope-log.es
+    PLUGINDIR=${ROOTDIR}/plugins/cscope
+
+    if ! test -d "$PLUGINDIR"; then
+        mkdir -p $PLUGINDIR
+    fi
+}
+
+function run_cscope
+{
+    d=$1
+    o=$2
+    l=$3
+
+    es_print "csope-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    cp /dev/null $o
+    grep text/x-c ${PLUGINDIR}/../file/file-i | cut -d: -f1 > ${PLUGINDIR}/cscope.files
+    (cd $d && ${CSCOPE} -b -i "${PLUGINDIR}/cscope.files" -f $o )
+    es_print "cscope-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+}
+
+function verify_commands
+{
+    while [ $# -gt 0 ]; do
+	if which $1 > /dev/null 2>&1; then
+	    :
+	else
+	    echo "cannot find $1" 1>&2
+	    abort
+	fi
+	shift 
+    done
+}
+
+function main
+{
+    verify_commands "${CSCOPE}"
+    parse_arguments "$@"
+
+    if ! test -e "${PLUGINDIR}/cscope.out" ||
+      test "${BUILDDIR}/STATUS" -nt "${PLUGINDIR}/cscope.out"; then
+        install -d $LOGDIR
+        run_cscope "${ROOTDIR}" "${PLUGINDIR}/cscope.out" $LOGFILE
+    fi
+}
+
+es_time main "$@"
+exit $?
