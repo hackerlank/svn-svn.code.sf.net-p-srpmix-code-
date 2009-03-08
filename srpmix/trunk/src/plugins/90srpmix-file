@@ -89,6 +89,8 @@ function parse_arguments
     LOGFILE=${ROOTDIR}/srpmix-LOG/file-log.es
     PLUGINDIR=${ROOTDIR}/plugins/file
 
+    if ! test -d "${BUILDDIR}"; then exit 0; fi
+
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
     fi
@@ -145,13 +147,13 @@ function main
     verify_commands "${FILE}"
     parse_arguments "$@"
 
-    if ! test -e "${PLUGINDIR}/file" ||
-      test "${BUILDDIR}/STATUS" -nt "${PLUGINDIR}/file"; then
+    if ( ! test -e "${PLUGINDIR}/file" ) ||
+      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file"; then
         install -d $LOGDIR
         run_file "${ROOTDIR}" "${PLUGINDIR}/file" $LOGFILE
     fi
-    if ! test -e "${PLUGINDIR}/file-i" ||
-      test "${BUILDDIR}" -nt "${PLUGINDIR}/file-i"; then
+    if ( ! test -e "${PLUGINDIR}/file-i" ) ||
+      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file-i"; then
         install -d $LOGDIR
         run_file_i "${ROOTDIR}" "${PLUGINDIR}/file-i" $LOGFILE
     fi

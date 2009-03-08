@@ -92,6 +92,8 @@ function parse_arguments
     LOGFILE=${ROOTDIR}/srpmix-LOG/etags-log.es
     PLUGINDIR=${ROOTDIR}/plugins/etags
 
+    if ! test -d "${BUILDDIR}"; then exit 0; fi
+
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
     fi
@@ -132,7 +134,7 @@ function main
     verify_commands "${ETAGS}"
     parse_arguments "$@"
 
-    if ! test -e "${PLUGINDIR}/TAGS" ||
+    if ( ! test -e "${PLUGINDIR}/TAGS" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/TAGS"; then
       install -d $LOGDIR
       run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE

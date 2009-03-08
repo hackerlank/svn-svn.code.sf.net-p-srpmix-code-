@@ -89,6 +89,8 @@ function parse_arguments
     LOGFILE=${ROOTDIR}/srpmix-LOG/cscope-log.es
     PLUGINDIR=${ROOTDIR}/plugins/cscope
 
+    if ! test -d "${BUILDDIR}"; then exit 0; fi
+
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
     fi
@@ -125,8 +127,8 @@ function main
     verify_commands "${CSCOPE}"
     parse_arguments "$@"
 
-    if ! test -e "${PLUGINDIR}/cscope.out" ||
-      test "${BUILDDIR}" -nt "${PLUGINDIR}/cscope.out"; then
+    if ( ! test -e "${PLUGINDIR}/cscope.out" ) ||
+      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/cscope.out"; then
         install -d $LOGDIR
         run_cscope "${ROOTDIR}" "${PLUGINDIR}/cscope.out" $LOGFILE
     fi
