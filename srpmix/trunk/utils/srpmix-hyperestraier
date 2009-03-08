@@ -34,7 +34,11 @@ SRPMIX_HYPERESTRAIER_FILTER_DIR=/usr/share/hyperestraier/filter
 function list_files() {
 
   if test -f "$1/plugins/file/file-i"; then
-    grep ' text/' "$1/plugins/file/file-i" | cut -d: -f1 | sed 's!^\./!!'
+    cat "$1/plugins/file/file-i" |
+      grep -v ' image/' |
+      grep -v ' audio/' |
+      grep -v ' video/' |
+      cut -d: -f1 | sed 's!^\./!!'
   else
     ( cd $1 && find -L . -not -type d | grep -v plugins )
   fi
