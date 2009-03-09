@@ -24,9 +24,9 @@
 #variable
 prefix="@prefix@"
 datarootdir="@datarootdir@"
-SRPMIX_USR_DIR="@datadir@/@PACKAGE@"
-SRPMIX_SWRFS_DIR="${SRPMIX_USR_DIR}/swrfs"
-SRPMIX_PLUGIN_DIR="${SRPMIX_USR_DIR}/plugins"
+SRPMIX_USR_DIR=${SRPMIX_USR_DIR:-"@datadir@/@PACKAGE@"}
+SRPMIX_SWRFS_DIR=${SRPMIX_SWRFS_DIR:-"${SRPMIX_USR_DIR}/swrfs"}
+SRPMIX_PLUGIN_DIR=${SRPMIX_PLUGIN_DIR:-"${SRPMIX_USR_DIR}/plugins"}
 SRPMIX_SYSCONF_DIR="@sysconfdir@"
 
 SRPMIX_VAR_DIR=
