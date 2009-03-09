@@ -96,50 +96,13 @@ Please note that font sizes only work with CSS-based output types."
 			       (cssize-face-foreground face))
 		  :background (cssize-color-to-rgb
 			       (cssize-face-background face)))))
-    (cond (cssize-running-xemacs
-	   ;; XEmacs doesn't provide a way to detect whether a face is
-	   ;; bold or italic, so we need to examine the font instance.
-	   ;; #### This probably doesn't work under MS Windows and/or
-	   ;; GTK devices.  I'll need help with those.
-	   (let* ((font-instance (face-font-instance face))
-		  (props (font-instance-properties font-instance)))
-	     (when (equalp (cdr (assq 'WEIGHT_NAME props)) "bold")
-	       (setf (cssize-fstruct-boldp fstruct) t))
-	     (when (or (equalp (cdr (assq 'SLANT props)) "i")
-		       (equalp (cdr (assq 'SLANT props)) "o"))
-	       (setf (cssize-fstruct-italicp fstruct) t))
-	     (setf (cssize-fstruct-strikep fstruct)
-		   (face-strikethru-p face))
-	     (setf (cssize-fstruct-underlinep fstruct)
-		   (face-underline-p face))))
-	  ((fboundp 'face-attribute)
-	   ;; GNU Emacs 21 and further.
-	   (dolist (attr '(:weight :slant :underline :overline :strike-through))
-	     (let ((value (if (>= emacs-major-version 22)
-			      ;; Use the INHERIT arg in GNU Emacs 22.
-			      (face-attribute face attr nil t)
-			    ;; Otherwise, fake it.
-			    (let ((face face))
-			      (while (and (eq (face-attribute face attr)
-					      'unspecified)
-					  (not (eq (face-attribute face :inherit)
-						   'unspecified)))
-				(setq face (face-attribute face :inherit)))
-			      (face-attribute face attr)))))
-	       (when (and value (not (eq value 'unspecified)))
-		 (cssize-face-emacs21-attr fstruct attr value))))
-	   (let ((size (cssize-face-size face)))
-	     (unless (eql size 1.0) 	; ignore non-spec
-	       (setf (cssize-fstruct-size fstruct) size))))
-	  (t
-	   ;; Older GNU Emacs.  Some of these functions are only
-	   ;; available under Emacs 20+, hence the guards.
-	   (when (fboundp 'face-bold-p)
-	     (setf (cssize-fstruct-boldp fstruct) (face-bold-p face)))
-	   (when (fboundp 'face-italic-p)
-	     (setf (cssize-fstruct-italicp fstruct) (face-italic-p face)))
-	   (setf (cssize-fstruct-underlinep fstruct)
-		 (face-underline-p face))))
+    (dolist (attr '(:weight :slant :underline :overline :strike-through))
+      (let ((value (face-attribute face attr nil t)))
+	(when (and value (not (eq value 'unspecified)))
+	  (cssize-face-emacs21-attr fstruct attr value))))
+    (let ((size (cssize-face-size face)))
+      (unless (eql size 1.0)		; ignore non-spec
+	(setf (cssize-fstruct-size fstruct) size)))
     ;; Generate the css-name property.  Emacs places no restrictions
     ;; on the names of symbols that represent faces -- any characters
     ;; may be in the name, even ^@.  We try hard to beat the face name
@@ -175,18 +138,7 @@ Please note that font sizes only work with CSS-based output types."
   ;; frame parameters.
   (let* ((function (if fg #'face-foreground #'face-background))
 	 color)
-    (if (>= emacs-major-version 22)
-	;; For GNU Emacs 22+ set INHERIT to get the inherited values.
-	(setq color (funcall function face nil t))
-      (setq color (funcall function face))
-      ;; For GNU Emacs 21 (which has `face-attribute'): if the color
-      ;; is nil, recursively check for the face's parent.
-      (when (and (null color)
-		 (fboundp 'face-attribute)
-		 (face-attribute face :inherit)
-		 (not (eq (face-attribute face :inherit) 'unspecified)))
-	(setq color (cssize-face-color-internal
-		     (face-attribute face :inherit) fg))))
+    (setq color (funcall function face nil t))
     (when (and (eq face 'default) (null color))
       (setq color (cdr (assq (if fg 'foreground-color 'background-color)
 			     (frame-parameters)))))
@@ -204,24 +156,12 @@ Please note that font sizes only work with CSS-based output types."
 (defun cssize-face-foreground (face)
   ;; Return the name of the foreground color of FACE.  If FACE does
   ;; not specify a foreground color, return nil.
-  (cond (cssize-running-xemacs
-	 ;; XEmacs.
-	 (and (cssize-face-specifies-property face 'foreground)
-	      (color-instance-name (face-foreground-instance face))))
-	(t
-	 ;; GNU Emacs.
-	 (cssize-face-color-internal face t))))
+  (cssize-face-color-internal face t))
 
 (defun cssize-face-background (face)
   ;; Return the name of the background color of FACE.  If FACE does
   ;; not specify a background color, return nil.
-  (cond (cssize-running-xemacs
-	 ;; XEmacs.
-	 (and (cssize-face-specifies-property face 'background)
-	      (color-instance-name (face-background-instance face))))
-	(t
-	 ;; GNU Emacs.
-	 (cssize-face-color-internal face nil))))
+  (cssize-face-color-internal face nil))
 
 ;; Convert COLOR to the #RRGGBB string.  If COLOR is already in that
 ;; format, it's left unchanged.
@@ -355,9 +295,9 @@ Please note that font sizes only work with CSS-based output types."
 
 
 ;;; Color handling.
-
+(defalias 'cssize-locate-file 'locate-file)
 (if (fboundp 'locate-file)
-    (defalias 'cssize-locate-file 'locate-file)
+    
   (defun cssize-locate-file (file path)
     (dolist (dir path nil)
       (when (file-exists-p (expand-file-name file dir))
@@ -454,12 +394,33 @@ If no rgb.txt file is found, return nil."
       (push "text-decoration: line-through;" result))
     (nreverse result)))
 
-(length (mapcar
-	 (lambda (f)
-	   (cons (cssize-fstruct-css-name f)
-		 (cssize-css-specs f)))
-	 (mapcar
-	  'cssize-face-to-fstruct
-	  (face-list))))
+(defun cssize-clean-up-face-name (face)
+  (let ((s (with-temp-buffer 
+	     ;; Use `prin1-to-string' rather than `symbol-name'
+	     ;; to get the face name because the "face" can also
+	     ;; be an attrlist, which is not a symbol.
+	     (prin1-to-string face))))
+    ;; If the name contains `--' or `*/', remove them.
+    (while (string-match "--" s)
+      (setq s (replace-match "-" t t s)))
+    (while (string-match "\\*/" s)
+      (setq s (replace-match "XX" t t s)))
+    ;; This is needed to use the face name as a file name.
+    (while (string-match "/" s)
+      (setq s (replace-match "." t t s)))
+    s))
+
+(defun cssize-face-to-css (face)
+  (let* ((fstruct (cssize-face-to-fstruct face))
+	 (cleaned-up-face-name (cssize-clean-up-face-name face))
+	 (specs (cssize-css-specs fstruct)))
+    (concat 
+     "." 
+     (cssize-fstruct-css-name fstruct)
+     (if (null specs)
+	 " {"
+       (concat " {\n        /* " cleaned-up-face-name " */\n        "))
+     (mapconcat #'identity specs "\n        ")
+     "\n}\n")))
 
 (provide 'cssize)
