@@ -17,6 +17,7 @@ Scripts to expand src.rpm.
 %package plugin-cscope
 Summary: SRPMix Plugin for creating cscope indexes.
 Requires: srpmix cscope
+Group: Development/Tools
 
 %description plugin-cscope
 SRPMix Plugin for creating cscope indexes.

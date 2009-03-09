@@ -1,5 +1,8 @@
 2009-03-10  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/specs/srpmix.spec.in (plugin-cscope): Added `Group'
+	field. rpmbuild of centos5 requires this field.
+
 	* src/srpmix-ix (MULTI_KERNEL): Experimental feature
 	to build soruce code for multiple architectures.
 
