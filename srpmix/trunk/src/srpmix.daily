@@ -3,5 +3,5 @@
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
 source libsrpmix.sh
-find $SRPMIX_SOURCES_DIR/*/ -maxdepth 1 -mtime -1 | grep -v "/$"  | xargs -n1 --verbose hardlink
+find $SRPMIX_SOURCES_DIR/*/ -maxdepth 1 -mtime -1 | grep -v "/$"  | xargs -n1 --verbose /usr/sbin/hardlink
 
