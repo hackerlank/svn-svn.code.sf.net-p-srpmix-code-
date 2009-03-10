@@ -158,7 +158,7 @@ function main
     do
         list_plugins | while read plugin
         do
-            $plugin $d
+            $plugin $d || true
         done
     done
 # TODO: return status, see srpmix-wrap
