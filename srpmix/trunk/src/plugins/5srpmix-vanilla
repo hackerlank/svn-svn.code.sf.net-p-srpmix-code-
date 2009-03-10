@@ -79,7 +79,8 @@ function parse_arguments
     verify_directory ${ROOTDIR}
 
     SOURCESDIR=${ROOTDIR}/archives
-    LOGDIR=${ROOTDIR}/srpmix-LOG
+    PLUGINDIR=${ROOTDIR}/plugins/vanilla
+    LOGDIR=${PLUGINDIR}/srpmix-LOG
     LOGFILE=${ROOTDIR}/srpmix-LOG/vanilla-log.es
 
 }
@@ -189,6 +190,7 @@ function main
     if test -d "${SOURCESDIR}" &&
        ( ! test -d "${ROOTDIR}/vanilla" ||
 	test "$(/bin/ls ${SOURCESDIR}/* | head -1)" -nt "${ROOTDIR}/vanilla"); then
+	install -d $LOGDIR
         test -d ${ROOTDIR}/.vanilla && /bin/rm -rf ${ROOTDIR}/.vanilla
 	o=${ROOTDIR}/.vanilla/`echo ${d} | sed -e 's!'"${SOURCESDIR}/"'!!'`
 	run_vanilla ${SOURCESDIR} $o $LOGFILE
