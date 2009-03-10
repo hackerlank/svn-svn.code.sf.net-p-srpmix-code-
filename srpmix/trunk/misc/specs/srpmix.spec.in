@@ -14,6 +14,13 @@ Group: Development/Tools
 %description
 Scripts to expand src.rpm.
 
+%package plugin-vanilla
+Summary: SRPMix Plugin for creating vanilla tree.
+Requires: srpmix cscope
+
+%description plugin-vanilla
+SRPMix Plugin for creating vanilla tree.
+
 %package plugin-cscope
 Summary: SRPMix Plugin for creating cscope indexes.
 Requires: srpmix cscope
@@ -62,6 +69,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plugin-cscope
 %{_datadir}/srpmix/plugins/91srpmix-cscope
+
+%files plugin-vanilla
+%{_datadir}/srpmix/plugins/5srpmix-vanilla
 
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0

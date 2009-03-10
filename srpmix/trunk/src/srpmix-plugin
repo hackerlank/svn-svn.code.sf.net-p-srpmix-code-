@@ -132,7 +132,7 @@ function list_plugin_candidates
 {
     local p
 
-    find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort | while read plugin
+    find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort -n | while read plugin
     do
         is_enabled_plugin $(basename $plugin) && echo $(basename $plugin) $plugin
     done
@@ -144,7 +144,7 @@ function list_plugin_candidates
 
 function list_plugins
 {
-    list_plugin_candidates | sort | while read base plugin
+    list_plugin_candidates | sort -n | while read base plugin
     do
         echo $plugin
     done
