@@ -185,17 +185,19 @@ function main
     verify_commands tar unzip fastjar gunzip bunzip2
     parse_arguments "$@"
 
+    tmpdir=${PLUGINDIR}/.vanilla
     if test -d "${SOURCESDIR}" &&
        ( ! test -d "${ROOTDIR}/vanilla" ||
 	test "$(/bin/ls ${SOURCESDIR}/* | head -1)" -nt "${ROOTDIR}/vanilla"); then
-        test -d ${PLUGINDIR}/.vanilla && /bin/rm -rf ${PLUGINDIR}/.vanilla
-	o=${PLUGINDIR}/.vanilla/`echo ${d} | sed -e 's!'"${SOURCESDIR}/"'!!'`
+        test -d $tmpdir && /bin/rm -rf $tmpdir
+	install -d $tmpdir
+	o=$tmpdir/`echo ${d} | sed -e 's!'"${SOURCESDIR}/"'!!'`
 	run_vanilla ${SOURCESDIR} $o $LOGFILE
 	if ! test -d "${ROOTDIR}/vanilla"; then
-            /bin/mv "${PLUGINDIR}/.vanilla" "${ROOTDIR}/vanilla"
+            /bin/mv "$tmpdir" "${ROOTDIR}/vanilla"
         else
-            rsync -a --delete ${PLUGINDIR}/.vanilla/ "${ROOTDIR}/vanilla"
-            /bin/rm -rf "${PLUGINDIR}/.vanilla"
+            rsync -a --delete $tmpdir/ "${ROOTDIR}/vanilla"
+            /bin/rm -rf "$tmpdir"
         fi
     fi
 }
