@@ -1,5 +1,14 @@
 2009-03-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix (--target): New option.
+
+	* src/srpmix-ix (SRPMIX_TARGET): New environment variable.
+
+	* srpmix-ix (get_current_target): Use _target_cpu
+	again. Don't use _host_cpu.
+
+2009-03-11  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/plugins/11srpmix-kindex: Implemented.
 
 	* src/plugins/10srpmix-ctags: New file.

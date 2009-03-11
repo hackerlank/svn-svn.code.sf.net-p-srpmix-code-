@@ -63,7 +63,7 @@ VERBOSE=no
 USE_SUDO=no
 FREEZE=no
 GROUP=
-TARGET=
+TARGET=${SRPMIX_TARGET}
 ABORT_COUNT=0
 TOTAL_COUNT=0
 DO_HARDLINK=${SRPMIX_DO_HARDLINK}
@@ -112,6 +112,7 @@ function print_usage
     echo "SRPMIX_MULTI_TARGETS=yes|no"
     echo "SRPMIX_KEEP_ORIGINAL=yes|no"
     echo "SRPMIX_IX_DEBUG=yes|no"
+    echo "SRPMIX_TARGET=i386|i686|x86_64|ia64|ppc64"
     echo 
 }
 
@@ -152,14 +153,14 @@ function update_count
 
 ########################################################################
 #
-function get_current_target
+function default_target
 {
     rpm --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
 }
 
-function make_targets
+function default_multi_targets
 {
-    local current=`get_current_target`
+    local current=`default_target`
     local targets=${current}
     
     for x in i386 i686 x86_64 ia64 ppc; do
@@ -172,19 +173,16 @@ function make_targets
     echo $targets
 }
 
-function set_multi_targets
-{
-    if test x"${MULTI_TARGETS}" = xyes; then
-	TARGET=$(make_targets)
-    fi
-}
-
 function parse_arguments
 {
+    if test -z "${TARGET}"; then
+	if test -z "${MULTI_TARGETS}"; then
+	    TARGET=$(default_target)
+	else
+	    TARGET=$(default_multi_targets)
+	fi
+    fi
 
-    set_multi_targets
-    
-    
     while [ $# -gt 0 ]; do
 	case "$1" in
 	    --help|-h)
@@ -233,7 +231,7 @@ function parse_arguments
                 shift 1
 		;;
 	    --multi-targets)
-	        TARGET=$(make_targets)
+	        TARGET=$(default_multi_targets)
 		shift 1
 		;;
             --target|-target|-t)
@@ -302,9 +300,6 @@ function parse_arguments
     verbose varset --CREATE_ROOTDIR=\""${CREATE_ROOTDIR}"\"
     verbose varset --USE-SUDO=\""${USE_SUDO}"\"
 
-    if test x${TARGET} = x; then
-	TARGET=$(get_current_target)
-    fi
     verbose varset --TARGET=\""${TARGET}"\"
 }
 #
@@ -672,6 +667,7 @@ function srpm_deploy
     if test "x${kernel_p}" = xyes; then
 #	targets="i686 x86_64 ia64 ppc64"
 	targets="i686 x86_64"
+	message varset --TARGET targets --kernel -t
     else
 	targets="${TARGET}"	
     fi

@@ -33,9 +33,12 @@ function print_usage
     echo "         [--release=RELEASE]"
     echo "         [--debug]"
     echo "         [--ignore-error]"
+    echo "         [--target=ARCH]"
     echo "         [--multi-targets]"
     echo "         [--keep-original]"
     echo "          --name=PACKAGE|--srpm=SRPM"
+    echo
+    echo "ARCH: i386(not for kenel), i686, x86_64, ia64, or ppc64"
 #    TODO: Multi targets
 #    TODO: URL support
 #    echo ""
@@ -87,6 +90,9 @@ function parse_arguments
 		else
 		    srpmix_abort "No such directory: ${OUTPUT_DIR}"
 		fi
+		;;
+	    --target=*)
+	        export SRPMIX_TARGET=$(echo $1 | sed 's/--target=//')
 		;;
 	    --debug)
 	        DEBUG=yes
