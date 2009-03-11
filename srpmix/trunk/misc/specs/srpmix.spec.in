@@ -73,6 +73,12 @@ rm -rf $RPM_BUILD_ROOT
 %files plugin-vanilla
 %{_datadir}/srpmix/plugins/5srpmix-vanilla
 
+%post plugin-cscope
+srpmix-plugin --enable=91srpmix-cscope
+
+%post plugin-vanilla
+srpmix-plugin --enable=5srpmix-vanilla
+
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0
 - First RPM build.
