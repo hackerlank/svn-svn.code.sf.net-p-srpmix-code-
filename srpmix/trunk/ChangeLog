@@ -1,3 +1,7 @@
+2009-03-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/50srpmix-coreutils: Fix a typo in comment.
+
 2009-03-12  Masato Taruishi <taruishi@redhat.com>
 
 	* src/plugins/: renumbering plugins

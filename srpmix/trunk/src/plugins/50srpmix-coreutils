@@ -2,7 +2,7 @@
 #
 ########################################################################
 #
-# srpmix-etags: Create some core file statistics such as md5sum, wc
+# srpmix-coreutils: Create some core file statistics such as md5sum, wc
 #
 # Copyright (C) 2009 Masato Taruishi
 #
