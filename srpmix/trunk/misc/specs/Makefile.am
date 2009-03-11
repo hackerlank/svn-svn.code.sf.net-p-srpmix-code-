@@ -1,7 +1,7 @@
 DISTCLEANFILES = srpmix.spec
 
 if MAINTAINER_MODE
-RPM_RELEASE = 0svn$(shell svn info | grep Revision | cut -d" " -f2)
+RPM_RELEASE = 0svn$(shell LANG=C svn info | grep Revision | cut -d" " -f2)
 else
 RPM_RELEASE = 0
 endif
