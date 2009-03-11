@@ -3,7 +3,7 @@
 #
 # twig: Manage a temporary branch for a package
 #
-# Copyright (C) 2008 Masatake YAMATO
+# Copyright (C) 2008-2009 Masatake YAMATO
 #
 # Author: Masatake YAMATO <yamato@redhat.com>
 #
@@ -26,17 +26,48 @@
 # verify
 # reduce/fold
 
-twig_commands="fork info diff specdiff pedigree commit build addlog help"
+twig_commands="home fork info diff specdiff pedigree commit build addlog help"
 
 function twig_p
 {
     test -d $1/TWIG
 }
 
+#
+#
+# twig home [dir]
+#
+#
+function twig_home_help
+{
+    echo "    " home [DIR]
+}
+
+function twig_home
+{
+    local d
+
+    if test x"$1" = x; then
+	d=$(pwd)
+    else
+	d=${1}
+    fi
+
+    if test ! -d ${d}; then
+	return 1
+    elif twig_p $d; then
+	return 0;
+    elif test $d = "/"; then
+	return 2;
+    else
+	twig_home $(dir $d)
+	return $?
+    fi
+}
 
 #
 #
-# twig form name from [dir]
+# twig fork name from [dir]
 #
 #
 function twig_fork_help
@@ -333,7 +364,7 @@ function twig_info_help
 
 function twig_info
 {
-    local form
+    local from
     local status
 
     if ! twig_p .; then
