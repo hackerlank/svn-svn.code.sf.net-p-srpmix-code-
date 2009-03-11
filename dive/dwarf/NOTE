@@ -1,0 +1,11 @@
+dwarves/pglobal.c
+GPL2
+
+[package name -> debuginfo rpm -> symbol files]
+[package name -> srpmix dir]
+=> [symbol files -> eS expression]
+=> [eS expression V srpmix dir]
+
+[eS expression <= query] 
+
+<es-src-dwarf>
