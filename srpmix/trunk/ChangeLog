@@ -1,3 +1,8 @@
+2009-03-12  Masato Taruishi <taruishi@redhat.com>
+
+	* src/plugins/: renumbering plugins
+	* src/plugin/50srpmix-coreutils: Implemented
+
 2009-03-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix (--target): New option.
