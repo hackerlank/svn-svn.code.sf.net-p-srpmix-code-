@@ -1,3 +1,10 @@
+2009-03-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/5srpmix-vanilla (TMPDIR): Use `basename' when
+	making a temporary directory.
+
+	* src/plugins/91srpmix-cscope (REGEX): Fix a typo in a log message.
+
 2009-03-10  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in (plugin-cscope): Added `Group'

@@ -30,7 +30,7 @@ LOGDIR=
 LOGFILE=
 LIBSRPMIX=libsrpmix.sh
 
-TMPDIR=/tmp/$0.$$
+TMPDIR=/tmp/$(basename $0).$$
 mkdir -p $TMPDIR
 trap "/bin/rm -rf $TMPDIR" 0
 
