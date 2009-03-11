@@ -28,7 +28,6 @@ CTAGS=ctags
 
 BUILDDIR=
 CTAGSDIR=
-LOGDIR=
 LOGFILE=
 PLUGINDIR=
 
@@ -89,9 +88,8 @@ function parse_arguments
 
     SPEC=${ROOTDIR}/*.spec
     BUILDDIR=${ROOTDIR}/pre-build
-    LOGDIR=${ROOTDIR}/srpmix-LOG
-    LOGFILE=${ROOTDIR}/srpmix-LOG/ctags-log.es
     PLUGINDIR=${ROOTDIR}/plugins/ctags
+    LOGFILE=${PLUGINDIR}/ctags-log.es
 
     if ! test -d "${BUILDDIR}"; then exit 0; fi
 
@@ -141,7 +139,6 @@ function main
 
     if ( ! test -e "${PLUGINDIR}/tags" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/tags"; then
-      install -d $LOGDIR
       run_ctags "${BUILDDIR}" "${PLUGINDIR}/tags" $LOGFILE
     fi
 }

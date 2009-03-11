@@ -28,7 +28,6 @@ FILE=file
 
 BUILDDIR=
 ETAGSDIR=
-LOGDIR=
 LOGFILE=
 PLUGINDIR=
 
@@ -85,9 +84,8 @@ function parse_arguments
     shift
 
     BUILDDIR=${ROOTDIR}/pre-build
-    LOGDIR=${ROOTDIR}/srpmix-LOG
-    LOGFILE=${ROOTDIR}/srpmix-LOG/file-log.es
     PLUGINDIR=${ROOTDIR}/plugins/file
+    LOGFILE=${PLUGINDIR}/file-log.es
 
     if ! test -d "${BUILDDIR}"; then exit 0; fi
 
@@ -149,12 +147,10 @@ function main
 
     if ( ! test -e "${PLUGINDIR}/file" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file"; then
-        install -d $LOGDIR
         run_file "${ROOTDIR}" "${PLUGINDIR}/file" $LOGFILE
     fi
     if ( ! test -e "${PLUGINDIR}/file-i" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file-i"; then
-        install -d $LOGDIR
         run_file_i "${ROOTDIR}" "${PLUGINDIR}/file-i" $LOGFILE
     fi
 }

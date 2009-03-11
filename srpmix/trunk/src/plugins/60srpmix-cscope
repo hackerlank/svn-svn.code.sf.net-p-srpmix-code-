@@ -28,7 +28,6 @@ CSCOPE=cscope
 
 BUILDDIR=
 ETAGSDIR=
-LOGDIR=
 LOGFILE=
 PLUGINDIR=
 
@@ -85,9 +84,8 @@ function parse_arguments
     shift
 
     BUILDDIR=${ROOTDIR}/pre-build
-    LOGDIR=${ROOTDIR}/srpmix-LOG
-    LOGFILE=${ROOTDIR}/srpmix-LOG/cscope-log.es
     PLUGINDIR=${ROOTDIR}/plugins/cscope
+    LOGFILE=${PLUGINDIR}/cscope-log.es
 
     if ! test -d "${BUILDDIR}"; then exit 0; fi
 
@@ -131,7 +129,6 @@ function main
 
     if ( ! test -e "${PLUGINDIR}/cscope.out" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/cscope.out"; then
-        install -d $LOGDIR
         run_cscope "${ROOTDIR}" "${PLUGINDIR}/cscope.out" $LOGFILE
     fi
 }

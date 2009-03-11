@@ -27,7 +27,6 @@ ROOTDIR=
 
 SPEC=
 PRE_BUILDDIR=
-# LOGDIR=
 # LOGFILE=
 LIBSRPMIX=libsrpmix.sh
 
@@ -85,8 +84,7 @@ function parse_arguments
     SPEC=${ROOTDIR}/*.spec
     PRE_BUILDDIR=${ROOTDIR}/pre-build
     PLUGINDIR=${ROOTDIR}/plugins/kindex
-#    LOGDIR=${PLUGINDIR}/srpmix-LOG
-#    LOGFILE=${LOGDIR}/kindex-log.es
+#    LOGFILE=${PLUGINDIR}/kindex-log.es
 
 }
 

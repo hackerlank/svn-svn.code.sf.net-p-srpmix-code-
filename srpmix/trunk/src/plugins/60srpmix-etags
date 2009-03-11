@@ -28,7 +28,6 @@ ETAGS=etags
 
 BUILDDIR=
 ETAGSDIR=
-LOGDIR=
 LOGFILE=
 PLUGINDIR=
 
@@ -91,9 +90,8 @@ function parse_arguments
 
     SPEC=${ROOTDIR}/*.spec
     BUILDDIR=${ROOTDIR}/pre-build
-    LOGDIR=${ROOTDIR}/srpmix-LOG
-    LOGFILE=${ROOTDIR}/srpmix-LOG/etags-log.es
     PLUGINDIR=${ROOTDIR}/plugins/etags
+    LOGFILE=${PLUGINDIR}/etags-log.es
 
     if ! test -d "${BUILDDIR}"; then exit 0; fi
 
@@ -144,7 +142,6 @@ function main
 
     if ( ! test -e "${PLUGINDIR}/TAGS" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/TAGS"; then
-      install -d $LOGDIR
       run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
     fi
 }
