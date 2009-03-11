@@ -98,25 +98,28 @@ rm -rf $RPM_BUILD_ROOT
 %files plugin-ctags
 %{_datadir}/srpmix/plugins/10srpmix-ctags
 
-%post plugin-cscope
-if [ "$1" = 1 ] ; then
-  srpmix-plugin --enable=91srpmix-cscope
-fi
+##
+## TODO requires background execution to enable these post
+##
+#%post plugin-cscope
+#if [ "$1" = 1 ] ; then
+#  srpmix-plugin --enable=91srpmix-cscope
+#fi
 
-%post plugin-vanilla
-if [ "$1" = 1 ] ; then
-  srpmix-plugin --enable=5srpmix-vanilla
-fi
+#%post plugin-vanilla
+#if [ "$1" = 1 ] ; then
+#  srpmix-plugin --enable=5srpmix-vanilla
+#fi
 
-%post plugin-kindex
-if [ "$1" = 1 ] ; then
-  srpmix-plugin --enable=11srpmix-kindex
-fi
+#%post plugin-kindex
+#if [ "$1" = 1 ] ; then
+#  srpmix-plugin --enable=11srpmix-kindex
+#fi
 
-%post plugin-ctags
-if [ "$1" = 1 ] ; then
-  srpmix-plugin --enable=10srpmix-ctags
-fi
+#%post plugin-ctags
+#if [ "$1" = 1 ] ; then
+#  srpmix-plugin --enable=10srpmix-ctags
+#fi
 
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0
