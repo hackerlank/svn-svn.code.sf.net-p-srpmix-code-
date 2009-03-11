@@ -1786,39 +1786,5 @@
   :group 'stitch
   :lighter " Stitch"
   )
-;;
-;; (define-key global-map [(hyper ?A)] 'stitch-annotate)
-;; TODO force insertion
-
-
-(require 'etags)
-(defvar stitch-original-visit-tags-table nil)
-(unless (fboundp 'stitch-original-visit-tags-table)
-  (fset 'stitch-original-visit-tags-table
-	(symbol-function 'visit-tags-table)))
-
-(defun stitch-search-tags-file (base)
-    (unless (equal base "/")
-      (let ((upper (file-name-directory base)))
-	(cond
-	 ((not upper)
-	  nil)
-	 ((file-exists-p (concat upper "plugins/etags/TAGS"))
-	  (concat upper "plugins/etags"))
-	 ((file-exists-p (concat upper ".lcopy/TAGS"))
-	  (concat upper ".lcopy"))
-	 (t
-	  (stitch-search-tags-file (directory-file-name upper)))))))
-    
-(defun stitch-visit-tags-table (file)
-  (interactive)
-  (if file
-      (stitch-original-visit-tags-table file)
-    (let ((in-stitch (stitch-search-tags-file default-directory)))
-      (let ((default-directory (or in-stitch default-directory)))
-	(call-interactively 'stitch-original-visit-tags-table)))))
-
-(fset 'visit-tags-table (symbol-function 'stitch-visit-tags-table))
-  
 
 (provide 'stitch)
