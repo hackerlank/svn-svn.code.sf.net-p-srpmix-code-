@@ -26,7 +26,7 @@
 # verify
 # reduce/fold
 
-twig_commands="fork info diff specdiff pedigree record build addlog help"
+twig_commands="fork info diff specdiff pedigree commit build addlog help"
 
 function twig_p
 {
@@ -116,7 +116,7 @@ function twig_fork_generic
     fi
 
     if ! echo $name > $dir/TWIG/name; then
-	echo "Cannot record name to $dir/TWIG/name" 1>&2
+	echo "Cannot commit name to $dir/TWIG/name" 1>&2
 	exit 1
     fi
 
@@ -152,7 +152,7 @@ function twig_fork_generic
 
     sleep 1
     if ! echo 0 > $dir/TWIG/build_id; then
-	echo "Cannot record initial build_id to $dir/TWIG/build_id" 1>&2
+	echo "Cannot commit initial build_id to $dir/TWIG/build_id" 1>&2
 	exit 1
     fi
 }
@@ -298,15 +298,15 @@ function twig_specdiff
 
 #
 #
-# twig record
+# twig commit
 #
 #
-function twig_record_help
+function twig_commit_help
 {
-    echo "    " record
+    echo "    " commit
 }
 
-function twig_record
+function twig_commit
 {
     local name
     local size
@@ -469,7 +469,7 @@ function twig_warning
     old_file=$1
 
     echo "*** $old_file is older than ./TWIG/build_id"
-    echo "*** You may forget to run \"twig record\"."
+    echo "*** You may forget to run \"twig commit\"."
     echo "*** To ignore the modification time use --ignore-modification-time"
     
 }
