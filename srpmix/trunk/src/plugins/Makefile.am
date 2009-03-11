@@ -1,12 +1,12 @@
 plugindir = $(pkgdatadir)/plugins
 
 dist_plugin_SCRIPTS =        \
-        5srpmix-vanilla      \
-        10srpmix-etags       \
-        10srpmix-ctags       \
-        11srpmix-kindex      \
-	90srpmix-file        \
-	91srpmix-cscope      \
+        10srpmix-vanilla      \
+	50srpmix-file        \
+        60srpmix-etags       \
+        60srpmix-ctags       \
+        60srpmix-kindex      \
+	60srpmix-cscope      \
 	\
         $(NULL)
 

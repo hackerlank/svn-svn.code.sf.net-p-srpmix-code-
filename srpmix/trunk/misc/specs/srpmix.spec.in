@@ -78,8 +78,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/srpmix-weakview-packages
 %{_bindir}/srpmix-plugin
 
-%{_datadir}/srpmix/plugins/10srpmix-etags
-%{_datadir}/srpmix/plugins/90srpmix-file
+%{_datadir}/srpmix/plugins/50srpmix-file
+%{_datadir}/srpmix/plugins/60srpmix-etags
 
 %{_datadir}/srpmix/utils
 
@@ -87,23 +87,23 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/cron.daily/srpmix.daily
 
 %files plugin-cscope
-%{_datadir}/srpmix/plugins/91srpmix-cscope
+%{_datadir}/srpmix/plugins/60srpmix-cscope
 
 %files plugin-vanilla
-%{_datadir}/srpmix/plugins/5srpmix-vanilla
+%{_datadir}/srpmix/plugins/10srpmix-vanilla
 
 %files plugin-kindex
-%{_datadir}/srpmix/plugins/11srpmix-kindex
+%{_datadir}/srpmix/plugins/60srpmix-kindex
 
 %files plugin-ctags
-%{_datadir}/srpmix/plugins/10srpmix-ctags
+%{_datadir}/srpmix/plugins/60srpmix-ctags
 
 ##
 ## TODO requires background execution to enable these post
 ##
 #%post plugin-cscope
 #if [ "$1" = 1 ] ; then
-#  srpmix-plugin --enable=91srpmix-cscope
+#  srpmix-plugin --enable=60srpmix-cscope
 #fi
 
 #%post plugin-vanilla
