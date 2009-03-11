@@ -221,7 +221,7 @@ fi
 %build
 srpmix-ix -f -v %{_builddir}/%{name} \
     %{_sourcedir}/`basename $target_srpm`
-srpmix-plugin --enable=10srpmix-etags,90srpmix-file %{_builddir}/%{name}
+srpmix-plugin --enable=50srpmix-coreutils,50srpmix-file,60srpmix-etags %{_builddir}/%{name}
 
 %install
 rm -rf \$RPM_BUILD_ROOT

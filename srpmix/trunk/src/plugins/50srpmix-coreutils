@@ -1,0 +1,160 @@
+#!/bin/sh
+#
+########################################################################
+#
+# srpmix-etags: Create some core file statistics such as md5sum, wc
+#
+# Copyright (C) 2009 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+ROOTDIR=
+MD5SUM=md5sum
+WC=wc
+
+BUILDDIR=
+ETAGSDIR=
+LOGFILE=
+PLUGINDIR=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  $0 [--help|-h]"
+    echo "  $0 ROOTDIR"
+    echo 
+}
+
+function abort
+{
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+function parse_arguments
+{
+    status=
+
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test $# -ne 1; then
+	echo "wrong number of argument" 1>&2
+	print_usage 1>&2
+	abort
+    fi
+
+    ROOTDIR=$(cd $1;pwd)
+    shift
+
+    BUILDDIR=${ROOTDIR}/pre-build
+    PLUGINDIR=${ROOTDIR}/plugins/coreutils
+    LOGFILE=${PLUGINDIR}/coreutils-log.es
+
+    if ! test -d "${BUILDDIR}"; then exit 0; fi
+
+    if ! test -d "$PLUGINDIR"; then
+        mkdir -p $PLUGINDIR
+    fi
+}
+
+function run_cmd
+{
+    d=$1
+    o=$2
+    l=$3
+    cmd=$4
+
+
+    es_print "$cmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    cp /dev/null $o
+    (cd $d && find -L . -not -type d \
+	| grep -v ^./STATUS \
+	| grep -v ^./SRPMIX \
+	| grep -v ^.\$ \
+	| grep -v ^./plugins \
+	| grep -v ^./archives \
+	| grep -v ^./srpmix-LOG \
+	| grep -v ^./srpmix-SPECS \
+	| grep -v ^./SPECS \
+	| xargs $cmd >> $o )
+    es_print "$cmd-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+}
+
+function run_md5sum
+{
+    run_cmd $1 $2 $3 "${MD5SUM}"
+}
+
+function run_wc
+{
+    run_cmd $1 $2 $3 "${WC}"
+}
+
+function verify_commands
+{
+    while [ $# -gt 0 ]; do
+	if which $1 > /dev/null 2>&1; then
+	    :
+	else
+	    echo "cannot find $1" 1>&2
+	    abort
+	fi
+	shift 
+    done
+}
+
+function main
+{
+    verify_commands "${MD5SUM}" "${WC}"
+    parse_arguments "$@"
+
+    if ( ! test -e "${PLUGINDIR}/md5sum" ) ||
+      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/md5sum"; then
+        run_md5sum "${ROOTDIR}" "${PLUGINDIR}/md5sum" $LOGFILE
+    fi
+    if ( ! test -e "${PLUGINDIR}/wc" ) ||
+      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/wc"; then
+        LANG=C run_wc "${ROOTDIR}" "${PLUGINDIR}/wc" $LOGFILE
+    fi
+}
+
+es_time main "$@"
+exit $?
