@@ -15,6 +15,7 @@ function cvs_checkout
 function cvs_checkout_print_usage
 {
     echo "	" cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' -d PACKAGEDIR MODULE 
+    echo "	" cvs -d :pserver:USER:PASSWD@HOST 'checkout|co' -d PACKAGEDIR MODULE 
     echo "	" '(adds -P automatically)'
 }
 
@@ -22,7 +23,14 @@ function cvs_checkout_parse_cmdline
 {
     local original=$@
     VCS=$1
-    REPO=${2/-d/}
+    
+    if test "x-d" = "x$2"; then
+	REPO=$3
+	shift 1
+    else
+	REPO=${2/-d/}
+    fi
+
     CMD=$3
     shift 3
 
