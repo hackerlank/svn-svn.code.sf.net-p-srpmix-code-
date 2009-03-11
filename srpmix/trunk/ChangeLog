@@ -1,5 +1,12 @@
 2009-03-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/11srpmix-kindex: Implemented.
+
+	* src/plugins/10srpmix-ctags: New file.
+
+	* src/srpmix-ix (srpm_deploy): Build only kernel.i686 and
+	kernel.x86_64.
+
 	* src/plugins/5srpmix-vanilla (TMPDIR): Use `basename' when
 	making a temporary directory.
 

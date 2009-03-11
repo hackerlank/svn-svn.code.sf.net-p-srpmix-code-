@@ -29,6 +29,25 @@ Group: Development/Tools
 %description plugin-cscope
 SRPMix Plugin for creating cscope indexes.
 
+
+%package plugin-kindex
+Summary: SRPMix Plugin for running make tags and make TAGS of kernel
+Requires: srpmix emacs-common ctags
+Group: Development/Tools
+
+%description plugin-kindex
+SRPMix Plugin for running make tags and make TAGS of kernel
+
+%package plugin-ctags
+Summary: SRPMix Plugin for creating ctags indexes.
+Requires: srpmix ctags
+Group: Development/Tools
+
+%description plugin-ctags
+SRPMix Plugin for creating ctags indexes.
+
+
+
 %prep
 %setup -q
 
@@ -73,11 +92,21 @@ rm -rf $RPM_BUILD_ROOT
 %files plugin-vanilla
 %{_datadir}/srpmix/plugins/5srpmix-vanilla
 
+%files plugin-kindex
+%{_datadir}/srpmix/plugins/11srpmix-kindex
+
+%files plugin-ctags
+%{_datadir}/srpmix/plugins/10srpmix-ctags
+
+
+
 %post plugin-cscope
 srpmix-plugin --enable=91srpmix-cscope
 
 %post plugin-vanilla
 srpmix-plugin --enable=5srpmix-vanilla
+
+
 
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0

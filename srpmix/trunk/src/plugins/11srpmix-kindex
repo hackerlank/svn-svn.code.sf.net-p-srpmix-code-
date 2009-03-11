@@ -2,7 +2,7 @@
 #
 ########################################################################
 #
-# srpmix-etags: Run etags for files under srpmix dir
+# srpmix-kindex: Do make tags and make TAGS if the target is kernel
 #
 # Copyright (C) 2007 Masatake YAMATO
 #
@@ -24,35 +24,26 @@
 ########################################################################
 
 ROOTDIR=
-ETAGS=etags
-
-BUILDDIR=
-ETAGSDIR=
-LOGDIR=
-LOGFILE=
-PLUGINDIR=
 
 SPEC=
-
+PRE_BUILDDIR=
+# LOGDIR=
+# LOGFILE=
 LIBSRPMIX=libsrpmix.sh
-function try_source
-{
-    source $1
-    if test $? != 0; then
-	echo "*** ABORT...cannot find $1" 1>&2
-	exit 1
-    fi
-}
-try_source ${LIBSRPMIX}
+
+# TARGETS="i686 x86_64 ia64 ppc64"
+TARGETS="i686 x86_64"
 
 
-BLACKLIST='.*\.bib$\|unic-005\.tex$\|.*\.srpmix$'
+TMPDIR=/tmp/$(basename $0).$$
+mkdir -p $TMPDIR
+trap "/bin/rm -rf $TMPDIR" 0
 
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-etags [--help|-h]"
-    echo "  srpmix-etags ROOTDIR"
+    echo "  $0 [--help|-h]"
+    echo "  $0 ROOTDIR"
     echo 
 }
 
@@ -89,34 +80,14 @@ function parse_arguments
     ROOTDIR=$(cd $1;pwd)
     shift
 
+    verify_directory ${ROOTDIR}
+
     SPEC=${ROOTDIR}/*.spec
-    BUILDDIR=${ROOTDIR}/pre-build
-    LOGDIR=${ROOTDIR}/srpmix-LOG
-    LOGFILE=${ROOTDIR}/srpmix-LOG/etags-log.es
-    PLUGINDIR=${ROOTDIR}/plugins/etags
+    PRE_BUILDDIR=${ROOTDIR}/pre-build
+    PLUGINDIR=${ROOTDIR}/plugins/kindex
+#    LOGDIR=${PLUGINDIR}/srpmix-LOG
+#    LOGFILE=${LOGDIR}/kindex-log.es
 
-    if ! test -d "${BUILDDIR}"; then exit 0; fi
-
-    if ! test -d "$PLUGINDIR"; then
-        mkdir -p $PLUGINDIR
-    fi
-}
-
-function run_etags
-{
-    d=$1
-    o=$2
-    l=$3
-
-
-    es_print etags-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
-    (cd $d && find */ -type f \
-	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
-	| grep -v .bz2           \
-	| grep -v .gz            \
-	| grep -v "${BLACKLIST}" \
-	| ${ETAGS} -o $o - )
-    es_print etags-end --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
 function verify_commands
@@ -132,22 +103,60 @@ function verify_commands
     done
 }
 
-function main
+function verify_directory
 {
-    verify_commands "${ETAGS}"
-    parse_arguments "$@"
-
-    if grep '^Name: *kernel\(%.*\)\?$' $SPEC > /dev/null 2>&1 ; then
-	# srpmix-kindex will make indexes.
-	return 0
-    fi
-
-    if ( ! test -e "${PLUGINDIR}/TAGS" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/TAGS"; then
-      install -d $LOGDIR
-      run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
+    if test ! -d ${1}; then
+	echo "*** ABORT...cannot find ${1}" '(' `pwd` ')'; 1>&2
+	exit 1
     fi
 }
 
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+
+function main
+{
+    verify_commands make etags ctags
+    parse_arguments "$@"
+
+
+    if ! grep '^Name: *kernel\(%.*\)\?$' $SPEC > /dev/null 2>&1; then
+	return 0
+    fi
+
+# TODO: cscope, xen    
+    if test -d "${PRE_BUILDDIR}" &&
+       ( ! test -d "${PLUGINDIR}" ); then
+	for t in $TARGETS; do
+	    if test -d ${PRE_BUILDDIR}/*/*.${t}; then
+		mkdir -p ${TMPDIR}/$t
+		cd ${PRE_BUILDDIR}/*/*.${t}
+
+
+		if ! make O=${TMPDIR}/$t TAGS; then
+		    return
+		fi
+		
+		make O=${TMPDIR}/$t tags
+	    fi
+	done
+	
+	mkdir -p "${PLUGINDIR}"
+	for t in $TARGETS; do
+	    mv ${TMPDIR}/$t/TAGS  ${PLUGINDIR}/${t}.TAGS
+	    mv ${TMPDIR}/$t/tags  ${PLUGINDIR}/${t}.tags
+	done
+    fi
+}
+
+
+try_source ${LIBSRPMIX}
 es_time main "$@"
 exit $?
+

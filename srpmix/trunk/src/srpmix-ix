@@ -71,9 +71,6 @@ IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
 KEEP_ORIGINAL=${SRPMIX_KEEP_ORIGINAL}
 MULTI_TARGETS=${SRPMIX_MULTI_TARGETS}
 
-# THIS IS NOT DOCUMENTED YET.
-MULTI_KERNEL=${SRPMIX_MULTI_KERNEL}
-
 if test "x${SRPMIX_IX_DEBUG}" = xyes; then
     set -x
     VERBOSE=yes
@@ -175,12 +172,19 @@ function make_targets
     echo $targets
 }
 
-function parse_arguments
+function set_multi_targets
 {
     if test x"${MULTI_TARGETS}" = xyes; then
 	TARGET=$(make_targets)
     fi
+}
 
+function parse_arguments
+{
+
+    set_multi_targets
+    
+    
     while [ $# -gt 0 ]; do
 	case "$1" in
 	    --help|-h)
@@ -616,6 +620,8 @@ function srpm_deploy
 
     local build_name=$3
 
+    local kernel_p=
+
     srpm_name=`basename ${srpm_file} .src.rpm`
 
     spec_file=`spec_file_get ${srpm_file}`
@@ -657,29 +663,31 @@ function srpm_deploy
 	${archive_name} ${build_name} ${spec_file}  \
 	> "${rootdir}/${SPECDIR}/${xspec_file}"
 
-    # Special hack for centos5 kernel
-    if ( test "x${MULTI_KERNEL}" = xyes ) &&
-	test "${xspec_file}" = "kernel-2.6.spec" ; then
-	targets="i686 x86_64 ia64 ppc64"
-	for arch in ${targets}; do
-	    message build-start --target=${arch} --spec-file=\""${xspec_file}\""
-	    srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
-	    message build-end --target=${arch} --spec-file=\""${xspec_file}\"" \
-		--status="${status}"
-	done
-    else
-	targets="${TARGET}"
-	for arch in ${targets}; do
-	    message build-start --target=${arch} --spec-file=\""${xspec_file}\""
-	    srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
-	    status=$?
-	    message build-end --target=${arch} --spec-file=\""${xspec_file}\"" \
-		--status="${status}"
-	    if test "${status}" = 0; then
-		break;
-	    fi
-	done
+    # Special hack for kernel
+    if test "${xspec_file}" = "kernel-2.6.spec" \
+	-o  "${xspec_file}" = "kernel.spec" ; then
+	kernel_p=yes
     fi
+
+    if test "x${kernel_p}" = xyes; then
+#	targets="i686 x86_64 ia64 ppc64"
+	targets="i686 x86_64"
+    else
+	targets="${TARGET}"	
+    fi
+
+    for arch in ${targets}; do
+	message build-start --target=${arch} --spec-file=\""${xspec_file}\""
+	srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
+	status=$?
+	message build-end --target=${arch} --spec-file=\""${xspec_file}\"" \
+	    --status="${status}"
+
+	if ( test "${status}" = 0 ) && ( test -z ${kernel_p} ); then
+	    break;
+	fi
+    done
+
     
     if test ${status} != 0; then
 	if test "x${IGNORE_ERROR}" = xyes; then
