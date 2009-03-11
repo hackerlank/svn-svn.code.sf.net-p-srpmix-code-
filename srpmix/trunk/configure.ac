@@ -23,6 +23,12 @@ AC_SUBST(SRPMIX_MICRO_VERSION, pkg_micro_version)
 
 #AC_RPM_RELEASE
 
+if test "x$USE_MAINTAINER_MODE" = "xyes"; then
+	AC_PATH_PROG([SVN], [svn])
+fi
+AM_CONDITIONAL([USE_SVN_RPM_RELEASE],
+	 [test "x$SVN" != "x" && test -d "$srcdir/.svn"])
+
 AC_OUTPUT([
            Makefile
            misc/Makefile
