@@ -1,0 +1,41 @@
+#!/bin/sh
+#|-*- scheme -*-|#
+:; exec gosh -- $0 "$@"
+(define rules
+  '(
+    ;(#/kernel-.*/ "--multi-targets")
+    ;("gcc-2.3.9"  "--multi-targets")
+    ))
+
+
+(define (help status)
+  (let1 port (if (eq? status 0) 
+		 (current-output-port)
+		 (current-error-port))
+    (display "Usage: \n")
+    (display "	out-rules PKG-FILE\n" port)
+    (display "	out-rules --help|-h\n" port)
+    (exit status)))
+
+(define-method object-apply ((str0 <string>) (str1 <string>))
+  (equal? str0 str1))
+
+(define (main args)
+  (let1 args (cdr args)
+    (cond
+     ((null? args) (help 2))
+     ((or (equal? (car args) "-h") (equal? (car args) "--help"))
+      (help 0))
+     (else
+      (let1 result (let/cc return
+		     (let1 pkg (car args)
+		       (for-each
+			(lambda (rule)
+			  (when ((car rule) pkg)
+			    (return (cadr rule))))
+			rules))
+		     (return #f))
+	(if result
+	    (display result)
+	    (exit 1))
+	(exit 0))))))
