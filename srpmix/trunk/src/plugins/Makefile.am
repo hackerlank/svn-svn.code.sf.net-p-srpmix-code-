@@ -8,6 +8,7 @@ dist_plugin_SCRIPTS =        \
         60srpmix-ctags       \
         60srpmix-kindex      \
 	60srpmix-cscope      \
+	60srpmix-doxygen     \
 	\
         $(NULL)
 

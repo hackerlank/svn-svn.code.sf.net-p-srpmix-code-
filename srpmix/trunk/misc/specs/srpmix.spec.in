@@ -46,7 +46,13 @@ Group: Development/Tools
 %description plugin-ctags
 SRPMix Plugin for creating ctags indexes.
 
+%package plugin-doxygen
+Summary: SRPMix Plugin for creating doxygen documents.
+Requires: srpmix doxygen
+Group: Development/Tools
 
+%description plugin-doxygen
+SRPMix Plugin for creating doxygen documents.
 
 %prep
 %setup -q
@@ -98,6 +104,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plugin-ctags
 %{_datadir}/srpmix/plugins/60srpmix-ctags
+
+%files plugin-doxygen
+%{_datadir}/srpmix/plugins/60srpmix-doxygen
 
 ##
 ## TODO requires background execution to enable these post
