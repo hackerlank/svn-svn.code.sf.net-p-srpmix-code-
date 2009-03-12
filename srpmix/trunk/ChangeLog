@@ -1,6 +1,6 @@
 2009-03-12  Masato Taruishi <taruishi@redhat.com>
 
-	* src/plugin/50srpmix-doxygen: Initial implementetation.
+	* src/plugin/60srpmix-doxygen: Initial implementetation.
 
 2009-03-12  Masatake YAMATO  <yamato@redhat.com>
 
