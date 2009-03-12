@@ -6,6 +6,7 @@
 	* src/plugins/10srpmix-vanilla (main): Remove ${d} 
 	related code. Its value was not defiend.
 	(run_vanilla): Added support for .lzma and tar.lzma.
+	make relative symlinks.
 
 	* src/srpmix-plugin (parse_arguments): Use --list
 	instead of --list-plugins. Added more help documents.
