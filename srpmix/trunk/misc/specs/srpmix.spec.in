@@ -16,7 +16,7 @@ Scripts to expand src.rpm.
 
 %package plugin-vanilla
 Summary: SRPMix Plugin for creating vanilla tree.
-Requires: srpmix libgcj
+Requires: srpmix libgcj lzma
 
 %description plugin-vanilla
 SRPMix Plugin for creating vanilla tree.

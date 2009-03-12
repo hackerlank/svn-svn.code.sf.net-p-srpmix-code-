@@ -1,3 +1,16 @@
+2009-03-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in (plugin-vanilla::Requires): Added
+	lzma.
+
+	* src/plugins/10srpmix-vanilla (main): Remove ${d} 
+	related code. Its value was not defiend.
+	(run_vanilla): Added support for .lzma and tar.lzma.
+
+	* src/srpmix-plugin (parse_arguments): Use --list
+	instead of --list-plugins. Added more help documents.
+	(list_plugins): Change the output format.
+
 2009-03-12  Masato Taruishi <taruishi@redhat.com>
 
 	* src/plugin/60srpmix-doxygen: Initial implementetation.

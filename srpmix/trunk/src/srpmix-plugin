@@ -35,14 +35,16 @@ function try_source
 try_source ${LIBSRPMIX}
 
 
-ROOTDIR=
+ROOTDIR=a
 
 function print_usage
 {
     echo "Usage: "
     echo "  srpmix-plugin [--help|-h]"
-    echo "  srpmix-plugin [--list-plugins|-L]"
+    echo "  srpmix-plugin [--list|-L]"
     echo "  srpmix-plugin [--enable=<plugins>] [--disable=<plugins>] [<ROOTDIR> ...]"
+    echo 
+    echo "<plugins> := <plugin0>[,<plugin1>...]"
     echo 
 }
 
@@ -75,7 +77,7 @@ function parse_arguments
                 arg="$(echo $1 | sed 's/--disable=//' | tr , ' ')"
                 DISABLE_PLUGIN="$DISABLE_PLUGIN $arg"
 		;;
-            --list-plugins|-L)
+            --list|-L)
 		list_plugins
 		exit 0
 		;;
@@ -146,7 +148,7 @@ function list_plugins
 {
     list_plugin_candidates | sort -n | while read base plugin
     do
-        echo $plugin
+        echo $base '=>' $plugin
     done
 }
 

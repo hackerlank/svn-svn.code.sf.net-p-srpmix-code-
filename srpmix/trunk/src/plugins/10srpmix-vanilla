@@ -4,7 +4,7 @@
 #
 # srpmix-vanilla: Expand compressed and/or archived files in SOURCES to VANILLA
 #
-# Copyright (C) 2007 Masatake YAMATO
+# Copyright (C) 2007-2009 Masatake YAMATO
 #
 # Author: Masatake YAMATO <yamato@redhat.com>
 #
@@ -92,15 +92,6 @@ function run_vanilla
 
     es_print vanilla-start --timestamp=\"`LANG=C date`\" --input=\"$d\" --output=\"$o\" | tee -a $l
 
-    mkdir "${o}"
-    status=$?
-    es_print mkdir --timestamp=\"`LANG=C date`\" --directory=\"$o\" --status=\"$status\" | tee -a $l
-
-    if test $status != 0; then
-	es_print vanilla-end --count=0 --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
-	return 0
-    fi
-
     count=0
     for f in `find ${d} -type f`; do
 	case "$f" in
@@ -141,6 +132,20 @@ function run_vanilla
 		ln -s $f "$o/`basename $f`"
 		(cd "$o"; bunzip2 --force $f 2>&1 > /dev/null;
 		    es_print vanilla-expand --command=\"bunzip2\" --input=\"$f\" --status=\"$?\" | tee -a $l)
+		;;
+	    *tar.lzma)
+		count=`expr $count + 1`
+		ln -s $f "$o/`basename $f`"
+		(cd "$o"; unlzma --force $f 2>&1 > /dev/null &&
+		    tar xvf $(basename $f .lzma) 2>&1 > /dev/null;
+		    es_print vanilla-expand --command=\"lzma+tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
+		;;
+	    *.lzma)
+	        count=`expr $count + 1`
+		# --force is needed to decompress a file specified by a soft link.
+		ln -s $f "$o/`basename $f`"
+		(cd "$o"; unlzma --force $f 2>&1 > /dev/null &&
+		    es_print vanilla-expand --command=\"lzma\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 	esac
     done
@@ -191,7 +196,8 @@ function main
 	test "$(/bin/ls ${SOURCESDIR}/* | head -1)" -nt "${ROOTDIR}/vanilla"); then
         test -d $tmpdir && /bin/rm -rf $tmpdir
 	install -d $tmpdir
-	o=$tmpdir/`echo ${d} | sed -e 's!'"${SOURCESDIR}/"'!!'`
+	# o=$tmpdir/`echo ${d} | sed -e 's!'"${SOURCESDIR}/"'!!'`
+	o=$tmpdir
 	run_vanilla ${SOURCESDIR} $o $LOGFILE
 	if ! test -d "${ROOTDIR}/vanilla"; then
             /bin/mv "$tmpdir" "${ROOTDIR}/vanilla"
