@@ -109,6 +109,16 @@
       (htmlize-file input output))
     (flserver-log (format "(end :cost %s)\n" (- (float-time (current-time)) (float-time start) )))))
 
+
+;;
+;; TODO
+;;
+;; (load-flserver-config ...)
+;; (require cssize+srpmix.org)
+;; (require xhtmlize+srpmix.org)
+;; (flserver-xhtmlize (input xhtml-output-file css-output-dir range))
+;;
+
 (server-start)
 (while t
   (sit-for 3600))
