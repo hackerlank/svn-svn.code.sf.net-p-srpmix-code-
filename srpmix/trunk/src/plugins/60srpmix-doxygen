@@ -108,6 +108,7 @@ function run_doxygen
             -e "s!CREATE_SUBDIRS .*!CREATE_SUBDIRS=YES!" \
             -e "s!EXTRACT_ALL .*!EXTRACT_ALL=YES!" \
             -e "s!SOURCE_BROWSER .*!SOURCE_BROWSER=YES!" \
+            -e "s!SHOW_DIRECTORIES .*!SHOW_DIRECTORIES=YES!" \
             -e "s!VERBATIM_HEADERS .*!VERBATIM_HEADERS=NO!" \
             -e 's!^RECURSIVE .*!RECURSIVE=YES!' |
       ${DOXYGEN} - 2>&1 ) | tee -a $l
