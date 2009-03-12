@@ -97,14 +97,17 @@ function parse_arguments
 function run_doxygen
 {
     d=$1
-    l=$2
+    o=$2
+    l=$3
 
-    es_print "doxygen-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" | tee -a $l
+    es_print "doxygen-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     (cd $d &&
       ${DOXYGEN} -g - | 
-        sed -e 's!^INPUT .*!INPUT=../../pre-build!' \
-            -e 's!^RECURSIVE .*!RECURSIVE=yes!' |
-      ${DOXYGEN} - >> $l )
+        sed -e 's!^INPUT .*!INPUT=pre-build!' \
+            -e "s!OUTPUT_DIRECTORY .*!OUTPUT_DIRECTORY=$o!" \
+            -e "s!EXTRACT_ALL .*!EXTRACT_ALL=YES!" \
+            -e 's!^RECURSIVE .*!RECURSIVE=YES!' |
+      ${DOXYGEN} - 2>&1 ) | tee -a $l
     es_print "doxygen-end" --status=$? --timestamp=\"`LANG=C date`\" | tee -a $l
 }
 
@@ -128,7 +131,7 @@ function main
 
     if ( ! test -e "${PLUGINDIR}/html/index.html" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/html/index.html"; then
-        run_doxygen "${PLUGINDIR}" $LOGFILE
+        run_doxygen "${ROOTDIR}" "${PLUGINDIR}" "$LOGFILE"
     fi
 }
 
