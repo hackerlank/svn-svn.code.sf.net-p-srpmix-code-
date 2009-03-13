@@ -61,6 +61,10 @@ if test -f "$SRPMIX_SYSCONF"; then
 fi
 srpmix_reset_var_dir "$SRPMIX_VAR_DIR"
 
+RPM=@RPM@
+RPMBUILD=@RPMBUILD@
+SWRFPM=@SWRFPM@
+SWRFBUILD=@SWRFBUILD@
 
 function srpmix_abort
 {
@@ -448,7 +452,7 @@ function create_swrf
     shift
 
     for srpm in $@; do
-	pvr=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
+	pvr=$($RPM -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
 
 	# TEMPORARY code: true --- srpmix1 requires this.
 	#if test -z "${OUTPUT_DIR}"; then
@@ -460,13 +464,13 @@ function create_swrf
 	srpmix-wrap $wrap_opts $srpm \
 	    || exit 1
 
-	rpmbuild --define "_rpmdir $workdir/RPMS"       \
-	         --define "_srcrpmdir $workdir/SRPMS"   \
-	         --define "_builddir $workdir/BUILD"    \
-		 --define "_buildrootdir $workdir/BUILDROOT" \
-                 --define "_specdir $workdir/SPECS"     \
-	         --define "_sourcedir $workdir/SOURCES" \
-	         --rebuild -ba ${pvr}-srpmix-*.swrf.src.rpm \
+	$SWRFBUILD --define "_rpmdir $workdir/RPMS"       \
+	           --define "_srcrpmdir $workdir/SRPMS"   \
+	           --define "_builddir $workdir/BUILD"    \
+	  	   --define "_buildrootdir $workdir/BUILDROOT" \
+                   --define "_specdir $workdir/SPECS"     \
+	           --define "_sourcedir $workdir/SOURCES" \
+	           --rebuild -ba ${pvr}-srpmix-*.swrf.src.rpm \
             || exit 2
     done
 

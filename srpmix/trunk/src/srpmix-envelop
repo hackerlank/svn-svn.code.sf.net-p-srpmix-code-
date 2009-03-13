@@ -35,7 +35,6 @@ function try_source
 try_source ${LIBSRPMIX}
 
 
-RPMBUILD=rpmbuild
 OUTPUTDIR=
 TMPDIR=
 DUMP_SPEC=
@@ -104,7 +103,7 @@ function parse_arguments
     fi
 }
 
-function envelop_srpm
+function envelop_swrf
 {
     target_swrf=$1
     spec=
@@ -112,7 +111,7 @@ function envelop_srpm
     es_name=
 
 
-    pvrd=$(rpm -qp --nosignature --queryformat \
+    pvrd=$($SWRFPM -qp --nosignature --queryformat \
 	"%{NAME} %{VERSION} %{RELEASE} %{Description}" \
 	$target_swrf)
     package=$(echo $pvrd | cut -d' ' -f1)
@@ -141,7 +140,7 @@ function envelop_srpm
 	fi
     fi
     
-    license=$(rpm -qp --nosignature --queryformat "%{License}" $target_swrf)
+    license=$($SWRFPM -qp --nosignature --queryformat "%{License}" $target_swrf)
 
     if test "x${DUMP_SPEC}" = "x"; then
 	spec="$TMPDIR/SPECS/${enveloped_name}.spec"
@@ -252,7 +251,7 @@ function main
 
     for swrf in $swrfs; do
         if test -f "$swrf"; then
-	    envelop_srpm "$swrf"
+	    envelop_swrf "$swrf"
         else
             srpmix_abort "No such file: $swrf"
         fi

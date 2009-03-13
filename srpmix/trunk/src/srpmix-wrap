@@ -131,7 +131,7 @@ function wrap_srpm
     wrapped_name=
     es_name=
 
-    pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_srpm)
+    pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_srpm)
     package=$(echo $pvrd | cut -d' ' -f1)
     version=$(echo $pvrd | cut -d' ' -f2)
     release=$(echo $pvrd | cut -d' ' -f3)
@@ -161,13 +161,13 @@ function wrap_srpm
 	fi
     fi
     
-    group=$(rpm -qp --nosignature --queryformat "%{Group}" $target_srpm)
-    license=$(rpm -qp --nosignature --queryformat "%{License}" $target_srpm)
-#    changelog=$(LANG=C rpm -qp --nosignature --changelog $target_srpm | sed 's/%/%%/g')
+    group=$($RPM -qp --nosignature --queryformat "%{Group}" $target_srpm)
+    license=$($RPM -qp --nosignature --queryformat "%{License}" $target_srpm)
+#    changelog=$(LANG=C $RPM -qp --nosignature --changelog $target_srpm | sed 's/%/%%/g')
 #    if test "x$changelog" = "x(none)"; then
 #        changelog=""
 #    fi
-    buildarch=$(rpm -qp --nosignature --queryformat "%{BUILDARCHS}" $target_srpm)
+    buildarch=$($RPM -qp --nosignature --queryformat "%{BUILDARCHS}" $target_srpm)
     if test "x$buildarch" = "x(none)"; then
         buildarch="noarch"
     fi

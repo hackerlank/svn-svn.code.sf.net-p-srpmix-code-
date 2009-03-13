@@ -23,8 +23,6 @@
 #
 ########################################################################
 
-RPMBUILD=rpmbuild
-
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {

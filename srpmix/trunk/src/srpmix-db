@@ -116,7 +116,7 @@ function srpmix_db
     package=$1
 
     if test -f "$package"; then
-	name="$(rpm -qp --queryformat %{NAME} $package)"
+	name="$($SWRFPM -qp --queryformat %{NAME} $package)"
     else
 	name=$package
     fi
@@ -147,9 +147,9 @@ function do_install
 	if test x"$QUIET" != xyes; then
 	    echo "($count/$max) Installing...$(basename $package)"
 	fi
-	rpm --nodeps -Uvh --dbpath "$SRPMIX_VAR_DIR"/"$db" --relocate /="$SRPMIX_VAR_DIR" "$package"
+	$SWRFPM --nodeps -Uvh --dbpath "$SRPMIX_VAR_DIR"/"$db" --relocate /="$SRPMIX_VAR_DIR" "$package"
 
-	pkgdir=${SRPMIX_VAR_DIR}$(dirname $(rpm -qpl "$package"  | head -1))
+	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
         
         # TODO move to hardlink plugin
 	if test "x$pkgdir" != "x"; then
@@ -201,7 +201,7 @@ function do_erase
 	fi
 	#
 
-	if rpm --nodeps -e -dbpath "$SRPMIX_VAR_DIR"/"$db" "$package"; then
+	if $SWRFPM --nodeps -e -dbpath "$SRPMIX_VAR_DIR"/"$db" "$package"; then
 	    rm -rf "$SRPMIX_VAR_DIR/$db"
 	else
 	    :

@@ -29,6 +29,15 @@ fi
 AM_CONDITIONAL([USE_SVN_RPM_RELEASE],
 	 [test "x$SVN" != "x" && test -d "$srcdir/.svn"])
 
+AC_CHECK_PROGS([RPM], [rpm])
+if test "x$RPM" = "x"; then AC_MSG_ERROR(rpm not found); fi
+
+AC_CHECK_PROGS([RPMBUILD], [rpmbuild])
+if test "x$RPMBUILD" = "x"; then AC_MSG_ERROR(rpmbuild not found); fi
+
+AC_SUBST(SWRFPM, $RPM)
+AC_SUBST(SWRFBUILD, $RPMBUILD)
+
 AC_ARG_WITH([test-srpms],
        [AS_HELP_STRING([--with-test-srpms='SRPMS...'],
           [specify the space-separated list of src.rpms for test])],

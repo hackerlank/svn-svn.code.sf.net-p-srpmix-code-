@@ -155,7 +155,7 @@ function update_count
 #
 function default_target
 {
-    rpm --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
+    $RPM --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
 }
 
 function default_multi_targets
@@ -862,7 +862,7 @@ function srpm_build
     fi
 
 
-    LANG=C rpmbuild --define "_default_patch_fuzz 2"\
+    LANG=C $RPMBUILD --define "_default_patch_fuzz 2"\
                     --target=${arch}                \
                     -bp                             \
                     --nodeps "${rootdir}/${SPECDIR}/${spec_file}"
