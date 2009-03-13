@@ -191,7 +191,7 @@ if test \$(stat --format="%D" \$from) = \$(stat --format="%D" \$to); then
 else
    transfer_cmd="rsync -a"
 fi
-\$transfer_cmd \$from \$to/$(basename $target_swrf .noarch.rpm)
+\$transfer_cmd \$from \$to/$(basename $target_swrf)
 
 
 %clean
@@ -204,7 +204,7 @@ if [ \$1 = 2 ]; then
 fi
 
 %post
-srpmix-db --install $(srpmix_swrfdir $target_swrf)/$(basename $target_swrf .noarch.rpm)
+srpmix-db --install $(srpmix_swrfdir $target_swrf)/$(basename $target_swrf)
 
 
 %preun

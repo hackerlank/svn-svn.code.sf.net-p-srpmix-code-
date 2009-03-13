@@ -14,12 +14,11 @@ function try_source
 }
 try_source ${LIBSRPMIX}
 
-
-
 MY_TMPDIR=
 WRAP_OPTS=""
 RELEASE=
 OUTPUT_DIR=
+OUTPUT_FORMAT=rpm
 DEBUG=""
 
 set -e
@@ -30,6 +29,7 @@ function print_usage
     echo "Usage: "
     echo "  srpmix [--hardlink]"
     echo "         [--output-dir=DIR]"
+    echo "         [--output-format=<rpm|swrf>]"
     echo "         [--release=RELEASE]"
     echo "         [--debug]"
     echo "         [--ignore-error]"
@@ -90,6 +90,9 @@ function parse_arguments
 		else
 		    srpmix_abort "No such directory: ${OUTPUT_DIR}"
 		fi
+		;;
+	    --output-format=*)
+	        export OUTPUT_FORMAT=$(echo $1 | sed 's/--output-format=//')
 		;;
 	    --target=*)
 	        export SRPMIX_TARGET=$(echo $1 | sed 's/--target=//')
@@ -242,10 +245,15 @@ function main
 	exit 3
     fi
 
-    envelope_swrf `find RPMS/noarch -name '*swrf.noarch.rpm'`
+    files=$(find RPMS/noarch -name '*.swrf')
+    case "$OUTPUT_FORMAT" in
+      rpm)
+        envelope_swrf $files
+        files=$(find RPMS/noarch -name '*.noarch.rpm')
+      ;;
+    esac
 
-    find RPMS/noarch -name '*noarch.rpm' | grep -v '\.swrf\.' \
-    | if test -n "${OUTPUT_DIR}"; then
+    echo $files | if test -n "${OUTPUT_DIR}"; then
 	while read p; do
 	    p0=$(basename $p)
 	    p00=`srpmix_srchash $p0`

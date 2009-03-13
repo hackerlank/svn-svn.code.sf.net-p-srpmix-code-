@@ -470,6 +470,10 @@ function create_swrf
             || exit 2
     done
 
+    for rpm in `find $workdir/RPMS -name '*.noarch.rpm'`; do
+        mv $rpm $(dirname $rpm)/$(basename $rpm .noarch.rpm)
+    done
+
 }
 
 
