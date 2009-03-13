@@ -7,5 +7,7 @@ For version 4
   release番号をあげるのにsvn commitが必要になる。release番号だけmakeかconfigure
   経由で変更したい。
 
+* ビルドの過程でsession idをふりなおす。これがないとgccがビルドできない。
+
 After version 4
 ========================================================================
