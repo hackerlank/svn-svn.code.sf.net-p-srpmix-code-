@@ -1,7 +1,12 @@
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/60srpmix-kindex (main): Copy
+	tags and TAGS if they exist.
+
 	* src/srpmix-ix (srpm_deploy): Don't set
 	target for kernel statically. Use opt-rules.
+	(srpm_deploy): Use "," for seperator to separate
+	targets.
 
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 

@@ -166,7 +166,7 @@ function default_multi_targets
 	if test "$x" = "$current"; then
 	    :
 	else
-	    targets="${targets} $x"
+	    targets="${targets},$x"
 	fi
     done
     echo $targets
@@ -666,7 +666,7 @@ function srpm_deploy
 	kernel_p=yes
     fi
 
-    targets="${TARGET}"	
+    targets="$(echo "${TARGET}" | tr "," " " )"
 
     for arch in ${targets}; do
 	message build-start --target=${arch} --spec-file=\""${xspec_file}\""

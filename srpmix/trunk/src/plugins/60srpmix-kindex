@@ -30,8 +30,8 @@ PRE_BUILDDIR=
 # LOGFILE=
 LIBSRPMIX=libsrpmix.sh
 
-# TARGETS="i686 x86_64 ia64 ppc64"
-TARGETS="i686 x86_64"
+TARGETS="i686 x86_64 ia64 ppc64"
+#TARGETS="i686 x86_64"
 
 
 TMPDIR=/tmp/$(basename $0).$$
@@ -147,8 +147,12 @@ function main
 	
 	mkdir -p "${PLUGINDIR}"
 	for t in $TARGETS; do
-	    mv ${TMPDIR}/$t/TAGS  ${PLUGINDIR}/${t}.TAGS
-	    mv ${TMPDIR}/$t/tags  ${PLUGINDIR}/${t}.tags
+	    if test -f ${TMPDIR}/$t/TAGS; then
+		mv ${TMPDIR}/$t/TAGS  ${PLUGINDIR}/${t}.TAGS
+	    fi
+	    if test -f ${TMPDIR}/$t/tags; then
+		mv ${TMPDIR}/$t/tags  ${PLUGINDIR}/${t}.tags
+	    fi
 	done
     fi
 }
