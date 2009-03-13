@@ -56,6 +56,19 @@ AC_ARG_WITH([test-srpms],
        [AS_HELP_STRING([--with-test-srpms='SRPMS...'],
           [specify the space-separated list of src.rpms for test])],
           [])
+#
+# Convert relative paths to absolute paths.
+#
+with_test_srpms2=
+for s in ${with_test_srpms}; do
+    if ( test "x${s}" != x )  &&
+       ( test -f "${s}"    )  && 
+       ( test -f "./${s}" ) ; then
+       with_test_srpms2="${with_test_srpms2} $(pwd)/${s}"
+   fi
+done
+with_test_srpms=${with_test_srpms2}
+   
 AC_SUBST([TEST_SRPMS], [$with_test_srpms])
 
 

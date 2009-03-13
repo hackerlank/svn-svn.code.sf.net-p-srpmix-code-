@@ -1,3 +1,10 @@
+2009-03-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/00srpmix.sh: Return 77 if no TEST_SRPMS is given.
+
+	* configure.ac (with_test_srpms): Convert relative paths 
+	to absolute paths.
+	
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-kindex (main): Copy
