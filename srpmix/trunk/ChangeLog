@@ -12,6 +12,7 @@
 
 	* tests/: simple testing framework.
 	* configure.ac: add --with-test-srpms.
+	* src/plugins/60srpmix-cscope: handle only for pre-build.
 
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 
