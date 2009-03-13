@@ -37,6 +37,8 @@ function list_files() {
     cat "$1/plugins/file/file-i" |
       grep 'pre-build'  |
       grep -v ' image/' |
+      grep -v ' application/x-elc' |
+      grep -v ' application/octet-stream' |
       grep -v ' audio/' |
       grep -v ' video/' |
       cut -d: -f1 | sed 's!^\./!!'
