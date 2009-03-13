@@ -355,7 +355,7 @@ function create_rootdir
 
 	echo "${SRPMIX_PKG_VERSION}" > "${rootdir}/${PROFILE}"
 	if test "x$FREEZE" = "xyes"; then
-          chmod a-w "${rootdir}/${PROFILE}"
+          chmod go-w "${rootdir}/${PROFILE}"
         fi
 	verbose mkdir \""${rootdir}"\" --type=rootdir
     else
@@ -885,14 +885,14 @@ function srpm_freeze
 	  verbose hardlink-end --srpm-file=\""${srpm_file}\"" --build-name="\"${build_name}\""
       fi
 
-      chmod -R a-w "${rootdir}/${SOURCEDIR}/${srpm_name}"
-      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SOURCEDIR}/${srpm_name}"\"
+      chmod -R go-w "${rootdir}/${SOURCEDIR}/${srpm_name}"
+      verbose chmod --mode=\"go-w\" --file=\""${rootdir}/${SOURCEDIR}/${srpm_name}"\"
 
 
       for x in "${rootdir}/${BUILDDIR}/${build_name}"/*; do
   	if test -e "${x}"; then
-	    chmod -R a-w "${x}"
-	    verbose chmod --mode=\"a-w\" --file=\""${x}"\"
+	    chmod -R go-w "${x}"
+	    verbose chmod --mode=\"go-w\" --file=\""${x}"\"
 	fi
       done
 
@@ -914,15 +914,15 @@ function srpm_freeze
 	verbose chmod --mode=\"ug+w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
     fi
 
-      chmod a-w "${rootdir}/${xspec_file}"
-      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${xspec_file}"\"
-      chmod a-w "${rootdir}/${SPECDIR}/${xspec_file}"
-      verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${SPECDIR}/${xspec_file}"\"
+      chmod go-w "${rootdir}/${xspec_file}"
+      verbose chmod --mode=\"go-w\" --file=\""${rootdir}/${xspec_file}"\"
+      chmod go-w "${rootdir}/${SPECDIR}/${xspec_file}"
+      verbose chmod --mode=\"go-w\" --file=\""${rootdir}/${SPECDIR}/${xspec_file}"\"
 
     fi
 
-    chmod a-w "${rootdir}/${BUILDDIR}/${build_name}"
-    verbose chmod --mode=\"a-w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
+    chmod go-w "${rootdir}/${BUILDDIR}/${build_name}"
+    verbose chmod --mode=\"go-w\" --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
 #    ls -lR "${rootdir}/${BUILDDIR}/${build_name}"
 
     verbose map                         \

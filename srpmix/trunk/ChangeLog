@@ -1,3 +1,7 @@
+2009-03-13  Masato Taruishi <taruishi@redhat.com>
+
+	* src/srpmix-ix: don't remove writable flag for owner.
+
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in (plugin-vanilla::Requires): Added
