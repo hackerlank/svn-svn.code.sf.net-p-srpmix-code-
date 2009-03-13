@@ -350,14 +350,14 @@ function create_rootdir
     local rootdir=$1
 
     
-    if mkdir "${rootdir}"; then
+    if mkdir -p "${rootdir}"; then
         IS_ROOTDIR_CREATED=yes
 
 	echo "${SRPMIX_PKG_VERSION}" > "${rootdir}/${PROFILE}"
 	if test "x$FREEZE" = "xyes"; then
           chmod go-w "${rootdir}/${PROFILE}"
         fi
-	verbose mkdir \""${rootdir}"\" --type=rootdir
+	verbose mkdir -p \""${rootdir}"\" --type=rootdir
     else
 	echo "fail to create directory: ${rootdir}" 1>&2
 	abort
