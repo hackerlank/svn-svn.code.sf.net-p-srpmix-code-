@@ -1,3 +1,8 @@
+2009-03-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (spec_file_hack): Added extra
+	rewrite rule to handle duplicated source29 in kernel.
+
 2009-03-13  Masato Taruishi <taruishi@redhat.com>
 
 	* src/srpmix-ix: don't remove writable flag for owner.
