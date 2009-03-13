@@ -668,8 +668,12 @@ function srpm_deploy
     fi
 
     if test "x${kernel_p}" = xyes; then
-#	targets="i686 x86_64 ia64 ppc64"
-	targets="i686 x86_64"
+	if "${xspec_file}" = "kernel-2.4.spec"
+	    # TODO
+	    targets="ia64"
+	else
+	    targets="i686 x86_64 ia64 ppc64"
+	fi
 	message varset --TARGET targets --kernel -t
     else
 	targets="${TARGET}"	
