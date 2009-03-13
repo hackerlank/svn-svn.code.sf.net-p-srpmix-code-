@@ -35,6 +35,7 @@ function list_files() {
 
   if test -f "$1/plugins/file/file-i"; then
     cat "$1/plugins/file/file-i" |
+      grep 'pre-build'  |
       grep -v ' image/' |
       grep -v ' audio/' |
       grep -v ' video/' |
