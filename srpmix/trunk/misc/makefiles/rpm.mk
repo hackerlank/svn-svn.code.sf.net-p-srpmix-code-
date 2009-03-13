@@ -1,10 +1,10 @@
 .PHONY: rpm srpm
 
-srpm: dist
+srpm: distcheck
 	$(mkinstalldirs) build/{SPECS,RPMS,BUILD,SRPMS}
 	rpmbuild --define "_topdir `pwd`/build" -ts $(DIST_ARCHIVES)
 
-rpm: dist
+rpm: distcheck
 	$(mkinstalldirs) build/{SPECS,RPMS,BUILD,SRPMS}
 	rpmbuild --define "_topdir `pwd`/build" -ta $(DIST_ARCHIVES)
 
