@@ -187,6 +187,31 @@ function check_pvr_output_dir
     fi
 }
 
+function envelope_swrf_by_rpm
+{
+    for swrf in $@; do
+	p=$(rpm -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
+	enveloped_name=$(srpmix_build_enveloped_name "$p")
+
+	# TODO: Return status
+	srpmix-envelop $ENVELOP_OPTS $swrf
+	p=$(ls ${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm | grep -v '\.swrf\.')
+	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"     \
+	         --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
+	         --define "_builddir $MY_TMPDIR/BUILD"  \
+		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
+                 --define "_specdir $MY_TMPDIR/SPECS"   \
+	         --define "_sourcedir $MY_TMPDIR/SOURCES" \
+	         --rebuild -ba $p \
+	    || exit 4
+    done
+}
+
+function envelope_swrf
+{
+    envelope_swrf_by_rpm $@
+}
+
 function main
 {
 #   all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
@@ -210,50 +235,14 @@ function main
 	TARGET_SRPM=$(/bin/ls *.src.rpm)
     fi
 
-    for srpm in $TARGET_SRPM; do
-	pvr=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
-
-	# TEMPORARY code: true --- srpmix1 requires this.
-	if test -z "${OUTPUT_DIR}"; then
-		check_pvr_rpm "${pvr}"
-	else
-		check_pvr_output_dir "${pvr}"
-	fi
-	
-	
-	srpmix-wrap $WRAP_OPTS $srpm \
-	    || exit 1
-
-	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"       \
-	         --define "_srcrpmdir $MY_TMPDIR/SRPMS"   \
-	         --define "_builddir $MY_TMPDIR/BUILD"    \
-		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
-                 --define "_specdir $MY_TMPDIR/SPECS"     \
-	         --define "_sourcedir $MY_TMPDIR/SOURCES" \
-	         --rebuild -ba ${pvr}-srpmix-*.swrf.src.rpm \
-            || exit 2
-    done
+    # create_swrf <workdir> <wrap_opts> [<target srpms>...]
+    create_swrf "$MY_TMPDIR" "$WRAP_OPTS" $TARGET_SRPM
 
     if test ! -d RPMS/noarch; then
 	exit 3
     fi
 
-    for swrf in `find RPMS/noarch -name '*swrf.noarch.rpm'`; do
-	p=$(rpm -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
-	enveloped_name=$(srpmix_build_enveloped_name "$p")
-
-	# TODO: Return status
-	srpmix-envelop $ENVELOP_OPTS $swrf
-	p=$(ls ${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm | grep -v '\.swrf\.')
-	rpmbuild --define "_rpmdir $MY_TMPDIR/RPMS"     \
-	         --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
-	         --define "_builddir $MY_TMPDIR/BUILD"  \
-		 --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
-                 --define "_specdir $MY_TMPDIR/SPECS"   \
-	         --define "_sourcedir $MY_TMPDIR/SOURCES" \
-	         --rebuild -ba $p \
-	    || exit 4
-    done
+    envelope_swrf `find RPMS/noarch -name '*swrf.noarch.rpm'`
 
     find RPMS/noarch -name '*noarch.rpm' | grep -v '\.swrf\.' \
     | if test -n "${OUTPUT_DIR}"; then

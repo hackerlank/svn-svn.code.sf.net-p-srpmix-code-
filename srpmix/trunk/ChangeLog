@@ -2,6 +2,7 @@
 
 	* src/srpmix-ix: don't remove writable flag for owner.
 	* src/srpmix-plugin: fix broken srpmix-plugin by list_plugins change
+	* src/srpmix: put creation of swrf package to libsrpmix.sh
 
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 
