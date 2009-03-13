@@ -1,6 +1,7 @@
 2009-03-13  Masato Taruishi <taruishi@redhat.com>
 
 	* src/srpmix-ix: don't remove writable flag for owner.
+	* src/srpmix-plugin: fix broken srpmix-plugin by list_plugins change
 
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 

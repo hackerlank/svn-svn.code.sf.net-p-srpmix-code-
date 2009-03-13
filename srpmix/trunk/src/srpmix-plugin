@@ -159,7 +159,7 @@ function main
 
     for d in $ROOTDIRS
     do
-        list_plugins | while read plugin
+        list_plugins | while read base dummy plugin
         do
             $plugin $d || true
         done
