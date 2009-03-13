@@ -9,6 +9,6 @@ endif
 dist-hook:
 	sed -e 's/#RPM_RELEASE#/$(RPM_RELEASE)/' \
 		-e 's/#PACKAGE_VERSION#/$(PACKAGE_VERSION)/' \
-		 < srpmix.spec.in \
+		 < $(srcdir)/srpmix.spec.in \
 		 > $(distdir)/srpmix.spec
-	install srpmix.spec.in $(distdir)/srpmix.spec.in
+	install $(srcdir)/srpmix.spec.in $(distdir)/srpmix.spec.in

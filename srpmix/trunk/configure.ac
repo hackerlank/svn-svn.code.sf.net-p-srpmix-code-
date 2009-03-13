@@ -41,5 +41,6 @@ AC_OUTPUT([
            src/plugins/Makefile
            doc/Makefile
            utils/Makefile
+           tests/Makefile
           ])
 

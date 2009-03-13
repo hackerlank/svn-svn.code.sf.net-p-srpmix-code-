@@ -1,3 +1,7 @@
+2009-03-13  Masato Taruishi <taruishi@redhat.com>
+
+	* tests/: simple testing framework.
+
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-ix (spec_file_hack): Added extra
@@ -12,7 +16,6 @@
 	* src/srpmix-plugin: fix broken srpmix-plugin by list_plugins change
 	* src/srpmix: put creation of swrf package to libsrpmix.sh.
 	add --output-format option.
-	
 
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 

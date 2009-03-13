@@ -6,6 +6,7 @@ SUBDIRS += misc
 SUBDIRS += src
 SUBDIRS += doc
 SUBDIRS += utils
+SUBDIRS += tests
 
 EXTRA_DIST = autogen.sh
 
