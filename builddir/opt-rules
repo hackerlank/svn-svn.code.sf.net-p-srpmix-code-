@@ -3,7 +3,7 @@
 :; exec gosh -- $0 "$@"
 (define rules
   '(
-    ;(#/kernel-.*/ "--multi-targets")
+    (#/kernel-2\.4\.18-e\.[456].*/ "--target=ia64")
     ;("gcc-2.3.9"  "--multi-targets")
     ))
 
