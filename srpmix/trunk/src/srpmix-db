@@ -18,10 +18,6 @@ function try_source
 }
 try_source ${LIBSRPMIX}
 
-HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
-
-
-
 function print_usage
 {
     echo "Usage: "

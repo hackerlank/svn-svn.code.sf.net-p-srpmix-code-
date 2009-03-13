@@ -61,10 +61,14 @@ if test -f "$SRPMIX_SYSCONF"; then
 fi
 srpmix_reset_var_dir "$SRPMIX_VAR_DIR"
 
+HARDLINK=@HARDLINK@
+RPM2CPIO=@RPM2CPIO@
+CPIO=@CPIO@
 RPM=@RPM@
 RPMBUILD=@RPMBUILD@
 SWRFPM=@SWRFPM@
 SWRFBUILD=@SWRFBUILD@
+GUILE=@GUILE@
 
 function srpmix_abort
 {
@@ -186,7 +190,6 @@ srpmix_distmap_to_json_script='
 	  (loop (read)))))
   (display "]"))'
 
-GUILE=guile
 # Print :package, :version, and :release field of dist-mapping es espression.
 # Example Input:
 # (srpmix-wrap name :target-srpm "ElectricFence-2.2.2-20.2.src.rpm" 

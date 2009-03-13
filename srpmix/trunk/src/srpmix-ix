@@ -29,8 +29,7 @@
 #
 # TODO:....SOURCES, SPECS, BUILDROOT
 
-HARDLINK=${HARDLINK:=/usr/sbin/hardlink}
-REQUIRED_COMMANDS="rpm2cpio cpio ${HARDLINK} id"
+REQUIRED_COMMANDS="${RPM2CPIO} ${CPIO} ${HARDLINK} id"
 
 PROFILE=SRPMIX
 SPECDIR=srpmix-SPECS
@@ -529,8 +528,8 @@ function spec_file_get
     local srpm_file=$1
     
     
-    rpm2cpio ${srpm_file} \
-	| cpio --list 2>/dev/null \
+    ${RPM2CPIO} ${srpm_file} \
+	| ${CPIO} --list 2>/dev/null \
 	| grep '\.spec$'
 }
 
