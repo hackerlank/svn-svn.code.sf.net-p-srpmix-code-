@@ -666,18 +666,7 @@ function srpm_deploy
 	kernel_p=yes
     fi
 
-    if test "x${kernel_p}" = xyes; then
-	if test "${xspec_file}" = "kernel-2.4.spec"; then
-	    # TODO: Targeting other than ia64 is
-	    #       failed with kernel-2.4.18.
-	    targets="ia64"
-	else
-	    targets="i686 x86_64 ia64 ppc64"
-	fi
-	message varset --TARGET $targets --kernel -t
-    else
-	targets="${TARGET}"	
-    fi
+    targets="${TARGET}"	
 
     for arch in ${targets}; do
 	message build-start --target=${arch} --spec-file=\""${xspec_file}\""

@@ -1,5 +1,10 @@
 2009-03-13  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-ix (srpm_deploy): Don't set
+	target for kernel statically. Use opt-rules.
+
+2009-03-13  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/plugins/60srpmix-ctags (main): Don't run
 	if tags target is defined in Makefile.
 	* src/plugins/60srpmix-etags (main): Don't run
