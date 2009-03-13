@@ -5,8 +5,10 @@ make DESTDIR=`pwd`/${TESTDIR} -C ${top_builddir} install
 
 PATH=`pwd`/${TESTDIR}/${bindir}:$PATH
 
-make -C ${top_builddir} rpm
-srpmix-wrap --dump-spec ${top_builddir}/build/SRPMS/*.src.rpm
-srpmix-wrap --just-print ${top_builddir}/build/SRPMS/*.src.rpm
-srpmix-wrap --output-dir=${TESTDIR} ${top_builddir}/build/SRPMS/*.src.rpm
+for srpm in $TEST_SRPMS
+do
+  srpmix-wrap --dump-spec $srpm
+  srpmix-wrap --just-print $srpm
+  srpmix-wrap --output-dir=${TESTDIR} $srpm
+done
 

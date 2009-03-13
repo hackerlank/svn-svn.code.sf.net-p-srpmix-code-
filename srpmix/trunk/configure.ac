@@ -29,6 +29,14 @@ fi
 AM_CONDITIONAL([USE_SVN_RPM_RELEASE],
 	 [test "x$SVN" != "x" && test -d "$srcdir/.svn"])
 
+AC_ARG_WITH([test-srpms],
+       [AS_HELP_STRING([--with-test-srpms='SRPMS...'],
+          [specify the space-separated list of src.rpms for test])],
+          [])
+AC_SUBST([TEST_SRPMS], [$with_test_srpms])
+
+
+
 AC_OUTPUT([
            Makefile
            misc/Makefile
