@@ -662,6 +662,7 @@ function srpm_deploy
 
     # Special hack for kernel
     if test "${xspec_file}" = "kernel-2.6.spec" \
+	-o  "${xspec_file}" = "kernel-2.4.spec" \
 	-o  "${xspec_file}" = "kernel.spec" ; then
 	kernel_p=yes
     fi
@@ -862,7 +863,7 @@ function srpm_build
                     --target=${arch}                \
                     -bp                             \
                     --nodeps "${rootdir}/${SPECDIR}/${spec_file}" \
-	            --without=ibcs
+	            --define="_without_ibcs=1"
     status=$?
     echo ${status} > "${rootdir}/STATUS"
     chmod -R a+r "${rootdir}/${BUILDDIR}/${build_name}"
