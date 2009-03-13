@@ -2,6 +2,8 @@
 
 	* src/srpmix-ix (spec_file_hack): Added extra
 	rewrite rule to handle duplicated source29 in kernel.
+	(dont_keep_original): Call rpmbuild with "--without-ibcs"
+	option to build kernel-2.4.18-e.12.
 
 2009-03-13  Masato Taruishi <taruishi@redhat.com>
 
