@@ -1,15 +1,46 @@
+(defconst config-file "/home/masatake/var/flserver/config.es")
+
+(defvar flserver-dir nil)
+(defvar flserver-emacs-dir nil)
+(defvar flserver-socket-file)
+(defvar flserver-cache-log)
+
+
+;; THIS SHOULD BE ON COMMAND LINE.
+(require 'es)
+(let* ((b (find-file-noselect))
+       (s (es-make-input-stream b))
+       (r t))
+  (setq r (es-read s))
+  (while r
+    (when (and 
+	   (listp r)
+	   (eq (car r) (intern "config")))
+      (let ((key (cadr r))
+	    (value (caddr r)))
+	(case key
+	  ('flserver-prog-dir
+	   (setq flserver-dir value))
+	  ('emacs-prog-dir
+	   (setq flserver-emacs-dir value))
+	  ('socket-file
+	   (setq flserver-socket-file value))
+	  ('cache-log
+	   (setq flserver-cache-log value))
+	  )))
+    (setq r (es-read s)))
+  (kill-buffer b))
+
+    
 ;;
 ;; Configurations
 ;;
-(defconst prefix "/home/masatake")
-(defconst flserver-dir (concat "/home/masatake" "/" "var/flserver"))
-(defconst flserver-emacs-dir (concat flserver-dir "/" "emacs"))
 (setq load-path (cons flserver-emacs-dir load-path))
 
-
-(setq server-socket-dir   "/home/masatake/tmp")
-(setq server-name         ".flserver")
-
+(setq server-socket-dir (directory-file-name 
+			 (file-name-directory 
+			  flserver-socket-file)))
+(setq server-name       (file-name-nondirectory flserver-socket-file))
 
 ;;
 ;; Avoid interactive features
@@ -27,7 +58,7 @@
 (defun flserver-log (str)
   (unless flserver-log-buffer
     (setq flserver-log-buffer 
-	  (find-file-noselect (concat flserver-dir "/" "flserver-log.es"))))
+	  (find-file-noselect flserver-cache-log)))
   (with-current-buffer flserver-log-buffer
     (goto-char (point-max))
     (insert str)

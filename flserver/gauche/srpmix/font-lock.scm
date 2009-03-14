@@ -13,11 +13,8 @@
   )
 (select-module srpmix.font-lock)
 
-(define socket-dir "/home/masatake/tmp")
-(define output-dir "/home/masatake/tmp/flcache")
-
 (define (make-cache-file-name path)
-  (build-path output-dir
+  (build-path cache-dir
 	      (digest-hexify (md5-digest-string path))))
 
 (define (script-font-lock input output range)
@@ -39,7 +36,7 @@
 	       (file-is-readable? output))
       (touch-file output))
     (unless (file-is-readable? output)
-      (let1 p (run-emacs (build-path socket-dir ".flserver")
+      (let1 p (run-emacs socket-file
 			 (script-font-lock input output #f)
 			 #t)
 	(unless (eq? (process-exit-status p) 0)

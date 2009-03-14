@@ -35,12 +35,6 @@
 ;;
 ;; Constants
 ;;
-(define dist-prefix (string-append prefix "/" "dists"))
-(define sources-prefix (string-append prefix "/" "sources"))
-
-(define socket-dir "/home/masatake/tmp")
-(define output-dir "/home/masatake/tmp/flcache")
-
 (define defined-stages  '(pre-build specs))
 (define defined-file-displays '(raw font-lock))
 (define defined-dir-displays '(raw font-lock))
