@@ -18,8 +18,13 @@ MY_TMPDIR=
 WRAP_OPTS=""
 RELEASE=
 OUTPUT_DIR=
+if test "`whoami`" = "root"; then
 OUTPUT_FORMAT=rpm
+else
+OUTPUT_FORMAT=swrf
+fi
 DEBUG=""
+SRPMIXBUILD_OPTS=
 
 set -e
 
@@ -70,6 +75,7 @@ function parse_arguments
 		SRPMIX_PKG_RELEASE=$RELEASE
 	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
+		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
 	        ;;
 	    --hardlink)
 	        export SRPMIX_DO_HARDLINK=yes
@@ -79,9 +85,11 @@ function parse_arguments
 		;;
 	    --multi-targets)
 	        export SRPMIX_MULTI_TARGETS=yes
+		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
 		;;
             --keep-original)
 	        export SRPMIX_KEEP_ORIGINAL=yes
+		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
 		;;
 	    --output-dir=*)
 	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
@@ -96,9 +104,11 @@ function parse_arguments
 		;;
 	    --target=*)
 	        export SRPMIX_TARGET=$(echo $1 | sed 's/--target=//')
+		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
 		;;
 	    --debug)
 	        DEBUG=yes
+		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
 		set -x
 		;;
 	    --*)
@@ -117,7 +127,7 @@ function parse_arguments
 	srpmix_abort "too many arguments"
     fi
 
-    if test -z "${OUTPUT_DIR}"; then
+    if test -z "${OUTPUT_DIR}" && test "x${OUTPUT_FORMAT}" = "xrpm"; then
 	if test "`whoami`" != "root"; then
 	    srpmix_abort "You must be root to run this program"
 	fi
@@ -157,62 +167,15 @@ function parse_arguments
 	    TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
 	fi
     fi
-}
 
-function check_pvr_rpm
-{
-    pvr=$1
-    count=
-
-#	if is_memeber "${pvr}" $all; then
-#	    echo "*** Source code for ${pvr} is already installed ***" 1>&2
-#	    exit 0
-#	fi
-
-    count=`$RPM -qa "^${pvr}-srpmix-"'*' | wc -l`
-    if test $count != 0; then
-	echo "*** Source code for ${pvr} is already installed ***" 1>&2
-	exit 0
-    fi    
-}
-
-function check_pvr_output_dir
-{
-    pvr=$1
-    p0=
-    p=
-
-    p0=$(srpmix_srchash $pvr)
-    p=$(echo "${OUTPUT_DIR}/$p0/${pvr}-srpmix-"[0-9]* | head -1)
-    if test -f "$p"; then
-	echo "*** Source code for ${pvr} exists at ${OUTPUT_DIR}/$p0 ***" 1>&2
-	exit 0
+    if test -n "${TARGET_NAME}"; then
+	yumdownloader --destdir=${MY_TMPDIR} --source "${TARGET_NAME}"
+	TARGET_SRPM=$(/bin/ls ${MY_TMPDIR}/*.src.rpm)
     fi
-}
 
-function envelope_swrf_by_rpm
-{
-    for swrf in $@; do
-	p=$($SWRFPM -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
-	enveloped_name=$(srpmix_build_enveloped_name "$p")
-
-	# TODO: Return status
-	srpmix-envelop $ENVELOP_OPTS $swrf
-	p=$(ls ${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm | grep -v '\.swrf\.')
-	$RPMBUILD --define "_rpmdir $MY_TMPDIR/RPMS"     \
-	          --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
-	          --define "_builddir $MY_TMPDIR/BUILD"  \
-	 	  --define "_buildrootdir $MY_TMPDIR/BUILDROOT" \
-                  --define "_specdir $MY_TMPDIR/SPECS"   \
-	          --define "_sourcedir $MY_TMPDIR/SOURCES" \
-	          --rebuild -ba $p \
-	    || exit 4
-    done
-}
-
-function envelope_swrf
-{
-    envelope_swrf_by_rpm $@
+    SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-format=$OUTPUT_FORMAT"
+    SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-dir=$OUTPUT_DIR"
+    SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --srpm=$TARGET_SRPM"
 }
 
 function main
@@ -221,7 +184,7 @@ function main
 
     MY_TMPDIR=`mktemp -d`
     trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
-
+    OUTPUT_DIR=$MY_TMPDIR
     
     parse_arguments "$@"
     if test -n "$DEBUG"; then
@@ -229,41 +192,21 @@ function main
 	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
 
-    cd $MY_TMPDIR
-    mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES
-    
-    
-    if test -n "${TARGET_NAME}"; then
-	yumdownloader --source "${TARGET_NAME}"
-	TARGET_SRPM=$(/bin/ls *.src.rpm)
+    srpmix-build $SRPMIXBUILD_OPTIONS
+
+    if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+        set -x
+        files=$(find ${OUTPUT_DIR} -name '*.swrf')
+        case "$OUTPUT_FORMAT" in
+          rpm)
+            files=$(find ${OUTPUT_DIR} -name '*.noarch.rpm')
+	    echo $files | xargs yum localinstall -y --nogpgcheck
+          ;;
+          swrf)
+	    echo $files | xargs srpmix-db -i
+          ;;
+        esac
     fi
-
-    # create_swrf <workdir> <wrap_opts> [<target srpms>...]
-    create_swrf "$MY_TMPDIR" "$WRAP_OPTS" $TARGET_SRPM
-
-    if test ! -d RPMS/noarch; then
-	exit 3
-    fi
-
-    files=$(find RPMS/noarch -name '*.swrf')
-    case "$OUTPUT_FORMAT" in
-      rpm)
-        envelope_swrf $files
-        files=$(find RPMS/noarch -name '*.noarch.rpm')
-      ;;
-    esac
-
-    echo $files | if test -n "${OUTPUT_DIR}"; then
-	while read p; do
-	    p0=$(basename $p)
-	    p00=`srpmix_srchash $p0`
-	    mkdir -p "${OUTPUT_DIR}/${p00}"
-	    mv $p "${OUTPUT_DIR}/${p00}/"
-	done
-    else
-	xargs yum localinstall -y --nogpgcheck
-    fi
-
     status=$?
 
     # Notify again

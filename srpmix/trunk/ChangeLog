@@ -1,3 +1,11 @@
+2009-03-14  Masato Taruishi <taruishi@redhat.com>
+
+	* tests/: Rerutrn 77 for all tests.
+	* src/libsrpmix.sh.in, src/srpmix: support userland installation.
+	non-root 'srpmix --name=yum' installs trees under $HOME/srpmix/
+	* src/srpmix-build: separate build code from srpmix
+	* src/plugins/60srpmix-cscope: handle all text files
+
 2009-03-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* tests/00srpmix.sh: Return 77 if no TEST_SRPMS is given.

@@ -7,6 +7,7 @@ TESTS_ENVIRONMENT = \
 	TEST_SRPMS='$(TEST_SRPMS)' \
 	top_builddir=$(top_builddir) \
 	SRPMIX_PLUGIN_DIR=`pwd`/$(TESTDIR)/${pkgdatadir}/plugins \
+	SRPMIX_VAR_DIR=`pwd`/$(TESTDIR)/${localstatedir}/lib/@PACKAGE@ \
 	bindir=$(bindir) \
 	$(SHELL) -x
 TESTS = $(dist_check_SCRIPTS)

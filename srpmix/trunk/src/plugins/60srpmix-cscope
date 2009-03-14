@@ -94,7 +94,7 @@ function parse_arguments
     fi
 }
 
-REGEX='\(\.c++\|\.[ylch]\)\(\.in\)\?:\|text/x-c'
+REGEX='\(\.c++\|\.[ylch]\)\(\.in\)\?:\|text/'
 
 function run_cscope
 {

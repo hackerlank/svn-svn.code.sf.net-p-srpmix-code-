@@ -71,6 +71,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %{_bindir}/srpmix
+%{_bindir}/srpmix-build
 %{_bindir}/srpmix-ix
 %{_bindir}/libsrpmix.sh
 

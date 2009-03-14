@@ -29,7 +29,11 @@ SRPMIX_SWRFS_DIR=${SRPMIX_SWRFS_DIR:-"${SRPMIX_USR_DIR}/swrfs"}
 SRPMIX_PLUGIN_DIR=${SRPMIX_PLUGIN_DIR:-"${SRPMIX_USR_DIR}/plugins"}
 SRPMIX_SYSCONF_DIR="@sysconfdir@"
 
-SRPMIX_VAR_DIR=
+if test "`whoami`" = "root"; then
+SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"@localstatedir@/lib/srpmix"}
+else
+SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"$HOME/srpmix"}
+fi
 SRPMIX_SOURCES_DIR=
 SRPMIX_SOURCES_RDIR=sources
 SRPMIX_DB_DIR=
@@ -40,7 +44,7 @@ function srpmix_reset_var_dir
     SRPMIX_SOURCES_DIR="${SRPMIX_VAR_DIR}/${SRPMIX_SOURCES_RDIR}"
     SRPMIX_DB_DIR="${SRPMIX_VAR_DIR}/${SRPMIX_DB_RDIR}"
 }
-srpmix_reset_var_dir @localstatedir@/lib/srpmix
+srpmix_reset_var_dir ${SRPMIX_VAR_DIR}
 
 SRPMIX_VERSION=@VERSION@
 SRPMIX_MAJOR_VERSION=@SRPMIX_MAJOR_VERSION@

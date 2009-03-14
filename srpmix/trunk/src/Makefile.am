@@ -6,6 +6,8 @@ CLEANFILES = $(bin_SCRIPTS)
 dist_bin_SCRIPTS =           \
         srpmix               \
 	\
+	srpmix-build         \
+	\
 	srpmix-ix            \
 	\
 	srpmix-wrap          \
