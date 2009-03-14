@@ -61,11 +61,14 @@ AC_ARG_WITH([test-srpms],
 #
 with_test_srpms2=
 for s in ${with_test_srpms}; do
-    if ( test "x${s}" != x )  &&
-       ( test -f "${s}"    )  && 
-       ( test -f "./${s}" ) ; then
-       with_test_srpms2="${with_test_srpms2} $(pwd)/${s}"
-   fi
+    if test "x${s}" != x; then
+       if test -f "${s}"; then
+           test -f "./${s}" && s=$(pwd)/${s}
+           with_test_srpms2="${with_test_srpms2} ${s}"
+       else
+           AC_MSG_ERROR(${s} not found)
+       fi
+    fi
 done
 with_test_srpms=${with_test_srpms2}
    
