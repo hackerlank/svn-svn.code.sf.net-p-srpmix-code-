@@ -195,7 +195,6 @@ function main
     srpmix-build $SRPMIXBUILD_OPTIONS
 
     if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
-        set -x
         files=$(find ${OUTPUT_DIR} -name '*.swrf')
         case "$OUTPUT_FORMAT" in
           rpm)
