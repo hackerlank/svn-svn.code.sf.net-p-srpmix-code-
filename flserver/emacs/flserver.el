@@ -85,9 +85,9 @@
 (require 'linum)
 
 ;;
-;; Htmlize core
+;; xHtmlize core
 ;;
-(require 'htmlize)
+(require 'xhtmlize)
 
 ;;
 ;; Font lockig
@@ -134,25 +134,17 @@
 ;;
 ;; Main
 ;;
-(defun flserver-htmlize (input output &optional range)
+(defun flserver-xhtmlize (input output)
   (linum-mode)
   (let ((start (current-time)))
-    (flserver-log (format "(start :time \"%s\" :input \"%s\" output: \"%s\" :range %s)\n" 
-			  (current-time-string start) input output range))
-    (if range
-	(htmlize-file input output (car range) (cadr range)) 
-      (htmlize-file input output))
-    (flserver-log (format "(end :cost %s)\n" (- (float-time (current-time)) (float-time start) )))))
-
-
-;;
-;; TODO
-;;
-;; (load-flserver-config ...)
-;; (require cssize+srpmix.org)
-;; (require xhtmlize+srpmix.org)
-;; (flserver-xhtmlize (input xhtml-output-file css-output-dir range))
-;;
+    (flserver-log 
+     (format "(start :time \"%s\" :input \"%s\" output: \"%s\")\n" 
+	     (current-time-string start) input output))
+    (xhtmlize-file input output)
+    (flserver-log 
+     (format "(end :cost %s)\n" 
+	     (- (float-time (current-time)) 
+		(float-time start) )))))
 
 (server-start)
 (while t

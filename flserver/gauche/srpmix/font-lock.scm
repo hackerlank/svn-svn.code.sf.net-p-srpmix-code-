@@ -18,7 +18,7 @@
 	      (digest-hexify (md5-digest-string path))))
 
 (define (script-font-lock input output)
-  (list 'flserver-htmlize 
+  (list 'flserver-xhtmlize 
 	input
 	output
 	))
