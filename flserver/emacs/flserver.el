@@ -2,22 +2,23 @@
 
 (defvar flserver-dir nil)
 (defvar flserver-emacs-dir nil)
-(defvar flserver-socket-file)
-(defvar flserver-cache-log)
+(defvar flserver-socket-file nil)
+(defvar flserver-cache-log nil)
 
 
 ;; THIS SHOULD BE ON COMMAND LINE.
 (require 'es)
-(let* ((b (find-file-noselect))
+(require 'cl)
+(let* ((b (find-file-noselect config-file))
        (s (es-make-input-stream b))
        (r t))
   (setq r (es-read s))
   (while r
     (when (and 
 	   (listp r)
-	   (eq (car r) (intern "config")))
-      (let ((key (cadr r))
-	    (value (caddr r)))
+	   (eq (car r) (intern "conf")))
+      (let ((key (nth 1 r))
+	    (value (nth 2 r)))
 	(case key
 	  ('flserver-prog-dir
 	   (setq flserver-dir value))
@@ -54,6 +55,7 @@
 ;;
 ;; Logging facilities
 ;;
+(setq make-backup-files nil)
 (defvar flserver-log-buffer nil)
 (defun flserver-log (str)
   (unless flserver-log-buffer

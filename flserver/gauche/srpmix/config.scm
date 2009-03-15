@@ -23,30 +23,32 @@
 (define socket-file #f)
 (define cache-dir #f)
 
-(call-with-input-file config-file
+(with-input-from-file config-file
   (lambda ()
     (let loop ((r (read)))
       (unless (eof-object? r)
-	(when (and (list? r)
-		   (eq? (car r) 'conf))
-	  (let ((key (cadr r))
-		(value (caddr r)))
-	    (case key
-	      ('web-dir
-	       (set! prefix value))
-	      ('emacsclient
-	       (set! emacsclient value))
-	      ('max-font-lock-size
-	       (set! max-font-lock-size value))
-	      ('socket-file
-	       (set! socket-file value))
-	      ('cache-dir
-	       (set! cache-dir value))
-	      ('dist-dir
-	       (set! dist-prefix value))
-	      ('sources-dir
-	       (set! sources-prefix value))
-	      ;;
-	      )))))))
+	      (when (and (list? r)
+			 (eq? (car r) 'conf))
+		    (let ((key (cadr r))
+			  (value (caddr r)))
+		      (case key
+			('web-dir
+			 (set! prefix value))
+			('emacsclient
+			 (set! emacsclient value))
+			('max-font-lock-size
+			 (set! max-font-lock-size value))
+			('socket-file
+			 (set! socket-file value))
+			('cache-dir
+			 (set! cache-dir value))
+			('dist-dir
+			 (set! dist-prefix value))
+			('sources-dir
+			 (set! sources-prefix value))
+			;;
+			)))
+	      (loop (read))
+	      ))))
 		
 (provide "srpmix/config")
