@@ -1,1 +1,0 @@
-/home/jet/workspace/droite/es-lang-elisp-emacs/trunk/es.el
