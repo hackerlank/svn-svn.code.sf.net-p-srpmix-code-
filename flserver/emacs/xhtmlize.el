@@ -1029,12 +1029,13 @@ it's called with the same value of KEY.  All other times, the cached
 (defun xhtmlize-css-make-cache-on-disk (face dir)
   (let ((file (concat (cssize-clean-up-face-name face) ".css")))
     (let ((path (concat (file-name-as-directory dir) file)))
-      (let ((buffer  (find-file-noselect path)))
-	(with-current-buffer buffer
-	  (erase-buffer)
-	  (insert (cssize-face-to-css face))
-	  (save-buffer))
-	(kill-buffer buffer)))))
+      (save-excursion
+	(let ((buffer  (find-file-noselect path)))
+	  (with-current-buffer buffer
+	    (erase-buffer)
+	    (insert (cssize-face-to-css face))
+	    (save-buffer))
+	  (kill-buffer buffer))))))
 
 (defun xhtmlize-external-css-insert-text (text fstruct-list buffer)
   (xhtmlize-css-insert-text text fstruct-list buffer)
