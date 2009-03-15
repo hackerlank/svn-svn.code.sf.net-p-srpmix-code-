@@ -128,7 +128,7 @@
 			     (params->path-via-dists dist package stage file err-return)
 			     (params->path-via-sources package version stage file err-return))))
 		      ((dir err-return)
-		       (let1 dir (debug-print (cgi-encode dir))
+		       (let1 dir (cgi-encode dir)
 			 (let1 path (check-dir dir err-return)
 			   (cond
 			    ((not (file-is-readable? path))
