@@ -1008,8 +1008,6 @@ it's called with the same value of KEY.  All other times, the cached
 	  (format " href=\"%s/%s.css\""
 		  xhtmlize-external-css-base-url
 		  (cssize-clean-up-face-name face))
-	  (format "          title=\"%s\"" 
-		  (cssize-clean-up-face-name face))
 	  "/>"
 	  ?\n))
 
@@ -1580,7 +1578,8 @@ does not name a directory, it will be used as output file name."
       ;; Set the file name so normal-mode and xhtmlize-buffer-1 pick it
       ;; up.  Restore it afterwards so with-temp-buffer's kill-buffer
       ;; doesn't complain about killing a modified buffer.
-      (let ((buffer-file-name file))
+      (let ((buffer-file-name file)
+	    (noninteractive nil))
 	;; Set the major mode for the sake of font-lock.
 	(normal-mode)
 	(font-lock-mode 1)
