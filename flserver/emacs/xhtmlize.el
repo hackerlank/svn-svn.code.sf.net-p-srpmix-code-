@@ -33,28 +33,7 @@
 ;;; Code:
 
 (require 'cl)
-
 (require 'cssize)
-(defun xhtmlize-face-to-fstruct (face)
-  (cssize-face-to-fstruct face))
-(defun xhtmlize-fstruct-css-name (fstruct)
-  (cssize-fstruct-css-name fstruct))
-(defun xhtmlize-fstruct-foreground (fstruct)
-  (cssize-fstruct-foreground fstruct))
-(defun xhtmlize-fstruct-background (fstruct)
-  (cssize-fstruct-background fstruct))
-(defun xhtmlize-fstruct-size (fstruct)
-  (cssize-fstruct-size fstruct))
-(defun xhtmlize-fstruct-boldp (fstruct)
-  (cssize-fstruct-boldp fstruct))
-(defun xhtmlize-fstruct-italicp (fstruct)
-  (cssize-fstruct-italicp fstruct))
-(defun xhtmlize-fstruct-underlinep (fstruct)
-  (cssize-fstruct-italicp fstruct))
-(defun xhtmlize-fstruct-overlinep (fstruct)
-  (cssize-fstruct-overlinep fstruct))
-(defun xhtmlize-fstruct-strikep (fstruct)
-  (cssize-fstruct-strikep fstruct))
 
 ;; TODO: THIS SHOULD BE REMOVED.
 (require 'linum)
@@ -673,12 +652,12 @@ without modifying their meaning."
 ;;; Color handling.
 (defmacro xhtmlize-copy-attr-if-set (attr-list dest source)
   ;; Expand the code of the type
-  ;; (and (xhtmlize-fstruct-ATTR source)
-  ;;      (setf (xhtmlize-fstruct-ATTR dest) (xhtmlize-fstruct-ATTR source)))
+  ;; (and (cssize-fstruct-ATTR source)
+  ;;      (setf (cssize-fstruct-ATTR dest) (cssize-fstruct-ATTR source)))
   ;; for the given list of boolean attributes.
   (cons 'progn
 	(loop for attr in attr-list
-	      for attr-sym = (intern (format "xhtmlize-fstruct-%s" attr))
+	      for attr-sym = (intern (format "cssize-fstruct-%s" attr))
 	      collect `(and (,attr-sym ,source)
 			    (setf (,attr-sym ,dest) (,attr-sym ,source))))))
 
@@ -686,22 +665,22 @@ without modifying their meaning."
   (xhtmlize-copy-attr-if-set
    (foreground background boldp italicp underlinep overlinep strikep)
    merged next)
-  (setf (xhtmlize-fstruct-size merged)
-	(xhtmlize-merge-size (xhtmlize-fstruct-size merged)
-			    (xhtmlize-fstruct-size next)))
+  (setf (cssize-fstruct-size merged)
+	(cssize-merge-size (cssize-fstruct-size merged)
+			    (cssize-fstruct-size next)))
   merged)
 
 (defun xhtmlize-merge-faces (fstruct-list)
   (cond ((null fstruct-list)
 	 ;; Nothing to do, return a dummy face.
-	 (make-xhtmlize-fstruct))
+	 (make-cssize-fstruct))
 	((null (cdr fstruct-list))
 	 ;; Optimize for the common case of a single face, simply
 	 ;; return it.
 	 (car fstruct-list))
 	(t
 	 (reduce #'xhtmlize-merge-two-faces
-		 (cons (make-xhtmlize-fstruct) fstruct-list)))))
+		 (cons (make-cssize-fstruct) fstruct-list)))))
 
 ;; GNU Emacs 20+ supports attribute lists in `face' properties.  For
 ;; example, you can use `(:foreground "red" :weight bold)' as an
@@ -712,24 +691,24 @@ without modifying their meaning."
 ;; as with regular faces.
 
 (defun xhtmlize-attrlist-to-fstruct (attrlist)
-  ;; Like xhtmlize-face-to-fstruct, but accepts an ATTRLIST as input.
-  (let ((fstruct (make-xhtmlize-fstruct)))
+  ;; Like cssize-face-to-fstruct, but accepts an ATTRLIST as input.
+  (let ((fstruct (make-cssize-fstruct)))
     (cond ((eq (car attrlist) 'foreground-color)
 	   ;; ATTRLIST is (foreground-color . COLOR)
-	   (setf (xhtmlize-fstruct-foreground fstruct)
-		 (xhtmlize-color-to-rgb (cdr attrlist))))
+	   (setf (cssize-fstruct-foreground fstruct)
+		 (cssize-color-to-rgb (cdr attrlist))))
 	  ((eq (car attrlist) 'background-color)
 	   ;; ATTRLIST is (background-color . COLOR)
-	   (setf (xhtmlize-fstruct-background fstruct)
-		 (xhtmlize-color-to-rgb (cdr attrlist))))
+	   (setf (cssize-fstruct-background fstruct)
+		 (cssize-color-to-rgb (cdr attrlist))))
 	  (t
 	   ;; ATTRLIST is a plist.
 	   (while attrlist
 	     (let ((attr (pop attrlist))
 		   (value (pop attrlist)))
 	       (when (and value (not (eq value 'unspecified)))
-		 (xhtmlize-face-emacs21-attr fstruct attr value))))))
-    (setf (xhtmlize-fstruct-css-name fstruct) "ATTRLIST")
+		 (cssize-face-emacs21-attr fstruct attr value))))))
+    (setf (cssize-fstruct-css-name fstruct) "ATTRLIST")
     fstruct))
 
 (defun xhtmlize-face-list-p (face-prop)
@@ -770,10 +749,10 @@ without modifying their meaning."
 	;; Haven't seen FACE yet; convert it to an fstruct and cache
 	;; it.
 	(let ((fstruct (if (symbolp face)
-			   (xhtmlize-face-to-fstruct face)
+			   (cssize-face-to-fstruct face)
 			 (xhtmlize-attrlist-to-fstruct face))))
 	  (setf (gethash face face-map) fstruct)
-	  (let* ((css-name (xhtmlize-fstruct-css-name fstruct))
+	  (let* ((css-name (cssize-fstruct-css-name fstruct))
 		 (new-name css-name)
 		 (i 0))
 	    ;; Uniquify the face's css-name by using NAME-1, NAME-2,
@@ -781,7 +760,7 @@ without modifying their meaning."
 	    (while (member new-name css-names)
 	      (setq new-name (format "%s-%s" css-name (incf i))))
 	    (unless (equal new-name css-name)
-	      (setf (xhtmlize-fstruct-css-name fstruct) new-name))
+	      (setf (cssize-fstruct-css-name fstruct) new-name))
 	    (push new-name css-names)))))
     face-map))
 
@@ -1049,28 +1028,28 @@ it's called with the same value of KEY.  All other times, the cached
 ;; Internal function; not a method.
 (defun xhtmlize-css-specs (fstruct)
   (let (result)
-    (when (xhtmlize-fstruct-foreground fstruct)
-      (push (format "color: %s;" (xhtmlize-fstruct-foreground fstruct))
+    (when (cssize-fstruct-foreground fstruct)
+      (push (format "color: %s;" (cssize-fstruct-foreground fstruct))
 	    result))
-    (when (xhtmlize-fstruct-background fstruct)
+    (when (cssize-fstruct-background fstruct)
       (push (format "background-color: %s;"
-		    (xhtmlize-fstruct-background fstruct))
+		    (cssize-fstruct-background fstruct))
 	    result))
-    (let ((size (xhtmlize-fstruct-size fstruct)))
+    (let ((size (cssize-fstruct-size fstruct)))
       (when (and size (not (eq xhtmlize-ignore-face-size t)))
 	(cond ((floatp size)
 	       (push (format "font-size: %d%%;" (* 100 size)) result))
 	      ((not (eq xhtmlize-ignore-face-size 'absolute))
 	       (push (format "font-size: %spt;" (/ size 10.0)) result)))))
-    (when (xhtmlize-fstruct-boldp fstruct)
+    (when (cssize-fstruct-boldp fstruct)
       (push "font-weight: bold;" result))
-    (when (xhtmlize-fstruct-italicp fstruct)
+    (when (cssize-fstruct-italicp fstruct)
       (push "font-style: italic;" result))
-    (when (xhtmlize-fstruct-underlinep fstruct)
+    (when (cssize-fstruct-underlinep fstruct)
       (push "text-decoration: underline;" result))
-    (when (xhtmlize-fstruct-overlinep fstruct)
+    (when (cssize-fstruct-overlinep fstruct)
       (push "text-decoration: overline;" result))
-    (when (xhtmlize-fstruct-strikep fstruct)
+    (when (cssize-fstruct-strikep fstruct)
       (push "text-decoration: line-through;" result))
     (nreverse result)))
 
@@ -1083,7 +1062,7 @@ it's called with the same value of KEY.  All other times, the cached
 	  "\n      }\n")
   (dolist (face (sort* (copy-list buffer-faces) #'string-lessp
 		       :key (lambda (f)
-			      (xhtmlize-fstruct-css-name (gethash f face-map)))))
+			      (cssize-fstruct-css-name (gethash f face-map)))))
     (let* ((fstruct (gethash face face-map))
 	   (cleaned-up-face-name
 	    (let ((s
@@ -1098,7 +1077,7 @@ it's called with the same value of KEY.  All other times, the cached
 		(setq s (replace-match "XX" t t s)))
 	      s))
 	   (specs (xhtmlize-css-specs fstruct)))
-      (insert "      ." (xhtmlize-fstruct-css-name fstruct))
+      (insert "      ." (cssize-fstruct-css-name fstruct))
       (if (null specs)
 	  (insert " {")
 	(insert " {\n        /* " cleaned-up-face-name " */\n        "
@@ -1117,7 +1096,7 @@ it's called with the same value of KEY.  All other times, the cached
   ;; face in FSTRUCT-LIST.
   (dolist (fstruct fstruct-list)
     (princ "<span class=\"" buffer)
-    (princ (xhtmlize-fstruct-css-name fstruct) buffer)
+    (princ (cssize-fstruct-css-name fstruct) buffer)
     (when id
       (princ "\" id=\"" buffer)
       ;; TODO HTML ESCAPING
@@ -1164,8 +1143,8 @@ it's called with the same value of KEY.  All other times, the cached
 (defun xhtmlize-font-body-tag (face-map)
   (let ((fstruct (gethash 'default face-map)))
     (format "<body text=\"%s\" bgcolor=\"%s\">"
-	    (xhtmlize-fstruct-foreground fstruct)
-	    (xhtmlize-fstruct-background fstruct))))
+	    (cssize-fstruct-foreground fstruct)
+	    (cssize-fstruct-background fstruct))))
        
 (defun xhtmlize-font-insert-text (text fstruct-list buffer)
   ;; In `font' mode, we use the traditional HTML means of altering
@@ -1175,18 +1154,18 @@ it's called with the same value of KEY.  All other times, the cached
 	 (markup (xhtmlize-memoize
 		  merged
 		  (cons (concat
-			 (and (xhtmlize-fstruct-foreground merged)
-			      (format "<font color=\"%s\">" (xhtmlize-fstruct-foreground merged)))
-			 (and (xhtmlize-fstruct-boldp merged)      "<b>")
-			 (and (xhtmlize-fstruct-italicp merged)    "<i>")
-			 (and (xhtmlize-fstruct-underlinep merged) "<u>")
-			 (and (xhtmlize-fstruct-strikep merged)    "<strike>"))
+			 (and (cssize-fstruct-foreground merged)
+			      (format "<font color=\"%s\">" (cssize-fstruct-foreground merged)))
+			 (and (cssize-fstruct-boldp merged)      "<b>")
+			 (and (cssize-fstruct-italicp merged)    "<i>")
+			 (and (cssize-fstruct-underlinep merged) "<u>")
+			 (and (cssize-fstruct-strikep merged)    "<strike>"))
 			(concat
-			 (and (xhtmlize-fstruct-strikep merged)    "</strike>")
-			 (and (xhtmlize-fstruct-underlinep merged) "</u>")
-			 (and (xhtmlize-fstruct-italicp merged)    "</i>")
-			 (and (xhtmlize-fstruct-boldp merged)      "</b>")
-			 (and (xhtmlize-fstruct-foreground merged) "</font>"))))))
+			 (and (cssize-fstruct-strikep merged)    "</strike>")
+			 (and (cssize-fstruct-underlinep merged) "</u>")
+			 (and (cssize-fstruct-italicp merged)    "</i>")
+			 (and (cssize-fstruct-boldp merged)      "</b>")
+			 (and (cssize-fstruct-foreground merged) "</font>"))))))
     (princ (car markup) buffer)
     (princ text buffer)
     (princ (cdr markup) buffer)))
