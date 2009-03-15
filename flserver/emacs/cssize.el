@@ -415,6 +415,10 @@ If no rgb.txt file is found, return nil."
 	 (cleaned-up-face-name (cssize-clean-up-face-name face))
 	 (specs (cssize-css-specs fstruct)))
     (concat 
+     (format "/* About copyright %s */\n"
+	     (describe-simplify-lib-file-name (symbol-file face 'defface))
+	     ;(symbol-file face 'defface)
+	     )
      "." 
      (cssize-fstruct-css-name fstruct)
      (if (null specs)

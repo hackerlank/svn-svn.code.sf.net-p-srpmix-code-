@@ -1,4 +1,4 @@
-;;; cssize.el -- Convert buffer to xhtml
+;;; xhtmlize.el -- Convert buffer text and decorations to XHTML.
 ;;
 ;; Copyright (C) 2009 Masatake YAMATO
 ;; Copyright (C) 1997,1998,1999,2000,2001,2002,2003,2005,2006 Hrvoje Niksic
@@ -18,12 +18,48 @@
 ;; Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 ;; Boston, MA 02111-1307, USA.
 
-;; This program is derived from htmlize.el written by 
+;; This program is mostly derived from htmlize.el written by 
 ;; Hrvoje Niksic <hniksic@xemacs.org>.
+;; The latest version of htmlize.el should be available at:
+;;
+;;        <http://fly.srk.fer.hr/~hniksic/emacs/xhtmlize.el>
+;;
+;; You can find a sample of xhtmlize's output (possibly generated with
+;; an older version) at:
+;;
+;;        <http://fly.srk.fer.hr/~hniksic/emacs/xhtmlize.el.html>
 
+
 ;;; Code:
 
 (require 'cl)
+
+(require 'cssize)
+(defun xhtmlize-face-to-fstruct (face)
+  (cssize-face-to-fstruct face))
+(defun xhtmlize-fstruct-css-name (fstruct)
+  (cssize-fstruct-css-name fstruct))
+(defun xhtmlize-fstruct-foreground (fstruct)
+  (cssize-fstruct-foreground fstruct))
+(defun xhtmlize-fstruct-background (fstruct)
+  (cssize-fstruct-background fstruct))
+(defun xhtmlize-fstruct-size (fstruct)
+  (cssize-fstruct-size fstruct))
+(defun xhtmlize-fstruct-boldp (fstruct)
+  (cssize-fstruct-boldp fstruct))
+(defun xhtmlize-fstruct-italicp (fstruct)
+  (cssize-fstruct-italicp fstruct))
+(defun xhtmlize-fstruct-underlinep (fstruct)
+  (cssize-fstruct-italicp fstruct))
+(defun xhtmlize-fstruct-overlinep (fstruct)
+  (cssize-fstruct-overlinep fstruct))
+(defun xhtmlize-fstruct-strikep (fstruct)
+  (cssize-fstruct-strikep fstruct))
+
+;; TODO: THIS SHOULD BE REMOVED.
+(require 'linum)
+
+
 (eval-when-compile
   (if (string-match "XEmacs" emacs-version)
       (byte-compiler-options
@@ -65,7 +101,7 @@
   :type 'string
   :group 'xhtmlize)
 
-(defcustom xhtmlize-output-type 'css
+(defcustom xhtmlize-output-type 'external-css
   "*Output type of generated HTML, one of `css', `inline-css', or `font'.
 When set to `css' (the default), xhtmlize will generate a style sheet
 with description of faces, and use it in the HTML document, specifying
@@ -83,7 +119,10 @@ When set to `font', the properties will be set using layout tags
 supporting old, pre-CSS browsers, and both `inline-css' and `font' for
 easier embedding of colorized text in foreign HTML documents (no style
 sheet to carry around)."
-  :type '(choice (const css) (const inline-css) (const font))
+  :type '(choice (const external-css) 
+		 (const css)
+		 (const inline-css)
+		 (const font))
   :group 'xhtmlize)
 
 (defcustom xhtmlize-generate-hyperlinks t
@@ -230,6 +269,16 @@ Set this to nil if you prefer the default (fundamental) mode."
 		 (function :tag "User-defined major mode"))
   :group 'xhtmlize)
 
+(defcustom xhtmlize-external-css-base-url "http://srpmix.org/api/css"
+  "*URL where css files are expected to be stored to."
+  :type 'string
+  :group 'xhtmlize)
+
+(defcustom xhtmlize-external-css-base-dir "/tmp"
+  "*Directory where css files are stored to."
+  :type 'directory
+  :group 'xhtmlize)
+
 (defvar xhtmlize-before-hook nil
   "Hook run before htmlizing a buffer.
 The hook functions are run in the source buffer (not the resulting HTML
@@ -245,7 +294,7 @@ output.")
   "Hook run by `xhtmlize-file' after htmlizing a file, but before saving it.")
 
 (defvar xhtmlize-buffer-places)
- 
+
 ;;; Some cross-Emacs compatibility.
 
 ;; I try to conditionalize on features rather than Emacs version, but
@@ -620,7 +669,7 @@ without modifying their meaning."
   (while (search-forward "Local Variables:" nil t)
     (replace-match "Local Variables&#58;" nil t)))
   
- 
+
 ;;; Color handling.
 (defmacro xhtmlize-copy-attr-if-set (attr-list dest source)
   ;; Expand the code of the type
@@ -865,7 +914,7 @@ property and by buffer overlays that specify `face'."
 	     ;; faces specified by text properties.
 	     (setq all-faces (nconc all-faces list)))
 	   all-faces))))
- 
+
 ;; xhtmlize supports generating HTML in two several fundamentally
 ;; different ways, one with the use of CSS and nested <span> tags, and
 ;; the other with the use of the old <font> tags.  Rather than adding
@@ -913,7 +962,7 @@ it's called with the same value of KEY.  All other times, the cached
 	 (setq ,value ,generator)
 	 (setf (gethash ,key xhtmlize-memoization-table) ,value))
        ,value)))
- 
+
 ;;; Default methods.
 
 (defun xhtmlize-default-doctype ()
@@ -938,11 +987,11 @@ it's called with the same value of KEY.  All other times, the cached
   ;; you have a problem with that, use the `css' engine designed to
   ;; create fully conforming HTML.
 
+  ;; HTMLIZE:
   ;;"<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">"
-  (concat "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-	  "<!DOCTYPE html\n    PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n"
+  ;; XHTMLIZE:
+  (concat "<!DOCTYPE html\n    PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n"
 	  "    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">")
-
   ;; Now-abandoned HTML Pro declaration.
   ;"<!DOCTYPE HTML PUBLIC \"+//Silmaril//DTD HTML Pro v0r11 19970101//EN\">"
   )
@@ -950,7 +999,49 @@ it's called with the same value of KEY.  All other times, the cached
 (defun xhtmlize-default-body-tag (face-map)
   nil					; no doc-string
   "<body>")
- 
+
+;;; External CSS based output support.
+(defun xhtmlize-external-css-insert-head (buffer-faces face-map)
+  ;; BODY
+  (let ((css-dir xhtmlize-external-css-base-dir))
+    (dolist (face (sort* (copy-list buffer-faces) #'string-lessp
+			 :key (lambda (f)
+				(cssize-fstruct-css-name (gethash f face-map)))))
+      (unless (xhtmlize-css-cached-on-disk-p face css-dir)
+	(xhtmlize-css-make-cache-on-disk face css-dir))
+      (insert "    <link rel=\"stylesheet\" type=\"text/css\""
+	      (format " href=\"%s/%s.css\""
+		      xhtmlize-external-css-base-url
+		      (cssize-clean-up-face-name face))
+	      (format "          title=\"%s\"" 
+		      (cssize-clean-up-face-name face))
+	      "/>"
+	      ?\n))))
+
+(defun xhtmlize-css-cached-on-disk-p (face dir)
+  (let ((file (concat (cssize-clean-up-face-name face) ".css")))
+    (let ((path (concat (file-name-as-directory dir) file)))
+      (file-readable-p path))))
+
+(defun xhtmlize-css-make-cache-on-disk (face dir)
+  (let ((file (concat (cssize-clean-up-face-name face) ".css")))
+    (let ((path (concat (file-name-as-directory dir) file)))
+      (let ((buffer  (find-file-noselect path)))
+	(with-current-buffer buffer
+	  (erase-buffer)
+	  (insert (cssize-face-to-css face))
+	  (save-buffer))
+	(kill-buffer buffer)))))
+
+(defun xhtmlize-external-css-insert-text (text fstruct-list buffer)
+  (xhtmlize-css-insert-text text fstruct-list buffer)
+  )
+
+(defun xhtmlize-external-css-insert-text-with-id (text id fstruct-list buffer)
+  (xhtmlize-css-insert-text-with-id text id fstruct-list buffer)
+  )
+
+
 ;;; CSS based output support.
 
 ;; Internal function; not a method.
@@ -982,8 +1073,7 @@ it's called with the same value of KEY.  All other times, the cached
     (nreverse result)))
 
 (defun xhtmlize-css-insert-head (buffer-faces face-map)
-  ;;(insert "    <style type=\"text/css\">\n    <!--\n")
-  (insert "    <style type=\"text/css\">\n    <![CDATA[\n")
+  (insert "    <style type=\"text/css\">\n    <!--\n")
   (insert "      body {\n        "
 	  (mapconcat #'identity
 		     (xhtmlize-css-specs (gethash 'default face-map))
@@ -1013,29 +1103,33 @@ it's called with the same value of KEY.  All other times, the cached
 		(mapconcat #'identity specs "\n        ")))
       (insert "\n      }\n")))
   (insert xhtmlize-hyperlink-style
-	  ;;"    -->\n    </style>\n"
-	  "]]>\n    </style>\n"
-	  ))
+	  "    -->\n    </style>\n"))
 
 (defun xhtmlize-css-insert-text (text fstruct-list buffer)
+  (xhtmlize-css-insert-text-with-id text nil fstruct-list buffer)
+  )
+
+(defun xhtmlize-css-insert-text-with-id (text id fstruct-list buffer)
   ;; Insert TEXT colored with FACES into BUFFER.  In CSS mode, this is
   ;; easy: just nest the text in one <span class=...> tag for each
   ;; face in FSTRUCT-LIST.
   (dolist (fstruct fstruct-list)
     (princ "<span class=\"" buffer)
     (princ (xhtmlize-fstruct-css-name fstruct) buffer)
-    (unless (stringp text)
+    (when id
       (princ "\" id=\"" buffer)
-      (princ (format "l%sc%d" 
-		     (car (split-string (cadr text)))
-		     (caddr text)) buffer)
+      ;; TODO HTML ESCAPING
+      (princ id buffer)
       )
     (princ "\">" buffer))
-  (princ (if (stringp text) text (car text)) buffer)
+  (princ text buffer)
   (dolist (fstruct fstruct-list)
     (ignore fstruct)			; shut up the byte-compiler
-    (princ "</span>" buffer)))
- 
+    (princ "</span>" buffer))
+  )
+
+
+
 ;; `inline-css' output support.
 
 (defun xhtmlize-inline-css-body-tag (face-map)
@@ -1057,7 +1151,12 @@ it's called with the same value of KEY.  All other times, the cached
     (princ text buffer)
     (when style
       (princ "</span>" buffer))))
- 
+
+(defun xhtmlize-inline-css-insert-text-with-id (text id fstruct-list buffer)
+  (xhtmlize-inline-css-insert-text text fstruct-list buffer)
+  )
+
+
 ;;; `font' tag based output support.
 
 (defun xhtmlize-font-body-tag (face-map)
@@ -1089,7 +1188,11 @@ it's called with the same value of KEY.  All other times, the cached
     (princ (car markup) buffer)
     (princ text buffer)
     (princ (cdr markup) buffer)))
- 
+
+(defun xhtmlize-font-insert-text-with-id (text id fstruct-list buffer)
+  (xhtmlize-font-insert-text text fstruct-list buffer))
+
+
 (defun xhtmlize-buffer-1 ()
   ;; Internal function; don't call it from outside this file.  Xhtmlize
   ;; current buffer, writing the resulting HTML to a new buffer, and
@@ -1122,15 +1225,23 @@ it's called with the same value of KEY.  All other times, the cached
       ;; Initialize HTMLBUF and insert the HTML prolog.
       (with-current-buffer htmlbuf
 	(buffer-disable-undo)
+	;; NEW CODE
+	(insert "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" ?\n)
+	;;
 	(insert (xhtmlize-method doctype) ?\n
 		(format "<!-- Created by xhtmlize-%s in %s mode. -->\n"
 			xhtmlize-version xhtmlize-output-type)
-		;"<html>\n  "
+		;; HTMLIZE.EL
+		;; "<html>\n  "
+		;; XHTMLIZE.EL
 		"<html xmlns=\"http://www.w3.org/TR/xhtml1\" xml:lang=\"en\" lang=\"en\">"
-		)
+		
+		?\n)
 	(plist-put places 'head-start (point-marker))
-	(insert "<head>\n"
-		"    <title>" (xhtmlize-protect-string title) "</title>\n"
+	;;
+	(insert "<head>" ?\n)
+	;;
+	(insert "    <title>" (xhtmlize-protect-string title) "</title>\n"
 		(if xhtmlize-html-charset
 		    (format (concat "    <meta http-equiv=\"Content-Type\" "
 				    "content=\"text/html; charset=%s\">\n")
@@ -1151,6 +1262,8 @@ it's called with the same value of KEY.  All other times, the cached
 	     ;; the loop.  Not calling `xhtmlize-method' in the loop
 	     ;; body yields a measurable speed increase.
 	     (xhtmlize-method-function 'insert-text))
+	    (insert-text-with-id-method
+	     (xhtmlize-method-function 'insert-text-with-id))
 	    ;; Declare variables used in loop body outside the loop
 	    ;; because it's faster to establish `let' bindings only
 	    ;; once.
@@ -1164,6 +1277,7 @@ it's called with the same value of KEY.  All other times, the cached
 	(goto-char (point-min))
 	(while (not (eobp))
 	  ;; NEW CODE
+	  ;; SRPMIX own LINUME hacking
 	  (mapc (lambda (o)
 		  (xhtmlize-zero-width-overlay o)
 		  )
@@ -1229,11 +1343,12 @@ it's called with the same value of KEY.  All other times, the cached
 	(buffer-enable-undo))
       htmlbuf)))
 
-(defvar xhtmlize-zero-width-overlay-temp-buffer (let  ((b (get-buffer-create
+;; SRPMIX LINUM HACKING
+(defvar xhtmlize-zero-width-overlay-temp-buffer (let ((b (get-buffer-create
 							  " *zero-width-overlay-xhtmlize*")))
-						 (with-current-buffer b
-						   (buffer-disable-undo))
-						 b))
+						  (with-current-buffer b
+						    (buffer-disable-undo))
+						  b))
 						 
 
 ;; insert-text-method fstruct-list htmlbuf
@@ -1273,13 +1388,18 @@ it's called with the same value of KEY.  All other times, the cached
 	;; Insert the text, along with the necessary markup to
 	;; represent faces in FSTRUCT-LIST.
 	(if (equal face-list '(linum))
-	    (funcall insert-text-method 
-		     (list text (overlay-get o 'linum-str) (overlay-start o))
+	    (funcall insert-text-with-id-method
+		     text
+		     (format "%s,%s,%d" 
+			     "xhtmlize"	;; should be customizable
+			     (car (split-string (overlay-get o 'linum-str)))
+			     (overlay-start o))
 		     fstruct-list htmlbuf)
 	    (funcall insert-text-method text fstruct-list htmlbuf)))
       (goto-char next-change))
     ))
 
+;; TODO: These code should be injected from +srpmix.
 (add-hook 'xhtmlize-before-hook
 	  'xhtmlize-linum-update-buffer)
 (defun xhtmlize-linum-update-buffer ()
@@ -1332,7 +1452,7 @@ it's called with the same value of KEY.  All other times, the cached
      ;; just saves it to an external cache so it's not done twice.
      )))
 
- 
+
 ;;;###autoload
 (defun xhtmlize-buffer (&optional buffer)
   "Convert BUFFER to HTML, preserving colors and decorations.
@@ -1406,9 +1526,7 @@ overload this function to do it and xhtmlize will comply."
 ;      (concat sans-extension ".html"))))
 
 ;;;###autoload
-(defun xhtmlize-file (file &optional target 
-			  ;; NEW CODE
-			  beg end)
+(defun xhtmlize-file (file &optional target)
   "Load FILE, fontify it, convert it to HTML, and save the result.
 
 Contents of FILE are inserted into a temporary buffer, whose major mode
@@ -1467,15 +1585,7 @@ does not name a directory, it will be used as output file name."
 	  ;; contrary to the documentation.  This seems to work.
 	  (font-lock-fontify-buffer))
 	;; xhtmlize the buffer and save the HTML.
-	(with-current-buffer 
-	    (if beg 
-		;; NEW CODE
-		(xhtmlize-region (save-excursion (goto-line beg)
-						(line-beginning-position))
-				(save-excursion (goto-line end)
-						(line-beginning-position)))
-						
-	      (xhtmlize-buffer-1))
+	(with-current-buffer (xhtmlize-buffer-1)
 	  (unwind-protect
 	      (progn
 		(run-hooks 'xhtmlize-file-hook)
@@ -1526,3 +1636,5 @@ corresponding source file."
   (xhtmlize-many-files (dired-get-marked-files nil arg) target-directory))
 
 (provide 'xhtmlize)
+
+;;; xhtmlize.el ends here

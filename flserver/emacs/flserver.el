@@ -28,6 +28,8 @@
 	   (setq flserver-socket-file value))
 	  ('cache-log
 	   (setq flserver-cache-log value))
+	  ('css-dir
+	   (setq xhtmlize-external-css-base-dir value))
 	  )))
     (setq r (es-read s)))
   (kill-buffer b))

@@ -17,14 +17,11 @@
   (build-path cache-dir
 	      (digest-hexify (md5-digest-string path))))
 
-(define (script-font-lock input output range)
+(define (script-font-lock input output)
   (list 'flserver-htmlize 
 	input
 	output
-	(list 'quote (if range 
-			 (list (car range)
-			       (last range))
-			 'nil))))
+	))
 
 (define (font-lock input err-return)
   ;; INPUT as OUTPUT if the file is too large.
@@ -37,7 +34,7 @@
       (touch-file output))
     (unless (file-is-readable? output)
       (let1 p (run-emacs socket-file
-			 (script-font-lock input output #f)
+			 (script-font-lock input output)
 			 #t)
 	(unless (eq? (process-exit-status p) 0)
 	  (err-return "failed in font-lock"))))

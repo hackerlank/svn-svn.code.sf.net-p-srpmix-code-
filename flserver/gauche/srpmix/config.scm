@@ -11,7 +11,8 @@
 (select-module srpmix.config)
 
 
-(define config-file "/home/masatake/var/flserver/config.es")
+;(define config-file "/home/masatake/var/flserver/config.es")
+(define config-file "/home/jet/workspace/srpmix/flserver/config.es")
 
 (define prefix #f)
 (define dist-prefix #f)
