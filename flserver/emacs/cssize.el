@@ -410,21 +410,26 @@ If no rgb.txt file is found, return nil."
       (setq s (replace-match "." t t s)))
     s))
 
-(defun cssize-face-to-css (face)
+(defun cssize-face-to-css (face &optional name)
   (let* ((fstruct (cssize-face-to-fstruct face))
 	 (cleaned-up-face-name (cssize-clean-up-face-name face))
 	 (specs (cssize-css-specs fstruct)))
     (concat 
-     (format "/* About copyright %s */\n"
+     (if (and (eq face 'default) (not name))
+	 (cssize-face-to-css face "body")
+	 "")
+     (format "/* About copyright see %s */\n"
 	     (describe-simplify-lib-file-name (symbol-file face 'defface))
 	     ;(symbol-file face 'defface)
 	     )
-     "." 
-     (cssize-fstruct-css-name fstruct)
+     ;; 
+     (if name name (concat "." (cssize-fstruct-css-name fstruct)))
      (if (null specs)
 	 " {"
        (concat " {\n        /* " cleaned-up-face-name " */\n        "))
      (mapconcat #'identity specs "\n        ")
-     "\n}\n")))
+     "\n}\n"
+     ;;
+     )))
 
 (provide 'cssize)

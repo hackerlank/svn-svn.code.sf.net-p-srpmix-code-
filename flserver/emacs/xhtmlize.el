@@ -1001,22 +1001,25 @@ it's called with the same value of KEY.  All other times, the cached
   "<body>")
 
 ;;; External CSS based output support.
+(defun xhtmlize-css-link (face css-dir face-map)
+  (unless (xhtmlize-css-cached-on-disk-p face css-dir)
+    (xhtmlize-css-make-cache-on-disk face css-dir))
+  (insert "    <link rel=\"stylesheet\" type=\"text/css\""
+	  (format " href=\"%s/%s.css\""
+		  xhtmlize-external-css-base-url
+		  (cssize-clean-up-face-name face))
+	  (format "          title=\"%s\"" 
+		  (cssize-clean-up-face-name face))
+	  "/>"
+	  ?\n))
+
 (defun xhtmlize-external-css-insert-head (buffer-faces face-map)
-  ;; BODY
   (let ((css-dir xhtmlize-external-css-base-dir))
+    (xhtmlize-css-link 'default css-dir face-map)
     (dolist (face (sort* (copy-list buffer-faces) #'string-lessp
 			 :key (lambda (f)
 				(cssize-fstruct-css-name (gethash f face-map)))))
-      (unless (xhtmlize-css-cached-on-disk-p face css-dir)
-	(xhtmlize-css-make-cache-on-disk face css-dir))
-      (insert "    <link rel=\"stylesheet\" type=\"text/css\""
-	      (format " href=\"%s/%s.css\""
-		      xhtmlize-external-css-base-url
-		      (cssize-clean-up-face-name face))
-	      (format "          title=\"%s\"" 
-		      (cssize-clean-up-face-name face))
-	      "/>"
-	      ?\n))))
+      (xhtmlize-css-link face css-dir face-map))))
 
 (defun xhtmlize-css-cached-on-disk-p (face dir)
   (let ((file (concat (cssize-clean-up-face-name face) ".css")))
