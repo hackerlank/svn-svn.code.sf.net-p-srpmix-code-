@@ -43,7 +43,7 @@ function list_files() {
       grep -v ' video/' |
       cut -d: -f1 | sed 's!^\./!!'
   else
-    ( cd $1 && find -L . -not -type d | grep -v plugins )
+    ( cd $1 && find -L pre-build -not -type d )
   fi
 
 }
