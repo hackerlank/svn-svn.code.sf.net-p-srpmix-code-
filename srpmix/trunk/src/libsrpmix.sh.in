@@ -214,6 +214,8 @@ function srpmix_distmap_to_json
     ${GUILE} -c "${srpmix_distmap_to_json_script}"
 }
 
+SRPMIX_ENABLE_PLUGIN=
+SRPMIX_DISABLE_PLUGIN=
 
 function srpmix_can_ln
 {
@@ -486,6 +488,52 @@ function create_swrf
     done
 
 }
+
+function is_enabled_plugin
+{
+    local p
+
+    for p in $SRPMIX_ENABLE_PLUGIN; do
+        if test "x$p" = "x$1"; then
+            return 0
+        fi
+    done
+
+    for p in $SRPMIX_DISABLE_PLUGIN; do
+        if test "x$p" = "x$1"; then
+            return 1
+        fi
+    done
+
+    if test "x$SRPMIX_ENABLE_PLUGIN" = "x"; then
+        return 0
+    fi
+
+    return 1
+}
+
+function list_plugin_candidates
+{
+    local p
+
+    find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort -n | while read plugin
+    do
+        is_enabled_plugin $(basename $plugin) && echo $(basename $plugin) $plugin
+    done
+    for p in $SRPMIX_EXTRA_PLUGINS
+    do
+        is_enabled_plugin $(basename $p) && echo $(basename $p) $p
+    done
+}
+
+function list_plugins
+{
+    list_plugin_candidates | sort -n | while read base plugin
+    do
+        echo $plugin
+    done
+}
+
 
 
 #
