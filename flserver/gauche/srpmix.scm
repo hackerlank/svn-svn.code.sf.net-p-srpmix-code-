@@ -165,7 +165,7 @@
 			       :filter (lambda (e) (not (equal? e ".htaccess")))
 			       )))
     (unless (member dist dists)
-      (err-return (format "Unknow dist: ~s" dist))) 
+      (err-return (format "Unknown dist: ~s" dist))) 
     (let1 dist-dir (string-append dist-prefix "/" dist)
       (let1 package-dir (string-append dist-dir "/" 
 				       "packages" "/"

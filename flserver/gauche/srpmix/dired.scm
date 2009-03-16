@@ -81,7 +81,7 @@
 	(prefix-length (string-length prefix)))
     (cond
      ((string-prefix? prefix path)
-      (uri-compose :scheme "http" :host "srpmix.org"
+      (uri-compose :scheme "http" :host host
 		   :path  (format "/api/browse.cgi?path=~a&display=~a"
 				  (wash-path (string-drop path prefix-length))
 				  display)))

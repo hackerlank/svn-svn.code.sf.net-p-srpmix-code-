@@ -7,6 +7,8 @@
 	  max-font-lock-size
 	  socket-file
 	  cache-dir
+	  ;;
+	  host
 	  ))
 (select-module srpmix.config)
 
@@ -14,6 +16,7 @@
 (define config-file "/home/masatake/var/flserver/config.es")
 ;(define config-file "/home/jet/workspace/srpmix/flserver/config.es")
 
+(define host #f)
 (define prefix #f)
 (define dist-prefix #f)
 (define sources-prefix #f)
@@ -47,6 +50,8 @@
 			 (set! dist-prefix value))
 			('sources-dir
 			 (set! sources-prefix value))
+			('host
+			 (set! host value))
 			;;
 			)))
 	      (loop (read))

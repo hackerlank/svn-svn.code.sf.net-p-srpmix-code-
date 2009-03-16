@@ -1,4 +1,5 @@
 (define-module srpmix.font-lock
+  (use srfi-13)
   (use file.util)
   (use gauche.process)
 
@@ -38,8 +39,13 @@
 			 #t)
 	(unless (eq? (process-exit-status p) 0)
 	  (err-return "failed in font-lock"))))
-    (list 
-     (cgi-header :content-type (if (eq? input output) "text/plain" "text/html"))
-     (call-with-input-file output port->string))))
+    (if (file-is-readable? output)
+	(list 
+	 (cgi-header :content-type (if (eq? input output) "text/plain" "text/html"))
+	 (call-with-input-file output port->string))
+	(list (cgi-header :content-type "text/plain")
+	      (format "Failed in font-lock'ing: ~s"
+		      (string-drop input (string-length prefix))
+		      )))))
 
 (provide "srpmix/font-lock")
