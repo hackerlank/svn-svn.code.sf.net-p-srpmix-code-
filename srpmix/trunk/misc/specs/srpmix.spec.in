@@ -3,7 +3,7 @@ Name: srpmix
 Version: #PACKAGE_VERSION#
 Release: #RPM_RELEASE#
 Source: srpmix-#PACKAGE_VERSION#.tar.bz2
-Requires: hardlink cpio rpm coreutils emacs-common guile file
+Requires: hardlink cpio rpm coreutils emacs-common guile file gauche
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root

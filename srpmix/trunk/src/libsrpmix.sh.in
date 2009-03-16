@@ -27,6 +27,7 @@ datarootdir="@datarootdir@"
 SRPMIX_USR_DIR=${SRPMIX_USR_DIR:-"@datadir@/@PACKAGE@"}
 SRPMIX_SWRFS_DIR=${SRPMIX_SWRFS_DIR:-"${SRPMIX_USR_DIR}/swrfs"}
 SRPMIX_PLUGIN_DIR=${SRPMIX_PLUGIN_DIR:-"${SRPMIX_USR_DIR}/plugins"}
+SRPMIX_HELPER_DIR=${SRPMIX_HELPER_DIR:-"${SRPMIX_USR_DIR}/helpers"}
 SRPMIX_SYSCONF_DIR="@sysconfdir@"
 
 if test "`whoami`" = "root"; then
@@ -73,6 +74,7 @@ RPMBUILD=@RPMBUILD@
 SWRFPM=@SWRFPM@
 SWRFBUILD=@SWRFBUILD@
 GUILE=@GUILE@
+GOSH=@GOSH@
 
 function srpmix_abort
 {

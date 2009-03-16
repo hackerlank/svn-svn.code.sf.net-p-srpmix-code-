@@ -15,8 +15,8 @@
 		 (current-output-port)
 		 (current-error-port))
     (display "Usage: \n")
-    (display "	out-rules PKG-FILE\n" port)
-    (display "	out-rules --help|-h\n" port)
+    (display "	build-out-rules PKG-FILE\n" port)
+    (display "	build-out-rules --help|-h\n" port)
     (exit status)))
 
 (define-method object-apply ((str0 <string>) (str1 <string>))

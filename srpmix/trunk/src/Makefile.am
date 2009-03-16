@@ -28,3 +28,10 @@ dist_sysconf_DATA = srpmix.cf
 crondailydir=$(sysconfdir)/cron.daily
 dist_crondaily_SCRIPTS = srpmix.daily
 
+
+helpersdir = $(pkgdatadir)/helpers
+dist_helpers_SCRIPTS =   \
+        build-opt-rules  \
+	\
+        $(NULL)
+

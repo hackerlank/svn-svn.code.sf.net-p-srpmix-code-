@@ -1,5 +1,18 @@
 2009-03-16  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix (opt_rules): Use build-opt-rules.
+	
+	* src/Makefile.am (helpersdir): New directory.
+	(dist_helpers_SCRIPTS): New primary.
+
+	* src/build-opt-rules: New helper script which
+	was called opt-rules.
+
+	* src/libsrpmix.sh.in (SRPMIX_HELPER_DIR, GOSH): 
+	New constatns.
+
+2009-03-16  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-wrap (main): Don't create TMPDIR
 	if JUST_PRINT is specified.
 
