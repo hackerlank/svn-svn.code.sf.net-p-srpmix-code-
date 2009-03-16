@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #|-*- scheme -*-|#
 :; exec gosh -- $0 "$@"
 (define rules

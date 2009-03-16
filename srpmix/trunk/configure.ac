@@ -31,6 +31,9 @@ AM_CONDITIONAL([USE_SVN_RPM_RELEASE],
 
 # PROGRAMS
 
+AC_CHECK_PROGS([BASH], [bash])
+if test "x$BASH" = "x"; then AC_MSG_ERROR(bash not found); fi
+
 AC_CHECK_PROGS([HARDLINK], [hardlink])
 if test "x$HARDLINK" = "x"; then AC_MSG_ERROR(hardlink not found); fi
 
