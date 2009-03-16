@@ -177,13 +177,14 @@ function parse_arguments
     SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-dir=$OUTPUT_DIR"
     SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --srpm=$TARGET_SRPM"
 
-    # TODO for f in rule_files; do...
+    
     SRPMIXBUILD_OPTIONS="$(opt_rules $TARGET_SRPM) $SRPMIXBUILD_OPTIONS"
 }
 
 function opt_rules
 {
-    $GOSH ${SRPMIX_HELPER_DIR}/build-opt-rules "$(basename $1)"
+    cat ${SRPMIX_BUILD_OPT_RULES_DIR}/*.scm \
+	| $GOSH ${SRPMIX_HELPER_DIR}/build-opt-rules "$(basename $1)"
 }
 
 function main

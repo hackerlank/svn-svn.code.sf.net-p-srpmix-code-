@@ -91,7 +91,13 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_datadir}/srpmix/utils
 
-%{_sysconfdir}/srpmix.cf
+%{_datadir}/srpmix/helpers
+%{_datadir}/srpmix/helpers/build-opt-rules
+
+%{_sysconfdir}/srpmix
+%{_sysconfdir}/srpmix/srpmix.cf
+%{_sysconfdir}/srpmix/build-opt-rules/*.scm
+
 %{_sysconfdir}/cron.daily/srpmix.daily
 
 %files plugin-cscope

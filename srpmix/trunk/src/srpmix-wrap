@@ -144,17 +144,6 @@ function create_core_spec
         echo "warning: failed to parse $target_srpm: ignored" 1>&2
         return
     fi
-
-    es_name=$(es_print srpmix-wrap name\
-       --target-srpm="\"$(basename $target_srpm)\"" \
-       --package="\"${package}\"" \
-       --version="\"${version}\"" \
-       --release="\"${release}\"" \
-       --wrapped-name="\"${wrapped_name}\"")
-    if test "x$JUST_PRINT" != "x"; then
-       echo "$es_name"
-       return
-    fi
     
     group=$($RPM -qp --nosignature --queryformat "%{Group}" $target_srpm)
     license=$($RPM -qp --nosignature --queryformat "%{License}" $target_srpm)
@@ -392,6 +381,10 @@ function wrap_srpm
 	--version="\"${version}\"" \
 	--release="\"${release}\"" \
 	--wrapped-name="\"${wrapped_name}\"" )
+    if test "x${JUST_PRINT}" != "x"; then
+       echo "$es_name"
+       return	
+    fi
 
     if test "x${DUMP_SPEC}" = "x"; then
 	spec="$TMPDIR/SPECS/${wrapped_name}.spec"

@@ -1,5 +1,41 @@
 2009-03-16  Masatake YAMATO  <yamato@redhat.com>
 
+	Introduce helpers directory and srpmix own
+	config directory. opt-rules uses them.
+	
+	* tests/Makefile.am (TESTS_ENVIRONMENT): Added
+	SRPMIX_SYSCONF_DIR.
+
+	* src/srpmix (opt_rules): Handle multi rules.
+
+	* src/srpmix-wrap (wrap_srpm): Reimplement
+	just-print.
+
+	* src/srpmix-ix (srpm_build): Use /dev/null
+	as output. See the comment about this modification.
+
+	* src/libsrpmix.sh.in (SRPMIX_SYSCONF_DIR): Set
+	/etc/srpmix as default value.
+	(SRPMIX_BUILD_OPT_RULES_DIR): New constant.
+	(SRPMIX_VAR_DIR): use @PACKAGE@.
+
+	* src/helpers/default.scm: New file.
+
+	* src/Makefile.am (dist_srpmixconf_DATA): Install
+	srpmix.cf to /etc/srpmix.
+
+	* src/helpers: 
+	* configure.ac (AC_OUTPUT[src/helpers/Makefile]): 
+	* misc/specs/srpmix.spec.in (%files/helpers): New directory.
+
+2009-03-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/Makefile.am (dist_check_SCRIPTS): Added 
+	00build-opt-rules.
+	(TESTS_ENVIRONMENT): Added SRPMIX_USR_DIR.
+
+	* tests/00build-opt-rules: New test.
+
 	* src/srpmix (opt_rules): Use build-opt-rules.
 	
 	* src/Makefile.am (helpersdir): New directory.
@@ -9,7 +45,7 @@
 	was called opt-rules.
 
 	* src/libsrpmix.sh.in (SRPMIX_HELPER_DIR, GOSH): 
-	New constatns.
+	New constants.
 
 2009-03-16  Masatake YAMATO  <yamato@redhat.com>
 

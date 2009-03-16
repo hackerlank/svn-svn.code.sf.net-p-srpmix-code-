@@ -59,7 +59,7 @@ AC_SUBST(SWRFPM, $RPM)
 AC_SUBST(SWRFBUILD, $RPMBUILD)
 
 AC_ARG_WITH([test-srpms],
-       [AS_HELP_STRING([--with-test-srpms='SRPMS...'],
+       [AS_HELP_STRING([--with-test-srpms='SRPMS0 ...'],
           [specify the space-separated list of src.rpms for test])],
           [])
 #
@@ -92,6 +92,7 @@ AC_OUTPUT([
            src/libsrpmix.sh
            src/Makefile
            src/plugins/Makefile
+           src/helpers/Makefile
            doc/Makefile
            utils/Makefile
            tests/Makefile

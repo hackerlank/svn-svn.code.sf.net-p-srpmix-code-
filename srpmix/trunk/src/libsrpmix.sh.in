@@ -28,10 +28,11 @@ SRPMIX_USR_DIR=${SRPMIX_USR_DIR:-"@datadir@/@PACKAGE@"}
 SRPMIX_SWRFS_DIR=${SRPMIX_SWRFS_DIR:-"${SRPMIX_USR_DIR}/swrfs"}
 SRPMIX_PLUGIN_DIR=${SRPMIX_PLUGIN_DIR:-"${SRPMIX_USR_DIR}/plugins"}
 SRPMIX_HELPER_DIR=${SRPMIX_HELPER_DIR:-"${SRPMIX_USR_DIR}/helpers"}
-SRPMIX_SYSCONF_DIR="@sysconfdir@"
+SRPMIX_SYSCONF_DIR=${SRPMIX_SYSCONF_DIR:-"@sysconfdir@/srpmix"}
+SRPMIX_BUILD_OPT_RULES_DIR=${SRPMIX_BUILD_OPT_RULES_DIR:-"${SRPMIX_SYSCONF_DIR}/build-opt-rules.d"}
 
 if test "`whoami`" = "root"; then
-SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"@localstatedir@/lib/srpmix"}
+SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"@localstatedir@/lib/@PACKAGE@"}
 else
 SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"$HOME/srpmix"}
 fi

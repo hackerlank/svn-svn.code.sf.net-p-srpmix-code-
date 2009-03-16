@@ -851,10 +851,16 @@ function srpm_build
     fi
 
 
-    LANG=C $RPMBUILD --define "_default_patch_fuzz 2"\
-                    --target=${arch}                \
-                    -bp                             \
-                    --nodeps "${rootdir}/${SPECDIR}/${spec_file}"
+    LANG=C $RPMBUILD --define "_default_patch_fuzz 2"		  \
+                    --target=${arch}				  \
+                    -bp						  \
+                    --nodeps "${rootdir}/${SPECDIR}/${spec_file}" \
+	> /dev/null
+    # 
+    # Above /dev/null hack is needed to avoid patch command 
+    # entering interactive mode.
+    #
+    
     status=$?
     echo ${status} > "${rootdir}/STATUS"
     chmod -R a+r "${rootdir}/${BUILDDIR}/${build_name}"

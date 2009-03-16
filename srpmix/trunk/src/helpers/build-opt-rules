@@ -1,15 +1,6 @@
-#!/bin/bash
+#!/bin/sh
 #|-*- scheme -*-|#
 :; exec gosh -- $0 "$@"
-(define rules
-  '(
-    (#/kernel-2\.4\.18-e\.[456].*/ "--target=ia64")
-    (#/kernel-2\.6\.18.*/ "--target=x86_64,i686"  )
-    (#/kernel-2\.4\.9.*/  "--target=i686" )
-    ;("gcc-2.3.9"  "--multi-targets")
-    ))
-
-
 (define (help status)
   (let1 port (if (eq? status 0) 
 		 (current-output-port)
@@ -17,6 +8,7 @@
     (display "Usage: \n")
     (display "	build-out-rules PKG-FILE\n" port)
     (display "	build-out-rules --help|-h\n" port)
+    (display "  Rules are read from stdin\n" port)
     (exit status)))
 
 (define-method object-apply ((str0 <string>) (str1 <string>))
@@ -35,7 +27,11 @@
 			(lambda (rule)
 			  (when ((car rule) pkg)
 			    (return (cadr rule))))
-			rules))
+			(let loop ((rules (list))
+				   (r (read)))
+			  (if (eof-object? r)
+			      rules
+			      (loop (cons r rules) (read))))))
 		     (return #f))
 	(if result
 	    (display result)
