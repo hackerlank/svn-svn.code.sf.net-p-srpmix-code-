@@ -594,6 +594,7 @@ function spec_file_hack
 	-e "s+\.\./\.\./BUILD/+../../${BUILDDIR}/+"    \
 	\
 	-e "s/Source29: kernel-%{kversion}-ppc64-debug.config/Source290: kernel-%{kversion}-ppc64-debug.config/" \
+        -e "s/Source46: kernel-%{kversion}-s390.config/Source460: kernel-%{kversion}-s390.config/" \
 	\
 	\
 	-e '/^%patch \+-P.*/b'                     \
