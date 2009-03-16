@@ -96,7 +96,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_sysconfdir}/srpmix
 %{_sysconfdir}/srpmix/srpmix.cf
-%{_sysconfdir}/srpmix/build-opt-rules/*.scm
+%{_sysconfdir}/srpmix/build-opt-rules.d/*.scm
 
 %{_sysconfdir}/cron.daily/srpmix.daily
 

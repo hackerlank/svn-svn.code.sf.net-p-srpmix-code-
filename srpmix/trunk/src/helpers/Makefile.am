@@ -5,4 +5,4 @@ dist_helpers_SCRIPTS =   \
         $(NULL)
 
 optrulesdir      = $(sysconfdir)/srpmix/build-opt-rules.d
-optrules_DATA    = default.scm
+dist_optrules_DATA    = default.scm
