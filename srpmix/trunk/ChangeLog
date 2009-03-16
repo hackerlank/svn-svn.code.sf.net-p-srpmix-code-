@@ -22,6 +22,8 @@
 	* srpmix-envelop:
 	* srpmix-build:
 	plugin package support
+	* src/:
+	use #!/bin/bash instead of #!/bin/sh
 
 2009-03-16  Masatake YAMATO <yamato@redhat.com>
 
