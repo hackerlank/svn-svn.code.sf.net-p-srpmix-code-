@@ -1215,7 +1215,7 @@ it's called with the same value of KEY.  All other times, the cached
 		;; HTMLIZE.EL
 		;; "<html>\n  "
 		;; XHTMLIZE.EL
-		"<html xmlns=\"http://www.w3.org/TR/xhtml1\" xml:lang=\"en\" lang=\"en\">"
+		"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">"
 		
 		?\n)
 	(plist-put places 'head-start (point-marker))
@@ -1371,8 +1371,8 @@ it's called with the same value of KEY.  All other times, the cached
 	(if (equal face-list '(linum))
 	    (funcall insert-text-with-id-method
 		     text
-		     (format "%s,%s,%d" 
-			     "xhtmlize"	;; should be customizable
+		     (format "%s:%s:%d" 
+			     "ground"	;; should be customizable
 			     (car (split-string (overlay-get o 'linum-str)))
 			     (overlay-start o))
 		     fstruct-list htmlbuf)
