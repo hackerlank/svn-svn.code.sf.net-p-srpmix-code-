@@ -1,3 +1,8 @@
+2009-03-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (main): Don't create TMPDIR
+	if JUST_PRINT is specified.
+
 2009-03-16  Masato Taruishi <taruishi@redhat.com>
 
 	* sramix-wrap:

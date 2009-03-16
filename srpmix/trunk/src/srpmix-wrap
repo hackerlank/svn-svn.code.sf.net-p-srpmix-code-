@@ -434,7 +434,8 @@ function main
     srpmix_verify_commands "${RPMBUILD}"
     parse_arguments "$@"
 
-    if test "x${DUMP_SPEC}" = "x"; then
+    if test "x${JUST_PRINT}" = "x" \
+	-o "x${DUMP_SPEC}" = "x"; then
 	TMPDIR=`mktemp -d`
 	trap cleanup 0
 	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
