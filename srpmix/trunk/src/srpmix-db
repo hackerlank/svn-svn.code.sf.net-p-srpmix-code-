@@ -6,6 +6,7 @@ RPM_PACKAGES=
 COMMAND=
 QUIET=
 
+OPT_NOPLUGIN=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -22,7 +23,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db -h|--help"
-    echo "  srpmix-db [--hardlink] [--root=ROOT] [--quite|-q] -i|--install SWRF..."
+    echo "  srpmix-db [--hardlink] [--noplugin] [--root=ROOT] [--quite|-q] -i|--install SWRF..."
     echo "  srpmix-db [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
     echo "  srpmix-db -l|--list"
     echo
@@ -78,6 +79,10 @@ function parse_arguments
 	        SRPMIX_DO_HARDLINK=yes
 		shift 1
 		;;
+	    --noplugin)
+	        OPT_NOPLUGIN=yes
+		shift 1
+                ;;
 	    *)
 		break
 		;;
@@ -157,10 +162,12 @@ function do_install
 	    fi
 	fi
 
-	if test x"$QUIET" != xyes; then
-	  echo "($count/$max) Running plugin for $pkgdir"
-	fi
-        srpmix-plugin "$pkgdir"
+        if test "x$OPT_NOPLUGIN" = "x"; then
+  	  if test x"$QUIET" != xyes; then
+	    echo "($count/$max) Running plugin for $pkgdir"
+	  fi
+          srpmix-plugin "$pkgdir"
+        fi
 
 	count=$(expr $count + 1)
     done
