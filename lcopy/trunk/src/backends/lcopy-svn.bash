@@ -36,9 +36,11 @@ function svn_checkout_parse_cmdline
 	return 1
     fi
 
-    # TODO: Handle
-    # svn co svn://svn@svn.a-k-r.org/akr/wfo/trunk wfo
     if echo "$REPO" | grep -E -e "^http[s]?://" > /dev/null 2>&1; then
+	:
+    elif echo "$REPO" | grep -E -e "^svn://" > /dev/null 2>&1; then
+	# e.g.
+        # svn co svn://svn@svn.a-k-r.org/akr/wfo/trunk wfo
 	:
     else
 	echo "unknown repository specification: $REPO" 2>&1
@@ -56,7 +58,7 @@ function svn_checkout_parse_cmdline
 function svn_checkout_print_usage
 {
     echo "	" svn "checkout|co" REPOS PACKAGEDIR
-    echo "	" "REPOS => http://... or https://..."
+    echo "	" "REPOS => http://..., https://..., or svn://..."
 }
 
 function svn_update

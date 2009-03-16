@@ -141,12 +141,22 @@ function main
 
 function do_checkout
 {
-    sudo -H -u lcopy $(lcopy_checkout "$VCS" "$REPO" "$BRANCH" "$MODULE")
+    local cmd
+    
+    cmd=$(lcopy_checkout "$VCS" "$REPO" "$BRANCH" "$MODULE")
+    if test -n "${cmd}"; then
+	sudo -H -u lcopy ${cmd}
+    fi
 }
 
 function do_checkout_after
 {
-    sudo -H -u lcopy $(lcopy_checkout_after "$VCS" "$REPO" "$BRANCH" "$MODULE")
+    local cmd
+
+    cmd=$(lcopy_checkout_after "$VCS" "$REPO" "$BRANCH" "$MODULE")
+    if test -n "${cmd}"; then
+	sudo -H -u lcopy ${cmd}
+    fi
 }
 
 function make_specs
