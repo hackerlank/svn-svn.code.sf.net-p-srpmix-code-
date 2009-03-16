@@ -24,13 +24,13 @@ done
 #TODO: test by configure?
 #srpmix --output-format=swrf --name=yum
 find ${TESTDIR} -name '*.swrf' | xargs -n1 --verbose rpm -qpl
-#find ${TESTDIR} -name '*.swrf' | while read swrf
-#do
-#  if rpm -qpl $swrf | grep SRPMIX > /dev/null; then
-#    srpmix-build --output-format=swrf --type=plugin --output-dir=${TESTDIR} --swrf=$swrf
-#    srpmix-build --output-format=rpm --type=plugin --output-dir=${TESTDIR} --swrf=$swrf
-#  fi
-#done
+find ${TESTDIR} -name '*.swrf' | while read swrf
+do
+  if rpm -qpl $swrf | grep SRPMIX > /dev/null; then
+    srpmix-build --output-format=swrf --type=plugin --output-dir=${TESTDIR} --swrf=$swrf
+    srpmix-build --output-format=rpm --type=plugin --output-dir=${TESTDIR} --swrf=$swrf
+  fi
+done
 
 for srpm in $TEST_SRPMS
 do
