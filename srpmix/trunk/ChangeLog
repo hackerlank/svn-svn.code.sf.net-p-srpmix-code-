@@ -1,3 +1,10 @@
+2009-03-16  Masato Taruishi <taruishi@redhat.com>
+
+	* sramix-wrap:
+	* srpmix-envelop:
+	* srpmix-build:
+	plugin package support
+
 2009-03-16  Masatake YAMATO <yamato@redhat.com>
 
 	* src/srpmix-ix (spec_file_hack):  Added an extra

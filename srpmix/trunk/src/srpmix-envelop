@@ -38,15 +38,13 @@ try_source ${LIBSRPMIX}
 OUTPUTDIR=
 TMPDIR=
 DUMP_SPEC=
-ALLOW_OVERWRITE=
-
 
 function print_usage
 {
 	echo "Usage: "
 	echo "  srpmix-envelop [--help|-h]"
 	echo "  srpmix-envelop [--dump-spec] SWRF..."
-	echo "  srpmix-envelop [--output-dir=OUTPUTDIR] [--release=RELEASE] [--allow-overwrite] [SWRF...]"
+	echo "  srpmix-envelop [--output-dir=OUTPUTDIR] [--release=RELEASE] [SWRF...]"
 	echo ""
 	echo "  If SWRF is not given, standard input is"
 	echo "  used for the list of source pacakges."
@@ -76,9 +74,6 @@ function parse_arguments
 		;;
 	    --dump-spec)
 	        DUMP_SPEC=1
-		;;
-	    --allow-overwrite)
-	        ALLOW_OVERWRITE=1
 		;;
 	    *)
 		break
@@ -130,15 +125,6 @@ function envelop_swrf
     n_filenames=$(find ${OUTPUTDIR} -name "${filename}" \
 	| grep -v 'swrf\.src\.rpm' \
 	| wc -l)
-    if test $n_filenames != 0; then
-	if test -z "$ALLOW_OVERWRITE"; then
-	    filename="${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm"
-            echo ";; fille matching to \"$filename\" already exists" 1>&2
-	    find ${OUTPUTDIR} -name "${filename}" 1>&2
-	    echo "$es_name"
-            return
-	fi
-    fi
     
     license=$($SWRFPM -qp --nosignature --queryformat "%{License}" $target_swrf)
 

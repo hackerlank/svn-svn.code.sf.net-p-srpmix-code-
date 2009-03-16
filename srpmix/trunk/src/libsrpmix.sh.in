@@ -470,8 +470,9 @@ function create_swrf
 	#	check_pvr_output_dir "${pvr}"
 	#fi
 	
-	srpmix-wrap $wrap_opts $srpm \
-	    || exit 1
+	wraplog=$(srpmix-wrap $wrap_opts $srpm)
+        if test "$?" != "0"; then exit 1; fi
+        file=$(echo $wraplog | tail -1 | sed 's/.*:file "\(.*\)".*/\1/')
 
 	$SWRFBUILD --define "_rpmdir $workdir/RPMS"       \
 	           --define "_srcrpmdir $workdir/SRPMS"   \
@@ -479,7 +480,7 @@ function create_swrf
 	  	   --define "_buildrootdir $workdir/BUILDROOT" \
                    --define "_specdir $workdir/SPECS"     \
 	           --define "_sourcedir $workdir/SOURCES" \
-	           --rebuild -ba ${pvr}-srpmix-*.swrf.src.rpm \
+	           --rebuild -ba ${file} \
             || exit 2
     done
 

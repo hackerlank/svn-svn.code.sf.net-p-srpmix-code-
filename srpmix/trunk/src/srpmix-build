@@ -19,6 +19,7 @@ RELEASE=
 OUTPUT_DIR=.
 OUTPUT_FORMAT=rpm
 DEBUG=""
+OPT_TYPE=core
 
 set -e
 
@@ -35,7 +36,11 @@ function print_usage
     echo "               [--target=ARCH]"
     echo "               [--multi-targets]"
     echo "               [--keep-original]"
-    echo "               --srpm=SRPM"
+    echo "               [--enable=<plugins>]"
+    echo "               [--disable=<plugins>]"
+    echo "               [--type=<core|plugin>]"
+    echo "               [--plugin-name=<name>]"
+    echo "               --srpm=SRPM|--swrf=SWRF"
     echo
     echo "ARCH: i386(not for kenel), i686, x86_64, ia64, or ppc64"
 #    TODO: Multi targets
@@ -62,12 +67,33 @@ function parse_arguments
 	    --srpm=*)
 	        TARGET_SRPM="$(echo $1 | sed 's/--srpm=//')"
 		;;
+            --swrf=*)
+                TARGET_SWRF="$(echo $1 | sed 's/--swrf=//')"
+                ;;
 	    --release=*)
 		RELEASE="$(echo $1 | sed 's/--release=//')"
 		SRPMIX_PKG_RELEASE=$RELEASE
 	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
 	        ;;
+            --enable=*)
+                ENABLE="$(echo $1 | sed 's/--enable=//')"
+                SRPMIX_ENABLE_PLUGIN=$ENABLE
+                WRAP_OPTS="$WRAP_OPTS --enable=$ENABLE"
+                ;;
+            --disable=*)
+                DISABLE="$(echo $1 | sed 's/--disable=//')"
+                SRPMIX_DISABLE_PLUGIN=$DISABLE
+                WRAP_OPTS="$WRAP_OPTS --disable=$DISABLE"
+                ;;
+            --plugin-name=*)
+                PLUGIN_NAME="$(echo $1 | sed 's/--plugin-name=//')"
+                WRAP_OPTS="$WRAP_OPTS --plugin-name=$PLUGIN_NAME"
+                ;;
+            --type=*)
+                OPT_TYPE="$(echo $1 | sed 's/--type=//')"
+                WRAP_OPTS="$WRAP_OPTS --type=$OPT_TYPE"
+                ;;
 	    --hardlink)
 	        export SRPMIX_DO_HARDLINK=yes
 	        ;;
@@ -114,17 +140,32 @@ function parse_arguments
 	srpmix_abort "too many arguments"
     fi
 
-    if test -z "${TARGET_SRPM}"; then
+    if test -z "${TARGET_SRPM}" && test -z "${TARGET_SWRF}"; then
 	print_usage 1>&2
-	srpmix_abort "Specify --srpm"
+	srpmix_abort "Specify --srpm or --swrf"
     fi
 
-    if srpmix_can_ln "${TARGET_SRPM}" ${MY_TMPDIR}; then
-	ln ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
-    else
-	cp ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
+    if test -n "${TARGET_SRPM}"; then
+        if test "x$OPT_TYPE" = "xplugin"; then
+            srpmix_abort "can't specify --srpm for plugin type"
+        fi
+        if srpmix_can_ln "${TARGET_SRPM}" ${MY_TMPDIR}; then
+  	    ln ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
+        else
+  	    cp ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
+        fi
+        TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
     fi
-    TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
+
+    if test -n "${TARGET_SWRF}"; then
+        if srpmix_can_ln "${TARGET_SWRF}" ${MY_TMPDIR}; then
+            ln ${TARGET_SWRF} ${MY_TMPDIR}/$(basename ${TARGET_SWRF})
+        else
+            cp ${TARGET_SWRF} ${MY_TMPDIR}/$(basename ${TARGET_SWRF})
+        fi
+        TARGET_SWRF=${MY_TMPDIR}/$(basename ${TARGET_SWRF})
+    fi
+
 }
 
 function check_pvr_rpm
@@ -165,8 +206,8 @@ function envelope_swrf_by_rpm
 	enveloped_name=$(srpmix_build_enveloped_name "$p")
 
 	# TODO: Return status
-	srpmix-envelop $ENVELOP_OPTS $swrf
-	p=$(ls ${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm | grep -v '\.swrf\.')
+	srpmix-envelop $ENVELOP_OPTS --output-dir=${MY_TMPDIR} $swrf
+	p=$(ls ${MY_TMPDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm | grep -v '\.swrf\.')
 	$RPMBUILD --define "_rpmdir $MY_TMPDIR/RPMS"     \
 	          --define "_srcrpmdir $MY_TMPDIR/SRPMS" \
 	          --define "_builddir $MY_TMPDIR/BUILD"  \
@@ -188,7 +229,7 @@ function main
 #   all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
 
     MY_TMPDIR=`mktemp -d`
-    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
+    trap "/bin/rm -rf $MY_TMPDIR" 0    
 
     
     parse_arguments "$@"
@@ -197,22 +238,20 @@ function main
 	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
 
-    cd $MY_TMPDIR
-    mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES
-    
+    ( cd $MY_TMPDIR && mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES )
     
     # create_swrf <workdir> <wrap_opts> [<target srpms>...]
-    create_swrf "$MY_TMPDIR" "$WRAP_OPTS" $TARGET_SRPM
+    create_swrf "$MY_TMPDIR" "$WRAP_OPTS --output-dir=${MY_TMPDIR}" $TARGET_SRPM $TARGET_SWRF
 
-    if test ! -d RPMS/noarch; then
+    if test ! -d ${MY_TMPDIR}/RPMS/noarch; then
 	exit 3
     fi
 
-    files=$(find RPMS/noarch -name '*.swrf')
+    files=$(find ${MY_TMPDIR}/RPMS/noarch -name '*.swrf')
     case "$OUTPUT_FORMAT" in
       rpm)
         envelope_swrf $files
-        files=$(find RPMS/noarch -name '*.noarch.rpm')
+        files=$(find ${MY_TMPDIR}/RPMS/noarch -name '*.noarch.rpm')
       ;;
     esac
 

@@ -41,14 +41,17 @@ OUTPUTDIR=
 TMPDIR=
 JUST_PRINT=
 DUMP_SPEC=
-ALLOW_OVERWRITE=
+OPT_TYPE=core
+OPT_PLUGIN_NAME=plugins
 
 function print_usage
 {
     echo "Usage: "
     echo "  srpmix-wrap [--help|-h]"
-    echo "  srpmix-wrap [--dump-spec|--just-print] [SRPMS...]"
-    echo "  srpmix-wrap [--output-dir=OUTPUTDIR] [--release=RELEASE] [--allow-overwrite] [SRPMS...]"
+    echo "  srpmix-wrap [--dump-spec|--just-print] [--type=core] [SRPMS...]"
+    echo "  srpmix-wrap [--output-dir=OUTPUTDIR] [--release=RELEASE] [--type=core] [SRPMS...]"
+    echo "  srpmix-wrap [--dump-spec|--just-print] [--type=plugin] [SWRFS...]"
+    echo "  srpmix-wrap [--output-dir=OUTPUTDIR] [--release=RELEASE] --type=plugin [--plugin-name=<name>] [--enable=<plugins>...] [--disable=<plugins>...] [SWRFS...]"
     echo ""
     echo "  If SRPMS is not given, standard input is"
     echo "  used for the list of source packages."
@@ -76,14 +79,23 @@ function parse_arguments
             --release=*)
 	        SRPMIX_PKG_RELEASE=$(echo $1 | sed 's/--release=//')
 		;;
-	    --just-print)
-	        JUST_PRINT=1
-		;;
 	    --dump-spec)
 	        DUMP_SPEC=1
 		;;
-	    --allow-overwrite)
-	        ALLOW_OVERWRITE=1
+	    --just-print)
+	        JUST_PRINT=1
+		;;
+            --type=*)
+	        OPT_TYPE=$(echo $1 | sed 's/--type=//')
+		;;
+            --enable=*)
+	        SRPMIX_ENABLE_PLUGIN=$(echo $1 | sed 's/--enable=//')
+		;;
+            --disable=*)
+	        SRPMIX_ENABLE_PLUGIN=$(echo $1 | sed 's/--disable=//')
+		;;
+            --plugin-name=*)
+	        OPT_PLUGIN_NAME=$(echo $1 | sed 's/--plugin-name=//')
 		;;
 	    *)
 		break
@@ -102,12 +114,11 @@ function parse_arguments
     fi
 
     if test "x${JUST_PRINT}" != "x" \
-	-a "x${DUMP_SPEC}" != "x"; then
-	print_usage 1>&2
-	srpmix_abort "Specify either --just-print or --dump-spec"
+       -a "x${DUMP_SPEC}" != "x"; then
+       print_usage 1>&2
+       srpmix_abort "Specify either --just-print or --dump-spec"
     fi
 
-    
     if test "x$OUTPUTDIR" = "x"; then
 	OUTPUTDIR=.
     fi
@@ -116,49 +127,33 @@ function parse_arguments
     fi
 }
 
-# A src.rpm is.
-# => src.rpm for Foo is wrapped to srpmixed src.rpm by this function.
-# ==> srpmixed rpm is created from srpmixed src.rpm by rpmbuild.
-# ===> By Installing srpmixed rpm source files of Foo are deployed as if src.rpm for Foo is deployed 
-#      by srpmix command.
-#
-# wrap_srpm srpm-file
-#
-function wrap_srpm
+function create_core_spec
 {
-    target_srpm=$1
-    spec=
-    wrapped_name=
-    es_name=
+    local target_srpm=$1
+    local spec=
+    local wrapped_name=
+    local es_name=
 
     pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_srpm)
     package=$(echo $pvrd | cut -d' ' -f1)
     version=$(echo $pvrd | cut -d' ' -f2)
     release=$(echo $pvrd | cut -d' ' -f3)
     description="$(echo $pvrd | cut -d' ' -f4-)"
+    wrapped_name=$(srpmix_build_wrapped_name "$package" "$version" "$release")
     if test "x$package" = "x"; then
         echo "warning: failed to parse $target_srpm: ignored" 1>&2
         return
     fi
-    
-    wrapped_name=$(srpmix_build_wrapped_name "$package" "$version" "$release")
+
     es_name=$(es_print srpmix-wrap name\
-	--target-srpm="\"$(basename $target_srpm)\"" \
-	--package="\"${package}\"" \
-	--version="\"${version}\"" \
-	--release="\"${release}\"" \
-	--wrapped-name="\"${wrapped_name}\"")
+       --target-srpm="\"$(basename $target_srpm)\"" \
+       --package="\"${package}\"" \
+       --version="\"${version}\"" \
+       --release="\"${release}\"" \
+       --wrapped-name="\"${wrapped_name}\"")
     if test "x$JUST_PRINT" != "x"; then
-	echo "$es_name"
-	return
-    fi
-    
-    if test -f ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm; then
-	if test -z "$ALLOW_OVERWRITE"; then
-            echo \;\; ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm already exists 1>&2
-	    echo "$es_name"
-            return
-	fi
+       echo "$es_name"
+       return
     fi
     
     group=$($RPM -qp --nosignature --queryformat "%{Group}" $target_srpm)
@@ -175,17 +170,7 @@ function wrap_srpm
     srcdir=$(srpmix_srcdir $package $version $release)
     installdir=$(srpmix_installdir $package $version $release)
 
-    if test "x${DUMP_SPEC}" = "x"; then
-	spec="$TMPDIR/SPECS/${wrapped_name}.spec"
-    else
-	spec="/dev/stdout"
-	if test ! -w "${spec}"; then
-	    # ???
-	    spec="/dev/tty"
-	fi
-    fi
-    
-    cat > "$spec" <<EOF
+    cat <<EOF
 Summary: Source Information for package $package ($version-$release)
 Name: ${wrapped_name}
 Version: $SRPMIX_PKG_VERSION
@@ -266,20 +251,182 @@ rm -rf \$RPM_BUILD_ROOT
 
 EOF
 
+}
+
+function create_plugin_spec
+{
+    target_swrf=$1
+    plugins_name=$2
+
+    pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_swrf)
+    package=$(echo $pvrd | cut -d' ' -f1)
+    version=$(echo $pvrd | cut -d' ' -f2)
+    release=$(echo $pvrd | cut -d' ' -f3)
+    description="$(echo $pvrd | cut -d' ' -f4-)"
+    installdir=$(dirname $($RPM -qpl "$target_swrf"  | head -1))
+
+    if test "x$package" = "x"; then
+        echo "warning: failed to parse $target_swrf: ignored" 1>&2
+        return
+    fi
+
+    plugin_package_name="$package"-$plugins_name
+
+    group=$($RPM -qp --nosignature --queryformat "%{Group}" $target_swrf)
+    license=$($RPM -qp --nosignature --queryformat "%{License}" $target_swrf)
+    arch=$($RPM -qp --nosignature --queryformat "%{ARCH}" $target_swrf)
+    if test "x$buildarch" = "x(none)"; then
+        buildarch="noarch"
+    fi
+
+    for plugin in `list_plugins`
+    do
+      enable_plugin="$enable_plugin,$(basename $plugin)"
+    done
+    if test "x$enable_plugin" != "x"; then
+      enable_plugin="--enable='$enable_plugin'"
+    fi
+
+    cat <<EOF
+Summary: $plugins_name information for package $package
+Name: ${plugin_package_name}
+Version: $SRPMIX_PKG_VERSION
+Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
+Source: $(basename $target_swrf)
+Autoreq: 0
+BuildRequires: rsync srpmix
+Buildarch: $arch
+
+Buildroot: %{_tmppath}/%{name}-root
+Group: $group
+License: $license
+
+%define __os_install_post true
+
+%description
+$description
+
+%prep
+if test -d %{_builddir}/%{name}; then 
+  chmod -R u+w  %{_builddir}/%{name}
+  rm -rf %{_builddir}/%{name}
+fi
+mkdir -p %{_builddir}/%{name}
+srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{_sourcedir}/`basename $target_swrf`
+
+%build
+touch %{_builddir}/%{name}/.run-plugin
+sleep 1
+srpmix-plugin $enable_plugin %{_builddir}/%{name}/$SRPMIX_VAR_DIR/$installdir
+
+%install
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$installdir
+
+from=%{_builddir}/%{name}/$SRPMIX_VAR_DIR
+to=\$RPM_BUILD_ROOT
+transfer_cmd=
+if test \$(stat --format="%D" \$from) = \$(stat --format="%D" \$to); then
+   transfer_cmd="cp -l"
+else
+   transfer_cmd="cp"
+fi
+( cd \$from; find . -newer %{_builddir}/%{name}/.run-plugin -not -type d | 
+while read f; do
+  install -d \$to/\$(dirname \$f)
+  \$transfer_cmd \$f \$to/\$f
+done )
+
+rm -rf \$to/db
+find \$to -name '*-log.es' | xargs rm
+
+%clean
+chmod -R u+w \$RPM_BUILD_ROOT
+rm -rf \$RPM_BUILD_ROOT
+
+%files
+/${SRPMIX_SOURCES_RDIR}/*/*/*/
+
+%changelog
+* Sat Jun  2 2007 SRPMIX WRAP <consulting-jp@redhat.com> $package-$version-$release
+- Automatically generated.
+
+EOF
+
+}
+
+
+# A src.rpm is.
+# => src.rpm for Foo is wrapped to srpmixed src.rpm by this function.
+# ==> srpmixed rpm is created from srpmixed src.rpm by rpmbuild.
+# ===> By Installing srpmixed rpm source files of Foo are deployed as if src.rpm for Foo is deployed 
+#      by srpmix command.
+#
+# wrap_srpm srpm-file
+#
+function wrap_srpm
+{
+    target=$1
+    spec=
+    wrapped_name=
+    es_name=
+
+    pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target)
+    package=$(echo $pvrd | cut -d' ' -f1)
+    version=$(echo $pvrd | cut -d' ' -f2)
+    release=$(echo $pvrd | cut -d' ' -f3)
+    description="$(echo $pvrd | cut -d' ' -f4-)"
+
+    case "$OPT_TYPE" in
+        core)
+            wrapped_name=$(srpmix_build_wrapped_name "$package" "$version" "$release")
+            ;;
+        plugin)
+            wrapped_name="$package"-"$OPT_PLUGIN_NAME"
+            ;;
+    esac
+
+    es_name=$(es_print srpmix-wrap name\
+	--target-srpm="\"$(basename $target)\"" \
+	--package="\"${package}\"" \
+	--version="\"${version}\"" \
+	--release="\"${release}\"" \
+	--wrapped-name="\"${wrapped_name}\"" )
+
+    if test "x${DUMP_SPEC}" = "x"; then
+	spec="$TMPDIR/SPECS/${wrapped_name}.spec"
+    else
+	spec="/dev/stdout"
+	if test ! -w "${spec}"; then
+	    # ???
+	    spec="/dev/tty"
+	fi
+    fi
+
+    case "$OPT_TYPE" in
+        core)
+	    create_core_spec "$target" > "$spec"
+            ;;
+        plugin)
+	    create_plugin_spec "$target" "$OPT_PLUGIN_NAME" > "$spec"
+            ;;
+    esac
+
     if test "x${DUMP_SPEC}" != "x"; then
 	printf "# "
 	echo "$es_name"
 	return
     fi
 
-    cp $target_srpm $TMPDIR/SOURCES/
+    cp $target $TMPDIR/SOURCES/
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
-    mv $TMPDIR/SRPMS/${wrapped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm "${OUTPUTDIR}"
-    rm $TMPDIR/SOURCES/`basename $target_srpm`
+    wrapped_srpm=$(/bin/ls $TMPDIR/SRPMS/*-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm)
+    mv "${wrapped_srpm}" "${OUTPUTDIR}"
+    rm $TMPDIR/SOURCES/`basename $target`
     echo "$es_name"
 
     es_print srpmix-wrap done \
-	--file="\"$(ls ${OUTPUTDIR}/${wrapped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm)\""
+	--file="\"$(ls ${OUTPUTDIR}/$(basename ${wrapped_srpm}))\""
 }
 
 function main
@@ -287,8 +434,7 @@ function main
     srpmix_verify_commands "${RPMBUILD}"
     parse_arguments "$@"
 
-    if test "x${JUST_PRINT}" = "x" \
-	-o "x${DUMP_SPEC}" = "x"; then
+    if test "x${DUMP_SPEC}" = "x"; then
 	TMPDIR=`mktemp -d`
 	trap cleanup 0
 	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
