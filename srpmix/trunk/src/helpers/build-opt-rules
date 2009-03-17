@@ -32,8 +32,6 @@
 			  (if (eof-object? r)
 			      rules
 			      (loop (cons r rules) (read))))))
-		     (return #f))
-	(if result
-	    (display result)
-	    (exit 1))
+		     (return ""))
+	(display result)
 	(exit 0))))))
