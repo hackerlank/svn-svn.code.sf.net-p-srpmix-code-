@@ -27,8 +27,7 @@ set -e
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-build [--hardlink]"
-    echo "               [--output-dir=DIR]"
+    echo "  srpmix-build [--output-dir=DIR]"
     echo "               [--output-format=<rpm|swrf>]"
     echo "               [--release=RELEASE]"
     echo "               [--build-requires=BUILD_REQUIRES]"
@@ -99,9 +98,6 @@ function parse_arguments
                 OPT_TYPE="$(echo $1 | sed 's/--type=//')"
                 WRAP_OPTS="$WRAP_OPTS --type=$OPT_TYPE"
                 ;;
-	    --hardlink)
-	        export SRPMIX_DO_HARDLINK=yes
-	        ;;
 	    --ignore-error)
 	        export SRPMIX_IGNORE_ERROR=yes
 		;;
