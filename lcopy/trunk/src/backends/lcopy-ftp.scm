@@ -39,7 +39,3 @@
 	 (write (ftp-get conn (car sorted)))
 	 (write "failed to get"))))
  :passive passive?)
-
-		 
-
-			  
