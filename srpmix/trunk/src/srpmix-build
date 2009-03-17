@@ -31,6 +31,7 @@ function print_usage
     echo "               [--output-dir=DIR]"
     echo "               [--output-format=<rpm|swrf>]"
     echo "               [--release=RELEASE]"
+    echo "               [--build-requires=BUILD_REQUIRES]"
     echo "               [--debug]"
     echo "               [--ignore-error]"
     echo "               [--target=ARCH]"
@@ -75,6 +76,10 @@ function parse_arguments
 		SRPMIX_PKG_RELEASE=$RELEASE
 	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
+	        ;;
+	    --build-requires=*)
+		BUILD_REQUIRES="$(echo $1 | sed 's/--build-requires=//')"
+	        WRAP_OPTS="$WRAP_OPTS --build-requires=$BUILD_REQUIRES"
 	        ;;
             --enable=*)
                 ENABLE="$(echo $1 | sed 's/--enable=//')"
