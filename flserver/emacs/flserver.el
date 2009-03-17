@@ -85,6 +85,12 @@
 (require 'linum)
 
 ;;
+;; Cssize
+;;
+(require 'dired)
+(require 'ccsize)
+
+;;
 ;; xHtmlize core
 ;;
 (require 'xhtmlize)
@@ -138,13 +144,25 @@
   (linum-mode)
   (let ((start (current-time)))
     (flserver-log 
-     (format "(start :time \"%s\" :input \"%s\" output: \"%s\")\n" 
+     (format "(xhtml-start :time \"%s\" :input \"%s\" output: \"%s\")\n" 
 	     (current-time-string start) input output))
     (xhtmlize-file input output)
     (flserver-log 
-     (format "(end :cost %s)\n" 
+     (format "(xhtml-end :cost %s)\n" 
 	     (- (float-time (current-time)) 
 		(float-time start) )))))
+
+(defun flserver-cssize (face output)
+  (let ((start (current-time)))
+    (flserver-log 
+     (format "(css-start :time \"%s\" :face \"%s\" output: \"%s\")\n" 
+	     (current-time-string start) face output))
+    (cssize-file face output)
+    (flserver-log 
+     (format "(css-end :cost %s)\n" 
+	     (- (float-time (current-time)) 
+		(float-time start) )))))
+
 
 (server-start)
 (while t

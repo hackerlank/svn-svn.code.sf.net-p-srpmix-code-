@@ -11,6 +11,7 @@
   (use rfc.uri)
 
   (use srpmix.config)
+  (use srpmix.cssize)
 
 
   (export run-dired)
@@ -18,6 +19,16 @@
 (select-module srpmix.dired)
 
 (random-source-randomize! default-random-source)
+
+(define faces '(
+		default
+		;;
+		dired-header
+		dired-directory
+		dired-marked
+		dired-symlink
+		;;
+		))
 
 (define css  "<!-- 
       body { 
@@ -35,27 +46,6 @@
         /* text-decoration: underline; */
         background-color: darkolivegreen;
       } 
-
-      .dired-header {
-        /* dired-header */
-        color: palegreen;
-      }
-      .dired-directory {
-        /* dired-directory */
-        color: #0000ff;
-        font-weight: bold;
-      }
-
-      .dired-marked {
-        /* dired-marked */
-        color: magenta;
-      }
-
-      .dired-symlink {
-        /* dired-symlink */
-        color: cyan;
-        font-weight: bold;
-      }
     -->")
 
 ;; TODO: Embed hrefs
@@ -140,11 +130,16 @@
 	  (html-doctype)
 	  (html:html
 	   (html:head
-	    (html:title  path-in-chroot)
-	    (html:style :type "text/css"
-			css
-			))
-
+	    (list 
+	     (html:title  path-in-chroot)
+	     
+	     (map (lambda (f)
+		    (ccsize f err-return)
+		    (html:link :rel "stylesheet" :type "text/css"
+			       :href "TODOTODO")
+		    ) faces)
+	     ))
+	   
 	   (html:body
 	    (html:pre 
 	     (list
