@@ -1,3 +1,7 @@
+2009-03-17  Masato Taruishi <taruishi@redhat.com>
+
+	* srpmix-wrap: add --build-requires option.
+
 2009-03-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/build-opt-rules (main): Return 0

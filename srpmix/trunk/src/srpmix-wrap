@@ -41,6 +41,7 @@ OUTPUTDIR=
 TMPDIR=
 JUST_PRINT=
 DUMP_SPEC=
+BUILD_REQUIRES="srpmix, rsync"
 OPT_TYPE=core
 OPT_PLUGIN_NAME=plugins
 
@@ -48,10 +49,13 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-wrap [--help|-h]"
-    echo "  srpmix-wrap [--dump-spec|--just-print] [--type=core] [SRPMS...]"
-    echo "  srpmix-wrap [--output-dir=OUTPUTDIR] [--release=RELEASE] [--type=core] [SRPMS...]"
-    echo "  srpmix-wrap [--dump-spec|--just-print] [--type=plugin] [SWRFS...]"
-    echo "  srpmix-wrap [--output-dir=OUTPUTDIR] [--release=RELEASE] --type=plugin [--plugin-name=<name>] [--enable=<plugins>...] [--disable=<plugins>...] [SWRFS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--dump-spec|--just-print] [--type=core] [SRPMS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--output-dir=OUTPUTDIR] [--release=RELEASE] [--type=core] [SRPMS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--dump-spec|--just-print] [--type=plugin] [SWRFS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--output-dir=OUTPUTDIR] [--release=RELEASE] --type=plugin [--plugin-name=<name>] [--enable=<plugins>...] [--disable=<plugins>...] [SWRFS...]"
+    echo ""
+    echo "Options:"
+    echo "  --build-requires <requirements>"
     echo ""
     echo "  If SRPMS is not given, standard input is"
     echo "  used for the list of source packages."
@@ -78,6 +82,10 @@ function parse_arguments
 		;;
             --release=*)
 	        SRPMIX_PKG_RELEASE=$(echo $1 | sed 's/--release=//')
+		;;
+            --build-requires=*)
+	        arg=$(echo $1 | sed 's/--build-requires=//')
+		BUILD_REQUIRES="${BUILD_REQUIRES}, $arg"
 		;;
 	    --dump-spec)
 	        DUMP_SPEC=1
@@ -166,8 +174,7 @@ Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
 Source: `basename $target_srpm`
 Autoreq: 0
-BuildRequires: srpmix
-BuildRequires: rsync
+BuildRequires: $BUILD_REQUIRES
 Buildarch: $buildarch
 
 Buildroot: %{_tmppath}/%{name}-root
@@ -283,7 +290,7 @@ Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
 Source: $(basename $target_swrf)
 Autoreq: 0
-BuildRequires: rsync srpmix
+BuildRequires: $BUILD_REQUIRES
 Buildarch: $arch
 
 Buildroot: %{_tmppath}/%{name}-root
