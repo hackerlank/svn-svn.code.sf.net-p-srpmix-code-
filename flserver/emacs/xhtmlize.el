@@ -34,6 +34,7 @@
 
 (require 'cl)
 (require 'cssize)
+(require 'assoc)
 
 ;; TODO: THIS SHOULD BE REMOVED.
 (require 'linum)
@@ -382,7 +383,7 @@ output.")
 
 (defun xhtmlize-overlays-between (p q)
   (sort (xhtmlize-fold (lambda (kar kdr)
-			(if (xhtmlize-acceptable-overlayp kar)
+			(if (xhtmlize-zero-width-overlay-acceptable-p kar)
 			    (cons kar kdr)
 			  kdr))
 		(overlays-in p q)
@@ -390,16 +391,13 @@ output.")
 	(lambda (o0 o1)
 	  (< (overlay-start o0) (overlay-start o1)))))
 
-(defun xhtmlize-acceptable-overlayp (o)
-  (or (overlay-get o 'linum-str)))
-
 (defun xhtmlize-next-change (pos prop &optional limit)
   (let ((r0 (next-char-property-change pos limit))
 	(r1 (next-single-char-property-change pos prop nil limit)))
     (if (< r0 r1)
 	(let ((ovs (xhtmlize-overlays-between r0 r1)))
 	  (let ((r00 (some (lambda (o) 
-			     (and (xhtmlize-acceptable-overlayp o)
+			     (and (xhtmlize-zero-width-overlay-acceptable-p o)
 				  (overlay-start o))
 			     )
 			   ovs)))
@@ -901,7 +899,7 @@ property and by buffer overlays that specify `face'."
 ;; `xhtmlize-buffer-1' calls a number of "methods", which indirect to
 ;; the functions that depend on `xhtmlize-output-type'.  The currently
 ;; used methods are `doctype', `insert-head', `body-tag', and
-;; `insert-text'.  Not all output types define all methods.
+;; `insert-text-with-id'.  Not all output types define all methods.
 ;;
 ;; Methods are called either with (xhtmlize-method METHOD ARGS...) 
 ;; special form, or by accessing the function with
@@ -1006,17 +1004,7 @@ it's called with the same value of KEY.  All other times, the cached
 (defun xhtmlize-css-make-cache-on-disk (face dir)
   (let ((file (concat (cssize-clean-up-face-name face) ".css")))
     (let ((path (concat (file-name-as-directory dir) file)))
-      (save-excursion
-	(let ((buffer  (find-file-noselect path)))
-	  (with-current-buffer buffer
-	    (erase-buffer)
-	    (insert (cssize-face-to-css face))
-	    (save-buffer))
-	  (kill-buffer buffer))))))
-
-(defun xhtmlize-external-css-insert-text (text fstruct-list buffer)
-  (xhtmlize-css-insert-text text fstruct-list buffer)
-  )
+      (ccsize-file face file))))
 
 (defun xhtmlize-external-css-insert-text-with-id (text id fstruct-list buffer)
   (xhtmlize-css-insert-text-with-id text id fstruct-list buffer)
@@ -1086,10 +1074,6 @@ it's called with the same value of KEY.  All other times, the cached
   (insert xhtmlize-hyperlink-style
 	  "    -->\n    </style>\n"))
 
-(defun xhtmlize-css-insert-text (text fstruct-list buffer)
-  (xhtmlize-css-insert-text-with-id text nil fstruct-list buffer)
-  )
-
 (defun xhtmlize-css-insert-text-with-id (text id fstruct-list buffer)
   ;; Insert TEXT colored with FACES into BUFFER.  In CSS mode, this is
   ;; easy: just nest the text in one <span class=...> tag for each
@@ -1118,7 +1102,7 @@ it's called with the same value of KEY.  All other times, the cached
 	  (mapconcat #'identity (xhtmlize-css-specs (gethash 'default face-map))
 		     " ")))
 
-(defun xhtmlize-inline-css-insert-text (text fstruct-list buffer)
+(defun xhtmlize-inline-css-insert-text-with-id (text id fstruct-list buffer)
   (let* ((merged (xhtmlize-merge-faces fstruct-list))
 	 (style (xhtmlize-memoize
 		 merged
@@ -1133,10 +1117,6 @@ it's called with the same value of KEY.  All other times, the cached
     (when style
       (princ "</span>" buffer))))
 
-(defun xhtmlize-inline-css-insert-text-with-id (text id fstruct-list buffer)
-  (xhtmlize-inline-css-insert-text text fstruct-list buffer)
-  )
-
 
 ;;; `font' tag based output support.
 
@@ -1146,7 +1126,7 @@ it's called with the same value of KEY.  All other times, the cached
 	    (cssize-fstruct-foreground fstruct)
 	    (cssize-fstruct-background fstruct))))
        
-(defun xhtmlize-font-insert-text (text fstruct-list buffer)
+(defun xhtmlize-font-insert-text-with-id (text id fstruct-list buffer)
   ;; In `font' mode, we use the traditional HTML means of altering
   ;; presentation: <font> tag for colors, <b> for bold, <u> for
   ;; underline, and <strike> for strike-through.
@@ -1170,10 +1150,69 @@ it's called with the same value of KEY.  All other times, the cached
     (princ text buffer)
     (princ (cdr markup) buffer)))
 
-(defun xhtmlize-font-insert-text-with-id (text id fstruct-list buffer)
-  (xhtmlize-font-insert-text text fstruct-list buffer))
-
 
+(defvar xhtmlize-zero-overlay-handlers (list))
+
+(defun xhtmlize-register-zero-overlay-handler (acceptable-p
+					       prepare
+					       make-id)
+  (setq xhtmlize-zero-overlay-handlers
+	(cons `((acceptable-p . ,acceptable-p)
+		(prepare  . ,prepare )
+		(make-id  . ,make-id ))
+	      xhtmlize-zero-overlay-handlers)))
+
+(defun xhtmlize-zero-width-overlay-acceptable-p (o)
+  (let ((handlers xhtmlize-zero-overlay-handlers ))
+    (xhtmlize-zero-width-overlay-acceptable-p0 o handlers)))
+(defun xhtmlize-zero-width-overlay-acceptable-p0 (o handlers)
+  (if (null handlers)
+      nil
+    (let ((handler (assq 'acceptable-p (car handlers))))
+      (if handler
+	  (let ((r (funcall (cdr handler) o)))
+	    (if r
+		(car handlers)
+	      (xhtmlize-zero-width-overlay-acceptable-p0 o (cdr handlers))))
+	;; ???
+	(xhtmlize-zero-width-overlay-acceptable-p0 o (cdr handlers))
+	))))
+(defun xhtmlize-zero-width-overlay-prepare (o handler)
+  (funcall (cdr (assq 'prepare handler)) o))
+(defun xhtmlize-zero-width-overlay-make-id (o handler)
+  (funcall (cdr (assq 'make-id handler)) o))
+
+
+
+
+(defun xhtmlize-linum-acceptable-p (o)
+  (if (overlay-get o 'linum-str) t nil))
+(defun xhtmlize-linum-prepare  (o)
+  ;(insert (overlay-get o 'linum-str))
+  (let ((s " "))
+    (put-text-property 0 1 'face 'linum s)
+    (insert s)))
+(defun xhtmlize-linum-make-id  (o)
+  (let ((str (overlay-get o 'linum-str)))
+  (format "linum:%s:%d" 
+	  (car (split-string str))
+	  (length str))))
+
+(xhtmlize-register-zero-overlay-handler
+ 'xhtmlize-linum-acceptable-p
+ 'xhtmlize-linum-prepare
+ 'xhtmlize-linum-make-id)
+	      
+;; TODO: These code should be injected from +srpmix.
+(add-hook 'xhtmlize-before-hook
+	  'xhtmlize-linum-update-buffer)
+(defun xhtmlize-linum-update-buffer ()
+  (flet ((window-start (win) (point-min))
+	 (window-end (win &optional update) (point-max))
+	 (set-window-margins (win width)))
+    (linum-update-window nil)))
+
+       
 (defun xhtmlize-buffer-1 ()
   ;; Internal function; don't call it from outside this file.  Xhtmlize
   ;; current buffer, writing the resulting HTML to a new buffer, and
@@ -1189,7 +1228,8 @@ it's called with the same value of KEY.  All other times, the cached
     (clrhash xhtmlize-extended-character-cache)
     (clrhash xhtmlize-memoization-table)
     (let* ((buffer-faces (xhtmlize-faces-in-buffer))
-	   (face-map (xhtmlize-make-face-map (adjoin 'default buffer-faces)))
+	   (face-map (xhtmlize-make-face-map (adjoin 'fringe
+						     (adjoin 'default buffer-faces))))
 	   ;; Generate the new buffer.  It's important that it inherits
 	   ;; default-directory from the current buffer.
 	   (htmlbuf (generate-new-buffer (if (buffer-file-name)
@@ -1238,11 +1278,9 @@ it's called with the same value of KEY.  All other times, the cached
 		"\n    ")
 	(plist-put places 'content-start (point-marker))
 	(insert "<pre>\n"))
-      (let ((insert-text-method
-	     ;; Get the inserter method, so we can funcall it inside
-	     ;; the loop.  Not calling `xhtmlize-method' in the loop
-	     ;; body yields a measurable speed increase.
-	     (xhtmlize-method-function 'insert-text))
+      (let (;; Get the inserter method, so we can funcall it inside
+	    ;; the loop.  Not calling `xhtmlize-method' in the loop
+	    ;; body yields a measurable speed increase.
 	    (insert-text-with-id-method
 	     (xhtmlize-method-function 'insert-text-with-id))
 	    ;; Declare variables used in loop body outside the loop
@@ -1263,7 +1301,15 @@ it's called with the same value of KEY.  All other times, the cached
 		  (xhtmlize-zero-width-overlay o)
 		  )
 		(xhtmlize-overlays-at (point)))
-	  
+
+	  (when (bolp)
+	    (funcall insert-text-with-id-method " "
+		     (format "left-fringe:%d" (point))
+		     (mapcar (lambda (f)
+			       (gethash f face-map))
+			     (list 'fringe))
+		     htmlbuf))
+
 	  (setq next-change (xhtmlize-next-change (point) 'face))
 	  ;; Get faces in use between (point) and NEXT-CHANGE, and
 	  ;; convert them to fstructs.
@@ -1289,7 +1335,10 @@ it's called with the same value of KEY.  All other times, the cached
 	  (when (> (length text) 0)
 	    ;; Insert the text, along with the necessary markup to
 	    ;; represent faces in FSTRUCT-LIST.
-	    (funcall insert-text-method text fstruct-list htmlbuf))
+	    (funcall insert-text-with-id-method text 
+		     (format "font-lock:%s" (point))
+		     fstruct-list
+		     htmlbuf))
 	  (goto-char next-change)))
 
       ;; Insert the epilog and post-process the buffer.
@@ -1324,28 +1373,22 @@ it's called with the same value of KEY.  All other times, the cached
 	(buffer-enable-undo))
       htmlbuf)))
 
-;; SRPMIX LINUM HACKING
+
 (defvar xhtmlize-zero-width-overlay-temp-buffer (let ((b (get-buffer-create
 							  " *zero-width-overlay-xhtmlize*")))
 						  (with-current-buffer b
 						    (buffer-disable-undo))
 						  b))
-						 
 
-;; insert-text-method fstruct-list htmlbuf
 (defun xhtmlize-zero-width-overlay (o)
-  (cond
-   ((overlay-get o 'linum-str)
-    (with-current-buffer xhtmlize-zero-width-overlay-temp-buffer
-      (xhtmlize-linum-prepare-buffer o)
-      (xhtmlize-buffer-0 o)))))
+  (let ((handler (xhtmlize-zero-width-overlay-acceptable-p o)))
+    (when handler
+      (with-current-buffer xhtmlize-zero-width-overlay-temp-buffer
+	(erase-buffer) 
+	(xhtmlize-zero-width-overlay-prepare o handler)
+	(xhtmlize-buffer-0 o handler)))))
 
-(defun xhtmlize-linum-prepare-buffer (o)
-  (erase-buffer) 
-  (insert (overlay-get o 'linum-str)) 
-  (insert " "))
-
-(defun xhtmlize-buffer-0 (o)
+(defun xhtmlize-buffer-0 (o handler)
   (let (next-change face-list fstruct-list text trailing-ellipsis)
     (goto-char (point-min))
     (while (not (eobp))
@@ -1368,27 +1411,12 @@ it's called with the same value of KEY.  All other times, the cached
       (when (> (length text) 0)
 	;; Insert the text, along with the necessary markup to
 	;; represent faces in FSTRUCT-LIST.
-	(if (equal face-list '(linum))
-	    (funcall insert-text-with-id-method
+	(funcall insert-text-with-id-method
 		     text
-		     (format "%s:%s:%d" 
-			     "ground"	;; should be customizable
-			     (car (split-string (overlay-get o 'linum-str)))
-			     (overlay-start o))
-		     fstruct-list htmlbuf)
-	    (funcall insert-text-method text fstruct-list htmlbuf)))
+		     (xhtmlize-zero-width-overlay-make-id o handler)
+		     fstruct-list htmlbuf))
       (goto-char next-change))
     ))
-
-;; TODO: These code should be injected from +srpmix.
-(add-hook 'xhtmlize-before-hook
-	  'xhtmlize-linum-update-buffer)
-(defun xhtmlize-linum-update-buffer ()
-  (flet ((window-start (win) (point-min))
-	 (window-end (win &optional update) (point-max))
-	 (set-window-margins (win width)))
-    (linum-update-window nil)))
-
 
 ;; Utility functions.
 

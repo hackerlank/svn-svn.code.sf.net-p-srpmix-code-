@@ -432,4 +432,14 @@ If no rgb.txt file is found, return nil."
      ;;
      )))
 
+(defun ccsize-file (face file)
+  (save-excursion
+    (let ((buffer  (find-file-noselect file)))
+      (with-current-buffer buffer
+	(buffer-disable-undo)
+	(erase-buffer)
+	(insert (cssize-face-to-css face))
+	(save-buffer))
+      (kill-buffer buffer))))
+
 (provide 'cssize)
