@@ -6,6 +6,8 @@
 	add --enable-plugin-* options.
 	* misc/m4/progs.m4:
 	separate program check codes from configure.ac
+	* src/srpmix:
+	create plugin data based on plugin package.
 
 2009-03-17  Masato Taruishi <taruishi@redhat.com>
 

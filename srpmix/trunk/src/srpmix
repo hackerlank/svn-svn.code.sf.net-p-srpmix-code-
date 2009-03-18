@@ -174,7 +174,7 @@ function parse_arguments
     fi
 
     SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-format=$OUTPUT_FORMAT"
-    SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-dir=$OUTPUT_DIR"
+    SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-dir=$MY_TMPDIR"
     
     SRPMIXBUILD_OPTIONS="$(opt_rules $TARGET_SRPM) $SRPMIXBUILD_OPTIONS"
 }
@@ -191,7 +191,7 @@ function main
 
     MY_TMPDIR=`mktemp -d`
     trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
-    OUTPUT_DIR=$MY_TMPDIR
+    OUTPUT_DIR=${MY_TMPDIR}
     
     parse_arguments "$@"
     if test -n "$DEBUG"; then
@@ -203,17 +203,40 @@ function main
         srpmix-build $SRPMIXBUILD_OPTIONS --srpm=$srpm
     done
 
-    if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
-        files=$(find ${OUTPUT_DIR} -name '*.swrf')
-        case "$OUTPUT_FORMAT" in
-          rpm)
-            files=$(find ${OUTPUT_DIR} -name '*.noarch.rpm')
-	    echo $files | xargs yum localinstall -y --nogpgcheck
-          ;;
-          swrf)
-	    echo $files | xargs srpmix-db -i
-          ;;
-        esac
+    # Create Plugin Package
+    if test "x$OUTPUT_FORMAT" = "xrpm"; then
+        files=$(find ${MY_TMPDIR} -name '*.noarch.rpm' | grep srpmix-$SRPMIX_PKG_MAJOR_VERSION)
+        for rpm in $files; do
+            (cd $MY_TMPDIR; rpm2cpio $rpm | cpio -i --make-directories)
+        done
+    
+    fi
+    files=$(find ${MY_TMPDIR} -name '*.swrf' | grep srpmix-$SRPMIX_PKG_MAJOR_VERSION)
+    for swrf in $files; do
+        srpmix-build --type=plugin $SRPMIXBUILD_OPTIONS --swrf=$swrf
+    done
+
+    case "$OUTPUT_FORMAT" in
+      rpm)
+        files=$(find ${MY_TMPDIR} -name '*.noarch.rpm')
+        if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+	    echo $files | SRPMIX_NOPLUGIN=yes xargs yum localinstall -y --nogpgcheck
+        fi
+      ;;
+      swrf)
+        files=$(find ${MY_TMPDIR} -name '*.swrf')
+        if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+            echo $files | xargs srpmix-db --noplugin -i
+        fi
+      ;;
+    esac
+    if test "x$OUTPUT_DIR" != "x$MY_TMPDIR"; then
+        for p in $files; do
+            p0=$(basename $p)
+            p00=`srpmix_srchash $p0`
+            mkdir -p "${OUTPUT_DIR}/${p00}"
+            mv $p "${OUTPUT_DIR}/${p00}/"
+        done
     fi
     status=$?
 

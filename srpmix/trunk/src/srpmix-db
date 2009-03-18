@@ -6,9 +6,10 @@ RPM_PACKAGES=
 COMMAND=
 QUIET=
 
-OPT_NOPLUGIN=
-
 LIBSRPMIX=libsrpmix.sh
+
+OPT_NOPLUGIN=$SRPMIX_NOPLUGIN
+
 function try_source
 {
     source $1

@@ -1,9 +1,10 @@
-dist_check_SCRIPTS = 00srpmix-wrap.sh  \
-                     00srpmix-ix.sh    \
-                     00srpmix.sh       \
-                     00build-opt-rules \
-                     \
-		     $(NULL)
+#dist_check_SCRIPTS = 00srpmix-wrap.sh  \
+#                     00srpmix-ix.sh    \
+#                     00srpmix.sh       \
+#                     00build-opt-rules \
+#                     \
+#		     $(NULL)
+dist_check_SCRIPTS = 00srpmix.sh
 
 TEST_SRPMS = @TEST_SRPMS@
 TESTDIR = data
