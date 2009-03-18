@@ -42,7 +42,7 @@ function print_usage
     echo "               [--plugin-name=<name>]"
     echo "               --srpm=SRPM|--swrf=SWRF"
     echo
-    echo "ARCH: i386(not for kenel), i686, x86_64, ia64, or ppc64"
+    echo "ARCH: i386(not for kenel), i686, x86_64, ia64, ppc, or ppc64"
 #    TODO: Multi targets
 #    TODO: URL support
 #    echo ""

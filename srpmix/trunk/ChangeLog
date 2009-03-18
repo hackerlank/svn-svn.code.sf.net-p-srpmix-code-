@@ -1,3 +1,12 @@
+2009-03-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (print_usage): Added ppc.
+
+	* src/srpmix-ix (print_usage, default_multi_targets)
+	(verify_target): Added ppc.
+
+	* src/srpmix-build (print_usage): Added ppc.
+
 2009-03-18  Masato Taruishi <taruishi@redhat.com>
 
         * misc/specs/srpmix.spec.in (%configre):

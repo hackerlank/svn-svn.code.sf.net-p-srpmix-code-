@@ -111,7 +111,7 @@ function print_usage
     echo "SRPMIX_MULTI_TARGETS=yes|no"
     echo "SRPMIX_KEEP_ORIGINAL=yes|no"
     echo "SRPMIX_IX_DEBUG=yes|no"
-    echo "SRPMIX_TARGET=i386|i686|x86_64|ia64|ppc64"
+    echo "SRPMIX_TARGET=i386|i686|x86_64|ia64|ppc|ppc64"
     echo 
 }
 
@@ -162,7 +162,7 @@ function default_multi_targets
     local current=`default_target`
     local targets=${current}
     
-    for x in i386 i686 x86_64 ia64 ppc; do
+    for x in i386 i686 x86_64 ia64 ppc ppc64; do
 	if test "$x" = "$current"; then
 	    :
 	else
@@ -494,6 +494,9 @@ function verify_target
 		:
 		;;
 	    ppc)
+		:
+		;;
+	    ppc64)
 		:
 		;;
 	    *)
