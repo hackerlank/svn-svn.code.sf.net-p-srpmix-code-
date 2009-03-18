@@ -1,3 +1,11 @@
+2009-03-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm: Renamed from default.scm.
+	Added comments.
+
+	* src/srpmix (SRPMIXBUILD_OPTS): Sort the
+	rules before reading.
+
 2009-03-18  Masato Taruishi <taruishi@redhat.com>
 
 	* src/srpmix: fix broekn glob use such as 'srpmix --name=yum-*'
