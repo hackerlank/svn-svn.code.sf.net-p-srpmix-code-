@@ -11,4 +11,8 @@
 ;;
 (#/yaboot-/ "--target=ppc")
 
+;;
+(#/s390utils-/ "--target=s390")
+
+
 
