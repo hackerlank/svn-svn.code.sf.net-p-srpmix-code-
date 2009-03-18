@@ -1,0 +1,136 @@
+#
+# JUST SKETCH, NOT READY TO USE
+#
+
+
+# TODO SOURCEDIR, BUILDDIR
+function spec_define
+{
+    echo "%define $1 $2"
+}
+
+function spec_comment
+{
+    echo "# " "$@"
+}
+
+function spec_file_header
+{
+    local rootdir=$1
+    local srpm_name=$2
+    local build_name=$3
+
+    spec_comment "########################################################################"
+    spec_comment "macro injected by srpmix-ix"
+    spec_comment "########################################################################"
+    spec_define  "_topdir"    "${rootdir}"
+    spec_define  "_sourcedir" "%{_topdir}/${SOURCEDIR}/${srpm_name}"
+    spec_define  "_builddir"  "%{_topdir}/${BUILDDIR}/${build_name}"
+    spec_comment "dogcat is a hack for redhat-ds-7.1SP3-5.RHEL4.src.rpm. "
+    spec_define  "_requireslist"  "dogcat"
+    spec_comment "########################################################################"
+}
+
+
+# TODO: KEEP_ORIGINAL, SOURCEDIR, BUILDDIR
+#
+# rhel5su2 kernel needs this.
+#
+no_hack__p_xen='\.p\.xen$'
+dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
+function spec_file_hack
+{
+    local rootdir=$1
+    local spec_file=$2
+    
+    
+    spec_file="${rootdir}/SPECS/${spec_file}"
+
+
+    if patch_on_backup_p "$spec_file" > /dev/null 2>&1 ; then
+#	message turn-on --keep-original=auto
+	KEEP_ORIGINAL=yes
+    fi
+
+    if test "x${KEEP_ORIGINAL}" = xyes; then
+	dont_keep_original="-e s/a/a/"
+    fi
+
+    cat - "${spec_file}"                           \
+    | sed					   \
+	\
+	\
+        -e /'^%patch.* '"$no_hack__p_xen"/b        \
+	\
+	\
+        "$dont_keep_original"                      \
+	\
+	\
+	-e "s+\.\./\.\./SOURCES/+../../${SOURCEDIR}/+" \
+	-e "s+\.\./\.\./BUILD/+../../${BUILDDIR}/+"    \
+	\
+	-e "s/Source29: kernel-%{kversion}-ppc64-debug.config/Source290: kernel-%{kversion}-ppc64-debug.config/" \
+        -e "s/Source46: kernel-%{kversion}-s390.config/Source460: kernel-%{kversion}-s390.config/" \
+	\
+	\
+	-e '/^%patch \+-P.*/b'                     \
+	\
+	\
+	-e 's/^Patch:/Patch0:/'                    \
+        -e 's/^%patch /%patch0 /'                  \
+        \
+	-e 's/^Copyright:/License:/'		   \
+	-e 's/^Serial:.*//'			   \
+	\
+	${NULL} 
+}
+
+##
+## KEEP_ORIGINAL guessing
+## ----------------------
+##
+## TEST: ~/rpmbuild/SRPMIX/images/f10/perl-CGI-SpeedyCGI-2.22-4.fc10.src.rpm
+##       ~/rpmbuild/SRPMIX/images/f10/easytag-2.1-5.fc9.src.rpm
+##
+
+# patch_on_backup_p
+# -----------------
+# INPUT:
+# $1: path to patch file 
+# 
+# OUTPUT:
+# return: 0 if the patch may be applied on backup files.
+# stdout: backup suffixes
+
+# TODO
+# touch -r 
+# e.g.
+# touch -c -r ./hdf/src/hdfi.h.ppc ./hdf/src/hdfi.h
+
+function patch_on_backup_p
+{
+    local spec_file=$1
+    local f
+
+    if grep -e '^touch.* -r ' $spec_file > /dev/null 2>&1; then
+#	message patch-on-backup --reason=touch
+# TODO	
+# print $backup	
+	return 0
+	
+    fi
+    
+    cat $spec_file | grep -e '^---' | sed -e 's/--- \([^ \t]*\).*$/\1/' | while read f; do
+	local lines=$(basename $f | tr '.' '\n')
+	local c=$(echo "$lines" | wc -l)
+	local backup=$(echo "$lines" | tail -1)
+
+	if [ "$c" -gt  2 ]; then
+#	    message patch-on-backup --reason=touch
+	    echo $backup
+	    return 0
+	fi
+   done
+
+   return 1
+}

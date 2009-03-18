@@ -9,10 +9,10 @@
 (#/kernel-2\.4\.9.*/  "--target=i686" )
 
 ;;
-(#/yaboot-/ "--target=ppc")
+(#/yaboot-.*/ "--target=ppc")
 
 ;;
-(#/s390utils-/ "--target=s390")
+(#/s390utils-.*/ "--target=s390")
 
 
 

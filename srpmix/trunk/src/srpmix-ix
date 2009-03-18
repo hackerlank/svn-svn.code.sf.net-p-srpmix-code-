@@ -574,7 +574,10 @@ dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
 function spec_file_hack
 {
     local rootdir=$1
-    local spec_file="${rootdir}/SPECS/${spec_file}"
+    local spec_file=$2
+    
+    
+    spec_file="${rootdir}/SPECS/${spec_file}"
 
 
     if patch_on_backup_p "$spec_file" > /dev/null 2>&1 ; then
@@ -614,6 +617,63 @@ function spec_file_hack
 	\
 	${NULL} 
 }
+
+##
+## KEEP_ORIGINAL guessing
+## ----------------------
+##
+## TEST: ~/rpmbuild/SRPMIX/images/f10/perl-CGI-SpeedyCGI-2.22-4.fc10.src.rpm
+##       ~/rpmbuild/SRPMIX/images/f10/easytag-2.1-5.fc9.src.rpm
+##
+
+# patch_on_backup_p
+# -----------------
+# INPUT:
+# $1: path to patch file 
+# 
+# OUTPUT:
+# return: 0 if the patch may be applied on backup files.
+# stdout: backup suffixes
+
+# TODO
+# touch -r 
+# e.g.
+# touch -c -r ./hdf/src/hdfi.h.ppc ./hdf/src/hdfi.h
+
+function patch_on_backup_p
+{
+    local spec_file=$1
+    local f
+
+    if grep -e '^touch.* -r ' $spec_file > /dev/null 2>&1; then
+#	message patch-on-backup --reason=touch
+# TODO	
+# print $backup	
+	return 0
+	
+    fi
+    
+    cat $spec_file | grep -e '^---' | sed -e 's/--- \([^ \t]*\).*$/\1/' | while read f; do
+	local lines=$(basename $f | tr '.' '\n')
+	local c=$(echo "$lines" | wc -l)
+	local backup=$(echo "$lines" | tail -1)
+
+	if [ "$c" -gt  2 ]; then
+#	    message patch-on-backup --reason=touch
+	    echo $backup
+	    return 0
+	fi
+   done
+
+   return 1
+}
+
+#
+########################################################################
+
+
+########################################################################
+#
 
 function srpm_deploy
 {
@@ -751,57 +811,6 @@ function srpm_install
     return $status
 }
 
-
-##
-## KEEP_ORIGINAL guessing
-## ----------------------
-##
-## TEST: ~/rpmbuild/SRPMIX/images/f10/perl-CGI-SpeedyCGI-2.22-4.fc10.src.rpm
-##       ~/rpmbuild/SRPMIX/images/f10/easytag-2.1-5.fc9.src.rpm
-##
-
-# patch_on_backup_p
-# -----------------
-# INPUT:
-# $1: path to patch file 
-# 
-# OUTPUT:
-# return: 0 if the patch may be applied on backup files.
-# stdout: backup suffixes
-
-# TODO
-# touch -r 
-# e.g.
-# touch -c -r ./hdf/src/hdfi.h.ppc ./hdf/src/hdfi.h
-
-function patch_on_backup_p
-{
-    local spec_file=$1
-    local f
-
-    if grep -e '^touch.* -r ' $spec_file > /dev/null 2>&1; then
-#	message patch-on-backup --reason=touch
-# TODO	
-# print $backup	
-	return 0
-	
-    fi
-    
-    cat $spec_file | grep -e '^---' | sed -e 's/--- \([^ \t]*\).*$/\1/' | while read f; do
-	local lines=$(basename $f | tr '.' '\n')
-	local c=$(echo "$lines" | wc -l)
-	local backup=$(echo "$lines" | tail -1)
-
-	if [ "$c" -gt  2 ]; then
-#	    message patch-on-backup --reason=touch
-	    echo $backup
-	    return 0
-	fi
-   done
-
-   return 1
-}
-
 function srpm_rearrange_spec
 {
     local rootdir=$1
@@ -809,6 +818,7 @@ function srpm_rearrange_spec
     local build_name=$3
     local spec_file=$4
 
+    # TODO Call `build-spec-rearrange'
     spec_file_header "${rootdir}" "${srpm_name}" "${build_name}" \
 	| spec_file_hack "${rootdir}" "${spec_file}"
 }

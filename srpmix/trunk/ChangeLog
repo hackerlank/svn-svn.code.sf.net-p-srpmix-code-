@@ -1,5 +1,9 @@
 2009-03-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/build-spec-rearrange: Just stub.
+
+2009-03-18  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix (print_usage): Added ppc and s390.
 
 	* src/srpmix-ix (print_usage, default_multi_targets)
