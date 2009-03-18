@@ -7,6 +7,9 @@
 	
 2009-03-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/build-opt-rules (main): Reverse
+	the rules list.
+
 	* src/helpers/99default.scm: Renamed from default.scm.
 	Added comments.
 

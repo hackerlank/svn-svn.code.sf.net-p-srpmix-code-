@@ -27,11 +27,12 @@
 			(lambda (rule)
 			  (when ((car rule) pkg)
 			    (return (cadr rule))))
-			(let loop ((rules (list))
-				   (r (read)))
-			  (if (eof-object? r)
-			      rules
-			      (loop (cons r rules) (read))))))
+			(reverse 
+			 (let loop ((rules (list))
+				    (r (read)))
+			   (if (eof-object? r)
+			       rules
+			       (loop (cons r rules) (read)))))))
 		     (return ""))
 	(display result)
 	(exit 0))))))
