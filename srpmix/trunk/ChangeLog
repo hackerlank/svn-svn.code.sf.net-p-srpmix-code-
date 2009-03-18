@@ -1,3 +1,10 @@
+2009-03-18  Masato Taruishi <taruishi@redhat.com>
+
+        * misc/specs/srpmix.spec.in (%configre):
+	enable some plugins.
+	(BuildRequires): Added cscope, ctags, and emacs-common.
+	(plugin-doxygen::%files): Temporary make the list empty.
+	
 2009-03-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/99default.scm: Renamed from default.scm.
