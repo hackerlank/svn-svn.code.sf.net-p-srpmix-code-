@@ -1,3 +1,7 @@
+2009-03-18  Masato Taruishi <taruishi@redhat.com>
+
+	* src/srpmix: fix broekn glob use such as 'srpmix --name=yum-*'
+
 2009-03-17  Masato Taruishi <taruishi@redhat.com>
 
 	* src/srpmix-wrap:

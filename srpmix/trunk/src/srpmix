@@ -175,8 +175,6 @@ function parse_arguments
 
     SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-format=$OUTPUT_FORMAT"
     SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-dir=$OUTPUT_DIR"
-    SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --srpm=$TARGET_SRPM"
-
     
     SRPMIXBUILD_OPTIONS="$(opt_rules $TARGET_SRPM) $SRPMIXBUILD_OPTIONS"
 }
@@ -201,7 +199,9 @@ function main
 	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
 
-    srpmix-build $SRPMIXBUILD_OPTIONS
+    for srpm in $TARGET_SRPM; do
+        srpmix-build $SRPMIXBUILD_OPTIONS --srpm=$srpm
+    done
 
     if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
         files=$(find ${OUTPUT_DIR} -name '*.swrf')
