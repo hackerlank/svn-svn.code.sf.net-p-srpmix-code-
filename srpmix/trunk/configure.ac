@@ -21,7 +21,7 @@ AC_SUBST(SRPMIX_MAJOR_VERSION, pkg_major_version)
 AC_SUBST(SRPMIX_MINOR_VERSION, pkg_minor_version)
 AC_SUBST(SRPMIX_MICRO_VERSION, pkg_micro_version)
 
-#AC_RPM_RELEASE
+dnl AC_RPM_RELEASE
 
 if test "x$USE_MAINTAINER_MODE" = "xyes"; then
 	AC_PATH_PROG([SVN], [svn])
@@ -29,34 +29,11 @@ fi
 AM_CONDITIONAL([USE_SVN_RPM_RELEASE],
 	 [test "x$SVN" != "x" && test -d "$srcdir/.svn"])
 
-# PROGRAMS
-
-AC_CHECK_PROGS([BASH], [bash])
-if test "x$BASH" = "x"; then AC_MSG_ERROR(bash not found); fi
-
-AC_CHECK_PROGS([HARDLINK], [hardlink])
-if test "x$HARDLINK" = "x"; then AC_MSG_ERROR(hardlink not found); fi
-
-AC_CHECK_PROGS([RPM2CPIO], [rpm2cpio])
-if test "x$RPM2CPIO" = "x"; then AC_MSG_ERROR(rpm2cpio not found); fi
-
-AC_CHECK_PROGS([CPIO], [cpio])
-if test "x$CPIO" = "x"; then AC_MSG_ERROR(cpio not found); fi
-
-AC_CHECK_PROGS([GUILE], [guile])
-if test "x$GUILE" = "x"; then AC_MSG_ERROR(guile not found); fi
-
-AC_CHECK_PROGS([GOSH], [gosh])
-if test "x$GOSH" = "x"; then AC_MSG_ERROR(gosh not found); fi
-
-AC_CHECK_PROGS([RPM], [rpm])
-if test "x$RPM" = "x"; then AC_MSG_ERROR(rpm not found); fi
-
-AC_CHECK_PROGS([RPMBUILD], [rpmbuild])
-if test "x$RPMBUILD" = "x"; then AC_MSG_ERROR(rpmbuild not found); fi
-
-AC_SUBST(SWRFPM, $RPM)
-AC_SUBST(SWRFBUILD, $RPMBUILD)
+SRPMIX_PROGS
+SRPMIX_ENABLE_PLUGIN_ETAGS
+SRPMIX_ENABLE_PLUGIN_CTAGS
+SRPMIX_ENABLE_PLUGIN_CSCOPE
+SRPMIX_ENABLE_PLUGIN_DOXYGEN
 
 AC_ARG_WITH([test-srpms],
        [AS_HELP_STRING([--with-test-srpms='SRPMS0 ...'],

@@ -1,6 +1,11 @@
 2009-03-18  Masato Taruishi <taruishi@redhat.com>
 
 	* src/srpmix: fix broekn glob use such as 'srpmix --name=yum-*'
+	* configure.ac:
+	* misc/m4/plugins.m4:
+	add --enable-plugin-* options.
+	* misc/m4/progs.m4:
+	separate program check codes from configure.ac
 
 2009-03-17  Masato Taruishi <taruishi@redhat.com>
 
