@@ -9,6 +9,6 @@
 (#/kernel-2\.4\.9.*/  "--target=i686" )
 
 ;;
-(#/yaboot-/ "--target=ppc64")
+(#/yaboot-/ "--target=ppc")
 
 
