@@ -163,7 +163,7 @@ function guess_target
     local line
 
     if line=$(grep ExclusiveArch: $spec_file 2>/dev/null); then
-	sed -e 's/ExclusiveArch: \?\([-_a-zA-Z0-9]\+\).*/\1/'
+	echo $line | sed -e 's/ExclusiveArch: \?\([-_a-zA-Z0-9]\+\).*/\1/' 
     fi
 }
 
