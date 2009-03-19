@@ -645,7 +645,7 @@ function srpm_deploy
     fi
 
     if test "${TARGET}" = '?'; then
-	TARGET=$(guess_target ${spec_file})
+	TARGET=$(guess_target "${rootdir}/${SPECDIR}/${xspec_file}")
 	if test -z "${TARGET}"; then
 	    TARGET=$(default_target)
 	    verbose varset --TARGET=\""${TARGET}"\" --rule=default
