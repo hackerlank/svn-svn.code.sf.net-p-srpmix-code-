@@ -187,7 +187,7 @@ function parse_arguments
     if test -z "${TARGET}"; then
 	if test -z "${MULTI_TARGETS}"; then
 	    # Make empty
-	    TARGET=GUESSING
+	    TARGET='?'
 	else
 	    TARGET=$(default_multi_targets)
 	fi
@@ -644,7 +644,7 @@ function srpm_deploy
 	kernel_p=yes
     fi
 
-    if test -z "${TARGET}"; then
+    if test "${TARGET}" = '?'; then
 	TARGET=$(guess_target ${xspec_file})
 	if test -z "${TARGET}"; then
 	    TARGET=$(default_target)
