@@ -1,3 +1,8 @@
+2009-03-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-spec-rearrange (use_old_autoreconf_p): New function.
+	(spec_file_hack): Use use_old_autoreconf_p.
+
 2009-03-19  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-ix (guess_target): Use $line

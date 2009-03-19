@@ -20,21 +20,38 @@ function try_source
 try_source ${LIBSRPMIX}
 
 
+function use_old_autoreconf_p
+{
+    local spec_file=$1
+    local lines=$(grep -e '^autoreconf ' ${spec_file})
+    
+    if echo $lines | grep -e '-l '; then
+	return 0
+    else
+	return 1
+    fi
+}
 function spec_file_hack
 {
     local rootdir=$1
     local spec_file=$2
 
 
+    local use_old_autoconf="-e s/a/a/"
+    local use_old_autoreconf="-e s/a/a/"
     #
     # rhel5su2 kernel needs this.
     #
     local no_hack__p_xen='\.p\.xen$'
     local dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
 
-    
+
     spec_file="${rootdir}/SPECS/${spec_file}"
 
+    if use_old_autoreconf_p "$spec_file" > /dev/null 2>&1; then
+	use_old_autoconf="-e s/^autoconf/autoconf-2.13/"
+	use_old_autoreconf="-e s/^autoreconf/autoreconf-2.13/"
+    fi
 
     if patch_on_backup_p "$spec_file" > /dev/null 2>&1 ; then
 #	message turn-on --keep-original=auto
