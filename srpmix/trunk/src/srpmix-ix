@@ -157,11 +157,21 @@ function default_target
     $RPM --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
 }
 
+function guess_target
+{
+    local spec_file=$1
+    local line
+
+    if line=$(grep ExclusiveArch: $spec_file 2>/dev/null)
+	sed -e 's/ExclusiveArch: \?\([-_a-zA-Z0-9]\+\).*/\1/'
+    fi
+}
+
 function default_multi_targets
 {
     local current=`default_target`
     local targets=${current}
-    
+
     for x in i386 i686 x86_64 ia64 s390 s390x ppc ppc64; do
 	if test "$x" = "$current"; then
 	    :
@@ -176,7 +186,8 @@ function parse_arguments
 {
     if test -z "${TARGET}"; then
 	if test -z "${MULTI_TARGETS}"; then
-	    TARGET=$(default_target)
+	    # Make empty
+	    TARGET=GUESSING
 	else
 	    TARGET=$(default_multi_targets)
 	fi
@@ -631,6 +642,16 @@ function srpm_deploy
 	-o  "${xspec_file}" = "kernel-2.4.spec" \
 	-o  "${xspec_file}" = "kernel.spec" ; then
 	kernel_p=yes
+    fi
+
+    if test -z "${TARGET}"; then
+	TARGET=$(guess_target ${xspec_file})
+	if test -z "${TARGET}"; then
+	    TARGET=$(default_target)
+	    verbose varset --TARGET=\""${TARGET}"\" --rule default
+	else
+	    verbose varset --TARGET=\""${TARGET}"\" --rule guessing-from-ExclusiveArch
+	fi
     fi
 
     targets="$(echo "${TARGET}" | tr "," " " )"

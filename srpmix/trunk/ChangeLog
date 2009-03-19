@@ -1,5 +1,7 @@
 2009-03-19  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-ix (guess_target): New function.
+
 	* src/srpmix (print_usage): Added s390x.
 
 	* src/srpmix-ix (print_usage, default_multi_targets)
