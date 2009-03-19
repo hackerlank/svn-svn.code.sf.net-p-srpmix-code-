@@ -1,5 +1,12 @@
 2009-03-19  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix (print_usage): Added s390x.
+
+	* src/srpmix-ix (print_usage, default_multi_targets)
+	(verify_target): Added s390x.
+
+	* src/srpmix-build (print_usage): Added s390x.	
+	
 	* src/srpmix-ix (srpm_rearrange_spec): Use 
 	build-spec-rearrange.
 
