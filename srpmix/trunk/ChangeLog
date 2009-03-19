@@ -2,6 +2,7 @@
 
 	* src/srpmix-ix (guess_target): Use $line
 	for input to sed.
+	(srpmix_deply): Pass ${spec_file} to guess_target.
 
 2009-03-19  Masatake YAMATO  <yamato@redhat.com>
 

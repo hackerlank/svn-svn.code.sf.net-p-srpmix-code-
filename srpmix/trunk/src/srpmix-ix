@@ -645,12 +645,12 @@ function srpm_deploy
     fi
 
     if test "${TARGET}" = '?'; then
-	TARGET=$(guess_target ${xspec_file})
+	TARGET=$(guess_target ${spec_file})
 	if test -z "${TARGET}"; then
 	    TARGET=$(default_target)
-	    verbose varset --TARGET=\""${TARGET}"\" --rule default
+	    verbose varset --TARGET=\""${TARGET}"\" --rule=default
 	else
-	    verbose varset --TARGET=\""${TARGET}"\" --rule guessing-from-ExclusiveArch
+	    verbose varset --TARGET=\""${TARGET}"\" --rule=guessing-from-ExclusiveArch
 	fi
     fi
 
