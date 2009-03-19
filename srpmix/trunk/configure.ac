@@ -35,6 +35,11 @@ SRPMIX_ENABLE_PLUGIN_CTAGS
 SRPMIX_ENABLE_PLUGIN_CSCOPE
 SRPMIX_ENABLE_PLUGIN_DOXYGEN
 
+
+dnl recommendations
+dnl wget ftp://ftp.redhat.com/pub/redhat/linux/enterprise/5Server/en/os/SRPMS/pstack-1.2-7.2.2.src.rpm
+dnl wget ftp://ftp.redhat.com/pub/redhat/linux/enterprise/5Server/en/os/SRPMS/arptables_jf-0.0.8-8.src.rpm
+
 AC_ARG_WITH([test-srpms],
        [AS_HELP_STRING([--with-test-srpms='SRPMS0 ...'],
           [specify the space-separated list of src.rpms for test])],

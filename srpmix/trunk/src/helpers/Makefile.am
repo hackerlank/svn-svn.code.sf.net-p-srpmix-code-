@@ -1,6 +1,7 @@
 helpersdir = $(pkgdatadir)/helpers
-dist_helpers_SCRIPTS =   \
-        build-opt-rules  \
+dist_helpers_SCRIPTS =        \
+        build-opt-rules       \
+        build-spec-rearrange  \
 	\
         $(NULL)
 

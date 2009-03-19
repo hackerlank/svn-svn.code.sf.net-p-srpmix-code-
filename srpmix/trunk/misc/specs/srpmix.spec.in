@@ -99,6 +99,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_datadir}/srpmix/helpers
 %{_datadir}/srpmix/helpers/build-opt-rules
+%{_datadir}/srpmix/helpers/build-spec-rearrange
 
 %{_sysconfdir}/srpmix
 %{_sysconfdir}/srpmix/srpmix.cf

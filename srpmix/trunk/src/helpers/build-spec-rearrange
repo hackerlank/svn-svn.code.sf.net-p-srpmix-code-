@@ -1,48 +1,37 @@
-#
-# JUST SKETCH, NOT READY TO USE
-#
+#!/bin/bash
+
+ROOTDIR=
+SPEC_FILE=
+
+KEEP_ORIGINAL=
+SOURCEDIR=
+BUILDDIR=
 
 
-# TODO SOURCEDIR, BUILDDIR
-function spec_define
+LIBSRPMIX=libsrpmix.sh
+function try_source
 {
-    echo "%define $1 $2"
+    source $1
+    if test $? != 0; then
+	echo ";;; ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
 }
-
-function spec_comment
-{
-    echo "# " "$@"
-}
-
-function spec_file_header
-{
-    local rootdir=$1
-    local srpm_name=$2
-    local build_name=$3
-
-    spec_comment "########################################################################"
-    spec_comment "macro injected by srpmix-ix"
-    spec_comment "########################################################################"
-    spec_define  "_topdir"    "${rootdir}"
-    spec_define  "_sourcedir" "%{_topdir}/${SOURCEDIR}/${srpm_name}"
-    spec_define  "_builddir"  "%{_topdir}/${BUILDDIR}/${build_name}"
-    spec_comment "dogcat is a hack for redhat-ds-7.1SP3-5.RHEL4.src.rpm. "
-    spec_define  "_requireslist"  "dogcat"
-    spec_comment "########################################################################"
-}
+try_source ${LIBSRPMIX}
 
 
-# TODO: KEEP_ORIGINAL, SOURCEDIR, BUILDDIR
-#
-# rhel5su2 kernel needs this.
-#
-no_hack__p_xen='\.p\.xen$'
-dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
 function spec_file_hack
 {
     local rootdir=$1
     local spec_file=$2
-    
+
+
+    #
+    # rhel5su2 kernel needs this.
+    #
+    local no_hack__p_xen='\.p\.xen$'
+    local dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
+
     
     spec_file="${rootdir}/SPECS/${spec_file}"
 
@@ -134,3 +123,47 @@ function patch_on_backup_p
 
    return 1
 }
+
+
+function print_usage
+{
+    :
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --keep-original=*)
+                KEEP_ORIGINAL="$(echo $1 | sed 's/--keep-original=//')"
+	        ;;
+            --sourcedir=*)
+                SOURCEDIR=$(echo $1 | sed 's/--sourcedir=//')
+	        ;;
+            --builddir=*)
+	        BUILDDIR=$(echo $1 | sed 's/--builddir=//')
+	        ;;
+	    *)
+	        break
+	        ;;
+	 esac
+	 shift
+    done
+    
+    ROOTDIR=$1
+    SPEC_FILE=$2
+}
+
+function main
+{
+    parse_arguments "$@"
+    
+    spec_file_hack ${ROOTDIR} ${SPEC_FILE}
+}
+
+es_time main "$@"
+exit $?

@@ -1,6 +1,11 @@
+2009-03-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (srpm_rearrange_spec): Use 
+	build-spec-rearrange.
+
 2009-03-18  Masatake YAMATO  <yamato@redhat.com>
 
-	* src/helpers/build-spec-rearrange: Just stub.
+	* src/helpers/build-spec-rearrange: New helper program.
 
 2009-03-18  Masatake YAMATO  <yamato@redhat.com>
 
