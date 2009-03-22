@@ -34,7 +34,7 @@
     (let1 document (js-eval "document")
       (add-handler! document "keypress" dispatch-event))
     
-    (linum-mode #t)
+    ;(linum-mode #t)
     (display "")
     ))
 
@@ -173,7 +173,7 @@
 			      "id"))
 			    id-prefix-len))
 		(pad-str-len 0)
-		(pad-str #f))
+		(pad-str ""))
 	   (for-each (lambda (l) 
 		       (let* ((id (element-read-attribute l "id"))
 			      (id-len (string-length id))
