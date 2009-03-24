@@ -20,6 +20,10 @@
 
 (define (current-buffer) (js-eval "document"))
 
+
+;;
+;; ???
+;;
 (define (elements-of-class-of pat) 
   (let1 code (string-append "$$('" pat "').to_list();")
     (js-eval code)))
@@ -157,36 +161,48 @@
      (set! prefix #t)
      )))
 
+
+(define (for-each-styleSheet proc)
+  (let* ((styleSheets (js-ref (current-buffer) "styleSheets"))
+	 (n-styleSheets (js-ref styleSheets "length")))
+    (let loop ((i (- n-styleSheets 1)))
+      (unless (< i 0)
+	(let1 styleSheet (js-eval (string-append 
+				   "document.styleSheets.item("
+				   (number->string i)
+				   ")"))
+	  (proc styleSheet)
+	  (loop (- i 1)))))))
+
+(define (for-each-cssRule proc styleSheet)
+  (let* ((cssRules (js-ref styleSheet "cssRules"))
+	 (n-cssRules (js-ref cssRules "length")))
+    (let loop ((i (- n-cssRules)))
+      (unless (< i 0)
+	(let1 cssRule (js-ref cssRules i)
+	  (proc cssRule)
+	  (loop (- i 1)))))))
+				
+;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
 (define-interactive (linum-mode p) ("P")
   (
-   ;;
-   (let1 linums (elements-of-class-of ".linum")
-     (if p
-	 (for-each (lambda(l) 
-		     (element-update! l "")
-		     ) linums)
-	 (let* ((id-prefix     "linum:")
-		(id-prefix-len (string-length id-prefix))
-		(max-len (- (string-length 
-			     (element-read-attribute 
-			      (car (reverse linums))
-			      "id"))
-			    id-prefix-len))
-		(pad-str-len 0)
-		(pad-str ""))
-	   (for-each (lambda (l) 
-		       (let* ((id (element-read-attribute l "id"))
-			      (id-len (string-length id))
-			      (line-str (substring id id-prefix-len id-len))
-			      (local-pad-len (- max-len (- id-len id-prefix-len))))
-			 (when (not (eq? pad-str-len local-pad-len))
-			       (set! pad-str-len local-pad-len)
-			       (set! pad-str (make-string pad-str-len #\space)))
-			 (element-update! l (string-append pad-str line-str " "))))
-		     linums))))
-   ;;
-   ))
+   (call/cc 
+   (lambda (return)
+     (for-each-styleSheet
+      (lambda (styleSheet)
+	(for-each-cssRule 
+	 (lambda (cssRule)
+	   (when (equal (js-ref cssRule "selectorText") ".linum")
+	     (set! (js-ref (js-ref cssRule "style") "display") 
+		   (if p "none" ""))
+	     (return #t)
+	     )
+	   )
+	   styleSheet)))))))
 
+;;
+;; Stitch
+;;
 
 (define-key global-map '(#\t) linum-mode)
 (define-key global-map '(#\u) universal-argument)
