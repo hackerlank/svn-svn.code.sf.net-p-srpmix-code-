@@ -4,6 +4,7 @@
 (load "file:///home/jet/workspace/srpmix/yogomacs/trunk/yogomacs.scm")
 </script>
 |#
+
 ;;
 ;; Utilities
 ;;
@@ -161,44 +162,50 @@
      (set! prefix #t)
      )))
 
-
 (define (for-each-styleSheet proc)
   (let* ((styleSheets (js-ref (current-buffer) "styleSheets"))
 	 (n-styleSheets (js-ref styleSheets "length")))
-    (let loop ((i (- n-styleSheets 1)))
-      (unless (< i 0)
-	(let1 styleSheet (js-eval (string-append 
-				   "document.styleSheets.item("
-				   (number->string i)
-				   ")"))
-	  (proc styleSheet)
-	  (loop (- i 1)))))))
+    (let loop ((i 0))
+      (when (< i n-styleSheets)
+	(let1 styleSheet (js-ref styleSheets i)
+	  (when styleSheets
+	    (proc styleSheet)
+	    (loop (+ i 1))))))))
 
 (define (for-each-cssRule proc styleSheet)
-  (let* ((cssRules (js-ref styleSheet "cssRules"))
-	 (n-cssRules (js-ref cssRules "length")))
-    (let loop ((i (- n-cssRules)))
-      (unless (< i 0)
+  (let* ((cssRules (or 
+		    (js-ref styleSheet "cssRules")
+		    (js-ref styleSheet "rules")
+		    ))
+	 (n-cssRules (js-ref cssRules "length"))
+	 )
+    (let loop ((i 0))
+      (when (< i n-cssRules)
 	(let1 cssRule (js-ref cssRules i)
-	  (proc cssRule)
-	  (loop (- i 1)))))))
+	  (when cssRule
+	    (proc cssRule)
+	    (loop (+ i 1))))))))
 				
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
 (define-interactive (linum-mode p) ("P")
   (
    (call/cc 
-   (lambda (return)
-     (for-each-styleSheet
-      (lambda (styleSheet)
-	(for-each-cssRule 
-	 (lambda (cssRule)
-	   (when (equal (js-ref cssRule "selectorText") ".linum")
-	     (set! (js-ref (js-ref cssRule "style") "display") 
-		   (if p "none" ""))
-	     (return #t)
-	     )
-	   )
-	   styleSheet)))))))
+    (lambda (return)
+      (for-each-styleSheet
+       (lambda (styleSheet)
+	 (for-each-cssRule 
+	  (lambda (cssRule)
+	    (when (equal? (js-ref cssRule "selectorText") ".linum")
+	      (js-set! (js-ref cssRule "style")
+		       "display"
+		       (if p "none" ""))
+	      (return #t)
+	      )
+	    )
+	  styleSheet)))))
+   ;; This one is needed to avoid broken intermediate code.
+   (display "")
+   ))
 
 ;;
 ;; Stitch
@@ -210,5 +217,4 @@
 ;(define-key global-map '((#\>)) linum-mode)
 
 (init-yogomacs)
-
 ;; format procedure? let-loop
