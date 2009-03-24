@@ -162,6 +162,11 @@
      (set! prefix #t)
      )))
 
+
+
+;;
+;; Face
+;;
 (define (for-each-styleSheet proc)
   (let* ((styleSheets (js-ref (current-buffer) "styleSheets"))
 	 (n-styleSheets (js-ref styleSheets "length")))
@@ -185,26 +190,38 @@
 	  (when cssRule
 	    (proc cssRule)
 	    (loop (+ i 1))))))))
-				
+
+(define (face-of name)
+  (let1 text (string-append "." (symbol->string name))
+    (let1 r (call/cc 
+	     (lambda (return)
+	       (for-each-styleSheet
+		(lambda (styleSheet)
+		  (for-each-cssRule 
+		   (lambda (cssRule)
+		     (when (equal? (js-ref cssRule "selectorText") text)
+		       (return cssRule)))
+		   styleSheet)))
+	       #f))
+      ;; This line is needed to avoid broken intermediate codes.
+      (display "")
+      r
+      )))
+
+(define (set-face-attribute name alist)
+  (let1 face (face-of name)
+    (if face
+	(for-each (lambda (pair)
+		    (js-set! (js-ref face "style")
+			     (symbol->string (car pair))
+			     (cdr pair)))
+		  alist))))
+
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
 (define-interactive (linum-mode p) ("P")
   (
-   (call/cc 
-    (lambda (return)
-      (for-each-styleSheet
-       (lambda (styleSheet)
-	 (for-each-cssRule 
-	  (lambda (cssRule)
-	    (when (equal? (js-ref cssRule "selectorText") ".linum")
-	      (js-set! (js-ref cssRule "style")
-		       "display"
-		       (if p "none" ""))
-	      (return #t)
-	      )
-	    )
-	  styleSheet)))))
-   ;; This one is needed to avoid broken intermediate code.
-   (display "")
+   (set-face-attribute 'linum  `((display . ,(if p "none" ""))))
+   (set-face-attribute 'fringe `((display . ,(if p "none" ""))))
    ))
 
 ;;
