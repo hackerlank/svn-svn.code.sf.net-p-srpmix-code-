@@ -29,6 +29,7 @@ source libsrpmix.sh
 SRPMIX_HYPERESTRAIER_INDEX_DIR=$SRPMIX_VAR_DIR/extra/hyperestraier/idx
 SRPMIX_HYPERESTRAIER_CREATE_OPTIONS=-xh3
 SRPMIX_HYPERESTRAIER_FILTER_DIR=/usr/share/hyperestraier/filter
+SRPMIX_HYPERESTRAIER_GATHER_OPTIONS="-apn -cm -sd -ft -fx html H@$SRPMIX_HYPERESTRAIER_FILTER_DIR/estfxasis"
 
 # list_files <source root dir>
 function list_files() {
@@ -57,6 +58,6 @@ find $SRPMIX_SOURCES_DIR/*/*/ -maxdepth 1 |
 	grep -v "/$" | while read d
 do
   cd $d
-  list_files . | estcmd gather -ft -fx html H@$SRPMIX_HYPERESTRAIER_FILTER_DIR/estfxasis $SRPMIX_HYPERESTRAIER_INDEX_DIR - || true
+  list_files . | estcmd gather $SRPMIX_HYPERESTRAIER_GATHER_OPTIONS $SRPMIX_HYPERESTRAIER_INDEX_DIR - || true
 done
 
