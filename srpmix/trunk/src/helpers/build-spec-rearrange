@@ -30,6 +30,19 @@ function use_old_autoreconf_p
 	return 1
     fi
 }
+
+function use_old_autoconf_p
+{
+    local spec_file=$1
+    local lines=$(grep -e '^autoconf ' ${spec_file})
+    
+    if echo $lines | grep -e '-l '; then
+	return 0
+    else
+	return 1
+    fi
+}
+
 function spec_file_hack
 {
     local spec_file=$1
@@ -45,6 +58,9 @@ function spec_file_hack
 
 
     if use_old_autoreconf_p "$spec_file" > /dev/null 2>&1; then
+	use_old_autoconf="-e s/^autoconf/autoconf-2.13/"
+	use_old_autoreconf="-e s/^autoreconf/autoreconf-2.13/"
+    elif use_old_autoconf_p "$spec_file" > /dev/null 2>&1; then
 	use_old_autoconf="-e s/^autoconf/autoconf-2.13/"
 	use_old_autoreconf="-e s/^autoreconf/autoreconf-2.13/"
     fi

@@ -1,5 +1,8 @@
 2009-03-25  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/build-spec-rearrange (use_old_autoconf_p): New function.
+	(spec_file_hack): Use use_old_autoconf_p.
+
 	* src/srpmix-build (parse_arguments:--rearrange-spec-command): 
 	New option.
 	
