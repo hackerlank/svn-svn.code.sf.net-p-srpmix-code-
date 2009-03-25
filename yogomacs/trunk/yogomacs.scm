@@ -8,6 +8,15 @@
 ;;
 ;; Utilities
 ;;
+(define js-null (js-eval "null"))
+(define (js-null? obj)
+  (eq? js-null obj))
+
+(define (js-len obj)
+  (js-ref obj "length"))
+
+
+
 (define (error msg)
   (let1 code (string-append "throw new Error(\"yogomacs: " 
 			   msg
@@ -19,8 +28,35 @@
   (display (string-append msg "\n")))
 
 
-(define (current-buffer) (js-eval "document"))
 
+
+
+;;
+;; Accessor
+;;
+(define (current-buffer) (js-eval "document"))
+(define (doctype-of buffer)
+  (js-ref (js-ref buffer "childNodes") 0))
+(define (html-of buffer)
+  (js-ref (js-ref buffer "childNodes") 1))
+
+(define (head-of buffer) (js-ref (js-ref (html-of buffer) "childNodes") 0))
+(define (body-of buffer) (js-ref (js-ref (html-of buffer) "childNodes") 1))
+(define (primary-pre-of buffer)
+  (let1 r (call/cc 
+	   (lambda (found)
+	     (let1 nodes (js-ref (body-of (current-buffer)) "childNodes")
+	       (let1 len (js-len nodes)
+		 (let loop ((i 0))
+		   (if (< i len)
+		       (let1 node (js-ref nodes i)
+			 (let1 nodeType (js-ref node "nodeType")
+			   (when (and (eq? nodeType 1) 
+				      (equal? (js-ref node "nodeName") "PRE"))
+			     (found node)))
+			 (loop (+ i 1)))
+		       (found #f)))))))
+    r))
 
 ;;
 ;; ???
@@ -100,6 +136,9 @@
 		     current-state-map
 		     update-current-state-map!)))
 
+(define (call-interactively cmd)
+  (apply cmd (make-interactive-args cmd)))
+
 (define (dispatch-event0 e root-map update-map!)
   ;; http://js.halaurum.googlepages.com/sample_key_event.html
   ;; C-M-x
@@ -115,6 +154,7 @@
 	(set! keyseq (cons 'M keyseq)))
       (when C
 	(set! keyseq (cons 'C keyseq)))
+
       (let1 r (lookup-key root-map keyseq)
 	(cond
 	 ((keymap? r)
@@ -123,26 +163,29 @@
 	  (update-map! global-map)
 	  (error "dispatch-event0: keyseq is undefined"))
 	 (else
-	  (let1 r0 (apply r (make-interactive-args r))
+	  (let1 r0 (call-interactively r)
 	    (update-map! global-map)
 	    r0)))))))
 
 ;; 
 ;; Interactive-Spec
 ;;
-(define-macro (define-interactive proc-sign interactive-spec body)
+(define-macro (define-interactive proc-sign input-spec output-spec body)
   `(begin
      (define ,proc-sign ,@body)
-     (define-interactive-spec ,(car proc-sign) ',interactive-spec)))
+     (define-interactive-spec ',(car proc-sign) ,(car proc-sign) ',input-spec ',output-spec)))
 
 (let ((prefix #f)
       (interactive-spec-table (list)))
-  (define (define-interactive-spec proc interactive-spec)
+  (define (define-interactive-spec name proc input-spec output-spec)
     (let1 cell (assoc proc interactive-spec-table)
       (if cell
-	  (set-cdr! cell interactive-spec)
+	  (set-cdr! cell `((input-spec  . ,input-spec)
+			   (output-spec . ,output-spec)))
 	  (set! interactive-spec-table (cons (cons proc 
-						   interactive-spec)
+						   `((name        . ,name)
+						     (input-spec  . ,input-spec)
+						     (output-spec . ,output-spec)))
 					     interactive-spec-table)))))
   (define (make-interactive-args proc)
     (let1 cell (assoc proc interactive-spec-table)
@@ -152,12 +195,12 @@
 			  ((equal? s "P") prefix)
 			  (else #f))
 			 )
-		       (cdr cell))
+		       (cdr (assq 'input-spec (cdr cell))))
 		  (list))
 	(set! prefix #f)
 	r)))
 
-  (define-interactive (universal-argument) ()
+  (define-interactive (universal-argument) () ()
     (
      (set! prefix #t)
      )))
@@ -169,7 +212,7 @@
 ;;
 (define (for-each-styleSheet proc)
   (let* ((styleSheets (js-ref (current-buffer) "styleSheets"))
-	 (n-styleSheets (js-ref styleSheets "length")))
+	 (n-styleSheets (js-len styleSheets)))
     (let loop ((i 0))
       (when (< i n-styleSheets)
 	(let1 styleSheet (js-ref styleSheets i)
@@ -182,7 +225,7 @@
 		    (js-ref styleSheet "cssRules")
 		    (js-ref styleSheet "rules")
 		    ))
-	 (n-cssRules (js-ref cssRules "length"))
+	 (n-cssRules (js-len cssRules))
 	 )
     (let loop ((i 0))
       (when (< i n-cssRules)
@@ -218,20 +261,47 @@
 		  alist))))
 
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
-(define-interactive (linum-mode p) ("P")
+(define-interactive (linum-mode p) ("P") ()
   (
    (set-face-attribute 'linum  `((display . ,(if p "none" ""))))
    (set-face-attribute 'fringe `((display . ,(if p "none" ""))))
    ))
 
 ;;
-;; Stitch
+;; Marker
 ;;
+(define-interactive (point-min) () ()
+  (
+   (call/cc
+    (lambda (found)
+      (let1 nodes (js-ref (primary-pre-of (current-buffer)) "childNodes")
+	(let1 len (js-len nodes)
+	  (let loop ((i 0))
+	    (if (< i len)
+		(let1 node (js-ref nodes i)
+		  (let1 nodeType (js-ref node "nodeType")
+		    (when (eq? nodeType 1)
+		      (let1 id (element-read-attribute node "id")
+			(when (and (not (js-null? id))
+				   (< (string-length "point:")
+				      (string-length id)))
+			  (let1 point-str (substring id (string-length "point:") (string-length id))
+			    (found (string->number point-str)))))))
+		  (loop (+ i 1)))
+		(found #f)))))))
+   ))
 
-(define-key global-map '(#\t) linum-mode)
-(define-key global-map '(#\u) universal-argument)
-;(define-key global-map '((#\<)) linum-mode)
-;(define-key global-map '((#\>)) linum-mode)
+
+
+(define (point-max) 
+  'todo)
+
+
+
+(define-key global-map '(#\t)     linum-mode)
+(define-key global-map '(#\u)     universal-argument)
+(define-key global-map '((M #\<)) point-min)
+(define-key global-map '((M #\>)) point-max)
 
 (init-yogomacs)
 ;; format procedure? let-loop
