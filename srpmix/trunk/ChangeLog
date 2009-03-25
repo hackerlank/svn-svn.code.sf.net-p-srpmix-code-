@@ -1,5 +1,8 @@
 2009-03-25  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-build (parse_arguments:--rearrange-spec-command): 
+	New option.
+	
 	* tests/01srpmix-ix.sh: New test case.
 
 	* src/srpmix-ix (default_target): Make regexp pattern

@@ -40,6 +40,7 @@ function print_usage
     echo "               [--disable=<plugins>]"
     echo "               [--type=<core|plugin>]"
     echo "               [--plugin-name=<name>]"
+    echo "               [--rearrange-spec-command=COMMAND]"
     echo "               --srpm=SRPM|--swrf=SWRF"
     echo
     echo "ARCH: i386(not for kenel), i686, x86_64, ia64, s390, s390x, ppc, or ppc64"
@@ -120,6 +121,9 @@ function parse_arguments
 		;;
 	    --target=*)
 	        export SRPMIX_TARGET=$(echo $1 | sed 's/--target=//')
+		;;
+	    --rearrange-spec-command=*)
+	        export SRPMIX_REARRANGE_SPEC_COMMAND=$(echo $1 | sed 's/--rearrange-spec-command=//')
 		;;
 	    --debug)
 	        DEBUG=yes
