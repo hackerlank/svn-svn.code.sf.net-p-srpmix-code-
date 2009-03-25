@@ -1,3 +1,15 @@
+2009-03-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-spec-rearrange (main): Use
+	the passed command line, EXTRA_COMMAND as the filter.
+
+	* Remove unnecessary white spaces.
+	
+	* src/srpmix-ix (REARRANGE_SPEC_COMMAND): New variable.
+	(print_usage:--rearrange-spec-command): New option.
+	(srpm_rearrange_spec): Pass `REARRANGE_SPEC_COMMAND' to
+	build-spec-rearrange.
+
 2009-03-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/build-spec-rearrange (use_old_autoreconf_p): New function.

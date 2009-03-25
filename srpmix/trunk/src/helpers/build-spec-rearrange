@@ -1,12 +1,11 @@
 #!/bin/bash
 
-ROOTDIR=
 SPEC_FILE=
 
 KEEP_ORIGINAL=
 SOURCEDIR=
 BUILDDIR=
-
+EXTRA_COMMAND=cat
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -33,8 +32,7 @@ function use_old_autoreconf_p
 }
 function spec_file_hack
 {
-    local rootdir=$1
-    local spec_file=$2
+    local spec_file=$1
 
 
     local use_old_autoconf="-e s/a/a/"
@@ -45,8 +43,6 @@ function spec_file_hack
     local no_hack__p_xen='\.p\.xen$'
     local dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
 
-
-    spec_file="${rootdir}/SPECS/${spec_file}"
 
     if use_old_autoreconf_p "$spec_file" > /dev/null 2>&1; then
 	use_old_autoconf="-e s/^autoconf/autoconf-2.13/"
@@ -164,22 +160,27 @@ function parse_arguments
             --builddir=*)
 	        BUILDDIR=$(echo $1 | sed 's/--builddir=//')
 	        ;;
+            --extra-command=*)
+	        EXTRA_COMMAND=$(echo $1 | sed 's/--extra-command=//')
 	    *)
 	        break
 	        ;;
 	 esac
 	 shift
     done
-    
-    ROOTDIR=$1
-    SPEC_FILE=$2
+
+    SPEC_FILE=$1
 }
 
 function main
 {
     parse_arguments "$@"
     
-    spec_file_hack ${ROOTDIR} ${SPEC_FILE}
+    spec_file_hack "${SPEC_FILE}"		\
+	|					\
+	SPEC_FILE="${SPEC_FILE}"		\
+	PATH="${SRPMIX_HELPER_DIR}:${PATH}"	\
+	eval "${EXTRA_COMMAND}"
 }
 
 es_time main "$@"

@@ -69,6 +69,7 @@ DO_HARDLINK=${SRPMIX_DO_HARDLINK}
 IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
 KEEP_ORIGINAL=${SRPMIX_KEEP_ORIGINAL}
 MULTI_TARGETS=${SRPMIX_MULTI_TARGETS}
+REARRANGE_SPEC_COMMAND=${SRPMIX_REARRANGE_SPEC_COMMAND}
 
 if test "x${SRPMIX_IX_DEBUG}" = xyes; then
     set -x
@@ -95,15 +96,15 @@ function print_usage
     echo "            [--multi-targets]"
     echo "            [--target=target|-t=target|--target target|-t target]"
     echo "            [--set-group=group|-g=group|--set-group group|-g group]"
-    echo "            [--hardlink] [--ignore-error] [--keep-original]"
+    echo "            [--hardlink] [--ignore-error] [--keep-original] [--rearrange-spec-command=COMMAND]"
     echo "            ROOTDIR SRPM_FILES..."
-    echo 
+    echo
     echo
     echo "  --force: create ROOTDIR if it doesn't exist."
     echo "           If --force given and ROOTDIR exists"
     echo "           existance of SRPMIX profile file is expected."
-    echo "  --sudo: use sudo in doing chown. "      
-    echo "  --freeze: freeze expanded files. "      
+    echo "  --sudo: use sudo in doing chown. "
+    echo "  --freeze: freeze expanded files. "
     echo ""
     echo "environment variables:"
     echo "SRPMIX_DO_HARDLINK=yes|no"
@@ -112,20 +113,21 @@ function print_usage
     echo "SRPMIX_KEEP_ORIGINAL=yes|no"
     echo "SRPMIX_IX_DEBUG=yes|no"
     echo "SRPMIX_TARGET=i386|i686|x86_64|ia64|s390|s390x|ppc|ppc64"
-    echo 
+    echo "SRPMIX_REARRANGE_SPEC_COMMAND=COMMAND"
+    echo
 }
 
 function verbose
 {
     if test x"${VERBOSE}" = xyes; then
-	es_print "$@"
+        es_print "$@"
     fi
 }
 
 
 function message
 {
-    es_print "$@" 
+    es_print "$@"
 }
 
 function abort
@@ -142,7 +144,7 @@ function update_count
 
     TOTAL_COUNT=`expr 1 + $TOTAL_COUNT`
     if ! test $status = 0; then
-	ABORT_COUNT=`expr 1 + $ABORT_COUNT`
+        ABORT_COUNT=`expr 1 + $ABORT_COUNT`
     fi
 }
 
@@ -154,7 +156,7 @@ function update_count
 #
 function default_target
 {
-    $RPM --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu	//'
+    $RPM --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu       //'
 }
 
 function guess_target
@@ -163,7 +165,7 @@ function guess_target
     local line
 
     if line=$(grep ExclusiveArch: $spec_file 2>/dev/null); then
-	echo $line | sed -e 's/ExclusiveArch: \?\([-_a-zA-Z0-9]\+\).*/\1/' 
+        echo $line | sed -e 's/ExclusiveArch: \?\([-_a-zA-Z0-9]\+\).*/\1/'
     fi
 }
 
@@ -173,11 +175,11 @@ function default_multi_targets
     local targets=${current}
 
     for x in i386 i686 x86_64 ia64 s390 s390x ppc ppc64; do
-	if test "$x" = "$current"; then
-	    :
-	else
-	    targets="${targets},$x"
-	fi
+        if test "$x" = "$current"; then
+            :
+        else
+            targets="${targets},$x"
+        fi
     done
     echo $targets
 }
@@ -185,115 +187,119 @@ function default_multi_targets
 function parse_arguments
 {
     if test -z "${TARGET}"; then
-	if test -z "${MULTI_TARGETS}"; then
-	    # Make empty
-	    TARGET='?'
-	else
-	    TARGET=$(default_multi_targets)
-	fi
+        if test -z "${MULTI_TARGETS}"; then
+            # Make empty
+            TARGET='?'
+        else
+            TARGET=$(default_multi_targets)
+        fi
     fi
 
     while [ $# -gt 0 ]; do
-	case "$1" in
-	    --help|-h)
-		print_usage
-		exit 0
-		;;
-	    --force|-f)
-		CREATE_ROOTDIR=yes
-		shift 1
-		;;
-	    --verbose|-v)
-		VERBOSE=yes
-		shift 1
-		;;
-	    --debug)
-		set -o xtrace
-		VERBOSE=yes
-		shift 1
-		;;
-	    --sudo|-s)
-		USE_SUDO=yes
-		shift 1
-		;;
-	    --freeze|-F)
-		FREEZE=yes
-		shift 1
-		;;
+        case "$1" in
+            --help|-h)
+                print_usage
+                exit 0
+                ;;
+            --force|-f)
+                CREATE_ROOTDIR=yes
+                shift 1
+                ;;
+            --verbose|-v)
+                VERBOSE=yes
+                shift 1
+                ;;
+            --debug)
+                set -o xtrace
+                VERBOSE=yes
+                shift 1
+                ;;
+            --sudo|-s)
+                USE_SUDO=yes
+                shift 1
+                ;;
+            --freeze|-F)
+                FREEZE=yes
+                shift 1
+                ;;
             --set-group|-g)
-		if [ $# -gt 0 ]; then
-	            shift 1
-		    
-		    GROUP=$1
-		    shift 1
-		else
-		    echo no option argument for "$1" 1>&2
-		    print_usage 1>&2
-		    abort
-		fi
-		;;
+                if [ $# -gt 0 ]; then
+                    shift 1
+
+                    GROUP=$1
+                    shift 1
+                else
+                    echo no option argument for "$1" 1>&2
+                    print_usage 1>&2
+                    abort
+                fi
+                ;;
             -g=*)
                 GROUP=`echo $1 | sed -e 's/-g=//'`
                 shift 1
                 ;;
-	    --set-group=*)
+            --set-group=*)
                 GROUP=`echo $1 | sed -e 's/--set-group=//'`
                 shift 1
-		;;
-	    --multi-targets)
-	        TARGET=$(default_multi_targets)
-		shift 1
-		;;
-            --target|-target|-t)
-		if [ $# -gt 0 ]; then
-	            shift 1
-		    
-		    TARGET=$1
-		    verify_target ${TARGET}
-		    shift 1
-		else
-		    echo no option argument for "$1" 1>&2
-		    print_usage 1>&2
-		    abort
-		fi
-		;;
-            -t=*)
-                TARGET=`echo $1 | sed -e 's/-t=//'`
-		verify_target ${TARGET}
+                ;;
+            --multi-targets)
+                TARGET=$(default_multi_targets)
                 shift 1
                 ;;
-	    --target=*)
-                TARGET=`echo $1 | sed -e 's/--target=//'`
-		verify_target ${TARGET}
+            --target|-target|-t)
+                if [ $# -gt 0 ]; then
+                    shift 1
+
+                    TARGET=$1
+                    verify_target ${TARGET}
+                    shift 1
+                else
+                    echo no option argument for "$1" 1>&2
+                    print_usage 1>&2
+                    abort
+                fi
+                ;;
+            -t=*)
+                TARGET=`echo $1 | sed -e 's/-t=//'`
+                verify_target ${TARGET}
                 shift 1
-		;;
-	    --hardlink)
-	        DO_HARDLINK=yes
-		shift 1
-		;;
+                ;;
+            --target=*)
+                TARGET=`echo $1 | sed -e 's/--target=//'`
+                verify_target ${TARGET}
+                shift 1
+                ;;
+            --hardlink)
+                DO_HARDLINK=yes
+                shift 1
+                ;;
             --ignore-error)
-	        IGNORE_ERROR=yes
-		shift 1;
-		;;
-	    --keep-original)
-	        KEEP_ORIGINAL=yes
-		shift 1;
-		;;
-	    -*)
-		echo unknown option: "$1" 1>&2
-		print_usage 1>&2
-		abort
-		;;
-	    *)
-		break
-		;;
-	esac
+                IGNORE_ERROR=yes
+                shift 1;
+                ;;
+            --keep-original)
+                KEEP_ORIGINAL=yes
+                shift 1;
+                ;;
+            --rearrange-spec-command=*)
+                REARRANGE_SPEC_COMMAND=`echo $1 | sed -e 's/--rearrange-spec-command//'`
+                shift 1
+                ;;
+            -*)
+                echo unknown option: "$1" 1>&2
+                print_usage 1>&2
+                abort
+                ;;
+            *)
+                break
+                ;;
+        esac
     done
 
     if test $# -lt 2; then
-	echo "too few argument" 1>&2
-	print_usage 1>&2
-	abort
+        echo "too few argument" 1>&2
+        print_usage 1>&2
+        abort
     fi
 
     ROOTDIR=$(if cd $1 2>/dev/null; then pwd; else echo $1; fi)
@@ -304,7 +310,7 @@ function parse_arguments
     if test "x$2" = "x"; then
         BUILDNAME=.
     fi
- 
+
     verbose varset --ROOTDIR=\""${ROOTDIR}"\"
     verbose varset --SRCFILES=\""${SRCFILES}"\"
     verbose varset --CREATE_ROOTDIR=\""${CREATE_ROOTDIR}"\"
@@ -329,13 +335,13 @@ function create_subdirs
 
 
     for d in ${SUBDIRS}; do
-	subdir="${rootdir}/${d}"
-	if mkdir ${subdir}; then
-	    verbose mkdir \""${subdir}"\" --type=subdir
-	else
-	    echo "fail to create directory: ${subdir}" 1>&2
-	    abort
-	fi
+        subdir="${rootdir}/${d}"
+        if mkdir ${subdir}; then
+            verbose mkdir \""${subdir}"\" --type=subdir
+        else
+            echo "fail to create directory: ${subdir}" 1>&2
+            abort
+        fi
     done
 }
 
@@ -346,12 +352,12 @@ function delete_subdirs
 
 
     for d in ${SUBDIRS}; do
-	subdir="${rootdir}/${d}"
-	if test -d "${subdir}"; then
-	    rm -rf "${subdir}"
+        subdir="${rootdir}/${d}"
+        if test -d "${subdir}"; then
+            rm -rf "${subdir}"
 
-	    verbose rmdir \""${subdir}"\" --type=subdir
-	fi
+            verbose rmdir \""${subdir}"\" --type=subdir
+        fi
     done
 }
 
@@ -359,36 +365,36 @@ function create_rootdir
 {
     local rootdir=$1
 
-    
+
     if mkdir -p "${rootdir}"; then
         IS_ROOTDIR_CREATED=yes
 
-	echo "${SRPMIX_PKG_VERSION}" > "${rootdir}/${PROFILE}"
-	if test "x$FREEZE" = "xyes"; then
+        echo "${SRPMIX_PKG_VERSION}" > "${rootdir}/${PROFILE}"
+        if test "x$FREEZE" = "xyes"; then
           chmod go-w "${rootdir}/${PROFILE}"
         fi
-	verbose mkdir -p \""${rootdir}"\" --type=rootdir
+        verbose mkdir -p \""${rootdir}"\" --type=rootdir
     else
-	echo "fail to create directory: ${rootdir}" 1>&2
-	abort
+        echo "fail to create directory: ${rootdir}" 1>&2
+        abort
     fi
 
     if test x${GROUP} != x; then
-	self=`id -u -n`
-	if test "${USE_SUDO}" = yes; then
-	    sudo=sudo
-	fi
-	${sudo} chown ${self}.${GROUP} ${rootdir}
-	verbose chown						\
-	    --user=\"${self}\"					\
-	    --group=\"${GROUP}\"				\
-	    --file=\"${rootdir}\"
+        self=`id -u -n`
+        if test "${USE_SUDO}" = yes; then
+            sudo=sudo
+        fi
+        ${sudo} chown ${self}.${GROUP} ${rootdir}
+        verbose chown                                           \
+            --user=\"${self}\"                                  \
+            --group=\"${GROUP}\"                                \
+            --file=\"${rootdir}\"
 
-  	chmod o-w ${rootdir}
-	verbose chmod --mode=\"o-w\" --file=\""${rootdir}"\"
+        chmod o-w ${rootdir}
+        verbose chmod --mode=\"o-w\" --file=\""${rootdir}"\"
 
-	chmod ug+w ${rootdir}
-	verbose chmod --mode=\"ug+w\" --file=\""${rootdir}"\"
+        chmod ug+w ${rootdir}
+        verbose chmod --mode=\"ug+w\" --file=\""${rootdir}"\"
     fi
 }
 
@@ -398,11 +404,11 @@ function delete_rootdir
 
 
     if test "${IS_ROOTDIR_CREATED}" = yes; then
-	delete_subdirs "${rootdir}"
-	rm -f "${rootdir}/${PROFILE}"
-	rmdir "${rootdir}"
+        delete_subdirs "${rootdir}"
+        rm -f "${rootdir}/${PROFILE}"
+        rmdir "${rootdir}"
 
-	verbose rmdir "\"${rootdir}\"" --type=rootdir
+        verbose rmdir "\"${rootdir}\"" --type=rootdir
     fi
 }
 
@@ -412,26 +418,26 @@ function verify_rootdir
     local create_rootdir=$2
 
     if test -d "${rootdir}"; then
-	if test -f "${rootdir}/${PROFILE}"; then
-	    if test `cat "${rootdir}/${PROFILE}"` = ${SRPMIX_PKG_VERSION}; then
-		verbose use-rootdir "\"${rootdir}\"" `cat "${rootdir}/${PROFILE}"`
-	    else
-		echo "directory version mismatch" 1>&2
-		echo "expected: ${SRPMIX_PKG_VERSION}, existing: `cat ${rootdir}/${PROFILE}`" 1>&2
-		abort
-	    fi
-	else
-	    echo "cannot find profile file: ${rootdir}/${PROFILE}" 1>&2
-	    abort
-	fi
+        if test -f "${rootdir}/${PROFILE}"; then
+            if test `cat "${rootdir}/${PROFILE}"` = ${SRPMIX_PKG_VERSION}; then
+                verbose use-rootdir "\"${rootdir}\"" `cat "${rootdir}/${PROFILE}"`
+            else
+                echo "directory version mismatch" 1>&2
+                echo "expected: ${SRPMIX_PKG_VERSION}, existing: `cat ${rootdir}/${PROFILE}`" 1>&2
+                abort
+            fi
+        else
+            echo "cannot find profile file: ${rootdir}/${PROFILE}" 1>&2
+            abort
+        fi
     else
-	if test "${create_rootdir}" = yes; then
-	    create_rootdir "${rootdir}"
-	else
-	    echo "root directory: ${rootdir} doesn't exist" 1>&2
-	    print_usage 1>&2
-	    abort
-	fi
+        if test "${create_rootdir}" = yes; then
+            create_rootdir "${rootdir}"
+        else
+            echo "root directory: ${rootdir} doesn't exist" 1>&2
+            print_usage 1>&2
+            abort
+        fi
     fi
 }
 function verify_subdirs
@@ -440,7 +446,7 @@ function verify_subdirs
     local is_create_rootdir=$2
 
     if test "${is_create_rootdir}" = yes; then
-	create_subdirs "${rootdir}"
+        create_subdirs "${rootdir}"
     fi
 }
 #
@@ -452,22 +458,22 @@ function verify_subdirs
 function verify_srcfiles
 {
     for f in "$@"; do
-	if ! test -r "${f}"; then
-	    echo "cannot read ${f}" 1>&2
-	    abort
-	fi
+        if ! test -r "${f}"; then
+            echo "cannot read ${f}" 1>&2
+            abort
+        fi
 
-	verbose readable? "\"${f}\"" "#t"
+        verbose readable? "\"${f}\"" "#t"
 
-	case "${f}" in
-	    *.src.rpm)
-		verbose srpm? "\"${f}\"" "#t"
-		;;
-	    *)
-		echo "unknown file type: ${f}" 1>&2
-		abort
-		;;
-	esac
+        case "${f}" in
+            *.src.rpm)
+                verbose srpm? "\"${f}\"" "#t"
+                ;;
+            *)
+                echo "unknown file type: ${f}" 1>&2
+                abort
+                ;;
+        esac
     done
 }
 #
@@ -479,13 +485,13 @@ function verify_srcfiles
 function verify_commands
 {
     while [ $# -gt 0 ]; do
-	if which $1 > /dev/null 2>&1; then
-	    verbose command-exist? "\"${1}\"" "#t"
-	else
-	    echo "cannot find $1" 1>&2
-	    abort
-	fi
-	shift 
+        if which $1 > /dev/null 2>&1; then
+            verbose command-exist? "\"${1}\"" "#t"
+        else
+            echo "cannot find $1" 1>&2
+            abort
+        fi
+        shift
     done
 }
 
@@ -494,33 +500,33 @@ function verify_target
     local target=$1
 
     if test "x${target}" != x; then
-	case "${target}" in
-	    i386|i586|i686)
-		:
-		;;
-	    x86_64)
-		:
-		;;
-	    ia64)
-		:
-		;;
-	    s390)
-		:
-		;;
-	    s390x)
-		:
-		;;
-	    ppc)
-		:
-		;;
-	    ppc64)
-		:
-		;;
-	    *)
-		echo "unknown target: ${target}" 1>&2
-		abort
-		;;
-	esac
+        case "${target}" in
+            i386|i586|i686)
+                :
+                ;;
+            x86_64)
+                :
+                ;;
+            ia64)
+                :
+                ;;
+            s390)
+                :
+                ;;
+            s390x)
+                :
+                ;;
+            ppc)
+                :
+                ;;
+            ppc64)
+                :
+                ;;
+            *)
+                echo "unknown target: ${target}" 1>&2
+                abort
+                ;;
+        esac
     fi
 }
 
@@ -546,11 +552,11 @@ function clean
 function spec_file_get
 {
     local srpm_file=$1
-    
-    
+
+
     ${RPM2CPIO} ${srpm_file} \
-	| ${CPIO} --list 2>/dev/null \
-	| grep '\.spec$'
+        | ${CPIO} --list 2>/dev/null \
+        | grep '\.spec$'
 }
 
 function spec_define
@@ -616,79 +622,79 @@ function srpm_deploy
     srpm_install "${rootdir}" "${srpm_file}" $archive_name
     status=$?
     message install-end --srpm-file=\""${srpm_file}"\" --status="${status}"
-    
+
     if test ${status} != 0; then
-	verbose abort				\
-	    --stage=install			\
-	    --srpm-file="\"${srpm_file}\""	\
-	echo ";;; abort to deploy ${srpm_file} to ${rootdir} in install stage" 1>&2
-	return 1
+        verbose abort                           \
+            --stage=install                     \
+            --srpm-file="\"${srpm_file}\""      \
+        echo ";;; abort to deploy ${srpm_file} to ${rootdir} in install stage" 1>&2
+        return 1
     fi
 
     srpm_save_spec "${rootdir}" "${spec_file}" "${xspec_file}"
 
     if test ${CREATE_ROOTDIR} = yes; then
-	if test -e "${rootdir}/${SPECDIR}/${xspec_file}"; then
-	    chmod a+r "${rootdir}/${SPECDIR}/${xspec_file}"
-	    chmod u+w "${rootdir}/${SPECDIR}/${xspec_file}"
-	fi
+        if test -e "${rootdir}/${SPECDIR}/${xspec_file}"; then
+            chmod a+r "${rootdir}/${SPECDIR}/${xspec_file}"
+            chmod u+w "${rootdir}/${SPECDIR}/${xspec_file}"
+        fi
     fi
     srpm_rearrange_spec "${rootdir}" \
-	${archive_name} ${build_name} ${spec_file}  \
-	> "${rootdir}/${SPECDIR}/${xspec_file}"
+        ${archive_name} ${build_name} ${spec_file}  \
+        > "${rootdir}/${SPECDIR}/${xspec_file}"
 
     # Special hack for kernel
     if test "${xspec_file}" = "kernel-2.6.spec" \
-	-o  "${xspec_file}" = "kernel-2.4.spec" \
-	-o  "${xspec_file}" = "kernel.spec" ; then
-	kernel_p=yes
+        -o  "${xspec_file}" = "kernel-2.4.spec" \
+        -o  "${xspec_file}" = "kernel.spec" ; then
+        kernel_p=yes
     fi
 
     if test "${TARGET}" = '?'; then
-	TARGET=$(guess_target "${rootdir}/${SPECDIR}/${xspec_file}")
-	if test -z "${TARGET}"; then
-	    TARGET=$(default_target)
-	    verbose varset --TARGET=\""${TARGET}"\" --rule=default
-	else
-	    verbose varset --TARGET=\""${TARGET}"\" --rule=guessing-from-ExclusiveArch
-	fi
+        TARGET=$(guess_target "${rootdir}/${SPECDIR}/${xspec_file}")
+        if test -z "${TARGET}"; then
+            TARGET=$(default_target)
+            verbose varset --TARGET=\""${TARGET}"\" --rule=default
+        else
+            verbose varset --TARGET=\""${TARGET}"\" --rule=guessing-from-ExclusiveArch
+        fi
     fi
 
     targets="$(echo "${TARGET}" | tr "," " " )"
 
     for arch in ${targets}; do
-	message build-start --target=${arch} --spec-file=\""${xspec_file}\""
-	srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
-	status=$?
-	message build-end --target=${arch} --spec-file=\""${xspec_file}\"" \
-	    --status="${status}"
+        message build-start --target=${arch} --spec-file=\""${xspec_file}\""
+        srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
+        status=$?
+        message build-end --target=${arch} --spec-file=\""${xspec_file}\"" \
+            --status="${status}"
 
-	if ( test "${status}" = 0 ) && ( test -z ${kernel_p} ); then
-	    break;
-	fi
+        if ( test "${status}" = 0 ) && ( test -z ${kernel_p} ); then
+            break;
+        fi
     done
 
-    
+
     if test ${status} != 0; then
-	if test "x${IGNORE_ERROR}" = xyes; then
-	    status=0
-	else
-    	    verbose abort				\
-		--stage=build			\
-		--srpm-file="\"${srpm_file}\""
-	    echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
-	    return 1
-	fi
+        if test "x${IGNORE_ERROR}" = xyes; then
+            status=0
+        else
+            verbose abort                               \
+                --stage=build                   \
+                --srpm-file="\"${srpm_file}\""
+            echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
+            return 1
+        fi
     fi
 
     srpm_freeze         \
-	"${rootdir}"    \
-	"${srpm_name}"  \
-	"${build_name}" \
-	"${xspec_file}" \
+        "${rootdir}"    \
+        "${srpm_name}"  \
+        "${build_name}" \
+        "${xspec_file}" \
         "${spec_name}"  \
-	\
-	${NULL}
+        \
+        ${NULL}
 
     return ${status}
 }
@@ -704,27 +710,27 @@ function srpm_install
     # mkdir "${source_dir}"
 
     if test ${CREATE_ROOTDIR} = yes; then
-	if test -e "${rootdir}/${SOURCEDIR}/${srpm_name}"; then
-	    chmod -R a+r "${rootdir}/${SOURCEDIR}/${srpm_name}"
-	    find "${rootdir}/${SOURCEDIR}/${srpm_name}" -type d -print0 | \
-		xargs -0 -e chmod a+x
-	    chmod -R u+w "${rootdir}/${SOURCEDIR}/${srpm_name}"
-	fi
+        if test -e "${rootdir}/${SOURCEDIR}/${srpm_name}"; then
+            chmod -R a+r "${rootdir}/${SOURCEDIR}/${srpm_name}"
+            find "${rootdir}/${SOURCEDIR}/${srpm_name}" -type d -print0 | \
+                xargs -0 -e chmod a+x
+            chmod -R u+w "${rootdir}/${SOURCEDIR}/${srpm_name}"
+        fi
     fi
 
-    verbose rpm-ivh							\
+    verbose rpm-ivh                                                     \
         --sourece-dir="\"${rootdir}/${SOURCEDIR}/${srpm_name}\""        \
-	\
-	${NULL}
-    
+        \
+        ${NULL}
+
     # dogcat is a hack for redhat-ds-7.1SP3-5.RHEL4.src.rpm.
-    LANG=C rpm								\
-        --define="_topdir ${rootdir}"					\
-        --define="_sourcedir ${rootdir}/${SOURCEDIR}/${srpm_name}"	\
-        --define="_requireslist dogcat"					\
+    LANG=C rpm                                                          \
+        --define="_topdir ${rootdir}"                                   \
+        --define="_sourcedir ${rootdir}/${SOURCEDIR}/${srpm_name}"      \
+        --define="_requireslist dogcat"                                 \
         -ivh "${srpm_file}"                                             \
         \
-	${NULL}
+        ${NULL}
 
     status=$?
 
@@ -739,13 +745,20 @@ function srpm_rearrange_spec
     local build_name=$3
     local spec_file=$4
 
-    # TODO Call `build-spec-rearrange'
+    local spec_path="${rootdir}/SPECS/${spec_file}"
+
+
+    if test -z "$REARRANGE_SPEC_COMMAND"; then
+        REARRANGE_SPEC_COMMAND=cat
+    fi
+
     spec_file_header "${rootdir}" "${srpm_name}" "${build_name}" \
-	| ${SRPMIX_HELPER_DIR}/build-spec-rearrange          \
-                          --keep-original="${KEEP_ORIGINAL}" \
-	                  --sourcedir="${SOURCEDIR}"         \
-                          --builddir="${BUILDDIR}"           \
-	                  "${rootdir}" "${spec_file}"
+	| ${SRPMIX_HELPER_DIR}/build-spec-rearrange                   \
+			  --keep-original="${KEEP_ORIGINAL}"          \
+			  --sourcedir="${SOURCEDIR}"                  \
+			  --builddir="${BUILDDIR}"                    \
+                          --extra-command="${REARRANGE_SPEC_COMMAND}" \
+			  "${spec_path}"
 }
 
 function srpm_save_spec
@@ -774,7 +787,7 @@ function srpm_build
     local arch=$4
     local status=
 
-    verbose rpmbuild-bp				                \
+    verbose rpmbuild-bp                                         \
 	--build-name="\"${rootdir}/${BUILDDIR}/${build_name}\"" \
 	\
 	${NULL}
@@ -793,16 +806,16 @@ function srpm_build
 
 
     LANG=C $RPMBUILD                                                    \
-        --define "_default_patch_fuzz 2"                                \
-        --target=${arch}                                                \
-        -bp                                                             \
-        --nodeps "${rootdir}/${SPECDIR}/${spec_file}"                   \
-        > /dev/null
-    # 
-    # Above /dev/null hack is needed to avoid patch command 
+	--define "_default_patch_fuzz 2"                                \
+	--target=${arch}                                                \
+	-bp                                                             \
+	--nodeps "${rootdir}/${SPECDIR}/${spec_file}"                   \
+	> /dev/null
+    #
+    # Above /dev/null hack is needed to avoid patch command
     # entering interactive mode.
     #
-    
+
     status=$?
     echo ${status} > "${rootdir}/STATUS"
     chmod -R a+r "${rootdir}/${BUILDDIR}/${build_name}"
@@ -836,7 +849,7 @@ function srpm_freeze
 
 
       for x in "${rootdir}/${BUILDDIR}/${build_name}"/*; do
-  	if test -e "${x}"; then
+	if test -e "${x}"; then
 	    chmod -R go-w "${x}"
 	    verbose chmod --mode=\"go-w\" --file=\""${x}"\"
 	fi
@@ -848,9 +861,9 @@ function srpm_freeze
 	    sudo=sudo
 	fi
 	${sudo} chown ${self}.${GROUP} ${rootdir}/${BUILDDIR}/${build_name}
-	verbose chown						\
-	    --user=\"${self}\"					\
-	    --group=\"${GROUP}\"				\
+	verbose chown                                           \
+	    --user=\"${self}\"                                  \
+	    --group=\"${GROUP}\"                                \
 	    --file=\""${rootdir}/${BUILDDIR}/${build_name}"\"
 
 	chmod o-w ${rootdir}/${BUILDDIR}/${build_name}
