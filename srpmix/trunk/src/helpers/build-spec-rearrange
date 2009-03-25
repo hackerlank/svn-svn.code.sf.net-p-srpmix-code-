@@ -100,6 +100,9 @@ function spec_file_hack
 	-e 's/^Copyright:/License:/'		   \
 	-e 's/^Serial:.*//'			   \
 	\
+	"${use_old_autoreconf}"                    \
+	"${use_old_autoconf}"                      \
+	\
 	${NULL} 
 }
 
