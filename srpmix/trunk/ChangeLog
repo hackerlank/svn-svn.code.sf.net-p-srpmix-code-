@@ -1,3 +1,10 @@
+2009-03-25  Masato Taruishi  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-hyperestraier:
+	* misc/m4/plugins.m4:
+	* misc/specs/srpmix.spec.in:
+	new plugin
+
 2009-03-25  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/build-spec-rearrange (use_old_autoconf_p): New function.

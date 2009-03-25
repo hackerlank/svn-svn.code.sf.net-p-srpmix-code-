@@ -41,3 +41,7 @@ AC_DEFUN([SRPMIX_ENABLE_PLUGIN_DOXYGEN],[
     SRPMIX_ENABLE_PLUGIN(doxygen, [test "x$DOXYGEN" != "x"])
 ])
 
+AC_DEFUN([SRPMIX_ENABLE_PLUGIN_HYPERESTRAIER],[
+    AC_CHECK_PROGS([ESTCMD], [estcmd])
+    SRPMIX_ENABLE_PLUGIN(hyperestraier, [test "x$ESTCMD" != "x"])
+])

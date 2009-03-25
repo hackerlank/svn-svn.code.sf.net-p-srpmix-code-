@@ -55,6 +55,14 @@ Group: Development/Tools
 %description plugin-doxygen
 SRPMix Plugin for creating doxygen documents.
 
+%package plugin-hyperestraier
+Summary: SRPMix Plugin for creating hyperestraier index.
+Requires: srpmix hyperestraier
+Group: Development/Tools
+
+%description plugin-hyperestraier
+SRPMix Plugin for creating hyperestraier index.
+
 %prep
 %setup -q
 
@@ -63,6 +71,7 @@ SRPMix Plugin for creating doxygen documents.
 	--enable-plugin-etags     \
 	--enable-plugin-ctags     \
 	--enable-plugin-cscope    \
+	--enable-plugin-hyperestraier    \
         --enable-plugin-doxygen=no
 
 make
@@ -118,6 +127,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plugin-ctags
 %{_datadir}/srpmix/plugins/60srpmix-ctags
+
+%files plugin-hyperestraier
+%{_datadir}/srpmix/plugins/60srpmix-hyperestraier
 
 # Temporary disabled
 #%files plugin-doxygen
