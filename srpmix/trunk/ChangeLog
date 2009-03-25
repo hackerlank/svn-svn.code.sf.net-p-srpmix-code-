@@ -1,5 +1,10 @@
 2009-03-25  Masatake YAMATO  <yamato@redhat.com>
 
+	* tests/01srpmix-ix.sh: New test case.
+
+	* src/srpmix-ix (default_target): Make regexp pattern
+	more specific.
+
 	* src/helpers/build-spec-rearrange (main): Use
 	the passed command line, EXTRA_COMMAND as the filter.
 

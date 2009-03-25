@@ -162,6 +162,7 @@ function parse_arguments
 	        ;;
             --extra-command=*)
 	        EXTRA_COMMAND=$(echo $1 | sed 's/--extra-command=//')
+		;;
 	    *)
 	        break
 	        ;;

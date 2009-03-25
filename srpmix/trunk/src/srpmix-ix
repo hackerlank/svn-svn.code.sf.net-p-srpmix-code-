@@ -156,7 +156,7 @@ function update_count
 #
 function default_target
 {
-    $RPM --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu       //'
+    $RPM --showrc | grep ' _target_cpu' | sed -e 's/.*_target_cpu[ \t]\+//'
 }
 
 function guess_target
