@@ -1,4 +1,4 @@
-;;; etags+srpmmix-guess.el --- Guessing the place where plugin/etags/TAGS file is
+;;; etags+srpmix-guess.el --- Guessing the place where plugin/etags/TAGS file is
 
 ;; Copyright (C) 2009 Masatake YAMATO
 
@@ -38,12 +38,12 @@
 
 (require 'etags)
 
-(defvar stitch-original-visit-tags-table nil)
-(unless (fboundp 'stitch-original-visit-tags-table)
-  (fset 'stitch-original-visit-tags-table
+(defvar etags+srpmix-guess-original-visit-tags-table nil)
+(unless (fboundp 'etags+srpmix-guess-original-visit-tags-table)
+  (fset 'etags+srpmix-guess-original-visit-tags-table
 	(symbol-function 'visit-tags-table)))
 
-(defun stitch-search-tags-file (base)
+(defun etags+srpmix-guess-search-tags-file (base)
   (unless (equal base "/")
     (let ((upper (file-name-directory base)))
       (cond
@@ -56,20 +56,20 @@
        ((file-exists-p (concat upper ".lcopy/TAGS"))
 	(concat upper ".lcopy"))
        ;; lcopy NG
-       ((file-exists-p (concat upper ".lcopy/plugins/TAGS"))
-	(concat upper ".lcopy/plugins"))
+       ((file-exists-p (concat upper ".lcopy/plugins/etags/TAGS"))
+	(concat upper ".lcopy/plugins/etags"))
        (t
-	(stitch-search-tags-file (directory-file-name upper)))))))
+	(etags+srpmix-guess-search-tags-file (directory-file-name upper)))))))
     
-(defun stitch-visit-tags-table (file &optional local)
+(defun etags+srpmix-guess-visit-tags-table (file &optional local)
   (interactive (list nil nil))
   (if file
-      (stitch-original-visit-tags-table file)
-    (let ((in-stitch (stitch-search-tags-file default-directory)))
+      (etags+srpmix-guess-original-visit-tags-table file)
+    (let ((in-stitch (etags+srpmix-guess-search-tags-file default-directory)))
       (let ((default-directory (or in-stitch default-directory)))
-	(call-interactively 'stitch-original-visit-tags-table)))))
+	(call-interactively 'etags+srpmix-guess-original-visit-tags-table)))))
 
-(fset 'visit-tags-table (symbol-function 'stitch-visit-tags-table))
+(fset 'visit-tags-table (symbol-function 'etags+srpmix-guess-visit-tags-table))
 
 (provide 'etags+srpmix-guess)
 ;; etags+srpmix-guess.el ends here
