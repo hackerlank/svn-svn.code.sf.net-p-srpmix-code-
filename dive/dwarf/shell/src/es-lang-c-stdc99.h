@@ -198,7 +198,7 @@ EsObject* es_srealize (const char* fmt,...);
    %_F: any number, ignore 
    %_@: ignore the rest */
 int        es_match        (EsObject* input, EsObject* fmt_object,...);
-int es_smatch   (EsObject* input, const char* fmt,...);
+int        es_smatch       (EsObject* input, const char* fmt,...);
 
 EsObject*  es_pget         (EsObject* plist, EsObject* key, EsObject* default_value);
 
