@@ -153,17 +153,18 @@ function lcopy_run_plugins
     local log=$1;
     shift
 
+    local sudo
+
+    if test "x$(id -u -n)" != xlcopy; then
+	sudo="sudo -H -u lcopy"
+    fi
+
     test -d $LCOPY_PLUGINDIR && \
 	find $LCOPY_PLUGINDIR -perm +0100 -type f | sort |  while read plugin
     do
-	es_print lcopy start-running-plugin "\"$plugin\"" | sudo -H -u lcopy tee -a $log > /dev/null
-	if test "x$(id -u -n)" = xlcopy; then
-	    lcopy $plugin "$@"
-	else
-	    sudo -H -u lcopy $plugin "$@"
-	fi
-
-	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? | sudo -H -u lcopy tee -a $log > /dev/null
+	es_print lcopy start-running-plugin "\"$plugin\"" | ${sudo} tee -a $log > /dev/null
+	${sudo} $plugin "$@"
+	es_print lcopy end-running-plugin "\"$plugin\"" --status=$? | ${sudo} tee -a $log > /dev/null
     done
 }
 

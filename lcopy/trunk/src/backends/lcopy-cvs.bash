@@ -53,8 +53,18 @@ function cvs_checkout_parse_cmdline
 	return 1
     fi
 
-    if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
-	echo "broken repo specification: $REPO" 2>&1
+    if echo "$REPO" | grep pserver > /dev/null 2>&1 ; then
+	if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
+	    echo "broken pserver repo specification: $REPO" 2>&1
+	    return 1
+	fi
+    elif echo "$REPO" | grep extssh > /dev/null 2>&1; then
+	if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x:::"; then
+	    echo "broken extssh repo specification: $REPO" 2>&1
+	    return 1
+	fi
+    else
+	echo "Unknown repo specification: $REPO" 2>&1
 	return 1
     fi
 
