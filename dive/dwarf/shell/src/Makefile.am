@@ -1,7 +1,7 @@
-bin_PROGRAMS = dwarfish
+bin_PROGRAMS = es-src-dwarf
 
-dwarfish_SOURCES = main.c dwarfish.c es-lang-c-stdc99.c
-dwarfish_LDADD  = @GLIB2_LIBS@ -ldwarves
+es_src_dwarf_SOURCES = main.c dwarfish.c es-lang-c-stdc99.c
+es_src_dwarf_LDADD  = @GLIB2_LIBS@ -ldwarves
 noinst_HEADERS   = list.h hash.h es-lang-c-stdc99.h dwarfish.h
 
 AM_CFLAGS = -g -Wall

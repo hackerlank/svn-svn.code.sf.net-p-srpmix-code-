@@ -13,7 +13,7 @@ AC_PROG_LIBTOOL
 
 dnl AM_PATH_GLIB_2_0
 PKG_CHECK_MODULES([GLIB2],    [glib-2.0])
-AC_CHECK_LIB(libdwarves, dwarves__init)
+AC_CHECK_LIB(dwarves, dwarves__init)
 
 AC_OUTPUT([
 	   Makefile
