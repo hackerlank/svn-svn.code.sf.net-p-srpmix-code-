@@ -160,7 +160,7 @@
 ;;
 (define-macro (define-interactive proc-sign input-spec output-spec . body)
   `(begin
-     (define ,proc-sign ,body)
+     (define ,proc-sign ,@body)
      (define-interactive-spec ',(car proc-sign) ,(car proc-sign) ',input-spec ',output-spec)))
 
 (let ((prefix #f)
