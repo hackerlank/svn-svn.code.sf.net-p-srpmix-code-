@@ -8,14 +8,8 @@
 ;;
 ;; Utilities
 ;;
-(define js-null (js-eval "null"))
-(define (js-null? obj)
-  (eq? js-null obj))
-
 (define (js-len obj)
   (js-ref obj "length"))
-
-
 
 (define (error msg)
   (let1 code (string-append "throw new Error(\"yogomacs: " 
@@ -26,10 +20,6 @@
 ;; biwascheme doesn't have format
 (define (message msg)
   (display (string-append msg "\n")))
-
-
-
-
 
 ;;
 ;; Accessor
@@ -74,9 +64,6 @@
     (set! yogomacs-initialized? #t)
     (let1 document (js-eval "document")
       (add-handler! document "keypress" dispatch-event))
-    
-    ;(linum-mode #t)
-    (display "")
     ))
 
 ;;		    
@@ -137,7 +124,8 @@
 		     update-current-state-map!)))
 
 (define (call-interactively cmd)
-  (apply cmd (make-interactive-args cmd)))
+  (apply cmd (make-interactive-args cmd))
+  )
 
 (define (dispatch-event0 e root-map update-map!)
   ;; http://js.halaurum.googlepages.com/sample_key_event.html
@@ -202,7 +190,7 @@
 
   (define-interactive (universal-argument) () ()
     (set! prefix #t)
-     ))
+    ))
 
 
 
@@ -214,7 +202,7 @@
 	 (n-styleSheets (js-len styleSheets)))
     (let loop ((i 0))
       (when (< i n-styleSheets)
-	(let1 styleSheet (js-ref styleSheets i)
+	(let1 styleSheet (js-ref styleSheets (number->string i))
 	  (when styleSheets
 	    (proc styleSheet)
 	    (loop (+ i 1))))))))
@@ -228,7 +216,7 @@
 	 )
     (let loop ((i 0))
       (when (< i n-cssRules)
-	(let1 cssRule (js-ref cssRules i)
+	(let1 cssRule (js-ref cssRules (number->string i))
 	  (when cssRule
 	    (proc cssRule)
 	    (loop (+ i 1))))))))
@@ -246,7 +234,6 @@
 		   styleSheet)))
 	       #f))
       ;; This line is needed to avoid broken intermediate codes.
-      (display "")
       r
       )))
 
@@ -274,7 +261,7 @@
        (let1 len (js-len nodes)
 	 (let loop ((i 0))
 	   (if (< i len)
-	       (let1 node (js-ref nodes i)
+	       (let1 node (js-ref nodes (number->string i))
 		 (let1 nodeType (js-ref node "nodeType")
 		   (when (eq? nodeType 1)
 		     (let1 id (element-read-attribute node "id")
