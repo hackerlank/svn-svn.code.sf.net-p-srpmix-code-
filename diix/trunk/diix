@@ -1,0 +1,55 @@
+#!/bin/bash
+
+INPUT=$1
+OUTPUT=$2
+TMP=`mktemp -d`
+
+if ! test -f "$INPUT"; then
+    echo no such file: $INPUT 1>&2;
+    exit 1
+fi
+
+if ! test -d "$OUTPUT"; then
+    mkdir "$OUTPUT"
+    if test "$?" != 0; then
+	exit 2
+    fi
+fi
+
+function extract
+{
+    (cd $TMP; cpio -id; find . | while read a; do
+	    if file $a | grep ELF > /dev/null 2>&1; then
+		echo $a
+	    fi
+     done)
+}
+
+function convert
+{
+    local i
+    local o
+    
+    while read a; do
+	i=$TMP/$a
+	o=$OUTPUT/$(echo $a | sed -e 's|\./|++|' -e 's|/|--|g')
+	
+	es $i $o
+    done
+}
+
+function es
+{
+    cp $1 $2
+}
+
+function main
+{
+    trap "/bin/rm -rf $TMP" 0 
+
+
+    rpm2cpio $INPUT | extract | convert
+}
+
+
+main
