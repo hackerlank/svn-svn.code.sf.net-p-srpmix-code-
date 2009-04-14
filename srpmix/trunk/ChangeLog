@@ -1,3 +1,8 @@
+2009-04-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* utils/etags+srpmix-guess.el (etags+srpmix-guess-search-tags-file): Check 
+	kindex.
+
 2009-03-25  Masato Taruishi  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-hyperestraier:

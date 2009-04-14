@@ -52,6 +52,9 @@
        ;; srpmix
        ((file-exists-p (concat upper "plugins/etags/TAGS"))
 	(concat upper "plugins/etags"))
+       ((or (file-exists-p (concat upper "plugins/kindex/x86_64.TAGS"))
+	    (file-exists-p (concat upper "plugins/kindex/i686.TAGS")))
+	(concat upper "plugins/kindex/"))
        ;; lcopy
        ((file-exists-p (concat upper ".lcopy/TAGS"))
 	(concat upper ".lcopy"))
