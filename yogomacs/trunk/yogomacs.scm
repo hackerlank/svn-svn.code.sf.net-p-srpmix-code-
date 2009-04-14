@@ -170,9 +170,9 @@
 ;; 
 ;; Interactive-Spec
 ;;
-(define-macro (define-interactive proc-sign input-spec output-spec body)
+(define-macro (define-interactive proc-sign input-spec output-spec . body)
   `(begin
-     (define ,proc-sign ,@body)
+     (define ,proc-sign ,body)
      (define-interactive-spec ',(car proc-sign) ,(car proc-sign) ',input-spec ',output-spec)))
 
 (let ((prefix #f)
@@ -201,9 +201,8 @@
 	r)))
 
   (define-interactive (universal-argument) () ()
-    (
-     (set! prefix #t)
-     )))
+    (set! prefix #t)
+     ))
 
 
 
@@ -262,34 +261,30 @@
 
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
 (define-interactive (linum-mode p) ("P") ()
-  (
-   (set-face-attribute 'linum  `((display . ,(if p "none" ""))))
-   (set-face-attribute 'fringe `((display . ,(if p "none" ""))))
-   ))
+  (set-face-attribute 'linum  `((display . ,(if p "none" ""))))
+  (set-face-attribute 'fringe `((display . ,(if p "none" "")))))
 
 ;;
 ;; Marker
 ;;
 (define-interactive (point-min) () ()
-  (
-   (call/cc
-    (lambda (found)
-      (let1 nodes (js-ref (primary-pre-of (current-buffer)) "childNodes")
-	(let1 len (js-len nodes)
-	  (let loop ((i 0))
-	    (if (< i len)
-		(let1 node (js-ref nodes i)
-		  (let1 nodeType (js-ref node "nodeType")
-		    (when (eq? nodeType 1)
-		      (let1 id (element-read-attribute node "id")
-			(when (and (not (js-null? id))
-				   (< (string-length "point:")
-				      (string-length id)))
-			  (let1 point-str (substring id (string-length "point:") (string-length id))
-			    (found (string->number point-str)))))))
-		  (loop (+ i 1)))
-		(found #f)))))))
-   ))
+  (call/cc
+   (lambda (found)
+     (let1 nodes (js-ref (primary-pre-of (current-buffer)) "childNodes")
+       (let1 len (js-len nodes)
+	 (let loop ((i 0))
+	   (if (< i len)
+	       (let1 node (js-ref nodes i)
+		 (let1 nodeType (js-ref node "nodeType")
+		   (when (eq? nodeType 1)
+		     (let1 id (element-read-attribute node "id")
+		       (when (and (not (js-null? id))
+				  (< (string-length "point:")
+				     (string-length id)))
+			 (let1 point-str (substring id (string-length "point:") (string-length id))
+			   (found (string->number point-str)))))))
+		 (loop (+ i 1)))
+	       (found #f))))))))
 
 
 
