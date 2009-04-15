@@ -1,7 +1,7 @@
 #|
 <div class="default" id="bs-console"></div>
 <script src="file:///home/jet/workspace/biwascheme/lib/biwascheme.js">
-(load "file:///home/jet/workspace/srpmix/yogomacs/trunk/yogomacs.scm")
+ (load "file:///home/jet/workspace/srpmix/yogomacs/trunk/yogomacs.scm")
 </script>
 |#
 
@@ -152,7 +152,8 @@
 	  (update-map! r))
 	 ((not r)
 	  (update-map! global-map)
-	  (error "dispatch-event0: keyseq is undefined"))
+	  ;(error "dispatch-event0: keyseq is undefined")
+	  )
 	 (else
 	  (let1 r0 (call-interactively r)
 	    (update-map! global-map)
@@ -261,10 +262,13 @@
 			     (cdr pair)))
 		  alist))))
 
+;; TODO: (defface ...)
+
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
 (define-interactive (linum-mode p) ("P") #f
   (set-face-attribute 'linum  `((display . ,(if p "none" ""))))
   (set-face-attribute 'fringe `((display . ,(if p "none" "")))))
+
 
 
 
@@ -342,9 +346,26 @@
 	#f)))
 
 (define (point-node-text-length node)
-  0)
+  (let loop ((last node) 
+	     (len 0))
+    (let1 sibling (js-ref last "nextSibling")
+      (if (and sibling (not (js-null? sibling)))
+	  (cond
+	   ((eq? (js-ref sibling "nodeType") 3)
+	    (loop sibling
+		  (+ len (string->number (js-ref sibling "length")))))
+	   ((point-node? sibling)
+	    ;; last
+	    len)
+	   (else
+	    (loop sibling
+		  len)))
+	  ;; last
+	  len))))
 
-
+;;
+;; Point
+;;
 (define-interactive (point-min) 
   () 
   (lambda (i) (message (if (number? i) (number->string i) "#f")))
