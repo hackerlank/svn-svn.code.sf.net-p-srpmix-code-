@@ -1,4 +1,18 @@
+2009-04-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/50srpmix-file: Use find -print0 and xargs -0 to handle
+	white spaces in a file name.
+
+	* src/plugins/50srpmix-coreutils (run_cmd): Ditto.
+
+	* misc/specs/Makefile.am (dist-hook): Use `R' as a temporary variable
+	to avoid potential variable name conflicts.
+
+	* configure.ac (SRPMIX_MICRO_VERSION): Re-enable AC_RPM_RELEASE.
+
 2009-04-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm: Added rules for s390utils-1.5.3-17.el5.
 
 	* utils/etags+srpmix-guess.el (etags+srpmix-guess-search-tags-file): Check 
 	kindex.

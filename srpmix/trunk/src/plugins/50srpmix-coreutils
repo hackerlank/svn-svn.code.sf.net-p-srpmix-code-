@@ -105,7 +105,7 @@ function run_cmd
 
     es_print "$cmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
-    (cd $d && find -L . -not -type d \
+    (cd $d && find -L . -not -type d -print0 \
 	| grep -v ^./STATUS \
 	| grep -v ^./SRPMIX \
 	| grep -v ^.\$ \
@@ -114,7 +114,7 @@ function run_cmd
 	| grep -v ^./srpmix-LOG \
 	| grep -v ^./srpmix-SPECS \
 	| grep -v ^./SPECS \
-	| xargs $cmd >> $o )
+	| xargs -0 $cmd >> $o )
     es_print "$cmd-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
