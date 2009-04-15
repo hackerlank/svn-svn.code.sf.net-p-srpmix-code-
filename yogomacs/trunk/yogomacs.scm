@@ -26,12 +26,12 @@
 ;;
 (define (current-buffer) (js-eval "document"))
 (define (doctype-of buffer)
-  (js-ref (js-ref buffer "childNodes") 0))
+  (js-ref (js-ref buffer "childNodes") "0"))
 (define (html-of buffer)
-  (js-ref (js-ref buffer "childNodes") 1))
+  (js-ref (js-ref buffer "childNodes") "1"))
 
-(define (head-of buffer) (js-ref (js-ref (html-of buffer) "childNodes") 0))
-(define (body-of buffer) (js-ref (js-ref (html-of buffer) "childNodes") 1))
+(define (head-of buffer) (js-ref (js-ref (html-of buffer) "childNodes") "0"))
+(define (body-of buffer) (js-ref (js-ref (html-of buffer) "childNodes") "1"))
 (define (primary-pre-of buffer)
   (let1 r (call/cc 
 	   (lambda (found)
@@ -39,7 +39,7 @@
 	       (let1 len (js-len nodes)
 		 (let loop ((i 0))
 		   (if (< i len)
-		       (let1 node (js-ref nodes i)
+		       (let1 node (js-ref nodes (number->string i))
 			 (let1 nodeType (js-ref node "nodeType")
 			   (when (and (eq? nodeType 1) 
 				      (equal? (js-ref node "nodeName") "PRE"))
