@@ -17,6 +17,8 @@
 			   "\");")
     (js-eval code)))
 
+
+
 ;; biwascheme doesn't have format
 (define (message msg)
   (display (string-append msg "\n")))
@@ -124,8 +126,9 @@
 		     update-current-state-map!)))
 
 (define (call-interactively cmd)
-  (apply cmd (make-interactive-args cmd))
-  )
+  (let1 r (apply cmd (make-interactive-args cmd))
+    (handle-interactive-return cmd r)
+    r))
 
 (define (dispatch-event0 e root-map update-map!)
   ;; http://js.halaurum.googlepages.com/sample_key_event.html
@@ -161,7 +164,11 @@
 (define-macro (define-interactive proc-sign input-spec output-spec . body)
   `(begin
      (define ,proc-sign ,@body)
-     (define-interactive-spec ',(car proc-sign) ,(car proc-sign) ',input-spec ',output-spec)))
+     (define-interactive-spec ',(car proc-sign) ,(car proc-sign) 
+       ',input-spec 
+       ;; Don't quote: output-spec is a function. 
+       ,output-spec
+       )))
 
 (let ((prefix #f)
       (interactive-spec-table (list)))
@@ -187,8 +194,16 @@
 		  (list))
 	(set! prefix #f)
 	r)))
+  (define (handle-interactive-return proc return)
+    (let1 cell (assoc proc interactive-spec-table)
+      (when cell
+	(let1 output-spec (assq 'output-spec (cdr cell))
+	  (when output-spec
+	    (let1 func (cdr output-spec)
+	      (when (procedure? func)
+		(func return))))))))
 
-  (define-interactive (universal-argument) () ()
+  (define-interactive (universal-argument) () #f
     (set! prefix #t)
     ))
 
@@ -247,36 +262,70 @@
 		  alist))))
 
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
-(define-interactive (linum-mode p) ("P") ()
+(define-interactive (linum-mode p) ("P") #f
   (set-face-attribute 'linum  `((display . ,(if p "none" ""))))
   (set-face-attribute 'fringe `((display . ,(if p "none" "")))))
 
 ;;
 ;; Marker
 ;;
-(define-interactive (point-min) () ()
+(define-interactive (point-min) 
+  () 
+  (lambda (i) (message (if (number? i) (number->string i) "#f")))
   (call/cc
    (lambda (found)
      (let1 nodes (js-ref (primary-pre-of (current-buffer)) "childNodes")
        (let1 len (js-len nodes)
+	 ;; MIN
 	 (let loop ((i 0))
+	   ;; CONDITION
 	   (if (< i len)
 	       (let1 node (js-ref nodes (number->string i))
 		 (let1 nodeType (js-ref node "nodeType")
 		   (when (eq? nodeType 1)
 		     (let1 id (element-read-attribute node "id")
+		       ;; CONDITION
 		       (when (and (not (js-null? id))
 				  (< (string-length "point:")
 				     (string-length id)))
-			 (let1 point-str (substring id (string-length "point:") (string-length id))
-			   (found (string->number point-str)))))))
+			 (let1 point-str (substring id (string-length "point:")
+						    (string-length id))
+			   (let1 point-num (string->number point-str)
+			     ;;
+			     (found point-num)))))))
+		 ;; INCREMENT
 		 (loop (+ i 1)))
 	       (found #f))))))))
 
 
 
-(define (point-max) 
-  'todo)
+(define-interactive (point-max) 
+  ()
+  (lambda (i) (message (if (number? i) (number->string i) "#f")))
+  (call/cc
+   (lambda (found)
+     (let1 nodes (js-ref (primary-pre-of (current-buffer)) "childNodes")
+       (let1 len (js-len nodes)
+	 ;; MAX
+	 (let loop ((i (- len 1)))
+	   ;; CONDITION
+	   (if (< -1 i)
+	       (let1 node (js-ref nodes (number->string i))
+		 (let1 nodeType (js-ref node "nodeType")
+		   (when (eq? nodeType 1)
+		     (let1 id (element-read-attribute node "id")
+		       ;; CONDITION
+		       (when (and (not (js-null? id))
+				  (< (string-length "point:")
+				     (string-length id)))
+			 (let1 point-str (substring id (string-length "point:")
+						    (string-length id))
+			   (let1 point-num (string->number point-str)
+			     ;; Extra: node->text
+			     (found point-num)))))))
+		 ;; DECREMENT
+		 (loop (- i 1)))
+	       (found #f))))))))
 
 
 
