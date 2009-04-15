@@ -266,68 +266,101 @@
   (set-face-attribute 'linum  `((display . ,(if p "none" ""))))
   (set-face-attribute 'fringe `((display . ,(if p "none" "")))))
 
-;;
-;; Marker
-;;
-(define-interactive (point-min) 
-  () 
-  (lambda (i) (message (if (number? i) (number->string i) "#f")))
+
+
+;; 
+;; Walk
+;; 
+(define (walk-nodes initial-index-func
+		    step-func
+		    cont-func
+		    action-func
+		    no-action-result)
   (call/cc
    (lambda (found)
      (let1 nodes (js-ref (primary-pre-of (current-buffer)) "childNodes")
        (let1 len (js-len nodes)
-	 ;; MIN
-	 (let loop ((i 0))
-	   ;; CONDITION
-	   (if (< i len)
+	 (let loop ((i (initial-index-func len)))
+	   (if (cont-func i len)
 	       (let1 node (js-ref nodes (number->string i))
 		 (let1 nodeType (js-ref node "nodeType")
 		   (when (eq? nodeType 1)
-		     (let1 id (element-read-attribute node "id")
-		       ;; CONDITION
-		       (when (and (not (js-null? id))
-				  (< (string-length "point:")
-				     (string-length id)))
-			 (let1 point-str (substring id (string-length "point:")
-						    (string-length id))
-			   (let1 point-num (string->number point-str)
-			     ;;
-			     (found point-num)))))))
-		 ;; INCREMENT
-		 (loop (+ i 1)))
-	       (found #f))))))))
+		     (action-func i node found)
+		     ))
+		 (loop (step-func i)))
+	       (no-action-result len found))))))))
+
+(define (walk-nodes-fw action-func no-action-result)
+  (walk-nodes 
+   (lambda (len) 0)
+   (lambda (i) (+ i 1))
+   (lambda (i len) (< i len))
+   action-func
+   no-action-result))
+
+(define (walk-nodes-bw action-func no-action-result)
+  (walk-nodes 
+   (lambda (len) (- len 1))
+   (lambda (i) (- i 1))
+   (lambda (i len) (< -1 i))
+   action-func
+   no-action-result))
+
+;;
+;; Point node
+;;
+(define (point-node-min)
+  (walk-nodes-fw
+   (lambda (i node return) 
+     (when (point-node? node)
+       (return node)))
+   (lambda (len return) (return #f))))
+
+(define (point-node-max)
+  (walk-nodes-bw
+   (lambda (i node return) 
+     (when (point-node? node)
+       (return node)))
+   (lambda (len return) (return #f))))
 
 
+(define (point-node? node)
+  (let1 id (element-read-attribute node "id")
+    (if (and (not (js-null? id))
+	     (< (string-length "point:")
+		(string-length id)))
+	id
+	#f)))
+
+(define (point-node->point node)
+  (let1 id (point-node? node)
+    (if id
+	(let1 point-str (substring id (string-length "point:")
+				   (string-length id))
+	  (let1 point-num (string->number point-str)
+	    point-num))
+	#f)))
+
+(define (point-node-text-length node)
+  0)
+
+
+(define-interactive (point-min) 
+  () 
+  (lambda (i) (message (if (number? i) (number->string i) "#f")))
+  (let1 node (point-node-min)
+    (if node
+	(point-node->point node)
+	node)))
 
 (define-interactive (point-max) 
   ()
   (lambda (i) (message (if (number? i) (number->string i) "#f")))
-  (call/cc
-   (lambda (found)
-     (let1 nodes (js-ref (primary-pre-of (current-buffer)) "childNodes")
-       (let1 len (js-len nodes)
-	 ;; MAX
-	 (let loop ((i (- len 1)))
-	   ;; CONDITION
-	   (if (< -1 i)
-	       (let1 node (js-ref nodes (number->string i))
-		 (let1 nodeType (js-ref node "nodeType")
-		   (when (eq? nodeType 1)
-		     (let1 id (element-read-attribute node "id")
-		       ;; CONDITION
-		       (when (and (not (js-null? id))
-				  (< (string-length "point:")
-				     (string-length id)))
-			 (let1 point-str (substring id (string-length "point:")
-						    (string-length id))
-			   (let1 point-num (string->number point-str)
-			     ;; Extra: node->text
-			     (found point-num)))))))
-		 ;; DECREMENT
-		 (loop (- i 1)))
-	       (found #f))))))))
-
-
+  (let1 node (point-node-max)
+    (if node
+	(+ (point-node->point node)
+	   (point-node-text-length node))
+	node)))
 
 (define-key global-map '(#\t)     linum-mode)
 (define-key global-map '(#\u)     universal-argument)
