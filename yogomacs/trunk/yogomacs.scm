@@ -1,10 +1,3 @@
-#|
-<div class="default" id="bs-console"></div>
-<script src="file:///home/jet/workspace/biwascheme/lib/biwascheme.js">
- (load "file:///home/jet/workspace/srpmix/yogomacs/trunk/yogomacs.scm")
-</script>
-|#
-
 ;;
 ;; Utilities
 ;;
@@ -76,7 +69,7 @@
   (js-ref (js-ref (html-of buffer) "childNodes") "0"))
 (define (body-of buffer)
   (js-ref (js-ref (html-of buffer) "childNodes") "1"))
-(define (buffer-contents-of buffer)
+(define (buffer-tree buffer)
   (let1 r (call/cc 
 	   (lambda (found)
 	     (let1 nodes (js-ref (body-of (current-buffer)) "childNodes")
@@ -326,7 +319,7 @@
 		    no-action-result)
   (call/cc
    (lambda (found)
-     (let1 nodes (js-ref (buffer-contents-of (current-buffer)) "childNodes")
+     (let1 nodes (js-ref (buffer-tree (current-buffer)) "childNodes")
        (let1 len (js-len nodes)
 	 (let loop ((i (initial-index-func len)))
 	   (if (cont-func i len)
@@ -383,30 +376,59 @@
 	#f)))
 
 
-(define (point-node->point node)
+(define (point-node->start node)
   (let1 id (point-node? node)
     (if id
 	(cadr id)
 	#f)))
+(define (point-node->length node)
+  (+ (point-node-trailing-text-length node)
+     (point-node-holding-text-length node)))
+(define (point-node->range node)
+  (let1 start (point-node->start node)
+    (if start
+	(list start (+ start (point-node->length node)))
+	#f)))
 
-(define (point-node-text-length node)
+
+(define (point-node->prefix node)
+  (let1 id (point-node? node)
+    (if id
+	(car id)
+	#f)))
+
+(define (point-node-text-length node starting-from)
   (let loop ((last node) 
-	     (len 0))
-    (let1 sibling (js-ref last "nextSibling")
+	     (len 0)
+	     (starting-from starting-from))
+    (let1 sibling (js-ref last starting-from)
       (if (and sibling (not (js-null? sibling)))
 	  (cond
 	   ((node-text? sibling)
 	    (loop sibling
-		  (+ len (string->number (js-ref sibling "length")))))
+		  (+ len (string->number (js-ref sibling "length")))
+		  "nextSibling"))
 	   ((point-node? sibling)
 	    ;; last
 	    len)
 	   (else
 	    (loop sibling
-		  len)))
+		  len
+		  "nextSibling")))
 	  ;; last
 	  len))))
 
+(define (point-node-trailing-text-length node)
+  (point-node-text-length node "nextSibling"))
+
+(define (point-node-holding-text-length node)
+  (case (point-node->prefix node)
+    ((point) 0)
+    ((font-lock) 
+     (point-node-text-length node "firstChild"))
+    ;; TODO: Error
+    (else 0)
+    ))
 ;;
 ;; Point
 ;;
@@ -416,7 +438,7 @@
   "TODO"
   (let1 node (point-node-min)
     (if node
-	(point-node->point node)
+	(point-node->start node)
 	node)))
 
 (define-interactive (point-max) 
@@ -425,8 +447,10 @@
   "TODO"
   (let1 node (point-node-max)
     (if node
-	(+ (point-node->point node)
-	   (point-node-text-length node))
+	(+ 
+	 (point-node->start node)
+	 (point-node->length node)
+	 )
 	node)))
 
 (define-key global-map '(#\t)     linum-mode)
