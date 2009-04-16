@@ -1,15 +1,23 @@
 #!/bin/sh
+#
+# Mirror src.rpm and debuginfo files at ftp.redhat.com to local
+#
+#
+# Masatake YAMATO, GPL3.
+#
 
+# Where the data are mirrored to
+OROOT=/tmp/mirror
+
+# Data sources
 FTP=ftp.redhat.com
 MPATH=ftp://${FTP}/pub/redhat
-OROOT=/tmp/mirror
+
 
 ODIR=${OROOT}/${FTP}
 LDIR=${OROOT}/log
 PATTERN='*.src.rpm,*-debuginfo-*'
 DATE=$(date --rfc-3339=date)
-
-
 
 if ! test -d $ODIR; then
    mkdir -p $ODIR
@@ -24,3 +32,4 @@ fi
     wget -nH --cut-dirs=2 --mirror ${MPATH} -A ${PATTERN} \
 	  -o ${LDIR}/${FTP}.${DATE}.log
 }
+
