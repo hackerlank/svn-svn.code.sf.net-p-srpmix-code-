@@ -7,15 +7,15 @@
 #
 
 # Where the data are mirrored to
-OROOT=/tmp/mirror
+ROOT=/tmp/mirror
 
 # Data sources
 FTP=ftp.redhat.com
 MPATH=ftp://${FTP}/pub/redhat
 
 
-ODIR=${OROOT}/${FTP}
-LDIR=${OROOT}/log
+ODIR=${ROOT}/${FTP}
+LDIR=${ROOT}/log
 PATTERN='*.src.rpm,*-debuginfo-*'
 DATE=$(date --rfc-3339=date)
 
