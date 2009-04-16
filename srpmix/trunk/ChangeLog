@@ -1,3 +1,7 @@
+2009-04-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix.daily: Use -print0 in find and --null in xargs.
+
 2009-04-15  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/50srpmix-file: Use find -print0 and xargs -0 to handle
