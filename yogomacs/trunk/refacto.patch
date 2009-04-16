@@ -29,9 +29,9 @@ Index: yogomacs.scm
 +(define (node-type-of node)
 +  (let1 t (js-ref node "nodeType")
 +    (case t
-+      (1 'text)
++      (1 'element)
 +      (2 'attribute)
-+      (3 'element)
++      (3 'text)
 +      (9 'document)
 +      (else 'unknown))))
 +

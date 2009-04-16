@@ -23,18 +23,60 @@
 (define (message msg)
   (display (string-append msg "\n")))
 
+
+(define (string-prefix? s1 s2 . optional)
+  ;; s1 => prefix, s2 => target
+  (and (string? s1) (string? s2)
+       (let ((prefix-length (string-length s1))
+	     (target-length (string-length s2)))
+	 (cond 
+	  ((eq? prefix-length target-length)
+	   (string=? prefix-length target-length))
+	  ((< prefix-length target-length)
+	   (string=? s1 (substring s2 0 prefix-length)))
+	  (else
+	   #f)))))
+
+(define (string-rest s1 s2)
+  (substring s2 (string-length s1) 
+	     (string-length s2)))
+
 ;;
 ;; Accessor
 ;;
+(define (node-type-of node)
+  (let1 t (js-ref node "nodeType")
+    (case t
+      ((1) 'element)
+      ((2) 'attribute)
+      ((3) 'text)
+      ((9) 'document)
+      (else 'unknown))))
+
+(define (node-text? node)
+  (eq? (node-type-of node) 'text))
+(define (node-element? node)
+  (eq? (node-type-of node) 'element))
+
+(define (element-id-of element)
+  (if (node-element? element)
+      (let1 id (element-read-attribute element "id")
+	(if (js-null? id)
+	    #f
+	    id))
+      #f))
+
 (define (current-buffer) (js-eval "document"))
 (define (doctype-of buffer)
   (js-ref (js-ref buffer "childNodes") "0"))
 (define (html-of buffer)
   (js-ref (js-ref buffer "childNodes") "1"))
 
-(define (head-of buffer) (js-ref (js-ref (html-of buffer) "childNodes") "0"))
-(define (body-of buffer) (js-ref (js-ref (html-of buffer) "childNodes") "1"))
-(define (primary-pre-of buffer)
+(define (head-of buffer)
+  (js-ref (js-ref (html-of buffer) "childNodes") "0"))
+(define (body-of buffer)
+  (js-ref (js-ref (html-of buffer) "childNodes") "1"))
+(define (buffer-contents-of buffer)
   (let1 r (call/cc 
 	   (lambda (found)
 	     (let1 nodes (js-ref (body-of (current-buffer)) "childNodes")
@@ -42,20 +84,13 @@
 		 (let loop ((i 0))
 		   (if (< i len)
 		       (let1 node (js-ref nodes (number->string i))
-			 (let1 nodeType (js-ref node "nodeType")
-			   (when (and (eq? nodeType 1) 
-				      (equal? (js-ref node "nodeName") "PRE"))
-			     (found node)))
+			 (when (and (node-element? node)
+				    (equal? (js-ref node "nodeName") "PRE"))
+			   (found node))
 			 (loop (+ i 1)))
 		       (found #f)))))))
     r))
 
-;;
-;; ???
-;;
-(define (elements-of-class-of pat) 
-  (let1 code (string-append "$$('" pat "').to_list();")
-    (js-eval code)))
 
 ;;
 ;; Initializer
@@ -162,27 +197,30 @@
 ;; 
 ;; Interactive-Spec
 ;;
-(define-macro (define-interactive proc-sign input-spec output-spec . body)
+(define-macro (define-interactive proc-sign input-spec output-spec desc . body)
   `(begin
      (define ,proc-sign ,@body)
      (define-interactive-spec ',(car proc-sign) ,(car proc-sign) 
        ',input-spec 
        ;; Don't quote: output-spec is a function. 
        ,output-spec
+       ,desc
        )))
 
 (let ((prefix #f)
       (interactive-spec-table (list)))
-  (define (define-interactive-spec name proc input-spec output-spec)
+  (define (define-interactive-spec name proc input-spec output-spec desc)
     (let1 cell (assoc proc interactive-spec-table)
       (if cell
 	  (set-cdr! cell `((input-spec  . ,input-spec)
 			   (output-spec . ,output-spec)))
-	  (set! interactive-spec-table (cons (cons proc 
-						   `((name        . ,name)
-						     (input-spec  . ,input-spec)
-						     (output-spec . ,output-spec)))
-					     interactive-spec-table)))))
+	  (set! interactive-spec-table (cons 
+					(cons proc 
+					      `((name        . ,name)
+						(input-spec  . ,input-spec)
+						(output-spec . ,output-spec)
+						(desc        . ,desc)))
+					interactive-spec-table)))))
   (define (make-interactive-args proc)
     (let1 cell (assoc proc interactive-spec-table)
       (let1 r (if cell
@@ -204,7 +242,10 @@
 	      (when (procedure? func)
 		(func return))))))))
 
-  (define-interactive (universal-argument) () #f
+  (define-interactive (universal-argument) 
+    () 
+    #f 
+    "Give universal arguments"
     (set! prefix #t)
     ))
 
@@ -265,7 +306,10 @@
 ;; TODO: (defface ...)
 
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
-(define-interactive (linum-mode p) ("P") #f
+(define-interactive (linum-mode p) 
+  ("P") 
+  #f 
+  "Turn on/off linum-mode"
   (set-face-attribute 'linum  `((display . ,(if p "none" ""))))
   (set-face-attribute 'fringe `((display . ,(if p "none" "")))))
 
@@ -282,15 +326,13 @@
 		    no-action-result)
   (call/cc
    (lambda (found)
-     (let1 nodes (js-ref (primary-pre-of (current-buffer)) "childNodes")
+     (let1 nodes (js-ref (buffer-contents-of (current-buffer)) "childNodes")
        (let1 len (js-len nodes)
 	 (let loop ((i (initial-index-func len)))
 	   (if (cont-func i len)
 	       (let1 node (js-ref nodes (number->string i))
-		 (let1 nodeType (js-ref node "nodeType")
-		   (when (eq? nodeType 1)
-		     (action-func i node found)
-		     ))
+		 (when (node-element? node)
+		   (action-func i node found))
 		 (loop (step-func i)))
 	       (no-action-result len found))))))))
 
@@ -303,12 +345,11 @@
    no-action-result))
 
 (define (walk-nodes-bw action-func no-action-result)
-  (walk-nodes 
-   (lambda (len) (- len 1))
-   (lambda (i) (- i 1))
-   (lambda (i len) (< -1 i))
-   action-func
-   no-action-result))
+  (walk-nodes (lambda (len) (- len 1))
+	      (lambda (i) (- i 1))
+	      (lambda (i len) (< -1 i))
+	      action-func
+	      no-action-result))
 
 ;;
 ;; Point node
@@ -327,22 +368,25 @@
        (return node)))
    (lambda (len return) (return #f))))
 
-
 (define (point-node? node)
-  (let1 id (element-read-attribute node "id")
-    (if (and (not (js-null? id))
-	     (< (string-length "point:")
-		(string-length id)))
-	id
+  (let1 id (element-id-of node)
+    (if id
+	(cond
+	 ((string-prefix? "point:" id)
+	  (list 'point
+		(string->number (string-rest "point:" id))))
+	 ((string-prefix? "font-lock:" id)
+	  (list 'font-lock 
+		(string->number (string-rest "font-lock:" id))))
+	 (else
+	  #f))
 	#f)))
+
 
 (define (point-node->point node)
   (let1 id (point-node? node)
     (if id
-	(let1 point-str (substring id (string-length "point:")
-				   (string-length id))
-	  (let1 point-num (string->number point-str)
-	    point-num))
+	(cadr id)
 	#f)))
 
 (define (point-node-text-length node)
@@ -351,7 +395,7 @@
     (let1 sibling (js-ref last "nextSibling")
       (if (and sibling (not (js-null? sibling)))
 	  (cond
-	   ((eq? (js-ref sibling "nodeType") 3)
+	   ((node-text? sibling)
 	    (loop sibling
 		  (+ len (string->number (js-ref sibling "length")))))
 	   ((point-node? sibling)
@@ -369,6 +413,7 @@
 (define-interactive (point-min) 
   () 
   (lambda (i) (message (if (number? i) (number->string i) "#f")))
+  "TODO"
   (let1 node (point-node-min)
     (if node
 	(point-node->point node)
@@ -377,6 +422,7 @@
 (define-interactive (point-max) 
   ()
   (lambda (i) (message (if (number? i) (number->string i) "#f")))
+  "TODO"
   (let1 node (point-node-max)
     (if node
 	(+ (point-node->point node)
