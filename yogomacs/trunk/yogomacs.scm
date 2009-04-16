@@ -23,48 +23,9 @@
 (define (message msg)
   (display (string-append msg "\n")))
 
-
-(define (string-prefix? s1 s2 . optional)
-  ;; s1 => prefix, s2 => target
-  (and (string? s1) (string? s2)
-       (let ((prefix-length (string-length s1))
-	     (target-length (string-length s2)))
-	 (cond 
-	  ((eq? prefix-length target-length)
-	   (string= prefix-length target-length))
-	  ((< prefix-length target-length)
-	   (string= s1 (substring s2 0 prefix-length)))
-	  (else
-	   #f)))))
-(define (string-rest s1 s2)
-  (substring s2 (string-length s1) (string-length s2)))
-
-
 ;;
 ;; Accessor
 ;;
-(define (node-type-of node)
-  (let1 t (js-ref node "nodeType")
-    (case t
-      (1 'text)
-      (2 'attribute)
-      (3 'element)
-      (9 'document)
-      (else 'unknown))))
-
-(define (node-text? node)
-  (eq? (node-type-of node) 'text))
-(define (node-element? node)
-  (eq? (node-type-of node) 'element))
-
-(define (element-id-of element)
-  (if (node-element? element)
-      (let1 id (element-read-attribute element "id")
-	(if (js-null? id)
-	    #f
-	    id))
-      #f))
-
 (define (current-buffer) (js-eval "document"))
 (define (doctype-of buffer)
   (js-ref (js-ref buffer "childNodes") "0"))
@@ -81,13 +42,20 @@
 		 (let loop ((i 0))
 		   (if (< i len)
 		       (let1 node (js-ref nodes (number->string i))
-			 (when (and (node-element? node)
-				    (equal? (js-ref node "nodeName") "PRE"))
-			   (found node))
+			 (let1 nodeType (js-ref node "nodeType")
+			   (when (and (eq? nodeType 1) 
+				      (equal? (js-ref node "nodeName") "PRE"))
+			     (found node)))
 			 (loop (+ i 1)))
 		       (found #f)))))))
     r))
 
+;;
+;; ???
+;;
+(define (elements-of-class-of pat) 
+  (let1 code (string-append "$$('" pat "').to_list();")
+    (js-eval code)))
 
 ;;
 ;; Initializer
@@ -319,8 +287,10 @@
 	 (let loop ((i (initial-index-func len)))
 	   (if (cont-func i len)
 	       (let1 node (js-ref nodes (number->string i))
-		 (when (node-element? node)
-		   (action-func i node found))
+		 (let1 nodeType (js-ref node "nodeType")
+		   (when (eq? nodeType 1)
+		     (action-func i node found)
+		     ))
 		 (loop (step-func i)))
 	       (no-action-result len found))))))))
 
@@ -357,26 +327,22 @@
        (return node)))
    (lambda (len return) (return #f))))
 
+
 (define (point-node? node)
-  (let1 id (element-id-of node)
-    (if id
-	(cond
-	 ((string-prefix? "point:" id)
-	  (string->number 'point 
-			  (string-rest "point:" id)))
-
-	 ((string-prefix? "font-lock:" id)
-	  (string->number 'font-lock 
-			  (string-rest "font-lock:" id)))
-	 (else
-	  #f))
+  (let1 id (element-read-attribute node "id")
+    (if (and (not (js-null? id))
+	     (< (string-length "point:")
+		(string-length id)))
+	id
 	#f)))
-
 
 (define (point-node->point node)
   (let1 id (point-node? node)
     (if id
-	(cadr id)
+	(let1 point-str (substring id (string-length "point:")
+				   (string-length id))
+	  (let1 point-num (string->number point-str)
+	    point-num))
 	#f)))
 
 (define (point-node-text-length node)
@@ -385,7 +351,7 @@
     (let1 sibling (js-ref last "nextSibling")
       (if (and sibling (not (js-null? sibling)))
 	  (cond
-	   ((node-text? sibling)
+	   ((eq? (js-ref sibling "nodeType") 3)
 	    (loop sibling
 		  (+ len (string->number (js-ref sibling "length")))))
 	   ((point-node? sibling)
