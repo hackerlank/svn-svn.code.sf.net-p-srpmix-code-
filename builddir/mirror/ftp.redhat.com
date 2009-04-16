@@ -7,7 +7,7 @@
 #
 
 # Where the data are mirrored to
-ROOT=/tmp/mirror
+ROOT=/srv/sources/archives/mirror
 
 # Data sources
 FTP=ftp.redhat.com
