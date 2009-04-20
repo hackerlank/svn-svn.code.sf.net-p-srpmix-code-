@@ -35,7 +35,7 @@
 	     (string-length s2)))
 
 ;;
-;; Accessor
+;; Accessors
 ;;
 (define (node-type-of node)
   (let1 t (js-ref node "nodeType")
@@ -83,7 +83,6 @@
 			 (loop (+ i 1)))
 		       (found #f)))))))
     r))
-
 
 ;;
 ;; Initializer
@@ -241,8 +240,6 @@
     "Give universal arguments"
     (set! prefix #t)
     ))
-
-
 
 ;;
 ;; Face
@@ -411,6 +408,12 @@
 	   ((point-node? sibling)
 	    ;; last
 	    len)
+	   ((node-element? sibling)
+	    ;; TODO
+	    (loop sibling
+		  len
+		  "nextSibling")
+	    )
 	   (else
 	    (loop sibling
 		  len
@@ -434,8 +437,10 @@
 ;;
 (define-interactive (point-min) 
   () 
-  (lambda (i) (message (if (number? i) (number->string i) "#f")))
-  "TODO"
+  (lambda (i) (message (if (number? i) 
+			   (string-append "Min point: " (number->string i))
+			   "#f")))
+  "Return (and show if called interactive) min point of buffer"
   (let1 node (point-node-min)
     (if node
 	(point-node->start node)
@@ -443,8 +448,10 @@
 
 (define-interactive (point-max) 
   ()
-  (lambda (i) (message (if (number? i) (number->string i) "#f")))
-  "TODO"
+  (lambda (i) (message (if (number? i) 
+			   (string-append "Max point: " (number->string i))
+			   "#f")))
+  "Return (and show if called interactive) max point of buffer"
   (let1 node (point-node-max)
     (if node
 	(+ 
