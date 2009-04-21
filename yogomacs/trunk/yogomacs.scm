@@ -372,6 +372,24 @@
 	  #f))
 	#f)))
 
+(let ((*point-nodes* #f))
+  (define (point-nodes)
+    (if *point-nodes*
+	*point-nodes*
+	(let1 nodes (js-ref (buffer-tree (current-buffer)) "childNodes")
+	  (set! *point-nodes*
+		(let1 len (js-len nodes)
+		  (list->vector
+		   (let loop ((i len)
+			      (r (list)))
+		     (if (< 0 i)
+			 (let1 node (js-ref nodes (number->string (- i 1)))
+			   (loop (- i 1)
+				 (if (point-node? node)
+				     (cons node r)
+				     r)))
+			 r)))))
+	  *point-nodes*))))
 
 (define (point-node->start node)
   (let1 id (point-node? node)
@@ -460,6 +478,49 @@
 	 )
 	node)))
 
+(define (point-node-for pos)
+  (call/cc
+   (lambda (found)
+     (let1 nodes (point-nodes)
+       (let1 len (vector-length nodes)
+	 (let loop ((part (/ len 2))
+		    (quantum (/ len 2)))
+	   (if (<= quantum 1)
+	       #f ; ???
+	       (let1 node (vector-ref nodes part)
+		 (let1 range (point-node->range node)
+		   (cond
+		    ((< pos (car range))
+		     (loop (- part (/ quantum 2))
+			   (/ quantum 2)))
+		    ((< (cadr range) pos)
+		     (loop (+ part (/ quantum 2))
+			   (/ quantum 2)))
+		    (else
+		     (found node))))))))))))
+
+;;
+;; Stitch
+;;
+(define (stitch pos obj)
+  (let1 pnode (point-node-for pos)
+    (when pnode
+      (let1 offset (- pos (point-node->start pnode))
+	;; offset
+	(point-node-stitch node offset obj)
+	))))
+(define (point-node-stitch node offset obj)
+  ;; TODO
+  )
+
+
+
+
+
+
+;;
+;; Key bindings
+;;
 (define-key global-map '(#\t)     linum-mode)
 (define-key global-map '(#\u)     universal-argument)
 (define-key global-map '((M #\<)) point-min)
