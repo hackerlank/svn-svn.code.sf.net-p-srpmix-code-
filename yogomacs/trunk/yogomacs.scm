@@ -372,23 +372,16 @@
 	  #f))
 	#f)))
 
+(js-load "./point-nodes.js" "PointNodes")
+(define js-point-nodes-func (js-eval "point_nodes"))
 (let ((*point-nodes* #f))
   (define (point-nodes)
     (if *point-nodes*
 	*point-nodes*
-	(let1 nodes (js-ref (buffer-tree (current-buffer)) "childNodes")
-	  (set! *point-nodes*
-		(let1 len (js-len nodes)
-		  (list->vector
-		   (let loop ((i len)
-			      (r (list)))
-		     (if (< 0 i)
-			 (let1 node (js-ref nodes (number->string (- i 1)))
-			   (loop (- i 1)
-				 (if (point-node? node)
-				     (cons node r)
-				     r)))
-			 r)))))
+	(let1 nodes (js-call 
+		     js-point-nodes-func
+		     (buffer-tree (current-buffer)))
+	  (set! *point-nodes* nodes)
 	  *point-nodes*))))
 
 (define (point-node->start node)
@@ -397,8 +390,8 @@
 	(cadr id)
 	#f)))
 (define (point-node->length node)
-  (+ (point-node-trailing-text-length node)
-     (point-node-holding-text-length node)))
+  (+ (point-node-holding-text-length node)
+     (point-node-trailing-text-length node)))
 (define (point-node->range node)
   (let1 start (point-node->start node)
     (if start
@@ -412,32 +405,33 @@
 	(car id)
 	#f)))
 
-(define (point-node-text-length node starting-from)
-  (let loop ((last node) 
-	     (len 0)
-	     (starting-from starting-from))
+(define (walk-point-node pnode starting-from action-func return-func param-init) 
+  (let loop ((last pnode)
+	     (starting-from starting-from)
+	     (param param-init))
     (let1 sibling (js-ref last starting-from)
       (if (and sibling (not (js-null? sibling)))
 	  (cond
 	   ((node-text? sibling)
-	    (loop sibling
-		  (+ len (string->number (js-ref sibling "length")))
-		  "nextSibling"))
+	    (action-func param sibling 
+		  (lambda (p) 
+		    (loop sibling "nextSibling" p))))
 	   ((point-node? sibling)
-	    ;; last
-	    len)
+	    (return-func param sibling))
 	   ((node-element? sibling)
-	    ;; TODO
-	    (loop sibling
-		  len
-		  "nextSibling")
-	    )
+	    (loop sibling "nextSibling" param))
 	   (else
-	    (loop sibling
-		  len
-		  "nextSibling")))
-	  ;; last
-	  len))))
+	    (loop sibling "nextSibling" param)))
+	  (return-func param sibling)))))
+
+(define (point-node-text-length node starting-from)
+  (walk-point-node node
+		   starting-from
+		   (lambda (p sibling loop)
+		     (loop (+ p (string->number (js-ref sibling "length")))))
+		   (lambda (p sibling)
+		     p)
+		   0))
 
 (define (point-node-trailing-text-length node)
   (point-node-text-length node "nextSibling"))
@@ -450,6 +444,11 @@
     ;; TODO: Error
     (else 0)
     ))
+
+(define (line-beginning-point-node line)
+  ;;
+  )
+
 ;;
 ;; Point
 ;;
@@ -483,40 +482,94 @@
    (lambda (found)
      (let1 nodes (point-nodes)
        (let1 len (vector-length nodes)
-	 (let loop ((part (/ len 2))
-		    (quantum (/ len 2)))
-	   (if (<= quantum 1)
-	       #f ; ???
-	       (let1 node (vector-ref nodes part)
+	 (let loop ((part (round (/ len 2)))
+		    (quantum (round (/ len 2))))
+	   ;;(display (list quantum part))
+	   (let1 node (vector-ref nodes part)
 		 (let1 range (point-node->range node)
 		   (cond
 		    ((< pos (car range))
-		     (loop (- part (/ quantum 2))
-			   (/ quantum 2)))
+		     (loop (- part (round (/ quantum 2)))
+			   (round (/ quantum 2))))
 		    ((< (cadr range) pos)
-		     (loop (+ part (/ quantum 2))
-			   (/ quantum 2)))
+		     (loop (+ part (round (/ quantum 2)))
+			   (round (/ quantum 2))))
 		    (else
-		     (found node))))))))))))
+		     (found node)))))))))))
 
 ;;
 ;; Stitch
 ;;
-(define (stitch pos obj)
+(define (stitch-at-point pos obj)
   (let1 pnode (point-node-for pos)
-    (when pnode
-      (let1 offset (- pos (point-node->start pnode))
-	;; offset
-	(point-node-stitch node offset obj)
-	))))
-(define (point-node-stitch node offset obj)
-  ;; TODO
+    (if pnode
+	(let1 offset (- pos (point-node->start pnode))
+	  (let1 tlen (point-node-holding-text-length pnode)
+	    (display (list tlen offset))
+	    (cond
+	     ((< offset tlen)
+	      (stitch-on-point-node pnode 
+					  offset 
+					  "firstChild" 
+					  obj ))
+	     ((eq? tlen 0)
+	      (stitch-after-node pnode obj))
+	     (else
+	      (stitch-on-point-node pnode 
+				    (- offset tlen) 
+				    "nextSibling"
+				    obj))))
+	  #t)
+	#f)))
+
+(define (make-text-node s)
+  (js-invoke (current-buffer) "createTextNode" s))
+(define (insert-before at obj)
+  (js-invoke (js-ref at "parentNode")
+	     "insertBefore" obj at))
+(define (remove-node node)
+  #;(js-call (js-ref node "removeNode") #t)
+  #;(js-invoke node "removeNode" #t)
+  (js-invoke (js-ref node "parentNode")
+	     "removeChild" node)
   )
 
+(define (stitch-on-point-node node offset starting-from obj)
+  (walk-point-node node starting-from 
+		   (lambda (o sibling loop)
+		     (let1 len (string->number (js-ref sibling "length"))
+		       (if (< o len)
+			   (stitch-on-text sibling o obj)
+			   (loop (- o len)))))
+		   (lambda (o sibling) #f)
+		   offset))
 
+(define (stitch-after-node pnode obj)
+  (let1 sibling (js-ref pnode "nextSibling")
+    (if (and sibling (not (js-null? sibling)))
+	(insert-before pnode obj)
+	(display "????? TODO"))
+    #t))
 
+(define (stitch-on-text text-node offset obj)
+  (let* ((data (js-ref text-node "data"))
+	 (len  (string-length data)))
+    (let ((s0 (substring data 0 offset))
+	  (s1 (substring data offset len)))
+      (let ((n0 (make-text-node s0))
+	    (n1 (make-text-node s1)))
+	(insert-before text-node n0)
+	(insert-before text-node obj)
+	(insert-before text-node n1)
+	(remove-node   text-node)
+	)))
+  #t)
 
+;(stitch-at-point 1 (make-text-node "CAT\n"))
+;(stitch-at-point 9 (make-text-node "DOG\n"))
 
+(define (stitch-at-name name obj)
+  )
 
 ;;
 ;; Key bindings
