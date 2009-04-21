@@ -1,0 +1,6 @@
+/* About copyright see dired.el */
+.dired-directory {
+        /* dired-directory */
+        color: #0000ff;
+        font-weight: bold;
+}

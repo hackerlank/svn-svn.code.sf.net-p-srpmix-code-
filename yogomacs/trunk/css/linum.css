@@ -1,0 +1,6 @@
+/* About copyright linum.el */
+.linum {
+        /* linum */
+        color: #666666;
+	display: none;
+}

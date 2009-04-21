@@ -1,0 +1,13 @@
+a { color: inherit; background-color: inherit; font: inherit; text-decoration: inherit; }
+/* About copyright see faces.el */
+a:hover {
+        /* highlight */
+        color: #000000;
+        background-color: #00ff00;
+}
+/* About copyright see faces.el */
+.highlight {
+        /* highlight */
+        color: #000000;
+        background-color: #00ff00;
+}

@@ -1,0 +1,6 @@
+/* About copyright see dired.el */
+.dired-symlink {
+        /* dired-symlink */
+        color: #00ffff;
+        font-weight: bold;
+}

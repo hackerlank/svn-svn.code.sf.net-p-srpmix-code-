@@ -1,0 +1,6 @@
+/* About copyright font-lock.el */
+.keyword {
+        /* font-lock-keyword-face */
+        color: #00ffff;
+        font-weight: bold;
+}

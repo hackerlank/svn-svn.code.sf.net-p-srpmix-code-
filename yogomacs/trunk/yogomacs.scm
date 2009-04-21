@@ -3,6 +3,8 @@
 ;;
 (define (js-len obj)
   (js-ref obj "length"))
+(define (js-data obj)
+  (js-ref obj "data"))
 
 (define (error msg)
   (let1 code (string-append "throw new Error(\"yogomacs: " 
@@ -58,6 +60,13 @@
 	    #f
 	    id))
       #f))
+(define (parent-of elt)
+  (js-ref elt "parentNode"))
+(define (next-sibling-of elt)
+  (js-ref elt "nextSibling"))
+(define (previous-sibling-of elt)
+  (js-ref elt "previousSibling"))
+
 
 (define (current-buffer) (js-eval "document"))
 (define (doctype-of buffer)
@@ -428,7 +437,7 @@
   (walk-point-node node
 		   starting-from
 		   (lambda (p sibling loop)
-		     (loop (+ p (string->number (js-ref sibling "length")))))
+		     (loop (+ p (string->number (js-len sibling)))))
 		   (lambda (p sibling)
 		     p)
 		   0))
@@ -444,10 +453,6 @@
     ;; TODO: Error
     (else 0)
     ))
-
-(define (line-beginning-point-node line)
-  ;;
-  )
 
 ;;
 ;; Point
@@ -525,19 +530,14 @@
 (define (make-text-node s)
   (js-invoke (current-buffer) "createTextNode" s))
 (define (insert-before at obj)
-  (js-invoke (js-ref at "parentNode")
-	     "insertBefore" obj at))
+  (js-invoke (parent-of at) "insertBefore" obj at))
 (define (remove-node node)
-  #;(js-call (js-ref node "removeNode") #t)
-  #;(js-invoke node "removeNode" #t)
-  (js-invoke (js-ref node "parentNode")
-	     "removeChild" node)
-  )
+  (js-invoke (parent-of at) "removeChild" node))
 
 (define (stitch-on-point-node node offset starting-from obj)
   (walk-point-node node starting-from 
 		   (lambda (o sibling loop)
-		     (let1 len (string->number (js-ref sibling "length"))
+		     (let1 len (string->number (js-len sibling))
 		       (if (< o len)
 			   (stitch-on-text sibling o obj)
 			   (loop (- o len)))))
@@ -545,14 +545,14 @@
 		   offset))
 
 (define (stitch-after-node pnode obj)
-  (let1 sibling (js-ref pnode "nextSibling")
+  (let1 sibling (next-sibling-of pnode)
     (if (and sibling (not (js-null? sibling)))
 	(insert-before pnode obj)
 	(display "????? TODO"))
     #t))
 
 (define (stitch-on-text text-node offset obj)
-  (let* ((data (js-ref text-node "data"))
+  (let* ((data (js-data text-node))
 	 (len  (string-length data)))
     (let ((s0 (substring data 0 offset))
 	  (s1 (substring data offset len)))
@@ -567,9 +567,34 @@
 
 ;(stitch-at-point 1 (make-text-node "CAT\n"))
 ;(stitch-at-point 9 (make-text-node "DOG\n"))
+(define (linum-node-for linum)
+  ;; TODO: Use format
+  (let1 lnode ($ (string-append "linum:" (number->string linum)))
+    (if (and lnode (not (js-null? lnode)))
+	lnode
+	#f)))
+
+(define (stitch-at-line linum obj)
+  (let1 lnode (linum-node-for linum)
+    (if lnode
+	(let* ((at (parent-of lnode)))
+	  (insert-before at obj))
+	#f)))
+;(stitch-at-line 10 (make-text-node "\n     HACK\n\n"))
+
+(define (name-node-for name)
+  (let1 nnode ($ (string-append "name:" name))
+    (if (and nnode (not (js-null? nnode)))
+	nnode
+	#f)))
 
 (define (stitch-at-name name obj)
-  )
+  (let1 nnode (name-node-for name)
+    (if nnode
+	(let* ((at (previous-sibling-of nnode)))
+	  (insert-before at obj)))))
+
+(stitch-at-name "." (make-text-node "\n     srpmix.org is a library of source codes\n\n"))
 
 ;;
 ;; Key bindings

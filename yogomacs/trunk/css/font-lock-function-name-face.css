@@ -1,0 +1,6 @@
+/* About copyright font-lock.el */
+.function-name {
+        /* font-lock-function-name-face */
+        color: #0000ff;
+        font-weight: bold;
+}

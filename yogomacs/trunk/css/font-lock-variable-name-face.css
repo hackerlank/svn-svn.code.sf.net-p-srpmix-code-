@@ -1,0 +1,5 @@
+/* About copyright see font-lock.el */
+.variable-name {
+        /* font-lock-variable-name-face */
+        color: #ffff00;
+}

@@ -1,0 +1,6 @@
+/* About copyright see font-lock.el */
+.preprocessor {
+        /* font-lock-preprocessor-face */
+        color: #0000ff;
+        font-weight: bold;
+}

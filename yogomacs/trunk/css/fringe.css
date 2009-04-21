@@ -1,0 +1,6 @@
+/* About copyright see faces.el */
+.fringe {
+        /* fringe */
+        background-color: #222222;
+	display: none;
+}

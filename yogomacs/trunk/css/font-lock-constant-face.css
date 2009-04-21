@@ -1,0 +1,5 @@
+/* About copyright see font-lock.el */
+.constant {
+        /* font-lock-constant-face */
+        color: #ff00ff;
+}

@@ -1,0 +1,5 @@
+/* About copyright font-lock.el */
+.comment {
+        /* font-lock-comment-face */
+        color: #ff0000;
+}

@@ -1,0 +1,5 @@
+/* About copyright font-lock.el */
+.string {
+        /* font-lock-string-face */
+        color: #00ff00;
+}
