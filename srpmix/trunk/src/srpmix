@@ -176,7 +176,7 @@ function parse_arguments
     SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-format=$OUTPUT_FORMAT"
     SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-dir=$MY_TMPDIR"
     
-    SRPMIXBUILD_OPTIONS="$(opt_rules $TARGET_SRPM) $SRPMIXBUILD_OPTIONS"
+    SRPMIXBUILD_OPTIONS=" $SRPMIXBUILD_OPTIONS"
 }
 
 function opt_rules
@@ -202,7 +202,7 @@ function main
     fi
 
     for srpm in $TARGET_SRPM; do
-        srpmix-build $SRPMIXBUILD_OPTIONS --srpm=$srpm
+        srpmix-build "$(opt_rules $srpm)" $SRPMIXBUILD_OPTIONS --srpm=$srpm
     done
 
     # Create Plugin Package

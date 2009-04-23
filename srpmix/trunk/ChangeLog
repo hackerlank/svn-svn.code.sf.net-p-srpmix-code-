@@ -1,5 +1,8 @@
 2009-04-23  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix (main): Pass $(opt_rules $srpm) directly to
+	srpmix-build.
+
 	* src/srpmix-ix (srpm_deploy): Dump spec file when aborting.
 	(srpm_build): Added _default_patch_flags --verbose.
 	(srpm_build): Added __patch --verbose.
