@@ -815,6 +815,7 @@ function srpm_build
     LANG=C $RPMBUILD                                                    \
 	--define "_default_patch_fuzz 2"                                \
         --define "_default_patch_flags --verbose"                       \
+        --define "__patch /usr/bin/patch --verbose"                     \
 	--target=${arch}                                                \
 	-bp                                                             \
 	--nodeps "${rootdir}/${SPECDIR}/${spec_file}"                   \

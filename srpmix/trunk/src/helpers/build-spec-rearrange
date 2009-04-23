@@ -78,7 +78,6 @@ function spec_file_hack
     | sed					   \
 	\
 	\
-        -e 's/^\(%patch[^ ]*\) \(.*\)/\1 --verbose \2/' \
         -e /'^%patch.* '"$no_hack__p_xen"/b        \
 	\
 	\

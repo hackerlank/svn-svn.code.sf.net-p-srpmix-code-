@@ -14,3 +14,8 @@
 ;;
 (#/s390utils-1\.5\.3-17\.el5/ "--target=s390x --keep-original")
 (#/s390utils-.*/ "--target=s390")
+
+;;
+(#/dmraid-.*RHEL4.*/ "--target=i686")
+(#/dmraid-.*/ "--keep-original")
+
