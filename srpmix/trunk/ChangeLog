@@ -1,9 +1,7 @@
 2009-04-23  Masatake YAMATO  <yamato@redhat.com>
 
-	* src/helpers/build-spec-rearrange (spec_file_hack): Added
-	--verbose to patch.
-
 	* src/srpmix-ix (srpm_deploy): Dump spec file when aborting.
+	(srpm_build): Define _default_patch_flags.
 
 	* src/plugins/10srpmix-vanilla (run_vanilla): Fix a typo
 	in the option passed to gunzip.
