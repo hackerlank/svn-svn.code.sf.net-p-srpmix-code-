@@ -123,7 +123,7 @@ function run_vanilla
 	        count=`expr $count + 1`
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
 		# --force is needed to decompress a file specified by a soft link.
-		(cd "$o"; gunzip -force $f 2>&1 > /dev/null;
+		(cd "$o"; gunzip --force $f 2>&1 > /dev/null;
 		    es_print vanilla-expand --command=\"gunzip\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
   	    *.bz2)
