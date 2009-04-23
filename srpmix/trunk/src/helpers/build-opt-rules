@@ -6,8 +6,8 @@
 		 (current-output-port)
 		 (current-error-port))
     (display "Usage: \n")
-    (display "	build-out-rules PKG-FILE\n" port)
-    (display "	build-out-rules --help|-h\n" port)
+    (display "	build-opt-rules PKG-FILE\n" port)
+    (display "	build-opt-rules --help|-h\n" port)
     (display "  Rules are read from stdin\n" port)
     (exit status)))
 
