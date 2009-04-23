@@ -683,6 +683,13 @@ function srpm_deploy
                 --stage=build                   \
                 --srpm-file="\"${srpm_file}\""
             echo ";;; abort to deploy ${srpm_file} to ${rootdir} in build stage" 1>&2
+	    echo 1>&2
+	    echo 1>&2
+	    echo ";;; SPEC FILE USED IN THIS BUILD ;;;" 1>&2
+	    cat "${rootdir}/${SPECDIR}/${xspec_file}" 1>&2
+	    echo ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" 1>&2
+	    echo 1>&2
+	    echo 1>&2
             return 1
         fi
     fi
