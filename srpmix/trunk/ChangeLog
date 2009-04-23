@@ -1,5 +1,8 @@
 2009-04-23  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/99default.scm (#/util-linux-2\.13-0\.44\.el5/): Added
+	a rule for util-linux-2.13-0.44.el5.
+
 	* src/srpmix (main): Pass $(opt_rules $srpm) directly to
 	srpmix-build.
 

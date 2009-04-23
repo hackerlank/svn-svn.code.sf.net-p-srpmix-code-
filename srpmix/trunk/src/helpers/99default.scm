@@ -19,3 +19,5 @@
 (#/dmraid-.*RHEL4.*/ "--target=i686")
 (#/dmraid-.*/ "--keep-original")
 
+(#/util-linux-2\.13-0\.44\.el5/ "--rearrange-spec-command={ echo \"%define rhel 1\";cat; }")
+
