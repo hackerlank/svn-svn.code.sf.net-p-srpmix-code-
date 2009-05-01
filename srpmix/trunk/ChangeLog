@@ -1,3 +1,13 @@
+2009-05-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (guess_target): Pick only the line
+	started from ExclusiveArch.
+
+2009-04-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): Don't pass an empty string as an argument
+	to srpmix-build.
+
 2009-04-24  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/build-opt-rules (help): Fix a typo in help message.

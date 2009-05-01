@@ -202,7 +202,12 @@ function main
     fi
 
     for srpm in $TARGET_SRPM; do
-        srpmix-build "$(opt_rules $srpm)" $SRPMIXBUILD_OPTIONS --srpm=$srpm
+	local xopt="$(opt_rules $srpm)"
+	if test x = "x${xopt}"; then
+            srpmix-build $SRPMIXBUILD_OPTIONS --srpm=$srpm
+	else
+	    srpmix-build "$xopt" $SRPMIXBUILD_OPTIONS --srpm=$srpm
+	fi
     done
 
     # Create Plugin Package
