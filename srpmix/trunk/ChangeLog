@@ -1,3 +1,7 @@
+2009-05-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/*: Improve debug facilities.
+
 2009-05-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-ix (guess_target): Pick only the line

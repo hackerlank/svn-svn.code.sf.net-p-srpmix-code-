@@ -1,0 +1,5 @@
+%_srpmix_ix_debug_option         %{nil}
+%_srpmix_ix_option               %{_srpmix_ix_debug_option}
+
+%_srpmix_plugin_debug_option     %{nil}
+%_srpmix_plugin_option           %{_srpmix_plugin_debug_option}

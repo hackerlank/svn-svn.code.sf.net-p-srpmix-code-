@@ -282,8 +282,19 @@ function es_time
 #
 function es_print
 {
+    local xtrace_p
+
+    if set | grep SHELLOPTS | grep xtrace 2>&1 > /dev/null; then
+	xtrace_p=yes
+	set +x
+    fi
+
     es_print_sans_newline "$@"
     printf "\n"
+
+    if test "x${xtrace_p}" = xyes; then
+	set -x
+    fi
 }
 
 function __es_print_tail_p
@@ -465,6 +476,16 @@ function create_swrf
     local wrap_opts=$1
     shift
 
+    local ix_debug="_srpmix_ix_debug_option %{nil}"
+    local plugin_debug="_srpmix_plugin_debug_option %{nil}"
+    for x in $wrap_opts; do
+	if test "x$x" = x"--debug"; then
+	    ix_debug="_srpmix_ix_debug_option --debug"
+	    plugin_debug="_srpmix_plugin_debug_option --debug"
+
+	fi
+    done
+
     for srpm in $@; do
 	pvr=$($RPM -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
 
@@ -475,16 +496,19 @@ function create_swrf
 	#	check_pvr_output_dir "${pvr}"
 	#fi
 	
-	wraplog=$(srpmix-wrap $wrap_opts $srpm)
+	wrap_log=$(srpmix-wrap $wrap_opts $srpm)
         if test "$?" != "0"; then exit 1; fi
-        file=$(echo $wraplog | tail -1 | sed 's/.*:file "\(.*\)".*/\1/')
+        file=$(echo $wrap_log | tail -1 | sed 's/.*:file "\(.*\)".*/\1/')
 
+        PS4="${PS4}[swrfbuild]"                           \
 	$SWRFBUILD --define "_rpmdir $workdir/RPMS"       \
 	           --define "_srcrpmdir $workdir/SRPMS"   \
 	           --define "_builddir $workdir/BUILD"    \
 	  	   --define "_buildrootdir $workdir/BUILDROOT" \
                    --define "_specdir $workdir/SPECS"     \
 	           --define "_sourcedir $workdir/SOURCES" \
+	           --define "$ix_debug"                   \
+	           --define "$plugin_debug"               \
 	           --rebuild -ba ${file} \
             || exit 2
     done

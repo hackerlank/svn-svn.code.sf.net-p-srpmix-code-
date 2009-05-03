@@ -24,6 +24,9 @@
 ########################################################################
 
 LIBSRPMIX=libsrpmix.sh
+
+SRPMIX_PLUGIN_DEBUG=
+
 function try_source
 {
     source $1
@@ -42,7 +45,7 @@ function print_usage
     echo "Usage: "
     echo "  srpmix-plugin [--help|-h]"
     echo "  srpmix-plugin [--list|-L]"
-    echo "  srpmix-plugin [--enable=<plugins>] [--disable=<plugins>] [<ROOTDIR> ...]"
+    echo "  srpmix-plugin [--debug] [--enable=<plugins>] [--disable=<plugins>] [<ROOTDIR> ...]"
     echo 
     echo "<plugins> := <plugin0>[,<plugin1>...]"
     echo 
@@ -82,6 +85,11 @@ function parse_arguments
 		exit 0
 		;;
             # TODO: --freeze-into-rpm-package=DIR
+	    --debug)
+	         SRPMIX_PLUGIN_DEBUG=yes
+		 PS4="${PS4}[plugin]"
+                 set -x
+		 ;;
 	    *)
 		break
 		;;

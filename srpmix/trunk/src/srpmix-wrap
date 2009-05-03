@@ -110,7 +110,7 @@ function parse_arguments
 		;;
 	    --debug)
 	        SRPMIX_WRAP_DEBUG=yes
-                PS4="${PS4}[srpmix-wrap] "
+                PS4="${PS4}[wrap]"
 	        set -x
 		;;
 	    *)
@@ -208,9 +208,13 @@ if test -d %{_builddir}/%{name}; then
 fi
 
 %build
-srpmix-ix -f -v %{_builddir}/%{name} \
+srpmix-ix -f -v %{_srpmix_ix_option}      \
+    %{_builddir}/%{name}                  \
     %{_sourcedir}/`basename $target_srpm`
-srpmix-plugin --enable=50srpmix-coreutils,50srpmix-file,60srpmix-etags %{_builddir}/%{name}
+
+srpmix-plugin --enable=50srpmix-coreutils,50srpmix-file,60srpmix-etags \
+    %{_srpmix_plugin_option}                                           \
+    %{_builddir}/%{name}
 
 %install
 rm -rf \$RPM_BUILD_ROOT

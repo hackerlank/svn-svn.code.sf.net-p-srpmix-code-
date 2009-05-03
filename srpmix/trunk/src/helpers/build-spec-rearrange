@@ -43,9 +43,8 @@ function spec_file_hack
 
 
     use_old_autoconf="-e s/a/a/"
-    elif use_old_autoconf_p "$spec_file" > /dev/null 2>&1; then
+    if use_old_autoconf_p "$spec_file" > /dev/null 2>&1; then
 	use_old_autoconf="-e s/^autoconf/autoconf-2.13/"
-	use_old_autoreconf="-e s/^autoreconf/autoreconf-2.13/"
     fi
 
     if patch_on_backup_p "$spec_file" > /dev/null 2>&1 ; then
@@ -83,7 +82,6 @@ function spec_file_hack
 	-e 's/^Copyright:/License:/'		   \
 	-e 's/^Serial:.*//'			   \
 	\
-	"${use_old_autoreconf}"                    \
 	"${use_old_autoconf}"                      \
 	\
 	${NULL} 

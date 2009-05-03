@@ -110,7 +110,7 @@ function parse_arguments
 	        SRPMIX_DEBUG=yes
 		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
 		set -x
-		PS4="${PS4}[srpmix] "
+		PS4="${PS4}[]"
 		;;
 	    --*)
 	        print_usage 1>&2

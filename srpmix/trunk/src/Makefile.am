@@ -23,6 +23,9 @@ dist_bin_SCRIPTS =           \
 	\
         $(NULL)
 
+macrosdir=$(sysconfdir)/rpm
+dist_macros_DATA = macros.srpmix
+
 srpmixconfdir=$(sysconfdir)/srpmix
 dist_srpmixconf_DATA = srpmix.cf
 

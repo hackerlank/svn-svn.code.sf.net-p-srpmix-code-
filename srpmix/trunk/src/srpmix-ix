@@ -71,11 +71,6 @@ KEEP_ORIGINAL=${SRPMIX_KEEP_ORIGINAL}
 MULTI_TARGETS=${SRPMIX_MULTI_TARGETS}
 REARRANGE_SPEC_COMMAND=${SRPMIX_REARRANGE_SPEC_COMMAND}
 
-if test "x${SRPMIX_IX_DEBUG}" = xyes; then
-    set -x
-    VERBOSE=yes
-fi
-
 #
 ########################################################################
 
@@ -111,7 +106,6 @@ function print_usage
     echo "SRPMIX_IGNORE_ERROR=yes|no"
     echo "SRPMIX_MULTI_TARGETS=yes|no"
     echo "SRPMIX_KEEP_ORIGINAL=yes|no"
-    echo "SRPMIX_IX_DEBUG=yes|no"
     echo "SRPMIX_TARGET=i386|i686|x86_64|ia64|s390|s390x|ppc|ppc64"
     echo "SRPMIX_REARRANGE_SPEC_COMMAND=COMMAND"
     echo
@@ -210,8 +204,10 @@ function parse_arguments
                 shift 1
                 ;;
             --debug)
-                set -o xtrace
+                set -x
                 VERBOSE=yes
+		SRPMIX_IX_DEBUG=yes
+		PS4="${PS4}[ix]"
                 shift 1
                 ;;
             --sudo|-s)
