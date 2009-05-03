@@ -45,6 +45,8 @@ BUILD_REQUIRES="srpmix, rsync"
 OPT_TYPE=core
 OPT_PLUGIN_NAME=plugins
 
+SRPMIX_WRAP_DEBUG=
+
 function print_usage
 {
     echo "Usage: "
@@ -56,6 +58,7 @@ function print_usage
     echo ""
     echo "Options:"
     echo "  --build-requires <requirements>"
+    echo "  --debug"
     echo ""
     echo "  If SRPMS is not given, standard input is"
     echo "  used for the list of source packages."
@@ -104,6 +107,11 @@ function parse_arguments
 		;;
             --plugin-name=*)
 	        OPT_PLUGIN_NAME=$(echo $1 | sed 's/--plugin-name=//')
+		;;
+	    --debug)
+	        SRPMIX_WRAP_DEBUG=yes
+                PS4="${PS4}[srpmix-wrap] "
+	        set -x
 		;;
 	    *)
 		break
@@ -288,7 +296,8 @@ Summary: $plugins_name information for package $package
 Name: ${plugin_package_name}
 Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
-Source: $(basename $target_swrf)
+Source0: $(basename $target_swrf)
+Source1: $(basename $target_swrf | sed -e 's/-srpmix-/-srpmix-archives-/')
 Autoreq: 0
 BuildRequires: $BUILD_REQUIRES
 Buildarch: $arch
@@ -308,7 +317,9 @@ if test -d %{_builddir}/%{name}; then
   rm -rf %{_builddir}/%{name}
 fi
 mkdir -p %{_builddir}/%{name}
+ls %{_sourcedir}/
 srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{_sourcedir}/`basename $target_swrf`
+srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{_sourcedir}/`basename $target_swrf | sed -e 's/-srpmix-/-srpmix-archives-/'`
 
 %build
 touch %{_builddir}/%{name}/.run-plugin

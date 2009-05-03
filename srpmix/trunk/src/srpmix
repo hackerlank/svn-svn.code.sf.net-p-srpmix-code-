@@ -23,7 +23,7 @@ OUTPUT_FORMAT=rpm
 else
 OUTPUT_FORMAT=swrf
 fi
-DEBUG=""
+SRPMIX_DEBUG=""
 SRPMIXBUILD_OPTS=
 
 set -e
@@ -107,9 +107,10 @@ function parse_arguments
 		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
 		;;
 	    --debug)
-	        DEBUG=yes
+	        SRPMIX_DEBUG=yes
 		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
 		set -x
+		PS4="${PS4}[srpmix] "
 		;;
 	    --*)
 	        print_usage 1>&2
@@ -196,7 +197,7 @@ function main
     OUTPUT_DIR=${MY_TMPDIR}
     
     parse_arguments "$@"
-    if test -n "$DEBUG"; then
+    if test -n "$SRPMIX_DEBUG"; then
 	trap 0
 	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
@@ -248,7 +249,7 @@ function main
     status=$?
 
     # Notify again
-    if test -n "$DEBUG"; then
+    if test -n "$SRPMIX_DEBUG"; then
 	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
     

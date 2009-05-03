@@ -19,18 +19,6 @@ function try_source
 try_source ${LIBSRPMIX}
 
 
-function use_old_autoreconf_p
-{
-    local spec_file=$1
-    local lines=$(grep -e '^autoreconf ' ${spec_file})
-    
-    if echo $lines | grep -e '-l '; then
-	return 0
-    else
-	return 1
-    fi
-}
-
 function use_old_autoconf_p
 {
     local spec_file=$1
@@ -46,10 +34,7 @@ function use_old_autoconf_p
 function spec_file_hack
 {
     local spec_file=$1
-
-
-    local use_old_autoconf="-e s/a/a/"
-    local use_old_autoreconf="-e s/a/a/"
+    
     #
     # rhel5su2 kernel needs this.
     #
@@ -57,9 +42,7 @@ function spec_file_hack
     local dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
 
 
-    if use_old_autoreconf_p "$spec_file" > /dev/null 2>&1; then
-	use_old_autoconf="-e s/^autoconf/autoconf-2.13/"
-	use_old_autoreconf="-e s/^autoreconf/autoreconf-2.13/"
+    use_old_autoconf="-e s/a/a/"
     elif use_old_autoconf_p "$spec_file" > /dev/null 2>&1; then
 	use_old_autoconf="-e s/^autoconf/autoconf-2.13/"
 	use_old_autoreconf="-e s/^autoreconf/autoreconf-2.13/"
