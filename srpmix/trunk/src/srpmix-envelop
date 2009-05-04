@@ -38,13 +38,14 @@ try_source ${LIBSRPMIX}
 OUTPUTDIR=
 TMPDIR=
 DUMP_SPEC=
+SRPMIX_ENVEOP_DEBUG=
 
 function print_usage
 {
 	echo "Usage: "
 	echo "  srpmix-envelop [--help|-h]"
 	echo "  srpmix-envelop [--dump-spec] SWRF..."
-	echo "  srpmix-envelop [--output-dir=OUTPUTDIR] [--release=RELEASE] [SWRF...]"
+	echo "  srpmix-envelop [--debug] [--output-dir=OUTPUTDIR] [--release=RELEASE] [SWRF...]"
 	echo ""
 	echo "  If SWRF is not given, standard input is"
 	echo "  used for the list of source pacakges."
@@ -74,6 +75,11 @@ function parse_arguments
 		;;
 	    --dump-spec)
 	        DUMP_SPEC=1
+		;;
+            --debug)
+	        SRPMIX_ENVEOP_DEBUG=yes
+		PS4="${PS4}[envelop]"
+		set -x
 		;;
 	    *)
 		break

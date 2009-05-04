@@ -128,6 +128,7 @@ function parse_arguments
 	    --debug)
                 SRPMIX_BUILD_DEBUG=yes
                 WRAP_OPTS="$WRAP_OPTS --debug"
+                ENVELOP_OPTS="$ENVELOP_OPTS --debug"
                 PS4="$PS4[build]"
                 set -x
 		;;
