@@ -33,6 +33,8 @@ PLUGINDIR=
 
 SPEC=
 
+SRPMIX_ETAGS_DEBUG=
+
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {
@@ -50,8 +52,8 @@ BLACKLIST='.*\.bib$\|unic-005\.tex$\|.*\.srpmix$'
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-etags [--help|-h]"
-    echo "  srpmix-etags ROOTDIR"
+    echo "  $0 [--help|-h]"
+    echo "  $0 [--debug] ROOTDIR"
     echo 
 }
 
@@ -71,6 +73,11 @@ function parse_arguments
 	    --help|-h)
 		print_usage
 		exit 0
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[etags]"
+		SRPMIX_ETAGS_DEBUG=yes
 		;;
 	    *)
 		break

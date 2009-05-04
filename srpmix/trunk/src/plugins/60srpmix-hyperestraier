@@ -31,6 +31,8 @@ ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
+SRPMIX_HYPERESTRAIER_DEBUG=
+
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {
@@ -50,7 +52,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
-    echo "  $0 ROOTDIR"
+    echo "  $0 [--debug] ROOTDIR"
     echo 
 }
 
@@ -70,6 +72,11 @@ function parse_arguments
 	    --help|-h)
 		print_usage
 		exit 0
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[hyperestraier]"
+		SRPMIX_HYPERESTRAIER_DEBUG=yes
 		;;
 	    *)
 		break

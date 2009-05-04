@@ -29,6 +29,8 @@ SOURCESDIR=
 LOGFILE=
 LIBSRPMIX=libsrpmix.sh
 
+SRPMIX_VANIILA_DEBUG=
+
 TMPDIR=/tmp/$(basename $0).$$
 mkdir -p $TMPDIR
 trap "/bin/rm -rf $TMPDIR" 0
@@ -37,7 +39,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
-    echo "  $0 ROOTDIR"
+    echo "  $0 [--debug] ROOTDIR"
     echo 
 }
 
@@ -57,6 +59,11 @@ function parse_arguments
 	    --help|-h)
 		print_usage
 		exit 0
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[vanilla]"
+		SRPMIX_VANIILA_DEBUG=yes
 		;;
 	    *)
 		break

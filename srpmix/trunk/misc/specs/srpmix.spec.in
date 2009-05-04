@@ -111,9 +111,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/srpmix/helpers/build-spec-rearrange
 
 %{_sysconfdir}/srpmix
+# TODO: config
 %{_sysconfdir}/srpmix/srpmix.cf
 
 %{_sysconfdir}/rpm
+# TODO: config
 %{_sysconfdir}/rpm/macros.srpmix
 
 %config(noreplace) %{_sysconfdir}/srpmix/build-opt-rules.d/99default.scm

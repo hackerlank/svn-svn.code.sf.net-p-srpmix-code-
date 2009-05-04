@@ -31,6 +31,8 @@ ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
+SRPMIX_FILES_DEBUG=
+
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {
@@ -46,7 +48,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
-    echo "  $0 ROOTDIR"
+    echo "  $0 [--debug] ROOTDIR"
     echo 
 }
 
@@ -66,6 +68,11 @@ function parse_arguments
 	    --help|-h)
 		print_usage
 		exit 0
+		;;
+	    --debug)
+		set -x
+		SRPMIX_FILES_DEBUG=yes
+		PS4="${PS4}[file]"
 		;;
 	    *)
 		break
@@ -104,7 +111,7 @@ function run_file_cmd
 
     es_print "$cmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
-    (cd $d && find -L . -not -type d -print0 \
+    (cd $d && find -L . -not -type d \
 	| grep -v ^./STATUS \
 	| grep -v ^./SRPMIX \
 	| grep -v ^.\$ \
@@ -113,7 +120,7 @@ function run_file_cmd
 	| grep -v ^./srpmix-LOG \
 	| grep -v ^./srpmix-SPECS \
 	| grep -v ^./SPECS \
-	| xargs -0 $cmd >> $o )
+	| xargs -d '\n' -n 1 $cmd >> $o )
     es_print "$cmd-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 

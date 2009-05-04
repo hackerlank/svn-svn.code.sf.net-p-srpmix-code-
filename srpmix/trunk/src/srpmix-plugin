@@ -163,13 +163,19 @@ function list_plugins
 
 function main
 {
+    local debug_opt
     parse_arguments "$@"
 
+
+    if test x$SRPMIX_PLUGIN_DEBUG != x; then
+	debug_opt=--debug
+    fi
+    
     for d in $ROOTDIRS
     do
         list_plugins | while read base dummy plugin
         do
-            $plugin $d || true
+            $plugin $debug_opt $d || true
         done
     done
 # TODO: return status, see srpmix-wrap

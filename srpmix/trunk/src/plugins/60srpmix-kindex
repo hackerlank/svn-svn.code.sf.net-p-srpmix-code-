@@ -33,6 +33,7 @@ LIBSRPMIX=libsrpmix.sh
 TARGETS="i686 x86_64 ia64 ppc64"
 #TARGETS="i686 x86_64"
 
+SRPMIX_KINDEX_DEBUG=
 
 TMPDIR=/tmp/$(basename $0).$$
 mkdir -p $TMPDIR
@@ -62,6 +63,11 @@ function parse_arguments
 	    --help|-h)
 		print_usage
 		exit 0
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[kindex]"
+		SRPMIX_KINDEX_DEBUG=yes
 		;;
 	    *)
 		break

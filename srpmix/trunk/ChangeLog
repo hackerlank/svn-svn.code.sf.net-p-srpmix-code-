@@ -1,5 +1,20 @@
 2009-05-05  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-wrap (create_core_spec): Use _srpmix_plugin_option
+	macro.
+
+	* src/srpmix-plugin (main): Pass --debug flag to plugins.
+	* src/srpmix.daily: Ditto.
+	
+	* src/plugins/50srpmix-coreutils (run_cmd): Don't use
+	-print0 and --null flags for find and xargs. Instead pass
+	-d newline option to xargs.
+	* src/plugins/50srpmix-file (run_cmd): Ditto. 
+
+	* src/plugins/*: Define debug flag.
+
+	* src/macros.srpmix (_srpmix_core_plugins): New macro.
+
 	* src/srpmix (parse_arguments): Use srpmix_cp. Use local.
 
 	* src/srpmix-wrap (create_core_spec): Use rpm macro to represent

@@ -211,8 +211,8 @@ srpmix-ix -f -v %{_srpmix_ix_option}      \
     %{_builddir}/%{name}                  \
     %{SOURCE0}
 
-srpmix-plugin --enable=50srpmix-coreutils,50srpmix-file,60srpmix-etags \
-    %{_srpmix_plugin_option}                                           \
+srpmix-plugin --enable=%{_srpmix_core_plugins} \
+    %{_srpmix_plugin_option}                   \
     %{_builddir}/%{name}
 
 %install
@@ -326,7 +326,9 @@ srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{SOURCE1}
 %build
 touch %{_builddir}/%{name}/.run-plugin
 sleep 1
-srpmix-plugin $enable_plugin %{_builddir}/%{name}/$SRPMIX_VAR_DIR/$installdir
+srpmix-plugin $enable_plugin           \
+    %{_srpmix_plugin_option} \
+    %{_builddir}/%{name}/$SRPMIX_VAR_DIR/$installdir
 
 %install
 rm -rf \$RPM_BUILD_ROOT
@@ -442,7 +444,7 @@ function wrap_srpm
     mv "${wrapped_srpm}" "${OUTPUTDIR}"
     rm $TMPDIR/SOURCES/`basename $target`
     if test x"$OPT_TYPE" = xplugin; then
-	$TMPDIR/SOURCES/$(basename $(archives_name $target))
+	rm $TMPDIR/SOURCES/$(basename $(archives_name $target))
     fi
     echo "$es_name"
 

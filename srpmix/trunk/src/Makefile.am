@@ -23,12 +23,12 @@ dist_bin_SCRIPTS =           \
 	\
         $(NULL)
 
-macrosdir=$(sysconfdir)/rpm
-dist_macros_DATA = macros.srpmix
-
 srpmixconfdir=$(sysconfdir)/srpmix
 dist_srpmixconf_DATA = srpmix.cf
 
 crondailydir=$(sysconfdir)/cron.daily
 dist_crondaily_SCRIPTS = srpmix.daily
+
+macrosdir=$(sysconfdir)/rpm
+dist_macros_DATA = macros.srpmix
 
