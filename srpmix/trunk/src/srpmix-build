@@ -153,24 +153,30 @@ function parse_arguments
 	srpmix_abort "Specify --srpm or --swrf"
     fi
 
+
+    local plugin_p
+    if test "x$OPT_TYPE" = "xplugin"; then
+          plugin_p=yes  
+    fi
+
     if test -n "${TARGET_SRPM}"; then
-        if test "x$OPT_TYPE" = "xplugin"; then
+	if test "x$plugin_p" != x; then
             srpmix_abort "can't specify --srpm for plugin type"
         fi
-        if srpmix_can_ln "${TARGET_SRPM}" ${MY_TMPDIR}; then
-  	    ln ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
-        else
-  	    cp ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
-        fi
+	srpmix_cp ${TARGET_SRPM} ${MY_TMPDIR}/
+
         TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
     fi
 
     if test -n "${TARGET_SWRF}"; then
-        if srpmix_can_ln "${TARGET_SWRF}" ${MY_TMPDIR}; then
-            ln ${TARGET_SWRF} ${MY_TMPDIR}/$(basename ${TARGET_SWRF})
-        else
-            cp ${TARGET_SWRF} ${MY_TMPDIR}/$(basename ${TARGET_SWRF})
+	local archives_swrf=$(archives_name ${TARGET_SWRF})
+        srpmix_cp ${TARGET_SWRF} ${MY_TMPDIR}/
+
+	# Plugins like vanilla may require the archives package, too.
+	if test "x$plugin_p" != x; then
+	    srpmix_cp ${archives_swrf} ${MY_TMPDIR}/
         fi
+        
         TARGET_SWRF=${MY_TMPDIR}/$(basename ${TARGET_SWRF})
     fi
 
@@ -178,8 +184,8 @@ function parse_arguments
 
 function check_pvr_rpm
 {
-    pvr=$1
-    count=
+    local pvr=$1
+    local count=
 
 #	if is_memeber "${pvr}" $all; then
 #	    echo "*** Source code for ${pvr} is already installed ***" 1>&2
@@ -195,9 +201,9 @@ function check_pvr_rpm
 
 function check_pvr_output_dir
 {
-    pvr=$1
-    p0=
-    p=
+    local pvr=$1
+    local p0=
+    local p=
 
     p0=$(srpmix_srchash $pvr)
     p=$(echo "${OUTPUT_DIR}/$p0/${pvr}-srpmix-"[0-9]* | head -1)
@@ -209,6 +215,8 @@ function check_pvr_output_dir
 
 function envelope_swrf_by_rpm
 {
+    local p
+
     for swrf in $@; do
 	p=$($SWRFPM -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
 	enveloped_name=$(srpmix_build_enveloped_name "$p")
@@ -256,7 +264,7 @@ function main
 	exit 3
     fi
 
-    files=$(find ${MY_TMPDIR}/RPMS/noarch -name '*.swrf')
+    local files=$(find ${MY_TMPDIR}/RPMS/noarch -name '*.swrf')
     case "$OUTPUT_FORMAT" in
       rpm)
         envelope_swrf $files
@@ -264,7 +272,7 @@ function main
       ;;
     esac
 
-    echo $files | while read p; do
+    for p in $files; do
 	p0=$(basename $p)
 	p00=`srpmix_srchash $p0`
 	mkdir -p "${OUTPUT_DIR}/${p00}"

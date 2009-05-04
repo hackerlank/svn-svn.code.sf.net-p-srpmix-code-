@@ -1,3 +1,22 @@
+2009-05-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (parse_arguments): Use srpmix_cp. Use local.
+
+	* src/srpmix-wrap (create_core_spec): Use rpm macro to represent
+	sources0.
+	(create_plugin_spec): Ditto.
+	(transfer_cmd): Copy archives if the type is plugin. Use local.
+	Use srpmix_cp.
+	
+	* src/srpmix-build (main): Don't use read to iterate files.
+	(*): Use local.
+	(OPT_TYPE): Do cp or ln archives if the type is plugin.
+	Plugins like vanilla may requires the archives.
+	(parse_arguments): Use srpmix_cp.
+
+	* src/libsrpmix.sh.in (archives_name): 
+	(srpmix_cp): New function.
+
 2009-05-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/*: Improve debug facilities.

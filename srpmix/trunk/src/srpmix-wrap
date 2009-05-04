@@ -121,8 +121,7 @@ function parse_arguments
     done
 
     if test "x$1" = "x"; then
-
-            while read tmp; do
+        while read tmp; do
 	  srpms="${srpms} ${tmp}"
 	done
     else
@@ -180,7 +179,7 @@ Summary: Source Information for package $package ($version-$release)
 Name: ${wrapped_name}
 Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
-Source: `basename $target_srpm`
+Source0: $(basename $target_srpm)
 Autoreq: 0
 BuildRequires: $BUILD_REQUIRES
 Buildarch: $buildarch
@@ -210,7 +209,7 @@ fi
 %build
 srpmix-ix -f -v %{_srpmix_ix_option}      \
     %{_builddir}/%{name}                  \
-    %{_sourcedir}/`basename $target_srpm`
+    %{SOURCE0}
 
 srpmix-plugin --enable=50srpmix-coreutils,50srpmix-file,60srpmix-etags \
     %{_srpmix_plugin_option}                                           \
@@ -301,7 +300,7 @@ Name: ${plugin_package_name}
 Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
 Source0: $(basename $target_swrf)
-Source1: $(basename $target_swrf | sed -e 's/-srpmix-/-srpmix-archives-/')
+Source1: $(archives_name $(basename $target_swrf))
 Autoreq: 0
 BuildRequires: $BUILD_REQUIRES
 Buildarch: $arch
@@ -321,9 +320,8 @@ if test -d %{_builddir}/%{name}; then
   rm -rf %{_builddir}/%{name}
 fi
 mkdir -p %{_builddir}/%{name}
-ls %{_sourcedir}/
-srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{_sourcedir}/`basename $target_swrf`
-srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{_sourcedir}/`basename $target_swrf | sed -e 's/-srpmix-/-srpmix-archives-/'`
+srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{SOURCE0}
+srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{SOURCE1}
 
 %build
 touch %{_builddir}/%{name}/.run-plugin
@@ -377,16 +375,17 @@ EOF
 #
 function wrap_srpm
 {
-    target=$1
-    spec=
-    wrapped_name=
-    es_name=
+    local target=$1
+    local spec=
+    local wrapped_name=
+    local es_name=
 
-    pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target)
-    package=$(echo $pvrd | cut -d' ' -f1)
-    version=$(echo $pvrd | cut -d' ' -f2)
-    release=$(echo $pvrd | cut -d' ' -f3)
-    description="$(echo $pvrd | cut -d' ' -f4-)"
+    local pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target)
+    local package=$(echo $pvrd | cut -d' ' -f1)
+    local version=$(echo $pvrd | cut -d' ' -f2)
+    local release=$(echo $pvrd | cut -d' ' -f3)
+    local description="$(echo $pvrd | cut -d' ' -f4-)"
+
 
     case "$OPT_TYPE" in
         core)
@@ -433,11 +432,18 @@ function wrap_srpm
 	return
     fi
 
-    cp $target $TMPDIR/SOURCES/
+    srpmix_cp $target $TMPDIR/SOURCES/
+    if test x"$OPT_TYPE" = xplugin; then
+	srpmix_cp $(archives_name $target) $TMPDIR/SOURCES/
+    fi
+    
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
     wrapped_srpm=$(/bin/ls $TMPDIR/SRPMS/*-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm)
     mv "${wrapped_srpm}" "${OUTPUTDIR}"
     rm $TMPDIR/SOURCES/`basename $target`
+    if test x"$OPT_TYPE" = xplugin; then
+	$TMPDIR/SOURCES/$(basename $(archives_name $target))
+    fi
     echo "$es_name"
 
     es_print srpmix-wrap done \

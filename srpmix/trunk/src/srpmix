@@ -160,11 +160,7 @@ function parse_arguments
 		    ;;
 	    esac
 	else
-	    if srpmix_can_ln "${TARGET_SRPM}" ${MY_TMPDIR}; then
-		ln ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
-	    else
-		cp ${TARGET_SRPM} ${MY_TMPDIR}/$(basename ${TARGET_SRPM})
-	    fi
+	    srpmix_cp ${TARGET_SRPM} ${MY_TMPDIR}/
 	    TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
 	fi
     fi
@@ -191,6 +187,7 @@ function opt_rules
 function main
 {
 #   all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
+    local status
 
     MY_TMPDIR=`mktemp -d`
     trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
@@ -202,8 +199,9 @@ function main
 	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
 
+    local xopt
     for srpm in $TARGET_SRPM; do
-	local xopt="$(opt_rules $srpm)"
+	xopt="$(opt_rules $srpm)"
 	if test x = "x${xopt}"; then
             srpmix-build $SRPMIXBUILD_OPTIONS --srpm=$srpm
 	else
@@ -212,34 +210,37 @@ function main
     done
 
     # Create Plugin Package
+    local pattern="-srpmix-$SRPMIX_PKG_MAJOR_VERSION\|-srpmix-archives-$SRPMIX_PKG_MAJOR_VERSION"
+    local rpms
     if test "x$OUTPUT_FORMAT" = "xrpm"; then
-        files=$(find ${MY_TMPDIR} -name '*.noarch.rpm' | grep srpmix-$SRPMIX_PKG_MAJOR_VERSION)
-        for rpm in $files; do
+        rpms=$(find ${MY_TMPDIR} -name '*.noarch.rpm' | grep -e "$pattern")
+        for rpm in $rpms; do
             (cd $MY_TMPDIR; rpm2cpio $rpm | cpio -i --make-directories)
         done
     
     fi
-    files=$(find ${MY_TMPDIR} -name '*.swrf' | grep srpmix-$SRPMIX_PKG_MAJOR_VERSION)
-    for swrf in $files; do
+    local swrfs=$(find ${MY_TMPDIR} -name '*.swrf' | grep srpmix-$SRPMIX_PKG_MAJOR_VERSION)
+    for swrf in $swrfs; do
         srpmix-build --type=plugin $SRPMIXBUILD_OPTIONS --swrf=$swrf
     done
 
+    local outputs
     case "$OUTPUT_FORMAT" in
       rpm)
-        files=$(find ${MY_TMPDIR} -name '*.noarch.rpm')
+        outputs=$(find ${MY_TMPDIR} -name '*.noarch.rpm')
         if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
-	    echo $files | SRPMIX_NOPLUGIN=yes xargs yum localinstall -y --nogpgcheck
+	    echo $outputs | SRPMIX_NOPLUGIN=yes xargs yum localinstall -y --nogpgcheck
         fi
       ;;
       swrf)
-        files=$(find ${MY_TMPDIR} -name '*.swrf')
+        outputs=$(find ${MY_TMPDIR} -name '*.swrf')
         if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
-            echo $files | xargs srpmix-db --noplugin -i
+            echo $outputs | xargs srpmix-db --noplugin -i
         fi
       ;;
     esac
     if test "x$OUTPUT_DIR" != "x$MY_TMPDIR"; then
-        for p in $files; do
+        for p in $outputs; do
             p0=$(basename $p)
             p00=`srpmix_srchash $p0`
             mkdir -p "${OUTPUT_DIR}/${p00}"

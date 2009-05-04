@@ -222,11 +222,18 @@ function srpmix_distmap_to_json
 SRPMIX_ENABLE_PLUGIN=
 SRPMIX_DISABLE_PLUGIN=
 
-function srpmix_can_ln
+function srpmix_cp
 {
-    test $(stat --format="%D" $1) = $(stat --format="%D" $2)
-}
+    local from=$1
+    local to=$2
+    local cmd
 
+    cmd=cp
+    if test $(stat --format="%D" $from) = $(stat --format="%D" $to); then
+	cmd=ln
+    fi
+    $cmd $from $to
+}
 
 ########################################################################
 #
@@ -564,7 +571,10 @@ function list_plugins
     done
 }
 
-
+function archives_name
+{
+    echo $1 | sed -e 's/-srpmix-/-srpmix-archives-/'
+}
 
 #
 # (Test
