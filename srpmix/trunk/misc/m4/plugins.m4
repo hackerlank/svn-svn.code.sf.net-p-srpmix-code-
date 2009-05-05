@@ -45,3 +45,8 @@ AC_DEFUN([SRPMIX_ENABLE_PLUGIN_HYPERESTRAIER],[
     AC_CHECK_PROGS([ESTCMD], [estcmd])
     SRPMIX_ENABLE_PLUGIN(hyperestraier, [test "x$ESTCMD" != "x"])
 ])
+
+AC_DEFUN([SRPMIX_ENABLE_PLUGIN_XGETTEXT],[
+    AC_CHECK_PROGS([XGETTEXT], [xgettext])
+    SRPMIX_ENABLE_PLUGIN(xgettext, [test "x$XGETTEXT" != "x"])
+])

@@ -5,6 +5,7 @@ EXTRA_DIST = 60srpmix-etags			\
 	60srpmix-cscope				\
 	60srpmix-doxygen			\
 	60srpmix-hyperestraier                  \
+	60srpmix-xgettext                       \
 	\
 	$(NULL)
 
@@ -28,6 +29,10 @@ endif
 
 if SRPMIX_ENABLE_PLUGIN_hyperestraier
 plugin_SCRIPTS += 60srpmix-hyperestraier
+endif
+
+if SRPMIX_ENABLE_PLUGIN_xgettext
+plugin_SCRIPTS += 60srpmix-xgettext
 endif
 
 dist_plugin_SCRIPTS = \

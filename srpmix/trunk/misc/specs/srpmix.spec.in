@@ -3,9 +3,9 @@ Name: srpmix
 Version: #PACKAGE_VERSION#
 Release: #RPM_RELEASE#
 Source: srpmix-#PACKAGE_VERSION#.tar.bz2
-Requires: hardlink cpio rpm coreutils emacs-common guile file gauche
+Requires: hardlink cpio rpm coreutils emacs-common guile file gauche gettext
 Buildarch: noarch
-BuildRequires: cscope, ctags, emacs-common, hyperestraier
+BuildRequires: cscope ctags emacs-common hyperestraier gettext
 
 Buildroot: %{_tmppath}/%{name}-root
 License: GPL
@@ -63,15 +63,26 @@ Group: Development/Tools
 %description plugin-hyperestraier
 SRPMix Plugin for creating hyperestraier index.
 
+%package plugin-xgettext
+Summary: SRPMix Plugin for creating xgettext indexes.
+Requires: srpmix gettext
+Group: Development/Tools
+
+%description plugin-xgettext
+SRPMix Plugin for creating xgettext indexes.
+
+
+
 %prep
 %setup -q
 
 %build
-%configure \
-	--enable-plugin-etags     \
-	--enable-plugin-ctags     \
-	--enable-plugin-cscope    \
+%configure                               \
+	--enable-plugin-etags            \
+	--enable-plugin-ctags            \
+	--enable-plugin-cscope           \
 	--enable-plugin-hyperestraier    \
+	--enable-plugin-xgettext         \
         --enable-plugin-doxygen=no
 
 make
@@ -136,6 +147,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plugin-hyperestraier
 %{_datadir}/srpmix/plugins/60srpmix-hyperestraier
+
+%files plugin-xgettext
+%{_datadir}/srpmix/plugins/60srpmix-xgettext
 
 # Temporary disabled
 #%files plugin-doxygen

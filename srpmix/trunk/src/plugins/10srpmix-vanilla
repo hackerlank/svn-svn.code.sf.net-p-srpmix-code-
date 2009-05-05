@@ -43,12 +43,6 @@ function print_usage
     echo 
 }
 
-function abort
-{
-    echo "*** ABORT..." "$@" 1>&2
-    exit 1
-}
-
 function parse_arguments
 {
     status=
@@ -75,7 +69,7 @@ function parse_arguments
     if test $# -ne 1; then
 	echo "wrong number of argument" 1>&2
 	print_usage 1>&2
-	abort
+	srpmix_abort
     fi
 
     ROOTDIR=$(cd $1;pwd)
@@ -95,7 +89,11 @@ function run_vanilla
     d=$1
     o=$2
     l=$3
+    local report_to=/dev/null
 
+    if test x$SRPMIX_VANIILA_DEBUG != x; then
+	report_to=/dev/stdout
+    fi
 
     es_print vanilla-start --timestamp=\"`LANG=C date`\" --input=\"$d\" --output=\"$o\" | tee -a $l
 
@@ -105,46 +103,47 @@ function run_vanilla
 	    *.tar.bz2|*.tbz|*.tbz2)
                 count=`expr $count + 1`
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; tar jxf $f 2>&1 > /dev/null;
+		(cd "$o"; tar jxvfm $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 	    *.tar.gz|*.tgz|*.tar.Z)
                 count=`expr $count + 1`
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; tar zxf $f 2>&1 > /dev/null;
+		(cd "$o"; tar zxvfm $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
+	    # TODO: Is -X needed to update the file modification time?
 	    *.zip)
 	        count=`expr $count + 1`
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; unzip -o $f 2>&1 > /dev/null;
+		(cd "$o"; unzip -o $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"unzip\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
   	    *.jar)
 	        count=`expr $count + 1`
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; fastjar xf $f 2>&1 > /dev/null;
+		(cd "$o"; fastjar xf $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"jar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
   	    *.gz|*.Z)
 	        count=`expr $count + 1`
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
 		# --force is needed to decompress a file specified by a soft link.
-		(cd "$o"; gunzip --force $f 2>&1 > /dev/null;
+		(cd "$o"; gunzip --force $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"gunzip\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
   	    *.bz2)
 	        count=`expr $count + 1`
 		# --force is needed to decompress a file specified by a soft link.
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; bunzip2 --force $f 2>&1 > /dev/null;
+		(cd "$o"; bunzip2 --force $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"bunzip2\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 	    *.tar.lzma)
 		count=`expr $count + 1`
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
 		(cd "$o"; unlzma --force --stdout $f > $(basename $f .lzma) &&
-		    tar xf $(basename $f .lzma); 
+		    tar xfm $(basename $f .lzma); 
 		    rm $(basename $f .lzma);
 		    es_print vanilla-expand --command=\"lzma+tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
@@ -159,19 +158,6 @@ function run_vanilla
     done
     es_print vanilla-end --count=${count} --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
     return 0
-}
-
-function verify_commands
-{
-    while [ $# -gt 0 ]; do
-	if which $1 > /dev/null 2>&1; then
-	    :
-	else
-	    echo "cannot find $1" 1>&2
-	    abort
-	fi
-	shift 
-    done
 }
 
 function verify_directory
@@ -195,7 +181,7 @@ function main
 {
     o= 
 
-    verify_commands tar unzip fastjar gunzip bunzip2
+    srpmix_verify_commands tar unzip fastjar gunzip bunzip2
     parse_arguments "$@"
 
     tmpdir=${PLUGINDIR}/.vanilla

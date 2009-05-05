@@ -2,11 +2,11 @@
 #
 ########################################################################
 #
-# srpmix-etags: Create MIME mapping cache for files under srpmix dir
+# srpmix-xgettext: Create Xgettext Index
 #
-# Copyright (C) 2009 Masato Taruishi
+# Copyright (C) 2009 Masatake YAMATO
 #
-# Author: Masato Taruishi <taruishi@redhat.com>
+# Author: Masatake YAMATO <yamato@redhat.com>
 #
 # program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
 ########################################################################
 
 ROOTDIR=
-FILE=file
+XGETTEXT=xgettext
 
 BUILDDIR=
 ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
-SRPMIX_FILES_DEBUG=
+SRPMIX_XGETTEXT_DEBUG=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -65,8 +65,8 @@ function parse_arguments
 		;;
 	    --debug)
 		set -x
-		SRPMIX_FILES_DEBUG=yes
-		PS4="${PS4}[file]"
+		PS4="${PS4}[xgettext]"
+		SRPMIX_XGETTEXT_DEBUG=yes
 		;;
 	    *)
 		break
@@ -78,15 +78,15 @@ function parse_arguments
     if test $# -ne 1; then
 	echo "wrong number of argument" 1>&2
 	print_usage 1>&2
-	srmpix_abort
+	srpmix_abort
     fi
 
     ROOTDIR=$(cd $1;pwd)
     shift
 
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/file
-    LOGFILE=${PLUGINDIR}/file-log.es
+    PLUGINDIR=${ROOTDIR}/plugins/xgettext
+    LOGFILE=${PLUGINDIR}/xgettext-log.es
 
     if ! test -d "${BUILDDIR}"; then exit 0; fi
 
@@ -95,51 +95,44 @@ function parse_arguments
     fi
 }
 
-function run_file_cmd
+# TODO
+REGEX='\(\.c++\|\.[ch]\)\(\.in\)\?:'
+
+function run_xgettext
 {
-    d=$1
-    o=$2
-    l=$3
-    cmd=$4
+    local d=$1
+    local o=$2
+    local l=$3
+    local s
 
-
-    es_print "$cmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    es_print "xgettext-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
-    (cd $d && find -L . -not -type d \
-	| grep -v ^./STATUS \
-	| grep -v ^./SRPMIX \
-	| grep -v ^.\$ \
-	| grep -v ^./plugins \
-	| grep -v ^./archives \
-	| grep -v ^./srpmix-LOG \
-	| grep -v ^./srpmix-SPECS \
-	| grep -v ^./SPECS \
-	| xargs -d '\n' -n 1 $cmd >> $o )
-    es_print "$cmd-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
-}
 
-function run_file_i
-{
-    run_file_cmd $1 $2 $3 "${FILE} -i"
-}
-
-function run_file
-{
-    run_file_cmd $1 $2 $3 "${FILE}"
+    grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 > "${PLUGINDIR}/xgettext.files"
+    (cd $d && \
+	cat "${PLUGINDIR}/xgettext.files" \
+	| ${XGETTEXT} --omit-header       \
+	              --sort-output       \
+	              --extract-all       \
+	              --from-code=utf-8   \
+                      --output=-          \
+	              --files-from=-      \
+                      --no-wrap           \
+	> $o )
+    s=$?
+    
+    es_print "xgettext-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+    return $s
 }
 
 function main
 {
-    srpmix_verify_commands "${FILE}"
+    srpmix_verify_commands "${XGETTEXT}"
     parse_arguments "$@"
 
-    if ( ! test -e "${PLUGINDIR}/file" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file"; then
-        run_file "${ROOTDIR}" "${PLUGINDIR}/file" $LOGFILE
-    fi
-    if ( ! test -e "${PLUGINDIR}/file-i" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file-i"; then
-        run_file_i "${ROOTDIR}" "${PLUGINDIR}/file-i" $LOGFILE
+    if ( ! test -e "${PLUGINDIR}/output.xgettext" ) ||
+	test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/xgettext.out"; then
+        run_xgettext "${ROOTDIR}" "${PLUGINDIR}/xgettext.out" $LOGFILE
     fi
 }
 

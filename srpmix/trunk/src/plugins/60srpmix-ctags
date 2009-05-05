@@ -55,12 +55,6 @@ function print_usage
     echo 
 }
 
-function abort
-{
-    echo "*** ABORT..." "$@" 1>&2
-    exit 1
-}
-
 function parse_arguments
 {
     status=
@@ -87,7 +81,7 @@ function parse_arguments
     if test $# -ne 1; then
 	echo "wrong number of argument" 1>&2
 	print_usage 1>&2
-	abort
+	srpmix_abort
     fi
 
     ROOTDIR=$(cd $1;pwd)
@@ -121,22 +115,9 @@ function run_ctags
     es_print ctags-end --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
-function verify_commands
-{
-    while [ $# -gt 0 ]; do
-	if which $1 > /dev/null 2>&1; then
-	    :
-	else
-	    echo "cannot find $1" 1>&2
-	    abort
-	fi
-	shift 
-    done
-}
-
 function main
 {
-    verify_commands "${CTAGS}"
+    srpmix_verify_commands "${CTAGS}"
     parse_arguments "$@"
 
     if grep '^Name: *kernel\(%.*\)\?$' $SPEC > /dev/null 2>&1 ; then

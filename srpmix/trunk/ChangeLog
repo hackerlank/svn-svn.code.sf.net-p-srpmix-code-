@@ -1,5 +1,18 @@
 2009-05-05  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/10srpmix-vanilla (run_vanilla): Added m to tar
+	to update file modification time.
+
+	* src/plugins/60srpmix-xgettext: Added new plugin.
+
+	* misc/specs/srpmix.spec.in: Ditto.
+
+	* misc/m4/plugins.m4: Ditto.
+
+	* configure.ac: Ditto.
+
+2009-05-05  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-wrap (create_core_spec): Use _srpmix_plugin_option
 	macro.
 
