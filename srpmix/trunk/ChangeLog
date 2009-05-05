@@ -1,3 +1,8 @@
+2009-05-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (run_vanilla): Use 
+	stdin for gz. Pass --keep to bunzip2.
+
 2009-05-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/10srpmix-vanilla (run_vanilla): Added m to tar

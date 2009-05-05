@@ -91,10 +91,6 @@ function run_vanilla
     l=$3
     local report_to=/dev/null
 
-    if test x$SRPMIX_VANIILA_DEBUG != x; then
-	report_to=/dev/stdout
-    fi
-
     es_print vanilla-start --timestamp=\"`LANG=C date`\" --input=\"$d\" --output=\"$o\" | tee -a $l
 
     count=0
@@ -125,18 +121,30 @@ function run_vanilla
 		(cd "$o"; fastjar xf $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"jar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
+#	    *.shar.gz)
+#               # shar.gz => GZIP=--best gunzip -c srpmix-3.104.0.shar.gz | unshar
+#		;;
   	    *.gz|*.Z)
 	        count=`expr $count + 1`
+		local suffix
+		case "$f" in
+		    *.gz)
+			suffix=.gz
+			;;
+		    *.Z)
+			suffix=.Z
+			;;
+		esac
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
 		# --force is needed to decompress a file specified by a soft link.
-		(cd "$o"; gunzip --force $f 2>&1 > ${report_to};
+		(cd "$o"; cat $f | gunzip --force - > $(basename $f $suffix) 2>${report_to};
 		    es_print vanilla-expand --command=\"gunzip\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
   	    *.bz2)
 	        count=`expr $count + 1`
 		# --force is needed to decompress a file specified by a soft link.
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; bunzip2 --force $f 2>&1 > ${report_to};
+		(cd "$o"; bunzip2 --keep --force $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"bunzip2\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 	    *.tar.lzma)
