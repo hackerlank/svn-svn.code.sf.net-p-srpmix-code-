@@ -1,5 +1,7 @@
 2009-05-06  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/m4/Makefile.am (EXTRA_DIST): Added m4 files.
+
 	* src/plugins/10srpmix-vanilla (run_vanilla): Use 
 	stdin for gz. Pass --keep to bunzip2.
 
