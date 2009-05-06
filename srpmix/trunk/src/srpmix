@@ -210,7 +210,7 @@ function main
     done
 
     # Create Plugin Package
-    local pattern="-srpmix-$SRPMIX_PKG_MAJOR_VERSION\|-srpmix-archives-$SRPMIX_PKG_MAJOR_VERSION"
+    local pattern="-srpmix-${SRPMIX_PKG_MAJOR_VERSION}\|-srpmix-archives-${SRPMIX_PKG_MAJOR_VERSION}"
     local rpms
     if test "x$OUTPUT_FORMAT" = "xrpm"; then
         rpms=$(find ${MY_TMPDIR} -name '*.noarch.rpm' | grep -e "$pattern")
@@ -219,7 +219,7 @@ function main
         done
     
     fi
-    local swrfs=$(find ${MY_TMPDIR} -name '*.swrf' | grep srpmix-$SRPMIX_PKG_MAJOR_VERSION)
+    local swrfs=$(find ${MY_TMPDIR} -name '*.swrf' | grep -e "-srpmix-${SRPMIX_PKG_MAJOR_VERSION}")
     for swrf in $swrfs; do
         srpmix-build --type=plugin $SRPMIXBUILD_OPTIONS --swrf=$swrf
     done

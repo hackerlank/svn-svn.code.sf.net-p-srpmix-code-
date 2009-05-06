@@ -1,3 +1,8 @@
+2009-05-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): Improve the pattern to extract swrf 
+	file name.
+
 2009-05-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/m4/Makefile.am (EXTRA_DIST): Added m4 files.
