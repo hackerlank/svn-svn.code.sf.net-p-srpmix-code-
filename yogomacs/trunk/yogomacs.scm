@@ -302,7 +302,30 @@
 			     (cdr pair)))
 		  alist))))
 
-;; TODO: (defface ...)
+(define (allocate-face name)
+  (let* ((styleSheets (js-ref (current-buffer) "styleSheets"))
+	 (n-styleSheets (js-len styleSheets))
+	 (sheet (js-ref styleSheets (- (number->string n-styleSheets) 1)))
+	 (len   (number->string (js-len sheet))))
+    (let ((addRule (js-ref sheet "addRule"))
+	  (insertRule (js-ref sheet "insertRule")))
+      (cond
+       (addRule (js-invoke sheet
+			   "addRule" 
+			   (string-append "." (symbol->string name))
+			   ""))
+       (insertRule (js-invoke sheet
+			      "insertRule" 
+			      (string-append "." (symbol->string name) "{}")
+			      len)))
+      (js-ref sheet len))))
+
+(define-macro (define-face face specs)
+  `(let1 instance (or (face-of ',face)
+		      (allocate-face ',face))
+     (set-face-attribute instance ',specs)
+     instance))
+  
 
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
 (define-interactive (linum-mode p) 
