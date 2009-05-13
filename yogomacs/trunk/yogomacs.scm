@@ -293,23 +293,20 @@
       r
       )))
 
-(define (set-face-attribute name alist)
-  (let1 face (face-of name)
-    (if face
+(define (set-face-attribute name-or-face alist)
+  (let1 face (if (symbol? name-or-face)
+		 (face-of name-or-face)
+		 name-or-face)
+    (when face
 	(for-each (lambda (pair)
 		    (js-set! (js-ref face "style")
 			     (symbol->string (car pair))
 			     (cdr pair)))
 		  alist))))
 
-(define (allocate-face name)
+(define (allocate-face! name)
   (let* ((styleSheets (js-ref (current-buffer) "styleSheets"))
-	 (n-styleSheets (js-len styleSheets))
-	 (sheet (js-ref styleSheets (number->string  (- n-styleSheets 1))))
-	 (len   (number->string (js-len (or 
-					 (js-ref sheet "cssRules")
-					 (js-ref sheet "rules")
-					 )))))
+	 (sheet (js-ref styleSheets "0")))
     (let ((addRule (js-ref sheet "addRule"))
 	  (insertRule (js-ref sheet "insertRule")))
       (cond
@@ -318,19 +315,21 @@
 		   "addRule" 
 		   (string-append "." (symbol->string name))
 		   ""))
-       ((not (js-undefined? insertRule)) (js-invoke sheet
-						    "insertRule" 
-						    (string-append "." (symbol->string name) "{}")
-						    len)))
-      (js-ref sheet len))))
+       ((not (js-undefined? insertRule))
+	(js-invoke sheet
+		   "insertRule" 
+		   (string-append "." (symbol->string name) "{}")
+		   0
+		   ))
+       (else
+	(display "[yogomacs] noway to allocate face\n"))))
+    (face-of name)
+    ))
 
 (define-macro (define-face face specs)
-  `(let1 instance (or (face-of ',face)
-		      (allocate-face ',face))
-     (set-face-attribute ',face ',specs)
-     instance))
+  `(set-face-attribute (or (face-of ',face) (allocate-face! ',face))
+		       ',specs))
   
-
 ;; http://wiki.bit-hive.com/tomizoo/pg/Javascript cssRules
 (define-interactive (linum-mode p) 
   ("P") 
@@ -621,7 +620,12 @@
 	(let* ((at (previous-sibling-of nnode)))
 	  (insert-before at obj)))))
 
-(define-face stitch ((color . "green")))
+
+(define-face stitch (
+		     (foreground . "white")
+		     (background . "gray")
+		     ))
+
 (define (make-element tag str face)
   (let ((elt (js-invoke (current-buffer) "createElement" tag))
 	(attr (js-invoke (current-buffer) "createAttribute" "class"))
@@ -629,7 +633,9 @@
     (let1 attributes (js-ref elt "attributes")
       (js-invoke attributes "setNamedItem" attr)
       (js-invoke elt "setAttribute" "class" (symbol->string face)))
-    (js-invoke elt "appendChild" text)))
+    (js-invoke elt "appendChild" text)
+    elt))
+
 
 ;(stitch-at-name "." (make-text-node "\n     srpmix.org is a library of source codes\n\n"))
 (stitch-at-name "." (make-element "div"
