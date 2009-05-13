@@ -305,25 +305,29 @@
 (define (allocate-face name)
   (let* ((styleSheets (js-ref (current-buffer) "styleSheets"))
 	 (n-styleSheets (js-len styleSheets))
-	 (sheet (js-ref styleSheets (- (number->string n-styleSheets) 1)))
-	 (len   (number->string (js-len sheet))))
+	 (sheet (js-ref styleSheets (number->string  (- n-styleSheets 1))))
+	 (len   (number->string (js-len (or 
+					 (js-ref sheet "cssRules")
+					 (js-ref sheet "rules")
+					 )))))
     (let ((addRule (js-ref sheet "addRule"))
 	  (insertRule (js-ref sheet "insertRule")))
       (cond
-       (addRule (js-invoke sheet
-			   "addRule" 
-			   (string-append "." (symbol->string name))
-			   ""))
-       (insertRule (js-invoke sheet
-			      "insertRule" 
-			      (string-append "." (symbol->string name) "{}")
-			      len)))
+       ((not (js-undefined? addRule))
+	(js-invoke sheet
+		   "addRule" 
+		   (string-append "." (symbol->string name))
+		   ""))
+       ((not (js-undefined? insertRule)) (js-invoke sheet
+						    "insertRule" 
+						    (string-append "." (symbol->string name) "{}")
+						    len)))
       (js-ref sheet len))))
 
 (define-macro (define-face face specs)
   `(let1 instance (or (face-of ',face)
 		      (allocate-face ',face))
-     (set-face-attribute instance ',specs)
+     (set-face-attribute ',face ',specs)
      instance))
   
 
@@ -617,7 +621,21 @@
 	(let* ((at (previous-sibling-of nnode)))
 	  (insert-before at obj)))))
 
-(stitch-at-name "." (make-text-node "\n     srpmix.org is a library of source codes\n\n"))
+(define-face stitch ((color . "green")))
+(define (make-element tag str face)
+  (let ((elt (js-invoke (current-buffer) "createElement" tag))
+	(attr (js-invoke (current-buffer) "createAttribute" "class"))
+	(text (make-text-node str)))
+    (let1 attributes (js-ref elt "attributes")
+      (js-invoke attributes "setNamedItem" attr)
+      (js-invoke elt "setAttribute" "class" (symbol->string face)))
+    (js-invoke elt "appendChild" text)))
+
+;(stitch-at-name "." (make-text-node "\n     srpmix.org is a library of source codes\n\n"))
+(stitch-at-name "." (make-element "div"
+				  "\n     srpmix.org is a library of source codes\n\n"
+				  'stitch
+				  ))
 
 ;;
 ;; Key bindings
