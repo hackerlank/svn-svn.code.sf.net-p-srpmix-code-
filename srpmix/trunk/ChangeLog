@@ -1,3 +1,7 @@
+2009-05-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-attach: Added stub.
+
 2009-05-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix (main): Improve the pattern to extract swrf 
