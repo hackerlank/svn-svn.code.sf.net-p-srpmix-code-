@@ -171,6 +171,7 @@ function main
 	debug_opt=--debug
     fi
     
+    # TODO: Support multi cores.
     for d in $ROOTDIRS
     do
         list_plugins | while read base dummy plugin

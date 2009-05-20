@@ -713,12 +713,7 @@ function srpm_install
     # mkdir "${source_dir}"
 
     if test ${CREATE_ROOTDIR} = yes; then
-        if test -e "${rootdir}/${SOURCEDIR}/${srpm_name}"; then
-            chmod -R a+r "${rootdir}/${SOURCEDIR}/${srpm_name}"
-            find "${rootdir}/${SOURCEDIR}/${srpm_name}" -type d -print0 | \
-                xargs -0 -e chmod a+x
-            chmod -R u+w "${rootdir}/${SOURCEDIR}/${srpm_name}"
-        fi
+	srpmix_chmod "${rootdir}/${SOURCEDIR}/${srpm_name}"
     fi
 
     verbose rpm-ivh                                                     \
@@ -823,10 +818,7 @@ function srpm_build
 
     status=$?
     echo ${status} > "${rootdir}/STATUS"
-    chmod -R a+r "${rootdir}/${BUILDDIR}/${build_name}"
-    find "${rootdir}/${BUILDDIR}/${build_name}" -type d -print0 | \
-	xargs -0 -e chmod a+x
-
+    srpmix_chmod "${rootdir}/${BUILDDIR}/${build_name}"
     return $status
 }
 

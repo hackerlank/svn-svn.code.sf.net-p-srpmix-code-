@@ -198,9 +198,12 @@ function main
 	test "$(/bin/ls ${SOURCESDIR}/* | head -1)" -nt "${ROOTDIR}/vanilla"); then
         test -d $tmpdir && /bin/rm -rf $tmpdir
 	install -d $tmpdir
-	# o=$tmpdir/`echo ${d} | sed -e 's!'"${SOURCESDIR}/"'!!'`
+	
+        # o=$tmpdir/`echo ${d} | sed -e 's!'"${SOURCESDIR}/"'!!'`
 	o=$tmpdir
 	run_vanilla ${SOURCESDIR} $o $LOGFILE
+	srpmix_chmod $o 
+	
 	if ! test -d "${ROOTDIR}/vanilla"; then
             /bin/mv "$tmpdir" "${ROOTDIR}/vanilla"
         else

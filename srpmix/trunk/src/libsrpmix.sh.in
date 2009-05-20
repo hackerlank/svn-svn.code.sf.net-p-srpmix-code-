@@ -235,6 +235,15 @@ function srpmix_cp
     $cmd $from $to
 }
 
+function srpmix_chmod
+{
+    if test -e "${rootdir}/${SOURCEDIR}/${srpm_name}"; then
+	chmod -R a+r $1
+	find $1 -type d -print0 | xargs -0 -e chmod a+x
+	chmod -R u+w $1
+    fi
+}
+
 ########################################################################
 #
 # es_time

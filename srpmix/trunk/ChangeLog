@@ -1,3 +1,11 @@
+2009-05-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (main): Use srpmix_chmod.
+
+	* src/srpmix-ix (srpm_build, srpm_install): Use srpmix_chmod.
+
+	* src/libsrpmix.sh.in (srpmix_chmod): New function.
+
 2009-05-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-attach: Added stub.
