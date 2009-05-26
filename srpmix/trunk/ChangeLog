@@ -1,5 +1,7 @@
 2009-05-26  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-db (SWRFPM_OPTS): New option.
+
 	* src/macros.srpmix: Fix a typo.
 
 	* src/srpmix-db (parse_arguments): Fix a typo.

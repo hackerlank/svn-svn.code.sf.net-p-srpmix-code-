@@ -6,6 +6,7 @@ RPM_PACKAGES=
 COMMAND=
 QUIET=
 SRPMIX_DB_DEBUG=
+SWRFPM_OPTS=
 
 LIBSRPMIX=libsrpmix.sh
 
@@ -87,6 +88,7 @@ function parse_arguments
                 ;;
 	    --debug)
 	        SRPMIX_DB_DEBUG=yes
+		SWRFPM_OPTS=vv
 		PS4="${PS4}[db]"
 		set -x
 		shift 1
@@ -156,7 +158,7 @@ function do_install
 	if test x"$QUIET" != xyes; then
 	    echo "($count/$max) Installing...$(basename $package)"
 	fi
-	$SWRFPM --nodeps -Uvh --dbpath "$SRPMIX_VAR_DIR"/"$db" --relocate /="$SRPMIX_VAR_DIR" "$package"
+	$SWRFPM --nodeps -Uv${SWRFPM_OPTS}h --dbpath "$SRPMIX_VAR_DIR"/"$db" --relocate /="$SRPMIX_VAR_DIR" "$package"
 
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
         
