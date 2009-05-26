@@ -90,6 +90,7 @@ function parse_arguments
 		PS4="${PS4}[db]"
 		set -x
 		shift 1
+		;;
 	    *)
 		break
 		;;

@@ -1,5 +1,7 @@
 2009-05-26  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-db (parse_arguments): Fix a typo.
+
 	* src/srpmix (parse_arguments): Rename SRPMIXBUILD_OPTIONS
 	to SRPMIX_BUILD_OPTS. Introduce SRPMIX_DB_OPTS.
 
