@@ -1,3 +1,17 @@
+2009-05-26  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (parse_arguments): Rename SRPMIXBUILD_OPTIONS
+	to SRPMIX_BUILD_OPTS. Introduce SRPMIX_DB_OPTS.
+
+	* src/srpmix-envelop: Passing %{_srpmix_db_option} to srpmix-db.
+
+	* src/srpmix-wrap: Ditto.
+
+	* src/srpmix-db: Added new option --debug.
+
+	* src/macros.srpmix (_srpmix_db_debug_option, _srpmix_db_option): 
+	Added new macros.
+
 2009-05-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/10srpmix-vanilla (main): Use srpmix_chmod.

@@ -191,17 +191,17 @@ rm -rf \$RPM_BUILD_ROOT
 %pre
 if [ \$1 = 2 ]; then
 # Install stage of rpm -U
-  srpmix-db --erase ${enveloped_name}
+  srpmix-db %{_srpmix_db_option} --erase ${enveloped_name}
 fi
 
 %post
-srpmix-db --install $(srpmix_swrfdir $target_swrf)/$(basename $target_swrf)
+srpmix-db %{_srpmix_db_option} --install $(srpmix_swrfdir $target_swrf)/$(basename $target_swrf)
 
 
 %preun
 if [ \$1 = 0 ]; then
 # rpm -e
-  srpmix-db --erase ${enveloped_name}
+  srpmix-db %{_srpmix_db_option} --erase ${enveloped_name}
 fi
 
 %files

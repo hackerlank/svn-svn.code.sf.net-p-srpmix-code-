@@ -5,6 +5,7 @@
 RPM_PACKAGES=
 COMMAND=
 QUIET=
+SRPMIX_DB_DEBUG=
 
 LIBSRPMIX=libsrpmix.sh
 
@@ -24,9 +25,9 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db -h|--help"
-    echo "  srpmix-db [--hardlink] [--noplugin] [--root=ROOT] [--quite|-q] -i|--install SWRF..."
-    echo "  srpmix-db [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
-    echo "  srpmix-db -l|--list"
+    echo "  srpmix-db [--debug] [--hardlink] [--noplugin] [--root=ROOT] [--quite|-q] -i|--install SWRF..."
+    echo "  srpmix-db [--debug] [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
+    echo "  srpmix-db [--debug] -l|--list"
     echo
 }
 
@@ -84,6 +85,11 @@ function parse_arguments
 	        OPT_NOPLUGIN=yes
 		shift 1
                 ;;
+	    --debug)
+	        SRPMIX_DB_DEBUG=yes
+		PS4="${PS4}[db]"
+		set -x
+		shift 1
 	    *)
 		break
 		;;

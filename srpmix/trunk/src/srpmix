@@ -24,7 +24,8 @@ else
 OUTPUT_FORMAT=swrf
 fi
 SRPMIX_DEBUG=""
-SRPMIXBUILD_OPTS=
+SRPMIX_BUILD_OPTS=
+SRPMIX_DB_OPTS=
 
 set -e
 
@@ -75,7 +76,7 @@ function parse_arguments
 		SRPMIX_PKG_RELEASE=$RELEASE
 	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
-		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
 	        ;;
 	    --hardlink)
 	        export SRPMIX_DO_HARDLINK=yes
@@ -85,11 +86,11 @@ function parse_arguments
 		;;
 	    --multi-targets)
 	        export SRPMIX_MULTI_TARGETS=yes
-		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
 		;;
             --keep-original)
 	        export SRPMIX_KEEP_ORIGINAL=yes
-		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
 		;;
 	    --output-dir=*)
 	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
@@ -104,11 +105,12 @@ function parse_arguments
 		;;
 	    --target=*)
 	        export SRPMIX_TARGET=$(echo $1 | sed 's/--target=//')
-		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
 		;;
 	    --debug)
 	        SRPMIX_DEBUG=yes
-		SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS $1"
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
+		SRPMIX_DB_OPTS="--debug"
 		set -x
 		PS4="${PS4}[]"
 		;;
@@ -170,10 +172,10 @@ function parse_arguments
 	TARGET_SRPM=$(/bin/ls ${MY_TMPDIR}/*.src.rpm)
     fi
 
-    SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-format=$OUTPUT_FORMAT"
-    SRPMIXBUILD_OPTIONS="$SRPMIXBUILD_OPTIONS --output-dir=$MY_TMPDIR"
+    SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS --output-format=$OUTPUT_FORMAT"
+    SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS --output-dir=$MY_TMPDIR"
     
-    SRPMIXBUILD_OPTIONS=" $SRPMIXBUILD_OPTIONS"
+    SRPMIX_BUILD_OPTS=" $SRPMIX_BUILD_OPTS"
 }
 
 function opt_rules
@@ -203,9 +205,9 @@ function main
     for srpm in $TARGET_SRPM; do
 	xopt="$(opt_rules $srpm)"
 	if test x = "x${xopt}"; then
-            srpmix-build $SRPMIXBUILD_OPTIONS --srpm=$srpm
+            srpmix-build $SRPMIX_BUILD_OPTS --srpm=$srpm
 	else
-	    srpmix-build "$xopt" $SRPMIXBUILD_OPTIONS --srpm=$srpm
+	    srpmix-build "$xopt" $SRPMIX_BUILD_OPTS --srpm=$srpm
 	fi
     done
 
@@ -221,7 +223,7 @@ function main
     fi
     local swrfs=$(find ${MY_TMPDIR} -name '*.swrf' | grep -e "-srpmix-${SRPMIX_PKG_MAJOR_VERSION}")
     for swrf in $swrfs; do
-        srpmix-build --type=plugin $SRPMIXBUILD_OPTIONS --swrf=$swrf
+        srpmix-build --type=plugin $SRPMIX_BUILD_OPTS --swrf=$swrf
     done
 
     local outputs
@@ -235,7 +237,7 @@ function main
       swrf)
         outputs=$(find ${MY_TMPDIR} -name '*.swrf')
         if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
-            echo $outputs | xargs srpmix-db --noplugin -i
+            echo $outputs | xargs srpmix-db $SRPMIX_DB_OPTS --noplugin -i
         fi
       ;;
     esac

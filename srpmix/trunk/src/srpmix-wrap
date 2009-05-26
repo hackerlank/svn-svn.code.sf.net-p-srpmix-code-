@@ -320,8 +320,8 @@ if test -d %{_builddir}/%{name}; then
   rm -rf %{_builddir}/%{name}
 fi
 mkdir -p %{_builddir}/%{name}
-srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{SOURCE0}
-srpmix-db --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{SOURCE1}
+srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{SOURCE0}
+srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --noplugin -i %{SOURCE1}
 
 %build
 touch %{_builddir}/%{name}/.run-plugin
