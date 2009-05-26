@@ -1,6 +1,8 @@
 2009-05-26  Masatake YAMATO  <yamato@redhat.com>
 
-	* src/srpmix-db (do_install): Specify --prefix.
+	* src/srpmix (main): Added --yum.
+
+	* src/srpmix-db (do_install): Specify --prefix. Don't use --relocate.
 
 	* src/srpmix-wrap (create_core_spec): use Prefix tag.
 	(create_plugin_spec): Ditto.

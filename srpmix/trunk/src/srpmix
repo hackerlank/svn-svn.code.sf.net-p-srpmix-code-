@@ -26,6 +26,7 @@ fi
 SRPMIX_DEBUG=""
 SRPMIX_BUILD_OPTS=
 SRPMIX_DB_OPTS=
+YUM_OPTS=
 
 set -e
 
@@ -42,6 +43,7 @@ function print_usage
     echo "         [--target=ARCH]"
     echo "         [--multi-targets]"
     echo "         [--keep-original]"
+    echo "         [--yum=YUM_OPTIONS]"
     echo "          --name=PACKAGE|--srpm=SRPM"
     echo
     echo "ARCH: i386(not for kenel), i686, x86_64, ia64, s390, s390x, ppc, or ppc64"
@@ -113,6 +115,9 @@ function parse_arguments
 		SRPMIX_DB_OPTS="--debug"
 		set -x
 		PS4="${PS4}[]"
+		;;
+	    --yum=*)
+	        YUM_OPTS=$(echo $1 | sed 's/--yum=//')
 		;;
 	    --*)
 	        print_usage 1>&2
@@ -231,7 +236,7 @@ function main
       rpm)
         outputs=$(find ${MY_TMPDIR} -name '*.noarch.rpm')
         if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
-	    echo $outputs | SRPMIX_NOPLUGIN=yes xargs yum localinstall -y --nogpgcheck
+	    echo $outputs | SRPMIX_NOPLUGIN=yes xargs yum ${YUM_OPTS} localinstall -y --nogpgcheck
         fi
       ;;
       swrf)
