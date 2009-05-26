@@ -158,11 +158,22 @@ function do_install
 	if test x"$QUIET" != xyes; then
 	    echo "($count/$max) Installing...$(basename $package)"
 	fi
+
+	#
+	# Till fedora 10 --prefix did't work but 
+	# --relocate /="$SRPMIX_VAR_DIR" worked fine.
+	# But in feodra 11 --relocate /="$SRPMIX_VAR_DIR" doesn't
+	# work but --prefix works fine.
+	#
+	# On fedora 11 "rpm --version" tells RPM version 4.7.0.
+	# Compatibility efforts are needed?
+	#
 	$SWRFPM -Uv${SWRFPM_OPTS} \
 	    --nodeps \
 	    --dbpath "$SRPMIX_VAR_DIR"/"$db" \
 	    --prefix "$SRPMIX_VAR_DIR" \
 	    "$package"
+
 
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
         
