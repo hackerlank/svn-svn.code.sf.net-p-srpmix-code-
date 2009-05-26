@@ -162,7 +162,6 @@ function do_install
 	    --nodeps \
 	    --dbpath "$SRPMIX_VAR_DIR"/"$db" \
 	    --prefix "$SRPMIX_VAR_DIR" \
-	    --relocate /="$SRPMIX_VAR_DIR" \
 	    "$package"
 
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
