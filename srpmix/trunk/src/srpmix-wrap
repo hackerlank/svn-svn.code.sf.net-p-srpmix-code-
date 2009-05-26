@@ -187,6 +187,7 @@ Buildarch: $buildarch
 Buildroot: %{_tmppath}/%{name}-root
 Group: $group
 License: $license
+Prefix: /
 
 %define __os_install_post true
 
@@ -196,6 +197,7 @@ $description
 %package archives
 Group: $group
 Summary: Source Archives for package $package ($version-$release)
+Prefix: /
 
 %description archives
 $description
@@ -308,6 +310,7 @@ Buildarch: $arch
 Buildroot: %{_tmppath}/%{name}-root
 Group: $group
 License: $license
+Prefix: /
 
 %define __os_install_post true
 

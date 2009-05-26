@@ -1,5 +1,10 @@
 2009-05-26  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-db (do_install): Specify --prefix.
+
+	* src/srpmix-wrap (create_core_spec): use Prefix tag.
+	(create_plugin_spec): Ditto.
+
 	* src/srpmix-db (SWRFPM_OPTS): New option.
 
 	* src/macros.srpmix: Fix a typo.
