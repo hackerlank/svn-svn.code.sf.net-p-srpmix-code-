@@ -173,7 +173,7 @@ function parse_arguments
     fi
 
     if test -n "${TARGET_NAME}"; then
-	yumdownloader --destdir=${MY_TMPDIR} --source "${TARGET_NAME}"
+	yumdownloader ${YUM_OPTS} --destdir=${MY_TMPDIR} --source "${TARGET_NAME}"
 	TARGET_SRPM=$(/bin/ls ${MY_TMPDIR}/*.src.rpm)
     fi
 
