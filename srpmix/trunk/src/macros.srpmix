@@ -8,3 +8,6 @@
 
 %_srpmix_db_debug_option         %{nil}
 %_srpmix_db_option               %{_srpmix_db_debug_option}
+
+# See processBinaryFiles() in rpm-4.7.0/build/files.c
+%_binaries_in_noarch_packages_terminate_build 0

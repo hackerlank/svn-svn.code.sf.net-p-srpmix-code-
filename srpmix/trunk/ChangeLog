@@ -1,5 +1,7 @@
 2009-06-02  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/macros.srpmix: Define _binaries_in_noarch_packages_terminate_build to 0.
+
 	* utils/rpm-spec-mode+srpmix-jump.el: Initial implementetation.
 
 2009-05-29  Masatake YAMATO  <yamato@redhat.com>
