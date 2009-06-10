@@ -1,1 +1,52 @@
 #!/bin/bash
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+RSYNC=rsync
+CONF=sop.cf
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    source "$1/${CONF}"
+elif test -f /etc/sop/${CONF}; then
+    source /etc/sop/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function count
+{
+    echo $#
+}
+
+function verify_src
+{
+    if test $(count "${BACKUP_SRC[@]}") = $(count "${BACKUP_DST[@]}"); then
+	return 0
+    else
+	return 1
+    fi
+}
+
+function main
+{
+    local n
+
+    if ! verify_src; then
+	echo "The number of elements of BACKUP_ arrays are not matched" 2>&1
+	exit 1
+    fi
+
+    let n=$(count "${BACKUP_SRC[@]}")
+    let i=0
+    while [ $i -lt $n ]; do
+	if echo "${BACKUP_DST[$i]}" | grep -e '.*/$' > /dev/null 2>&1; then
+	    mkdir -p $(driname "${BACKUP_DST[$i]}")
+	else
+	    mkdir -p "${BACKUP_DST[$i]}"
+	fi
+	${RSYNC} -auvH "${BACKUP_SRC[$i]}" "${BACKUP_DST[$i]}" 2>&1 |tee "/tmp/rsync${i}.log"
+	let i=i+1
+    done
+}
+
+time main

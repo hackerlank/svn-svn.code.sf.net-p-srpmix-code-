@@ -1,1 +1,32 @@
 #!/bin/bash
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+HARDLINK=hardlink
+CONF=sop.cf
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    source "$1/${CONF}"
+elif test -f /etc/sop/${CONF}; then
+    source /etc/sop/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function count
+{
+    echo $#
+}
+
+function main
+{
+    local n
+
+    let n=$(count "${BACKUP_DST[@]}")
+    let i=0
+    while [ $i -lt $n ]; do
+	${HARDLINK} ${BACKUP_DST[$i]}
+	let i=i+1
+    done
+}
+
+time main

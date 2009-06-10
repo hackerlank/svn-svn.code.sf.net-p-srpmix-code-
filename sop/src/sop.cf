@@ -1,0 +1,31 @@
+SOURCES_DIR=/srv/sources
+ARCHIVES_DIR=${SOURCES_DIR}/archives
+MIRROR_DIR=${ARCHIVES_DIR}/mirror
+BACKUP_DIR=/backup
+
+
+
+
+MIRROR_TARGET_HOST=(
+	"ftp.redhat.com"
+)
+
+MIRROR_TARGET_PATH=(
+	"/pub/redhat"
+)
+
+MIRROR_TARGET_PATTERN=(
+	'*.src.rpm'
+)
+
+
+
+BACKUP_SRC=(
+	"${MIRROR_DIR}/ftp.redhat.com"
+	"${MIRROR_DIR}/extra"
+)
+
+BACKUP_DST=(
+	"${BACKUP_DIR}/mirror/ftp.redhat.com"
+	"${BACKUP_DIR}/mirror/extra"
+)

@@ -1,1 +1,48 @@
 #!/bin/bash
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+HARDLINK=hardlink
+CONF=sop.cf
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    source "$1/${CONF}"
+elif test -f /etc/sop/${CONF}; then
+    source /etc/sop/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function count
+{
+    echo $#
+}
+
+function verify_targets
+{
+    if test $(count "${MIRROR_TARGET_HOST[@]}") = $(count "${MIRROR_TARGET_PATH[@]}") &&
+	test $(count "${MIRROR_TARGET_HOST[@]}") = $(count "${MIRROR_TARGET_PATTERN[@]}"); then
+	return 0
+    else
+	return 1
+    fi
+}
+
+function main
+{
+    local n
+
+    if ! verify_targets; then
+	echo "The number of elements of MIRROR_TARGET_ arrays are not matched" 2>&1
+	exit 1;
+    fi
+    
+    let n=$(count "${MIRROR_TARGET_HOST[@]}")
+    let i=0
+    while [ $i -lt $n ]; do
+	${HARDLINK} ${MIRROR_DIR}/${MIRROR_TARGET_HOST[$i]}
+	let i=i+1
+    done
+}
+
+time main
