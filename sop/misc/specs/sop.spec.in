@@ -29,7 +29,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_sysconfdir}/cron.daily/sop-*
-%{_sysconfdir}/sop/sop.cf
+%config(noreplace) %{_sysconfdir}/sop/sop.cf
 
 
 %changelog
