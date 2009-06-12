@@ -1,3 +1,7 @@
+2009-06-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm: Added a rule for pam-0.99.6*.
+
 2009-06-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* utils/diff-mode+srpmix-guess.el: Initial implementetation.

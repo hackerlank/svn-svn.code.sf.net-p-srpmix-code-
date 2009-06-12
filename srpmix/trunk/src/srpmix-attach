@@ -23,4 +23,4 @@
 #
 ########################################################################
 
-# srpmix-sttach --release=N name data-directory package version
+# srpmix-sttach --release=N --output-dir= --type= --name=plugin-name data-directory package version

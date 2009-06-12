@@ -21,3 +21,5 @@
 
 (#/util-linux-2\.13-0\.44\.el5/ "--rearrange-spec-command={ echo \"%define rhel 1\";cat; }")
 
+;; Avoids to run autoreconf.
+(#/pam-0.99.6.*/ "--rearrange-spec-command={ sed -e \"s/^autoreconf//\"; }")
