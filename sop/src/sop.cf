@@ -1,6 +1,6 @@
 SOP_SOURCES_DIR=/srv/sources
-SOP_ARCHIVES_DIR=${SOURCES_DIR}/archives
-SOP_MIRROR_DIR=${ARCHIVES_DIR}/mirror
+SOP_ARCHIVES_DIR=${SOP_SOURCES_DIR}/archives
+SOP_MIRROR_DIR=${SOP_ARCHIVES_DIR}/mirror
 SOP_BACKUP_DIR=/backup
 
 
@@ -21,11 +21,11 @@ SOP_MIRROR_TARGET_PATTERN=(
 
 SOP_ENABLE_BACKUP=yes
 SOP_BACKUP_SRC=(
-	"${MIRROR_DIR}/ftp.redhat.com"
-	"${MIRROR_DIR}/extra"
+	"${SOP_MIRROR_DIR}/ftp.redhat.com"
+	"${SOP_MIRROR_DIR}/extra"
 )
 
 SOP_BACKUP_DST=(
-	"${BACKUP_DIR}/mirror/ftp.redhat.com"
-	"${BACKUP_DIR}/mirror/extra"
+	"${SOP_BACKUP_DIR}/mirror/ftp.redhat.com"
+	"${SOP_BACKUP_DIR}/mirror/extra"
 )
