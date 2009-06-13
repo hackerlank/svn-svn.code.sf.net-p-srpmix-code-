@@ -123,7 +123,7 @@ function parse_arguments
 	        export SRPMIX_TARGET=$(echo $1 | sed 's/--target=//')
 		;;
 	    --rearrange-spec-command=*)
-	        export SRPMIX_REARRANGE_SPEC_COMMAND=$(echo $1 | sed 's/--rearrange-spec-command=//')
+	        export SRPMIX_REARRANGE_SPEC_COMMAND=$(echo "$1" | sed 's/--rearrange-spec-command=//')
 		;;
 	    --debug)
                 SRPMIX_BUILD_DEBUG=yes

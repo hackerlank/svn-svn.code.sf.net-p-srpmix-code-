@@ -1,3 +1,24 @@
+2009-06-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (REARRANGE_SPEC_COMMAND): Quote the value to
+	be assigned.
+	(parse_arguments): Quote $1 before passing to
+	sed.
+
+	* src/srpmix-build (parse_arguments): Quote $1 before passing to
+	sed.
+
+	* src/plugins/60srpmix-etags (run_etags): Check the existence
+	of */ before running find.
+
+	* src/plugins/60srpmix-ctags (run_ctags): Check the existence
+	of */ before running find.
+
+	* src/plugins/60srpmix-cscope (REGEX): Added cpp and py.
+	(run_cscope): Run cscope if scope.files is not empty.
+
+	* src/plugins/60srpmix-xgettext (REGEX): Added cpp and py.
+
 2009-06-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/99default.scm: Added a rule for pam-0.99.6*.

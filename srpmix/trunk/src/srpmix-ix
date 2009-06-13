@@ -69,7 +69,7 @@ DO_HARDLINK=${SRPMIX_DO_HARDLINK}
 IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
 KEEP_ORIGINAL=${SRPMIX_KEEP_ORIGINAL}
 MULTI_TARGETS=${SRPMIX_MULTI_TARGETS}
-REARRANGE_SPEC_COMMAND=${SRPMIX_REARRANGE_SPEC_COMMAND}
+REARRANGE_SPEC_COMMAND="${SRPMIX_REARRANGE_SPEC_COMMAND}"
 
 #
 ########################################################################
@@ -278,7 +278,7 @@ function parse_arguments
                 shift 1;
                 ;;
             --rearrange-spec-command=*)
-                REARRANGE_SPEC_COMMAND=`echo $1 | sed -e 's/--rearrange-spec-command//'`
+                REARRANGE_SPEC_COMMAND=`echo "$1" | sed -e 's/--rearrange-spec-command=//'`
                 shift 1
                 ;;
             -*)

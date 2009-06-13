@@ -6,7 +6,7 @@ For version 4
   release番号をあげるのにsvn commitが必要になる。release番号だけmakeかconfigure
   経由で変更したい。
 
-* ビルドの過程でsession idをふりなおす。これがないとgccがビルドできない。
+* ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
 
 * swrfの拡張子を確立する。
 

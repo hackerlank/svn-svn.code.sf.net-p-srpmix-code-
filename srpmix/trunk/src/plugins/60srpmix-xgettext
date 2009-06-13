@@ -96,7 +96,7 @@ function parse_arguments
 }
 
 # TODO
-REGEX='\(\.c++\|\.[ch]\)\(\.in\)\?:'
+REGEX='\(\.c++\|\.cxx\|\.cpp\|\.[ch]\|\.py\)\(\.in\)\?:'
 
 function run_xgettext
 {
@@ -109,7 +109,7 @@ function run_xgettext
     cp /dev/null $o
 
     grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 > "${PLUGINDIR}/xgettext.files"
-    (cd $d && \
+    (cd $d && test -s "${PLUGINDIR}/xgettext.files" && \
 	cat "${PLUGINDIR}/xgettext.files" \
 	| ${XGETTEXT} --omit-header       \
 	              --sort-output       \
