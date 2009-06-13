@@ -1,31 +1,31 @@
-SOURCES_DIR=/srv/sources
-ARCHIVES_DIR=${SOURCES_DIR}/archives
-MIRROR_DIR=${ARCHIVES_DIR}/mirror
-BACKUP_DIR=/backup
+SOP_SOURCES_DIR=/srv/sources
+SOP_ARCHIVES_DIR=${SOURCES_DIR}/archives
+SOP_MIRROR_DIR=${ARCHIVES_DIR}/mirror
+SOP_BACKUP_DIR=/backup
 
 
 
-ENABLE_MIRROR=yes
-MIRROR_TARGET_HOST=(
+SOP_ENABLE_MIRROR=yes
+SOP_MIRROR_TARGET_HOST=(
 	"ftp.redhat.com"
 )
 
-MIRROR_TARGET_PATH=(
+SOP_MIRROR_TARGET_PATH=(
 	"/pub/redhat"
 )
 
-MIRROR_TARGET_PATTERN=(
+SOP_MIRROR_TARGET_PATTERN=(
 	'*.src.rpm'
 )
 
 
-ENABLE_BACKUP=yes
-BACKUP_SRC=(
+SOP_ENABLE_BACKUP=yes
+SOP_BACKUP_SRC=(
 	"${MIRROR_DIR}/ftp.redhat.com"
 	"${MIRROR_DIR}/extra"
 )
 
-BACKUP_DST=(
+SOP_BACKUP_DST=(
 	"${BACKUP_DIR}/mirror/ftp.redhat.com"
 	"${BACKUP_DIR}/mirror/extra"
 )

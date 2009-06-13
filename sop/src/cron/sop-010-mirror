@@ -20,8 +20,8 @@ function count
 
 function verify_targets
 {
-    if test $(count "${MIRROR_TARGET_HOST[@]}") = $(count "${MIRROR_TARGET_PATH[@]}") &&
-	test $(count "${MIRROR_TARGET_HOST[@]}") = $(count "${MIRROR_TARGET_PATTERN[@]}"); then
+    if test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATH[@]}") &&
+	test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATTERN[@]}"); then
 	return 0
     else
 	return 1
@@ -34,8 +34,8 @@ function mirror
     local path=$2
     local pattern=$3
 
-    local odir="${MIRROR_DIR}/${host}"
-    local ldir="${MIRROR_DIR}/log"
+    local odir="${SOP_MIRROR_DIR}/${host}"
+    local ldir="${SOP_MIRROR_DIR}/log"
     local date=$(date --rfc-3339=date)
 
     if ! test -d $odir; then
@@ -57,19 +57,19 @@ function main
 {
     local n
 
-    if test "x$ENABLE_MIRROR" = x; then
+    if test "x$SOP_ENABLE_MIRROR" = x; then
 	return 0
     fi
 
     if ! verify_targets; then
-	echo "The number of elements of MIRROR_TARGET_ arrays are not matched" 2>&1
+	echo "The number of elements of SOP_MIRROR_TARGET_ arrays are not matched" 2>&1
 	exit 1;
     fi
     
-    let n=$(count "${MIRROR_TARGET_HOST[@]}")
+    let n=$(count "${SOP_MIRROR_TARGET_HOST[@]}")
     let i=0
     while [ $i -lt $n ]; do
-	mirror "${MIRROR_TARGET_HOST[$i]}" "${MIRROR_TARGET_PATH[$i]}" "${MIRROR_TARGET_PATTERN[$i]}" 
+	mirror "${SOP_MIRROR_TARGET_HOST[$i]}" "${SOP_MIRROR_TARGET_PATH[$i]}" "${SOP_MIRROR_TARGET_PATTERN[$i]}" 
 	let i=i+1
     done
 

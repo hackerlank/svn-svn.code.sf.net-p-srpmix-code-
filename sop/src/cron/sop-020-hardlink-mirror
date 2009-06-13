@@ -20,8 +20,8 @@ function count
 
 function verify_targets
 {
-    if test $(count "${MIRROR_TARGET_HOST[@]}") = $(count "${MIRROR_TARGET_PATH[@]}") &&
-	test $(count "${MIRROR_TARGET_HOST[@]}") = $(count "${MIRROR_TARGET_PATTERN[@]}"); then
+    if test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATH[@]}") &&
+	test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATTERN[@]}"); then
 	return 0
     else
 	return 1
@@ -33,14 +33,14 @@ function main
     local n
 
     if ! verify_targets; then
-	echo "The number of elements of MIRROR_TARGET_ arrays are not matched" 2>&1
+	echo "The number of elements of SOP_MIRROR_TARGET_ arrays are not matched" 2>&1
 	exit 1;
     fi
     
-    let n=$(count "${MIRROR_TARGET_HOST[@]}")
+    let n=$(count "${SOP_MIRROR_TARGET_HOST[@]}")
     let i=0
     while [ $i -lt $n ]; do
-	${HARDLINK} ${MIRROR_DIR}/${MIRROR_TARGET_HOST[$i]}
+	${HARDLINK} ${SOP_MIRROR_DIR}/${SOP_MIRROR_TARGET_HOST[$i]}
 	let i=i+1
     done
 }

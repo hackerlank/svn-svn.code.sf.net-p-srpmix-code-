@@ -21,10 +21,10 @@ function main
 {
     local n
 
-    let n=$(count "${BACKUP_DST[@]}")
+    let n=$(count "${SOP_BACKUP_DST[@]}")
     let i=0
     while [ $i -lt $n ]; do
-	${HARDLINK} ${BACKUP_DST[$i]}
+	${HARDLINK} ${SOP_BACKUP_DST[$i]}
 	let i=i+1
     done
 }
