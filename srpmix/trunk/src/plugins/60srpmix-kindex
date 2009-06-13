@@ -115,13 +115,15 @@ function main
 	return 0
     fi
 
+    perarch_kernel=
 # TODO: cscope, xen    
     if test -d "${PRE_BUILDDIR}" &&
        ( ! test -d "${PLUGINDIR}" ); then
 	for t in $TARGETS; do
-	    if test -d ${PRE_BUILDDIR}/*/*.${t}; then
+	    if test -d ${PRE_BUILDDIR}/kernel-*/linux-*.${t}; then
+		perarch_kernel=1
 		mkdir -p ${TMPDIR}/$t
-		cd ${PRE_BUILDDIR}/*/*.${t}
+		cd ${PRE_BUILDDIR}/kernel-*/linux-*.${t}
 
 
 		if ! make O=${TMPDIR}/$t TAGS; then
@@ -131,9 +133,26 @@ function main
 		make O=${TMPDIR}/$t tags
 	    fi
 	done
-	
+
+	if test "x${perarch_kernel}" = x; then
+	    for x in ${PRE_BUILDDIR}/kernel-*/linux*/Makefile; do
+		if test -f $x; then
+		    if grep '^TAGS:' $x > /dev/null 2>&1; then
+			mkdir -p ${TMPDIR}/generic
+			cd $(dirname $x)
+			if ! make O=${TMPDIR}/generic TAGS; then
+			    continue
+			fi
+
+			make O=${TMPDIR}/generic tags
+		    fi
+		fi
+	    done
+	fi
+
+
 	mkdir -p "${PLUGINDIR}"
-	for t in $TARGETS; do
+	for t in generic $TARGETS; do
 	    if test -f ${TMPDIR}/$t/TAGS; then
 		mv ${TMPDIR}/$t/TAGS  ${PLUGINDIR}/${t}.TAGS
 	    fi
@@ -141,6 +160,8 @@ function main
 		mv ${TMPDIR}/$t/tags  ${PLUGINDIR}/${t}.tags
 	    fi
 	done
+
+	
     fi
 }
 

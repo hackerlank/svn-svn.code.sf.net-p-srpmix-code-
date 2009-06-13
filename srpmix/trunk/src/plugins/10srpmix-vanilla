@@ -144,7 +144,7 @@ function run_vanilla
 	        count=`expr $count + 1`
 		# --force is needed to decompress a file specified by a soft link.
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; bunzip2 --keep --force $f 2>&1 > ${report_to};
+		(cd "$o"; bunzip2 --keep --stdout --force $f > $(basename $f .bz2) 2>${report_to};
 		    es_print vanilla-expand --command=\"bunzip2\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 	    *.tar.lzma)

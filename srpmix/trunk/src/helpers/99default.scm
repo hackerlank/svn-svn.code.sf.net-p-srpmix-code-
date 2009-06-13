@@ -23,3 +23,6 @@
 
 ;; Avoids to run autoreconf.
 (#/pam-0.99.6.*/ "--rearrange-spec-command={ sed -e \"s/^autoreconf//\"; }")
+
+;; Don't run gcc_update --touch
+(#/gcc-.*/ "--rearrange-spec-command={ sed -e \'s/^.*gcc_update --touch.*$//\'; }")

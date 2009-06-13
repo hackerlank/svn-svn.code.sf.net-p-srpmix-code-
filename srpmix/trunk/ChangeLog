@@ -1,5 +1,15 @@
 2009-06-13  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/10srpmix-vanilla (run_vanilla): Use stdout to run bunzip2.
+
+	* src/plugins/60srpmix-kindex (main): Handle rhel4 kernel.
+
+	* src/plugins/60srpmix-etags (main): Send grep output to /dev/null.
+
+	* src/plugins/60srpmix-ctags (main): Send grep output to /dev/null.
+
+	* src/helpers/99default.scm: Kill gcc_update line.
+
 	* src/srpmix-ix (REARRANGE_SPEC_COMMAND): Quote the value to
 	be assigned.
 	(parse_arguments): Quote $1 before passing to

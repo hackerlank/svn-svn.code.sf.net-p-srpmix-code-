@@ -1,12 +1,16 @@
 For version 4
 ========================================================================
 
-* pluginのAPIを強化する
+* pluginのAPIを強化する。
+** srpmix-attach
+** uninstallでファイルをもっと消す。
+
 * subversionのrevによってrelease番号を指定する現状の機構では、
   release番号をあげるのにsvn commitが必要になる。release番号だけmakeかconfigure
-  経由で変更したい。
+  経由で変更したい。<done>
 
 * ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
+** ひっかかる行をspecファイルから消すようにして潰した。<done>
 
 * swrfの拡張子を確立する。
 
@@ -15,8 +19,6 @@ For version 4
 * kindexのパスが絶対パスになってるのを直す。
 
 * kindexがそもそも起動していない場合がある。
-
-* srpmix-attach
 
 After version 4
 ========================================================================

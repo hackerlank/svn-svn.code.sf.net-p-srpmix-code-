@@ -128,7 +128,7 @@ function main
     if grep '^Name: *kernel\(%.*\)\?$' $SPEC > /dev/null 2>&1 ; then
 	for x in ${BUILDDIR}/*/linux*/Makefile; do
 	    if test -f $x; then
-		if grep '^TAGS:' $x; then
+		if grep '^TAGS:' $x > /dev/null 2>&1; then
 	        # srpmix-kindex will make indexes.
 		    return 0
 		fi
