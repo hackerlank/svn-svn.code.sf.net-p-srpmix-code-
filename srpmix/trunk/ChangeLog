@@ -1,5 +1,9 @@
 2009-06-13  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 3.105.0.
+
+2009-06-13  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/plugins/10srpmix-vanilla (run_vanilla): Use stdout to run bunzip2.
 
 	* src/plugins/60srpmix-kindex (main): Handle rhel4 kernel.
