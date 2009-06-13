@@ -5,7 +5,7 @@ BACKUP_DIR=/backup
 
 
 
-
+ENABLE_MIRROR=yes
 MIRROR_TARGET_HOST=(
 	"ftp.redhat.com"
 )
@@ -19,7 +19,7 @@ MIRROR_TARGET_PATTERN=(
 )
 
 
-
+ENABLE_BACKUP=yes
 BACKUP_SRC=(
 	"${MIRROR_DIR}/ftp.redhat.com"
 	"${MIRROR_DIR}/extra"

@@ -57,6 +57,10 @@ function main
 {
     local n
 
+    if test "x$ENABLE_MIRROR" = x; then
+	return 0
+    fi
+
     if ! verify_targets; then
 	echo "The number of elements of MIRROR_TARGET_ arrays are not matched" 2>&1
 	exit 1;
