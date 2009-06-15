@@ -1,0 +1,155 @@
+#!/bin/bash
+#
+########################################################################
+#
+# sop-mummify: generate livecd iso image from srpmix repo
+#
+# Copyright (C) 2009 Tatsuo Kawasaki
+# Copyright (C) 2009 Masatake YAMATO
+#
+# Author: Tatsuo Kawaski <kawasaki@redhat.com>
+#         Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+# OS REPOS      --- depends on the distribution of build environment
+# SRPMIX REPOS  --- depends on sop or command line
+
+# ROOTPW        --- depends on sop/mummify.cf or command line
+# PART_SIZE     --- depends on command line
+
+# TIMEZONE      --- depends on given default, sop/mummify.cf or command line
+
+# PKGS          --- /usr/share/sop/mummify/*.ks or command line
+
+
+exit 0
+
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-livecd: generate livecd iso image using livecd-creator
+#
+# Copyright (C) 2009 Tatsuo Kawasaki
+#
+# Author: Tatsuo Kawaski <kawasaki@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+export LANG=C
+TODAY=`date  +"%Y%m%d%H%M"`
+
+OUTPUT_DIR="."
+#SRPMIX_KSFILE="srpmix-rhel.ks"
+#SRPMIX_KSFILE="srpmix-small.ks"
+SRPMIX_CFGFILE="/srv/sources/archives/srpmix/srpmix-test.ks"
+SRPMIX_FSLABEL="srpmix"
+
+set -e
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-livecd [--ks=ksfile]"
+    echo "                [--output-dir=DIR]"
+    echo 
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+		case "$1" in
+			--help|-h)
+				print_usage
+				exit 0
+				;;
+			--ks=*)
+				SRPMIX_CFGFILE="$(echo $1 | sed 's/--ks=//')"
+				;;
+			--output-dir=*)
+				OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
+				if test -d ${OUTPUT_DIR} ; then
+					OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd);
+				else
+   					echo "*** No such directory... <${OUTPUT_DIR}>"
+   					exit 1
+				fi
+				;;
+			--*)
+				print_usage 1>&2
+				break
+				;;
+			*)
+				break
+				;;
+		esac
+		shift
+	done
+
+}
+parse_arguments "$@"
+
+
+if test ! -f ${SRPMIX_CFGFILE} ; then
+	echo "*** ABORT... " " unknown kickstart file <${SRPMIX_CFGFILE}>"
+   	exit 1
+fi
+	
+
+date
+echo ""
+echo ""
+echo "=================================================="
+echo "         Creating sources livecd"
+echo "--------------------------------------------------"
+echo " KS file       : ${SRPMIX_CFGFILE}"
+echo " ISO Output dir: ${OUTPUT_DIR}"
+echo "=================================================="
+(cd $OUTPUT_DIR; time livecd-creator --config=${SRPMIX_CFGFILE} --fslabel=livecd-${SRPMIX_FSLABEL}-${TODAY} --cache=/var/cache/live)
+
+if test $? != 0; then
+    echo "*** ABORT... " " Cannot create livecd "
+    exit 1
+fi
+
+echo "=================================================="
+echo "             livecd created   " 
+echo "=================================================="
+echo ""
+echo ""
+date
+echo ""
+echo "Copy the livecd-${SRPMIX_FSLABEL}-${TODAY}.iso to "${OUTPUT_DIR}" dir and make symbolic link to livecd.iso."
+echo "Ex: ln -s ${OUTPUT_DIR}/livecd-${SRPMIX_FSLABEL}-${TODAY}.iso /srv/sources/.livecd/livecd.iso"
+echo "Have Fun!"
+
+#
+# vim: set ai si sm: ts=4
+
