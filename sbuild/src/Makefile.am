@@ -1,0 +1,15 @@
+sbuildconfdir=$(sysconfdir)/sbuild
+dist_sbuildconf_DATA = sbuild.cf
+
+dist_bin_SCRIPTS= \
+	sbuild    \
+	\
+	$(NULL)
+
+pkgdata_SCRIPTS=  \
+	sbuild-createrepo.mk \
+	sbuild.mk            \
+        sbuild-srpm-list.sh  \
+        sbuild-vpath-list.sh \
+	\
+	$(NULL)

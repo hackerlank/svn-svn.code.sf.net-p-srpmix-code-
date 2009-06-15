@@ -1,0 +1,103 @@
+#!/bin/bash
+
+PKGCONFDIR=/etc/sbuild
+PKGDATADIR=/usr/share/sbuild
+LIST_MAKER=cat
+
+if ! source ${SYSCONFDIR}/sbuild.cf; then
+    echo "failed to read ${SYSCONFDIR}/sbulid.cf" 1>&2
+    exit 1
+fi
+
+# verify_command srpmix
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  sbuild [--tmpdir=TMPDIR]"
+    echo "         [--output-dir=OUTPUTDIR]"
+    echo "         [--release=RELEASE]"
+    echo "         [--debug]"
+    echo "         [--blacklist-dir=BALCKLISTDIR]"
+    echo "         [--vpath-file=VPATHFILE]"
+    echo "         [--all-pkgs]"
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --tmpdir=*)
+                SBUILD_TMPDIR="$(echo $1 | sed -e 's/--tmpdir=//')"
+		;;
+	    --outputdir=*)
+	        SBUILD_OUTPUTDIR="$(echo $1 | sed -e 's/--outputdir=//')"
+		;;
+	    --release=*)
+                # RELEASE=`date +%Y%m%d`
+	        SBUILD_RELEASE="$(echo $1 | sed -e 's/--release=//')"
+		;;
+	    --debug)
+	        SBUILD_DEBUG=y
+                ;;
+            --blacklist-dir=*)
+	        SBUILD_BLACKLISTDIR="$(echo $1 | sed -e 's/--blacklist-dir=//')"
+	        ;;
+            --vpath-file=*)
+	        SBUILD_VPATHFILE="$(echo $1 | sed -e 's/--vpath-file=//')"
+		;;
+	    --all-pkgs=*)
+	        LIST_MAKER=${PKGDATADIR}/sbuild-srpm-list.sh
+        esac
+    done
+
+
+    if ! { mount | grep ${SBUILD_TMPDIR}; } > /dev/null; then
+	mount -t tmpfs -o size=2G tmpfs "${SBUILD_TMPDIR}"
+    fi
+}
+
+
+function run_make 
+{
+    local f
+    local h
+
+    $LIST_MAKER \
+    | while read f; do
+	f=$(basename $f)
+	h=$(echo $f | sed 's/\(.\).*/\1/')
+
+	echo "Processing $h"
+	install -d $h
+
+	${PKGDATADIR}/sbuild.mk			\
+            DEBUG=$DEBUG			\
+            TMPDIR=${SBUILD_TMPDIR}		\
+            OUTPUTDIR=${SBUILD_OUTPUTDIR}	\
+	    VPATHFILE=${SBUILD_VPATHFILE}	\
+	    BLACKLISTDIR=${SBUILD_BLACKLISTDIR}	\
+            RELEASE=${SBUILD_RELEASE}		\
+	    DEBUG=${SBUILD_DEBUG}               \
+	    -k -l4 -e				\
+	    -C  $h				\
+	    $(echo $f | sed 's/\.rpm/.log/g')
+    done
+}
+
+function transfer
+{
+    ${PKGDATADIR}/sbuild-createrepo.mk -C $SBUILD_OUTPUTDIR
+}
+
+function main
+{
+    run_make
+    transfer
+}
+
+time main

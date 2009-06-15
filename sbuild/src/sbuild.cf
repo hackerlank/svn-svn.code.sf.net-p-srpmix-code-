@@ -1,0 +1,6 @@
+SBUILD_TMPDIR=/var/tmp/sources-seed
+SBUILD_OUTPUTDIR=/misc/srpmix/redhat-srpmix
+SBUILD_RELEASE=0
+
+SBUILD_VPATHFILE=
+SBUILD_BLACKLISTDIR=$(pwd)/blacklist.d
