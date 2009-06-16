@@ -1,6 +1,8 @@
 環境変数HALD_VERBOSEに何かをセットうるか、hald起動時に--verbose=yes
 stderrに出る。stderrに出るものは--daemon=noでおさえる。
 
+/sbin/serviceでやるとstderrに出ない。syslogに出てる。
+
 まったく別の系統(syslog)でsyslogに出るものがある。
 
 
