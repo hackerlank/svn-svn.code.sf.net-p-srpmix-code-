@@ -801,7 +801,6 @@
 (srpmix-wrap name :target-srpm "tora-1.3.14.1-2.src.rpm" :package "tora" :version "1.3.14.1" :release "2" :wrapped-name "tora-1.3.14.1-2-srpmix")
 (srpmix-wrap name :target-srpm "traceroute-1.4a12-27.EL4.1.src.rpm" :package "traceroute" :version "1.4a12" :release "27.EL4.1" :wrapped-name "traceroute-1.4a12-27.EL4.1-srpmix")
 (srpmix-wrap name :target-srpm "transfig-3.2.4-8.src.rpm" :package "transfig" :version "3.2.4" :release "8" :wrapped-name "transfig-3.2.4-8-srpmix")
-(srpmix-wrap name :target-srpm "TRANS.TBL" :package "" :version "" :release "" :wrapped-name "---srpmix")
 (srpmix-wrap name :target-srpm "tsclient-0.132-4.src.rpm" :package "tsclient" :version "0.132" :release "4" :wrapped-name "tsclient-0.132-4-srpmix")
 (srpmix-wrap name :target-srpm "ttfonts-indic-1.10-1.EL.src.rpm" :package "ttfonts-indic" :version "1.10" :release "1.EL" :wrapped-name "ttfonts-indic-1.10-1.EL-srpmix")
 (srpmix-wrap name :target-srpm "ttfonts-ja-1.2-36.EL4.0.src.rpm" :package "ttfonts-ja" :version "1.2" :release "36.EL4.0" :wrapped-name "ttfonts-ja-1.2-36.EL4.0-srpmix")
