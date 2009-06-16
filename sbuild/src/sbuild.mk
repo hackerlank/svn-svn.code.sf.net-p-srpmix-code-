@@ -7,6 +7,7 @@
 #RELEASE=
 #DEBUG=
 
+
 PKGDATADIR = /usr/share/sbuild
 ifeq ($(strip $(VPATHFILE)),)
 VPATH          := $(shell $(PKGDATADIR)/sbuild-vpath-list.sh | tr \\n :)
@@ -31,10 +32,10 @@ all:
 	        echo "$$(basename $<)"; \
 		SRPMIX_OPTIONS="$(SRPMIX_OPTIONS)"; \
 		echo TMPDIR=$(TMPDIR) srpmix --srpm=$< $$SRPMIX_OPTIONS; \
-		if TMPDIR=$(TMPDIR) srpmix --srpm=$< $$SRPMIX_OPTIONS > .$@ 2>&1; then \
-			mv .$@ $@; \
+		if TMPDIR=$(TMPDIR) srpmix --srpm=$< $$SRPMIX_OPTIONS > $(TSTAMPDIR)/.$@ 2>&1; then \
+			mv $(TSTAMPDIR)/.$@ $(TSTAMPDIR)/$@; \
 		else \
-			mv .$@ $(BLACKLISTDIR)/$@; \
+			mv $(TSTAMPDIR)/.$@ $(BLACKLISTDIR)/$@; \
 			exit 1; \
 		fi; \
 	fi

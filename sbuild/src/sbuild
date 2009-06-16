@@ -3,14 +3,25 @@
 PKGCONFDIR=/etc/sbuild
 PKGDATADIR=/usr/share/sbuild
 LIST_MAKER=cat
+DONT_CREATEREPO=
+RSYNC=rsync
+SOP_CONF=sop.cf
 
 if ! source ${SYSCONFDIR}/sbuild.cf; then
     echo "failed to read ${SYSCONFDIR}/sbulid.cf" 1>&2
     exit 1
 fi
 
-# verify_command srpmix
+if [ "x$1" != x ] && [ -r "$1/${SOP_CONF}" ]; then
+    source "$1/${SOP_CONF}"
+elif test -f /etc/sop/${SOP_CONF}; then
+    source /etc/sop/${SOP_CONF}
+else
+    echo "Cannot load ${SOP_CONF} file" 1>&2
+    exit 1
+fi
 
+# verify_command srpmix
 function print_usage
 {
     echo "Usage: "
@@ -19,8 +30,12 @@ function print_usage
     echo "         [--release=RELEASE]"
     echo "         [--debug]"
     echo "         [--blacklist-dir=BALCKLISTDIR]"
+    echo "         [--tstamp-dir=TSTAMPDIR]"
     echo "         [--vpath-file=VPATHFILE]"
     echo "         [--all-pkgs]"
+    echo "         [--createrepo-only]"
+    echo "         [--done-createrepo]"
+    echo "         [--use-tmpfs]"
 }
 
 function parse_arguments
@@ -47,39 +62,56 @@ function parse_arguments
             --blacklist-dir=*)
 	        SBUILD_BLACKLISTDIR="$(echo $1 | sed -e 's/--blacklist-dir=//')"
 	        ;;
+            --tstamp-dir=*)
+	        SBUILD_TSTAMPDIR="$(echo $1 | sed -e 's/--tstamp-dir=//')"
+	        ;;
             --vpath-file=*)
 	        SBUILD_VPATHFILE="$(echo $1 | sed -e 's/--vpath-file=//')"
 		;;
 	    --all-pkgs=*)
 	        LIST_MAKER=${PKGDATADIR}/sbuild-srpm-list.sh
+		;;
+	    --createrepo-only)
+	        run_creterepo
+		exit $?
+		;;
+            --dont-createrepo)
+	        DONT_CREATEREPO=1
+		;;
+	    --use-tmpfs)
+	        if ! { mount | grep ${SBUILD_TMPDIR}; } > /dev/null; then
+		    mount -t tmpfs -o size=2G tmpfs "${SBUILD_TMPDIR}"
+		fi
+		;;
         esac
     done
-
-
-    if ! { mount | grep ${SBUILD_TMPDIR}; } > /dev/null; then
-	mount -t tmpfs -o size=2G tmpfs "${SBUILD_TMPDIR}"
-    fi
 }
 
 
 function run_make 
 {
+    local a
     local f
-    local h
+    local last_h
+
 
     $LIST_MAKER \
     | while read f; do
 	f=$(basename $f)
 	h=$(echo $f | sed 's/\(.\).*/\1/')
 
-	echo "Processing $h"
-	install -d $h
+	if test "x${h}" != "x${last_h}"; then
+	    a=$h
+	    echo "Processing $h"
+	    install -d $h
+	fi
 
 	${PKGDATADIR}/sbuild.mk			\
             DEBUG=$DEBUG			\
             TMPDIR=${SBUILD_TMPDIR}		\
             OUTPUTDIR=${SBUILD_OUTPUTDIR}	\
 	    VPATHFILE=${SBUILD_VPATHFILE}	\
+            TSTAMPDIR=${SBUILD_TSTAMPDIR}       \
 	    BLACKLISTDIR=${SBUILD_BLACKLISTDIR}	\
             RELEASE=${SBUILD_RELEASE}		\
 	    DEBUG=${SBUILD_DEBUG}               \
@@ -87,17 +119,38 @@ function run_make
 	    -C  $h				\
 	    $(echo $f | sed 's/\.rpm/.log/g')
     done
+
+    
 }
 
-function transfer
+function run_creterepo
 {
     ${PKGDATADIR}/sbuild-createrepo.mk -C $SBUILD_OUTPUTDIR
 }
 
-function main
+function run_rsync
 {
-    run_make
-    transfer
+    mkdir -p ${SOP_BLACKLIST_DIR}
+    rsync -a ${SBUILD_BLACKLISTDIR} ${SOP_BLACKLIST_DIR}
 }
 
-time main
+function main
+{
+    local r
+
+
+    parse_arguments "$@"
+    run_make
+
+    r=$?
+
+    run_rsync
+
+    if test "x${DONT_CREATEREPO}" != x; then
+	return $r;
+    fi
+
+    run_creterepo
+}
+
+time main "$@"
