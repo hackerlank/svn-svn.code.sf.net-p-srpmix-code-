@@ -1,10 +1,15 @@
 SOP_SOURCES_DIR=/srv/sources
-SOP_ARCHIVES_DIR=${SOP_SOURCES_DIR}/archives
-SOP_MIRROR_DIR=${SOP_ARCHIVES_DIR}/mirror
+SOP_ATTIC_DIR=${SOP_SOURCES_DIR}/archives
+# => SOP_ATTIC_DIR=${SOP_SOURCES_DIR}/attic
+SOP_MIRROR_DIR=${SOP_ATTIC_DIR}/mirror
 SOP_BACKUP_DIR=/backup
 
-SOP_REPO_DIR=${SOP_ARCHIVES_DIR}/srpmix/redhat-srpmix
-SOP_CASKETS_DIR=${SOP_ARCHIVES_DIR}/srpmix
+SOP_REPO_DIR=${SOP_ATTIC_DIR}/srpmix/redhat-srpmix
+# => SOP_REPO_DIR=${SOP_ATTIC_DIR}/repo
+
+SOP_CASKETS_DIR=${SOP_ATTIC_DIR}/caskets
+SOP_REQUESTS_DIR=${SOP_ATTIC_DIR}/requests
+SOP_BLACKLIST_DIR=${SOP_ATTIC_DIR}/blacklist
 
 
 SOP_ENABLE_MIRROR=yes
@@ -24,10 +29,10 @@ SOP_MIRROR_TARGET_PATTERN=(
 SOP_ENABLE_BACKUP=yes
 SOP_BACKUP_SRC=(
 	"${SOP_MIRROR_DIR}/ftp.redhat.com"
-	"${SOP_MIRROR_DIR}/extra"
+	"${SOP_REQUESTS_DIR}/requests"
 )
 
 SOP_BACKUP_DST=(
 	"${SOP_BACKUP_DIR}/mirror/ftp.redhat.com"
-	"${SOP_BACKUP_DIR}/mirror/extra"
+	"${SOP_BACKUP_DIR}/requests"
 )

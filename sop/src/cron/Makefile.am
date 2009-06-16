@@ -3,6 +3,7 @@ dist_crondaily_SCRIPTS =        \
 	\
 	sop-010-mirror          \
 	sop-020-hardlink-mirror \
+	sop-025-gather-requests \
         sop-030-backup          \
         sop-040-hardlink-backup \
 	\
