@@ -1,5 +1,7 @@
 #!/bin/sh
 
+chmod u+x $0
+
 set -x
 
 LANG=C

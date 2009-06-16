@@ -6,7 +6,7 @@ dist_bin_SCRIPTS= \
 	\
 	$(NULL)
 
-pkgdata_SCRIPTS=  \
+dist_pkgdata_SCRIPTS=  \
 	sbuild-createrepo.mk \
 	sbuild.mk            \
         sbuild-srpm-list.sh  \

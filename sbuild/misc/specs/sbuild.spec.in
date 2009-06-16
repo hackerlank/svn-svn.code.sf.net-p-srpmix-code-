@@ -1,22 +1,26 @@
-Summary: 
+Summary: Script sets to builds sources
 Name: sbuild
-Version: 
-Release: 1
-License: 
-Group: 
-URL: 
-Source0: %{name}-%{version}.tar.gz
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPL
+Group: Development/Tools
+Buildarch: noarch
+Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
+Script sets to build sources
 
 %prep
 %setup -q
 
 %build
+%configure
+make
 
 %install
 rm -rf $RPM_BUILD_ROOT
+%makeinstall
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -24,10 +28,13 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc
+%{_bindir}/sbuild
+%{_datadir}/sbuild/*
+
+%config(noreplace) %{_sysconfdir}/sbuild/sbuild.cf
 
 
 %changelog
-* Mon Jun 15 2009 Masatake YAMATO <yamato@localhost.localdomain> - 
+* Wed Jun 10 2009 Masatake YAMATO <yamato@redhat.com> 0.0.0-0
 - Initial build.
 
