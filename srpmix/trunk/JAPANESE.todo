@@ -16,7 +16,7 @@ For version 4
 
 * srpmixでdownloadしたsrc.rpmをキャッシュする。
 
-* kindexのパスが絶対パスになってるのを直す。
+* kindexのパスが絶対パスになってるのを直す。*/pre-buildの部分を ../../pre-buildに書きかえる。
 
 * kindexがそもそも起動していない場合がある。<done>
 
