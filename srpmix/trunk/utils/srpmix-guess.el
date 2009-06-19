@@ -1,4 +1,4 @@
-;;; etags+srpmix-guess.el --- Guessing the place where plugin/etags/TAGS file is
+;; srpmix-guess.el --- Guessing paths for file installed with srpmix in various situations
 
 ;; Copyright (C) 2009 Masatake YAMATO
 
@@ -16,33 +16,10 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-;; Commentary:
 ;;
-;; In Sources environment, TAGS files are stored for somewhere special.
-;; 
-;; $ ls
-;; archives  plugins  pre-build  specs.spec  SRPMIX  STATUS
-;; $ ls plugins/
-;; etags
-;; $ ls plugins/etags
-;; TAGS
-;; $  
+;; For etags
 ;;
-;; Emacs with this elisp program will look for plugins/etags when
-;; you invoke `visit-tags-table' in somewhere under archives or 
-;; pre-build.
-;;
-
-;; INSTALL:
-;; (require 'etags+srpmix-guess)
-
-(require 'etags)
-
 (defvar etags+srpmix-guess-original-visit-tags-table nil)
-(unless (fboundp 'etags+srpmix-guess-original-visit-tags-table)
-  (fset 'etags+srpmix-guess-original-visit-tags-table
-	(symbol-function 'visit-tags-table)))
-
 (defun etags+srpmix-guess-search-tags-file (base)
   (unless (equal base "/")
     (let ((upper (file-name-directory base)))
@@ -63,7 +40,6 @@
 	(concat upper ".lcopy/plugins/etags/"))
        (t
 	(etags+srpmix-guess-search-tags-file (directory-file-name upper)))))))
-    
 (defun etags+srpmix-guess-visit-tags-table (file &optional local)
   (interactive (list nil nil))
   (if file
@@ -72,7 +48,66 @@
       (let ((default-directory (or in-stitch default-directory)))
 	(call-interactively 'etags+srpmix-guess-original-visit-tags-table)))))
 
-(fset 'visit-tags-table (symbol-function 'etags+srpmix-guess-visit-tags-table))
+(eval-after-load
+    "etags"
+  '(progn
+     (unless (fboundp 'etags+srpmix-guess-original-visit-tags-table)
+       (fset 'etags+srpmix-guess-original-visit-tags-table
+	     (symbol-function 'visit-tags-table)))
+     (fset 'visit-tags-table 
+	   (symbol-function 'etags+srpmix-guess-visit-tags-table))))
 
-(provide 'etags+srpmix-guess)
-;; etags+srpmix-guess.el ends here
+;;
+;; Under Diff-mode
+;;
+(eval-after-load
+    "diff-mode"
+  '(defadvice diff-find-file-name (around srpmix-guess activate)
+    (let ((default-directory (if (string-match "/archives/$" default-directory)
+				 (file-name-as-directory
+				  (concat (file-name-directory 
+					   (directory-file-name default-directory))
+					  "pre-build"))
+			       default-directory)))
+      ad-do-it)))
+
+
+;;
+;; Rpm spec mode
+;;
+(add-hook 'rpm-spec-mode-hook
+	  (lambda ()
+	    (define-key rpm-spec-mode-map "\C-cj" 'rpm-jump-to-patch-file)))
+
+(defun rpm-jump-to-patch-file ()
+  (interactive)
+  (let ((file (save-excursion
+		(beginning-of-line)
+		(cond
+		 ((looking-at "Patch[0-9]+:\\s-*\\(.*\\)")
+		  (match-string 1))
+		 ((looking-at "%patch\\([0-9]+\\)")
+		  (let ((pnum (match-string 1)))
+		    (goto-char (point-min))
+		    (if (re-search-forward (format "Patch%s:" pnum)
+					   nil
+					   t)
+			(rpm-jump-to-patch-file)
+		      nil)))
+		 (t
+		  nil)))))
+    (if file
+	(srpmix-find-file-in-archives file)
+      (error "Cannot patch line"))))
+
+(defun srpmix-find-file-in-archives (file)
+  (find-file (format "./%s/%s" 
+		     "archives"
+		     file)))
+
+
+;;
+;; TODO: Vc-mode(C-xv=)
+;;
+(provide 'srpmix-guess)
+;; srpmix-guess.el ends here
