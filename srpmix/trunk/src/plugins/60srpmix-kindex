@@ -111,7 +111,8 @@ function main
     parse_arguments "$@"
 
 
-    if ! grep '^Name: *kernel\(%.*\)\?$' $SPEC > /dev/null 2>&1; then
+    if !grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \
+	$SPEC > /dev/null 2>&1; then
 	return 0
     fi
 
@@ -154,10 +155,13 @@ function main
 	mkdir -p "${PLUGINDIR}"
 	for t in generic $TARGETS; do
 	    if test -f ${TMPDIR}/$t/TAGS; then
-		mv ${TMPDIR}/$t/TAGS  ${PLUGINDIR}/${t}.TAGS
+		# Convert the absolute path to relative
+		sed -e 's|^/.*/pre-build|../../pre-build|' ${TMPDIR}/$t/TAGS \
+		    > ${PLUGINDIR}/${t}.TAGS
 	    fi
 	    if test -f ${TMPDIR}/$t/tags; then
-		mv ${TMPDIR}/$t/tags  ${PLUGINDIR}/${t}.tags
+		sed -i -e 's|/[^\t]*/pre-build|../../pre-build|' ${TMPDIR}/$t/tags \
+		    > ${PLUGINDIR}/${t}.tags
 	    fi
 	done
 
