@@ -1,5 +1,5 @@
 SBUILD_TMPDIR=/var/tmp/sources-seed
-SBUILD_OUTPUTDIR=/misc/srpmix/redhat-srpmix
+SBUILD_OUTPUTDIR=/misc/repo
 SBUILD_RELEASE=0
 
 SBUILD_VPATHFILE=
