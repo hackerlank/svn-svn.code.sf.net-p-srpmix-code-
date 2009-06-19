@@ -32,85 +32,89 @@
 	found
       nil)))
 
+(defvar srpmix-history-last-prefix nil)
+(defvar srpmix-history-last-varray nil)
 (defun srpmix-history-version-neighbor (version prefix newer)
   (when (file-directory-p prefix)
-    (let* ((default-directory prefix)
-	   (script (let ((stream (es-make-output-stream ""))) 
-		     (es-print srpmix-history-compare-script stream) 
-		     (es-stream-get-string stream)))
-	   (result (shell-command-to-string (format "ls %s| gosh -e '%s'"
-						    ;; ???
-						    prefix
-						    script)))
-	   (stream (es-make-input-stream result))
-	   (varray (apply 'vector (es-read stream))))
-      (let ((last-idx (- (length varray) 1))
-	    (idx (srpmix-history-index-for version varray)))
-	(if idx
-	    (if newer
-		(if (< idx last-idx)
-		    (aref varray (+ idx 1))
-		  nil)
-	      (if (< 0 idx)
-		  (aref varray (- idx 1))
-		nil))
-	  nil)))))
+    (let ((varray (if (and (equal srpmix-history-last-prefix prefix) 
+			   srpmix-history-last-varray)
+		      srpmix-history-last-varray
+		    (let* ((default-directory prefix)
+			   (script (let ((stream (es-make-output-stream ""))) 
+				     (es-print srpmix-history-compare-script stream) 
+				     (es-stream-get-string stream)))
+			   (result (shell-command-to-string (format "ls %s| gosh -e '%s'"
+								    prefix
+								    script)))
+			   (stream (es-make-input-stream result))
+			   (varray (apply 'vector (es-read stream))))
+		      (setq srpmix-history-last-prefix prefix
+			    srpmix-history-last-varray varray)
+		      varray))))
+	   
+	(let ((last-idx (- (length varray) 1))
+	      (idx (srpmix-history-index-for version varray)))
+	  (if idx
+	      (if newer
+		  (if (< idx last-idx)
+		      (aref varray (+ idx 1))
+		    nil)
+		(if (< 0 idx)
+		    (aref varray (- idx 1))
+		  nil))
+	    nil)))))
 
 
-(defun srpmix-history-neighbor-string (contents
-				       distro-level
-				       newer)
+(defun srpmix-history-neighbor-string (contents newer)
   (cond
    ;; /srv/sources/dists/rhel4u7/packages/4/4Suite/*
    ;; /var/lib/srpmix/dists/rhel4u7/packages/4/4Suite/*
    ((string-match 
-     "\\(/srv/sources/dists/\\|/var/lib/srpmix/dists/\\)\\([^/]+\\)\\(.*\\)"
+     "\\(/srv/sources/\\(?:.rawhide/srpmix/\\)dists/\\|/var/lib/srpmix/dists/\\)\\([^/]+\\)\\(.*\\)"
      contents)
     (let ((prefix (match-string 1 contents))
 	  (distro (match-string 2 contents))
 	  (rest   (match-string 3 contents)))
-      (when distro-level
-	(let ((neighbor-distro (srpmix-history-distro-neighbor distro prefix newer)))
+      (let ((neighbor-distro (srpmix-history-distro-neighbor distro prefix newer)))
 	  (when neighbor-distro
-	    (concat prefix neighbor-distro rest))))))
+	    (concat prefix neighbor-distro rest)))))
      ;; /srv/sources/packages/4/4Suite/rhel4u4/
      ;; /var/lib/srpmix/packages/4/4Suite/rhel4u4/
      ((string-match 
-       "\\(\\(?:/srv/sources/packages/\\|/var/lib/srpmix/packages/\\)\\(?:[^/]+\\)/\\(?:[^/]+\\)/\\)\\([^/]+\\)\\(.*\\)"
+       "\\(\\(?:/srv/sources/\\(?:.rawhide/srpmix/\\)packages/\\|/var/lib/srpmix/packages/\\)\\(?:[^/]+\\)/\\(?:[^/]+\\)/\\)\\([^/]+\\)\\(.*\\)"
        contents)
       (let ((prefix (match-string 1 contents))
 	    (distro (match-string 2 contents))
 	    (rest   (match-string 3 contents)))
-	(when distro-level
-	  (let ((neighbor-distro (srpmix-history-distro-neighbor distro prefix newer)))
+	(let ((neighbor-distro (srpmix-history-distro-neighbor distro prefix newer)))
 	    (when neighbor-distro
-	      (concat prefix neighbor-distro rest))))))
+	      (concat prefix neighbor-distro rest)))))
      ;; /srv/sources/sources/4/4Suite/1.0-3/*     
      ;; /var/lib/srpmix/sources/4/4Suite/1.0-3/*
      ;; ---
      ((string-match 
-       "\\(\\(?:/srv/sources/sources/\\|/var/lib/srpmix/sources/\\)\\(?:[^/]+\\)/\\(?:[^/]+\\)/\\)\\([^/]+\\)\\(.*\\)"
+       "\\(\\(?:/srv/sources/\\(?:.rawhide/srpmix/\\)sources/\\|/var/lib/srpmix/sources/\\)\\(?:[^/]+\\)/\\(?:[^/]+\\)/\\)\\([^/]+\\)\\(.*\\)"
        contents)
       (let ((prefix (match-string 1 contents))
 	    (version (match-string 2 contents))
 	    (rest   (match-string 3 contents)))
-	(unless distro-level
-	  (let ((neighbor-version (srpmix-history-version-neighbor version prefix newer)))
+	(let ((neighbor-version (srpmix-history-version-neighbor version prefix newer)))
 	    (when neighbor-version
-	      (concat prefix neighbor-version rest))))))))
+	      (concat prefix neighbor-version rest)))))))
 
-(defun srpmix-history-neighbor-path (distro-level newer)
+(defun srpmix-history-neighbor-path (newer)
   (let ((replacement (srpmix-history-neighbor-string (minibuffer-contents)
-						     distro-level
 						     newer)))
     (when replacement
       (delete-minibuffer-contents)
       (insert replacement))))
 
-(defun srpmix-history-newer-path (distro-level)
-  (interactive "P")
-  (srpmix-history-neighbor-path distro-level t))
+(defun srpmix-history-newer-path ()
+  (interactive)
+  (srpmix-history-neighbor-path t))
 
-(defun srpmix-history-older-path (distro-level)
-  (interactive "P")
-  (srpmix-history-neighbor-path distro-level nil))
+(defun srpmix-history-older-path ()
+  (interactive)
+  (srpmix-history-neighbor-path  nil))
+
+(provide 'srpmix-history)

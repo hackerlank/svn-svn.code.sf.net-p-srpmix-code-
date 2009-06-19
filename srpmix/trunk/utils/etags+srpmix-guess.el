@@ -51,16 +51,16 @@
 	nil)
        ;; srpmix
        ((file-exists-p (concat upper "plugins/etags/TAGS"))
-	(concat upper "plugins/etags"))
+	(concat upper "plugins/etags/"))
        ((or (file-exists-p (concat upper "plugins/kindex/x86_64.TAGS"))
 	    (file-exists-p (concat upper "plugins/kindex/i686.TAGS")))
 	(concat upper "plugins/kindex/"))
        ;; lcopy
        ((file-exists-p (concat upper ".lcopy/TAGS"))
-	(concat upper ".lcopy"))
+	(concat upper ".lcopy/"))
        ;; lcopy NG
        ((file-exists-p (concat upper ".lcopy/plugins/etags/TAGS"))
-	(concat upper ".lcopy/plugins/etags"))
+	(concat upper ".lcopy/plugins/etags/"))
        (t
 	(etags+srpmix-guess-search-tags-file (directory-file-name upper)))))))
     
