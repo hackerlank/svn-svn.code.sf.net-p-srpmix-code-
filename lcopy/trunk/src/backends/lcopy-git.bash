@@ -24,7 +24,7 @@ function git_checkout_parse_cmdline
 	return 1
     fi
 
-    if test \( -z "$CMD"          \) -a    \
+    if test \( -z "$CMD"          \) -o    \
             \( "$CMD" != clone \) ; then
 	echo "broken git command line: $@" 2>&1
 	return 1
