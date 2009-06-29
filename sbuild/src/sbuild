@@ -34,7 +34,7 @@ function print_usage
     echo "         [--vpath-file=VPATHFILE]"
     echo "         [--all-pkgs]"
     echo "         [--createrepo-only]"
-    echo "         [--done-createrepo]"
+    echo "         [--dont-createrepo]"
     echo "         [--use-tmpfs]"
 }
 
