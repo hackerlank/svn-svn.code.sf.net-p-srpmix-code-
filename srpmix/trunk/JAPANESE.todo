@@ -3,24 +3,41 @@ For version 4
 
 * pluginのAPIを強化する。
 ** srpmix-attach
-** uninstallでファイルをもっと消す。
-
-* subversionのrevによってrelease番号を指定する現状の機構では、
-  release番号をあげるのにsvn commitが必要になる。release番号だけmakeかconfigure
-  経由で変更したい。<done>
-
-* ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
-** ひっかかる行をspecファイルから消すようにして潰した。<done>
+** 全文検索
+*** ウェブインターフェイス
 
 * swrfの拡張子を確立する。
 
 * srpmixでdownloadしたsrc.rpmをキャッシュする。
 
-* kindexのパスが絶対パスになってるのを直す。*/pre-buildの部分を ../../pre-buildに書きかえる。
+* kindexでのcscopeのサポート
+
+* ビルド率
+** 配列を使って複数のrulesオプションを渡せるようにする。
+** cscopeがクラッシュする。
+** 環境変数をつかえるようにする。
+
+* %kouji tracking
+** rpm -eでよりきれい消えるようにする。
+** インストールシステム上でのpluginsの実行をつぶす。
+** srpmix-hashdir*-, srpmix-pkgdir-foo-
+
+* mummify/slice
+** -confオプションの追加
+
+
+done
+-----
+* ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
+** ひっかかる行をspecファイルから消すようにして潰した。<done>
 
 * kindexがそもそも起動していない場合がある。<done>
 
-* rpm -eでよりきれい消えるようにする。
+* subversionのrevによってrelease番号を指定する現状の機構では、
+  release番号をあげるのにsvn commitが必要になる。release番号だけmakeかconfigure
+  経由で変更したい。<done>
+
+* kindexのパスが絶対パスになってるのを直す。*/pre-buildの部分を ../../pre-buildに書きかえる。 <done>
 
 After version 4
 ========================================================================
