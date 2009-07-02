@@ -108,6 +108,37 @@
 
 
 ;;
+;; Cscope
+;;
+(eval-after-load "xcscope"
+  '(defadvice cscope-search-directory-hierarchy (around srpmix-guess activate)
+     (let ((result ad-do-it))
+       (setq ad-return-value
+	     (cond
+	      ((not (equal result "/")) result)
+	      (t (cscope+srpmix-search-directory-hierarchy (ad-get-arg 0)))
+	      )))))
+
+(eval-after-load "xcscope"
+  '(defadvice cscope-insert-with-text-properties (around srpmix-guess activate)
+     (let ((f_ (ad-get-arg 1)))
+       (ad-set-arg 1 (if (string-match "\\(.*\\)plugins/cscope/\\(.*\\)" f_)
+			 (concat (match-string 1 f_) (match-string 2 f_))
+		       f_)))
+     ad-do-it))
+
+(defun cscope+srpmix-search-directory-hierarchy (base)
+  (if (equal base "/")
+      base
+    (let ((upper (file-name-directory base)))
+      (cond
+       ((not upper) "/")
+       ((or (file-exists-p (concat upper "plugins/cscope/cscope.files")))
+	(concat upper "plugins/cscope/"))
+       (t (cscope+srpmix-search-directory-hierarchy (directory-file-name upper)))))))
+  
+	   
+;;
 ;; TODO: Vc-mode(C-xv=)
 ;;
 (provide 'srpmix-guess)
