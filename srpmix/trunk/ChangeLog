@@ -1,5 +1,8 @@
 2009-07-02  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-wrap (create_plugin_spec): Use ln instead
+	of transfer_cmd if a symbol link is given.
+
 	* src/srpmix (main): Use SRPMIX_BUILD_OPTS and
 	SRPMIX_DB_OPTS enthronement variables.
 
