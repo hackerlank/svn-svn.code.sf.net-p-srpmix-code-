@@ -10,13 +10,14 @@
 
 PKGDATADIR = /usr/share/sbuild
 VPATH := $(shell cat $(VPATHFILE) | tr \\n :)
-SRPMIX_OPTIONS  = --release=$(RELEASE) --output-dir=$(OUTPUTDIR)
 
+SRPMIX_OPTIONS = 
 ifneq ($(DEBUG),y)
 .SILENT:
 else
 SRPMIX_OPTIONS += --debug
 endif
+SRPMIX_OPTIONS  += --release=$(RELEASE) --output-dir=$(OUTPUTDIR)
 
 
 all:
