@@ -70,7 +70,7 @@
    ;; /srv/sources/dists/rhel4u7/packages/4/4Suite/*
    ;; /var/lib/srpmix/dists/rhel4u7/packages/4/4Suite/*
    ((string-match 
-     "\\(/srv/sources/\\(?:.rawhide/srpmix/\\)dists/\\|/var/lib/srpmix/dists/\\)\\([^/]+\\)\\(.*\\)"
+     "\\(/srv/sources/\\(?:.rawhide/srpmix/\\)?dists/\\|/var/lib/srpmix/dists/\\)\\([^/]+\\)\\(.*\\)"
      contents)
     (let ((prefix (match-string 1 contents))
 	  (distro (match-string 2 contents))
@@ -81,7 +81,7 @@
      ;; /srv/sources/packages/4/4Suite/rhel4u4/
      ;; /var/lib/srpmix/packages/4/4Suite/rhel4u4/
      ((string-match 
-       "\\(\\(?:/srv/sources/\\(?:.rawhide/srpmix/\\)packages/\\|/var/lib/srpmix/packages/\\)\\(?:[^/]+\\)/\\(?:[^/]+\\)/\\)\\([^/]+\\)\\(.*\\)"
+       "\\(\\(?:/srv/sources/\\(?:.rawhide/srpmix/\\)?packages/\\|/var/lib/srpmix/packages/\\)\\(?:[^/]+\\)/\\(?:[^/]+\\)/\\)\\([^/]+\\)\\(.*\\)"
        contents)
       (let ((prefix (match-string 1 contents))
 	    (distro (match-string 2 contents))
@@ -93,7 +93,7 @@
      ;; /var/lib/srpmix/sources/4/4Suite/1.0-3/*
      ;; ---
      ((string-match 
-       "\\(\\(?:/srv/sources/\\(?:.rawhide/srpmix/\\)sources/\\|/var/lib/srpmix/sources/\\)\\(?:[^/]+\\)/\\(?:[^/]+\\)/\\)\\([^/]+\\)\\(.*\\)"
+       "\\(\\(?:/srv/sources/\\(?:.rawhide/srpmix/\\)?sources/\\|/var/lib/srpmix/sources/\\)\\(?:[^/]+\\)/\\(?:[^/]+\\)/\\)\\([^/]+\\)\\(.*\\)"
        contents)
       (let ((prefix (match-string 1 contents))
 	    (version (match-string 2 contents))

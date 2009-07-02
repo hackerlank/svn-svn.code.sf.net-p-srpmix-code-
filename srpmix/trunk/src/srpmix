@@ -24,8 +24,8 @@ else
 OUTPUT_FORMAT=swrf
 fi
 SRPMIX_DEBUG=""
-SRPMIX_BUILD_OPTS=
-SRPMIX_DB_OPTS=
+SRPMIX_BUILD_OPTS=${SRPMIX_BUILD_OPTS}
+SRPMIX_DB_OPTS=${SRPMIX_DB_OPTS}
 YUM_OPTS=
 
 set -e
@@ -47,6 +47,11 @@ function print_usage
     echo "          --name=PACKAGE|--srpm=SRPM"
     echo
     echo "ARCH: i386(not for kenel), i686, x86_64, ia64, s390, s390x, ppc, or ppc64"
+    echo ""
+    echo "Environment variables:"
+    echo "  SRPMIX_BUILD_OPTS"
+    echo "  SRPMIX_DB_OPTS"
+    echo ""
 #    TODO: Multi targets
 #    TODO: URL support
 #    echo ""
@@ -112,7 +117,7 @@ function parse_arguments
 	    --debug)
 	        SRPMIX_DEBUG=yes
 		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
-		SRPMIX_DB_OPTS="--debug"
+		SRPMIX_DB_OPTS="--debug ${SRPMIX_DB_OPTS}"
 		set -x
 		PS4="${PS4}[]"
 		;;
