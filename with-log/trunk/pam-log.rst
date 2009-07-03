@@ -5,3 +5,4 @@ _PAM_LOGFILEのデフォルトは
 0.99.* => /var/run/pam-debug.log
 存在しなければstderrにログを出す。
 
+pam_rootok.soにdebugをつけると /var/log/messagesにログが出る。
