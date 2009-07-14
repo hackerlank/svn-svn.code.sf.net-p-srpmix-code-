@@ -25,6 +25,7 @@ For version 4
 * mummify/slice
 ** -confオプションの追加
 
+* repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
 
 done
 -----

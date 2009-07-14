@@ -241,7 +241,7 @@ function main
       rpm)
         outputs=$(find ${MY_TMPDIR} -name '*.noarch.rpm')
         if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
-	    echo $outputs | SRPMIX_NOPLUGIN=yes xargs yum ${YUM_OPTS} localinstall -y --nogpgcheck
+	    echo $outputs | xargs yum ${YUM_OPTS} localinstall -y --nogpgcheck
         fi
       ;;
       swrf)
