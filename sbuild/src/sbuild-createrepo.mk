@@ -4,5 +4,5 @@
 RPMS := $(wildcard [0-9a-zA-Z]) weakview $(wildcard *.rpm)
 
 repodata/primary.xml.gz: $(RPMS) comps.xml
+# GC
 	time createrepo --update -d --skip-stat -g comps.xml .
-
