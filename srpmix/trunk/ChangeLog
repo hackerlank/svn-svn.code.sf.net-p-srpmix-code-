@@ -1,5 +1,9 @@
 2009-07-17  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/specs/srpmix.spec.in: Turn off hyperestraier.
+
+2009-07-17  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-wrap (wrap_srpm): Delete --noplugin option.
 
 	* src/srpmix (main): Ditto.
