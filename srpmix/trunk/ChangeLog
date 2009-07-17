@@ -1,5 +1,9 @@
 2009-07-17  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-weakview-packages (create_packages_weakview): Added dependency
+	to srpmix-dir-base. Make paths for %files not from /.
+	* src/srpmix-weakview-dist (create_dist_weakview): Ditto.
+
 	* src/srpmix(main): Use array to store multiple options.
 
 	* src/helpers/build-opt-rules: Print multiple options

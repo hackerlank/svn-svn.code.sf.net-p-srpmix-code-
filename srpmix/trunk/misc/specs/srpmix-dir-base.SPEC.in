@@ -17,6 +17,7 @@ rm -rf $RPM_BUILD_ROOT
 %build
 
 %install
+# TODO: Use libsrpmix.
 rootdir=/var/lib/srpmix
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT${rootdir}

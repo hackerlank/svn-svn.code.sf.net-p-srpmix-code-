@@ -129,6 +129,7 @@ Release: $SRPMIX_PKG_RELEASE%{?dist}
 Autoreq: 0
 BuildRequires: srpmix
 Buildarch: noarch
+Requires: srpmix-dir-base
 
 Buildroot: %{_tmppath}/%{name}-root
 Group: System/Daemon
@@ -172,7 +173,7 @@ rsync -va \$buildpackagesdir/* \$RPM_BUILD_ROOT/$packagesdir
 
 %files
 %defattr(-,root,root)
-/
+\$SRPMIX_VAR_DIR/packages/*/*/*
 
 %changelog
 
