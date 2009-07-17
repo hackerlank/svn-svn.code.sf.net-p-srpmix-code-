@@ -98,8 +98,9 @@ cs="${cs} a b c d e f g h i j k l m n o p q r s t u v w x y z"
 cs="${cs} A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
 cs="${cs} `seq 0 9`"
 
-swrfsdir=/usr/share/srpmix
-for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${swrfsdir}/${c}; done
+srpmixdir=/usr/share/srpmix
+mkdir -p ${RPM_BUILD_ROOT}${srpmixdir}/swrfs
+for c in ${cs}; do mkdir -p ${RPM_BUILD_ROOT}${srpmixdir}/swrfs/${c}; done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
