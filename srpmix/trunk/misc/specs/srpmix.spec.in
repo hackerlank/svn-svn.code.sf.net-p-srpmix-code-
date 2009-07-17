@@ -7,7 +7,7 @@ Requires: hardlink cpio rpm coreutils emacs-common guile file gauche gettext
 Requires: srpmix-dir-base
 Buildarch: noarch
 BuildRequires: cscope ctags emacs-common gettext
-BuildRequires: hyperestraier 
+#BuildRequires: hyperestraier 
 
 Buildroot: %{_tmppath}/%{name}-root
 License: GPL
