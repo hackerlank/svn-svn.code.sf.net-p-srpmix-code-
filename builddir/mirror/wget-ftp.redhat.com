@@ -16,7 +16,10 @@ MPATH=ftp://${FTP}/pub/redhat
 
 ODIR=${ROOT}/${FTP}
 LDIR=${ROOT}/log
-PATTERN='*.src.rpm,*-debuginfo-*'
+
+#PATTERN='*.src.rpm,*-debuginfo-*'
+PATTERN='*.src.rpm'
+
 DATE=$(date --rfc-3339=date)
 
 if ! test -d $ODIR; then
@@ -29,7 +32,7 @@ fi
 
 {
     cd ${ODIR}
-    wget -nH --cut-dirs=2 --mirror ${MPATH} -A ${PATTERN} \
-	  -o ${LDIR}/${FTP}.${DATE}.log
+    LANG=C wget -nH --cut-dirs=2 --mirror ${MPATH} -A ${PATTERN} \
+	        -o ${LDIR}/${FTP}.${DATE}.log
 }
 

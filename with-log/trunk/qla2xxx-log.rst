@@ -1,3 +1,4 @@
+qla_printk関数 => 
 int ql2xextended_error_logging;
 module_param(ql2xextended_error_logging, int, S_IRUGO|S_IRUSR);
 MODULE_PARM_DESC(ql2xextended_error_logging,

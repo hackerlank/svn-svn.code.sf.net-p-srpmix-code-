@@ -1,0 +1,38 @@
+#!/bin/sh
+DIST=dist-f12-maven
+KOJIURL=http://kojipkgs.fedoraproject.org
+DIR=/srv/sources/attic/mirror/fedoraproject-koji
+PEEK=/dev/null
+
+function newer_name
+{
+    gosh -b -e "(begin (use gauche.version) (exit (if (version>? \"$1\" \"$2\" ) 0 1)))"
+}
+
+if test -f "${PEEK}" && test ${PEEK} != /dev/null; then
+    cat "${PEEK}"
+else
+    koji latest-pkg --all --paths ${DIST} | tee ${PEEK} 
+fi  | grep -v "^Build"						\
+    | grep -v -e "^---"						\
+    | cut -f 1 -d ' '						\
+    | sed -e 's|/mnt/koji/packages/||'				\
+    | tr / ' '							\
+    | while read p v r; do
+    c=${p:0:1}
+    mkdir -p $DIR/$c
+    (
+	cd $DIR/$c; 
+	f=$(ls $p-[0-9]*.src.rpm 2>/dev/null)
+	if ! test -f "$f"; then
+	    echo "(lcopy-koji new \"$p-$v-$r.src.rpm\")"
+	    wget -q ${KOJIURL}/packages/$p/$v/$r/src/$p-$v-$r.src.rpm
+	elif newer_name $p-$v-$r.src.rpm "$f"; then
+	    echo "(lcopy-koji update :new \"$p-$v-$r.src.rpm\" :old \"$f\")"
+	    wget -q ${KOJIURL}/packages/$p/$v/$r/src/$p-$v-$r.src.rpm
+	    rm "$f"
+        else
+	    echo "(lcopy-koji latest \"$p-$v-$r.src.rpm\")"
+	fi
+	)
+done
