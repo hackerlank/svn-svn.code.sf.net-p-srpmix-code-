@@ -213,11 +213,11 @@ function main
 
     local xopt
     for srpm in $TARGET_SRPM; do
-	xopt="$(opt_rules $srpm)"
-	if test x = "x${xopt}"; then
+	mapfile xopt < <(opt_rules $srpm)
+	if test x = "x${xopt[0]}"; then
             srpmix-build $SRPMIX_BUILD_OPTS --srpm=$srpm
 	else
-	    srpmix-build "$xopt" $SRPMIX_BUILD_OPTS --srpm=$srpm
+	    srpmix-build "${xopt[@]}" $SRPMIX_BUILD_OPTS --srpm=$srpm
 	fi
     done
 

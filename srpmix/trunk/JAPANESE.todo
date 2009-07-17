@@ -13,13 +13,12 @@ For version 4
 * kindexでのcscopeのサポート
 
 * ビルド率
-** 配列を使って複数のrulesオプションを渡せるようにする。
 ** cscopeがクラッシュする。
 ** 環境変数をつかえるようにする。
 
 * %kouji tracking
 ** rpm -eでよりきれい消えるようにする。
-** インストールシステム上でのpluginsの実行をつぶす。
+** pluginを個別パッケージにさらに分解する。
 ** srpmix-hashdir*-, srpmix-pkgdir-foo-
 
 * mummify/slice
@@ -40,5 +39,9 @@ done
 
 * kindexのパスが絶対パスになってるのを直す。*/pre-buildの部分を ../../pre-buildに書きかえる。 <done>
 
+
+** 配列を使って複数のrulesオプションを渡せるようにする。<not-tested>
+** インストールシステム上でのpluginsの実行をつぶす。<done>
+ 
 After version 4
 ========================================================================

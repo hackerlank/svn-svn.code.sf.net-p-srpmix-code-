@@ -26,13 +26,13 @@
 		       (for-each
 			(lambda (rule)
 			  (when ((car rule) pkg)
-			    (return (cadr rule))))
+			    (return (cdr rule))))
 			(reverse 
 			 (let loop ((rules (list))
 				    (r (read)))
 			   (if (eof-object? r)
 			       rules
 			       (loop (cons r rules) (read)))))))
-		     (return ""))
-	(display result)
+		     (return (list)))
+	(for-each (lambda (x) (display x) (newline)) result)
 	(exit 0))))))

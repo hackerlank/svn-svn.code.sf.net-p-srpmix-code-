@@ -27,3 +27,6 @@
 ;; Don't run gcc_update --touch
 (#/gcc-.*/ "--rearrange-spec-command={ sed -e \'s/^.*gcc_update --touch.*$//\'; }")
 
+;; TEST
+;; (#/SRPMIX-TEST/ "a" "b")
+
