@@ -1,6 +1,8 @@
 #!/bin/bash
 
 TARGET_SRPM=
+TARGET_SWRF=
+TARGET_PKGNAME=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -180,6 +182,12 @@ function parse_arguments
         TARGET_SWRF=${MY_TMPDIR}/$(basename ${TARGET_SWRF})
     fi
 
+    if test -n "${TARGET_SRPM}"; then
+	TARGET_PKGNAME=$($RPM -qp --queryformat %{NAME} "${TARGET_SRPM}")
+    elif test -n "${TARGET_SWRF}"; then
+	TARGET_PKGNAME=$($RPM -qp --queryformat %{NAME} "${TARGET_SWRF}")
+    fi
+
 }
 
 function check_pvr_rpm
@@ -222,7 +230,7 @@ function envelope_swrf_by_rpm
 	enveloped_name=$(srpmix_build_enveloped_name "$p")
 
 	# TODO: Return status
-	srpmix-envelop $ENVELOP_OPTS --output-dir=${MY_TMPDIR} $swrf
+	srpmix-envelop $ENVELOP_OPTS --output-dir=${MY_TMPDIR} --package-name=${TARGET_PKGNAME} $swrf
 	p=$(ls ${MY_TMPDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm | grep -v '\.swrf\.')
 	
 	PS4="${PS4}[rpmbuild]" $RPMBUILD --define "_rpmdir $MY_TMPDIR/RPMS"	\

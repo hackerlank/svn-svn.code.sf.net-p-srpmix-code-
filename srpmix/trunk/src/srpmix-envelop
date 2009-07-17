@@ -39,13 +39,14 @@ OUTPUTDIR=
 TMPDIR=
 DUMP_SPEC=
 SRPMIX_ENVEOP_DEBUG=
+PKGNAME=
 
 function print_usage
 {
 	echo "Usage: "
 	echo "  srpmix-envelop [--help|-h]"
 	echo "  srpmix-envelop [--dump-spec] SWRF..."
-	echo "  srpmix-envelop [--debug] [--output-dir=OUTPUTDIR] [--release=RELEASE] [SWRF...]"
+	echo "  srpmix-envelop [--debug] [--output-dir=OUTPUTDIR] [--release=RELEASE] --package-name=NAME [SWRF...]"
 	echo ""
 	echo "  If SWRF is not given, standard input is"
 	echo "  used for the list of source pacakges."
@@ -81,12 +82,19 @@ function parse_arguments
 		PS4="${PS4}[envelop]"
 		set -x
 		;;
+	    --package-name=*)
+	        PKGNAME=$(echo $1 | sed 's/--package-name=//')
+		;;
 	    *)
 		break
 		;;
 	esac
 	shift
     done
+
+    if test "x$PKGNAME" = x; then
+	srpmix_abort "No --package-name is given"
+    fi
 
     if test "x$1" = "x"; then
         while read tmp; do
@@ -110,7 +118,7 @@ function envelop_swrf
     spec=
     enveloped_name=
     es_name=
-
+    req_dir_pkg=
 
     pvrd=$($SWRFPM -qp --nosignature --queryformat \
 	"%{NAME} %{VERSION} %{RELEASE} %{Description}" \
@@ -144,6 +152,15 @@ function envelop_swrf
 	fi
     fi
 
+    if echo ${enveloped_name} | grep -e '.*-srpmix-[0-9].*' > /dev/null 2>&1; then
+	# Dir pkg
+	req_dir_pkg=srpmix-dir-pkg-$PKGNAME
+    else
+	# Base pkg
+	req_dir_pkg=$PKGNAME
+    fi
+
+
 # About %pre, %post and %preun, See
 # http://www.vinelinux.org/manuals/making-rpm-9.html
     cat > "$spec" <<EOF
@@ -154,6 +171,7 @@ Release: $SRPMIX_PKG_RELEASE%{?dist}
 Source: `basename $target_swrf`
 Autoreq: 0
 Requires: srpmix
+Requires: $req_dir_pkg
 BuildRequires: rsync
 Buildarch: noarch
 

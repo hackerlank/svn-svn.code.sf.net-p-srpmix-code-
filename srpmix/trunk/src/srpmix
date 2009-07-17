@@ -247,7 +247,7 @@ function main
       swrf)
         outputs=$(find ${MY_TMPDIR} -name '*.swrf')
         if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
-            echo $outputs | xargs srpmix-db $SRPMIX_DB_OPTS --noplugin -i
+            echo $outputs | xargs srpmix-db $SRPMIX_DB_OPTS -i
         fi
       ;;
     esac

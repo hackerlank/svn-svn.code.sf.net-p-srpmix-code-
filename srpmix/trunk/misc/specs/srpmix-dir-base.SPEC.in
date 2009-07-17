@@ -1,3 +1,4 @@
+# -*- rpm-spec -*-
 Summary: Base directories for source code archives deployed by srpmix
 Name: srpmix-dir-base
 Version: #PACKAGE_VERSION#
@@ -18,7 +19,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %install
 # TODO: Use libsrpmix.
-rootdir=/var/lib/srpmix
+rootdir=%{_sharedstatedir}/srpmix
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT${rootdir}
 
@@ -42,12 +43,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-/var/lib/srpmix
-/var/lib/srpmix/sources
-/var/lib/srpmix/sources/*
-/var/lib/srpmix
-/var/lib/srpmix/db
-/var/lib/srpmix/db/*
+%{_sharedstatedir}/srpmix
+%{_sharedstatedir}/srpmix/sources
+%{_sharedstatedir}/srpmix/sources/*
+%{_sharedstatedir}/srpmix
+%{_sharedstatedir}/srpmix/db
+%{_sharedstatedir}/srpmix/db/*
 
 %changelog
 * Fri Jul 17 2009 Masatake YAMATO <yamato@redhat.com>

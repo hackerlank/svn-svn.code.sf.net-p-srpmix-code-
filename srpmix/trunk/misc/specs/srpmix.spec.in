@@ -86,11 +86,20 @@ SRPMix Plugin for creating xgettext indexes.
 	--enable-plugin-xgettext         \
         --enable-plugin-doxygen=no
 
+
 make
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %makeinstall
+
+cs=
+cs="${cs} a b c d e f g h i j k l m n o p q r s t u v w x y z"
+cs="${cs} A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+cs="${cs} `seq 0 9`"
+
+swrfsdir=/usr/share/srpmix
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${swrfsdir}/${c}; done
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -133,6 +142,9 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/srpmix/build-opt-rules.d/99default.scm
 
 %{_sysconfdir}/cron.daily/srpmix.daily
+
+%{_datadir}/srpmix/swrfs
+%{_datadir}/srpmix/swrfs/*
 
 %files plugin-cscope
 %{_datadir}/srpmix/plugins/60srpmix-cscope
