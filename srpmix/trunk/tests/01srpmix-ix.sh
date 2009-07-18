@@ -1,5 +1,7 @@
 #!/bin/sh -e
 
+DEBUG=${DEBUG}
+
 if test -z "$TEST_SRPMS"; then
     echo ";;; No TEST_SRPMS is specified" 1>&2
 # magic number defined in automake:
@@ -20,12 +22,13 @@ do
   ROOTDIR=`pwd`/${TESTDIR}/tmp/$(basename $0).$$/$(basename $srpm)
 
   # This must be failed because "Name: ..." in spec is deleted.
-  srpmix-ix -f -v --rearrange-spec-command='sed -e s/^Name: .*//' ${ROOTDIR} $srpm 
+  srpmix-ix ${DEBUG} -f -v --rearrange-spec-command='sed -e "s/^Name:[\t ]\+.*//"' ${ROOTDIR} $srpm 
   if test $? = 0; then
+      cp -r ${TESTDIR} /tmp/
       exit 1
   fi
 
-  SRPMIX_REARRANGE_SPEC_COMMAND='sed -e s/^Name: .*//' srpmix-ix -f -v ${ROOTDIR} $srpm 
+  SRPMIX_REARRANGE_SPEC_COMMAND='sed -e "s/^Name:[\t ]\+.*//"' srpmix-ix ${DEBUG} -f -v ${ROOTDIR} $srpm 
   if test $? = 0; then
       exit 1
   fi

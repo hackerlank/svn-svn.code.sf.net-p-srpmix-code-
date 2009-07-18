@@ -44,11 +44,6 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_sharedstatedir}/srpmix
-%{_sharedstatedir}/srpmix/sources
-%{_sharedstatedir}/srpmix/sources/*
-%{_sharedstatedir}/srpmix
-%{_sharedstatedir}/srpmix/db
-%{_sharedstatedir}/srpmix/db/*
 
 %changelog
 * Fri Jul 17 2009 Masatake YAMATO <yamato@redhat.com>

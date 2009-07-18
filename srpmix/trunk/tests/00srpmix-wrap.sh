@@ -1,5 +1,7 @@
 #!/bin/sh -e
 
+DEBUG=${DEBUG}
+
 if test -z "$TEST_SRPMS"; then
     echo ";;; No TEST_SRPMS is specified" 1>&2
 # magic number defined in automake:
@@ -17,8 +19,8 @@ PATH=`pwd`/${TESTDIR}/${bindir}:$PATH
 
 for srpm in $TEST_SRPMS
 do
-  srpmix-wrap --dump-spec $srpm
-  srpmix-wrap --just-print $srpm
-  srpmix-wrap --output-dir=${TESTDIR} $srpm
+  srpmix-wrap ${DEBUG} --dump-spec $srpm
+  srpmix-wrap ${DEBUG} --just-print $srpm
+  srpmix-wrap ${DEBUG} --output-dir=${TESTDIR} $srpm
 done
 

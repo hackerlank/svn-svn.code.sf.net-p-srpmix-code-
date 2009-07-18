@@ -1,3 +1,28 @@
+2009-07-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* Makefile.am(XSPECS): Specify srpmix-dir-base.SPEC as extra spec file.
+
+	* misc/specs/srpmix.spec.in: Remove duplicated elements in
+	%files.
+	(srpmixdir): Mark %config(noreplace).
+
+	* misc/specs/srpmix-dir-base.SPEC.in: Ditto.
+
+	* misc/specs/Makefile.am: Use xspecs.mk and svn_release.mk.
+
+	* misc/makefiles/Makefile.am (EXTRA_DIST): Added xspecs.mk and
+	svn_release.mk.
+
+	* misc/makefiles/xspecs.mk: New file.
+
+	* misc/makefiles/svn_release.mk: New file.
+
+	* tests/*.sh: Added DEBUG flag.
+
+	* tests/test-srpmix*: Added src.rpm as default test data.
+
+	* tests/01srpmix-ix.sh (TEST_SRPMS, EXTRA_DIST): Ditto.
+
 2009-07-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/makefiles/rpm.mk: Build srpmix-dir-base.rpm.

@@ -10,4 +10,5 @@ SUBDIRS += tests
 
 EXTRA_DIST = autogen.sh
 
+XSPECS=misc/specs/srpmix-dir-base.SPEC
 include $(top_srcdir)/misc/makefiles/rpm.mk

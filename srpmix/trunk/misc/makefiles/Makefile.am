@@ -1,2 +1,5 @@
-EXTRA_DIST = rpm.mk
-
+EXTRA_DIST = rpm.mk         \
+	     svn_release.mk \
+	     xspecs.mk      \
+	     \
+	     $(NULL)

@@ -1,3 +1,4 @@
+EXTRA_DIST = test-srpmix-0-0.fc11.src.rpm test-srpmix.c test-srpmix.SPEC
 dist_check_SCRIPTS = 00srpmix-wrap.sh  \
                      00srpmix-ix.sh    \
                      01srpmix-ix.sh    \
@@ -6,7 +7,8 @@ dist_check_SCRIPTS = 00srpmix-wrap.sh  \
                      \
 		     $(NULL)
 
-TEST_SRPMS = @TEST_SRPMS@
+
+TEST_SRPMS = @TEST_SRPMS@ test-srpmix-0-0.fc11.src.rpm
 TESTDIR = data
 
 TESTS_ENVIRONMENT =							\
