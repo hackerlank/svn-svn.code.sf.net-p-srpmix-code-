@@ -1,3 +1,10 @@
+2009-07-22  Masatake YAMATO  <jet@f11.localdomain>
+
+	* tests/Makefile.am (TEST_SRPMS): Added $(srcdir) as prefix for the
+	default tess src.rpm.
+
+	* configure.ac: Convert relative paths for test src.rpms to absolute.
+
 2009-07-19  Masatake YAMATO  <yamato@redhat.com>
 
 	* Makefile.am(XSPECS): Specify srpmix-dir-base.SPEC as extra spec file.

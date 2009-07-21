@@ -53,7 +53,8 @@ with_test_srpms2=
 for s in ${with_test_srpms}; do
     if test "x${s}" != x; then
        if test -f "${s}"; then
-           test -f "./${s}" && s=$(pwd)/${s}
+           c=$(echo "${s}" | sed 's/\(.\).*/\1/')
+           test ${c} != / && s=$(pwd)/${s}
            with_test_srpms2="${with_test_srpms2} ${s}"
        else
            AC_MSG_ERROR(${s} not found)

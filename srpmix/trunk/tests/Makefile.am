@@ -8,7 +8,7 @@ dist_check_SCRIPTS = 00srpmix-wrap.sh  \
 		     $(NULL)
 
 
-TEST_SRPMS = @TEST_SRPMS@ test-srpmix-0-0.fc11.src.rpm
+TEST_SRPMS = @TEST_SRPMS@ $(srcdir)/test-srpmix-0-0.fc11.src.rpm
 TESTDIR = data
 
 TESTS_ENVIRONMENT =							\
