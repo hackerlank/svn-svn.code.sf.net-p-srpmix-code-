@@ -1,7 +1,8 @@
 2009-07-22  Masatake YAMATO  <jet@f11.localdomain>
 
 	* src/srpmix-wrap (BUILD_REQUIRES): Don't require srpmix.
-
+	(transfer_cmd): Don't remote temporary file if in debug mode.
+	
 	* tests/Makefile.am (TEST_SRPMS): Added $(srcdir) as prefix for the
 	default tess src.rpm.
 
