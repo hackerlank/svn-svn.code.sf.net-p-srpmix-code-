@@ -41,7 +41,10 @@ OUTPUTDIR=
 TMPDIR=
 JUST_PRINT=
 DUMP_SPEC=
-BUILD_REQUIRES="srpmix, rsync"
+# BUILD_REQUIRES="srpmix, rsync"
+# Don't require srpmix here because make check run from make rpm of srpmix itself is failed; 
+# srpmix installed via rpm is required to build srpmix.rpm.
+BUILD_REQUIRES="rsync"
 OPT_TYPE=core
 OPT_PLUGIN_NAME=plugins
 
