@@ -12,6 +12,7 @@ TEST_SRPMS = @TEST_SRPMS@ $(srcdir)/test-srpmix-0-0.fc11.src.rpm
 TESTDIR = data
 
 TESTS_ENVIRONMENT =							\
+        DEBUG=$(DEBUG)                                                  \
 	TESTDIR=$(TESTDIR)						\
 	TEST_SRPMS='$(TEST_SRPMS)'					\
 	top_builddir=$(top_builddir)					\

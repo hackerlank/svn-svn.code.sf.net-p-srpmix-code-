@@ -1,6 +1,6 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
-DEBUG=${DEBUG}
+DEBUG=${DEBUG:+--debug}
 
 if test -z "$TEST_SRPMS"; then
     echo ";;; No TEST_SRPMS is specified" 1>&2

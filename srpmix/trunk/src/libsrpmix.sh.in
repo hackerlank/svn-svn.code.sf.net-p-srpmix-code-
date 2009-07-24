@@ -581,7 +581,8 @@ function list_plugins
 
 function archives_name
 {
-    echo $1 | sed -e 's/-srpmix-/-srpmix-archives-/'
+    local version_pattern=$(echo $SRPMIX_VERSION | sed -e 's/\./\\./g')
+    echo $1 | sed -e "s/-srpmix-$version_pattern/-srpmix-archives-$SRPMIX_VERSION/"
 }
 
 #
