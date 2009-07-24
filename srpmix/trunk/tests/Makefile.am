@@ -15,6 +15,7 @@ TESTS_ENVIRONMENT =							\
 	TESTDIR=$(TESTDIR)						\
 	TEST_SRPMS='$(TEST_SRPMS)'					\
 	top_builddir=$(top_builddir)					\
+        top_srcdir=$(top_srcdir)                                        \
 	SRPMIX_PLUGIN_DIR=`pwd`/$(TESTDIR)/${pkgdatadir}/plugins	\
 	SRPMIX_VAR_DIR=`pwd`/$(TESTDIR)/${localstatedir}/lib/@PACKAGE@	\
         SRPMIX_USR_DIR=`pwd`/$(TESTDIR)/${datadir}/@PACKAGE@		\

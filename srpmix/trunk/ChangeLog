@@ -1,3 +1,23 @@
+2009-07-24  Masatake YAMATO  <jet@f11.localdomain>
+
+	* tests/Makefile.am (TESTS_ENVIRONMENT): Set top_srcdir.
+
+	* tests/01srpmix-ix.sh: Copy macros.srpmix under home directory.
+
+	* tests/01srpmix-ix.sh: Ditto.
+
+	* tests/00srpmix-wrap.sh: Ditto.
+
+	* tests/00srpmix.sh: Ditto.
+
+	* src/srpmix-wrap(RPMBUILD): Don't set.
+
+	* src/libsrpmix.sh.in (RPMBUILD, SWRFBUILD): Use the values in environment
+	variables if available.
+
+	* configure.ac: Improve the way to get absolute path for
+	test srpms.
+	
 2009-07-22  Masatake YAMATO  <jet@f11.localdomain>
 
 	* src/srpmix-wrap (BUILD_REQUIRES): Don't require srpmix.

@@ -53,19 +53,17 @@ with_test_srpms2=
 for s in ${with_test_srpms}; do
     if test "x${s}" != x; then
        if test -f "${s}"; then
-           c=$(echo "${s}" | sed 's/\(.\).*/\1/')
-           test ${c} != / && s=$(pwd)/${s}
-           with_test_srpms2="${with_test_srpms2} ${s}"
+           b=$(dirname ${s})
+           p=$(cd $b; pwd)
+           with_test_srpms2="${with_test_srpms2} ${p}/$(basename ${s})"
        else
            AC_MSG_ERROR(${s} not found)
        fi
     fi
 done
 with_test_srpms=${with_test_srpms2}
-   
+
 AC_SUBST([TEST_SRPMS], [$with_test_srpms])
-
-
 
 AC_OUTPUT([
            Makefile
