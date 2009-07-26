@@ -56,15 +56,13 @@ try_source ${LIBSRPMIX}
 # Variables
 #
 ROOTDIR=
-SRCFILES=
+SRCFILE=
 CREATE_ROOTDIR=no
 VERBOSE=no
 USE_SUDO=no
 FREEZE=no
 GROUP=
 TARGET=${SRPMIX_TARGET}
-ABORT_COUNT=0
-TOTAL_COUNT=0
 DO_HARDLINK=${SRPMIX_DO_HARDLINK}
 IGNORE_ERROR=${SRPMIX_IGNORE_ERROR}
 KEEP_ORIGINAL=${SRPMIX_KEEP_ORIGINAL}
@@ -130,16 +128,6 @@ function abort
 
     echo "*** ABORT..." "$@" 1>&2
     exit 1
-}
-
-function update_count
-{
-    local status=$1
-
-    TOTAL_COUNT=`expr 1 + $TOTAL_COUNT`
-    if ! test $status = 0; then
-        ABORT_COUNT=`expr 1 + $ABORT_COUNT`
-    fi
 }
 
 #
@@ -301,14 +289,16 @@ function parse_arguments
     ROOTDIR=$(if cd $1 2>/dev/null; then pwd; else echo $1; fi)
     shift
 
-    SRCFILES="$@"
+    SRCFILE="$1"
+    shift
+
     BUILDNAME=""
-    if test "x$2" = "x"; then
+    if test "x$1" = "x"; then
         BUILDNAME=.
     fi
 
     verbose varset --ROOTDIR=\""${ROOTDIR}"\"
-    verbose varset --SRCFILES=\""${SRCFILES}"\"
+    verbose varset --SRCFILE=\""${SRCFILE}"\"
     verbose varset --CREATE_ROOTDIR=\""${CREATE_ROOTDIR}"\"
     verbose varset --USE-SUDO=\""${USE_SUDO}"\"
 
@@ -897,10 +887,13 @@ function srpm_freeze
 #
 function main
 {
+    local status
+
+
     parse_arguments "$@"
 
     verify_commands ${REQUIRED_COMMANDS}
-    verify_srcfiles ${SRCFILES}
+    verify_srcfiles ${SRCFILE}
     verify_rootdir "${ROOTDIR}" "${CREATE_ROOTDIR}"
 
     verify_subdirs "${ROOTDIR}" "${IS_ROOTDIR_CREATED}"
@@ -911,20 +904,14 @@ function main
 	\
 	${NULL}
 
-    for x in ${SRCFILES}; do
-	case "${x}" in
-	    *.rpm)
-		srpm_deploy ${ROOTDIR} ${x} $BUILDNAME
-		update_count $?
-		;;
-	esac
-    done
+    srpm_deploy ${ROOTDIR} ${SRCFILE} $BUILDNAME
+    status=$?
 
     clean
 
-    message main-end --total=${TOTAL_COUNT} --abort=${ABORT_COUNT}
+    message main-end
 
-    return ${ABORT_COUNT}
+    return $status
 }
 #
 ########################################################################

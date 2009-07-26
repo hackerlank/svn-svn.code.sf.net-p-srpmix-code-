@@ -118,7 +118,7 @@ function run_vanilla
   	    *.jar)
 	        count=`expr $count + 1`
 		ln -s ../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; fastjar xf $f 2>&1 > ${report_to};
+		(cd "$o"; "${FASTJAR}" xf $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"jar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 #	    *.shar.gz)

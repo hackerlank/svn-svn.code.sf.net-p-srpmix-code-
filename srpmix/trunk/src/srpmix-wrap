@@ -450,9 +450,10 @@ function wrap_srpm
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
     wrapped_srpm=$(/bin/ls $TMPDIR/SRPMS/*-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm)
     mv "${wrapped_srpm}" "${OUTPUTDIR}"
-    rm $TMPDIR/SOURCES/`basename $target`
+
+    rm -f $TMPDIR/SOURCES/`basename $target`
     if test x"$OPT_TYPE" = xplugin; then
-	rm $TMPDIR/SOURCES/$(basename $(archives_name $target))
+	rm -f $TMPDIR/SOURCES/$(basename $(archives_name $target))
     fi
     echo "$es_name"
 
