@@ -198,7 +198,7 @@ EOF
 
 function main
 {
-    srpmix_verify_commands "${RPMBUILD}" "${GUILE}"
+    srpmix_verify_commands "${RPMBUILD}" "${GOSH}"
     parse_arguments "$@"
 
     if test "x${DUMP_SPEC}" = "x"; then

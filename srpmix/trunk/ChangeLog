@@ -1,5 +1,21 @@
 2009-07-26  Masatake YAMATO  <yamato@redhat.com>
 
+	* tests/Makefile.am (dist_check_SCRIPTS): Added 00distmap.sh.
+
+	* tests/00distmap.sh (LIBSRPMIX): New file.
+
+	* src/srpmix-weakview-dist (main): Check gosh.
+
+	* src/srpmix-weakview-packages (main): Ditto.
+
+	* src/libsrpmix.sh.in: Use only gosh.
+
+	* misc/specs/srpmix.spec.in: Don't require guile.
+
+	* misc/m4/progs.m4: Don't check guile.
+
+2009-07-26  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-wrap (wrap_srpm): Use -f option for rm command.
 
 	* src/srpmix-ix: Targets only single src.rpm.

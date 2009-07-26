@@ -26,8 +26,6 @@ For version 4
 
 * repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
 
-* Use gauche only, don't use guile.
-
 done
 -----
 * ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
@@ -44,6 +42,8 @@ done
 
 ** 配列を使って複数のrulesオプションを渡せるようにする。<not-tested>
 ** インストールシステム上でのpluginsの実行をつぶす。<done>
+
+* Use gauche only, don't use guile. <done>
  
 After version 4
 ========================================================================

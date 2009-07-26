@@ -75,7 +75,6 @@ RPM=@RPM@
 RPMBUILD="${RPMBUILD:-@RPMBUILD@}"
 SWRFPM=@SWRFPM@
 SWRFBUILD="${SWRFBUILD:-@SWRFBUILD@}"
-GUILE=@GUILE@
 GOSH=@GOSH@
 FASTJAR=@FASTJAR@
 
@@ -157,7 +156,6 @@ srpmix_distmap_to_pvr_script='
 		       ((eq? (car kl) ky) (cadr kl))
 		       (else (kget (cdr kl) ky))))
 	       ))
-  (read-set! keywords `prefix)  
   (let loop ((r (read)))
     (if (eof-object? r)
 	#f
@@ -167,9 +165,9 @@ srpmix_distmap_to_pvr_script='
 		 (not (null? (cdr r)))
 		 (eq? (cadr r) `name))
 	    (format #t "~a ~a ~a\n" 
-		    (kget r #:package)
-		    (kget r #:version)
-		    (kget r #:release))
+		    (kget r :package)
+		    (kget r :version)
+		    (kget r :release))
 	    #f)
 	  (loop (read))))))'
 
@@ -180,7 +178,6 @@ srpmix_distmap_to_json_script='
 		       (else (kget (cdr kl) ky))))
 	       ))
   (display "[")
-  (read-set! keywords `prefix)  
   (let loop ((r (read)))
     (if (eof-object? r)
 	#f
@@ -190,11 +187,11 @@ srpmix_distmap_to_json_script='
 		 (not (null? (cdr r)))
 		 (eq? (cadr r) `name))
 	    (format #t "{\"target-srpm\": ~s, \"package\": ~s, \"version\": ~s, \"release\": ~s, \"wrapped-name\": ~s}," 
-                    (kget r #:target-srpm)
-		    (kget r #:package)
-		    (kget r #:version)
-		    (kget r #:release)
-                    (kget r #:wrapped-name))
+                    (kget r :target-srpm)
+		    (kget r :package)
+		    (kget r :version)
+		    (kget r :release)
+                    (kget r :wrapped-name))
 	    #f)
 	  (loop (read)))))
   (display "]"))'
@@ -211,12 +208,12 @@ srpmix_distmap_to_json_script='
 #
 function srpmix_distmap_to_pvr
 {
-    ${GUILE} -c "${srpmix_distmap_to_pvr_script}"
+    ${GOSH} -e "${srpmix_distmap_to_pvr_script}"
 }
 
 function srpmix_distmap_to_json
 {
-    ${GUILE} -c "${srpmix_distmap_to_json_script}"
+    ${GOSH} -e "${srpmix_distmap_to_json_script}"
 }
 
 SRPMIX_ENABLE_PLUGIN=

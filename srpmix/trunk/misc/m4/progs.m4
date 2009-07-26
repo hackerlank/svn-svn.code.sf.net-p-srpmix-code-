@@ -12,9 +12,6 @@ AC_DEFUN([SRPMIX_PROGS],[
   AC_CHECK_PROGS([CPIO], [cpio])
   if test "x$CPIO" = "x"; then AC_MSG_ERROR(cpio not found); fi
 
-  AC_CHECK_PROGS([GUILE], [guile])
-  if test "x$GUILE" = "x"; then AC_MSG_ERROR(guile not found); fi
-
   AC_CHECK_PROGS([GOSH], [gosh])
   if test "x$GOSH" = "x"; then AC_MSG_ERROR(gosh not found); fi
 
