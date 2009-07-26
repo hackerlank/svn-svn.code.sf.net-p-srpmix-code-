@@ -1,4 +1,3 @@
-LIBSRPMIX=${top_srcdir}/src/libsrpmix.sh
 function try_source
 {
     source $1
@@ -7,7 +6,13 @@ function try_source
 	exit 1
     fi
 }
-try_source ${LIBSRPMIX}
+
+rm -rf `pwd`/${TESTDIR}
+make DESTDIR=`pwd`/${TESTDIR} -C ${top_builddir} install
+
+PATH=`pwd`/${TESTDIR}/${bindir}:$PATH
+
+try_source libsrpmix.sh
 
 x=$(
 srpmix_distmap_to_pvr <<EOF

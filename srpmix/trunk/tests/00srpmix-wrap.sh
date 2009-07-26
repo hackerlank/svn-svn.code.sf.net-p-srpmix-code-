@@ -16,7 +16,7 @@ if test -f ~/.rpmmacros; then
     echo ";;; Use own .rpmmacros exists" 1>&2
     exit 77
 else
-    cat ${top_srcdir}/src/macros.srpmix >> ~/.rpmmacros
+    cat ${abs_top_srcdir}/src/macros.srpmix >> ~/.rpmmacros
     trap "rm ~/.rpmmacros" 0
 fi
 
