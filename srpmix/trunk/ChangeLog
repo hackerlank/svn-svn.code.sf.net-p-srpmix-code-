@@ -1,5 +1,10 @@
 2009-07-27  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-wrap (create_plugin_spec): Added -f option
+	to rm to handle the case that no plugin package is installed.
+
+2009-07-27  Masatake YAMATO  <yamato@redhat.com>
+
 	* tests/00distmap.sh: Remove newline in srpmix_distmap_to_pvr
 	process substitution.
 

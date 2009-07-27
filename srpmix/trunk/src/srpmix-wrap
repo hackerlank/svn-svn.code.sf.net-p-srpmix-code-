@@ -357,7 +357,7 @@ while read f; do
 done )
 
 rm -rf \$to/db
-find \$to -name '*-log.es' | xargs rm
+find \$to -name '*-log.es' | xargs rm -f
 
 %clean
 chmod -R u+w \$RPM_BUILD_ROOT
