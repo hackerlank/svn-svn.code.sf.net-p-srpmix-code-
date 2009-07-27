@@ -1,3 +1,22 @@
+2009-07-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): use srpmix-dir-pkg.
+
+	* src/srpmix-dir-pkg: Implemented.
+
+	* src/srpmix-build (main): Added command name in debug message.
+
+	* src/libsrpmix.sh.in (srpmix_pkg_name, srpmix_dirpkg_name): New functions.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-dir-pkg.
+
+	* misc/specs/srpmix.spec.in (files): Added srpmix-dir-pkg.
+
+2009-07-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): Unify srpmix-build invocation even if
+	opt_rules returns something or not.
+
 2009-07-27  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-wrap (create_plugin_spec): Added -f option
