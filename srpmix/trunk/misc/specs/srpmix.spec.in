@@ -117,6 +117,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_bindir}/srpmix-envelop
 
+%{_bindir}/srpmix-dir-pkg
+
 %{_bindir}/srpmix-weakview-dist
 %{_bindir}/srpmix-weakview-packages
 %{_bindir}/srpmix-plugin

@@ -15,6 +15,8 @@ dist_bin_SCRIPTS =           \
 	srpmix-db            \
 	\
 	srpmix-envelop       \
+	\
+	srpmix-dir-pkg       \
         \
 	srpmix-weakview-dist			\
 	srpmix-weakview-packages		\

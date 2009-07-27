@@ -26,6 +26,7 @@ fi
 SRPMIX_DEBUG=""
 SRPMIX_BUILD_OPTS="${SRPMIX_BUILD_OPTS}"
 SRPMIX_DB_OPTS="${SRPMIX_DB_OPTS}"
+SRPMIX_DIR_PKG_OPTS=
 YUM_OPTS=
 
 set -e
@@ -45,7 +46,9 @@ function print_usage
     echo "         [--keep-original]"
     echo "         [--yum=YUM_OPTIONS]"
     echo "          --name=PACKAGE|--srpm=SRPM"
-    echo
+    echo ""
+    echo "  srpmix --help"
+    echo ""
     echo "ARCH: i386(not for kenel), i686, x86_64, ia64, s390, s390x, ppc, or ppc64"
     echo ""
     echo "Environment variables:"
@@ -118,6 +121,7 @@ function parse_arguments
 	        SRPMIX_DEBUG=yes
 		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
 		SRPMIX_DB_OPTS="--debug ${SRPMIX_DB_OPTS}"
+		SRPMIX_DIR_PKG_OPTS="--debug"
 		set -x
 		PS4="${PS4}[]"
 		;;
@@ -196,6 +200,67 @@ function opt_rules
 	| $GOSH ${SRPMIX_HELPER_DIR}/build-opt-rules "$(basename $1)"
 }
 
+function dirpkg_installed_p
+{
+    local srpm=$1
+    local dirpkg=$(srpmix_dirpkg_name $srpm)
+
+    rpm -qi $dirpkg >/dev/null 2>&1
+    return $?
+}
+
+function dirpkg_created_p
+{
+    local srpm=$1
+    local ouput_dir=$2
+    local b=$(basename $srpm)
+    local p=$(srpmix_srchash $b)
+    local f=${OUPUT_DIR}/$p/$(srpmix_dirpkg_name $srpm)-${SRPMIX_PKG_MAJOR_VERSION}*.rpm
+
+    test -f $f
+}
+
+function core_build
+{
+    local xopt
+    mapfile xopt < <(opt_rules $TARGET_SRPM)
+    srpmix-build "${xopt[@]}" $SRPMIX_BUILD_OPTS --srpm=$TARGET_SRPM
+}
+
+function dir_pkg_build
+{
+    local pkg_name=$(srpmix_pkg_name $TARGET_SRPM)
+    if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+	if ! dirpkg_installed_p $TARGET_SRPM; then
+	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR
+	    return 0
+	fi
+    else
+	if ! dirpkg_created_p $TARGET_SRPM $OUTPUT_DIR; then
+	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR
+	    return 0
+	fi
+    fi
+    return 1
+}
+
+function plugin_build
+{
+    local pattern="-srpmix-${SRPMIX_PKG_MAJOR_VERSION}\|-srpmix-archives-${SRPMIX_PKG_MAJOR_VERSION}"
+    local rpms
+    if test "x$OUTPUT_FORMAT" = "xrpm"; then
+        rpms=$(find ${MY_TMPDIR} -name '*.noarch.rpm' | grep -e "$pattern")
+        for rpm in $rpms; do
+            (cd $MY_TMPDIR; rpm2cpio $rpm | cpio -i --make-directories)
+        done
+	
+    fi
+    local swrfs=$(find ${MY_TMPDIR} -name '*.swrf' | grep -e "-srpmix-${SRPMIX_PKG_MAJOR_VERSION}")
+    for swrf in $swrfs; do
+        srpmix-build --type=plugin $SRPMIX_BUILD_OPTS --swrf=$swrf
+    done
+}
+
 function main
 {
 #   all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
@@ -211,30 +276,9 @@ function main
 	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
 
-    local xopt
-    for srpm in $TARGET_SRPM; do
-	mapfile xopt < <(opt_rules $srpm)
-	if test x = "x${xopt[0]}"; then
-            srpmix-build $SRPMIX_BUILD_OPTS --srpm=$srpm
-	else
-	    srpmix-build "${xopt[@]}" $SRPMIX_BUILD_OPTS --srpm=$srpm
-	fi
-    done
-
-    # Create Plugin Package
-    local pattern="-srpmix-${SRPMIX_PKG_MAJOR_VERSION}\|-srpmix-archives-${SRPMIX_PKG_MAJOR_VERSION}"
-    local rpms
-    if test "x$OUTPUT_FORMAT" = "xrpm"; then
-        rpms=$(find ${MY_TMPDIR} -name '*.noarch.rpm' | grep -e "$pattern")
-        for rpm in $rpms; do
-            (cd $MY_TMPDIR; rpm2cpio $rpm | cpio -i --make-directories)
-        done
-    
-    fi
-    local swrfs=$(find ${MY_TMPDIR} -name '*.swrf' | grep -e "-srpmix-${SRPMIX_PKG_MAJOR_VERSION}")
-    for swrf in $swrfs; do
-        srpmix-build --type=plugin $SRPMIX_BUILD_OPTS --swrf=$swrf
-    done
+    core_build
+    dir_pkg_build
+    plugin_build
 
     local outputs
     case "$OUTPUT_FORMAT" in
