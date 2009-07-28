@@ -1,0 +1,112 @@
+\input texinfo   @c -*-texinfo-*-
+@comment %**start of header
+@setfilename intcs.info
+@include version.texi
+@settitle 詳解 Cluster2
+@c @syncodeindex fn cp
+@c @syncodeindex vr cp
+@c @syncodeindex tp cp
+@comment %**end of header
+
+@dircategory Using Source code
+@direntry
+* 詳解 Cluster2: (intcs)       詳解 Cluster2
+@end direntry
+
+@titlepage
+@title 詳解 Cluster2
+@author Masatake YAMATO (@email{yamato@@redhat.com})
+@page
+@vskip 0pt plus 1filll
+@c @insertcopying
+@end titlepage
+
+@ifnottex
+@node Top
+@top 詳解 Cluster2
+本文章ではCluster2の内部構造について解説します。
+ソースコードを活用してCluster 2のトラブルシューティングを実施するための
+基礎となる知識の提供を目的とています。
+@end ifnottex
+
+@menu
+* コンポーネントとパッケージの関係::
+* レイヤとプロトコル::
+* コンポーネント間の通信経路::
+* 各コンポーネントのステート::
+* コンフィギュレーションの指定方法::
+* ログの活用::
+@end menu
+
+@node コンポーネントとパッケージの関係
+@chapter  コンポーネントとパッケージの関係
+Cluster2は複数のパッケージに分割され、さらにそのパッケージのなかに複数
+のコンポーネントが含まれています。コンポーネントにはツールやサービスデー
+モンといった実行ファイルやライブラリが含まれます。
+
+Cluster2が深遠だと感じるのは、協調して動作する目新しいコンポーネントが
+多数存在していることにあります。Cluster2について理解していくには、まず
+コンポーネントの名前を全て覚えてしまいましょう。各コンポーネントの役割
+については、この文章のなかで徐々に説明していきます。
+
+
+@multitable @columnfractions .5 .5
+@cindex コンポーネント
+@headitem コンポーネント @tab 役割
+@item aiexec
+@tab クラスターコア
+@end multitable
+
+
+コンポーネントの名前を一通り覚えたら、次に各コンポーネントがどのパッケー
+ジに所属しているかを把握しておきます。ログやpsコマンドの出力といったプ
+ログラムの実行によって得られる情報においては、主にコンポーネントの名前
+が使われます。一方ソースコードはパッケージを単位として編成されています。
+従って実行によって得られた情報を元にソースコードを調査する場合、前もっ
+て各コンポーネントがどのパッケージに所属しているか知っておくことが望ま
+しいです。
+
+@multitable @columnfractions .5 .5
+@cindex パッケージ
+@headitem パッケージ @tab 所属するコンポーネント
+@item openais
+@tab aixexec
+@end multitable
+
+@node レイヤとプロトコル
+@chapter レイヤとプロトコル
+
+Cluster2の通信レイヤを下から順に記すと以下に記します。
+
+@verbatim
+ip
+udp
+corosync_totemnet
+corosync_totemsrp
+corosync_totempg
+  openais_cman
+    clvmd
+    rgmanager
+  openais_a
+    openais_cpg
+      groupd
+    openais_evt
+    openais_clm
+  flowcontrol
+  sync
+@end verbatim
+
+@node コンポーネント間の通信経路
+@chapter コンポーネント間の通信経路
+
+@node 各コンポーネントのステート
+@chapter  各コンポーネントのステート
+
+@node コンフィギュレーションの指定方法
+@chapter コンフィギュレーションの指定方法
+
+@node ログの活用
+@chapter ログの活用
+
+@contents
+@bye
