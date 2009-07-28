@@ -1,5 +1,13 @@
 2009-07-28  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-envelop (envelop_swrf): Improve the pattern
+	to detect a plugin package.
+
+	* src/libsrpmix.sh.in (SRPMIX_PKG_PATTERN): New constant.
+	(archives_name): Use SRPMIX_PKG_PATTERN.
+
+2009-07-28  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix (main): use srpmix-dir-pkg.
 
 	* src/srpmix-dir-pkg: Implemented.

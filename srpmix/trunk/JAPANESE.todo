@@ -19,6 +19,7 @@ For version 4
 * %kouji tracking
 ** rpm -eでよりきれい消えるようにする。
 ** pluginを個別パッケージにさらに分解する。
+** When removeing plugin package, too man files will be removed. See %files of srpmix-wrap create_plugin_spec.
 ** srpmix-hashdir*-, srpmix-pkgdir-foo-
 
 * mummify/slice

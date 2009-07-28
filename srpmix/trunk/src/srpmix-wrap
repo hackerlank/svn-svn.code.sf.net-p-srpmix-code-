@@ -239,11 +239,7 @@ rm -rf \$RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-# ${SRPMIX_VAR_DIR}
-# ${SRPMIX_SOURCES_DIR}/
-# ${SRPMIX_SOURCES_DIR}/*
-# ${SRPMIX_SOURCES_DIR}/*/*
-# ${SRPMIX_SOURCES_DIR}/*/*/*/
+# %dir /${SRPMIX_SOURCES_RDIR}/*/*/*/
 /${SRPMIX_SOURCES_RDIR}/*/*/*/SRPMIX
 /${SRPMIX_SOURCES_RDIR}/*/*/*/STATUS
 /${SRPMIX_SOURCES_RDIR}/*/*/*/pre-build
@@ -252,7 +248,6 @@ rm -rf \$RPM_BUILD_ROOT
 
 %files archives
 %defattr(-,root,root)
-# ${SRPMIX_SOURCES_DIR}/*/*/*/archives
 /${SRPMIX_SOURCES_RDIR}/*/*/*/archives
 
 %changelog

@@ -58,6 +58,7 @@ SRPMIX_PKG_MICRO_VERSION=0
 
 SRPMIX_PKG_VERSION=${SRPMIX_PKG_MAJOR_VERSION}.${SRPMIX_PKG_MINOR_VERSION}.${SRPMIX_PKG_MICRO_VERSION}
 SRPMIX_PKG_RELEASE=0
+SRPMIX_PKG_PATTERN=$(echo $SRPMIX_PKG_VERSION | sed -e 's/\./\\./g')
 
 SRPMIX_SYSCONF="$SRPMIX_SYSCONF_DIR/srpmix.cf"
 
@@ -594,8 +595,7 @@ function list_plugins
 
 function archives_name
 {
-    local version_pattern=$(echo $SRPMIX_VERSION | sed -e 's/\./\\./g')
-    echo $1 | sed -e "s/-srpmix-$version_pattern/-srpmix-archives-$SRPMIX_VERSION/"
+    echo $1 | sed -e "s/-srpmix-${SRPMIX_PKG_PATTERN}/-srpmix-archives-${SRPMIX_PKG_VERSION}/"
 }
 
 #

@@ -118,7 +118,7 @@ function envelop_swrf
     spec=
     enveloped_name=
     es_name=
-    req_dir_pkg=
+    req_pkg=
 
     pvrd=$($SWRFPM -qp --nosignature --queryformat \
 	"%{NAME} %{VERSION} %{RELEASE} %{Description}" \
@@ -152,14 +152,18 @@ function envelop_swrf
 	fi
     fi
 
-    if echo ${enveloped_name} | grep -e '.*-srpmix-[0-9].*' > /dev/null 2>&1; then
-	# Dir pkg
-	req_dir_pkg=srpmix-dir-pkg-$PKGNAME
-    else
-	# Base pkg
-	req_dir_pkg=$PKGNAME
-    fi
 
+    case ${enveloped_name} in
+	*-srpmix-plugins)
+	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-plugins/\1-srpmix/')
+	    ;;
+	*-srpmix-archives)
+	    req_pkg=$(srpmix_dirpkg_name $PKGNAME)
+	    ;;
+	*)
+	    req_pkg=$(srpmix_dirpkg_name $PKGNAME)
+	    ;;
+    esac
 
 # About %pre, %post and %preun, See
 # http://www.vinelinux.org/manuals/making-rpm-9.html
@@ -171,7 +175,7 @@ Release: $SRPMIX_PKG_RELEASE%{?dist}
 Source: `basename $target_swrf`
 Autoreq: 0
 Requires: srpmix
-Requires: $req_dir_pkg
+Requires: $req_pkg
 BuildRequires: rsync
 Buildarch: noarch
 
