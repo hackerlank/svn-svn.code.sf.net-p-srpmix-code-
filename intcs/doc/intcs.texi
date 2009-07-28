@@ -31,9 +31,9 @@
 
 @menu
 * コンポーネントとパッケージの関係::
-* レイヤとプロトコル::
+* ネットワーク通信レイヤ::
 * コンポーネント間の通信経路::
-* 各コンポーネントのステート::
+* コンポーネントのステート::
 * コンフィギュレーションの指定方法::
 * ログの活用::
 @end menu
@@ -44,17 +44,74 @@ Cluster2は複数のパッケージに分割され、さらにそのパッケー
 のコンポーネントが含まれています。コンポーネントにはツールやサービスデー
 モンといった実行ファイルやライブラリが含まれます。
 
-Cluster2が深遠だと感じるのは、協調して動作する目新しいコンポーネントが
-多数存在していることにあります。Cluster2について理解していくには、まず
-コンポーネントの名前を全て覚えてしまいましょう。各コンポーネントの役割
-については、この文章のなかで徐々に説明していきます。
+Cluster2が深遠だと感じる理由の一つは、協調して動作する目新しいコンポー
+ネントが多数存在していることにあります。Cluster2について理解していくに
+は、まずコンポーネントの名前を全て覚えてしまいましょう。各コンポーネン
+トの役割については、この文章のなかで徐々に説明していきます。
 
-
-@multitable @columnfractions .5 .5
+@multitable @columnfractions .5 .5 .5
 @cindex コンポーネント
-@headitem コンポーネント @tab 役割
+@headitem コンポーネント @tab 種類 @tab 役割
 @item aiexec
-@tab クラスターコア
+@tab サービスデーモン
+@tab クラスターコア。メンバーシップと通信順序についてクラスター全体での合意を形成する。
+
+@item service_cman.lcrso
+@tab DLL
+@tab aiexecに実行時に読み込まれるライブラリ。Quorumを提供する。
+
+@item libcman.so
+@tab DLL
+@tab aiexecプロセスの外からservice_cman.lcrsoを利用するためのライブラリ
+
+@item cman
+@tab 起動スクリプト
+@tab Cluster 2特有の設定の元でaiexecを起動します。
+      
+@item cman_tool
+@tab コマンド
+@tab XXX
+
+@item ccsd
+@tab サービスデーモン
+@tab XXX
+
+@item ccs_tool
+@tab コマンド
+@tab XXX
+
+@item fenced
+@tab サービスデーモン
+@tab XXX
+
+@item fenceエージェント
+@tab コマンド
+@tab XXX
+
+@item groupd
+@tab サービスデーモン
+@tab XXX
+
+@item group_tool
+@tab コマンド
+@tab XXX
+
+@item qdiskd
+@tab サービスデーモン
+@tab XXX
+
+@item rgmanager
+@tab 起動スクリプト
+@tab XXX
+
+@item clurgmgrd
+@tab サービスデーモン
+@tab フェイルオーバーするサービスを監視、管理する
+
+@item clurmtabd
+@tab XXX        
+@tab XXX
+
 @end multitable
 
 
@@ -69,38 +126,43 @@ Cluster2が深遠だと感じるのは、協調して動作する目新しいコ
 @multitable @columnfractions .5 .5
 @cindex パッケージ
 @headitem パッケージ @tab 所属するコンポーネント
+
 @item openais
 @tab aixexec
+
 @end multitable
 
-@node レイヤとプロトコル
-@chapter レイヤとプロトコル
+@node ネットワーク通信レイヤ
+@chapter ネットワーク通信レイヤ
 
-Cluster2の通信レイヤを下から順に記すと以下に記します。
+Cluster2のネットワーク通信レイヤを下から順に記すと以下に記します。
 
 @verbatim
 ip
-udp
-corosync_totemnet
-corosync_totemsrp
-corosync_totempg
-  openais_cman
-    clvmd
-    rgmanager
-  openais_a
-    openais_cpg
-      groupd
-    openais_evt
-    openais_clm
-  flowcontrol
-  sync
+  udp
+    corosync_totemnet
+      corosync_totemsrp
+        corosync_totempg
+          openais_cman
+            clvmd
+            rgmanager
+          openais_a
+            openais_cpg
+              groupd
+            openais_evt
+            openais_clm
+          flowcontrol
+          sync
 @end verbatim
+
+
+
 
 @node コンポーネント間の通信経路
 @chapter コンポーネント間の通信経路
 
-@node 各コンポーネントのステート
-@chapter  各コンポーネントのステート
+@node コンポーネントのステート
+@chapter  コンポーネントのステート
 
 @node コンフィギュレーションの指定方法
 @chapter コンフィギュレーションの指定方法
