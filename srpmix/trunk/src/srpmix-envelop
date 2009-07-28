@@ -158,7 +158,7 @@ function envelop_swrf
 	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-plugins/\1-srpmix/')
 	    ;;
 	*-srpmix-archives)
-	    req_pkg=$(srpmix_dirpkg_name $PKGNAME)
+	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-archives/\1-srpmix/')
 	    ;;
 	*)
 	    req_pkg=$(srpmix_dirpkg_name $PKGNAME)

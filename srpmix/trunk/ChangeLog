@@ -1,5 +1,15 @@
 2009-07-28  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-wrap (create_core_spec): Added %dir mark
+	to /${SRPMIX_SOURCES_RDIR}/*/*/*/.
+	(transfer_cmd): Don't use dirname to calculate the value
+	for $installdir.
+
+	* src/srpmix-envelop (envelop_swrf): Make srpmix archive package
+	depend to its srpmix package.
+	
+2009-07-28  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-envelop (envelop_swrf): Improve the pattern
 	to detect a plugin package.
 

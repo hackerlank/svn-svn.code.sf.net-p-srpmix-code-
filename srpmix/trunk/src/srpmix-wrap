@@ -239,7 +239,7 @@ rm -rf \$RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-# %dir /${SRPMIX_SOURCES_RDIR}/*/*/*/
+%dir /${SRPMIX_SOURCES_RDIR}/*/*/*/
 /${SRPMIX_SOURCES_RDIR}/*/*/*/SRPMIX
 /${SRPMIX_SOURCES_RDIR}/*/*/*/STATUS
 /${SRPMIX_SOURCES_RDIR}/*/*/*/pre-build
@@ -268,7 +268,7 @@ function create_plugin_spec
     version=$(echo $pvrd | cut -d' ' -f2)
     release=$(echo $pvrd | cut -d' ' -f3)
     description="$(echo $pvrd | cut -d' ' -f4-)"
-    installdir=$(dirname $($RPM -qpl "$target_swrf"  | head -1))
+    installdir=$($RPM -qpl "$target_swrf"  | head -1)
 
     if test "x$package" = "x"; then
         echo "warning: failed to parse $target_swrf: ignored" 1>&2
