@@ -3,6 +3,7 @@ For version 4
 
 * pluginのAPIを強化する。
 ** srpmix-attach
+** pluginを個別パッケージにさらに分解する。
 ** 全文検索
 *** ウェブインターフェイス
 
@@ -17,9 +18,7 @@ For version 4
 ** 環境変数をつかえるようにする。
 
 * %kouji tracking
-
-** pluginを個別パッケージにさらに分解する。
-** When removeing plugin package, too man files will be removed. See %files of srpmix-wrap create_plugin_spec.
+** db, swrfのディレクトリを一階層深くする。
 
 * mummify/slice
 ** -confオプションの追加
