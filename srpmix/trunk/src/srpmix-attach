@@ -23,4 +23,31 @@
 #
 ########################################################################
 
-# srpmix-sttach --release=N --output-dir= --type= --name=plugin-name data-directory package version
+ATTACHMENT_VERSION=0
+ATTACHMENT_RELEASE=0
+ATTACHMENT_OUTPUT_DIR=.
+ATTACHMENT_TYPE=
+ATTACHMENT_NAME=
+PKG_ATTACHED_TO=
+VER_ATTACHED_TO=
+ATTACHMENT_DATA_DIR=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+function print_usage
+{
+    # srpmix-sttach --pkg-version= --pkg-release=N --output-dir= --type= --name=plugin-name package version data-directory 
+}
+
+function parse_arguments
+{
+}

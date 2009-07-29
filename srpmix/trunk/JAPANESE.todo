@@ -17,10 +17,9 @@ For version 4
 ** 環境変数をつかえるようにする。
 
 * %kouji tracking
-** rpm -eでよりきれい消えるようにする。
+
 ** pluginを個別パッケージにさらに分解する。
 ** When removeing plugin package, too man files will be removed. See %files of srpmix-wrap create_plugin_spec.
-** srpmix-hashdir*-, srpmix-pkgdir-foo-
 
 * mummify/slice
 ** -confオプションの追加
@@ -45,6 +44,10 @@ done
 ** インストールシステム上でのpluginsの実行をつぶす。<done>
 
 * Use gauche only, don't use guile. <done>
- 
+
+** rpm -eでよりきれい消えるようにする。<done>
+
+** srpmix-hashdir*-, srpmix-pkgdir-foo- <done>
+
 After version 4
 ========================================================================
