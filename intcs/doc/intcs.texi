@@ -21,6 +21,12 @@
 @c @insertcopying
 @end titlepage
 
+
+@alias comp  = code
+@alias pkg   = code
+@alias proto = code
+
+
 @ifnottex
 @node Top
 @top 詳解 Cluster2
@@ -31,7 +37,7 @@
 
 @menu
 * コンポーネントとパッケージの関係::
-* ネットワーク通信レイヤ::
+* ネットワーク通信プロトコル::
 * コンポーネント間の通信経路::
 * コンポーネントのステート::
 * コンフィギュレーションの指定方法::
@@ -45,142 +51,167 @@ Cluster2は複数のパッケージに分割され、さらにそのパッケー
 モンといった実行ファイルやライブラリが含まれます。
 
 Cluster2が深遠だと感じる理由の一つは、協調して動作する目新しいコンポー
-ネントが多数存在していることにあります。Cluster2について理解していくに
-は、まずコンポーネントの名前を全て覚えてしまいましょう。各コンポーネン
-トの役割については、この文章のなかで徐々に説明していきます。
+ネントが多数存在していることにあります。クラスターの様々な機能が細かく
+コンポーネントに分解されていることに加え、Cluster1のソフトウェア資産を
+活かすために、コンポーネントが増えています。
 
-@multitable @columnfractions .2 .2 .6
+Cluster2の前身Cluster1では、クラスターソフトウェアの中枢部分がLinuxカー
+ネルのモジュールとして提供されていました。Cluster2の開発の目的の一つは、
+その中枢部分をカーネル空間からユーザ空間で動作するサーバopenaisで置き換
+えることでした。一方である程度成功を収めていたCluster1の周辺ソフトウェ
+アについては、そのままCluster2でも使い続けようとしました。そのため
+Cluster2 には、Cluster1の周辺ソフトウェアを動作させるための互換レイヤと
+も言うべきコンポーネントが含まれています。
+
+Cluster2について理解していこうとすると、このコンポーネントの数と格闘す
+ることになります。後回しにせず先にコンポーネントの名前を全て覚えてしま
+いましょう。各コンポーネントの役割については、この文章のなかで徐々に説
+明していきます。
+
+また、各コンポーネントがどのパッケージに所属しているかを把握しておきま
+す。ログやpsコマンドの出力といったプログラムの実行によって得られる情報
+においては、主にコンポーネントの名前が使われます。一方ソースコードはパッ
+ケージを単位として編成されています。従って実行によって得られた情報を元
+にソースコードを調査する場合、前もって各コンポーネントがどのパッケージ
+に所属しているか知っておくことが望ましいです。
+
+@multitable @columnfractions .3 .3 .2 .5
 @cindex コンポーネント
-@headitem コンポーネント @tab 種類 @tab 役割
-@item aiexec
+@c @headitem コンポーネント @tab 種類 @tab パッケージ @tab 役割
+@headitem コンポーネント @tab 種類 @tab パッケージ @tab 役割
+@item @comp{aiexec}
 @tab サービスデーモン
-@tab クラスターコア。メンバーシップと通信順序についてクラスター全体での合意を形成する。
+@tab @pkg{openais}
+@tab クラスターコア
 
-@item service_cman.lcrso
+@item @comp{service_cman.lcrso}
 @tab DLL
-@tab aiexecに実行時に読み込まれるライブラリ。Quorumを提供する。
+@tab @pkg{cman}
+@tab Quorateを提供する。
 
-@item libcman.so
+@item @comp{libcman.so}
 @tab DLL
-@tab aiexecプロセスの外からservice_cman.lcrsoを利用するためのライブラリ
+@tab @pkg{cman}
+@tab aisexecプロセスの外から service_cman.lcrso を利用するためのライブラリ
 
-@item cman
+@item @comp{cman}
 @tab 起動スクリプト
-@tab Cluster 2特有の設定の元でaiexecを起動します。
+@tab @pkg{cman}
+@tab Cluster2 特有の設定の元でaiexecを起動します。
       
-@item cman_tool
+@item @comp{cman_tool}
 @tab コマンド
+@tab @pkg{cman}
 @tab XXX
 
-@item ccsd
+@item @comp{ccsd}
 @tab サービスデーモン
+@tab @pkg{cman}
 @tab XXX
 
-@item ccs_tool
+@item @comp{ccs_tool}
 @tab コマンド
+@tab @pkg{cman}
 @tab XXX
 
-@item fenced
+@item @comp{fenced}
 @tab サービスデーモン
+@tab @pkg{cman}
 @tab XXX
 
 @item fenceエージェント
 @tab ユーティリティコマンド
-@tab XXX
+@tab @pkg{cman}
+@tab フェンシングを実行する。ハードウェアに応じて様々な実装がある。
 
-@item fence_tool
+@item @comp{fence_tool}
 @tab コマンド
+@tab @pkg{cman}
 @tab XXX
 
-@item fence_node
+@item @comp{fence_node}
 @tab コマンド
+@tab @pkg{cman}
 @tab XXX
 
-@item groupd
+@item @comp{groupd}
 @tab サービスデーモン
+@tab @pkg{cman}
 @tab XXX
 
-@item group_tool
+@item @comp{group_tool}
 @tab コマンド
+@tab @pkg{cman}
 @tab XXX
 
-@item libgroup
+@item @comp{libgroup}
 @tab スタティックライブラリ
-@tab XXX
-
-@item qdiskd
-@tab サービスデーモン
-@tab XXX
-
-@item rgmanager
-@tab 起動スクリプト
-@tab XXX
-
-@item clurgmgrd
-@tab サービスデーモン
-@tab フェイルオーバーするサービスを監視、管理する
-
-@item clurmtabd
-@tab XXX        
-@tab XXX
-
-@item qdiskd
-@tab サービスデーモン
+@tab @pkg{cman}
 @tab Quorum disk
 
-@end multitable
+@item @comp{qdiskd}
+@tab サービスデーモン
+@tab @pkg{cman}
+@tab XXX
 
+@item @comp{rgmanager}
+@tab 起動スクリプト
+@tab @pkg{rgmanager}
+@tab XXX
 
-コンポーネントの名前を一通り覚えたら、次に各コンポーネントがどのパッケー
-ジに所属しているかを把握しておきます。ログやpsコマンドの出力といったプ
-ログラムの実行によって得られる情報においては、主にコンポーネントの名前
-が使われます。一方ソースコードはパッケージを単位として編成されています。
-従って実行によって得られた情報を元にソースコードを調査する場合、前もっ
-て各コンポーネントがどのパッケージに所属しているか知っておくことが望ま
-しいです。
+@item @comp{clurgmgrd}
+@tab サービスデーモン
+@tab @pkg{rgmanager}
+@tab フェイルオーバーするサービスを監視、管理する
 
-@multitable @columnfractions .5 .5
-@cindex パッケージ
-@headitem パッケージ @tab 所属するコンポーネント
-
-@item openais
-@tab aixexec
-
-@item cman
-@tab service_cman.lcrso, qdisk, fenced, fenceエージェント, 
-
-@item rgmanager
-@tab  clurgmgrd
+@item @comp{clurmtabd}
+@tab XXX        
+@tab @pkg{rgmanager}
+@tab XXX
 
 @end multitable
 
-@node ネットワーク通信レイヤ
-@chapter ネットワーク通信レイヤ
 
-Cluster2のネットワーク通信レイヤを下から順に記すと以下に記します。
+@node ネットワーク通信プロトコル
+@chapter ネットワーク通信プロトコル
+
+Cluster2のネットワーク通信プロトコルスタックを以下に示します。
+
+プロトコルの名称は、筆者が独自に与えたものです。筆者はCluster2のプロト
+コル群に対するwiresharkのprotocol dissector群を開発中です。プロトコルの
+名称は、そのprotocol dissector群で使っているものです。
+
+@proto{corosync_}というプレフィックスは、Cluster3からとったものです。
+Cluster2の保守と並行してCluster2の後継にあたるCluster3が開発中です。
+Cluster2向けに開発していたprotocol dissector群ですが、Cluster3の
+通信も扱えるようにしたいと考え、いくつかの固有名詞をCluster3から借用して
+います。
+
+そのプロトコルの通信を実装しているコンポーネントを<...>の部分に記しました。
+
+@proto{totem}という名称は、aisexecのノード間通信で採用しているアリゴリズム
+に由来します。                  @c cite
 
 @verbatim
-(ip)
-  (udp)
-    corosync_totemnet    <openais>
-      corosync_totemsrp  <openais>
-        corosync_totempg <openais>
-          openais_cman   <libcman.so>
+(ip)                     <linux>
+  (udp)                  <linux>
+    corosync_totemnet    <aisexec>
+      corosync_totemsrp  <aisexec>
+        corosync_totempg <aisexec>
+          openais_cman   <service_cman.lcrso>
             rgmanager    <clurgmgrd>
-          openais_a      <openais>
-            openais_cpg  <openais>
+          openais_a      <aisexec>
+            openais_cpg  <aisexec>
               groupd     <groupd>
-            openais_evt  <openais>
-            openais_clm  <openais>
-          flowcontrol
-          sync
+            openais_evt  <aisexec>
+            openais_clm  <aisexec>
+          flowcontrol    <aisexec?>
+          sync           <aisexec?>
 @end verbatim
-
-
-
 
 @node コンポーネント間の通信経路
 @chapter コンポーネント間の通信経路
+@c 誰が起動するのか、通信経路の確立方法
 
 @node コンポーネントのステート
 @chapter  コンポーネントのステート
