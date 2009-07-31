@@ -27,12 +27,12 @@ fi  | grep -v "^Build"						\
 	if ! test -f "$f"; then
 	    echo "(lcopy-koji new \"$p-$v-$r.src.rpm\")"
 	    wget -q ${KOJIURL}/packages/$p/$v/$r/src/$p-$v-$r.src.rpm
-	elif newer_name $p-$v-$r.src.rpm "$f"; then
+	elif newer_name $v-$r.src.rpm $(echo "$f" | sed -e s"/$p-\(.*\)/\1/"); then
 	    echo "(lcopy-koji update :new \"$p-$v-$r.src.rpm\" :old \"$f\")"
 	    wget -q ${KOJIURL}/packages/$p/$v/$r/src/$p-$v-$r.src.rpm
 	    rm "$f"
         else
-	    echo "(lcopy-koji latest \"$p-$v-$r.src.rpm\")"
+	    echo "(lcopy-koji latest \"$p-$v-$r.src.rpm\" :date)"
 	fi
 	)
 done

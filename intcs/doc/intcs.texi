@@ -49,7 +49,7 @@ Cluster2が深遠だと感じる理由の一つは、協調して動作する目
 は、まずコンポーネントの名前を全て覚えてしまいましょう。各コンポーネン
 トの役割については、この文章のなかで徐々に説明していきます。
 
-@multitable @columnfractions .5 .5 .5
+@multitable @columnfractions .2 .2 .6
 @cindex コンポーネント
 @headitem コンポーネント @tab 種類 @tab 役割
 @item aiexec
@@ -85,6 +85,14 @@ Cluster2が深遠だと感じる理由の一つは、協調して動作する目
 @tab XXX
 
 @item fenceエージェント
+@tab ユーティリティコマンド
+@tab XXX
+
+@item fence_tool
+@tab コマンド
+@tab XXX
+
+@item fence_node
 @tab コマンド
 @tab XXX
 
@@ -94,6 +102,10 @@ Cluster2が深遠だと感じる理由の一つは、協調して動作する目
 
 @item group_tool
 @tab コマンド
+@tab XXX
+
+@item libgroup
+@tab スタティックライブラリ
 @tab XXX
 
 @item qdiskd
@@ -111,6 +123,10 @@ Cluster2が深遠だと感じる理由の一つは、協調して動作する目
 @item clurmtabd
 @tab XXX        
 @tab XXX
+
+@item qdiskd
+@tab サービスデーモン
+@tab Quorum disk
 
 @end multitable
 
@@ -130,6 +146,12 @@ Cluster2が深遠だと感じる理由の一つは、協調して動作する目
 @item openais
 @tab aixexec
 
+@item cman
+@tab service_cman.lcrso, qdisk, fenced, fenceエージェント, 
+
+@item rgmanager
+@tab  clurgmgrd
+
 @end multitable
 
 @node ネットワーク通信レイヤ
@@ -138,19 +160,18 @@ Cluster2が深遠だと感じる理由の一つは、協調して動作する目
 Cluster2のネットワーク通信レイヤを下から順に記すと以下に記します。
 
 @verbatim
-ip
-  udp
-    corosync_totemnet
-      corosync_totemsrp
-        corosync_totempg
-          openais_cman
-            clvmd
-            rgmanager
-          openais_a
-            openais_cpg
-              groupd
-            openais_evt
-            openais_clm
+(ip)
+  (udp)
+    corosync_totemnet    <openais>
+      corosync_totemsrp  <openais>
+        corosync_totempg <openais>
+          openais_cman   <libcman.so>
+            rgmanager    <clurgmgrd>
+          openais_a      <openais>
+            openais_cpg  <openais>
+              groupd     <groupd>
+            openais_evt  <openais>
+            openais_clm  <openais>
           flowcontrol
           sync
 @end verbatim

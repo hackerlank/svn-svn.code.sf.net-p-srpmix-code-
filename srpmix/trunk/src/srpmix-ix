@@ -145,9 +145,16 @@ function guess_target
 {
     local spec_file=$1
     local line
+    local arch
 
     if line=$(grep ^ExclusiveArch: $spec_file 2>/dev/null); then
-        echo $line | sed -e 's/ExclusiveArch: \?\([-_a-zA-Z0-9]\+\).*/\1/'
+        # "ExclusiveArch: %{ix86}" in wine
+        arch=$(echo $line | sed -e 's/ExclusiveArch: \?\([-%{}_a-zA-Z0-9]\+\).*/\1/')
+	if test "x${arch}" = 'x%{ix86}'; then
+	    echo i386
+	else
+	    echo ${arch}
+	fi
     fi
 }
 

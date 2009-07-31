@@ -1,4 +1,5 @@
-DISTCLEANFILES = srpmix.spec srpmix-dir-base.SPEC
+GENERATED=srpmix.spec srpmix-dir-base.SPEC
+DISTCLEANFILES = $(GENERATED)
 
 
 XSPECS=srpmix.spec srpmix-dir-base.SPEC
