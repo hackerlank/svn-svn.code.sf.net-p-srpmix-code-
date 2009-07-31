@@ -265,8 +265,8 @@ function main
 
     ( cd $MY_TMPDIR && mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES )
     
-    # create_swrf <workdir> <wrap_opts> [<target srpms>...]
-    create_swrf "$MY_TMPDIR" "$WRAP_OPTS --output-dir=${MY_TMPDIR}" $TARGET_SRPM $TARGET_SWRF
+    # srpmix_create_swrf <workdir> <wrap_opts> [<target srpms>...]
+    srpmix_create_swrf "$MY_TMPDIR" "$WRAP_OPTS --output-dir=${MY_TMPDIR}" $TARGET_SRPM $TARGET_SWRF
 
     if test ! -d ${MY_TMPDIR}/RPMS/noarch; then
 	exit 3

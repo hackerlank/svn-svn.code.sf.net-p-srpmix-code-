@@ -23,14 +23,17 @@
 #
 ########################################################################
 
-ATTACHMENT_VERSION=0
-ATTACHMENT_RELEASE=0
-ATTACHMENT_OUTPUT_DIR=.
-ATTACHMENT_TYPE=
-ATTACHMENT_NAME=
-PKG_ATTACHED_TO=
-VER_ATTACHED_TO=
-ATTACHMENT_DATA_DIR=
+MY_TMPDIR=
+PKG_NAME=
+PKG_VERSION=0
+PKG_RELEASE=0
+OUTPUT_DIR=
+OUTPUT_FORMAT=rpm
+TARGET_PACKAGE=
+TARGET_VERSION=
+DATA_DIRECTORY=
+
+SRPMIX_ATTACH_DEBUG=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -43,11 +46,108 @@ function try_source
 }
 try_source ${LIBSRPMIX}
 
+
 function print_usage
 {
-    # srpmix-sttach --pkg-version= --pkg-release=N --output-dir= --type= --name=plugin-name package version data-directory 
+    echo "Usage: "
+    echo "  srpmix-sttach [--help|-h]"
+    echo "  srpmix-sttach [--debug] \\ "
+    echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=R] \\ "
+    echo "                [--output-dir=DIR [--output-format=swrf|rpm]]"
+    echo "                TARGET-PACKAGE TARGET-VERSION DATA-DIRECTORY" 
 }
 
 function parse_arguments
 {
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --debug)
+		SRPMIX_ATTACH_DEBUG=yes
+		PS4="${PS4}[attach]"
+		set -x
+		;;
+	    --pkg-name=*)
+                PKG_NAME=${1/--pkg-name=}
+		;;
+	    --pkg-version=*)
+                PKG_VERSION=${1/--pkg-version=}
+		;;
+	    --pkg-version=*)
+                PKG_VERSION=${1/--pkg-version=}
+		;;
+	     --output-dir=*)
+	        OUTPUT_DIR=${1/--output-dir=}
+		;;
+             --output-format=*)
+	        OUTPUT_FORMAT=${1/--output-format=}
+		case "${OUTPUT_FORMAT}" in
+		    rpm|swrf)
+			;;
+		    *)
+			echo "*** Unknow output format: " "${OUTPUT_FORMAT}" 1>&2
+			print_usage 1>&2
+			exit 1
+			;;
+		esac
+		;;
+	      *)
+	      break
+	      ;;
+	esac
+	shift
+    done
+
+    if test $# -ne 3; then
+	echo "*** Wrong number of arguments: " $# " (3 arguments are expected)" 1>&2
+	print_usage 1>&2
+	exit 2
+    fi
+
+    TARGET_PACKAGE="$1"
+    shift 1
+    
+    TARGET_VERSION="$1"
+    shift 1
+
+    DATA_DIRECTORY="$1"
+    shift 1
+
+    if test -z "$PKG_NAME"; then
+	PKG_NAME=$(basename ${DATA_DIRECTORY})
+    fi
 }
+
+function create_swrf
+{
+}
+
+function main
+{
+    MY_TMPDIR=`mktemp -d`
+    trap "/bin/rm -rf $MY_TMPDIR" 0    
+
+    parse_arguments "$@"
+    if test -n "$SRPMIX_ATTACH_DEBUG"; then
+	trap 0
+	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-attach"
+    fi
+
+    (cd $MY_TMPDIR && mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES )
+    create_swrf
+    
+
+}
+
+
+main $@
+exti $?
+
+
+# swrf
+# swrfbuild
+# evelop
+# envelopbuild

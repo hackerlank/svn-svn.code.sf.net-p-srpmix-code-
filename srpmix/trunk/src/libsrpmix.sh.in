@@ -497,8 +497,8 @@ function __es_echo_n
 	
 }
 
-# create_swrf <workdir> <wrap_opts> [<target srpms>...]
-function create_swrf
+# srpmix_create_swrf <workdir> <wrap_opts> [<target srpms>...]
+function srpmix_create_swrf
 {
     local workdir=$1
     shift
