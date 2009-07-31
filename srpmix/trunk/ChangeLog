@@ -1,3 +1,8 @@
+2009-07-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (guess_target): Use i386 if %{ix86} is specified
+	in ExclusiveArch field.
+
 2009-07-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-wrap (create_core_spec): Added %dir mark
