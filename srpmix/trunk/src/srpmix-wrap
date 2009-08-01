@@ -172,7 +172,6 @@ function create_core_spec
         buildarch="noarch"
     fi
 
-    srcdir=$(srpmix_srcdir $package $version $release)
     installdir=$(srpmix_installdir $package $version $release)
 
     cat <<EOF

@@ -46,10 +46,12 @@ function print_usage
 	echo "Usage: "
 	echo "  srpmix-envelop [--help|-h]"
 	echo "  srpmix-envelop [--dump-spec] SWRF..."
-	echo "  srpmix-envelop [--debug] [--output-dir=OUTPUTDIR] [--release=RELEASE] --package-name=NAME [SWRF...]"
+	echo "  srpmix-envelop [--debug] [--output-dir=OUTPUTDIR] [--release=RELEASE] [--package-name=NAME] [SWRF...]"
 	echo ""
 	echo "  If SWRF is not given, standard input is"
 	echo "  used for the list of source pacakges."
+	echo "  --package-name=NAME is required when "
+        echo "  enveloping core package."
 	echo
 }
 
@@ -91,10 +93,6 @@ function parse_arguments
 	esac
 	shift
     done
-
-    if test "x$PKGNAME" = x; then
-	srpmix_abort "No --package-name is given"
-    fi
 
     if test "x$1" = "x"; then
         while read tmp; do
@@ -157,10 +155,16 @@ function envelop_swrf
 	*-srpmix-plugins)
 	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-plugins/\1-srpmix/')
 	    ;;
+	*-srpmix-plugin-*)
+	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-plugin-.*/\1-srpmix/')
+	    ;;
 	*-srpmix-archives)
 	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-archives/\1-srpmix/')
 	    ;;
 	*)
+	    if test "x$PKGNAME" = x; then
+		srpmix_abort "No --package-name is given"
+	    fi
 	    req_pkg=$(srpmix_dirpkg_name $PKGNAME)
 	    ;;
     esac

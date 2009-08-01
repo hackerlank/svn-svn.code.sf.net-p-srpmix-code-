@@ -22,7 +22,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
-
 MY_TMPDIR=
 PKG_NAME=
 PKG_VERSION=0
@@ -31,9 +30,10 @@ OUTPUT_DIR=
 OUTPUT_FORMAT=rpm
 TARGET_PACKAGE=
 TARGET_VERSION=
-DATA_DIRECTORY=
+ATTACHMENT=
 
 SRPMIX_ATTACH_DEBUG=
+YUM_OPTS=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -50,11 +50,11 @@ try_source ${LIBSRPMIX}
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-sttach [--help|-h]"
-    echo "  srpmix-sttach [--debug] \\ "
-    echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=R] \\ "
-    echo "                [--output-dir=DIR [--output-format=swrf|rpm]]"
-    echo "                TARGET-PACKAGE TARGET-VERSION DATA-DIRECTORY" 
+    echo "  srpmix-attach [--help|-h]"
+    echo "  srpmix-attach [--debug] \\ "
+    echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=REL] \\ "
+    echo "                [--output-dir=DIR [--output-format=swrf|rpm]] [--yum=YUMOPT] \\ "
+    echo "                TARGET-PACKAGE TARGET-VERSION ATTACHMENT" 
 }
 
 function parse_arguments
@@ -81,6 +81,10 @@ function parse_arguments
 		;;
 	     --output-dir=*)
 	        OUTPUT_DIR=${1/--output-dir=}
+		if ! test -d "${OUTPUT_DIR}"; then
+		    srpmix_abort "No such directory: $OUTPUT_DIR"
+		fi
+		OUTPUT_DIR=$(cd $OUTPUT_DIR && pwd)
 		;;
              --output-format=*)
 	        OUTPUT_FORMAT=${1/--output-format=}
@@ -94,6 +98,13 @@ function parse_arguments
 			;;
 		esac
 		;;
+	      --yum=*)
+	        YUM_OPTS=$(echo $1 | sed 's/--yum=//')
+		;;		
+	    --*|-*)
+	        print_usage 1>&2
+		srpmix_abort "Unknow option: $1"
+		;;		
 	      *)
 	      break
 	      ;;
@@ -113,22 +124,114 @@ function parse_arguments
     TARGET_VERSION="$1"
     shift 1
 
-    DATA_DIRECTORY="$1"
+    ATTACHMENT="$1"
+    if test -d "${ATTACHMENT}"; then
+	ATTACHMENT=$(cd $1 && pwd)
+    else
+	:			# TODO
+    fi
     shift 1
 
-    if test -z "$PKG_NAME"; then
-	PKG_NAME=$(basename ${DATA_DIRECTORY})
-    fi
+    : ${PKG_NAME:=$(basename ${ATTACHMENT})}
 }
 
 function create_swrf
 {
+    local pkg_full_name=${TARGET_PACKAGE}-${TARGET_VERSION}-srpmix-plugin-${PKG_NAME}
+
+    ( cd ${MY_TMPDIR} && mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES SWRFS)
+    local sources_dir=${MY_TMPDIR}/SOURCES
+    (
+	cd $(dirname $ATTACHMENT)
+	tar -c --to-stdout $(basename $ATTACHMENT) > ${sources_dir}/${PKG_NAME}.tar
+    )
+    installdir=$(srpmix_installdir $TARGET_PACKAGE ${TARGET_VERSION})
+    local spec_file=$MY_TMPDIR/SPECS/${pkg_full_name}.spec
+    cat > ${spec_file} <<EOF
+Summary: $PKG_NAME plugin information for package ${TARGET_PACKAGE}-${TARGET_VERSION}
+Name: ${pkg_full_name}
+Version: ${PKG_VERSION}
+Release: ${PKG_RELEASE}%{?dist}.swrf
+Source0: ${PKG_NAME}.tar
+Autoreq: 0
+
+Buildarch: noarch
+Buildroot: %{_tmppath}/%{name}-root
+BuildRequires: tar
+Group: Software/Tools
+License: GPL
+Prefix: /
+
+%define __os_install_post true
+
+%description
+$PKG_NAME plugin information for package ${TARGET_PACKAGE}-${TARGET_VERSION}
+
+%prep
+rm -rf $RPM_BUILD_ROOT
+
+%build
+
+%install 
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$installdir
+mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins
+
+from=%{SOURCE0}
+to=\$RPM_BUILD_ROOT/$installdir/plugins
+(cd \${to}; tar xf \${from})
+
+%clean
+chmod -R u+w \$RPM_BUILD_ROOT
+rm -rf \$RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+/${SRPMIX_SOURCES_RDIR}/*/*/*/plugins/$PKG_NAME
+
+%changelog
+* Sat Aug  1 2009 SRPMIX WRAP <consulting-jp@redhat.com> ${PKG_NAME}-${PKG_VERSION}-${PKG_RELEASE}
+- Automatically generated.
+EOF
+
+    PS4="${PS4}[swrfbuild]" \
+    $SWRFBUILD --define "_topdir $MY_TMPDIR" -ba "$spec_file"
+    
+    local swrf_rpm=$(find $MY_TMPDIR/RPMS -name '*.noarch.rpm')
+    if test -f ${swrf_rpm}; then
+	local swrf="${MY_TMPDIR}/SWRFS/$(basename ${swrf_rpm} .noarch.rpm)"
+	mv $swrf_rpm $swrf
+	
+    else
+	srpmix_abort "*** cannot find generated swrf.noarch.rpm file in $MY_TMPDIR/RPMS" 2>&1
+    fi
+
+    return 0
+}
+
+function create_rpm
+{
+    local swrf=$1
+    local opts="--output-dir=$MY_TMPDIR/SRPMS"
+
+    if test -n ${SRPMIX_ATTACH_DEBUG}; then
+	opts="${opts} --debug"
+    fi
+    
+    srpmix-envelop $opts $swrf
+    for p in $MY_TMPDIR/SRPMS/*.src.rpm; do
+	if echo $p | grep -v '\.swrf\.src\.rpm$' > /dev/null 2>&1; then
+	    PS4="${PS4}[rpmbuild]" \
+		$RPMBUILD --define "_topdir $MY_TMPDIR" --rebuild -ba $p
+	    break
+	fi
+    done
 }
 
 function main
 {
     MY_TMPDIR=`mktemp -d`
-    trap "/bin/rm -rf $MY_TMPDIR" 0    
+    trap "/bin/rm -rf ${MY_TMPDIR}" 0    
 
     parse_arguments "$@"
     if test -n "$SRPMIX_ATTACH_DEBUG"; then
@@ -136,15 +239,29 @@ function main
 	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-attach"
     fi
 
-    (cd $MY_TMPDIR && mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES )
     create_swrf
-    
+    local swrf=$MY_TMPDIR/SWRFS/*
+    if ! test -r ${swrf}; then
+	srpmix_abort "*** Failed to create swrf file: $swrf" 2>&1
+    elif test -n "$OUTPUT_DIR" && test ${OUTPUT_FORMAT} = swrf; then
+	mv $swrf $OUTPUT_DIR
+	return $?
+    fi
 
+    create_rpm ${swrf}
+    local rpm=$MY_TMPDIR/RPMS/noarch/*.noarch.rpm
+    if ! test -r ${rpm}; then
+	srpmix_abort "*** Failed to create rpm file: $rpm" 2>&1
+    elif test -n "$OUTPUT_DIR" && test ${OUTPUT_FORMAT} = rpm; then
+	mv $rpm $OUTPUT_DIR
+	return $?
+    fi
+
+    yum ${YUM_OPTS} localinstall -y --nogpgcheck $rpm
 }
 
-
 main $@
-exti $?
+exit $?
 
 
 # swrf

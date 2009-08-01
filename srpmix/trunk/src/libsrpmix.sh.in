@@ -122,8 +122,12 @@ function srpmix_srcdir
 
     local pkg_hash=$(srpmix_srchash ${package})
     local pkg_root="${SRPMIX_SOURCES_DIR}"/"${pkg_hash}"/"$package"
-    
-    echo "${pkg_root}"/"$version-$release"
+
+    if test -n "$release"; then
+	echo "${pkg_root}"/"$version-$release"
+    else
+	echo "${pkg_root}"/"$version"
+    fi
 }
 
 function srpmix_installdir
@@ -135,7 +139,11 @@ function srpmix_installdir
     local pkg_hash=$(srpmix_srchash ${package})
     local pkg_root=${SRPMIX_SOURCES_RDIR}/"${pkg_hash}"/"$package"
     
-    echo "${pkg_root}"/"$version-$release"
+    if test -n "$release"; then
+	echo "${pkg_root}"/"$version-$release"
+    else
+	echo "${pkg_root}"/"$version"
+    fi
 }
 
 function srpmix_swrfdir
@@ -148,6 +156,7 @@ function srpmix_swrfdir
 function srpmix_srchash
 {
     echo ${1:0:1}
+#    echo $1 | sed -e 's/\([a-zA-Z0-9]\).*/\1/'
 }
 
 srpmix_distmap_to_pvr_script='

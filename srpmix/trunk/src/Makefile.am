@@ -22,6 +22,7 @@ dist_bin_SCRIPTS =           \
 	srpmix-weakview-packages		\
 	\
 	srpmix-plugin                           \
+	srpmix-attach                           \
 	\
         $(NULL)
 
