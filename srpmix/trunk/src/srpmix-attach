@@ -238,13 +238,15 @@ function main
 	trap 0
 	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-attach"
     fi
+    local srchash=$(srpmix_srchash $TARGET_PACKAGE)
 
     create_swrf
     local swrf=$MY_TMPDIR/SWRFS/*
     if ! test -r ${swrf}; then
 	srpmix_abort "*** Failed to create swrf file: $swrf" 2>&1
     elif test -n "$OUTPUT_DIR" && test ${OUTPUT_FORMAT} = swrf; then
-	mv $swrf $OUTPUT_DIR
+	mkdir -p $OUTPUT_DIR/${srchash}
+	mv $swrf $OUTPUT_DIR/${srchash}
 	return $?
     fi
 
@@ -253,7 +255,8 @@ function main
     if ! test -r ${rpm}; then
 	srpmix_abort "*** Failed to create rpm file: $rpm" 2>&1
     elif test -n "$OUTPUT_DIR" && test ${OUTPUT_FORMAT} = rpm; then
-	mv $rpm $OUTPUT_DIR
+	mkdir -p $OUTPUT_DIR/${srchash}
+	mv $swrf $OUTPUT_DIR/${srchash}
 	return $?
     fi
 

@@ -546,7 +546,10 @@ function spec_file_get
 {
     local srpm_file=$1
 
-
+    # TODO:
+    #
+    # rpm -q --queryformat '[%10{FILEFLAGS:fflags} %{FILENAMES}\n]' -p test-srpmix-0-0.fc11.src.rpm 
+    # 
     ${RPM2CPIO} ${srpm_file} \
         | ${CPIO} --list 2>/dev/null \
         | grep '\.spec$'

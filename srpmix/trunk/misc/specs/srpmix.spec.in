@@ -122,6 +122,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/srpmix-weakview-dist
 %{_bindir}/srpmix-weakview-packages
 %{_bindir}/srpmix-plugin
+%{_bindir}/srpmix-attach
 
 %dir %{_datadir}/srpmix
 %dir %{_datadir}/srpmix/plugins

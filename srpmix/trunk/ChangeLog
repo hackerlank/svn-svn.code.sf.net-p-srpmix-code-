@@ -1,5 +1,30 @@
 2009-08-02  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 3.107.0.
+
+	* src/srpmix (dir_pkg_build): Store the generated dir-pkg package to
+	OUTPUT_DIR/dir-pkg/srchash.
+
+	* src/srpmix-weakview-dist(create_dist_weakview): Store the generated file to 
+	OUTPUT_DIR/weakview.
+
+	* src/srpmix-weakview-packages (create_dist_weakview): Ditto.
+
+	* src/srpmix-attach: Store the generated file to OUTPUT_DIR/$srchash.
+
+	* misc/specs/srpmix.spec.in (%files): Added srpmix-attach
+
+	* configure.ac: Give default test src.rpm from configure to 
+	tests/Makefile.am
+	
+	* tests/Makefile.am (TEST_SRPMS): Remove test-srpmix-0-0.fc11.src.rpm.
+
+	* tests/test-srpmix.SPEC: Copy SOURCE0 to BUILD dir.
+
+	* tests/test-srpmix-0-0.fc11.src.rpm: Updated based on new spec file.
+	
+2009-08-02  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-wrap (create_core_spec): Remove srcdir variable.
 
 	* src/srpmix-envelop (envelop_swrf): Handle the input

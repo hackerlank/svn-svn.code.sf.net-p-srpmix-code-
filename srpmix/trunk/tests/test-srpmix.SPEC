@@ -14,10 +14,12 @@ test package for srpmix
 
 %prep
 %setup -c -T
+pwd
+cp %{SOURCE0} .
 
 %build
 rm -rf $RPM_BUILD_ROOT
-gcc -Wall $RPM_OPT_FLAGS -g %{SOURCE0} -o test-srpmix
+gcc -Wall $RPM_OPT_FLAGS -g $(basename %{SOURCE0}) -o test-srpmix
 
 %install
 install -D -m 755 test-srpmix $RPM_BUILD_ROOT%{_bindir}/test-srpmix

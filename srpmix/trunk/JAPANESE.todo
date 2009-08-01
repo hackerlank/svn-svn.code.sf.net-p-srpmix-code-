@@ -1,8 +1,10 @@
 For version 4
 ========================================================================
 
+* パッケージ削除の順序によって/var/lib/srpmix/sources/a/avahi/0.6.25-3.fc11が残る。
+  sudo rpm -e  avahi-0.6.25-3.fc11-srpmix avahi-0.6.25-3.fc11-srpmix-plugins   avahi-0.6.25-3.fc11-srpmix-archives 
+
 * pluginのAPIを強化する。
-** srpmix-attach
 ** pluginを個別パッケージにさらに分解する。
 ** 全文検索
 *** ウェブインターフェイス
@@ -20,10 +22,17 @@ For version 4
 * %kouji tracking
 ** db, swrfのディレクトリを一階層深くする。
 
-* mummify/slice
+* mummify/slice #
 ** -confオプションの追加
+** compsの生成
 
 * repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
+
+* /usr/localに入れた場合でも正しく動作するように編成する。
+
+* .specを拡張子に持たないspecファイルの処理
+
+* root権限がない場合のattachは？
 
 done
 -----
@@ -47,6 +56,13 @@ done
 ** rpm -eでよりきれい消えるようにする。<done>
 
 ** srpmix-hashdir*-, srpmix-pkgdir-foo- <done>
+
+* defaultのテストをoffにする。<done>
+
+* testのsrc.rpmの*.cをBUILDにに入れる。<done>
+
+* srpmix-attach <done>
+** attachによるパッケージをhashed dirに入れる。 <done>
 
 After version 4
 ========================================================================

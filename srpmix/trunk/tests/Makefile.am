@@ -10,7 +10,8 @@ dist_check_SCRIPTS = \
 		     $(NULL)
 
 
-TEST_SRPMS = @TEST_SRPMS@ $(srcdir)/test-srpmix-0-0.fc11.src.rpm
+# TEST_SRPMS = @TEST_SRPMS@ $(srcdir)/test-srpmix-0-0.fc11.src.rpm
+TEST_SRPMS = @TEST_SRPMS@
 TESTDIR = data
 
 TESTS_ENVIRONMENT =							\

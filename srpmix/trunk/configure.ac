@@ -5,7 +5,7 @@ dnl If the source code of srpmix is changed but the directory is not changed,
 dnl just increment micro version.
 
 m4_define([pkg_major_version],[3])
-m4_define([pkg_minor_version],[106])
+m4_define([pkg_minor_version],[107])
 m4_define([pkg_micro_version],[0])
 m4_define([pkg_name],    [srpmix])
 m4_define([pkg_version], pkg_major_version.pkg_minor_version.pkg_micro_version)
@@ -23,8 +23,10 @@ AC_SUBST(SRPMIX_MICRO_VERSION, pkg_micro_version)
 
 AC_RPM_RELEASE
 
+default_test_srpm=
 if test "x$USE_MAINTAINER_MODE" = "xyes"; then
 	AC_PATH_PROG([SVN], [svn])
+	default_test_srpm=tests/test-srpmix-0-0.fc11.src.rpm
 fi
 AM_CONDITIONAL([USE_SVN_RPM_RELEASE],
 	 [test "x$SVN" != "x" && test -d "$srcdir/.svn"])
@@ -50,7 +52,7 @@ AC_ARG_WITH([test-srpms],
 # Convert relative paths to absolute paths.
 #
 with_test_srpms2=
-for s in ${with_test_srpms}; do
+for s in ${default_test_srpm} ${with_test_srpms}; do
     if test "x${s}" != x; then
        if test -f "${s}"; then
            b=$(dirname ${s})
