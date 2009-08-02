@@ -1,5 +1,7 @@
 2009-08-03  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/10srpmix-vanilla: Put all files to plugins/vanilla directory.
+
 	* src/srpmix-wrap (create_core_spec): Create a symbol for vanilla
 	directory.
 	(create_plugin_spec): Use plugins as top directory in %files section.

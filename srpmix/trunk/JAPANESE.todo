@@ -4,10 +4,9 @@ For version 4
 
 * pluginのAPIを強化する。
 ** pluginを個別パッケージにさらに分解する。#
-*** パッケージ削除の順序によって/var/lib/srpmix/sources/a/avahi/0.6.25-3.fc11が残る。
+*** パッケージ削除の順序によって/var/lib/srpmix/sources/a/avahi/0.6.25-3.fc11が残る。###
   sudo rpm -e  avahi-0.6.25-3.fc11-srpmix avahi-0.6.25-3.fc11-srpmix-plugins   avahi-0.6.25-3.fc11-srpmix-archives 
 ** attachデータをpluginから作れるようにする。
-** vanillaの生成位置を調整する。
 
 * mummify/slice #
 ** -confオプションの追加
@@ -67,6 +66,8 @@ done
 
 * srpmix-attach <done>
 ** attachによるパッケージをhashed dirに入れる。 <done>
+
+** vanillaの生成位置を調整する。<done>
 
 After version 4
 ========================================================================

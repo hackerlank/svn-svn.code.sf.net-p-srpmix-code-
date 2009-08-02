@@ -98,26 +98,26 @@ function run_vanilla
 	case "$f" in
 	    *.tar.bz2|*.tbz|*.tbz2)
                 count=`expr $count + 1`
-		ln -s ../archives/$(basename $f) "$o/`basename $f`"
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
 		(cd "$o"; tar jxvfm $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 	    *.tar.gz|*.tgz|*.tar.Z)
                 count=`expr $count + 1`
-		ln -s ../archives/$(basename $f) "$o/`basename $f`"
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
 		(cd "$o"; tar zxvfm $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 	    # TODO: Is -X needed to update the file modification time?
 	    *.zip)
 	        count=`expr $count + 1`
-		ln -s ../archives/$(basename $f) "$o/`basename $f`"
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
 		(cd "$o"; unzip -o $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"unzip\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
   	    *.jar)
 	        count=`expr $count + 1`
-		ln -s ../archives/$(basename $f) "$o/`basename $f`"
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
 		(cd "$o"; "${FASTJAR}" xf $f 2>&1 > ${report_to};
 		    es_print vanilla-expand --command=\"jar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
@@ -135,7 +135,7 @@ function run_vanilla
 			suffix=.Z
 			;;
 		esac
-		ln -s ../archives/$(basename $f) "$o/`basename $f`"
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
 		# --force is needed to decompress a file specified by a soft link.
 		(cd "$o"; cat $f | gunzip --force - > $(basename $f $suffix) 2>${report_to};
 		    es_print vanilla-expand --command=\"gunzip\" --input=\"$f\" --status=\"$?\" | tee -a $l)
@@ -143,13 +143,13 @@ function run_vanilla
   	    *.bz2)
 	        count=`expr $count + 1`
 		# --force is needed to decompress a file specified by a soft link.
-		ln -s ../archives/$(basename $f) "$o/`basename $f`"
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
 		(cd "$o"; bunzip2 --keep --stdout --force $f > $(basename $f .bz2) 2>${report_to};
 		    es_print vanilla-expand --command=\"bunzip2\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
 	    *.tar.lzma)
 		count=`expr $count + 1`
-		ln -s ../archives/$(basename $f) "$o/`basename $f`"
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
 		(cd "$o"; unlzma --force --stdout $f > $(basename $f .lzma) &&
 		    tar xfm $(basename $f .lzma); 
 		    rm $(basename $f .lzma);
@@ -158,7 +158,7 @@ function run_vanilla
 	    *.lzma)
 	        count=`expr $count + 1`
 		# --force is needed to decompress a file specified by a soft link.
-		ln -s ../archives/$(basename $f) "$o/`basename $f`"
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
 		(cd "$o"; unlzma --force --stdout $f > $(basename $f .lzma)  &&
 		    es_print vanilla-expand --command=\"lzma\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
@@ -188,14 +188,16 @@ function try_source
 function main
 {
     o= 
-
+    count=0
     srpmix_verify_commands tar unzip fastjar gunzip bunzip2
     parse_arguments "$@"
 
+    if test -d ${PLUGINDIR}; then
+	count=$(ls ${PLUGINDIR} | wc -l)
+    fi
     tmpdir=${PLUGINDIR}/.vanilla
-    if test -d "${SOURCESDIR}" &&
-       ( ! test -d "${ROOTDIR}/vanilla" ||
-	test "$(/bin/ls ${SOURCESDIR}/* | head -1)" -nt "${ROOTDIR}/vanilla"); then
+
+    if test -d "${SOURCESDIR}" && test $count -eq 0; then
         test -d $tmpdir && /bin/rm -rf $tmpdir
 	install -d $tmpdir
 	
@@ -203,13 +205,13 @@ function main
 	o=$tmpdir
 	run_vanilla ${SOURCESDIR} $o $LOGFILE
 	srpmix_chmod $o 
+
 	
-	if ! test -d "${ROOTDIR}/vanilla"; then
-            /bin/mv "$tmpdir" "${ROOTDIR}/vanilla"
-        else
-            rsync -a --delete $tmpdir/ "${ROOTDIR}/vanilla"
-            /bin/rm -rf "$tmpdir"
-        fi
+	count=$(ls ${tmpdir} | wc -l)
+	if test $count -gt 0; then
+            mv $tmpdir/* "${PLUGINDIR}"
+	fi
+        /bin/rm -rf "$tmpdir"
     fi
 }
 
