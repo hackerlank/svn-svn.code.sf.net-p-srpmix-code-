@@ -1,7 +1,7 @@
 #!/bin/sh
 DIST=dist-f12-maven
 KOJIURL=http://kojipkgs.fedoraproject.org
-DIR=/srv/sources/attic/mirror/fedoraproject-koji
+DIR=${1:-/srv/sources/attic/mirror/fedoraproject-koji}
 PEEK=/dev/null
 
 function newer_name
