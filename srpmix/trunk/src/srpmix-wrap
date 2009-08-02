@@ -174,6 +174,9 @@ function create_core_spec
 
     installdir=$(srpmix_installdir $package $version $release)
 
+    # These variables are used to put broken symbolic link to %files
+    local rinstalldir=$(srpmix_rinstalldir $package $version $release)
+    
     cat <<EOF
 Summary: Source Information for package $package ($version-$release)
 Name: ${wrapped_name}
@@ -231,6 +234,7 @@ else
 fi
 \$transfer_cmd \$(/bin/ls -d \$from/* | grep -v LOG | grep -v SPECS\$) \$to
 mv \$RPM_BUILD_ROOT/$installdir/*.spec \$RPM_BUILD_ROOT/$installdir/specs.spec
+ln -s plugins/vanilla \$RPM_BUILD_ROOT/$installdir/vanilla
 
 %clean
 chmod -R u+w \$RPM_BUILD_ROOT
@@ -243,6 +247,9 @@ rm -rf \$RPM_BUILD_ROOT
 /${SRPMIX_SOURCES_RDIR}/*/*/*/STATUS
 /${SRPMIX_SOURCES_RDIR}/*/*/*/pre-build
 /${SRPMIX_SOURCES_RDIR}/*/*/*/plugins
+# rinstalldir is need to make a broken symlink %files member
+# See http://www.asahi-net.or.jp/~kw3m-nki/moomoo/diary/diary0412.html#21-02
+/${SRPMIX_SOURCES_RDIR}/${rinstalldir}/vanilla
 /${SRPMIX_SOURCES_RDIR}/*/*/*/specs.spec
 
 %files archives
@@ -324,13 +331,15 @@ srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR -i %{
 %build
 touch %{_builddir}/%{name}/.run-plugin
 sleep 1
-srpmix-plugin $enable_plugin           \
+srpmix-plugin $enable_plugin \
     %{_srpmix_plugin_option} \
     %{_builddir}/%{name}/$SRPMIX_VAR_DIR/$installdir
 
 %install
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$installdir
+mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins
+echo "$enable_plugin" > \$RPM_BUILD_ROOT/$installdir/plugins/PLUGINS
 
 from=%{_builddir}/%{name}/$SRPMIX_VAR_DIR
 to=\$RPM_BUILD_ROOT
@@ -358,7 +367,7 @@ chmod -R u+w \$RPM_BUILD_ROOT
 rm -rf \$RPM_BUILD_ROOT
 
 %files
-/${SRPMIX_SOURCES_RDIR}/*/*/*/
+/${SRPMIX_SOURCES_RDIR}/*/*/*/plugins/*
 
 %changelog
 * Sat Jun  2 2007 SRPMIX WRAP <consulting-jp@redhat.com> $package-$version-$release

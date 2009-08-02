@@ -1,3 +1,11 @@
+2009-08-03  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_core_spec): Create a symbol for vanilla
+	directory.
+	(create_plugin_spec): Use plugins as top directory in %files section.
+
+	* src/libsrpmix.sh.in (srpmix_rinstalldir): New function.
+
 2009-08-02  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 3.107.0.

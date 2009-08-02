@@ -130,6 +130,24 @@ function srpmix_srcdir
     fi
 }
 
+# Relative installdir
+function srpmix_rinstalldir
+{
+    local package=$1
+    local version=$2
+    local release=$3
+
+    local pkg_hash=$(srpmix_srchash ${package})
+    local pkg_root="${pkg_hash}"/"$package"
+    
+    if test -n "$release"; then
+	echo "${pkg_root}"/"$version-$release"
+    else
+	echo "${pkg_root}"/"$version"
+    fi
+}
+
+# Absolute installdir
 function srpmix_installdir
 {
     local package=$1
