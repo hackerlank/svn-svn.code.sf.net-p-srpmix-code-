@@ -115,7 +115,10 @@
      (let ((result ad-do-it))
        (setq ad-return-value
 	     (cond
-	      ((not (equal result "/")) result)
+	      ((and (not (equal result "/"))
+		    ;; ???
+		    (not (equal result (ad-get-arg 0))))
+	       result)
 	      (t (cscope+srpmix-search-directory-hierarchy (ad-get-arg 0)))
 	      )))))
 
