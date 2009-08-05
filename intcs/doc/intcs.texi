@@ -8,7 +8,14 @@
 @c @syncodeindex tp cp
 @comment %**end of header
 
-@dircategory Using Source code
+@setchapternewpage odd
+@ifinfo
+Copyright @copyright{} 2009 Masatake YAMATO
+Copyright @copyright{} 2009 Red hat, K.K.
+@end ifinfo
+
+
+@dircategory Understanding source code
 @direntry
 * 詳解 Cluster2: (intcs)       詳解 Cluster2
 @end direntry
@@ -18,10 +25,15 @@
 @author Masatake YAMATO (@email{yamato@@redhat.com})
 @page
 @vskip 0pt plus 1filll
+Copyright @copyright{} 2009 Masatake YAMATO
+Copyright @copyright{} 2009 Red hat, K.K.
 @c @insertcopying
 @end titlepage
 
 
+@c 
+@c Macros should be here
+@c 
 @alias comp  = code
 @alias pkg   = code
 @alias proto = code
@@ -30,18 +42,18 @@
 @ifnottex
 @node Top
 @top 詳解 Cluster2
-本文章ではCluster2の内部構造について解説します。
-ソースコードを活用してCluster 2のトラブルシューティングを実施するための
-基礎となる知識の提供を目的とています。
 @end ifnottex
+本文章ではCluster2の内部構造について解説します。ソースコードを活用して
+Cluster 2のトラブルシューティングを実施するための基礎となる知識の提供を
+目的とています。インストールの手順などについては解説しません。
+
 
 @menu
 * コンポーネントとパッケージの関係::
-* ネットワーク通信プロトコル::
-* コンポーネント間の通信経路::
+* コンポーネント間の関係::
 * コンポーネントのステート::
 * コンフィギュレーションの指定方法::
-* ログの活用::
+* ツールコマンドとログの活用::
 @end menu
 
 @node コンポーネントとパッケージの関係
@@ -63,7 +75,7 @@ Cluster2の前身Cluster1では、クラスターソフトウェアの中枢部�
 Cluster2 には、Cluster1の周辺ソフトウェアを動作させるための互換レイヤと
 も言うべきコンポーネントが含まれています。
 
-Cluster2について理解していこうとすると、このコンポーネントの数と格闘す
+Cluster2について理解して行こうとすると、このコンポーネントの数と格闘す
 ることになります。後回しにせず先にコンポーネントの名前を全て覚えてしま
 いましょう。各コンポーネントの役割については、この文章のなかで徐々に説
 明していきます。
@@ -75,45 +87,83 @@ Cluster2について理解していこうとすると、このコンポーネン
 にソースコードを調査する場合、前もって各コンポーネントがどのパッケージ
 に所属しているか知っておくことが望ましいです。
 
+次に示す表は、各コンポーネントと、種類、所属するパッケージと、役割の概要
+をまとめたものです。
 @multitable @columnfractions .3 .3 .2 .5
 @cindex コンポーネント
 @c @headitem コンポーネント @tab 種類 @tab パッケージ @tab 役割
 @headitem コンポーネント @tab 種類 @tab パッケージ @tab 役割
+
+
+
 @item @comp{aiexec}
 @tab サービスデーモン
 @tab @pkg{openais}
 @tab クラスターコア
 
+@c
+@c cman
+@c
 @item @comp{service_cman.lcrso}
 @tab DLL
 @tab @pkg{cman}
-@tab Quorateを提供する。
+@tab クラスターコアにQuorateを追加する。 @c ???
 
-@item @comp{libcman.so}
-@tab DLL
+@item @comp{libcman.a|so}
+@tab ソケットクライアントライブラリ
 @tab @pkg{cman}
-@tab aisexecプロセスの外から service_cman.lcrso を利用するためのライブラリ
+@tab aisexecプロセスの外から service_cman.lcrsoと通信する。
+      
+@item @comp{cman_tool}
+@tab ツールコマンド
+@tab @pkg{cman}
+@tab XXX
 
 @item @comp{cman}
 @tab 起動スクリプト
 @tab @pkg{cman}
-@tab Cluster2 特有の設定の元でaiexecを起動します。
-      
-@item @comp{cman_tool}
-@tab コマンド
+@tab Cluster2特有の設定の元でaiexecを起動する。
+
+@c 
+@c cpg & groupd
+@c 
+@item @comp{libcpg.so}
+@tab ソケットクライアントライブラリ
+@tab @pkg{openais}
+@tab aisexecに組込まれているcpgと通信する。
+
+@item @comp{groupd}
+@tab サービスデーモン
 @tab @pkg{cman}
 @tab XXX
 
+@item @comp{libgroup.so}
+@tab ソケットクライアントライブラリ
+@tab @pkg{cman}
+@tab groupdと通信する。
+
+@item @comp{group_tool}
+@tab ツールコマンド
+@tab @pkg{cman}
+@tab XXX
+
+@c ccsd
 @item @comp{ccsd}
 @tab サービスデーモン
 @tab @pkg{cman}
 @tab XXX
 
-@item @comp{ccs_tool}
-@tab コマンド
+@item @comp{libccs.a}
+@tab ソケットクライアントライブラリ
 @tab @pkg{cman}
 @tab XXX
 
+@item @comp{ccs_tool}
+@tab ツールコマンド
+@tab @pkg{cman}
+@tab XXX
+
+@c fence
 @item @comp{fenced}
 @tab サービスデーモン
 @tab @pkg{cman}
@@ -125,7 +175,7 @@ Cluster2について理解していこうとすると、このコンポーネン
 @tab フェンシングを実行する。ハードウェアに応じて様々な実装がある。
 
 @item @comp{fence_tool}
-@tab コマンド
+@tab ツールコマンド
 @tab @pkg{cman}
 @tab XXX
 
@@ -133,21 +183,6 @@ Cluster2について理解していこうとすると、このコンポーネン
 @tab コマンド
 @tab @pkg{cman}
 @tab XXX
-
-@item @comp{groupd}
-@tab サービスデーモン
-@tab @pkg{cman}
-@tab XXX
-
-@item @comp{group_tool}
-@tab コマンド
-@tab @pkg{cman}
-@tab XXX
-
-@item @comp{libgroup}
-@tab スタティックライブラリ
-@tab @pkg{cman}
-@tab Quorum disk
 
 @item @comp{qdiskd}
 @tab サービスデーモン
@@ -159,10 +194,16 @@ Cluster2について理解していこうとすると、このコンポーネン
 @tab @pkg{rgmanager}
 @tab XXX
 
+@c dep libccs, libcman, libdlm
 @item @comp{clurgmgrd}
 @tab サービスデーモン
 @tab @pkg{rgmanager}
 @tab フェイルオーバーするサービスを監視、管理する
+
+@item @comp{libclulib.a}
+@tab XXX
+@tab @pkg{rgmanager}
+@tab XXX
 
 @item @comp{clurmtabd}
 @tab XXX        
@@ -172,25 +213,51 @@ Cluster2について理解していこうとすると、このコンポーネン
 @end multitable
 
 
+Cluster2では様々なサービスデーモンがUNIXソケット経由でサービスを提供し
+ています。サービスデーモンに関連するコンポーネントの名称には簡単なルー
+ルがります。@comp{foo}というサービスデーモンに対しては、@comp{libfoo}
+と @comp{foo_tool}が用意されます。
+
+サービスを利用するコンポーネントはソケットを直接読み書きするのではなく、
+サービスデーモン毎に用意された専用のライブラリを用います。このように
+UNIXソケット通信を隠蔽するライブラリは特にソケットクライアントライブラ
+リと呼ぶこととします。@comp{libfoo}は@comp{foo}サービスデーモンに対する
+ソケットクライアントライブラリです。
+
+また多くのサービスデーモンには専用のツール(ツールコマンド)が存在します。
+そのツールを用いるとコマンドラインからサービスデーモンの状態をダンプし
+たり制御することができます。@comp{foo_tool}は@comp{foo}サービスデーモン
+に対するツールコマンドです。ツールコマンドの実装には大抵、同じサービス
+デーモンに対するソケットクライアントライブラリが使われています。
+
+
+@node コンポーネント間の関係
+@chapter コンポーネント間の関係
+
+Cluster2の各コンポーネントのソースコードはそれほど大きくありません。し
+かし、Cluster2全体におけるそのコンポーネントの位置付けがわからない限り、
+ソースコードを理解するには至らないでしょう。そこで各コンポーネントの役
+割に先立って、コンポーネント間の接続関係について解説します。
+
+接続関係は大きく2つに分けて考えることができます。クラスターノードを越え
+た接続関係と、クラスターノード内の接続関係です。
+
+@menu
+* ネットワーク通信プロトコル::
+* コンポーネント間の通信経路::
+@end menu
+
 @node ネットワーク通信プロトコル
-@chapter ネットワーク通信プロトコル
+@section ネットワーク通信プロトコル
 
-Cluster2のネットワーク通信プロトコルスタックを以下に示します。
+いくつかのコンポーネントが、ノード間で通信をします。そのなかでも
+@comp{aixexec}が、最も複雑な通信をします。@comp{aixexec}の通信プロトコ
+ルはUDP上に構成されています。多くのコンポーネントが、ソケットクライアン
+トライブラリを用いたクラスターノード内の通信を介して最終的に、
+@comp{aixexec}にノード間通信を依頼します。
 
-プロトコルの名称は、筆者が独自に与えたものです。筆者はCluster2のプロト
-コル群に対するwiresharkのprotocol dissector群を開発中です。プロトコルの
-名称は、そのprotocol dissector群で使っているものです。
-
-@proto{corosync_}というプレフィックスは、Cluster3からとったものです。
-Cluster2の保守と並行してCluster2の後継にあたるCluster3が開発中です。
-Cluster2向けに開発していたprotocol dissector群ですが、Cluster3の
-通信も扱えるようにしたいと考え、いくつかの固有名詞をCluster3から借用して
-います。
-
-そのプロトコルの通信を実装しているコンポーネントを<...>の部分に記しました。
-
-@proto{totem}という名称は、aisexecのノード間通信で採用しているアリゴリズム
-に由来します。                  @c cite
+aisexecのネットワーク通信プロトコルスタックを以下に示します。そのプロト
+コルの通信を実装しているコンポーネントを<...>の部分に記しました。
 
 @verbatim
 (ip)                     <linux>
@@ -203,15 +270,69 @@ Cluster2向けに開発していたprotocol dissector群ですが、Cluster3の
           openais_a      <aisexec>
             openais_cpg  <aisexec>
               groupd     <groupd>
+              LOCKSPACE_deaclk <dlm_controld???>
+              gfs_controld <gfs_controld>
+              LEVEL_NAME <groupd>
+            openais_ckpt <openais?>
             openais_evt  <aisexec>
             openais_clm  <aisexec>
           flowcontrol    <aisexec?>
           sync           <aisexec?>
 @end verbatim
 
+
+プロトコルの名称は、筆者が独自に与えたものです。筆者はCluster2のプロト
+コル群に対するwiresharkのprotocol dissector群を開発中です。プロトコルの
+名称は、そのprotocol dissector群で使っているものです。
+@proto{corosync_}というプレフィックスは、Cluster3からとったものです。
+Cluster2の保守と並行してCluster2の後継にあたるCluster3が開発中です。
+Cluster2向けに開発していたprotocol dissector群ですが、Cluster3の通信も
+扱えるようにしたいと考え、いくつかの固有名詞をCluster3から借用していま
+す。
+
+@proto{totem}という名称は、aisexecのノード間通信で採用しているアリゴリズム
+に由来します。                  @c cite
+
+
 @node コンポーネント間の通信経路
-@chapter コンポーネント間の通信経路
+@section コンポーネント間の通信経路
 @c 誰が起動するのか、通信経路の確立方法
+
+コンポーネント間の通信の多くはソケットクライアントライブラリに隠蔽され
+ています。あるコンポーネントがどのソケットクライアントライブラリを使っ
+ているかがわかると、コンポーネント間の関係がわかってきます。あるコンポー
+ネントがどのソケットクライアントライブラリを使っているか調べるには、そ
+のコンポーネントの@file{Makefile}を見ます。コンパイルに渡すフラッグ中に
+@code{-lfoo}とあれば@comp{libfoo}というソケットクライアントライブラリを
+使っていることがわかります。
+
+ソケットクライアントライブラリはUNIX匿名ソケットを使います。
+UNIXソケットは@code{bind}するとき、そのアドレスにファイルパスを使います。
+従ってソケットファイルはシステム上の全てのプロセスから見えます。ファイ
+ルパスを@code{\0}で始めると、他のプロセスからは見えないUNIXソケット
+(UNIX匿名ソケット)を作ることができます。
+
+ソケットクライアントライブラリのAPIには共通の特徴があります。初期化時あるいは
+接続時にコールバック関数のテーブルを登録するのです。この関数テーブルのプロト
+タイプ宣言に着目すると、ソケットクライアントライブラリの背後にあるサービス
+デーモンの役割が見えてきます。
+
+
+@c libcman
+/* Callback routine for a membership event */
+typedef void (*cman_callback_t)(cman_handle_t handle, void *privdata, int reason, int arg);
+
+/* Callback routine for data received */
+typedef void (*cman_datacallback_t)(cman_handle_t handle, void *privdata,
+				    char *buf, int len, uint8_t port, int nodeid);
+
+
+typedef void (*cman_confchgcallback_t)(cman_handle_t handle, void *privdata,
+				       unsigned int *member_list, int member_list_entries,
+				       unsigned int *left_list, int left_list_entries,
+				       unsigned int *joined_list, int joined_list_entries);
+
+
 
 @node コンポーネントのステート
 @chapter  コンポーネントのステート
@@ -219,8 +340,8 @@ Cluster2向けに開発していたprotocol dissector群ですが、Cluster3の
 @node コンフィギュレーションの指定方法
 @chapter コンフィギュレーションの指定方法
 
-@node ログの活用
-@chapter ログの活用
+@node ツールコマンドとログの活用
+@chapter ツールコマンドとログの活用
 
 @contents
 @bye

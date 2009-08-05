@@ -1,0 +1,206 @@
+// fdp
+digraph innode {
+	graph[fontsize=5,label="Innode connections",rankdir=RL];	
+	node[fontsize=5];
+
+        subgraph clusterkernel  {
+		label = "kernel"
+		"sysfs"[shape=circle];
+		"configfs"[shape=circle];
+		"netlink"[shape=circle];
+		subgraph clusterdlm {
+			label="dlm";
+			"/dev/misc/dlm-contorol"[shape=circle];
+			"/dev/misc/dlm_default"[shape=circle];
+		}
+		subgraph clustergfs {
+			label="gfs";
+			"/dev/misc/lock_dlm_plock"[shape=circle];
+		}
+        }
+	
+	subgraph clusteraisexec {
+		label = "aisexec";
+		"\\0libais.socket"[shape=circle];
+		"cpg"[shape=diamond];
+		"ckpt"[shape=diamond];
+		subgraph clusterserviceCman {
+			label = "service_cman.lcrso";
+			"/var/lib/cman_client"[shape=circle];
+			"/var/lib/cman_admin"[shape=circle];
+			"cman_libccs.*"[shape=diamond,label="libccs.*"];
+	        }
+        }
+	subgraph clustergroupd {
+		label = "groupd";
+		"groupd_libcpg.so"[shape=diamond,label="libcpg.so"];
+		"groupd_libcman.so"[shape=diamond,label="libcman.so"];
+		"\\0groupd_socket"[shape=circle];
+	}
+	subgraph clusterccsd {
+ 		label = "ccsd";
+		"127.0.0.1:50006"[shape=circle];
+		"/var/run/cluster/ccsd.sock"[shape=circle];
+		"ccsd_libcman.so"[shape=diamond,label="libcman.so"];
+        }
+	subgraph clusterqdiskd {
+		label = "qdiskd";
+		"qdiskd_libcman.so"[shape=diamond,label="libcman.so"];
+		"qdiskd_libccs.*" [shape=diamond,label="libccs.*"];
+	}
+	subgraph clusterfenced {
+		label = "fenced";
+                "fenced_libgroup.a"[shape=diamond, label="libgroup.a"];
+		"fenced_libcman.so"[shape=diamond, label="libcman.so"];
+		"fenced_libccs.*"[shape=diamond, label="libccs.*"];
+		"\\0fenced_socket" [shape=circle];
+	}
+	subgraph clusterdlmcontrold {
+		label = "dlm_controld";
+		"dlm_controld_libcman.so" [shape=diamond,label="libcman.so"];
+		"dlm_controld_libccs.*"   [shape=diamond,label="libccs.*"];
+		"dlm_controld_libgroup.a" [shape=diamond,label="libgroup.a"];
+		"dlm_controld_libdlm.so"  [shape=diamond,label="libdlm.so"];
+		"dlm_controld_libc.so"    [shape=diamond,label="libc.so"];
+		// cpg is for dealock handling. Not enabled yet.
+	}
+	subgraph clustergfscontrold {
+		label = "gfs_controld";
+		"gfs_controld_libcman.so" [shape=diamond,label="libcman.so"];
+		"gfs_controld_libccs.*"   [shape=diamond,label="libccs.*"];
+		"gfs_controld_libgroup.a" [shape=diamond,label="libgroup.a"];
+		"gfs_controld_libSaCkpt.so" [shape=diamond,label="libSaCkpt.so"];
+		"gfs_controld_libcpg.so" [shape=diamond,label="libcpg.so"];
+		"\\0gfs_controld_sock"   [shape=circle];
+		"gfs_controld_libc.so"   [shape=diamond,label="libc.so"];
+		
+		// ??? -> kernel
+		
+        }
+        subgraph clustergrouptool {
+		label = "group_tool";
+		"group_tool_libgroup.a"[shape=diamond,label="libgroup.a"];
+		"group_tool_libc.so"[shape=diamond,label="libc.so"];
+	}
+
+        subgraph clusterfencetool {
+		label = "fence_tool";
+		"fence_tool_libgroup.a"[shape=diamond,label="libgroup.a"]; 
+		"fence_tool_libcman.so"[shape=diamond,label="libcman.so"];
+		"fence_tool_libccs.*"[shape=diamond,label="libccs.*"];
+		"fence_tool_libc.so" [shape=diamond,label="libc.so"];
+	}
+
+        subgraph clusterccstool {
+		label = "ccs_tool";
+		"ccs_tool_libccs.*"[shape=diamond,label="libccs.*"]; 
+	}
+
+        subgraph clusterdlmtool {
+		label = "dlm_tool";
+		"dlm_tool_libdlm.so"[shape=diamond,label="libdlm.so"]; 
+	}
+
+        subgraph clusterfencenode {
+		label = "fence_node";
+		"fence_node_libcman.so"[shape=diamond,label="libcman.so"]; //admin
+		"fence_node_libccs.*"[shape=diamond,label="libccs.*"];
+	}
+
+        subgraph clusterclurgmgrd {
+		label="clurgmgrd";
+		"clurgmgrd_libcman.so"[shape=diamond,label="libcman.so"];
+		"clurgmgrd_libccs.*"[shape=diamond,label="libccs.*"];
+		"clurgmgrd_libdlm.so"[shape=diamond,label="libdlm.so"];
+		"clurgmgrd_libclulib.so"[shape=diamond,label="libclulib.so"];
+		// UNIX SOCKET???
+	}
+	//
+        // aisexec
+	//
+	"\\0libais.socket"->"cpg";
+	"\\0libais.socket"->"ckpt";
+	"cman_libccs.*"->"/var/run/cluster/ccsd.sock";
+	"ccsd_libcman.so"->"/var/lib/cman_client";
+	"ccsd_libcman.so"->"/var/lib/cman_admin";
+	//
+	// groupd
+	//
+	"groupd_libcpg.so"->"\\0libais.socket"
+	"groupd_libcman.so"->"/var/lib/cman_client";
+	"groupd_libcman.so"->"/var/lib/cman_admin";
+	//
+        // fenced
+	//
+        "fenced_libgroup.a"->"\\0groupd_socket";
+	"fenced_libcman.so"->"/var/lib/cman_client";
+	"fenced_libcman.so"->"/var/lib/cman_admin";	
+	"fenced_libccs.*"->"/var/run/cluster/ccsd.sock";
+	//
+        // qdiskd
+	//
+	"qdiskd_libcman.so"->"/var/lib/cman_client";
+	"qdiskd_libcman.so"->"/var/lib/cman_admin";
+	"qdiskd_libccs.*"->"/var/run/cluster/ccsd.sock";
+	//
+	// dlm_controld
+	//
+	"dlm_controld_libcman.so"->"/var/lib/cman_client";
+	// client only
+	"dlm_controld_libccs.*"->"/var/run/cluster/ccsd.sock";
+	"dlm_controld_libgroup.a"->"\\0groupd_socket";
+	"dlm_controld_libc.so"->"sysfs";
+	"dlm_controld_libc.so"->"configfs";
+	"dlm_controld_libc.so"->"netlink";
+	"dlm_controld_libdlm.so"->"/dev/misc/dlm-contorol";
+	"dlm_controld_libdlm.so"->"/dev/misc/dlm_default";
+	//
+	// gfs_controld
+	//
+	"gfs_controld_libcman.so"->"/var/lib/cman_client";
+	// client only
+	"gfs_controld_libccs.*"->"/var/run/cluster/ccsd.sock";
+	"gfs_controld_libgroup.a"->"\\0groupd_socket";
+	"gfs_controld_libcpg.so"->"\\0libais.socket";
+	"gfs_controld_libSaCkpt.so"->"\\0libais.socket";
+	"gfs_controld_libc.so"->"netlink";
+	"gfs_controld_libc.so"->"/dev/misc/lock_dlm_plock";
+	
+	//
+	// group_tool
+	//
+	"group_tool_libgroup.a"->"\\0groupd_socket";
+	"group_tool_libc.so"->"\\0fenced_socket";
+	"group_tool_libc.so"->"\\0gfs_controld_sock";
+	
+	//
+        // fence_tool
+	//
+	"fence_tool_libcman.so"->"/var/lib/cman_client";
+	"fence_tool_libcman.so"->"/var/lib/cman_admin";
+	"fence_tool_libccs.*"->"/var/run/cluster/ccsd.sock";
+	"fence_tool_libgroup.a"->"\\0groupd_socket";
+	"fence_tool_libc.so"->"\\0fenced_socket";
+		
+	//
+	// ccs_tool
+	//
+	"ccs_tool_libccs.*"->"/var/run/cluster/ccsd.sock";
+	//
+	// dlm_tool
+	//
+	"dlm_tool_libdlm.so"->"/dev/misc/dlm-contorol";
+	"dlm_tool_libdlm.so"->"/dev/misc/dlm_default";
+	//
+	// fence_node
+	//
+	"fence_node_libcman.so"->"/var/lib/cman_admin";
+	"fence_node_libccs.*"->"/var/run/cluster/ccsd.sock";
+	//
+	// clurgmgrd
+	//
+	"clurgmgrd_libcman.so"->"/var/lib/cman_client";
+	"clurgmgrd_libccs.*"->"/var/run/cluster/ccsd.sock";
+	"clurgmgrd_libdlm.so"->"/dev/misc/dlm-contorol";
+	"clurgmgrd_libdlm.so"->"/dev/misc/dlm_default"; //???
+}

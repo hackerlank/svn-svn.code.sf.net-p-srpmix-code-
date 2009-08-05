@@ -1,0 +1,12 @@
+digraph sample {
+  subgraph cluster0 {
+    label = "area 0";
+    a->b;
+    a->c;
+  }
+  subgraph cluster1 {
+    label = "area 1";
+    d->e;
+    d->f;
+  }
+}
