@@ -51,9 +51,9 @@ Cluster 2のトラブルシューティングを実施するための基礎と�
 * コンポーネントの種別::
 * コンポーネント一覧::
 * コンポーネント間の関係::
-* コンポーネントのステート::
+* コンポーネントのステートとツールコマンドによる観察::
 * 初期化スクリプトとコンフィギュレーションの指定方法::
-* ツールコマンドとログの活用::
+* ログの活用::
 @end menu
 
 @node コンポーネントの種別
@@ -491,9 +491,9 @@ UNIXソケットは@code{bind}するとき、そのアドレスにファイル�
 @node libcman
 @subsection libcman
 
-@deftypefun void (*cman_callback_t) (cman_handle_t @var{handle}, void* @var{privdata}, int @var{reason}, int @var{arg})
+@deftypefn {Callback} void (*cman_callback_t) (cman_handle_t @var{handle}, void* @var{privdata}, int @var{reason}, int @var{arg})
 XXX
-@end deftypefun
+@end deftypefn
 @c /* Callback routine for a membership event */
 @c typedef void (*cman_callback_t)(cman_handle_t handle, void *privdata, int reason, int arg);
 
@@ -527,8 +527,8 @@ XXX
 
 
 
-@node コンポーネントのステート
-@chapter  コンポーネントのステート
+@node コンポーネントのステートとツールコマンドによる観察
+@chapter  コンポーネントのステートとツールコマンドによる観察
 
 Cluster2は多数のコンポーネントからなるので、まず全体を
 おおまかに把握することが重要であると考え、コンポーネント間の
@@ -538,8 +538,8 @@ Cluster2は多数のコンポーネントからなるので、まず全体を
 @node 初期化スクリプトとコンフィギュレーションの指定方法
 @chapter 初期化スクリプトとコンフィギュレーションの指定方法
 
-@node ツールコマンドとログの活用
-@chapter ツールコマンドとログの活用
+@node ログの活用
+@chapter ログの活用
 
 @contents
 @bye
