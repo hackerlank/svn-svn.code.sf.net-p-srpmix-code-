@@ -1,7 +1,7 @@
 // fdp
 digraph innode {
-	graph[fontsize=5,label="Innode connections",rankdir=RL];	
-	node[fontsize=5];
+	graph[fontsize=9,label="Innode connections",rankdir=RL];	
+	node[fontsize=9];
 
         subgraph clusterkernel  {
 		label = "kernel"

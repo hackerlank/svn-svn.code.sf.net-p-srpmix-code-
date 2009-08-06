@@ -47,25 +47,25 @@ Copyright @copyright{} 2009 Red hat, K.K.
 Cluster 2のトラブルシューティングを実施するための基礎となる知識の提供を
 目的とています。インストールの手順などについては解説しません。
 
-
 @menu
-* コンポーネントとパッケージの関係::
+* コンポーネントの種別::
+* コンポーネント一覧::
 * コンポーネント間の関係::
 * コンポーネントのステート::
-* コンフィギュレーションの指定方法::
+* 初期化スクリプトとコンフィギュレーションの指定方法::
 * ツールコマンドとログの活用::
 @end menu
 
-@node コンポーネントとパッケージの関係
-@chapter  コンポーネントとパッケージの関係
+@node コンポーネントの種別
+@chapter  コンポーネントの種別
 Cluster2は複数のパッケージに分割され、さらにそのパッケージのなかに複数
-のコンポーネントが含まれています。コンポーネントにはツールやサービスデー
-モンといった実行ファイルやライブラリが含まれます。
+のコンポーネントが含まれています。ここでコンポーネントには実行ファイルや
+ライブラリを指します。
 
 Cluster2が深遠だと感じる理由の一つは、協調して動作する目新しいコンポー
 ネントが多数存在していることにあります。クラスターの様々な機能が細かく
 コンポーネントに分解されていることに加え、Cluster1のソフトウェア資産を
-活かすために、コンポーネントが増えています。
+活用ているため、コンポーネントが増えています。
 
 Cluster2の前身Cluster1では、クラスターソフトウェアの中枢部分がLinuxカー
 ネルのモジュールとして提供されていました。Cluster2の開発の目的の一つは、
@@ -76,119 +76,195 @@ Cluster2 には、Cluster1の周辺ソフトウェアを動作させるための
 も言うべきコンポーネントが含まれています。
 
 Cluster2について理解して行こうとすると、このコンポーネントの数と格闘す
-ることになります。後回しにせず先にコンポーネントの名前を全て覚えてしま
-いましょう。各コンポーネントの役割については、この文章のなかで徐々に説
-明していきます。
+ることになります。数が多いので個々のコンポーネントを列挙した説明を読んでも
+理解は容易ではありません。そこでまずCluster2に含まれるコンポーネントの
+種別を定義します。各コンポーネントを説明するときはそれがどの種別に含まれるか
+を延べるので理解の助けとして下さい。
 
-また、各コンポーネントがどのパッケージに所属しているかを把握しておきま
+@table @samp
+@item  サービスカーネルモジュール
+@itemx サービスデーモン
+@itemx サービスモジュール
+何らかのサービスをUNIXソケットファイルあるいはデバイスファイル経由
+で提供するコンポーネントの種別です。サービスをカーネルモジュールとして
+実装するか、独立プロセスとして実装するか、他のプロセスに静的あるいは動的に
+リンクするライブラリとして実装するかという違いがありますが、ファイル経由
+でサービスを提供するという意味で良く似ています。そこでこの種別をまとめて
+@dfn{サービスデーモン}と総称します。また
+
+@item ソケットライブラリ
+サービスデーモンのサービスを利用するためのライブラリの種別です。ソケッ
+トライブラリは、サービスの利用に必要となる、UNIXソケットファイル、ある
+いはデバイスファイルに対するI/Oを隠蔽して、かわりにAPIを提供します。サー
+ビスを利用するコンポーネントはこのAPIを利用します。ソケットライブラリが
+デバイスファイルへのI/Oを隠蔽している場合であっても、まとめて@dfn{ソケッ
+トライブラリ}と総称します。またソケットライブラリが隠蔽するI/Oが使う
+UNIXソケットファイル、あるいはデバイスファイルについてもまとめて
+@dfn{ソケットファイル}と総称することにします。
+
+
+多くの場合、@comp{foo}という名前のサービスデーモンに対する
+ソケットライブラリの名称は@comp{libfoo}となります。
+
+@item コマンドツール
+サービスデーモン毎に状態をダンプしたり、制御するための専用の専用の実行
+ファイルがあります。この実行ファイルの種類をコマンドツールと呼ぶことに
+します。多くの場合、サービス@comp{foo}に対するコマンドツールの名称は
+@comp{foo_tool}となり、ソケットライブラリ@comp{libfoo}を用いて実装
+されています。
+
+@item 起動スクリプト
+@file{/etc/init.d}以下に配置される、サービスデーモンを起動するための
+スクリプトです。起動スクリプト自体は短いものですが、起動スクリプトを経由
+すれば「デバッグモードを有効にする」といったサービスデーモンの引数を与える
+ことができるので、その存在を把握しておくことはトラブルシューティングに役立ち
+ます。
+
+@end table
+
+
+
+@node コンポーネント一覧
+@chapter  コンポーネント一覧
+
+コンポーネントの種別を提起したところで、コンポーネントの一覧を表に示し
+ます。各コンポーネントの役割については、この文章のなかで徐々に説明して
+いきます。
+
+表では、各コンポーネントがどのパッケージに所属しているかも示しま
 す。ログやpsコマンドの出力といったプログラムの実行によって得られる情報
 においては、主にコンポーネントの名前が使われます。一方ソースコードはパッ
 ケージを単位として編成されています。従って実行によって得られた情報を元
 にソースコードを調査する場合、前もって各コンポーネントがどのパッケージ
-に所属しているか知っておくことが望ましいです。
+に所属しているか知っておくことが望ましいためです。
 
-次に示す表は、各コンポーネントと、種類、所属するパッケージと、役割の概要
-をまとめたものです。
 @multitable @columnfractions .3 .3 .2 .5
 @cindex コンポーネント
 @c @headitem コンポーネント @tab 種類 @tab パッケージ @tab 役割
-@headitem コンポーネント @tab 種類 @tab パッケージ @tab 役割
+@headitem コンポーネント @tab 種別 @tab パッケージ @tab 役割
 
-
-
+@c 
+@c aisexec
+@c 
 @item @comp{aiexec}
-@tab サービスデーモン
+@tab その他
 @tab @pkg{openais}
 @tab クラスターコア
+
+@c
+@c ccs
+@c 
+@item @comp{ccsd}
+@tab サービスデーモン
+@tab @pkg{cman}
+@tab ノード間でクラスターの設定を維持する。
+
+@item @comp{libccs}
+@tab サービスデーモン
+@tab @pkg{cman}
+@tab @comp{ccsd}を利用するためのライブラリ
+
+@item @comp{ccs_tool}
+@tab サービスデーモン
+@tab @pkg{cman}
+@tab @comp{ccsd}を制御する。
 
 @c
 @c cman
 @c
 @item @comp{service_cman.lcrso}
-@tab DLL
+@tab サービスモジュール
 @tab @pkg{cman}
-@tab クラスターコアにQuorateを追加する。 @c ???
+@tab @comp{aisexec}上で動作しクラスターコアにQuorateを追加する。 @c ???
 
-@item @comp{libcman.a|so}
-@tab ソケットクライアントライブラリ
+@item @comp{libcman.so}
+@tab ソケットライブラリ
 @tab @pkg{cman}
-@tab aisexecプロセスの外から service_cman.lcrsoと通信する。
+@tab @comp{service_cman.lcrso}を利用するためのライブラリ
       
 @item @comp{cman_tool}
 @tab ツールコマンド
 @tab @pkg{cman}
-@tab XXX
+@tab @comp{service_cman.lcrso}を制御する。
 
 @item @comp{cman}
 @tab 起動スクリプト
 @tab @pkg{cman}
-@tab Cluster2特有の設定の元でaiexecを起動する。
+@tab Cluster2特有の設定の元で@comp{aiexec}を起動する。
 
 @c 
 @c cpg & groupd
 @c 
-@item @comp{libcpg.so}
-@tab ソケットクライアントライブラリ
+@item @comp{cpg}
+@item サービスモジュール
 @tab @pkg{openais}
-@tab aisexecに組込まれているcpgと通信する。
+@item クローズドプロセスグループを提供する。
+
+@item @comp{libcpg.so}
+@tab ソケットライブラリ
+@tab @pkg{openais}
+@tab @comp{cpg}を利用するためのライブラリ
 
 @item @comp{groupd}
 @tab サービスデーモン
 @tab @pkg{cman}
-@tab XXX
+@tab @comp{cpg}を利用して、Cluster1由来のコンポーネントに互換レイヤを提供する。
 
 @item @comp{libgroup.so}
-@tab ソケットクライアントライブラリ
+@tab ソケットライブラリ
 @tab @pkg{cman}
-@tab groupdと通信する。
+@tab @comp{groupd}を利用するためのライブラリ
 
 @item @comp{group_tool}
 @tab ツールコマンド
 @tab @pkg{cman}
-@tab XXX
+@tab @comp{groupd}を制御する。
 
-@c ccsd
-@item @comp{ccsd}
-@tab サービスデーモン
-@tab @pkg{cman}
-@tab XXX
+@c
+@c ckpt
+@c
+@item @comp{ckpt}
+@tab  サービスモジュール
+@tab  @pkg{openais}
+@tab  XXX
 
-@item @comp{libccs.a}
-@tab ソケットクライアントライブラリ
-@tab @pkg{cman}
-@tab XXX
+@item @comp{libSaCkpt}
+@tab  ソケットライブラリ
+@tab  @pkg{openais}
+@tab  @comp{ckpt}を利用するためのライブラリ
 
-@item @comp{ccs_tool}
-@tab ツールコマンド
-@tab @pkg{cman}
-@tab XXX
-
+@c
 @c fence
+@c
 @item @comp{fenced}
 @tab サービスデーモン
 @tab @pkg{cman}
 @tab XXX
 
 @item fenceエージェント
-@tab ユーティリティコマンド
+@tab その他
 @tab @pkg{cman}
 @tab フェンシングを実行する。ハードウェアに応じて様々な実装がある。
 
 @item @comp{fence_tool}
 @tab ツールコマンド
 @tab @pkg{cman}
-@tab XXX
+@tab @comp{fenced}の状態を表示する。
 
 @item @comp{fence_node}
-@tab コマンド
+@tab その他
 @tab @pkg{cman}
-@tab XXX
+@tab 手動でfencingを実行するのに使う。
+
 
 @item @comp{qdiskd}
-@tab サービスデーモン
+@tab その他
 @tab @pkg{cman}
-@tab XXX
+@tab Quorumディスクを監視する。
 
+@c
+@c rgmanager
+@c
 @item @comp{rgmanager}
 @tab 起動スクリプト
 @tab @pkg{rgmanager}
@@ -210,51 +286,83 @@ Cluster2について理解して行こうとすると、このコンポーネン
 @tab @pkg{rgmanager}
 @tab XXX
 
+
+@c
+@c TODO: kernel
+@c
+@item @comp{dlm.ko}
+@tab サービスカーネルモジュール
+@tab @pkg{kernel}
+@tab XXX
+
+@c TODO: 起動スクリプト
+
+@item @comp{dlm_controld}
+@tab  サービスデーモン
+@tab @pkg{cman}
+@tab XXX
+
+@item @comp{gfs_controld}
+@tab  サービスデーモン
+@tab @pkg{cman}
+@tab XXX
+
+@item @comp{libdlm}
+@tab  ソケットライブラリ
+@tab @pkg{cman}
+@tab @comp{dlm.ko}を利用するためのライブラリ
+
 @end multitable
-
-
-Cluster2では様々なサービスデーモンがUNIXソケット経由でサービスを提供し
-ています。サービスデーモンに関連するコンポーネントの名称には簡単なルー
-ルがります。@comp{foo}というサービスデーモンに対しては、@comp{libfoo}
-と @comp{foo_tool}が用意されます。
-
-サービスを利用するコンポーネントはソケットを直接読み書きするのではなく、
-サービスデーモン毎に用意された専用のライブラリを用います。このように
-UNIXソケット通信を隠蔽するライブラリは特にソケットクライアントライブラ
-リと呼ぶこととします。@comp{libfoo}は@comp{foo}サービスデーモンに対する
-ソケットクライアントライブラリです。
-
-また多くのサービスデーモンには専用のツール(ツールコマンド)が存在します。
-そのツールを用いるとコマンドラインからサービスデーモンの状態をダンプし
-たり制御することができます。@comp{foo_tool}は@comp{foo}サービスデーモン
-に対するツールコマンドです。ツールコマンドの実装には大抵、同じサービス
-デーモンに対するソケットクライアントライブラリが使われています。
-
 
 @node コンポーネント間の関係
 @chapter コンポーネント間の関係
 
-Cluster2の各コンポーネントのソースコードはそれほど大きくありません。し
-かし、Cluster2全体におけるそのコンポーネントの位置付けがわからない限り、
-ソースコードを理解するには至らないでしょう。そこで各コンポーネントの役
-割に先立って、コンポーネント間の接続関係について解説します。
-
 接続関係は大きく2つに分けて考えることができます。クラスターノードを越え
 た接続関係と、クラスターノード内の接続関係です。
 
+コンポーネントの機能としてノード間の通信が必要であっても、それを意識する必要
+はありません。@comp{aisexec}とソケットライブラリによって隠蔽されたノード間
+通信によって、他のノード上で動作する同種のコンポーネントと通信できます。
+
+例外は@comp{ccsd}と@comp{dlm.ko}です。ccsdはクラスターの設定をクラスター
+ノード内で共通に維持するためのサービスデーモンです。設定の対象となる@comp{aisexec}
+にあまり依存するわけにはいきません。@comp{dlm.ko}はカーネルモジュールであり、
+プロセスとして動作する@comp{aisexec}とは独立して実装されています。
+
 @menu
-* ネットワーク通信プロトコル::
-* コンポーネント間の通信経路::
+* クラスターノードを越えた接続関係::
+* クラスターノード内の接続関係::
 @end menu
 
-@node ネットワーク通信プロトコル
-@section ネットワーク通信プロトコル
+@node クラスターノードを越えた接続関係
+@section クラスターノードを越えた接続関係
 
-いくつかのコンポーネントが、ノード間で通信をします。そのなかでも
-@comp{aixexec}が、最も複雑な通信をします。@comp{aixexec}の通信プロトコ
-ルはUDP上に構成されています。多くのコンポーネントが、ソケットクライアン
-トライブラリを用いたクラスターノード内の通信を介して最終的に、
-@comp{aixexec}にノード間通信を依頼します。
+筆者はCluster2のプロトコル群に対するwiresharkのprotocol dissector群を開
+発中です。プロトコルの名称は、そのprotocol dissector群で使っている独自
+のものです。このセクションで説明するノード間通信について、その通信を分
+解することができます
+(@url{http://people.redhat.com/yamato/rhel5cluster})。
+
+@menu
+* @comp{ccsd}間の通信::
+* @comp{aisexec}間の通信::
+* @comp{dlm.ko}間の通信::
+@end menu
+
+@node @comp{ccsd}間の通信
+@subsection @comp{ccsd}間の通信
+TODO
+
+
+@node @comp{aisexec}間の通信
+@subsection @comp{aisexec}間の通信
+
+@comp{aixexec}は、Cluster2のコンポーネント中で最も複雑な通信をします。
+他の多くのコンポーネントが、この@comp{aixexec}の通信に頼っています。
+
+@comp{aixexec}の通信プロトコルはUDP上に構成されています。多くのコンポー
+ネントが、ソケットライブラリを用いたクラスターノード内の通
+信を介して最終的に、@comp{aixexec}にノード間通信を依頼します。
 
 aisexecのネットワーク通信プロトコルスタックを以下に示します。そのプロト
 コルの通信を実装しているコンポーネントを<...>の部分に記しました。
@@ -268,12 +376,12 @@ aisexecのネットワーク通信プロトコルスタックを以下に示し�
           openais_cman   <service_cman.lcrso>
             rgmanager    <clurgmgrd>
           openais_a      <aisexec>
-            openais_cpg  <aisexec>
+            openais_cpg  <cpg>
               groupd     <groupd>
               LOCKSPACE_deaclk <dlm_controld???>
               gfs_controld <gfs_controld>
               LEVEL_NAME <groupd>
-            openais_ckpt <openais?>
+            openais_ckpt <ckpg>
             openais_evt  <aisexec>
             openais_clm  <aisexec>
           flowcontrol    <aisexec?>
@@ -281,64 +389,154 @@ aisexecのネットワーク通信プロトコルスタックを以下に示し�
 @end verbatim
 
 
-プロトコルの名称は、筆者が独自に与えたものです。筆者はCluster2のプロト
-コル群に対するwiresharkのprotocol dissector群を開発中です。プロトコルの
-名称は、そのprotocol dissector群で使っているものです。
-@proto{corosync_}というプレフィックスは、Cluster3からとったものです。
 Cluster2の保守と並行してCluster2の後継にあたるCluster3が開発中です。
-Cluster2向けに開発していたprotocol dissector群ですが、Cluster3の通信も
-扱えるようにしたいと考え、いくつかの固有名詞をCluster3から借用していま
-す。
+@proto{corosync_}というプレフィックスは、Cluster3からとったものです。
 
 @proto{totem}という名称は、aisexecのノード間通信で採用しているアリゴリズム
 に由来します。                  @c cite
 
 
-@node コンポーネント間の通信経路
-@section コンポーネント間の通信経路
+
+@node @comp{dlm.ko}間の通信
+@subsection @comp{dlm.ko}間の通信
+TODO
+
+
+
+@node クラスターノード内の接続関係
+@section クラスターノード内の接続関係
 @c 誰が起動するのか、通信経路の確立方法
 
-コンポーネント間の通信の多くはソケットクライアントライブラリに隠蔽され
-ています。あるコンポーネントがどのソケットクライアントライブラリを使っ
-ているかがわかると、コンポーネント間の関係がわかってきます。あるコンポー
-ネントがどのソケットクライアントライブラリを使っているか調べるには、そ
-のコンポーネントの@file{Makefile}を見ます。コンパイルに渡すフラッグ中に
-@code{-lfoo}とあれば@comp{libfoo}というソケットクライアントライブラリを
-使っていることがわかります。
+コンポーネント間の通信の多くはソケットライブラリに隠蔽されています。あ
+るコンポーネントがどのソケットライブラリを使っているかがわかると、コン
+ポーネント間の関係がわかってきます。あるコンポーネントがどのソケットラ
+イブラリを使っているか調べるには、そのコンポーネントの@file{Makefile}を
+見ます。コンパイルに渡すフラッグ中に@code{-lfoo}あるいは@code{libfoo.a}
+とあれば@comp{libfoo}というソケットライブラリを使っていることがわかります。
 
-ソケットクライアントライブラリはUNIX匿名ソケットを使います。
+ソケットライブラリの種類によっては、サービスデーモンとの通信に使うUNIX
+ソケットがファイルシステム上に表れないUNIX匿名ソケットを使っています。
 UNIXソケットは@code{bind}するとき、そのアドレスにファイルパスを使います。
-従ってソケットファイルはシステム上の全てのプロセスから見えます。ファイ
-ルパスを@code{\0}で始めると、他のプロセスからは見えないUNIXソケット
-(UNIX匿名ソケット)を作ることができます。
+従って通常、UNIXソケットに対するソケットファイルはシステム上の全てのプ
+ロセスから見えます。ところがファイルパスを@code{\0}で始めると、他のプロ
+セスからは見えないUNIX匿名ソケットを作ることができます。
 
-ソケットクライアントライブラリのAPIには共通の特徴があります。初期化時あるいは
-接続時にコールバック関数のテーブルを登録するのです。この関数テーブルのプロト
-タイプ宣言に着目すると、ソケットクライアントライブラリの背後にあるサービス
-デーモンの役割が見えてきます。
+ソケットライブラリと、それが使うソケットファイル、そのソケットライブラリを使うコンポーネント
+(@dfn{クライアントコンポーネント})を以下にまとめます。
+
+@multitable @columnfractions .3 .3 @c .4
+@headitem ソケットライブラリ @tab ソケットファイル @c @tab クライアントコンポーネント
+
+@item @comp{libccs}
+@tab  @file{/var/run/cluster/ccsd.scok}
+
+@item @comp{libcman}
+@tab  @file{/var/lib/cman_@{client,admin@}}
+
+@item @comp{libcpg}
+@tab  @file{\0libais.socket}
+
+@item @comp{libsaCkpt}
+@tab  @file{\0libais.socket}
+
+@item @comp{libgroup}
+@tab  @file{\0groupd_socket}
+
+@item @comp{libfence} @footnote{現実には存在せず@code{socket}/@code{connect}システムコールを用いてfencedと通信する。}
+@tab  @file{\0fenced_socket}
+
+@item @comp{libdlm}
+@tab  @file{/dev/misc/dlm-control}
+
+@end multitable
+
+本セクションでは、各ソケットライブラリがどのようなAPIを提供しているか、
+クライアントコンポーネントはそのAPIをどのように利用しているかを説明して
+行きます。APIのなかでも特に常用だと考えるのは、接続に対する名前の設定と
+コールバック関数の登録です。
+
+サービスデーモンとソケットライブラリの接続関係に名前を付けサービスデー
+モンに登録するためのAPIがいくつかのソケットライブラリにあります。あるサー
+ビスデーモンに登録した接続関係は、そのサービスデーモンのツールコマンド
+で閲覧できます。APIを知っていれば、ツールコマンドの出力結果中の名前から
+対応するソースコードを割り出すことができます。
+
+サービスデーモンから、クライアントコンポーネントに告知がある場合、コー
+ルバック関数が呼び出されます。ここで告知とはクラスターの構成変更やメン
+バーの損失といったイベントです。また@comp{aisexec}とソケットライブラリ
+によって隠蔽された、他のノードで動く同種クライアントコンポーネントとの
+通信における通信データの着信もコールバック関数によって知らされます。コー
+ルバック関数の型に着目すれば、サービスデーモンがクライアントコンポーネ
+ントに対してどういったサービスを提供しているのか、わかります。逆に
+クライアントコンポーネントが、どういったコールバック関数を登録しているか
+調べれば、クライアントコンポーネントがサービスデーモンをどのように活用して
+いるのか、あるいはクライアントコンポーネント同士で何を通信しているの
+かわかります。コールバック関数から直接わかるのは通信における受信部分
+だけですが、受信部分のコードを読みシンボルをいくつか知れば、対応する
+送信部分をgrepで割り出すのは難しくありません。
+
+@menu
+* libccs::
+* libcman::
+* libcpg::
+* libgroup::
+* libfence::
+* libsaCkpt::
+* libdlm::
+@end menu
+
+@node libccs
+@subsection libccs
+
+@node libcman
+@subsection libcman
+
+@deftypefun void (*cman_callback_t) (cman_handle_t @var{handle}, void* @var{privdata}, int @var{reason}, int @var{arg})
+XXX
+@end deftypefun
+@c /* Callback routine for a membership event */
+@c typedef void (*cman_callback_t)(cman_handle_t handle, void *privdata, int reason, int arg);
+
+@c /* Callback routine for data received */
+@c typedef void (*cman_datacallback_t)(cman_handle_t handle, void *privdata,
+@c 				    char *buf, int len, uint8_t port, int nodeid);
 
 
-@c libcman
-/* Callback routine for a membership event */
-typedef void (*cman_callback_t)(cman_handle_t handle, void *privdata, int reason, int arg);
-
-/* Callback routine for data received */
-typedef void (*cman_datacallback_t)(cman_handle_t handle, void *privdata,
-				    char *buf, int len, uint8_t port, int nodeid);
+@c typedef void (*cman_confchgcallback_t)(cman_handle_t handle, void *privdata,
+@c 				       unsigned int *member_list, int member_list_entries,
+@c 				       unsigned int *left_list, int left_list_entries,
+@c 				       unsigned int *joined_list, int joined_list_entries);
 
 
-typedef void (*cman_confchgcallback_t)(cman_handle_t handle, void *privdata,
-				       unsigned int *member_list, int member_list_entries,
-				       unsigned int *left_list, int left_list_entries,
-				       unsigned int *joined_list, int joined_list_entries);
+
+@node libcpg
+@subsection libcpg
+
+@node libgroup
+@subsection libgroup
+
+@node libfence
+@subsection libfence
+
+@node libsaCkpt
+@subsection libsaCkpt
+
+@node libdlm
+@subsection libdlm
+
 
 
 
 @node コンポーネントのステート
 @chapter  コンポーネントのステート
 
-@node コンフィギュレーションの指定方法
-@chapter コンフィギュレーションの指定方法
+Cluster2は多数のコンポーネントからなるので、まず全体を
+おおまかに把握することが重要であると考え、コンポーネント間の
+関係を先に説明しました。ここでは個々のコンポーネントについて
+説明していきます。
+
+@node 初期化スクリプトとコンフィギュレーションの指定方法
+@chapter 初期化スクリプトとコンフィギュレーションの指定方法
 
 @node ツールコマンドとログの活用
 @chapter ツールコマンドとログの活用
