@@ -196,9 +196,9 @@ UNIXソケットファイル、あるいはデバイスファイルについて�
 @c cpg & groupd
 @c 
 @item @comp{cpg}
-@item サービスモジュール
+@tab サービスモジュール
 @tab @pkg{openais}
-@item クローズドプロセスグループを提供する。
+@tab クローズドプロセスグループを提供する。
 
 @item @comp{libcpg.so}
 @tab ソケットライブラリ
