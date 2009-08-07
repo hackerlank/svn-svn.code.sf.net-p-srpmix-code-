@@ -1,0 +1,33 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+(use gauche.parseopt)
+
+
+(define (show-help prog n)
+  (format #t "~a rules LOG\n" prog)
+  (exit n))
+
+(define (load-data file)
+  (with-input-from-file file
+    (let loop ((n 0)
+	       (l (read-line))
+	       (L (list)))
+      (if (eof-object? l)
+	  L
+	  (loop (+ 1 n)
+		(read-line)
+		(cons (list l n) L))))))
+
+(define (compile rules)
+  )
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cut show-help name0))
+       . rest)
+    (let ((rules (read-from-string (car rest)))
+	  (log   (cadr rest)))
+      (let ((data (load-data log))
+	    (prog (compile-rules rules)))
+	(prog data)))))
