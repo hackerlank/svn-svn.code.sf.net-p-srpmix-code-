@@ -4,6 +4,7 @@ KOJIURL=http://kojipkgs.fedoraproject.org
 DIR=${1:-/srv/sources/attic/mirror/fedoraproject-koji}
 PEEK=/dev/null
 
+# TODO: Check gauche, wget, koji
 function print_usage
 {
     echo "Usage: "
