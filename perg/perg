@@ -1,0 +1,9 @@
+#!/bin/sh
+db=$1
+log=$2
+max=30
+
+{ cat $1 ; echo "(log " \""$2"\" ")"; } \
+  | es-filter-filelines \
+  | es-filter-spout :filelines :fileline $max\
+  | es-dest-grep '(:fileline :file)' '(:fileline :line)' '(:fileline :msg)' '(1)'

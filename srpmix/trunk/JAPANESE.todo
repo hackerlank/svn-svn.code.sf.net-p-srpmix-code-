@@ -37,6 +37,8 @@ For version 4
 
 * root権限がない場合のattachは？
 
+* weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
+
 done
 -----
 * ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
