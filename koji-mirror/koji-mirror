@@ -4,10 +4,21 @@ KOJIURL=http://kojipkgs.fedoraproject.org
 DIR=${1:-/srv/sources/attic/mirror/fedoraproject-koji}
 PEEK=/dev/null
 
+function print_usage
+{
+    echo "Usage: "
+    echo "	koji-mirror [DIR]"
+}
+
 function newer_name
 {
     gosh -b -e "(begin (use gauche.version) (exit (if (version>? \"$1\" \"$2\" ) 0 1)))"
 }
+
+if ! test -d ${DIR}; then
+    echo "No such directory: ${DIR}" 2>&1
+    exit 1
+fi
 
 if test -f "${PEEK}" && test ${PEEK} != /dev/null; then
     cat "${PEEK}"
