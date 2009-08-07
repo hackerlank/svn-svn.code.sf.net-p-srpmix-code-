@@ -20,6 +20,11 @@
 		(cons (list l n) L))))))
 
 (define (compile rules)
+  ;; (clue pattern) => data
+  ;; (clue pattern n0) => data str0
+  ;; (clue pattern n0 n1) => data str0 str1
+  (clue #/.*fctx \(0x[a-z0-9]+\): noanswer_response/ 1)
+  (firm )
   )
 
 (define (main args)
