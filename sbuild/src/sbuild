@@ -1,6 +1,7 @@
 #!/bin/bash
 # REQUIRE: rsync
 # verify_command srpmix
+# Record all pkgs to a external file
 
 PKGCONFDIR=/etc/sbuild
 PKGDATADIR=/usr/share/sbuild
@@ -8,7 +9,7 @@ LIST_MAKER=cat
 DONT_CREATEREPO=
 RSYNC=rsync
 
-SBUILD_CONF=${PKGCONFDIR}/sbulid.cf
+SBUILD_CONF=${PKGCONFDIR}/sbuild.cf
 SOP_CONF=/etc/sop/sop.cf
 
 
@@ -30,8 +31,39 @@ function print_usage
     echo "         [--use-tmpfs=GBYTE]"
 }
 
+function prepare_conf
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --sbuild-conf=*)
+                SBUILD_CONF=${1/--sbuild-conf=/}
+		;;
+	    --sop-conf=*)
+                SOP_CONF=${1/--sop-conf=/}
+                ;;
+	 esac
+    done
+
+    if test -f "${SBUILD_CONF}"; then
+	source "${SBUILD_CONF}"
+    else
+	echo "Cannot load ${SBUILD_CONF} file" 1>&2
+	exit 1
+    fi
+
+    if test -f "${SOP_CONF}"; then
+	source "${SOP_CONF}"
+    else
+	echo "Cannot load ${SOP_CONF} file" 1>&2
+	exit 1
+    fi
+
+}
+
 function parse_arguments
 {
+    prepare_conf "$@"
+
     while [ $# -gt 0 ]; do
 	case "$1" in
 	    --help|-h)
@@ -39,10 +71,10 @@ function parse_arguments
 		exit 0
 		;;
 	    --sbuild-conf=*)
-                SBUILD_CONF=${1/--sbuild-conf=/}
+                :
 		;;
 	    --sop-conf=*)
-                SOP_CONF=${1/--sop-conf=/}
+                :
                 ;;
 	    --tmpdir=*)
                 SBUILD_TMPDIR=${1/--tmpdir=/}
@@ -67,17 +99,18 @@ function parse_arguments
 	        SBUILD_VPATHFILE=${1/--vpath-file=/}
 		;;
 	    --all-pkgs)
-	        LIST_MAKER=${PKGDATADIR}/sbuild-srpm-list.sh
+	        LIST_MAKER="${PKGDATADIR}/sbuild-srpm-list.sh ${SOP_MIRROR_DIR}"
 		;;
 	    --createrepo-only)
 	        run_creterepo
 		exit $?
 		;;
             --dont-createrepo)
-	        DONT_CREATEREPO=1
+	        DONT_CREATEREPO=yes
 		;;
 	    --use-tmpfs=*)
 	        local tmpfs_size=${1/--use-tmpfs=/}
+		mkdir -p ${SBUILD_TMPDIR}
 	        if { mount | grep ${SBUILD_TMPDIR}; } > /dev/null; then
 		    echo "A file system is already mounted on ${SBUILD_TMPDIR}" 1>&2
 		    exit 1
@@ -96,18 +129,13 @@ function parse_arguments
 	shift
     done
 
-    if test -f "${SBUILD_CONF}"; then
-	source "${SBUILD_CONF}"
-    else
-	echo "Cannot load ${SBUILD_CONF} file" 1>&2
-	exit 1
+    if !test -d ${SBUILD_OUTPUTDIR}; then
+	mkdir -p ${SBUILD_OUTPUTDIR}
     fi
 
-    if test -f "${SOP_CONF}"; then
-	source "${SOP_CONF}"
-    else
-	echo "Cannot load ${SOP_CONF} file" 1>&2
-	exit 1
+    if test -z "$SBUILD_VPATHFILE"; then
+	${PKGDATADIR}/sbuild-vpath-list.sh ${SOP_MIRROR_DIR} > ${SBUILD_TSTAMPDIR}/vpath.list
+	SBUILD_VPATHFILE=${SBUILD_TSTAMPDIR}/vpath.list
     fi
 }
 
@@ -119,14 +147,9 @@ function run_make
     local last_h
 
 
-    if test -z "$SBUILD_VPATHFILE"; then
-	${PKGDATADIR}/sbuild-vpath-list.sh > ${SBUILD_TSTAMPDIR}/vpath.list
-	SBUILD_VPATHFILE=${SBUILD_TSTAMPDIR}/vpath.list
-    fi
-
     while read f; do
 	f=$(basename $f)
-	h=$(echo $f | sed 's/\(.\).*/\1/')
+	h=${f:0:1}
 
 	if test "x${h}" != "x${last_h}"; then
 	    last_h=$h
@@ -134,7 +157,7 @@ function run_make
 	    install -d ${SBUILD_TSTAMPDIR}/$h
 	fi
 
-	# TODO -l should be given externally
+	# TODO: Generate makefile
 	${PKGDATADIR}/sbuild.mk			\
             DEBUG=$DEBUG			\
             TMPDIR=${SBUILD_TMPDIR}		\
@@ -168,11 +191,11 @@ function main
 
 
     parse_arguments "$@"
-    run_make
+    $LIST_MAKER | run_make
 
     r=$?
 
-    $LIST_MAKER | run_rsync
+    run_rsync
 
     if test "x${DONT_CREATEREPO}" != x; then
 	return $r;
