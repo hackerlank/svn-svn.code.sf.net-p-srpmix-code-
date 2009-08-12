@@ -18,7 +18,7 @@ function newer_name_p
 
 function delete_header
 {
-    grep -v "^Build" | grep -v -e "^---"						\
+    grep -v "^Build" | grep -v -e "^---"
 }
 
 function get_srpm
@@ -51,17 +51,17 @@ function latest
 }
 
 function rearrange
-{						\
+{
     cut -f 1 -d ' '				\
 	| sed -e 's|/mnt/koji/packages/||'	\
 	| tr / ' '				
 }
 
-
-
 function main
 {
     local c
+    local f
+
 
     prepare
     latest ${SNAPSHOT} ${DIST}			\
@@ -70,7 +70,7 @@ function main
 	c=${p:0:1}
 	mkdir -p $OUTPUT_DIR/$c
 	(
-	    cd $OUTPUT_DIR/$c; 
+	    cd $OUTPUT_DIR/$c
 	    f=$(ls $p-[0-9]*.src.rpm 2>/dev/null)
 	    if ! test -f "$f"; then
 		echo "(lcopy-koji new \"$p-$v-$r.src.rpm\")"
