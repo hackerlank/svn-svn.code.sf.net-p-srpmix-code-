@@ -13,6 +13,7 @@ AC_PROG_LIBTOOL
 
 dnl AM_PATH_GLIB_2_0
 PKG_CHECK_MODULES([GLIB2],    [glib-2.0])
+PKG_CHECK_MODULES([ES_LANG_C_STDC99], [es-lang-c-stdc99])
 AC_CHECK_LIB(dwarves, dwarves__init)
 
 AC_OUTPUT([
