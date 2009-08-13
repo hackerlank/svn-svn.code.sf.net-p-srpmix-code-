@@ -1,38 +1,183 @@
 #!/bin/sh
 #| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
+
+
+#|
+(clue 
+;  :regex #/fctx (0x[0-9a-f]+): (noanswer_response|timeout|answer_response|no addresses)/ 
+ ; :regex #/fctx (0x[0-9a-f]+): answer_response/
+; :regex #/fctx (0x[0-9a-f]+): noanswer_response/
+  :regex #/fctx (0x[0-9a-f]+): (noanswer_response|timeout|no addresses)/ 
+  :keys ((1 fctx-object))
+  :next (report 
+ 	:next (clue 
+ 	       :fmt ("fctx ~a: create" fctx-object)
+ 	       :next (report 
+ 		      :next (tail 
+ 			     :line 5
+ 			     :next (clue 
+ 				    :regex #/createfetch: ([^ ]+)/
+ 				    :next (report)))))))
+|#
 (use gauche.parseopt)
+(use droite.klist)
+(use srfi-1)
 
 
 (define (show-help prog n)
-  (format #t "~a rules LOG\n" prog)
+  (format #t "~a rule LOG\n" prog)
   (exit n))
+
+(define (make-line l n)
+  (list l n))
 
 (define (load-data file)
   (with-input-from-file file
-    (let loop ((n 0)
-	       (l (read-line))
-	       (L (list)))
-      (if (eof-object? l)
-	  L
-	  (loop (+ 1 n)
-		(read-line)
-		(cons (list l n) L))))))
+    (lambda ()
+      (let loop ((n 0)
+		 (l (read-line))
+		 (L (list)))
+	(if (eof-object? l)
+	    L
+	    (loop (+ 1 n)
+		  (read-line)
+		  (cons (make-line l n)
+			L)))))))
 
-(define (compile rules)
-  ;; (clue pattern) => data
-  ;; (clue pattern n0) => data str0
-  ;; (clue pattern n0 n1) => data str0 str1
-  (clue #/.*fctx \(0x[a-z0-9]+\): noanswer_response/ 1)
-  (firm )
-  )
+(define (compile-clue rule)
+  (let1 rule (cdr rule)
+    (define (make-ctx ctx m r)
+      (append (map 
+	       (lambda (k)
+		 (cons (cadr k) (m (car k)))
+		 )
+	       (kget r :keys (list)))
+	      ctx))
+    
+    (let ((regex (kget rule :regex))
+	  (fmt   (kget rule :fmt))
+	  (next  (kget rule :next)))
+      (values
+       (lambda (data ctx)
+	 (let loop ((data data))
+	   (cond
+	    ((null? data)
+	     (values (list) ctx))
+	    (else
+	     (let1 m ((if regex 
+			  regex
+			  (string->regexp (apply format (car fmt) 
+						 (map (lambda (k)
+							(cdr (assq k ctx))
+							)
+						      (cdr fmt)))))
+		      (car (car data)))
+	       (if m
+		   (values data (make-ctx ctx m rule))
+		   (loop (cdr data))))))))
+       next))))
 
+(define (compile-report rule)
+  (let1 rule (cdr rule)
+    (let ((fmt  (kget rule :fmt))
+	  (next (kget rule :next)))
+      (values
+       (lambda (data ctx)
+	 (if fmt
+	     (format #t "[~d] ~a\n" (+ 1 (cadr (car data)))
+		     (apply format (car fmt) 
+			    (map (lambda (k)
+				   (cdr (assq k ctx))
+				   )
+				 (cdr fmt))))
+	     (format #t "[~d] ~a\n" (+ (cadr (car data)) 1) (car (car data))))
+	 (values data ctx))
+       next))))
+
+
+(define (compile-tail rule)
+  (let1 rule (cdr rule)
+    (let ((line (kget rule :line))
+	  ;; TODO
+	  (next (kget rule :next)))
+      (values
+       (lambda (data ctx)
+	 (values 
+	  (if (< (length data) line)
+	      data
+	      (take data line))
+	  ctx))
+       next))))
+
+(define (compile-drop rule)
+  (let1 rule (cdr rule)
+    (let ((line (kget rule :line))
+	  ;; TODO
+	  (next (kget rule :next)))
+      (values
+       (lambda (data ctx)
+	 (values 
+	  (if (< (length data) line)
+	      (list)
+	      (drop data line))
+	  ctx))
+       next))))
+
+(define (compile-file rule)
+  (with-input-from-file (cadr rule)
+    (lambda ()
+      (compile (read)))))
+
+(define compiler `((clue   . ,compile-clue)
+		   (tail   . ,compile-tail)
+		   (drop   . ,compile-drop)
+		   (report . ,compile-report)
+		   (file   . ,compile-file)
+		   ))
+
+(define (compile rule)
+    (let1 com (assq (car rule) compiler)
+      (if com
+	  ((cdr com) rule)
+	  (error "No such command: " rule))))
+
+(define (compile-rule rule)
+  ;;
+  (define (run code data ctx return)
+    (if (or (null? data)
+	    (null? code))
+	return
+	(receive (next-data next-ctx)
+	    ((car code) data ctx)
+	  (run (cdr code) next-data next-ctx 
+	       (if (and (null? return) (not (null? next-data)))
+		   (cdr next-data)
+		   return)))))
+  ;;
+  (let1 code (reverse (let loop ((code (list))
+				 (rule rule))
+			(if rule
+			    (receive (c r)
+				(compile rule)
+			      (loop (cons c code)
+				    r))
+			    code)))
+    (rec (f data)
+	 (unless (null? data)
+	   (let1 next-data (run code data (list) (list))
+	     (newline)
+	     (f next-data))))))
+
+;; rule -> compile -> code
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cut show-help name0))
        . rest)
-    (let ((rules (read-from-string (car rest)))
-	  (log   (cadr rest)))
+    (unless (eq? (length rest) 2)
+      (error "Too few arguments:" rest))
+    (let ((rule (read-from-string (car rest)))
+	  (log  (cadr rest)))
       (let ((data (load-data log))
-	    (prog (compile-rules rules)))
+	    (prog (compile-rule rule)))
 	(prog data)))))
