@@ -41,8 +41,6 @@ For version 4
 
 * weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
 
-* errorログ中のspecダンプから%changelogを削る。
-
 done
 -----
 * ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
@@ -76,6 +74,7 @@ done
 ** vanillaの生成位置を調整する。<done>
 
 ** -confオプションの追加 <done>
+* errorログ中のspecダンプから%changelogを削る。<done>
 
 After version 4
 ========================================================================
