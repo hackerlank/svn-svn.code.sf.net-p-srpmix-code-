@@ -17,7 +17,10 @@ SRPMIX_OPTIONS += --debug
 endif
 SRPMIX_OPTIONS  += --release=$(RELEASE) --output-dir=$(OUTPUTDIR)
 
-
+# or
+# cat .$@ | gzip > $@; rm .$@;
+# mv .$@ $@; touch --reference=$@ $@;
+# touch $@; rm .$@;
 dummy:
 %.log: %.rpm
 	install -d $(BLACKLISTDIR)
