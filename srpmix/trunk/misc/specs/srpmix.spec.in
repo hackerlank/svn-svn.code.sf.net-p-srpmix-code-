@@ -5,6 +5,7 @@ Release: #RPM_RELEASE#
 Source: srpmix-#PACKAGE_VERSION#.tar.bz2
 Requires: hardlink cpio rpm coreutils emacs-common file gauche gettext
 Requires: srpmix-dir-base
+# Requires: autoconf* automake* libtool 
 Buildarch: noarch
 BuildRequires: cscope ctags emacs-common gettext
 #BuildRequires: hyperestraier 

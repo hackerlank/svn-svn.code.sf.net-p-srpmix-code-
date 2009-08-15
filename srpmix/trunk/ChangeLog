@@ -1,5 +1,9 @@
 2009-08-15  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/m4/progs.m4: Improve the error message for fastjar.
+
+2009-08-15  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-ix (srpm_deploy): Drop the lines after
 	%changelog to shrink the error log.
 

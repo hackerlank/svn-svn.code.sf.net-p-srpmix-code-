@@ -11,8 +11,7 @@ For version 4
 
 * mummify/slice #
 ** compsの生成 #
-
-* Generate Maekfile in sbuild
+* Generate Maekfile in sbuild #
 
 * %kouji tracking
 ** db, swrfのディレクトリを一階層深くする。
