@@ -1,4 +1,5 @@
 #!/bin/sh
+# find . -type f |grep -v dir-pkg  |xargs -n 1 basename | sed -e 's/\(.*\)-srpmix.*/\1/' -e :loop -e 's/\(.\+\)-[0-9].*/\1/' -e 't loop' -e p | less
 
 FILE=$1
 DIST=$(basename $FILE .es)
