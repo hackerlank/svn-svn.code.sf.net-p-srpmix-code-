@@ -7,7 +7,7 @@ Group: Development/Tools
 Buildarch: noarch
 Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Requires: make rsync srpmix
+Requires: make rsync srpmix gauche
 
 %description
 Script sets to build sources

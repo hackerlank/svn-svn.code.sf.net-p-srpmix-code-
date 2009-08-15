@@ -11,5 +11,7 @@ dist_pkgdata_SCRIPTS=  \
 	sbuild.mk            \
         sbuild-srpm-list.sh  \
         sbuild-vpath-list.sh \
+	gc-repo.scm          \
+	create-comps.scm     \
 	\
 	$(NULL)
