@@ -120,7 +120,7 @@ function parse_arguments
 		else
 		    if ! mount -t tmpfs -o size=${tmpfs_size}G tmpfs "${SBUILD_TMPDIR}"; then
 			echo "Failed in mounting tmpfs on "${SBUILD_TMPDIR}" with size ${tmpfs_size}G" 1>&2
-			exit
+			exit 1
 		    fi
 		fi
 		;;
@@ -147,6 +147,15 @@ function parse_arguments
 	SBUILD_VPATHFILE=${SBUILD_TSTAMPDIR}/vpath.list
     fi
 
+    if ! test -f  "$SBUILD_VPATHFILE"; then
+	echo "Cannot read vpathfile: $SBUILD_VPATHFILE" 1>&2
+	exit 1
+    fi
+
+    if test ${SBUILD_VPATHFILE:0:1} != /; then
+	SBUILD_VPATHFILE=$(pwd)/${SBUILD_VPATHFILE}
+    fi
+    
     SBUILD_JOBS=${SBUILD_JOBS:-1}
     SBUILD_LOAD=${SBUILD_LOAD:-1}
 }
@@ -172,6 +181,7 @@ function run_make
 	    all_h="$all_h $h"
 	    last_h=$h
 	    install -d ${SBUILD_TSTAMPDIR}/$h
+	    echo ""                                 >> $mkfile
 	    echo "sub-$h: \\"                       >> $mkfile
 	fi
 	echo "$(echo $f | sed 's/\.rpm/.log/g') \\" >> $mkfile
