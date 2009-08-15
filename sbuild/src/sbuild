@@ -29,6 +29,8 @@ function print_usage
     echo "         [--createrepo-only]"
     echo "         [--dont-createrepo]"
     echo "         [--use-tmpfs=GBYTE]"
+    echo "         [--jobs=J]"
+    echo "         [--load=L]"
 }
 
 function prepare_conf
@@ -121,6 +123,12 @@ function parse_arguments
 		    fi
 		fi
 		;;
+	    --load=*)
+	        SBUILD_LOAD=${1/--load=/}
+		;;
+	    --jobs=*)
+	        SBUILD_JOBS=${1/--jobs=/}
+		;;
             *)
 	        print_usage 1>&2
 		exit 1
@@ -145,20 +153,29 @@ function run_make
     local h
     local f
     local last_h
+    local mkfile
 
-
+    mkfile=${SBUILD_TSTAMPDIR}/sbuild-tmp.mk
+    echo "include sbuild.mk"              > $mkfile
+    echo ""                               >> $mkfile
+    echo "all: \\"                        >> $mkfile
+    
     while read f; do
 	f=$(basename $f)
 	h=${f:0:1}
 
 	if test "x${h}" != "x${last_h}"; then
 	    last_h=$h
-	    echo "Processing $h"
+	    # echo "Processing $h"
 	    install -d ${SBUILD_TSTAMPDIR}/$h
 	fi
 
-	# TODO: Generate makefile
-	${PKGDATADIR}/sbuild.mk			\
+	echo "$(echo $f | sed 's/\.rpm/.log/g') \\" >> $mkfile
+    done
+    
+
+    make    --makefile=$mkfile			\
+            --include-dir=${PKGDATADIR}         \
             DEBUG=$DEBUG			\
             TMPDIR=${SBUILD_TMPDIR}		\
             OUTPUTDIR=${SBUILD_OUTPUTDIR}	\
@@ -166,12 +183,12 @@ function run_make
 	    BLACKLISTDIR=${SBUILD_BLACKLISTDIR}	\
             RELEASE=${SBUILD_RELEASE}		\
 	    DEBUG=${SBUILD_DEBUG}               \
-	    -k -l4 -e				\
-	    -C  ${SBUILD_TSTAMPDIR}/$h			\
-	    $(echo $f | sed 's/\.rpm/.log/g')
-    done
-
-    
+	    --keep-going                        \
+            --environment-overrides             \
+	    --directory  ${SBUILD_TSTAMPDIR}/$h	\
+            --jobs=${SBUILD_JOBS}               \
+	    --max-load=${SBUILD_LOAD}           \
+	     all
 }
 
 function run_creterepo

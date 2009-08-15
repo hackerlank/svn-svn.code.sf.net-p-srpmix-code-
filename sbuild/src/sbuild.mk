@@ -20,8 +20,7 @@ endif
 SRPMIX_OPTIONS  += --release=$(RELEASE) --output-dir=$(OUTPUTDIR)
 
 
-all:
-
+dummy:
 %.log: %.rpm
 	install -d $(BLACKLISTDIR)
 	+if ! test -f $(BLACKLISTDIR)/$@; then \
