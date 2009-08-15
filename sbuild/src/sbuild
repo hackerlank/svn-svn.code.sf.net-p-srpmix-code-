@@ -44,6 +44,7 @@ function prepare_conf
                 SOP_CONF=${1/--sop-conf=/}
                 ;;
 	 esac
+	 shift
     done
 
     if test -f "${SBUILD_CONF}"; then
@@ -101,7 +102,7 @@ function parse_arguments
 	        SBUILD_VPATHFILE=${1/--vpath-file=/}
 		;;
 	    --all-pkgs)
-	        LIST_MAKER="${PKGDATADIR}/sbuild-srpm-list.sh ${SOP_MIRROR_DIR}"
+	        LIST_MAKER="${PKGDATADIR}/sbuild-srpm-list.shf ${SOP_MIRROR_DIR}"
 		;;
 	    --createrepo-only)
 	        run_creterepo
@@ -137,7 +138,7 @@ function parse_arguments
 	shift
     done
 
-    if !test -d ${SBUILD_OUTPUTDIR}; then
+    if ! test -d ${SBUILD_OUTPUTDIR}; then
 	mkdir -p ${SBUILD_OUTPUTDIR}
     fi
 
@@ -145,6 +146,9 @@ function parse_arguments
 	${PKGDATADIR}/sbuild-vpath-list.sh ${SOP_MIRROR_DIR} > ${SBUILD_TSTAMPDIR}/vpath.list
 	SBUILD_VPATHFILE=${SBUILD_TSTAMPDIR}/vpath.list
     fi
+
+    SBUILD_JOBS=${SBUILD_JOBS:-1}
+    SBUILD_LOAD=${SBUILD_LOAD:-1}
 }
 
 
@@ -154,41 +158,63 @@ function run_make
     local f
     local last_h
     local mkfile
+    local all_h
 
     mkfile=${SBUILD_TSTAMPDIR}/sbuild-tmp.mk
     echo "include sbuild.mk"              > $mkfile
     echo ""                               >> $mkfile
-    echo "all: \\"                        >> $mkfile
     
     while read f; do
 	f=$(basename $f)
 	h=${f:0:1}
 
 	if test "x${h}" != "x${last_h}"; then
+	    all_h="$all_h $h"
 	    last_h=$h
-	    # echo "Processing $h"
 	    install -d ${SBUILD_TSTAMPDIR}/$h
+	    echo "sub-$h: \\"                       >> $mkfile
 	fi
-
 	echo "$(echo $f | sed 's/\.rpm/.log/g') \\" >> $mkfile
     done
-    
 
-    make    --makefile=$mkfile			\
-            --include-dir=${PKGDATADIR}         \
-            DEBUG=$DEBUG			\
-            TMPDIR=${SBUILD_TMPDIR}		\
-            OUTPUTDIR=${SBUILD_OUTPUTDIR}	\
-	    VPATHFILE=${SBUILD_VPATHFILE}	\
-	    BLACKLISTDIR=${SBUILD_BLACKLISTDIR}	\
-            RELEASE=${SBUILD_RELEASE}		\
-	    DEBUG=${SBUILD_DEBUG}               \
-	    --keep-going                        \
-            --environment-overrides             \
-	    --directory  ${SBUILD_TSTAMPDIR}/$h	\
-            --jobs=${SBUILD_JOBS}               \
-	    --max-load=${SBUILD_LOAD}           \
-	     all
+    echo  "all: \\" >> $mkfile
+    for h in $all_h; do 
+	echo "sub-$h \\" >> $mkfile
+    done
+
+    echo '#' make  --makefile=$mkfile			\
+                   --include-dir=${PKGDATADIR}		\
+                   --keep-going				\
+                   --environment-overrides		\
+	            --directory  ${SBUILD_TSTAMPDIR}/$h	\
+                    --jobs=${SBUILD_JOBS}		\
+	            --max-load=${SBUILD_LOAD}		\
+                    DEBUG=$DEBUG			\
+                    TMPDIR=${SBUILD_TMPDIR}		\
+                    OUTPUTDIR=${SBUILD_OUTPUTDIR}	\
+                    VPATHFILE=${SBUILD_VPATHFILE}	\
+	            BLACKLISTDIR=${SBUILD_BLACKLISTDIR}	\
+                    RELEASE=${SBUILD_RELEASE}		\
+	            DEBUG=${SBUILD_DEBUG} >> $mkfile
+
+    echo "Processing $h"
+    for h in $all_h; do 
+	make  --makefile=$mkfile			\
+              --include-dir=${PKGDATADIR}		\
+              --keep-going				\
+              --environment-overrides			\
+	      --directory  ${SBUILD_TSTAMPDIR}/$h	\
+              --jobs=${SBUILD_JOBS}			\
+	      --max-load=${SBUILD_LOAD}			\
+              DEBUG=$DEBUG				\
+              TMPDIR=${SBUILD_TMPDIR}			\
+              OUTPUTDIR=${SBUILD_OUTPUTDIR}		\
+              VPATHFILE=${SBUILD_VPATHFILE}		\
+	      BLACKLISTDIR=${SBUILD_BLACKLISTDIR}	\
+              RELEASE=${SBUILD_RELEASE}			\
+	      DEBUG=${SBUILD_DEBUG}			\
+	      sub-$h
+    done
 }
 
 function run_creterepo
