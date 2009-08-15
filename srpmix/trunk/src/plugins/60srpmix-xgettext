@@ -118,7 +118,7 @@ function run_xgettext
                       --output=-          \
 	              --files-from=-      \
                       --no-wrap           \
-	> $o )
+	> $o 2> /dev/null)
     s=$?
     
     es_print "xgettext-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l

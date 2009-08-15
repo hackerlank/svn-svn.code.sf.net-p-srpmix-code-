@@ -1,5 +1,8 @@
 2009-08-15  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/60srpmix-xgettext: Use /dev/null for stderr of xgettext 
+	running.
+
 	* misc/m4/progs.m4: Improve the error message for fastjar.
 
 2009-08-15  Masatake YAMATO  <yamato@redhat.com>
