@@ -1,8 +1,9 @@
 sbuildconfdir=$(sysconfdir)/sbuild
 dist_sbuildconf_DATA = sbuild.cf
 
-dist_bin_SCRIPTS= \
-	sbuild    \
+dist_bin_SCRIPTS=    \
+	sbuild       \
+	sbuild-comps \
 	\
 	$(NULL)
 

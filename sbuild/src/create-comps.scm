@@ -23,6 +23,8 @@
   (map print   `(" <group>"
 		 ;; TODO: groupreq
 		 ,(format "  <id>srpmix-group-~a</id>" name)
+		 ,(format "  <name>srpmix-group-~a</name>" name)
+		 ;; langonly?
 		 ,(format "  <description>~a</description>"
 			  (if desc 
 			      desc 
@@ -40,6 +42,7 @@
   (map print `(" <category>"
 	       "  <id>srpmix</id>"
 	       "  <name>SRPMix</name>"
+	       "  <description>Repackaged source code with canonical directory layout</description>"
 	       "  <display_order>99</display_order>"
 	       "  <grouplist>"
 	       ,@(map (cute format "   <groupid>srpmix-groupd-~a</groupid>" <>)

@@ -1,5 +1,3 @@
-#!/usr/bin/make -f
-
 #TMPDIR=
 #OUTPUTDIR=
 #VPATHFILE=
@@ -34,4 +32,3 @@ dummy:
 			exit 1; \
 		fi; \
 	fi
-
