@@ -683,7 +683,7 @@ function srpm_deploy
 	    echo 1>&2
 	    echo ";;; SPEC FILE USED IN THIS BUILD ;;;" 1>&2
 	    # Drop the lines after %changelog to shrink the error log.
-	    cat "${rootdir}/${SPECDIR}/${xspec_file}" | sed '/^%changelog$/q' 1>&2
+	    '/^%changelog$/q' < "${rootdir}/${SPECDIR}/${xspec_file}" 1>&2
 	    echo ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;" 1>&2
 	    echo 1>&2
 	    echo 1>&2

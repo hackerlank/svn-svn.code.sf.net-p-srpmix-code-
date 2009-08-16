@@ -1,3 +1,8 @@
+2009-08-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (srpm_deploy): Don't use cat to provide file
+	contents to sed.
+
 2009-08-15  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-xgettext: Use /dev/null for stderr of xgettext 

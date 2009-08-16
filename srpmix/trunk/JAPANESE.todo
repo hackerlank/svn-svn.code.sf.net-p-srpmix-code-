@@ -6,42 +6,41 @@ For version 4
 ** pluginを個別パッケージにさらに分解する。#
 *** パッケージ削除の順序によって/var/lib/srpmix/sources/a/avahi/0.6.25-3.fc11が残る。@
   sudo rpm -e  avahi-0.6.25-3.fc11-srpmix avahi-0.6.25-3.fc11-srpmix-plugins   avahi-0.6.25-3.fc11-srpmix-archives 
+** kindexでのcscopeのサポート
+** attachデータをpluginから作れるようにする。##
 
-** attachデータをpluginから作れるようにする。#
-
-* mummify/slice #
-** compsの生成 #
-* Generate Maekfile in sbuild #
+* live media ###
+** mummify/slice ###
+** compsの生成 ???
 
 * %kouji tracking
 ** db, swrfのディレクトリを一階層深くする。
+** repoをわける。--groupオプション?
+   group-name,group-source-dir,group-output-dir,group-hooks
 
+* srpmix.org
 ** 全文検索
-*** ウェブインターフェイス
-
-* swrfの拡張子を確立する。
-
-* srpmixでdownloadしたsrc.rpmをキャッシュする。
-
-* kindexでのcscopeのサポート
+** ウェブインターフェイス
 
 * ビルド率
 ** cscopeがクラッシュする。
 ** 環境変数をつかえるようにする。
 
 
-* repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
+* non-root-user
+** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
+** root権限がない場合のattachは？
+** /usr/localに入れた場合でも正しく動作するように編成する。
 
-* /usr/localに入れた場合でも正しく動作するように編成する。
-
-* .specを拡張子に持たないspecファイルの処理
-
-* root権限がない場合のattachは？
-
-* weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
+* その他
+** logを空にする、あるいはgzipする。
+** .specを拡張子に持たないspecファイルの処理
+** repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
+** srpmixでdownloadしたsrc.rpmをキャッシュする。
+** swrfの拡張子を確立する。???
 
 done
------
+-------------------------------------------------------------------------------------
 * ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
 ** ひっかかる行をspecファイルから消すようにして潰した。<done>
 
@@ -74,6 +73,8 @@ done
 
 ** -confオプションの追加 <done>
 * errorログ中のspecダンプから%changelogを削る。<done>
+
+* Generate Maekfile in sbuild <done>
 
 After version 4
 ========================================================================
