@@ -29,7 +29,7 @@ dummy:
 		SRPMIX_OPTIONS="$(SRPMIX_OPTIONS)"; \
 		echo TMPDIR=$(TMPDIR) srpmix --srpm=$< $$SRPMIX_OPTIONS; \
 		if TMPDIR=$(TMPDIR) srpmix --srpm=$< $$SRPMIX_OPTIONS > .$@ 2>&1; then \
-			mv .$@ $@; \
+			touch --reference=.$@ $@; rm -f .$@; \
 		else \
 			mv .$@ $(BLACKLISTDIR)/$@; \
 			exit 1; \

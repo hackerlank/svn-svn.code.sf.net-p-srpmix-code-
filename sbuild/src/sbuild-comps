@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# sbuild-comps $path/dist-mapping/*.es
+#
+PKGDATADIR=${PKGDATADIR:-/usr/share/sbuild}
+
+for f in "$@"; do
+    if ! test -r "$f"; then
+	echo "Cannot read: $f\n" 1>&2 
+	exit 1
+    fi
+done
+
+for f in "$@"; do
+    d=$(basename "$f" .es)
+    printf "(srpmix-group \"%s\")\n" "$d"
+    cat "$f"
+done | gosh ${PKGDATADIR}/create-comps.scm

@@ -102,7 +102,7 @@ function parse_arguments
 	        SBUILD_VPATHFILE=${1/--vpath-file=/}
 		;;
 	    --all-pkgs)
-	        LIST_MAKER="${PKGDATADIR}/sbuild-srpm-list.shf ${SOP_MIRROR_DIR}"
+	        LIST_MAKER="${PKGDATADIR}/sbuild-srpm-list.sh ${SOP_MIRROR_DIR}"
 		;;
 	    --createrepo-only)
 	        run_creterepo
@@ -208,8 +208,8 @@ function run_make
                     RELEASE=${SBUILD_RELEASE}			\
 	            DEBUG=${SBUILD_DEBUG}\; done        >> $mkfile
 
-    echo "Processing $h"
     for h in $all_h; do 
+	echo "Processing $h"
 	make  --makefile=$mkfile			\
               --include-dir=${PKGDATADIR}		\
               --keep-going				\
