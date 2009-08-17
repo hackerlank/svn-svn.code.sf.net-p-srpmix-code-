@@ -1,0 +1,19 @@
+#!/bin/bash 
+host="$1"
+path="$2"
+pattern="$3"
+log="$4"
+
+for h in /home/*; do
+    if test -d $h -a -d "$h/$path"; then
+	for p in "$h/$path"/$pattern; do
+	    if test -r $p; then
+		s=$(basename $p)
+		if ! test -f ./$s; then
+                    echo "import $p" >> $log
+		    cp $p ./
+		fi
+	    fi
+	done
+    fi
+done 

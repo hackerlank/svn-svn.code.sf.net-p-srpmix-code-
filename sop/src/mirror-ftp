@@ -1,7 +1,7 @@
 #!/bin/bash 
-local host="$1"
-local path="$2"
-local pattern="$3"
-local log="$4"
+host="$1"
+path="$2"
+pattern="$3"
+log="$4"
 
 wget -nH --cut-dirs=2 --mirror "ftp://${host}${path}" -A "${pattern}" -o ${log}

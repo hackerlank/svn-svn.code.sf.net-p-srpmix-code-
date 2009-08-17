@@ -61,7 +61,7 @@ function mirror
 
 	local log=${ldir}/${host}.${date}.log
 
-	"${handler}" "${host}" "${path}" "${log}"
+	"${handler}" "${host}" "${path}" "${pattern}" "${log}"
     )
 }
 
@@ -81,7 +81,10 @@ function main
     let n=$(count "${SOP_MIRROR_TARGET_HOST[@]}")
     let i=0
     while [ $i -lt $n ]; do
-	mirror "${SOP_MIRROR_TARGET_HOST[$i]}" "${SOP_MIRROR_TARGET_PATH[$i]}" "${SOP_MIRROR_TARGET_PATTERN[$i]}" 
+	mirror "${SOP_MIRROR_METHOD[$i]}"		\
+	       "${SOP_MIRROR_TARGET_HOST[$i]}"		\
+	       "${SOP_MIRROR_TARGET_PATH[$i]}"		\
+	       "${SOP_MIRROR_TARGET_PATTERN[$i]}" 
 	let i=i+1
     done
 
