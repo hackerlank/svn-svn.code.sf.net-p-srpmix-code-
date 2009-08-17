@@ -23,30 +23,30 @@ function bzr_checkout_parse_cmdline
     PACKAGE=$4
 
     if test "x$VCS" != xbzr; then
-	echo "wrong vcs: $VCS" 2>&1
+	echo "wrong vcs: $VCS" 1>&2
 	return 1
     fi
 
     if test \( -z "$CMD"          \) -a    \
             \( "$CMD" != branch \) ; then
-	echo "broken bzr command line: $@" 2>&1
+	echo "broken bzr command line: $@" 1>&2
 	return 1
     fi
 
     if test -z "$REPO"; then
-	echo "no repository" 2>&1
+	echo "no repository" 1>&2
 	return 1
     fi
 
     if echo "$REPO" | grep -E -e "^http[s]?://" > /dev/null 2>&1; then
 	:
     else
-	echo "unknown repository specification: $REPO" 2>&1
+	echo "unknown repository specification: $REPO" 1>&2
 	return 1
     fi
  
     if test -z "$PACKAGE"; then
-	echo "no packagedir" 2>&1
+	echo "no packagedir" 1>&2
 	return 1
     fi
 

@@ -35,7 +35,7 @@ function cvs_checkout_parse_cmdline
     shift 3
 
     if test "x$VCS" != xcvs; then
-	echo "wrong vcs: $VCS" 2>&1
+	echo "wrong vcs: $VCS" 1>&2
 	return 1
     fi
 
@@ -44,27 +44,27 @@ function cvs_checkout_parse_cmdline
                \( "$CMD" != co       \) -a    \
                \( "$CMD" != checkout \)       \
             \) ; then
-	echo "broken cvs command line about cvs comamnd(checkout: $CMD)): $original" 2>&1
+	echo "broken cvs command line about cvs comamnd(checkout: $CMD)): $original" 1>&2
 	return 1
     fi
 
     if test -z "$REPO"; then
-	echo "no repository" 2>&1
+	echo "no repository" 1>&2
 	return 1
     fi
 
     if echo "$REPO" | grep pserver > /dev/null 2>&1 ; then
 	if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x::::"; then
-	    echo "broken pserver repo specification: $REPO" 2>&1
+	    echo "broken pserver repo specification: $REPO" 1>&2
 	    return 1
 	fi
     elif echo "$REPO" | grep extssh > /dev/null 2>&1; then
 	if test "x$(echo $REPO | sed -e 's/[^:]//g')" != "x:::"; then
-	    echo "broken extssh repo specification: $REPO" 2>&1
+	    echo "broken extssh repo specification: $REPO" 1>&2
 	    return 1
 	fi
     else
-	echo "Unknown repo specification: $REPO" 2>&1
+	echo "Unknown repo specification: $REPO" 1>&2
 	return 1
     fi
 
@@ -78,12 +78,12 @@ function cvs_checkout_parse_cmdline
     shift 2
 
     if test \( -n "${dflags}" \) -a \( "${dflags}" != "-d" \); then
-	echo "broken cvs command line about directory specification(-d: ${dflags}): $original" 2>&1
+	echo "broken cvs command line about directory specification(-d: ${dflags}): $original" 1>&2
 	return 1
     fi
 
     if test -z "$PACKAGE"; then
-	echo "no packagedir" 2>&1
+	echo "no packagedir" 1>&2
 	return 1
     fi
 
@@ -93,7 +93,7 @@ function cvs_checkout_parse_cmdline
 
     MODULE=$1
     if test -z "$MODULE"; then
-	echo "no module" 2>&1
+	echo "no module" 1>&2
 	return 1
     fi
 

@@ -20,18 +20,18 @@ function git_checkout_parse_cmdline
     PACKAGE=$4
 
     if test "x$VCS" != xgit; then
-	echo "wrong vcs: $VCS" 2>&1
+	echo "wrong vcs: $VCS" 1>&2
 	return 1
     fi
 
     if test \( -z "$CMD"          \) -o    \
             \( "$CMD" != clone \) ; then
-	echo "broken git command line: $@" 2>&1
+	echo "broken git command line: $@" 1>&2
 	return 1
     fi
 
     if test -z "$REPO"; then
-	echo "no repository" 2>&1
+	echo "no repository" 1>&2
 	return 1
     fi
 
@@ -44,7 +44,7 @@ function git_checkout_parse_cmdline
 #    fi
 
     if test -z "$PACKAGE"; then
-	echo "no packagedir" 2>&1
+	echo "no packagedir" 1>&2
 	return 1
     fi
 

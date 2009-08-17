@@ -86,20 +86,20 @@ function main
     done
 
     if test -z "$1"; then
-	echo "Too few arguments" 2>&1
-	print_usage 2>&1
+	echo "Too few arguments" 1>&2
+	print_usage 1>&2
 	exit 1
     fi
 
     if ! lcopy_is_member "${1}" $SUPPORTED_VCSs; then
-	echo "unknown vcs: ${1}" 2>&1
-	print_usage 2>&1
+	echo "unknown vcs: ${1}" 1>&2
+	print_usage 1>&2
 	exit 1
     fi
 
     if ! ${1}_checkout_parse_cmdline "$@"; then
-	echo "failed in the command line for ${1}" 2>&1
-	print_usage 2>&1
+	echo "failed in the command line for ${1}" 1>&2
+	print_usage 1>&2
 	exit 1
     fi
     PHASH=$(lcopy_package_hash $PACKAGE)

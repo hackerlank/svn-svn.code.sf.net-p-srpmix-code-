@@ -19,23 +19,23 @@ function darcs_checkout_parse_cmdline
     PACKAGE=$4
 
     if test "x$VCS" != xdarcs; then
-	echo "wrong vcs: $VCS" 2>&1
+	echo "wrong vcs: $VCS" 1>&2
 	return 1
     fi
     
     if test \( -z "$CMD"          \) -a    \
         \( "$CMD" != get \) ; then
-	echo "broken darcs command line: $@" 2>&1
+	echo "broken darcs command line: $@" 1>&2
 	return 1
     fi
 
     if test -z "$REPO"; then
-	echo "no repository" 2>&1
+	echo "no repository" 1>&2
 	return 1
     fi
 
     if test -z "$PACKAGE"; then
-	echo "no packagedir" 2>&1
+	echo "no packagedir" 1>&2
 	return 1
     fi
 
