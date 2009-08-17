@@ -36,7 +36,7 @@ function main
     fi
 
     if ! verify_src; then
-	echo "The number of elements of SOP_BACKUP_ arrays are not matched" 2>&1
+	echo "The number of elements of SOP_BACKUP_ arrays are not matched" 1>&2
 	exit 1
     fi
 

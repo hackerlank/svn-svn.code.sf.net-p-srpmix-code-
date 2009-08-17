@@ -11,6 +11,11 @@ SOP_BLACKLIST_DIR=${SOP_ATTIC_DIR}/blacklist
 
 
 SOP_ENABLE_MIRROR=yes
+
+SOP_MIRROR_METHOD=(
+	"ftp"
+)
+
 SOP_MIRROR_TARGET_HOST=(
 	"ftp.redhat.com"
 )

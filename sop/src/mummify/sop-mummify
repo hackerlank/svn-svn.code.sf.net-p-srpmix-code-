@@ -132,7 +132,10 @@ echo "--------------------------------------------------"
 echo " KS file       : ${SRPMIX_CFGFILE}"
 echo " ISO Output dir: ${OUTPUT_DIR}"
 echo "=================================================="
-(cd $OUTPUT_DIR; time livecd-creator --config=${SRPMIX_CFGFILE} --fslabel=livecd-${SRPMIX_FSLABEL}-${TODAY} --cache=/var/cache/live)
+(cd $OUTPUT_DIR; 
+ time livecd-creator --config=${SRPMIX_CFGFILE} 
+                     --fslabel=livecd-${SRPMIX_FSLABEL}-${TODAY} 
+		     --cache=/var/cache/live)
 
 if test $? != 0; then
     echo "*** ABORT... " " Cannot create livecd "

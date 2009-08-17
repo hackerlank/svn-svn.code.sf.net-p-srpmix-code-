@@ -33,7 +33,7 @@ function main
     local n
 
     if ! verify_targets; then
-	echo "The number of elements of SOP_MIRROR_TARGET_ arrays are not matched" 2>&1
+	echo "The number of elements of SOP_MIRROR_TARGET_ arrays are not matched" 1>&2
 	exit 1;
     fi
     

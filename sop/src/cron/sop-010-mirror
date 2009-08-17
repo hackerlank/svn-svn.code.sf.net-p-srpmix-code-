@@ -2,6 +2,7 @@
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 CONF=sop.cf
+PKGDATADIR=/usr/share/sop
 
 if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
     source "$1/${CONF}"
@@ -20,7 +21,8 @@ function count
 
 function verify_targets
 {
-    if test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATH[@]}") &&
+    if test $(count "${SOP_MIRROR_METHOD[@]}") = $(count "${SOP_MIRROR_TARGET_HOST[@]}") && 
+	test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATH[@]}") &&
 	test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATTERN[@]}"); then
 	return 0
     else
@@ -30,13 +32,21 @@ function verify_targets
 
 function mirror
 {
-    local host=$1
-    local path=$2
-    local pattern=$3
+    local method=$1
+    local host=$2
+    local path=$3
+    local pattern=$4
 
+    local handler="${PKGDATADIR}/mirror-${method}"
     local odir="${SOP_MIRROR_DIR}/${host}"
     local ldir="${SOP_MIRROR_DIR}/log"
     local date=$(date --rfc-3339=date)
+
+
+    if ! test -x "${handler}"; then
+	echo "No mirror handler for method: $method in $PKGDATADIR" 1>&2
+	return 1
+    fi
 
     if ! test -d $odir; then
 	mkdir -p $odir
@@ -48,9 +58,11 @@ function mirror
 
     (
 	cd ${odir}
-	wget -nH --cut-dirs=2 --mirror ftp://${host}${path} -A "${pattern}" \
-            -o ${ldir}/${host}.${date}.log
-	)
+
+	local log=${ldir}/${host}.${date}.log
+
+	"${handler}" "${host}" "${path}" "${log}"
+    )
 }
 
 function main
@@ -62,7 +74,7 @@ function main
     fi
 
     if ! verify_targets; then
-	echo "The number of elements of SOP_MIRROR_TARGET_ arrays are not matched" 2>&1
+	echo "The number of elements of SOP_MIRROR_TARGET_ arrays are not matched" 1>&2
 	exit 1;
     fi
     
