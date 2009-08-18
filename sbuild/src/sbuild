@@ -1,31 +1,27 @@
 #!/bin/bash
-# REQUIRE: rsync
-# verify_command srpmix
-# Record all pkgs to a external file
+
 
 PKGCONFDIR=/etc/sbuild
 PKGDATADIR=/usr/share/sbuild
-LIST_MAKER=cat
-DONT_CREATEREPO=
-RSYNC=rsync
 
 SBUILD_CONF=${PKGCONFDIR}/sbuild.cf
-SOP_CONF=/etc/sop/sop.cf
+SOP_CONF_DIR=/etc/sop
+
+CREATEREPO_ONLY=
+DONT_CREATEREPO=
+TARGET_MIRROR=
 
 
 function print_usage
 {
     echo "Usage: "
     echo "  sbuild --help"
-    echo "  sbuild [--sbuild-conf=FILE] [--sop-conf=FILE]"
+    echo "  sbuild [--sbuild-conf=FILE] [--sop-conf-dir=DIR]"
     echo "         [--tmpdir=TMPDIR]"
-    echo "         [--output-dir=OUTPUTDIR]"
     echo "         [--release=RELEASE]"
     echo "         [--debug]"
-    echo "         [--blacklist-dir=BALCKLISTDIR]"
     echo "         [--tstamp-dir=TSTAMPDIR]"
-    echo "         [--vpath-file=VPATHFILE]"
-    echo "         [--all-pkgs]"
+    echo "         [--target-mirror=NAME]"
     echo "         [--createrepo-only]"
     echo "         [--dont-createrepo]"
     echo "         [--use-tmpfs=GBYTE]"
@@ -40,8 +36,8 @@ function prepare_conf
 	    --sbuild-conf=*)
                 SBUILD_CONF=${1/--sbuild-conf=/}
 		;;
-	    --sop-conf=*)
-                SOP_CONF=${1/--sop-conf=/}
+	    --sop-conf-dir=*)
+                SOP_CONF_DIR=${1/--sop-conf-dir=/}
                 ;;
 	 esac
 	 shift
@@ -54,10 +50,10 @@ function prepare_conf
 	exit 1
     fi
 
-    if test -f "${SOP_CONF}"; then
-	source "${SOP_CONF}"
+    if test -f "${SOP_CONF_DIR}/sop.cf"; then
+	source "${SOP_CONF_DIR}/sop.cf"
     else
-	echo "Cannot load ${SOP_CONF} file" 1>&2
+	echo "Cannot load ${SOP_CONF_DIR}/sop.cf file" 1>&2
 	exit 1
     fi
 
@@ -76,14 +72,11 @@ function parse_arguments
 	    --sbuild-conf=*)
                 :
 		;;
-	    --sop-conf=*)
+	    --sop-conf-dir=*)
                 :
                 ;;
 	    --tmpdir=*)
                 SBUILD_TMPDIR=${1/--tmpdir=/}
-		;;
-	    --output-dir=*)
-	        SBUILD_OUTPUTDIR=${1/--output-dir=/}
 		;;
 	    --release=*)
                 # RELEASE=`date +%Y%m%d`
@@ -92,21 +85,14 @@ function parse_arguments
 	    --debug)
 	        SBUILD_DEBUG=y
                 ;;
-            --blacklist-dir=*)
-	        SBUILD_BLACKLISTDIR=${1/--blacklist-dir=/}
-	        ;;
+	    --target-mirror=)
+	        TARGET_MIRROR=${1/--target-mirror=/}
+		;;
             --tstamp-dir=*)
 	        SBUILD_TSTAMPDIR=${1/--tstamp-dir=/}
 	        ;;
-            --vpath-file=*)
-	        SBUILD_VPATHFILE=${1/--vpath-file=/}
-		;;
-	    --all-pkgs)
-	        LIST_MAKER="${PKGDATADIR}/sbuild-srpm-list.sh ${SOP_MIRROR_DIR}"
-		;;
 	    --createrepo-only)
-	        run_creterepo
-		exit $?
+	        CREATEREPO_ONLY=yes
 		;;
             --dont-createrepo)
 	        DONT_CREATEREPO=yes
@@ -115,8 +101,7 @@ function parse_arguments
 	        local tmpfs_size=${1/--use-tmpfs=/}
 		mkdir -p ${SBUILD_TMPDIR}
 	        if { mount | grep ${SBUILD_TMPDIR}; } > /dev/null; then
-		    echo "A file system is already mounted on ${SBUILD_TMPDIR}" 1>&2
-		    exit 1
+		    :
 		else
 		    if ! mount -t tmpfs -o size=${tmpfs_size}G tmpfs "${SBUILD_TMPDIR}"; then
 			echo "Failed in mounting tmpfs on "${SBUILD_TMPDIR}" with size ${tmpfs_size}G" 1>&2
@@ -137,50 +122,48 @@ function parse_arguments
         esac
 	shift
     done
-
-    if ! test -d ${SBUILD_OUTPUTDIR}; then
-	mkdir -p ${SBUILD_OUTPUTDIR}
-    fi
-
-    if test -z "$SBUILD_VPATHFILE"; then
-	${PKGDATADIR}/sbuild-vpath-list.sh ${SOP_MIRROR_DIR} > ${SBUILD_TSTAMPDIR}/vpath.list
-	SBUILD_VPATHFILE=${SBUILD_TSTAMPDIR}/vpath.list
-    fi
-
-    if ! test -f  "$SBUILD_VPATHFILE"; then
-	echo "Cannot read vpathfile: $SBUILD_VPATHFILE" 1>&2
-	exit 1
-    fi
-
-    if test ${SBUILD_VPATHFILE:0:1} != /; then
-	SBUILD_VPATHFILE=$(pwd)/${SBUILD_VPATHFILE}
-    fi
     
     SBUILD_JOBS=${SBUILD_JOBS:-1}
     SBUILD_LOAD=${SBUILD_LOAD:-1}
 }
 
 
-function run_make 
+function run_make
 {
+    local cf=$1
+    local name=$2
+    local tstampdir
+    local mkfile
+
     local h
     local f
-    local last_h
-    local mkfile
     local all_h
+    local last_h
 
-    mkfile=${SBUILD_TSTAMPDIR}/sbuild-tmp.mk
+    source $cf
+    if test -z "${BUILD}"; then
+	echo "No BUILD in $cf" 1>&2
+	return 1
+    fi
+
+    if test "${BUILD}" != yes; then
+	return 0
+    fi
+
+    tstampdir=${SBUILD_TSTAMPDIR}/$name
+    mkdir -p ${tstampdir}
+    mkfile=${tstampdir}/sbuild-${name}.mk
     echo "include sbuild.mk"              > $mkfile
     echo ""                               >> $mkfile
-    
-    while read f; do
+
+    cat ${SOP_MIRROR_DIR}/${name}/PKGS | while read f; do
 	f=$(basename $f)
 	h=${f:0:1}
 
 	if test "x${h}" != "x${last_h}"; then
 	    all_h="$all_h $h"
 	    last_h=$h
-	    install -d ${SBUILD_TSTAMPDIR}/$h
+	    install -d ${tstampdir}
 	    echo ""                                 >> $mkfile
 	    echo "sub-$h: \\"                       >> $mkfile
 	fi
@@ -193,68 +176,96 @@ function run_make
 	echo "sub-$h \\" >> $mkfile
     done
     echo "" >> $mkfile
-
+    
     echo '#' for h in $all_h; do  make  --makefile=$mkfile	\
-                   --include-dir=${PKGDATADIR}			\
-                   --keep-going					\
-                   --environment-overrides			\
-	            --directory=${SBUILD_TSTAMPDIR}/\$h		\
-                    --jobs=${SBUILD_JOBS}			\
-	            --max-load=${SBUILD_LOAD}			\
-                    TMPDIR=${SBUILD_TMPDIR}			\
-                    OUTPUTDIR=${SBUILD_OUTPUTDIR}		\
-                    VPATHFILE=${SBUILD_VPATHFILE}		\
-	            BLACKLISTDIR=${SBUILD_BLACKLISTDIR}		\
-                    RELEASE=${SBUILD_RELEASE}			\
-	            DEBUG=${SBUILD_DEBUG}\; done        >> $mkfile
+        --include-dir=${PKGDATADIR}				\
+        --keep-going						\
+        --environment-overrides					\
+	--directory=${tstampdir}/\$h			        \
+        --jobs=${SBUILD_JOBS}					\
+	--max-load=${SBUILD_LOAD}				\
+        TMPDIR=${SBUILD_TMPDIR}					\
+        OUTPUTDIR=${SOP_REPO_DIR}/${name}			\
+        VPATHFILE=${SOP_MIRROR_DIR}/${name}/VPATH               \
+	BLACKLISTDIR=${tstampdir}/blacklist.d			\
+        RELEASE=${SBUILD_RELEASE}				\
+	DEBUG=${SBUILD_DEBUG}\; done        >> $mkfile
 
+    mkdir -p ${SOP_REPO_DIR}/${name}
+    mkdir -p $${tstampdir}/blacklist.d
     for h in $all_h; do 
 	echo "Processing $h"
 	make  --makefile=$mkfile			\
               --include-dir=${PKGDATADIR}		\
               --keep-going				\
               --environment-overrides			\
-	      --directory=${SBUILD_TSTAMPDIR}/$h	\
+	      --directory=${tstampdir}/\$h              \
               --jobs=${SBUILD_JOBS}			\
 	      --max-load=${SBUILD_LOAD}			\
               TMPDIR=${SBUILD_TMPDIR}			\
-              OUTPUTDIR=${SBUILD_OUTPUTDIR}		\
-              VPATHFILE=${SBUILD_VPATHFILE}		\
-	      BLACKLISTDIR=${SBUILD_BLACKLISTDIR}	\
+              OUTPUTDIR=${SOP_REPO_DIR}/${name}         \
+              VPATHFILE=${SOP_MIRROR_DIR}/${name}/VPATH \
+	      BLACKLISTDIR=${tstampdir}/blacklist.d     \
               RELEASE=${SBUILD_RELEASE}			\
 	      DEBUG=${SBUILD_DEBUG}			\
 	      sub-$h
     done
-}
 
-function run_creterepo
-{
-    ${PKGDATADIR}/sbuild-createrepo.mk -C ${SBUILD_OUTPUTDIR}
 }
 
 function run_rsync
 {
-    mkdir -p ${SOP_BLACKLIST_DIR}
-    rsync -a ${SBUILD_BLACKLISTDIR}/ ${SOP_BLACKLIST_DIR}
+    local cf=$1
+    local name=$2
+
+    source $cf
+    if test -z "${BUILD}"; then
+	echo "No BUILD in $cf" 1>&2
+	return 1
+    fi
+
+    if test "${BUILD}" != yes; then
+	return 0
+    fi
+
+    mkdir -p ${SOP_BLACKLIST_DIR}/${name}
+    rsync -a ${SBUILD_TSTAMPDIR}/${name}/blacklist.d/ ${SOP_BLACKLIST_DIR}/${name}
+}
+
+function run_creterepo
+{
+    local cf=$1
+    local name=$2
+
+    source $cf
+    
+    # TODO: GC, older files, dist-mapping->weakview
+    ${PKGDATADIR}/sbuild-createrepo.mk -C ${SOP_REPO_DIR}/${name}
 }
 
 function main
 {
-    local r
-
-
+    local name
+    prepare_conf "$@"	
     parse_arguments "$@"
-    $LIST_MAKER | run_make
 
-    r=$?
+    for cf in ${SOP_CONF_DIR}/mirror.d/*; do
+	name=$(basename $cf)
+	
+	if test -z "$TARGET_MIRROR" \
+	    || test "$TARGET_MIRROR" = $name; then
+	    if test -z "$CREATEREPO_ONLY"; then
+		( run_make $cf $name )
+		( run_rsync $cf $name )
+	    fi
 
-    run_rsync
+	    if test -z "$DONT_CREATEREPO"; then
+		( run_creterepo $cf $name )
+	    fi
+	fi
+    done
 
-    if test "x${DONT_CREATEREPO}" != x; then
-	return $r;
-    fi
-
-    run_creterepo
+    
 }
 
 time main "$@"

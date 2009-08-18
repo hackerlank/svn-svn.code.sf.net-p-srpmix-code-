@@ -23,7 +23,6 @@ SRPMIX_OPTIONS  += --release=$(RELEASE) --output-dir=$(OUTPUTDIR)
 # touch $@; rm .$@;
 dummy:
 %.log: %.rpm
-	install -d $(BLACKLISTDIR)
 	+if ! test -f $(BLACKLISTDIR)/$@; then \
 	        echo "$$(basename $<)"; \
 		SRPMIX_OPTIONS="$(SRPMIX_OPTIONS)"; \

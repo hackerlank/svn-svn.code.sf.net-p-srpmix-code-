@@ -9,9 +9,19 @@ AC_CONFIG_AUX_DIR(misc/ac-aux)
 AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
 AM_MAINTAINER_MODE
 
+AC_CHECK_PROGS([SRPMIX], [srpmix])
+if test "x$GOSH" = "x"; then 
+   AC_MSG_ERROR(srpmix not found); 
+fi
+
 AC_CHECK_PROGS([GOSH], [gosh])
 if test "x$GOSH" = "x"; then 
    AC_MSG_ERROR(gosh not found); 
+fi
+
+AC_CHECK_PROGS([RSYNC], [rsync])
+if test "x$RSYNC" = "x"; then 
+   AC_MSG_ERROR(rsync not found); 
 fi
 
 AC_RPM_RELEASE
