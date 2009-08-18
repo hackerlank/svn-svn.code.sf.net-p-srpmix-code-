@@ -17,6 +17,9 @@ For version 4
 ** db, swrfのディレクトリを一階層深くする。
 ** repoをわける。--groupオプション?
    group-name,group-source-dir,group-output-dir,group-hooks
+** gen repo file from name
+
+* sopにdeployに対するハードリンクがない。
 
 * srpmix.org
 ** 全文検索
