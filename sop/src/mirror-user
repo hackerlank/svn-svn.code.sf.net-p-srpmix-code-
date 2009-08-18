@@ -1,12 +1,24 @@
 #!/bin/bash 
-host="$1"
-path="$2"
-pattern="$3"
-log="$4"
+cf=$1
+log=$2
+
+source $cf
+
+
+if test -z "$USER_PATH"; then
+    echo "No USER_PATH in $1" 1>&2
+    exit 1
+fi
+
+if test -z "$USER_PATTERN"; then
+    echo "No USER_PATTERN in $1" 1>&2
+    exit 1
+fi
+
 
 for h in /home/*; do
-    if test -d $h -a -d "$h/$path"; then
-	for p in "$h/$path"/$pattern; do
+    if test -d $h -a -d "$h/$USER_PATH"; then
+	for p in "$h/$USER_PATH"/$USER_PATTERN; do
 	    if test -r $p; then
 		s=$(basename $p)
 		if ! test -f ./$s; then

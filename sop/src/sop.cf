@@ -8,41 +8,5 @@ SOP_REPO_DIR=${SOP_ATTIC_DIR}/repo
 SOP_CASKETS_DIR=${SOP_ATTIC_DIR}/caskets
 SOP_BLACKLIST_DIR=${SOP_ATTIC_DIR}/blacklist
 
-
 SOP_ENABLE_MIRROR=yes
-
-SOP_MIRROR_METHOD=(
-	"ftp"
-	"koji"
-	"user"
-)
-
-SOP_MIRROR_TARGET_HOST=(
-	"ftp.redhat.com"
-	"kojipkgs.fedoraproject.org"
-	"local.user"
-)
-
-SOP_MIRROR_TARGET_PATH=(
-	"/pub/redhat"
-	"dist-f12-maven"
-	"srpmix-requests"
-)
-
-SOP_MIRROR_TARGET_PATTERN=(
-	'*.src.rpm'
-	'-'
- 	'*.src.rpm'
-)
-
-
 SOP_ENABLE_BACKUP=yes
-SOP_BACKUP_SRC=(
-	"${SOP_MIRROR_DIR}/ftp.redhat.com"
-	"${SOP_REQUESTS_DIR}/requests"
-)
-
-SOP_BACKUP_DST=(
-	"${SOP_BACKUP_DIR}/mirror/ftp.redhat.com"
-	"${SOP_BACKUP_DIR}/requests"
-)

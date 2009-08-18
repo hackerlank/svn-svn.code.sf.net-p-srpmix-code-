@@ -1,11 +1,22 @@
 #!/bin/bash
-host=$1
-path=$2
-pattern=$3
-log=$4
+cf=$1
+log=$2
 
-KOJIURL=http://$1
-DIST=$2
+source $cf
+
+if test -z "$KOJI_HOST"; then
+    echo "No KOJI_HOST in $1" 1>&2
+    exit 1
+fi
+
+if test -z "$KOJI_DIST"; then
+    echo "No KOJI_DIST in $1" 1>&2
+    exit 1
+fi
+
+
+URL=http://$KOJI_HOST
+DIST=$KOJI_DIST
 OUTPUT_DIR=$(pwd)
 LOG=$log
 SNAPSHOT=/dev/null
@@ -27,7 +38,7 @@ function get_srpm
     local v=$2
     local r=$3
 
-    wget -q ${KOJIURL}/packages/$p/$v/$r/src/$p-$v-$r.src.rpm
+    wget -q ${URL}/packages/$p/$v/$r/src/$p-$v-$r.src.rpm
 }
 
 function prepare

@@ -1,55 +1,49 @@
 #!/bin/bash
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
-RSYNC=rsync
+SOPCONFDIR=/etc/sop
 CONF=sop.cf
+PKGDATADIR=/usr/share/sop
 
 if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    SOPCONFDIR=$1
     source "$1/${CONF}"
-elif test -f /etc/sop/${CONF}; then
-    source /etc/sop/${CONF}
+elif test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
 else
     echo "Cannot load ${CONF} file" 1>&2
     exit 1
 fi
 
-function count
+function backup
 {
-    echo $#
-}
+    local cf=$1
+    local name=$(basename $cf)
 
-function verify_src
-{
-    if test $(count "${SOP_BACKUP_SRC[@]}") = $(count "${SOP_BACKUP_DST[@]}"); then
-	return 0
-    else
+    source $cf
+    if test -z "$BACKUP"; then
+	echo "No BACKUP in $cf" 1>&2
 	return 1
     fi
-}
+    
+    if test "$BACKUP" != yes; then
+	return 0
+    fi
+    
+    mkdir -p ${SOP_BACKUP_DIR}/$name
+    rsync -auvH ${SOP_MIRROR_DIR}/$name ${SOP_BAKCUP_DIR}/mirror/$name 2>&1 \
+	|tee "/tmp/rsync-${name}.log"
 
+}
 function main
 {
-    local n
-
     if test "x${SOP_ENABLE_BACKUP}" = x; then
 	return 0
     fi
 
-    if ! verify_src; then
-	echo "The number of elements of SOP_BACKUP_ arrays are not matched" 1>&2
-	exit 1
-    fi
-
-    let n=$(count "${SOP_BACKUP_SRC[@]}")
-    let i=0
-    while [ $i -lt $n ]; do
-	if echo "${SOP_BACKUP_DST[$i]}" | grep -e '.*/$' > /dev/null 2>&1; then
-	    mkdir -p $(driname "${SOP_BACKUP_DST[$i]}")
-	else
-	    mkdir -p "${SOP_BACKUP_DST[$i]}"
-	fi
-	${RSYNC} -auvH "${SOP_BACKUP_SRC[$i]}" "${SOP_BACKUP_DST[$i]}" 2>&1 |tee "/tmp/rsync${i}.log"
-	let i=i+1
+    
+    for x in ${SOPCONFDIR}/mirror.d/*; do
+	( backup "$x" )
     done
 }
 

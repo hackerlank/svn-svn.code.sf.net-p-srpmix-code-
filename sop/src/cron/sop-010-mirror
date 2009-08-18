@@ -1,44 +1,51 @@
 #!/bin/bash
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
+SOPCONFDIR=/etc/sop
 CONF=sop.cf
 PKGDATADIR=/usr/share/sop
 
 if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    SOPCONFDIR=$1
     source "$1/${CONF}"
-elif test -f /etc/sop/${CONF}; then
-    source /etc/sop/${CONF}
+elif test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
 else
     echo "Cannot load ${CONF} file" 1>&2
     exit 1
 fi
 
-
-function count
-{
-    echo $#
-}
-
-function verify_targets
-{
-    if test $(count "${SOP_MIRROR_METHOD[@]}") = $(count "${SOP_MIRROR_TARGET_HOST[@]}") && 
-	test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATH[@]}") &&
-	test $(count "${SOP_MIRROR_TARGET_HOST[@]}") = $(count "${SOP_MIRROR_TARGET_PATTERN[@]}"); then
-	return 0
-    else
-	return 1
-    fi
-}
-
 function mirror
 {
-    local method=$1
-    local host=$2
-    local path=$3
-    local pattern=$4
+    local cf=$1
+    local name=$(basename $1)
 
-    local handler="${PKGDATADIR}/mirror-${method}"
-    local odir="${SOP_MIRROR_DIR}/${host}"
+    source $cf
+    if test -z "$METHOD"; then
+	echo "No METHOD found in $cf" 1>&2
+	return 1
+    fi
+    if test -z "$ENABLE"; then
+	echo "No ENABLE found in $cf" 1>&2
+	return 1
+    fi
+    if test -z "$GC"; then
+	echo "No GC found in $cf" 1>&2
+	return 1
+    fi
+    if test -z "$BACKUP"; then
+	echo "No BACKUP found in $cf" 1>&2
+	return 1
+    fi
+    
+
+    if test $ENABLE != yes; then
+	return 0
+    fi
+
+
+    local handler="${PKGDATADIR}/mirror-${METHOD}"
+    local odir="${SOP_MIRROR_DIR}/${name}"
     local ldir="${SOP_MIRROR_DIR}/log"
     local date=$(date --rfc-3339=date)
 
@@ -56,39 +63,24 @@ function mirror
 	mkdir -p $ldir
     fi
 
-    (
-	cd ${odir}
 
-	local log=${ldir}/${host}.${date}.log
+    cd ${odir}
 
-	"${handler}" "${host}" "${path}" "${pattern}" "${log}"
-    )
+    local log=${ldir}/${host}.${date}.log
+
+    "${handler}" ${cf} "${log}"
 }
 
 function main
 {
-    local n
-
     if test "x$SOP_ENABLE_MIRROR" = x; then
 	return 0
     fi
 
-    if ! verify_targets; then
-	echo "The number of elements of SOP_MIRROR_TARGET_ arrays are not matched" 1>&2
-	exit 1;
-    fi
-    
-    let n=$(count "${SOP_MIRROR_TARGET_HOST[@]}")
-    let i=0
-    while [ $i -lt $n ]; do
-	mirror "${SOP_MIRROR_METHOD[$i]}"		\
-	       "${SOP_MIRROR_TARGET_HOST[$i]}"		\
-	       "${SOP_MIRROR_TARGET_PATH[$i]}"		\
-	       "${SOP_MIRROR_TARGET_PATTERN[$i]}" 
-	let i=i+1
-    done
 
-    return 0
+    for x in ${SOPCONFDIR}/mirror.d/*; do
+	( mirror $x )
+    done
 }
 
 time main
