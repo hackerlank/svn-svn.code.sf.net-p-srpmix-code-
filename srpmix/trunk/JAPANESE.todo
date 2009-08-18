@@ -18,7 +18,7 @@ For version 4
 ** repoをわける。--groupオプション?
    group-name,group-source-dir,group-output-dir,group-hooks
 ** gen repo file from name
-
+** installer
 * sopにdeployに対するハードリンクがない。
 
 * srpmix.org
@@ -81,3 +81,6 @@ done
 
 After version 4
 ========================================================================
+Improve spec arrange stage
+real package management
+extra backend
