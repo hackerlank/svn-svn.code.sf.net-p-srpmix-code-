@@ -351,11 +351,11 @@ else
 fi
 ( cd \$from; find . -newer %{_builddir}/%{name}/.run-plugin -not -type d | 
 while read f; do
-  install -d \$to/\$(dirname \$f)
-  if test -L \$f; then
-    ln -s \$(readlink \$f) \$to/\$f 
+  install -d \$to/\$(dirname "\$f")
+  if test -L "\$f"; then
+    ln -s \$(readlink "\$f") \$to/"\$f"
   else
-    \$transfer_cmd \$f \$to/\$f
+    \$transfer_cmd "\$f" \$to/"\$f"
   fi
 done )
 
