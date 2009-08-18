@@ -2,6 +2,7 @@ METHOD=user
 ENABLE=yes
 GC=no
 BACKUP=yes
+BUILD=yes
 
 USER_PATH=srpmix-request
 USER_PATTERN='*.src.rpm'

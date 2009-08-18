@@ -2,6 +2,7 @@ METHOD=koji
 ENABLE=yes
 GC=yes
 BACKUP=no
+BUILD=yes
 
 KOJI_HOST=kojipkgs.fedoraproject.org
 KOJI_DIST=dist-f12-maven
