@@ -37,6 +37,10 @@ function mirror
 	echo "No BACKUP found in $cf" 1>&2
 	return 1
     fi
+    if test -z "$DIST_MAPPING"; then
+	echo "No DIST_MAPPING found in $cf" 1>&2
+	return 1
+    fi
     
 
     if test $ENABLE != yes; then
@@ -81,6 +85,12 @@ function mirror
 	| sort					\
 	| uniq					\
 	> ${odir}/PKGS
+
+    if test "${DIST_MAPPING}" = yes; then
+	find ${odir} -name '*.src.rpm' \
+	    | srpmix-wrap --just-print \
+	    > ${odir}/${name}.es
+    fi
 }
 
 function main
