@@ -69,6 +69,18 @@ function mirror
     local log=${ldir}/${host}.${date}.log
 
     "${handler}" ${cf} "${log}"
+
+    # TODO: share the code
+    find ${odir} -name '*.src.rpm'		\
+	| while read p; do dirname $p; done	\
+	| sort					\
+	| uniq					\
+	> ${odir}/VPATH
+    find ${odir} -name '*.src.rpm'		\
+	| while read p; do basename $p; done	\
+	| sort					\
+	| uniq					\
+	> ${odir}/PKGS
 }
 
 function main
