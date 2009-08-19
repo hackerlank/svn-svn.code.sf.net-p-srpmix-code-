@@ -3,7 +3,7 @@ Name: srpmix
 Version: #PACKAGE_VERSION#
 Release: #RPM_RELEASE#
 Source: srpmix-#PACKAGE_VERSION#.tar.bz2
-Requires: hardlink cpio rpm coreutils emacs-common file gauche gettext
+Requires: hardlink cpio rpm coreutils emacs-common file gauche
 Requires: srpmix-dir-base
 # Requires: gettext gettext-devel autoconf* automake* libtool jcommon
 Buildarch: noarch
