@@ -21,6 +21,8 @@ For version 4
 ** installer
 * sopにdeployに対するハードリンクがない。
 
+* gc-repo.scmでのattachmentの扱い
+
 * srpmix.org
 ** 全文検索
 ** ウェブインターフェイス

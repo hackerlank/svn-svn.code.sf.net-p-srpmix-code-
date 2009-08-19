@@ -20,7 +20,7 @@ AC_DEFUN([SRPMIX_PROGS],[
 
 
   AC_CHECK_PROGS([FASTJAR], [fastjar])
-  if test "x$FASTJAR" = "x"; then AC_MSG_ERROR(fastjar (maybe in libgcj pkg) not found); fi
+  if test "x$FASTJAR" = "x"; then AC_MSG_ERROR([fastjar (maybe in libgcj pkg) not found]); fi
 
   AC_CHECK_PROGS([RPMBUILD], [rpmbuild])
   if test "x$RPMBUILD" = "x"; then AC_MSG_ERROR(rpmbuild not found); fi

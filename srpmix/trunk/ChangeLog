@@ -1,5 +1,7 @@
 2009-08-19  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/m4/progs.m4([SRPM_PROGS]): Put [] around error message.
+
 	* src/srpmix-wrap (transfer_cmd): Quote file names when transfering.
 
 2009-08-16  Masatake YAMATO  <yamato@redhat.com>
