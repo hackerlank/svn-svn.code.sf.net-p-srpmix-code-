@@ -70,7 +70,7 @@ function mirror
 
     cd ${odir}
 
-    local log=${ldir}/${host}.${date}.log
+    local log=${ldir}/${name}.${date}.log
 
     "${handler}" ${cf} "${log}"
 
