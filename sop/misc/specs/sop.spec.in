@@ -31,6 +31,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_sysconfdir}/cron.daily/sop-*
 %{_datadir}/sop/*
+%{_bindir}/sop-repofile
+%{_bindir}/sop-update
+%{_bindir}/sop-mummify
 %config(noreplace) %{_sysconfdir}/sop/sop.cf
 
 

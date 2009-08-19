@@ -1,8 +1,8 @@
 METHOD=user
 ENABLE=yes
 GC=no
-BACKUP=yes
-BUILD=yes
+BACKUP=no
+BUILD=no
 DIST_MAPPING=no
 
 USER_PATH=srpmix-request

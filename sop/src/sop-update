@@ -1,0 +1,63 @@
+#!/bin/bash
+
+SOPCONFDIR=/etc/sop
+CONF=sop.cf
+PKGDATADIR=/usr/share/sop
+
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    SOPCONFDIR=$1
+    source "$1/${CONF}"
+elif test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function print_usage
+{
+    echo "Usage: "
+    echo "	sop-update MIRROR_NAME..."
+}
+
+function run_update
+{
+    local cf=$1
+    local name=$2
+    local repo_name=$3
+    local action=$4
+
+    source $cf
+
+    if test -z "$GC"; then
+	echo "No GC found in $cf" 1>&2
+	return 1
+    fi
+
+    if test $GC != yes; then
+	yum -y --disablerepo='*' --enablerepo=${repo_name} ${action}
+	return $?
+    fi
+
+    # TODO
+}
+    
+function main
+{
+    local cf
+    local repo_name
+    local protocol
+
+    protocol=file
+    for mirror_name in "$@"; do
+	cf=${SOPCONFDIR}/mirror.d/$mirro_name
+	if ! test -f $cf; then
+	    echo "No such mirror: $name" 1>&2
+	    continue
+	fi
+	( run_update $cf $mirro_name $repo_name update )
+    done
+}
+
+main "$@"

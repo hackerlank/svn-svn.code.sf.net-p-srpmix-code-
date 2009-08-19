@@ -1,7 +1,7 @@
 METHOD=ftp
 ENABLE=yes
 GC=no
-BACKUP=yes
+BACKUP=no
 BUILD=yes
 DIST_MAPPING=no
 

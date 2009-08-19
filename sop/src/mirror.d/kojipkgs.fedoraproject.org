@@ -2,7 +2,7 @@ METHOD=koji
 ENABLE=yes
 GC=yes
 BACKUP=no
-BUILD=yes
+BUILD=no
 DIST_MAPPING=yes
 
 KOJI_HOST=kojipkgs.fedoraproject.org

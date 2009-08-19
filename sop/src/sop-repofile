@@ -1,0 +1,84 @@
+#!/bin/bash
+
+SOPCONFDIR=/etc/sop
+CONF=sop.cf
+PKGDATADIR=/usr/share/sop
+
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    SOPCONFDIR=$1
+    source "$1/${CONF}"
+elif test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+#
+# sop-repofile --output-dir=dir --protocol=file mirror-name
+#
+function print_usage
+{
+    echo "Usage: "
+    echo "       sop-repofile [--output-dir=DIR] [--protocol=PROTOCOL] MIRROR_NAME"
+    echo ""
+    echo "       Supported protocols: file"
+}
+function main
+{
+    local output_dir
+    local output_file=/dev/stdout
+    local protocol
+    local mirror_name
+    local name
+    local repo_name
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --output-dir=*)
+                output_dir=${1/--output-dir=/}
+		;;
+	     --protocol=*)
+	        protocol=${1/--protocol=/}
+		if test $protocol != "file"; then
+	            print_usage 1>&2
+		    exit 1
+		fi
+		;;
+	     -*)
+	        print_usage 1>&2
+		exit 1
+		;;
+	 esac
+	 shift
+    done
+    
+    if [ $# -ne 1 ]; then
+	print_usage 1>&2
+	exit 1
+    fi
+    mirror_name=$1
+    name=$(echo $mirror_name | sed -e's/\./-/g')
+    repo_name=srpmix-$protocol-${name}
+    shift
+
+    if ! test -z $output_dir; then
+	output_file=$output_dir/${repo_name}.repo
+    fi
+    
+    cat > "$output_file" <<EOF
+[${repo_name}]
+name=Srpmix packages for $mirror_name via $protocol
+baseurl=file://${SOP_REPO_DIR}/${name}
+enabled=0
+gpgcheck=0
+EOF
+
+}
+
+main "$@"

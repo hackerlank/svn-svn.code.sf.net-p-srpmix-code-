@@ -90,6 +90,7 @@ function mirror
 	find ${odir} -name '*.src.rpm' \
 	    | srpmix-wrap --just-print \
 	    > ${odir}/${name}.es
+	# TODO make comps
     fi
 }
 

@@ -10,3 +10,10 @@ dist_pkgdata_SCRIPTS= \
 	mirror-user   \
 	\
 	$(NULL)
+
+dist_bin_SCRIPTS =				\
+	sop-repofile				\
+	sop-update				\
+	sop-mummify				\
+	\
+	$(NULL)
