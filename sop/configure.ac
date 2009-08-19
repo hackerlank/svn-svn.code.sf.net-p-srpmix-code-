@@ -41,6 +41,7 @@ AC_OUTPUT([
 	misc/makefiles/Makefile
 	src/Makefile
 	src/cron/Makefile
+	src/mirror.d/Makefile
 	])
 
 
