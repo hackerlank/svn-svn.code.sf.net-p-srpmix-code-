@@ -245,7 +245,9 @@ function run_creterepo
 
     source $cf
 
-    ${PKGDATADIR}/sbuild-createrepo.mk -C ${SOP_REPO_DIR}/${name}
+    if test -d ${SOP_REPO_DIR}/${name}; then
+	${PKGDATADIR}/sbuild-createrepo.mk -C ${SOP_REPO_DIR}/${name}
+    fi
 }
 
 function repogc
