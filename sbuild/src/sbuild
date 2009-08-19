@@ -158,13 +158,16 @@ function run_make
     echo ""                               >> $mkfile
 
     cat ${SOP_MIRROR_DIR}/${name}/PKGS | while read f; do
+	if test -z "$f"; then
+	    break
+	fi
 	f=$(basename $f)
 	h=${f:0:1}
 
 	if test "x${h}" != "x${last_h}"; then
 	    all_h="$all_h $h"
 	    last_h=$h
-	    install -d ${tstampdir}
+	    install -d ${tstampdir}/$h
 	    echo ""                                 >> $mkfile
 	    echo "sub-$h: \\"                       >> $mkfile
 	fi
@@ -178,7 +181,7 @@ function run_make
     done
     echo "" >> $mkfile
     
-    echo '#' for h in $all_h; do  make  --makefile=$mkfile	\
+    echo '#' for h in $all_h\; do  make  --makefile=$mkfile	\
         --include-dir=${PKGDATADIR}				\
         --keep-going						\
         --environment-overrides					\
@@ -193,7 +196,7 @@ function run_make
 	DEBUG=${SBUILD_DEBUG}\; done        >> $mkfile
 
     mkdir -p ${SOP_REPO_DIR}/${name}
-    mkdir -p $${tstampdir}/blacklist.d
+    mkdir -p ${tstampdir}/blacklist.d
     for h in $all_h; do 
 	echo "Processing $h"
 	make  --makefile=$mkfile			\
