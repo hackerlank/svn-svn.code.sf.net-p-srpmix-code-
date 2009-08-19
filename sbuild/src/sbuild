@@ -158,13 +158,13 @@ function run_make
     echo ""                               >> $mkfile
 
     cat ${SOP_MIRROR_DIR}/${name}/PKGS | while read f; do
-	if test -z "$f"; then
+	if [[ -z "$f" ]]; then
 	    break
 	fi
 	f=$(basename $f)
 	h=${f:0:1}
 
-	if test "x${h}" != "x${last_h}"; then
+	if [[ "x${h}" != "x${last_h}" ]]; then
 #           Cannot return the result to parent process.
 #	    all_h="$all_h $h"
 	    last_h=$h
@@ -205,7 +205,7 @@ function run_make
               --include-dir=${PKGDATADIR}		\
               --keep-going				\
               --environment-overrides			\
-	      --directory=${tstampdir}/\$h              \
+	      --directory=${tstampdir}/$h               \
               --jobs=${SBUILD_JOBS}			\
 	      --max-load=${SBUILD_LOAD}			\
               TMPDIR=${SBUILD_TMPDIR}			\
