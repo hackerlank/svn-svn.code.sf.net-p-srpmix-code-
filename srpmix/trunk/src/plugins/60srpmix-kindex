@@ -138,7 +138,7 @@ function main
 	if test "x${perarch_kernel}" = x; then
 	    for x in ${PRE_BUILDDIR}/kernel-*/linux*/Makefile; do
 		if test -f $x; then
-		    if grep '^TAGS:' $x > /dev/null 2>&1; then
+		    if grep '\(^TAGS:\)\|\( TAGS \)' $x > /dev/null 2>&1; then
 			mkdir -p ${TMPDIR}/generic
 			cd $(dirname $x)
 			if ! make O=${TMPDIR}/generic TAGS; then
