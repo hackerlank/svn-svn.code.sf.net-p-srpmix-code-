@@ -30,6 +30,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_bindir}/sbuild
+%{_bindir}/sbuild-comps
 %{_datadir}/sbuild/*
 
 %config(noreplace) %{_sysconfdir}/sbuild/sbuild.cf

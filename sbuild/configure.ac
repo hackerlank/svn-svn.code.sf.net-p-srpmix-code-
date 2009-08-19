@@ -1,6 +1,6 @@
 m4_define([pkg_name],[sbuild])
 m4_define([pkg_major_version],[0])
-m4_define([pkg_minor_version],[0])
+m4_define([pkg_minor_version],[1])
 m4_define([pkg_micro_version],[0])
 m4_define([pkg_version],pkg_major_version.pkg_minor_version.pkg_micro_version)
 
@@ -10,7 +10,7 @@ AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
 AM_MAINTAINER_MODE
 
 AC_CHECK_PROGS([SRPMIX], [srpmix])
-if test "x$GOSH" = "x"; then 
+if test "x$SRPMIX" = "x"; then 
    AC_MSG_ERROR(srpmix not found); 
 fi
 
