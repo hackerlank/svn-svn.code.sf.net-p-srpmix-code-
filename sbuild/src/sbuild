@@ -172,7 +172,7 @@ function run_make
 	    echo ""                                 >> $mkfile
 	    echo "sub-$h: \\"                       >> $mkfile
 	fi
-	echo "$(echo $f | sed 's/\.rpm/.log/g') \\" >> $mkfile
+	echo ${f/.src.rpm/.src.log}                 >> $mkfile
     done
 
     all_h=$(cat ${SOP_MIRROR_DIR}/${name}/PKGS | sed -e 's/\(.\).*$/\1/' | uniq)
