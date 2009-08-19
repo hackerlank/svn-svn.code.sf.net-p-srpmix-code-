@@ -165,7 +165,8 @@ function run_make
 	h=${f:0:1}
 
 	if test "x${h}" != "x${last_h}"; then
-	    all_h="$all_h $h"
+#           Cannot return the result to parent process.
+#	    all_h="$all_h $h"
 	    last_h=$h
 	    install -d ${tstampdir}/$h
 	    echo ""                                 >> $mkfile
@@ -174,6 +175,7 @@ function run_make
 	echo "$(echo $f | sed 's/\.rpm/.log/g') \\" >> $mkfile
     done
 
+    all_h=$(cat ${SOP_MIRROR_DIR}/${name}/PKGS | sed -e 's/\(.\).*$/\1/' | uniq)
     echo "" >> $mkfile
     echo  "all: \\" >> $mkfile
     for h in $all_h; do 
