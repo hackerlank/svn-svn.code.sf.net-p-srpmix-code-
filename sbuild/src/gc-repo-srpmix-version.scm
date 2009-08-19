@@ -1,6 +1,8 @@
-#!/usr/bin/gosh
+#!/usr/bin/gosh				;
 ;; -*- scheme -*-
 (use gauche.version)
+(use file.util)
+
 
 ;; find /srv/sources/attic/repo -type f | gosh sbuild-repogc.scm
 (define (main args)
@@ -32,7 +34,7 @@
 	 (hash-table-push! htable base (list file version))
 	 (loop (read-line)))
 	(else
-	 (print l)
+	 ;;(print l)
 	 (loop (read-line))
 	 ))))
   (hash-table-for-each htable 
@@ -41,9 +43,11 @@
 					    (lambda (a b)
 					      (version>? (cadr a) (cadr b)))))
 			   (unless (null? l)
-			     (for-each (lambda (elt)
-					 (write `(gc ,(car elt)))
-					 (newline))
-				       l)
-			     ;(newline)
-			 )))))
+			     (remove-files (map (lambda (elt)
+						  (let1 file (car elt)
+						    (write `(gc ,file))
+						    (newline)
+						    file))
+						l))
+			     ;;(newline)
+			     )))))

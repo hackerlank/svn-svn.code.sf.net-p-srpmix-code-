@@ -114,6 +114,7 @@ function parse_arguments
 		;;
 	    --jobs=*)
 	        SBUILD_JOBS=${1/--jobs=/}
+
 		;;
             *)
 	        print_usage 1>&2
@@ -238,9 +239,85 @@ function run_creterepo
     local name=$2
 
     source $cf
-    
-    # TODO: GC, older files, dist-mapping->weakview
+
     ${PKGDATADIR}/sbuild-createrepo.mk -C ${SOP_REPO_DIR}/${name}
+}
+
+function repogc
+{
+    local cf=$1
+    local name=$2
+
+
+    source $cf
+    find ${SOP_REPO_DIR}/${name} -type f \
+	| gosh ${PKGDATADIR}/gc-repo-srpmix-version.scm
+
+
+    if test -z "${GC}"; then
+	echo "No GC in $cf" 1>&2
+	return 1
+    fi
+    
+    if test -z "${BUILD}"; then
+	echo "No BUILD in $cf" 1>&2
+	return 1
+    fi
+    
+    if test ${GC} != yes; then
+	return 0
+    fi
+
+    if test ${BUILD} != yes; then
+	return 0
+    fi
+
+    local repo_dir=${SOP_REPO_DIR}/${name}
+    local dist_mapping=${SOP_REPO_DIR}/${name}/${name}.es
+    
+    if ! test -f ${dist_mapping}; then
+	return 0
+    fi
+    :
+    : TODO gc-repo-pkg-version.scm
+    :
+}
+
+function create_weakview
+{
+    local cf=$1
+    local name=$2
+    local today
+
+    source $cf
+
+
+    if test -z "${GC}"; then
+	echo "No GC in $cf" 1>&2
+	return 1
+    fi
+    
+    if test -z "${BUILD}"; then
+	echo "No BUILD in $cf" 1>&2
+	return 1
+    fi
+    
+    if test ${GC} != yes; then
+	return 0
+    fi
+
+    if test ${BUILD} != yes; then
+	return 0
+    fi
+
+    local repo_dir=${SOP_REPO_DIR}/${name}
+    local dist_mapping=${SOP_REPO_DIR}/${name}/${name}.es
+    if ! test -f ${dist_mapping}; then
+	return 0
+    fi
+    :
+    :  TODO
+    :
 }
 
 function main
@@ -260,6 +337,8 @@ function main
 	    fi
 
 	    if test -z "$DONT_CREATEREPO"; then
+                ( repogc $cf $name )
+		( create_weakview $cf $name )
 		( run_creterepo $cf $name )
 	    fi
 	fi

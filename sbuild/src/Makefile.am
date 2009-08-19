@@ -7,10 +7,11 @@ dist_bin_SCRIPTS=    \
 	\
 	$(NULL)
 
-dist_pkgdata_SCRIPTS=  \
-	sbuild-createrepo.mk \
-	sbuild.mk            \
-	gc-repo.scm          \
-	create-comps.scm     \
+dist_pkgdata_SCRIPTS=				\
+	sbuild-createrepo.mk			\
+	sbuild.mk				\
+	gc-repo-srpmix-version.scm		\
+	gc-repo-pkg-version.scm			\
+	create-comps.scm                        \
 	\
 	$(NULL)
