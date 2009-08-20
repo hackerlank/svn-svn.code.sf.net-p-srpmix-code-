@@ -187,7 +187,7 @@ function run_make
 	    echo ""                                 >> $mkfile
 	    echo "sub-$h: \\"                       >> $mkfile
 	fi
-	echo ${f/.src.rpm/.src.log}                 >> $mkfile
+	echo " " ${f/.src.rpm/.src.log} '\'         >> $mkfile
     done
 
     all_h=$(cat ${pkgs} | sed -e 's/\(.\).*$/\1/' | uniq)
@@ -351,8 +351,8 @@ function main
     parse_arguments "$@"
 
     for cradle in ${SOP_CRADLES_DIR}/*; do
-	cf=$(cradle)/cf
-	name=$(basename $cf)
+	cf=${cradle}/cf
+	name=$(basename ${cradle})
 	
 	if test -z "$CRADLE" \
 	    || test "$CRADLE" = $name; then
