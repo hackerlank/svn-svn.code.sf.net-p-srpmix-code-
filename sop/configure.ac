@@ -42,6 +42,8 @@ AC_OUTPUT([
 	src/Makefile
 	src/cron/Makefile
 	src/cradle-confs/Makefile
+	src/dist-mapping/Makefile
+	src/dist-mapping/ftp.redhat.com/Makefile
 	])
 
 
