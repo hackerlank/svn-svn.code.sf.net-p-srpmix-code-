@@ -17,13 +17,14 @@ fi
 function print_usage
 {
     echo "Usage: "
-    echo "	sop-prepare CRADLE-CONF [NAME]"
+    echo "	sop-prepare CRADLE-CONF [NAME] [DIST-MAPPING-DIR]"
 }
 
 function main
 {
     local cradle_cf=$1
     local cradle_name=$2
+    local dist_mapping_dir=$3
 
     if test -z "$cradle_cf"; then
 	print_usage 1>&2
@@ -35,16 +36,31 @@ function main
 	exit 1
     fi
 
-    if test -z "cradle_name"; then
-	cradle_name=$($basename {cradle_cf})
+    if test -z "${cradle_name}"; then
+	cradle_name=$(basename ${cradle_cf})
     fi
 
+    if test -z "${dist_mapping_dir}"; then
+	if test -d ${PKGDATADIR}/dist-mapping/${cradle_name};
+	    dist_mapping_dir="${PKGDATADIR}/dist-mapping/${cradle_name}"
+	fi
+    fi
+
+    if test -n "${dist_mapping_dir}" && ( ! test -d "${dist_mapping_dir}" ); then
+	echo "No such dirname $dist_mapping_dir" 1>&2
+	exit 1
+    fi
+    
     mkdir -p ${SOP_SOURCES_DIR}
     mkdir -p ${SOP_ATTIC_DIR}
     mkdir -p ${SOP_CRADLES_DIR}/${cradle_name}
     cp "$cradle_cf" ${SOP_CRADLES_DIR}/${cradle_name}/cf
     
     mkdir -p ${SOP_CRADLES_DIR}/${cradle_name}/{mirror,repo,blacklist,log,dist-mapping}
+    
+    if test -n "${dist_mapping_dir}"; then
+	cp ${dist_mapping_dir}/* ${SOP_CRADLES_DIR}/${cradle_name}/dist-mapping
+    fi
 }
 
 main "$@"
