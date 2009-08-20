@@ -303,6 +303,7 @@ function main
             p0=$(basename $p)
             p00=`srpmix_srchash $p0`
             mkdir -p "${OUTPUT_DIR}/${p00}"
+	    # TODO: Parallel dir-pkg building  may conflicts
             mv $p "${OUTPUT_DIR}/${p00}/"
         done
     fi

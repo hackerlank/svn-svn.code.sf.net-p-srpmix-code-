@@ -21,6 +21,7 @@ For version 4
 ** installer
 * sopにdeployに対するハードリンクがない。
 
+* # TODO: Parallel dir-pkg building  may conflicts
 * gc-repo.scmでのattachmentの扱い
 
 * srpmix.org
