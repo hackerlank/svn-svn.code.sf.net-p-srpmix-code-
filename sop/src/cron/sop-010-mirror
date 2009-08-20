@@ -81,7 +81,7 @@ function mirror
 	| LANG=C sort				\
 	| uniq					\
 	> ${ndir}/.mirror-vpath
-    mv -f ${ndir}/.mirror-vpath ${ndir}/mirro-vpath
+    mv -f ${ndir}/.mirror-vpath ${ndir}/mirror-vpath
     find ${odir} -name '*.src.rpm'		\
 	| while read p; do basename $p; done	\
 	| LANG=C sort			        \
