@@ -1,1 +1,34 @@
 #!/bin/bash
+#!/bin/bash
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+SOPCONFDIR=/etc/sop
+CONF=sop.cf
+PKGDATADIR=/usr/share/sop
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    SOPCONFDIR=$1
+    source "$1/${CONF}"
+elif test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function main
+{
+    local n
+
+    for x in ${SOP_SOURCES_DIR}/*; do
+	if test -d $x; then
+	    for y in $x/*; do
+		if test -d $y; then
+		    ( hardlink $y )
+		fi
+	    done
+	fi
+    done
+}
+
+time main
