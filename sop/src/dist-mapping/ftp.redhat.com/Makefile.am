@@ -1,4 +1,4 @@
-dmappingdir=$(pkgdatadir)/dist-mapping
+dmappingdir=$(pkgdatadir)/dist-mapping/ftp.redhat.com
 dist_dmapping_DATA = \
 cs3u8.es  ds8u0.es	 rhel2u0.es  rhel3u2.es  rhel4u0.es  rhel4u8.es		\
 cs4u0.es  gfs4u0.es	 rhel2u2.es  rhel3u3.es  rhel4u1.es  rhel5su0.es	\

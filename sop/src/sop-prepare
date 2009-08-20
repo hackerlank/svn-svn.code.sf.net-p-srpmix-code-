@@ -41,7 +41,7 @@ function main
     fi
 
     if test -z "${dist_mapping_dir}"; then
-	if test -d ${PKGDATADIR}/dist-mapping/${cradle_name};
+	if test -d ${PKGDATADIR}/dist-mapping/${cradle_name}; then
 	    dist_mapping_dir="${PKGDATADIR}/dist-mapping/${cradle_name}"
 	fi
     fi
