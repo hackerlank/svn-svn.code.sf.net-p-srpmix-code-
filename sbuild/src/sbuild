@@ -9,7 +9,7 @@ SOP_CONF_DIR=/etc/sop
 
 CREATEREPO_ONLY=
 DONT_CREATEREPO=
-TARGET_MIRROR=
+CRADLE=
 
 
 function print_usage
@@ -21,7 +21,7 @@ function print_usage
     echo "         [--release=RELEASE]"
     echo "         [--debug]"
     echo "         [--tstamp-dir=TSTAMPDIR]"
-    echo "         [--target-mirror=NAME]"
+    echo "         [--cradle=NAME]"
     echo "         [--createrepo-only]"
     echo "         [--dont-createrepo]"
     echo "         [--use-tmpfs=GBYTE]"
@@ -85,8 +85,8 @@ function parse_arguments
 	    --debug)
 	        SBUILD_DEBUG=y
                 ;;
-	    --target-mirror=)
-	        TARGET_MIRROR=${1/--target-mirror=/}
+	    --cradle=)
+	        CRADLE=${1/--cradle=/}
 		;;
             --tstamp-dir=*)
 	        SBUILD_TSTAMPDIR=${1/--tstamp-dir=/}
@@ -124,8 +124,8 @@ function parse_arguments
 	shift
     done
     
-    SBUILD_JOBS=${SBUILD_JOBS:-1}
-    SBUILD_LOAD=${SBUILD_LOAD:-1}
+    SBUILD_JOBS=${SBUILD_JOBS:-$(cat /proc/cpuinfo  | grep ^processor  | wc -l)}
+    SBUILD_LOAD=${SBUILD_LOAD:-$(cat /proc/cpuinfo  | grep ^processor  | wc -l)}
 }
 
 
@@ -133,6 +133,10 @@ function run_make
 {
     local cf=$1
     local name=$2
+    local cradle_dir=${SOP_CRADLES_DIR}/${name}
+    local pkgs=${cradle_dir}/mirror-pkgs
+    local repo=${cradle_dir}/repo
+    local vpath=${cradle_dir}/mirror-vpath
     local tstampdir
     local mkfile
 
@@ -151,13 +155,24 @@ function run_make
 	return 0
     fi
 
+    if ! test -f ${pkgs}; then
+	echo "No mirror-pkgs found: ${pkgs}" 1>&2
+	return 1
+    fi
+
+    if ! test -f ${vpath}; then
+	echo "No mirror-vpath found: ${vpath}" 1>&2
+	return 1
+    fi
+
     tstampdir=${SBUILD_TSTAMPDIR}/$name
     mkdir -p ${tstampdir}
     mkfile=${tstampdir}/sbuild-${name}.mk
     echo "include sbuild.mk"              > $mkfile
     echo ""                               >> $mkfile
 
-    cat ${SOP_MIRROR_DIR}/${name}/PKGS | while read f; do
+
+    cat $pkgs | while read f; do
 	if [[ -z "$f" ]]; then
 	    break
 	fi
@@ -175,7 +190,7 @@ function run_make
 	echo ${f/.src.rpm/.src.log}                 >> $mkfile
     done
 
-    all_h=$(cat ${SOP_MIRROR_DIR}/${name}/PKGS | sed -e 's/\(.\).*$/\1/' | uniq)
+    all_h=$(cat ${pkgs} | sed -e 's/\(.\).*$/\1/' | uniq)
     echo "" >> $mkfile
     echo  "all: \\" >> $mkfile
     for h in $all_h; do 
@@ -191,13 +206,13 @@ function run_make
         --jobs=${SBUILD_JOBS}					\
 	--max-load=${SBUILD_LOAD}				\
         TMPDIR=${SBUILD_TMPDIR}					\
-        OUTPUTDIR=${SOP_REPO_DIR}/${name}			\
-        VPATHFILE=${SOP_MIRROR_DIR}/${name}/VPATH               \
+        OUTPUTDIR=${repo}			                \
+        VPATHFILE=${vpath}                                      \
 	BLACKLISTDIR=${tstampdir}/blacklist.d			\
         RELEASE=${SBUILD_RELEASE}				\
 	DEBUG=${SBUILD_DEBUG}\; done        >> $mkfile
 
-    mkdir -p ${SOP_REPO_DIR}/${name}
+    mkdir -p ${repo}
     mkdir -p ${tstampdir}/blacklist.d
     for h in $all_h; do 
 	echo "Processing $h"
@@ -209,8 +224,8 @@ function run_make
               --jobs=${SBUILD_JOBS}			\
 	      --max-load=${SBUILD_LOAD}			\
               TMPDIR=${SBUILD_TMPDIR}			\
-              OUTPUTDIR=${SOP_REPO_DIR}/${name}         \
-              VPATHFILE=${SOP_MIRROR_DIR}/${name}/VPATH \
+              OUTPUTDIR=${repo}                         \
+              VPATHFILE=${vpath}                        \
 	      BLACKLISTDIR=${tstampdir}/blacklist.d     \
               RELEASE=${SBUILD_RELEASE}			\
 	      DEBUG=${SBUILD_DEBUG}			\
@@ -234,19 +249,20 @@ function run_rsync
 	return 0
     fi
 
-    mkdir -p ${SOP_BLACKLIST_DIR}/${name}
-    rsync -a ${SBUILD_TSTAMPDIR}/${name}/blacklist.d/ ${SOP_BLACKLIST_DIR}/${name}
+    mkdir -p ${SOP_CRADLES_DIR}/${name}/blacklist
+    rsync -a ${SBUILD_TSTAMPDIR}/${name}/blacklist.d/ ${SOP_CRADLES_DIR}/${name}/blacklist
 }
 
 function run_creterepo
 {
     local cf=$1
     local name=$2
+    local repo=${SOP_CRADLES_DIR}/${name}/repo
 
     source $cf
 
-    if test -d ${SOP_REPO_DIR}/${name}; then
-	${PKGDATADIR}/sbuild-createrepo.mk -C ${SOP_REPO_DIR}/${name}
+    if test -d ${repo}; then
+	${PKGDATADIR}/sbuild-createrepo.mk -C ${repo}
     fi
 }
 
@@ -254,10 +270,10 @@ function repogc
 {
     local cf=$1
     local name=$2
-
+    local repo=${SOP_CRADLES_DIR}/${name}/repo
 
     source $cf
-    find ${SOP_REPO_DIR}/${name} -type f \
+    find ${repo} -type f \
 	| gosh ${PKGDATADIR}/gc-repo-srpmix-version.scm
 
 
@@ -279,15 +295,14 @@ function repogc
 	return 0
     fi
 
-    local repo_dir=${SOP_REPO_DIR}/${name}
-    local dist_mapping=${SOP_REPO_DIR}/${name}/${name}.es
-    
-    if ! test -f ${dist_mapping}; then
-	return 0
-    fi
-    :
-    : TODO gc-repo-pkg-version.scm
-    :
+    local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping
+    for f in ${dist_mapping}/*.es; do
+	if test -f $f; then
+	    :
+	    : TODO gc-repo-pkg-version.scm $f
+	    :
+	fi
+    done
 }
 
 function create_weakview
@@ -317,27 +332,30 @@ function create_weakview
 	return 0
     fi
 
-    local repo_dir=${SOP_REPO_DIR}/${name}
-    local dist_mapping=${SOP_REPO_DIR}/${name}/${name}.es
-    if ! test -f ${dist_mapping}; then
-	return 0
-    fi
-    :
-    :  TODO
-    :
+    local repo=${SOP_CRADLES_DIR}/${name}/repo/weakview
+    local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping
+    for f in ${dist_mapping}/*.es; do
+	if test -f $f; then
+	    :
+	    : TODO createwakeview $f $repo
+	    :
+	fi
+    done
 }
 
 function main
 {
+    local cf
     local name
     prepare_conf "$@"	
     parse_arguments "$@"
 
-    for cf in ${SOP_CONF_DIR}/mirror.d/*; do
+    for cradle in ${SOP_CRADLES_DIR}/*; do
+	cf=$(cradle)/cf
 	name=$(basename $cf)
 	
-	if test -z "$TARGET_MIRROR" \
-	    || test "$TARGET_MIRROR" = $name; then
+	if test -z "$CRADLE" \
+	    || test "$CRADLE" = $name; then
 	    if test -z "$CREATEREPO_ONLY"; then
 		( run_make $cf $name )
 		( run_rsync $cf $name )
