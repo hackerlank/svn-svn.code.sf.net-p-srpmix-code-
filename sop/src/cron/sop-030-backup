@@ -17,8 +17,9 @@ fi
 
 function backup
 {
-    local cf=$1
-    local name=$(basename $cf)
+    local cf=$1/cf
+    local name=$(basename $1)
+    local date=$(date --rfc-3339=date)
 
     source $cf
     if test -z "$BACKUP"; then
@@ -30,9 +31,9 @@ function backup
 	return 0
     fi
     
-    mkdir -p ${SOP_BACKUP_DIR}/$name
-    rsync -auvH ${SOP_MIRROR_DIR}/$name ${SOP_BAKCUP_DIR}/mirror/$name 2>&1 \
-	|tee "/tmp/rsync-${name}.log"
+    mkdir -p ${SOP_BACKUP_DIR}/$name/mirror
+    rsync -auvH ${SOP_CRADLES_DIR}/$name/mirror ${SOP_BAKCUP_DIR}/$name/mirror 2>&1 \
+	|tee "${SOP_CRADLES_DIR}/$name/log/backup-$date"
 
 }
 function main
@@ -42,8 +43,10 @@ function main
     fi
 
     
-    for x in ${SOPCONFDIR}/mirror.d/*; do
-	( backup "$x" )
+    for x in ${SOP_CRADLES_DIR}/*; do
+	if test -d $x; then
+	    ( backup "$x" )
+	fi
     done
 }
 

@@ -17,8 +17,8 @@ fi
 
 function hlink
 {
-    local cf=$1
-    local name=$(basename $cf)
+    local cf=$1/cf
+    local name=$(basename $1)
 
     source $cf
 
@@ -31,15 +31,17 @@ function hlink
 	return 0
     fi
     
-    hardlink ${SOP_MIRROR_DIR}/${name}
+    hardlink ${SOP_CRADLES_DIR}/${name}/mirror
 }
 
 function main
 {
     local n
 
-    for x in ${SOPCONFDIR}/mirror.d/*; do
-	( hlink $x )
+    for x in ${SOP_CRADLES_DIR}/*; do
+	if test -d $x; then
+	    ( hlink $x )
+	fi
     done
 }
 

@@ -1,5 +1,5 @@
-mirrorconfdir=$(sysconfdir)/sop/mirror.d
-dist_mirrorconf_DATA =				\
+cradleconfdir=$(pkgdatadir)/cradle-confs
+dist_cradleconf_DATA =				\
 	ftp.redhat.com				\
 	kojipkgs.fedoraproject.org		\
 	user					\

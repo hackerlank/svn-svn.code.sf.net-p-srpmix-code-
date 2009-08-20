@@ -51,11 +51,12 @@ function main
 
     protocol=file
     for mirror_name in "$@"; do
-	cf=${SOPCONFDIR}/mirror.d/$mirro_name
+	cf=${SOP_CRADLES_DIR}/$mirro_name/cf
 	if ! test -f $cf; then
-	    echo "No such mirror: $name" 1>&2
+	    echo "No such mirror: $mirror_name" 1>&2
 	    continue
 	fi
+	repo_name=$(echo $mirror_name | sed -e's/\./-/g')
 	( run_update $cf $mirro_name $repo_name update )
     done
 }

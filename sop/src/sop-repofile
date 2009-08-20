@@ -74,7 +74,7 @@ function main
     cat > "$output_file" <<EOF
 [${repo_name}]
 name=Srpmix packages for $mirror_name via $protocol
-baseurl=file://${SOP_REPO_DIR}/${name}
+baseurl=file://${SOP_CRADLES_DIR}/${name}/repo
 enabled=0
 gpgcheck=0
 EOF

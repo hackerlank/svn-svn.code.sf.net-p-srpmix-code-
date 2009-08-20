@@ -34,11 +34,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sop-repofile
 %{_bindir}/sop-update
 %{_bindir}/sop-mummify
+%{_bindir}/sop-prepare
 
 %dir %{_sysconfdir}/sop
 %config(noreplace) %{_sysconfdir}/sop/sop.cf
-%dir %{_sysconfdir}/sop/mirror.d
-%config(noreplace) %{_sysconfdir}/sop/mirror.d/*
+
 
 %changelog
 * Wed Jun 10 2009 Masatake YAMATO <yamato@redhat.com> 0.0.0-0

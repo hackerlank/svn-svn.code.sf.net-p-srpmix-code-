@@ -1,5 +1,5 @@
 SUBDIRS  = .
-SUBDIRS += cron mirror.d 
+SUBDIRS += cron cradle-confs
 
 sopconfdir=$(sysconfdir)/sop
 dist_sopconf_DATA = sop.cf
@@ -15,5 +15,6 @@ dist_bin_SCRIPTS =				\
 	sop-repofile				\
 	sop-update				\
 	sop-mummify				\
+	sop-prepare				\
 	\
 	$(NULL)

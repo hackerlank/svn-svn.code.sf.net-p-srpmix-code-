@@ -17,7 +17,7 @@ fi
 
 function mirror
 {
-    local cf=$1
+    local cf=$1/cf
     local name=$(basename $1)
 
     source $cf
@@ -49,8 +49,9 @@ function mirror
 
 
     local handler="${PKGDATADIR}/mirror-${METHOD}"
-    local odir="${SOP_MIRROR_DIR}/${name}"
-    local ldir="${SOP_MIRROR_DIR}/log"
+    local ndir="${SOP_CRADLES_DIR}/${name}"
+    local odir="${ndir}/mirror"
+    local ldir="${ndir}/log"
     local date=$(date --rfc-3339=date)
 
 
@@ -70,7 +71,7 @@ function mirror
 
     cd ${odir}
 
-    local log=${ldir}/${name}.${date}.log
+    local log=${ldir}/mirror-${date}.log
 
     "${handler}" ${cf} "${log}"
 
@@ -79,21 +80,21 @@ function mirror
 	| while read p; do dirname $p; done	\
 	| LANG=C sort				\
 	| uniq					\
-	> ${odir}/.VPATH
-    mv -f ${odir}/.VPATH ${odir}/VPATH
+	> ${ndir}/.mirror-vpath
+    mv -f ${ndir}/.mirror-vpath ${ndir}/mirro-vpath
     find ${odir} -name '*.src.rpm'		\
 	| while read p; do basename $p; done	\
 	| LANG=C sort			        \
 	| uniq					\
-	> ${odir}/.PKGS
-    mv -f ${odir}/.PKGS ${odir}/PKGS
+	> ${ndir}/.mirror-pkgs
+    mv -f ${ndir}/.mirror-pkgs ${ndir}/mirror-pkgs
 
     if test "${DIST_MAPPING}" = yes; then
+	mkdir -p ${ndir}/dist-mapping
 	find ${odir} -name '*.src.rpm' \
 	    | srpmix-wrap --just-print \
-	    > ${odir}/.${name}.es
-	mv -f ${odir}/.${name}.es ${odir}/.${name}es
-	# TODO make comps
+	    > ${ndir}/dist-mapping/.${name}.es
+	mv -f ${ndir}/dist-mapping/.${name}.es ${ndir}/dist-mapping/${name}.es 
     fi
 }
 
@@ -103,9 +104,10 @@ function main
 	return 0
     fi
 
-
-    for x in ${SOPCONFDIR}/mirror.d/*; do
-	( mirror $x )
+    for x in ${SOP_CRADLES_DIR}/*; do
+	if test -d $x; then
+	    ( mirror $x )
+	fi
     done
 }
 

@@ -1,12 +1,25 @@
 SOP_SOURCES_DIR=/srv/sources
 SOP_ATTIC_DIR=${SOP_SOURCES_DIR}/attic
-SOP_MIRROR_DIR=${SOP_ATTIC_DIR}/mirror
+SOP_CRADLES_DIR=${SOP_ATTIC_DIR}/cradles
+SOP_CASKETS_DIR=${SOP_ATTIC_DIR}/caskets
 SOP_BACKUP_DIR=/backup
 
-SOP_REPO_DIR=${SOP_ATTIC_DIR}/repo
+# NEW 
+# ----------------------------------------------------------------------
+# ${SOP_CRADLES_DIR}/$name/cf
+# ${SOP_CRADLES_DIR}/$name/mirror
+# ${SOP_CRADLES_DIR}/$name/repo
+# ${SOP_CRADLES_DIR}/$name/blacklist
+# ${SOP_CRADLES_DIR}/$name/log
+# ${SOP_CRADLES_DIR}/$name/dist-mapping
+# ${SOP_CRADLES_DIR}/$name/mirror-pkgs
+# ${SOP_CRADLES_DIR}/$name/mirror-vpath
 
-SOP_CASKETS_DIR=${SOP_ATTIC_DIR}/caskets
-SOP_BLACKLIST_DIR=${SOP_ATTIC_DIR}/blacklist
+# OBSOLETE
+# ----------------------------------------------------------------------
+# SOP_MIRROR_DIR=${SOP_ATTIC_DIR}/mirror
+# SOP_REPO_DIR=${SOP_ATTIC_DIR}/repo
+# SOP_BLACKLIST_DIR=${SOP_ATTIC_DIR}/blacklist
 
 SOP_ENABLE_MIRROR=yes
-SOP_ENABLE_BACKUP=yes
+SOP_ENABLE_BACKUP=no
