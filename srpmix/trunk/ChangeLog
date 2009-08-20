@@ -1,5 +1,8 @@
 2009-08-20  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-wrap (transfer_cmd): Use temporary variable to quote
+	an argument passed to install command.
+
 	* src/plugins/60srpmix-kindex (main): Handler newer Makefile
 	of kernel.
 
@@ -11,9 +14,9 @@
 
 	* misc/specs/srpmix.spec.in (Requires): Remove gettext.
 
-	* misc/m4/progs.m4([SRPM_PROGS]): Put [] around error message.
+	* misc/m4/progs.m4(SRPM_PROGS): Put [] around error message.
 
-	* src/srpmix-wrap (transfer_cmd): Quote file names when transfering.
+	* src/srpmix-wrap (create_plugin_spec): Quote file names when transfering.
 
 2009-08-16  Masatake YAMATO  <yamato@redhat.com>
 
