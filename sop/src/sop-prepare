@@ -1,0 +1,50 @@
+#!/bin/bash
+
+SOPCONFDIR=/etc/sop
+CONF=sop.cf
+PKGDATADIR=/usr/share/sop
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    SOPCONFDIR=$1
+    source "$1/${CONF}"
+elif test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function print_usage
+{
+    echo "Usage: "
+    echo "	sop-prepare CRADLE-CONF [NAME]"
+}
+
+function main
+{
+    local cradle_cf=$1
+    local cradle_name=$2
+
+    if test -z "$cradle_cf"; then
+	print_usage 1>&2
+	exit 1
+    fi
+
+    if ! test -r "$cradle_cf"; then
+	echo "cannot read $cradle_cf" 1>&2
+	exit 1
+    fi
+
+    if test -z "cradle_name"; then
+	cradle_name=$($basename {cradle_cf})
+    fi
+
+    mkdir -p ${SOP_SOURCES_DIR}
+    mkdir -p ${SOP_ATTIC_DIR}
+    mkdir -p ${SOP_CRADLES_DIR}/${cradle_name}
+    cp "$cradle_cf" ${SOP_CRADLES_DIR}/${cradle_name}/cf
+    
+    mkdir -p ${SOP_CRADLES_DIR}/${cradle_name}/{mirror,repo,blacklist,log,dist-mapping}
+}
+
+main "$@"
