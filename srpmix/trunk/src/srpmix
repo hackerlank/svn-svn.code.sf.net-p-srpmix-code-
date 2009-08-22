@@ -217,7 +217,16 @@ function dirpkg_created_p
     local p=$(srpmix_srchash $b)
     local f=${OUPUT_DIR}/dir-pkg/$p/$(srpmix_dirpkg_name $srpm)-${SRPMIX_PKG_MAJOR_VERSION}*.rpm
 
+    local r
     test -f $f
+    r=$?
+    if test $r = 2; then
+       echo "test -f meets multiple arguments: " 1>&2
+       ls $f 1>&2
+       echo 1>&2
+       echo 1>&2
+    fi
+    return $r
 }
 
 function core_build

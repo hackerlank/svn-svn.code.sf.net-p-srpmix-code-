@@ -1,3 +1,7 @@
+2009-08-23  root  <yamato@redhat.com>
+
+	* src/srpmix (dirpkg_created_p): run ls if test -f is failed.
+
 2009-08-23  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/build-spec-rearrange (spec_file_hack): Handle pattern ^%patch$.
