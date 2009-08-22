@@ -78,6 +78,7 @@ function spec_file_hack
 	\
 	-e 's/^Patch:/Patch0:/'                    \
         -e 's/^%patch /%patch0 /'                  \
+        -e 's/^%patch$/%patch0/'                    \
         \
 	-e 's/^Copyright:/License:/'		   \
 	-e 's/^Serial:.*//'			   \
