@@ -295,14 +295,25 @@ function repogc
 	return 0
     fi
 
-    local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping
-    for f in ${dist_mapping}/*.es; do
-	if test -f $f; then
-	    :
-	    : TODO gc-repo-pkg-version.scm $f
-	    :
-	fi
-    done
+    local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping/${name}.es
+    if test -f ${dist_mapping}; then
+	{
+	    cat ${dist_mapping}
+	    echo
+	    find ${repo} -name '*.noarch.rpm' | grep -v 'dir-pkg\|weakview' | while read f; do
+		rpm -qp --nosignature --queryformat "(in-repo :name \"%{NAME}\" :file \"$f\")" $f
+		echo 
+	    done 
+	} | gosh ${PKGDATADIR}/gc-repo-pkg-version.scm | while read f; do
+	    echo gc...${f}
+	    rm -f ${f}
+	done
+    fi
+}
+
+function create_comps
+{
+    # TODO
 }
 
 function create_weakview
@@ -332,15 +343,55 @@ function create_weakview
 	return 0
     fi
 
-    local repo=${SOP_CRADLES_DIR}/${name}/repo/weakview
+    local output=${SOP_CRADLES_DIR}/${name}/repo/weakview
     local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping
     for f in ${dist_mapping}/*.es; do
 	if test -f $f; then
-	    :
-	    : TODO createwakeview $f $repo
-	    :
+	    local body0=$(basename $f .es)
+	    local body=$(echo $body0 | tr . -)
+	    if test "$body0" = "${name}" ; then
+		if test -f ${output}/srpmix-weakview-view-dist-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm; then
+		    rm -f ${output}/srpmix-weakview-view-dist-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm
+		fi
+		if test -f ${output}/srpmix-weakview-view-packages-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm; then
+		    rm -f ${output}/srpmix-weakview-view-packages-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm
+		fi
+		body=${body}-`date +%Y%m%d`
+	    fi
+	
+	    if ( ! test -f ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm ) || \
+		test $f -nt ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm; then
+		rm -f ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm
+		create_weakview_dist $f ${body} ${repo} 
+	    fi
+	    if ( ! test -f ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm ) || \
+		test $f -nt ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm; then
+		rm -f ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm
+		create_weakview_packages $f ${body} ${repo} 
+	    fi
 	fi
     done
+}
+
+
+function create_weakview_dist
+{
+    local es_file=$1
+    local name=$2
+    local output=$3
+    
+
+    cat $es_file | srpmix-weakview-dist --name=$name --putput-dir=$3 
+}
+
+function create_weakview_packages
+{
+    local es_file=$1
+    local name=$2
+    local output=$3
+    
+    
+    cat $es_file | srpmix-weakview-packages --name=$name --putput-dir=$3 
 }
 
 function main
@@ -364,6 +415,7 @@ function main
 	    if test -z "$DONT_CREATEREPO"; then
                 ( repogc $cf $name )
 		( create_weakview $cf $name )
+		( create_comps $cf $name )
 		( run_creterepo $cf $name )
 	    fi
 	fi
