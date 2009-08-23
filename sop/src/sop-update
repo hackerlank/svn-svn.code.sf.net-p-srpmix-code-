@@ -21,7 +21,7 @@ function print_usage
     echo "	sop-update [MIRROR_NAME...]"
 }
 
-function run_update
+function run_yum
 {
     local cf=$1
     local repo_name=$2
@@ -71,7 +71,7 @@ function main
 		continue
 	    fi
 	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
-	    ( run_update "$cf" "$repo_name" "update" "no" )
+	    ( run_yum "$cf" "$repo_name" "install" "no" )
 	done
     else
 	for mirror_name in "$@"; do
@@ -81,7 +81,7 @@ function main
 		continue
 	    fi
 	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
-	    ( run_update "$cf" "$repo_name" "update" "yes" )
+	    ( run_yum "$cf" "$repo_name" "install" "yes" )
 	done
     fi
 }
