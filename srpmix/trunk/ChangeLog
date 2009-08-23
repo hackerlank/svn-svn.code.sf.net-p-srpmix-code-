@@ -1,3 +1,9 @@
+2009-08-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (odirpkg_created_p): Fix a typo.
+
+	* src/plugins/60srpmix-etags (main): Fix a typo.
+
 2009-08-23  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-weakview-dist: Added new option --make-rpm.

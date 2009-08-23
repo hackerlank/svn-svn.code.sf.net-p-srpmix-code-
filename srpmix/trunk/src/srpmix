@@ -212,10 +212,10 @@ function dirpkg_installed_p
 function dirpkg_created_p
 {
     local srpm=$1
-    local ouput_dir=$2
+    local output_dir=$2
     local b=$(basename $srpm)
     local p=$(srpmix_srchash $b)
-    local f=${OUPUT_DIR}/dir-pkg/$p/$(srpmix_dirpkg_name $srpm)-${SRPMIX_PKG_MAJOR_VERSION}*.rpm
+    local f=${output_dir}/dir-pkg/$p/$(srpmix_dirpkg_name $srpm)-${SRPMIX_PKG_MAJOR_VERSION}*.rpm
 
     local r
     test -f $f
