@@ -364,12 +364,12 @@ function create_weakview
 	    if ( ! test -f ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm ) || \
 		test $f -nt ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm
-		create_weakview_dist $f ${body} ${repo} 
+		create_weakview_dist $f ${body} ${output} 
 	    fi
 	    if ( ! test -f ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm ) || \
 		test $f -nt ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm
-		create_weakview_packages $f ${body} ${repo} 
+		create_weakview_packages $f ${body} ${output} 
 	    fi
 	fi
     done
@@ -383,7 +383,7 @@ function create_weakview_dist
     local output=$3
     
 
-    cat $es_file | srpmix-weakview-dist --name=$name --putput-dir=$3 
+    cat $es_file | srpmix-weakview-dist --name=$name --output-dir=$output
 }
 
 function create_weakview_packages
@@ -393,7 +393,7 @@ function create_weakview_packages
     local output=$3
     
     
-    cat $es_file | srpmix-weakview-packages --name=$name --putput-dir=$3 
+    cat $es_file | srpmix-weakview-packages --name=$name --output-dir=$output
 }
 
 function main
