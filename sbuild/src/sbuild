@@ -402,7 +402,7 @@ function create_repofile
 
     for p in $protocols; do
 	local repo_name_body=$(echo $name | tr . -)
-	local repo_name=$(srpmix-${p}-${repo_name_body})
+	local repo_name="srpmix-${p}-${repo_name_body}"
 	local output_file=${SOP_CRADLES_DIR}/${name}/$p.repo
 	create_${p}_repofile $repo_name $name > $output_file
     done
