@@ -4,6 +4,10 @@
 
 2009-08-23  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-weakview-packages (create_packages_weakview): OUTPUT_DIR -> OUTPUTDIR.
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Ditto.
+
 	* src/helpers/build-spec-rearrange (spec_file_hack): Handle pattern ^%patch$.
 
 	* src/srpmix-ix (srpm_deploy): Use sed to cut down the lines after %changelog.
