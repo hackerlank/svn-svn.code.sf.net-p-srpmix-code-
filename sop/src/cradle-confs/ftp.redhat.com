@@ -4,6 +4,7 @@ GC=no
 BACKUP=no
 BUILD=yes
 DIST_MAPPING=no
+INSTALL=no
 
 FTP_HOST=ftp.redhat.com
 FTP_PATH=/pub/redhat

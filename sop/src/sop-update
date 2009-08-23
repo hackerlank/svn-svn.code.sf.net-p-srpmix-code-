@@ -18,7 +18,7 @@ fi
 function print_usage
 {
     echo "Usage: "
-    echo "	sop-update MIRROR_NAME..."
+    echo "	sop-update [MIRROR_NAME...]"
 }
 
 function run_update
@@ -27,20 +27,30 @@ function run_update
     local name=$2
     local repo_name=$3
     local action=$4
-
+    local force=$5
+    
     source $cf
 
     if test -z "$GC"; then
 	echo "No GC found in $cf" 1>&2
 	return 1
     fi
-
-    if test $GC != yes; then
-	yum -y --disablerepo='*' --enablerepo=${repo_name} ${action}
-	return $?
+    if test -z $INSTALL; then
+	echo "No INSTALL found in $cf" 1>&2
+	return 1
     fi
 
+    if ( test $force != yes ) && ( test $INSTALL != yes ); then
+	return 0
+    fi
+
+    if test $GC != yes; then
+	yum -y --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
+	return $?
+    fi
+    
     # TODO
+    return 1
 }
     
 function main
@@ -48,19 +58,33 @@ function main
     local cf
     local repo_name
     local protocol
+    local mirror_name
+
 
     protocol=file
 
 
-    for mirror_name in "$@"; do
-	cf=${SOP_CRADLES_DIR}/$mirro_name/cf
-	if ! test -f $cf; then
-	    echo "No such mirror: $mirror_name" 1>&2
-	    continue
-	fi
-	repo_name=$(echo $mirror_name | sed -e's/\./-/g')
-	( run_update $cf $mirro_name $repo_name update )
-    done
+    if test $# = 0; then
+	for n in ${SOP_CRADLES_DIR}/*; do
+	    mirror_name=$(basename $n)
+	    cf=${SOP_CRADLES_DIR}/${mirror_name}/cf
+	    if ! test -f $cf; then
+		continue
+	    fi
+	    repo_name=$(echo $mirror_name | tr '.' '-')
+	    ( run_update $cf $mirro_name $repo_name update no)
+	done
+    else
+	for mirror_name in "$@"; do
+	    cf=${SOP_CRADLES_DIR}/$mirro_name/cf
+	    if ! test -f $cf; then
+		echo "No such mirror: $mirror_name" 1>&2
+		continue
+	    fi
+	    repo_name=$(echo $mirror_name | tr '.' '-')
+	    ( run_update $cf $mirro_name $repo_name update yes)
+	done
+    fi
 }
 
 main "$@"
