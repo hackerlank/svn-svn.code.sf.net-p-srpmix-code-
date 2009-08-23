@@ -342,7 +342,8 @@ function create_weakview
 	return 0
     fi
 
-    local output=${SOP_CRADLES_DIR}/${name}/repo/weakview
+    local repo=${SOP_CRADLES_DIR}/${name}/repo
+    local output=${repo}/weakview
     local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping
     for f in ${dist_mapping}/*.es; do
 	if test -f $f; then
@@ -364,12 +365,12 @@ function create_weakview
 	    if ( ! test -f ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm ) || \
 		test $f -nt ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-view-dist-${body}*.noarch.rpm
-		create_weakview_dist $f ${body} ${output} 
+		create_weakview_dist $f ${body} ${repo} 
 	    fi
 	    if ( ! test -f ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm ) || \
 		test $f -nt ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-view-packages-${body}*.noarch.rpm
-		create_weakview_packages $f ${body} ${output} 
+		create_weakview_packages $f ${body} ${repo} 
 	    fi
 	fi
     done
@@ -383,7 +384,7 @@ function create_weakview_dist
     local output=$3
     
 
-    cat $es_file | srpmix-weakview-dist --name=$name --output-dir=$output
+    cat $es_file | srpmix-weakview-dist --name=$name --output-dir=$output --make-rpm
 }
 
 function create_weakview_packages
@@ -393,7 +394,7 @@ function create_weakview_packages
     local output=$3
     
     
-    cat $es_file | srpmix-weakview-packages --name=$name --output-dir=$output
+    cat $es_file | srpmix-weakview-packages --name=$name --output-dir=$output --make-rpm
 }
 
 function main
