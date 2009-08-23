@@ -24,10 +24,9 @@ function print_usage
 function run_update
 {
     local cf=$1
-    local name=$2
-    local repo_name=$3
-    local action=$4
-    local force=$5
+    local repo_name=$2
+    local action=$3
+    local force=$4
     
     source $cf
 
@@ -40,12 +39,12 @@ function run_update
 	return 1
     fi
 
-    if ( test $force != yes ) && ( test $INSTALL != yes ); then
+    if ( test $force != yes ) && ( test "$INSTALL" != yes ); then
 	return 0
     fi
 
+    yum -y --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
     if test $GC != yes; then
-	yum -y --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
 	return $?
     fi
     
@@ -71,18 +70,18 @@ function main
 	    if ! test -f $cf; then
 		continue
 	    fi
-	    repo_name=$(echo $mirror_name | tr '.' '-')
-	    ( run_update $cf $mirro_name $repo_name update no)
+	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
+	    ( run_update "$cf" "$repo_name" "update" "no" )
 	done
     else
 	for mirror_name in "$@"; do
-	    cf=${SOP_CRADLES_DIR}/$mirro_name/cf
+	    cf=${SOP_CRADLES_DIR}/$mirror_name/cf
 	    if ! test -f $cf; then
 		echo "No such mirror: $mirror_name" 1>&2
 		continue
 	    fi
-	    repo_name=$(echo $mirror_name | tr '.' '-')
-	    ( run_update $cf $mirro_name $repo_name update yes)
+	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
+	    ( run_update "$cf" "$repo_name" "update" "yes" )
 	done
     fi
 }
