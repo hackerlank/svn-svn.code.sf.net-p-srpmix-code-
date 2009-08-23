@@ -12,7 +12,6 @@ dist_pkgdata_SCRIPTS= \
 	$(NULL)
 
 dist_bin_SCRIPTS =				\
-	sop-repofile				\
 	sop-update				\
 	sop-mummify				\
 	sop-prepare				\

@@ -50,6 +50,8 @@ function main
     local protocol
 
     protocol=file
+
+
     for mirror_name in "$@"; do
 	cf=${SOP_CRADLES_DIR}/$mirro_name/cf
 	if ! test -f $cf; then
