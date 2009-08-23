@@ -314,6 +314,7 @@ function repogc
 function create_comps
 {
     # TODO
+    :
 }
 
 function create_weakview
@@ -321,7 +322,9 @@ function create_weakview
     local cf=$1
     local name=$2
     local today
-
+    local dist_pattern
+    local pkg_pattern
+    
     source $cf
 
 
@@ -335,10 +338,6 @@ function create_weakview
 	return 1
     fi
     
-    if test ${GC} != yes; then
-	return 0
-    fi
-
     if test ${BUILD} != yes; then
 	return 0
     fi
@@ -349,12 +348,15 @@ function create_weakview
 	if test -f $f; then
 	    local body0=$(basename $f .es)
 	    local body=$(echo $body0 | tr . -)
-	    if test "$body0" = "${name}" ; then
-		if test -f ${output}/srpmix-weakview-view-dist-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm; then
-		    rm -f ${output}/srpmix-weakview-view-dist-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm
+	    dist_pattern==${output}/srpmix-weakview-view-dist-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm
+	    pkg_pattern=${output}/srpmix-weakview-view-packages-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm
+
+	    if test ${GC} != yes && test "$body0" = "${name}" ; then
+		if test -f ${dist_pattern}; then
+		    rm -f ${dist_pattern}
 		fi
-		if test -f ${output}/srpmix-weakview-view-packages-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm; then
-		    rm -f ${output}/srpmix-weakview-view-packages-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].noarch.rpm
+		if test -f ${pkg_pattern}; then
+		    rm -f ${pkg_pattern}
 		fi
 		body=${body}-`date +%Y%m%d`
 	    fi
