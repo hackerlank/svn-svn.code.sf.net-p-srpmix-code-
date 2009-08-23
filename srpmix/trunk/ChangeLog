@@ -1,3 +1,10 @@
+2009-08-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist: Added new option --make-rpm.
+	(create_dist_weakview): Don't quote $SRPMIX_VAR_DIR with backslash.
+
+	* src/srpmix-weakview-packages: Ditto.
+
 2009-08-23  root  <yamato@redhat.com>
 
 	* src/srpmix (dirpkg_created_p): run ls if test -f is failed.

@@ -40,6 +40,7 @@ NAME=
 OUTPUTDIR=
 TMPDIR=
 DUMP_SPEC=
+MAKE_RPM=
 
 # TODO: --srpm
 function print_usage
@@ -47,7 +48,7 @@ function print_usage
     echo "Usage: "
     echo "  srpmix-weakview-packages [--help|-h]"
     echo "  srpmix-weakview-packages --name=NAME [--dump-spec]"
-    echo "  srpmix-weakview-packages --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE]"
+    echo "  srpmix-weakview-packages --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE] [--make-rpm]"
     echo 
 }
 
@@ -71,6 +72,9 @@ function parse_arguments
 		;;
 	    --output-dir=*)
 	        OUTPUTDIR="${1/--output-dir=/}"
+		;;
+            --make-rpm)
+	        MAKE_RPM=yes
 		;;
             --release=*)
 	        SRPMIX_PKG_RELEASE="${1/--release=/}"
@@ -173,7 +177,7 @@ rsync -va \$buildpackagesdir/* \$RPM_BUILD_ROOT/$packagesdir
 
 %files
 %defattr(-,root,root)
-\$SRPMIX_VAR_DIR/packages/*/*/*
+$SRPMIX_VAR_DIR/packages/*/*/*
 
 %changelog
 
@@ -182,10 +186,20 @@ EOF
 	return
     fi
 
-    $RPMBUILD --nodeps --quiet --define "_topdir $TMPDIR" -bs $spec > /dev/null
-    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-packages-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*
+    local build_flag=-bs
+    if test "${MAKE_RPM}" = yes; then
+	build_flag=-ba
+    fi
+    $RPMBUILD --nodeps --quiet --define "_topdir $TMPDIR" ${build_flag} $spec > /dev/null
+#    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-packages-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*
     mkdir -p $OUTPUTDIR/weakview
-    mv $TMPDIR/SRPMS/srpmix-weakview-packages-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm "${OUTPUTDIR}"/weakview
+
+    local file=$TMPDIR/SRPMS/srpmix-weakview-packages-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm
+    if test "${MAKE_RPM}" = yes; then
+	find $TMPDIR
+	file=$TMPDIR/RPMS/noarch/srpmix-weakview-packages-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.noarch.rpm
+    fi
+    mv ${file} "${OUTPUTDIR}"/weakview
 }
 
 
