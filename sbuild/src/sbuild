@@ -11,12 +11,14 @@ CREATEREPO_ONLY=
 DONT_CREATEREPO=
 CRADLE=
 
+SHORT_CUT=
 
 function print_usage
 {
     echo "Usage: "
     echo "  sbuild --help"
     echo "  sbuild [--sbuild-conf=FILE] [--sop-conf-dir=DIR]"
+    echo "         [--short-cut]"
     echo "         [--tmpdir=TMPDIR]"
     echo "         [--release=RELEASE]"
     echo "         [--debug]"
@@ -27,6 +29,7 @@ function print_usage
     echo "         [--use-tmpfs=GBYTE]"
     echo "         [--jobs=J]"
     echo "         [--load=L]"
+    echo "         [--short-cut]"
 }
 
 function prepare_conf
@@ -85,7 +88,7 @@ function parse_arguments
 	    --debug)
 	        SBUILD_DEBUG=y
                 ;;
-	    --cradle=)
+	    --cradle=*)
 	        CRADLE=${1/--cradle=/}
 		;;
             --tstamp-dir=*)
@@ -115,6 +118,9 @@ function parse_arguments
 	    --jobs=*)
 	        SBUILD_JOBS=${1/--jobs=/}
 
+		;;
+	    --short-cut)
+	        SHORT_CUT=yes
 		;;
             *)
 	        print_usage 1>&2
@@ -311,12 +317,6 @@ function repogc
     fi
 }
 
-function create_comps
-{
-    # TODO
-    :
-}
-
 function create_weakview
 {
     local cf=$1
@@ -376,6 +376,52 @@ function create_weakview
     done
 }
 
+function create_comps
+{
+    local cf=$1
+    local name=$2
+
+    source $cf
+    local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping
+    local repo_dir=${SOP_CRADLES_DIR}/${name}/repo
+    for f in ${dist_mapping}/*.es; do
+	if test -f $f; then
+	    local body0=$(basename "$f" .es)
+	    local body=$(echo $body0 | tr . -)
+	    printf "(srpmix-group \"%s\")\n" "$body"
+	    cat "$f"
+	fi
+    done | gosh ${PKGDATADIR}/create-comps.scm > ${repo_dir}/comps.xml
+}
+
+function create_repofile
+{
+    local cf=$1
+    local name=$2
+    local protocols=file
+
+    for p in $protocols; do
+	local repo_name_body=$(echo $name | tr . -)
+	local repo_name=$(srpmix-${p}-${repo_name_body})
+	local output_file=${SOP_CRADLES_DIR}/${name}/repofile-$p.repo
+	create_${p}_repofile $repo_name $name > $output_file
+    done
+}
+
+function create_file_repofile
+{
+    local repo_name=$1
+    local name=$2
+    local p=file
+
+    cat  <<EOF
+[${repo_name}]
+name=Srpmix packages for $name (via $p)
+baseurl=file://${SOP_CRADLES_DIR}/${name}/repo
+enable=0
+gpgcheck=0
+EOF
+}
 
 function create_weakview_dist
 {
@@ -410,7 +456,9 @@ function main
 	
 	if test -z "$CRADLE" \
 	    || test "$CRADLE" = $name; then
-	    if test -z "$CREATEREPO_ONLY"; then
+
+	    if test -z "$CREATEREPO_ONLY" \
+		&& test -z "$SHORT_CUT"; then
 		( run_make $cf $name )
 		( run_rsync $cf $name )
 	    fi
@@ -419,6 +467,7 @@ function main
                 ( repogc $cf $name )
 		( create_weakview $cf $name )
 		( create_comps $cf $name )
+		( create_repofile $cf $name )
 		( run_creterepo $cf $name )
 	    fi
 	fi
