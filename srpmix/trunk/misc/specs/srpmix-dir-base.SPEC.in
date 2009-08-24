@@ -33,6 +33,15 @@ sourcesdir=${rootdir}/sources
 mkdir -p $RPM_BUILD_ROOT${sourcesdir}
 for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${sourcesdir}/${c}; done
 
+
+wvdistsdir=${rootdir}/dists
+mkdir -p ${wvdistsdir}
+
+wvpkgsdir=${rootdir}/packages
+mkdir -p ${wvpkgsdir}
+for c in ${cs}; do mkdir -p ${wvpkgsdir}/${c}; done
+# for each common directories
+
 dbdir=${rootdir}/db
 mkdir -p $RPM_BUILD_ROOT${dbdir}
 for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${dbdir}/${c}; done

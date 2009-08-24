@@ -1,5 +1,10 @@
 2009-08-24  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/specs/srpmix-dir-base.SPEC.in (%install): Make
+	directories for weakviews.
+
+2009-08-24  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix (odirpkg_created_p): Fix a typo.
 
 	* src/plugins/60srpmix-etags (main): Fix a typo.
