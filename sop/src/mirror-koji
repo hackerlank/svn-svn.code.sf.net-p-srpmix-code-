@@ -73,6 +73,11 @@ function main
     local c
     local f
 
+    local p v r
+    local PVR P V R
+    local found
+    local update
+
 
     prepare
     latest ${SNAPSHOT} ${DIST}			\
@@ -82,15 +87,38 @@ function main
 	mkdir -p $OUTPUT_DIR/$c
 	(
 	    cd $OUTPUT_DIR/$c
-	    f=$(ls $p-[0-9]*.src.rpm 2>/dev/null)
-	    if ! test -f "$f"; then
+
+	    found=no
+	    update=no
+
+	    if ! fs=$(ls $p-*.src.rpm 2>/dev/null); then
 		echo "(lcopy-koji new \"$p-$v-$r.src.rpm\")" >> $LOG
 		get_srpm $p $v $r
-	    elif newer_name_p $v-$r.src.rpm $(echo "$f" | sed -e s"/$p-\(.*\)/\1/"); then
-		echo "(lcopy-koji update :new \"$p-$v-$r.src.rpm\" :old \"$f\")"  >> $LOG
+		exit 0
+	    fi
+
+	    for f in $fs; do
+		PVR=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE}" $f)
+		P=$(echo $PVR | cut -d' ' -f1)
+		V=$(echo $PVR | cut -d' ' -f2)
+		R=$(echo $PVR | cut -d' ' -f3)
+		
+		if test "$P" = "$p"; then
+		    found=yes
+		    if newer_name_p $v-$r $V-$R; then
+			update=yes
+			echo "(lcopy-koji update :new \"$p-$v-$r.src.rpm\" :old \"$f\")"  >> $LOG
+			rm $f
+		    fi
+		fi
+	    done
+	    
+	    if test "$update" = yes; then
 		get_srpm $p $v $r
-		rm "$f"
-            else
+	    elif test "$found" = no; then
+		echo "(lcopy-koji new \"$p-$v-$r.src.rpm\")" >> $LOG
+		get_srpm $p $v $r
+	    else
 		echo "(lcopy-koji latest \"$p-$v-$r.src.rpm\" :date)"  >> $LOG
 	    fi
        )
