@@ -45,7 +45,7 @@
 			   (unless (null? l)
 			     (remove-files (map (lambda (elt)
 						  (let1 file (car elt)
-						    (write `(gc ,file))
+						    (write `(gc-repo-srpmix-version ,file))
 						    (newline)
 						    file))
 						l))

@@ -312,7 +312,7 @@ function repogc
 		echo 
 	    done 
 	} | gosh ${PKGDATADIR}/gc-repo-pkg-version.scm | while read f; do
-	    echo gc...${f}
+	    echo "(gc-repo-pkg-version \"${f}\")"
 	    rm -f ${f}
 	done
     fi
