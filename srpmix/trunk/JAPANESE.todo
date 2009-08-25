@@ -19,7 +19,9 @@ For version 4
    group-name,group-source-dir,group-output-dir,group-hooks
 ** gen repo file from name
 ** installer
-* sopにdeployに対するハードリンクがない。
+* sopのdeployに対するハードリンクがない。
+
+* weakviewはmakeで作らせる。
 
 * # TODO: Parallel dir-pkg building  may conflicts
 * gc-repo.scmでのattachmentの扱い

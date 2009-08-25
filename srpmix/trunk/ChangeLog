@@ -1,3 +1,8 @@
+2009-08-26  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix-dir-base.SPEC.in (%install): Added prefix $RPM_BUILD_ROOT$ to
+	${sourcesdir} and ${wvpkgsdir}.
+
 2009-08-24  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix-dir-base.SPEC.in (%install): Make
