@@ -26,6 +26,8 @@ For version 4
 * # TODO: Parallel dir-pkg building  may conflicts
 * gc-repo.scmでのattachmentの扱い
 
+* deco-archive
+
 * srpmix.org
 ** 全文検索
 ** ウェブインターフェイス

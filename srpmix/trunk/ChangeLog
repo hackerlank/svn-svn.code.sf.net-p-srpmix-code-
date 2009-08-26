@@ -1,3 +1,7 @@
+2009-08-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Added -r option to read command.
+
 2009-08-26  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix-dir-base.SPEC.in (%install): Added prefix $RPM_BUILD_ROOT$ to

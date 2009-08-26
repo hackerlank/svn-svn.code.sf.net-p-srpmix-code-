@@ -349,8 +349,9 @@ if test \$(stat --format="%D" \$from) = \$(stat --format="%D" \$to); then
 else
    transfer_cmd="cp"
 fi
+# See deco-archive src.rpm package why read needs -r option.
 ( cd \$from; find . -newer %{_builddir}/%{name}/.run-plugin -not -type d | 
-while read f; do
+while read -r f; do
   d=\$(dirname "\$f")
   install -d "\$to/\$d"
   if test -L "\$f"; then
