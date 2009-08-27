@@ -1,0 +1,1 @@
+find /srv/sources/dists/rhel5su2/packages/b/bind/pre-build/bind-9.3.4-P1 -type f -name '*.h' | ./crate | ./crate-dir | sed -e 's|/srv/sources/dists/rhel5su2/packages/b/bind/pre-build/||'

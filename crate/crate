@@ -1,0 +1,117 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+(use file.util)
+
+
+(define (c-crate)
+  (let loop ((c       (read-char))
+	     (total   0)
+	     (comment 0)
+	     (state   'normal))
+    (if (eof-object? c)
+	(values total comment "c")
+	(case state
+	  ('normal
+	   (case c
+	     ((#\/)
+	      (loop (read-char)
+		    (+ total 1)
+		    comment
+		    'slash))
+	     (else
+	      (loop (read-char)
+		    (+ total 1)
+		    comment
+		    'normal))))
+	  ('slash
+	   (case c
+	     ((#\*)
+	      (loop (read-char)
+		    (+ total 1)
+		    comment
+		    'c-comment))
+	     ((#\/)
+	      (loop (read-char)
+		    (+ total 1)
+		    comment
+		    'c++-comment))
+	     (else
+	      (loop (read-char)
+		    (+ total 1)
+		    comment
+		    'normal))))
+	  ('c-comment
+	   (case c
+	     ((#\*)
+	      (loop (read-char)
+		    (+ total 1)
+		    (+ comment 1)
+		    'star))
+	     (else
+	      (loop (read-char)
+		    (+ total 1)
+		    (+ comment 1)
+		    'c-comment))))
+	  ('c++-comment
+	   (case c
+	     ((#\newline)
+	      (loop (read-char)
+		    (+ total 1)
+		    (+ comment 1)
+		    'normal))
+	     (else
+	      (loop (read-char)
+		    (+ total 1)
+		    (+ comment 1)
+		    'c++-comment))))
+	  ('star
+	   (case c
+	     ((#\/)
+	      (loop (read-char)
+		    (+ total 1)
+		    (+ comment 1)
+		    'normal))
+	     (else
+	      (loop (read-char)
+		    (+ total 1)
+		    (+ comment 1)
+		    'c-comment))))
+	  (else
+	   (print state)
+	   )))))
+
+(define crate-table
+  `(("c"   . ,c-crate)
+    ("h"   . ,c-crate)
+    ("cxx" . ,c-crate)
+    ("hxx" . ,c-crate)
+    ("cpp" . ,c-crate)
+    ("hpp" . ,c-crate)))
+
+(define (crate file)
+  (let1 x (path-extension file)
+    (let1 ent (assoc x  crate-table)
+      (if ent
+	  (with-input-from-file file (cdr ent))
+	  (values 0 0 'unknown)))))
+
+
+(define (print? total comment type)
+  (and (< 1500 total)
+       (< 0.5 (/ comment total))))
+
+(define (main args)
+  (let loop ((f (read-line)))
+    (unless (eof-object? f)
+      (receive (total comment type) (crate f)
+	(when (print? total comment type)
+	  (write `(crate ,f 
+			 :rate  ,(round (exact->inexact  
+						      (* 100
+							 (/ comment total))))
+			 :total ,total 
+			 :comment ,comment
+			 :type ,type))
+	  (newline)))
+      (loop (read-line)))))

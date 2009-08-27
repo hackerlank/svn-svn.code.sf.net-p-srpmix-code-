@@ -1,0 +1,41 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+(use file.util)
+
+
+(define table (make-hash-table 'equal?))
+
+(define (main args)
+  (let loop ((r (read)))
+    (unless (eof-object? r)
+      (when (eq? (car r) 'crate)
+	(let1 d (sys-dirname (cadr r))
+	  (hash-table-push! table d r)))
+      (loop (read))))
+  (for-each (lambda (elt)
+	      (write (cons 'crate-dir-comment elt))
+	      (newline)
+	      )
+	    (sort (hash-table-map table
+				  (lambda (dir li)
+				    (list dir (apply + (map (lambda (e)
+							      (cadr (memq :comment e)))
+							    li)))))
+		  (lambda (a b)
+		    (> (cadr a) (cadr b)))))
+  (for-each (lambda (elt)
+	      (write (cons 'crate-dir-rate elt))
+	      (newline)
+	      )
+	    (sort (hash-table-map table
+				  (lambda (dir li)
+				    (list dir 
+					  (apply + (map (lambda (e)
+							  (cadr (memq :comment e)))
+							    li))
+					  (apply + (map (lambda (e)
+							  (cadr (memq :total e)))
+							li)))))
+		  (lambda (a b)
+		    (> (/ (cadr a) (caddr a)) (/ (cadr b) (caddr b)))))))
