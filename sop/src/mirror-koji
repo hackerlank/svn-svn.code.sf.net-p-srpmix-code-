@@ -119,7 +119,7 @@ function main
 		echo "(lcopy-koji new \"$p-$v-$r.src.rpm\")" >> $LOG
 		get_srpm $p $v $r
 	    else
-		echo "(lcopy-koji latest \"$p-$v-$r.src.rpm\" :date)"  >> $LOG
+		echo "(lcopy-koji latest \"$p-$v-$r.src.rpm\")"  >> $LOG
 	    fi
        )
     done
