@@ -30,10 +30,6 @@ function run_yum
     
     source $cf
 
-    if test -z "$GC"; then
-	echo "No GC found in $cf" 1>&2
-	return 1
-    fi
     if test -z $INSTALL; then
 	echo "No INSTALL found in $cf" 1>&2
 	return 1
@@ -44,12 +40,101 @@ function run_yum
     fi
 
     yum -y --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
-    if test $GC != yes; then
-	return $?
-    fi
-    
+    return $?
+}
+
+function run_gc
+{
+    #
     # TODO
-    return 1
+    #
+
+    MY_TMPDIR=`mktemp -d`
+    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
+
+
+    local cf=$1
+    local mirror_name=$2
+    local force=$3
+
+
+    if test -z "$GC"; then
+	echo "No GC found in $cf" 1>&2
+	return 1
+    fi
+
+    if test "$GC" != yes; then
+	return 0
+    fi
+
+    if test -z $INSTALL; then
+	echo "No INSTALL found in $cf" 1>&2
+	return 1
+    fi
+
+    if ( test $force != yes ) && ( test "$INSTALL" != yes ); then
+	return 0
+    fi
+
+    local all=${MY_TMPDIR}/${mirror_name}-all.lines
+    local weakview=${MY_TMPDIR}/${mirror_name}-weakview.lines
+    local dist=${MY_TMPDIR}/${mirror_name}-dist.lines
+    local packages=${MY_TMPDIR}/${mirror_name}-packages.lines
+
+
+    rpm -qa --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" > ${all}
+    grep weakview < ${all} > ${weakview}
+    grep -e dist     | grep -e ${mirror_name} < ${weakview} | LANG=C sort -n -r > ${dist}
+    grep -e packages | grep -e ${mirror_name} < ${weakview} | LANG=C sort -n -r > ${packages}
+
+    local count=$(wc -l ${dist})
+    if test 0 = ${count} || test 1 = ${count}; then
+	return 0
+    fi
+
+    local dist_car=$(head -1 ${dist} | tr ' ' '-')
+    local dist_car_list=${MY_TMPDIR}/${mirror_name}-dist-car-list.lines
+    local dist_cadr
+    local dist_cadr_list=${MY_TMPDIR}/${mirror_name}-dist-cadr-list.lines
+    local diff=${MY_TMPDIR}/diff
+    local pkgs=${MY_TMPDIR}/pkgs
+
+    rpm -ql ${dist_car} \
+	| grep '/packages/./' \
+	| xargs -n 1 readlink \
+	| $sed -e 's|.*/\([^/]*\)/\([^/]*\)$|\1 \2|' \
+	> ${dist_car_list}
+
+    tail -n +2 ${dist} | tr ' ' '-' | while read dist_cadr; do
+	rpm -ql ${dist_cadr} \
+	    | grep '/packages/./' \
+	    | xargs -n 1 readlink \
+	    | $sed -e 's|.*/\([^/]*\)/\([^/]*\)$|\1 \2|' \
+	    > ${dist_cadr_list}
+	
+	diff ${dist_cadr_list} {dist_car_list} | grep -e '^-[^-].*' | sed -e 's/^-//' >  ${diff}
+	
+	cat ${diff} | while read p0; do
+	    fgrep -e "${p0}" ${all} > ${pkgs}
+	    grep -e '-plugin-' ${pkgs} | tr ' ' '-' | while read p; do
+		echo rpm -e ${p}
+	    done
+	    grep -e '-plugins-' ${pkgs} | tr ' ' '-' | while read p; do
+		echo rpm -e ${p}
+	    done
+	    grep -e '-archives-' ${pkgs} | tr ' ' '-' | while read p; do
+		echo rpm -e ${p}
+	    done
+	    grep -e '-srpmix [0-9]' ${pkgs} tr ' ' '-' | while read p; do
+		echo rpm -e ${p}
+	    done
+	done
+	echo rpm -e ${dist_cadr}
+    done
+
+    tail -n +2 ${packages} | tr ' ' '-' | while read n; do
+	echo rpm -e "$n"
+    done
 }
     
 function main
@@ -71,7 +156,9 @@ function main
 		continue
 	    fi
 	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
-	    ( run_yum "$cf" "$repo_name" "install" "no" )
+	    if ( run_yum "$cf" "$repo_name" "install" "no" ); then
+		( run_gc  "$cf" "$mirror_name" "no")
+	    fi
 	done
     else
 	for mirror_name in "$@"; do
@@ -81,7 +168,9 @@ function main
 		continue
 	    fi
 	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
-	    ( run_yum "$cf" "$repo_name" "install" "yes" )
+	    if ( run_yum "$cf" "$repo_name" "install" "yes" ); then
+		( run_gc "$cf" "$repo_name" "yes" )
+	    fi
 	done
     fi
 }
