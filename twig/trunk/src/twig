@@ -22,9 +22,10 @@
 #
 ########################################################################
 
-
+# TODO:
 # verify
 # reduce/fold
+# vfork/unshare
 
 twig_commands="home fork info diff specdiff pedigree commit build addlog help"
 
