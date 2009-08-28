@@ -45,13 +45,10 @@ function run_yum
 
 function run_gc
 {
-    #
-    # TODO
-    #
     set -x
 
     MY_TMPDIR=`mktemp -d`
-    # trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
+    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
 
 
     local cf=$1
@@ -136,16 +133,16 @@ function run_gc
 		echo ${p} >> ${efiles_bases}
 	    done
 	done
-	echo rpm -e ${dist_cadr}
+	rpm -e ${dist_cadr}
     done
 
-    # LANG=C sort ${efiles_plugin}   | uniq | xargs rpm -e
-    # LANG=C sort ${efiles_plugins}  | uniq | xargs rpm -e
-    # LANG=C sort ${efiles_archives} | uniq | xargs rpm -e
-    # LANG=C sort ${efiles_bases}    | uniq | xargs rpm -e
+    LANG=C sort ${efiles_plugin}   | uniq | xargs rpm -e
+    LANG=C sort ${efiles_plugins}  | uniq | xargs rpm -e
+    LANG=C sort ${efiles_archives} | uniq | xargs rpm -e
+    LANG=C sort ${efiles_bases}    | uniq | xargs rpm -e
 
     tail -n +2 ${packages} | tr ' ' '-' | while read n; do
-	echo rpm -e "$n"
+	rpm -e "$n"
     done
 }
     
