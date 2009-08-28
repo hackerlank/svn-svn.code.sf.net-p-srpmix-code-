@@ -58,6 +58,8 @@ function run_gc
     local mirror_name=$2
     local force=$3
 
+    source $cf
+
 
     if test -z "$GC"; then
 	echo "No GC found in $cf" 1>&2
@@ -85,10 +87,10 @@ function run_gc
 
     rpm -qa --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" > ${all}
     grep weakview < ${all} > ${weakview}
-    grep -e dist     | grep -e ${mirror_name} < ${weakview} | LANG=C sort -n -r > ${dist}
-    grep -e packages | grep -e ${mirror_name} < ${weakview} | LANG=C sort -n -r > ${packages}
+    grep -e dist     < ${weakview} | grep -e ${mirror_name} | LANG=C sort -n -r > ${dist}
+    grep -e packages < ${weakview} | grep -e ${mirror_name} | LANG=C sort -n -r > ${packages}
 
-    local count=$(wc -l ${dist})
+    local count=$(wc -l < ${dist})
     if test 0 = ${count} || test 1 = ${count}; then
 	return 0
     fi
@@ -113,20 +115,20 @@ function run_gc
 	    | sed -e 's|.*/\([^/]*\)/\([^/]*\)$|\1 \2|' \
 	    > ${dist_cadr_list}
 	
-	diff ${dist_cadr_list} ${dist_car_list} | grep -e '^-[^-].*' | sed -e 's/^-//' >  ${diff}
+	diff -uN ${dist_cadr_list} ${dist_car_list} | grep -e '^-[^-].*' | sed -e 's/^-//' >  ${diff}
 	
-	cat ${diff} | while read p0; do
-	    fgrep -e "${p0}" ${all} > ${pkgs}
-	    grep -e '-plugin-' ${pkgs} | tr ' ' '-' | while read p; do
+	cat ${diff} | while read p0 vr0; do
+	    fgrep -e "${p0}" ${all} | fgrep -e "${vr0}" > ${pkgs}
+	    grep -e '.\+srpmix-plugin-' ${pkgs}      | tr ' ' '-' | while read p; do
 		echo rpm -e ${p}
 	    done
-	    grep -e '-plugins-' ${pkgs} | tr ' ' '-' | while read p; do
+	    grep -e '.\+srpmix-plugins- [0-9]' ${pkgs}     | tr ' ' '-' | while read p; do
 		echo rpm -e ${p}
 	    done
-	    grep -e '-archives-' ${pkgs} | tr ' ' '-' | while read p; do
+	    grep -e '.\+srpmix-archives- [0-9]' ${pkgs}    | tr ' ' '-' | while read p; do
 		echo rpm -e ${p}
 	    done
-	    grep -e '-srpmix [0-9]' ${pkgs} tr ' ' '-' | while read p; do
+	    grep -e '.\+-srpmix [0-9]' ${pkgs} | tr ' ' '-' | while read p; do
 		echo rpm -e ${p}
 	    done
 	done
@@ -158,7 +160,7 @@ function main
 	    fi
 	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
 	    if ( run_yum "$cf" "$repo_name" "install" "no" ); then
-		( run_gc  "$cf" "$mirror_name" "no")
+		( run_gc  "$cf" $(echo $mirror_name | tr '.' '-') "no")
 	    fi
 	done
     else
@@ -170,7 +172,7 @@ function main
 	    fi
 	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
 	    if ( run_yum "$cf" "$repo_name" "install" "yes" ); then
-		( run_gc "$cf" "$repo_name" "yes" )
+		( run_gc "$cf" $(echo $mirror_name | tr '.' '-') "yes" )
 	    fi
 	done
     fi
