@@ -101,6 +101,10 @@ function run_gc
     local dist_cadr_list=${MY_TMPDIR}/${mirror_name}-dist-cadr-list.lines
     local diff=${MY_TMPDIR}/${mirror_name}-diff
     local pkgs=${MY_TMPDIR}/${mirror_name}-pkgs
+    local efiles_plugin=${MY_TMPDIR}/${mirror_name}-efiles-plugin
+    local efiles_plugins=${MY_TMPDIR}/${mirror_name}-efiles-plugins
+    local efiles_archives=${MY_TMPDIR}/${mirror_name}-efiles-archives
+    local efiles_bases=${MY_TMPDIR}/${mirror_name}-efiles-bases
 
     rpm -ql ${dist_car} \
 	| grep '/packages/./' \
@@ -119,21 +123,26 @@ function run_gc
 	
 	cat ${diff} | while read p0 vr0; do
 	    fgrep -e "${p0}" ${all} | fgrep -e "${vr0}" > ${pkgs}
-	    grep -e '.\+srpmix-plugin-' ${pkgs}      | tr ' ' '-' | while read p; do
-		echo rpm -e ${p}
+	    grep -e '.\+srpmix-plugin-.\+' ${pkgs}      | tr ' ' '-' | while read p; do
+		echo ${p} >> ${efiles_plugin}
 	    done
-	    grep -e '.\+srpmix-plugins- [0-9]' ${pkgs}     | tr ' ' '-' | while read p; do
-		echo rpm -e ${p}
+	    grep -e '.\+srpmix-plugins [0-9]' ${pkgs}     | tr ' ' '-' | while read p; do
+		echo ${p} >> ${efiles_plugins}
 	    done
-	    grep -e '.\+srpmix-archives- [0-9]' ${pkgs}    | tr ' ' '-' | while read p; do
-		echo rpm -e ${p}
+	    grep -e '.\+srpmix-archives [0-9]' ${pkgs}    | tr ' ' '-' | while read p; do
+		echo ${p} >> ${efiles_archives}
 	    done
 	    grep -e '.\+-srpmix [0-9]' ${pkgs} | tr ' ' '-' | while read p; do
-		echo rpm -e ${p}
+		echo ${p} >> ${efiles_bases}
 	    done
 	done
 	echo rpm -e ${dist_cadr}
     done
+
+    # LANG=C sort ${efiles_plugin}   | uniq | xargs rpm -e
+    # LANG=C sort ${efiles_plugins}  | uniq | xargs rpm -e
+    # LANG=C sort ${efiles_archives} | uniq | xargs rpm -e
+    # LANG=C sort ${efiles_bases}    | uniq | xargs rpm -e
 
     tail -n +2 ${packages} | tr ' ' '-' | while read n; do
 	echo rpm -e "$n"
