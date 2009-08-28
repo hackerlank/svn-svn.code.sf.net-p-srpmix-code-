@@ -49,6 +49,39 @@ For version 4
 ** srpmixでdownloadしたsrc.rpmをキャッシュする。
 ** swrfの拡張子を確立する。???
 
+* primary.xml.gzの中のなぞのfile entry
+<package type="rpm">
+  <name>srpmix-weakview-packages-kojipkgs-fedoraproject-org-20090825</name>
+  <arch>noarch</arch>
+  <version epoch="0" ver="3.107.0" rel="0.fc11"/>
+  <checksum type="sha256" pkgid="YES">3b41261817f942abe5cc8bd6cb1c9f0bb257db565db5e24bcb4185155faae9b9</checksum>
+  <summary>Srpmix weakview kojipkgs-fedoraproject-org-20090825 label to specfied version of packages</summary>
+  <description>Srpmix weakview from packages to kojipkgs-fedoraproject-org-20090825</description>
+  <packager/>
+  <url/>
+  <time file="1251242497" build="1251239823"/>
+  <size package="2262219" installed="0" archive="1921436"/>
+<location href="weakview/.backup/srpmix-weakview-packages-kojipkgs-fedoraproject-org-20090825-3.107.0-0.fc11.noarch.rpm"/>
+  <format>
+    <rpm:license>Unknown</rpm:license>
+    <rpm:vendor/>
+    <rpm:group>System/Daemon</rpm:group>
+    <rpm:buildhost>sbuild.localdomain</rpm:buildhost>
+    <rpm:sourcerpm>srpmix-weakview-packages-kojipkgs-fedoraproject-org-20090825-3.107.0-0.fc11.src.rpm</rpm:sourcerpm>
+    <rpm:header-range start="280" end="2079384"/>
+    <rpm:provides>
+      <rpm:entry name="srpmix-weakview-packages-kojipkgs-fedoraproject-org-20090825" flags="EQ" epoch="0" ver="3.107.0" rel="0.fc11"/>
+    </rpm:provides>
+    <rpm:requires>
+      <rpm:entry name="srpmix-dir-base"/>
+    </rpm:requires>    <file>/var/lib/srpmix/packages/f/flamerobin/kojipkgs-fedoraproject-org-20090825</file>
+    <file>/var/lib/srpmix/packages/p/polyxmass-bin/kojipkgs-fedoraproject-org-20090825</file>
+    <file>/var/lib/srpmix/packages/p/pastebin/kojipkgs-fedoraproject-org-20090825</file>
+
+  </format>
+</package>
+
+
 done
 -------------------------------------------------------------------------------------
 * ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
