@@ -48,9 +48,10 @@ function run_gc
     #
     # TODO
     #
+    set -x
 
     MY_TMPDIR=`mktemp -d`
-    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
+    # trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
 
 
     local cf=$1
@@ -96,23 +97,23 @@ function run_gc
     local dist_car_list=${MY_TMPDIR}/${mirror_name}-dist-car-list.lines
     local dist_cadr
     local dist_cadr_list=${MY_TMPDIR}/${mirror_name}-dist-cadr-list.lines
-    local diff=${MY_TMPDIR}/diff
-    local pkgs=${MY_TMPDIR}/pkgs
+    local diff=${MY_TMPDIR}/${mirror_name}-diff
+    local pkgs=${MY_TMPDIR}/${mirror_name}-pkgs
 
     rpm -ql ${dist_car} \
 	| grep '/packages/./' \
 	| xargs -n 1 readlink \
-	| $sed -e 's|.*/\([^/]*\)/\([^/]*\)$|\1 \2|' \
+	| sed -e 's|.*/\([^/]*\)/\([^/]*\)$|\1 \2|' \
 	> ${dist_car_list}
 
     tail -n +2 ${dist} | tr ' ' '-' | while read dist_cadr; do
 	rpm -ql ${dist_cadr} \
 	    | grep '/packages/./' \
 	    | xargs -n 1 readlink \
-	    | $sed -e 's|.*/\([^/]*\)/\([^/]*\)$|\1 \2|' \
+	    | sed -e 's|.*/\([^/]*\)/\([^/]*\)$|\1 \2|' \
 	    > ${dist_cadr_list}
 	
-	diff ${dist_cadr_list} {dist_car_list} | grep -e '^-[^-].*' | sed -e 's/^-//' >  ${diff}
+	diff ${dist_cadr_list} ${dist_car_list} | grep -e '^-[^-].*' | sed -e 's/^-//' >  ${diff}
 	
 	cat ${diff} | while read p0; do
 	    fgrep -e "${p0}" ${all} > ${pkgs}
