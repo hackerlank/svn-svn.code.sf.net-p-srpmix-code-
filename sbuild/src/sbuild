@@ -13,6 +13,7 @@ DONT_CREATEREPO=
 CRADLE=
 
 SHORT_CUT=
+DATE=$(date +%Y%m%d)
 
 function print_usage
 {
@@ -356,7 +357,7 @@ function create_weakview
 	    if test ${GC} = yes && test "$body0" = "${name}" ; then
 		rm -f ${dist_pattern}
 		rm -f ${pkg_pattern}
-		body=${body}-`date +%Y%m%d`
+		body=${body}-${DATE}
 	    fi
 	
 	    if ( ! test -f ${output}/srpmix-weakview-dist-${body}*.noarch.rpm ) || \
@@ -385,7 +386,7 @@ function create_comps
 	if test -f $f; then
 	    local body0=$(basename "$f" .es)
 	    local body=$(echo $body0 | tr . -)
-	    printf "(srpmix-group \"%s\")\n" "$body"
+	    printf "(srpmix-group \"%s\")\n" "$body-${DATE}"
 	    cat "$f"
 	fi
     done | gosh ${PKGDATADIR}/create-comps.scm > ${repo_dir}/comps.xml
