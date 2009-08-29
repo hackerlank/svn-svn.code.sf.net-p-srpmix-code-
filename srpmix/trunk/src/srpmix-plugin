@@ -73,11 +73,11 @@ function parse_arguments
 		exit 0
 		;;
             --enable=*)
-                arg="$(echo $1 | sed 's/--enable=//' | tr , ' ')"
+                arg=$(echo "$1" | sed 's/--enable=//' | tr , ' ')
                 ENABLE_PLUGIN="$ENABLE_PLUGIN $arg"
 		;;
             --disable=*)
-                arg="$(echo $1 | sed 's/--disable=//' | tr , ' ')"
+                arg=$(echo "$1" | sed 's/--disable=//' | tr , ' ')
                 DISABLE_PLUGIN="$DISABLE_PLUGIN $arg"
 		;;
             --list|-L)

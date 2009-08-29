@@ -122,11 +122,11 @@ function srpmix_db
     package=$1
 
     if test -f "$package"; then
-	name="$($SWRFPM -qp --queryformat %{NAME} $package)"
+	name=$($SWRFPM -qp --queryformat '%{NAME}' "$package")
     else
 	name=$package
     fi
-    hash="$(srpmix_srchash "$name")"
+    hash=$(srpmix_srchash "$name")
     echo "${SRPMIX_DB_RDIR}/$hash/$name"
 }
 

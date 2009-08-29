@@ -1,6 +1,10 @@
 For version 4
 ========================================================================
 
+* External bug
+** ctagsが無限ループに入る。
+** rpmがクラッシュする。
+** createrepoがおかしい。
 
 * pluginのAPIを強化する。
 ** pluginを個別パッケージにさらに分解する。#
@@ -8,46 +12,38 @@ For version 4
   sudo rpm -e  avahi-0.6.25-3.fc11-srpmix avahi-0.6.25-3.fc11-srpmix-plugins   avahi-0.6.25-3.fc11-srpmix-archives 
 ** kindexでのcscopeのサポート
 ** attachデータをpluginから作れるようにする。##
+** root権限がない場合のattachは？
+** gc-repo.scmでのattachmentの扱い
 
 * live media ###
 ** mummify/slice ###
 ** compsの生成 ???
+** repoをわける。--groupオプション?
+   group-name,group-source-dir,group-output-dir,group-hooks
+
 
 * %kouji tracking
 ** db, swrfのディレクトリを一階層深くする。
-** repoをわける。--groupオプション?
-   group-name,group-source-dir,group-output-dir,group-hooks
-** gen repo file from name
-** installer
-* sopのdeployに対するハードリンクがない。
-
 * weakviewはmakeで作らせる。
-
 * # TODO: Parallel dir-pkg building  may conflicts
-* gc-repo.scmでのattachmentの扱い
 
-* deco-archive
 
 * srpmix.org
 ** 全文検索
 ** ウェブインターフェイス
 
 * ビルド率
-** cscopeがクラッシュする。
 ** 環境変数をつかえるようにする。
 
-
-* non-root-user
-** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
-** root権限がない場合のattachは？
-** /usr/localに入れた場合でも正しく動作するように編成する。
-
 * その他
-** logを空にする、あるいはgzipする。
 ** .specを拡張子に持たないspecファイルの処理
 ** repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
 ** srpmixでdownloadしたsrc.rpmをキャッシュする。
 ** swrfの拡張子を確立する。???
+** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
+** /usr/localに入れた場合でも正しく動作するように編成する。
+
+
 
 * primary.xml.gzの中のなぞのfile entry
 <package type="rpm">
@@ -118,6 +114,14 @@ done
 * errorログ中のspecダンプから%changelogを削る。<done>
 
 * Generate Maekfile in sbuild <done>
+
+** cscopeがクラッシュする。 <done>
+** deco-archive -> read -r <may ok>
+
+* sopのdeployに対するハードリンクがない。<done>
+** gen repo file from name <done>
+** installer<done>
+** logを空にする、あるいはgzipする。<done>
 
 After version 4
 ========================================================================

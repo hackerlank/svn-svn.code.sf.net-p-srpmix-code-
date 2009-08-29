@@ -1,3 +1,22 @@
+2009-08-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-build: Don't use double quotes around process substitution at
+	the right value of assignment. e.g.  x=$(ls "$dir") instead of x="$(ls $dir)".
+
+	* src/srpmix-db: Ditto.
+
+	* src/srpmix-envelop: Ditto.
+
+	* src/srpmix-ix: Ditto.
+
+	* src/srpmix-plugin: Ditto.
+
+	* src/srpmix-weakview-packages: Ditto.
+
+	* src/srpmix-wrap: Ditto.
+
+	* src/srpmix: Ditto.
+
 2009-08-27  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-wrap (create_plugin_spec): Added -r option to read command.

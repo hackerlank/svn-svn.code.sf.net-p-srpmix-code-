@@ -656,7 +656,7 @@ function srpm_deploy
         fi
     fi
 
-    targets="$(echo "${TARGET}" | tr "," " " )"
+    targets=$(echo "${TARGET}" | tr "," " " )
 
     for arch in ${targets}; do
         message build-start --target=${arch} --spec-file=\""${xspec_file}\""

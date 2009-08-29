@@ -76,13 +76,13 @@ function parse_arguments
 		exit 0
 		;;
 	    --name=*)
-                TARGET_NAME="$(echo $1 | sed 's/--name=//')"
+                TARGET_NAME=$(echo "$1" | sed 's/--name=//')
                 ;;
 	    --srpm=*)
-	        TARGET_SRPM="$(echo $1 | sed 's/--srpm=//')"
+	        TARGET_SRPM=$(echo "$1" | sed 's/--srpm=//')
 		;;
 	    --release=*)
-		RELEASE="$(echo $1 | sed 's/--release=//')"
+		RELEASE=$(echo "$1" | sed 's/--release=//')
 		SRPMIX_PKG_RELEASE=$RELEASE
 	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
@@ -103,7 +103,7 @@ function parse_arguments
 		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
 		;;
 	    --output-dir=*)
-	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
+	        OUTPUT_DIR=$(echo "$1" | sed 's/--output-dir=//')
 		if test -d "${OUTPUT_DIR}"; then
 		    OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
 		else

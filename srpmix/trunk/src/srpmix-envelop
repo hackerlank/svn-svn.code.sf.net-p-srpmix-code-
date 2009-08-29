@@ -121,8 +121,8 @@ function envelop_swrf
     pvrd=$($SWRFPM -qp --nosignature --queryformat \
 	"%{NAME} %{VERSION} %{RELEASE} %{Description}" \
 	$target_swrf)
-    package=$(echo $pvrd | cut -d' ' -f1)
-    description="$(echo $pvrd | cut -d' ' -f4-)"
+    package=$(echo "$pvrd" | cut -d' ' -f1)
+    description=$(echo "$pvrd" | cut -d' ' -f4-)
     if test "x$package" = "x"; then
         echo "warning: failed to parse $target_swrf: ignored" 1>&2
         return

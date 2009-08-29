@@ -68,37 +68,37 @@ function parse_arguments
 		exit 0
 		;;
 	    --srpm=*)
-	        TARGET_SRPM="$(echo $1 | sed 's/--srpm=//')"
+	        TARGET_SRPM=$(echo "$1" | sed 's/--srpm=//')
 		;;
             --swrf=*)
-                TARGET_SWRF="$(echo $1 | sed 's/--swrf=//')"
+                TARGET_SWRF=$(echo "$1" | sed 's/--swrf=//')
                 ;;
 	    --release=*)
-		RELEASE="$(echo $1 | sed 's/--release=//')"
+		RELEASE=$(echo "$1" | sed 's/--release=//')
 		SRPMIX_PKG_RELEASE=$RELEASE
 	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
 		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
 	        ;;
 	    --build-requires=*)
-		BUILD_REQUIRES="$(echo $1 | sed 's/--build-requires=//')"
+		BUILD_REQUIRES=$(echo "$1" | sed 's/--build-requires=//')
 	        WRAP_OPTS="$WRAP_OPTS --build-requires=$BUILD_REQUIRES"
 	        ;;
             --enable=*)
-                ENABLE="$(echo $1 | sed 's/--enable=//')"
+                ENABLE=$(echo "$1" | sed 's/--enable=//')
                 SRPMIX_ENABLE_PLUGIN=$ENABLE
                 WRAP_OPTS="$WRAP_OPTS --enable=$ENABLE"
                 ;;
             --disable=*)
-                DISABLE="$(echo $1 | sed 's/--disable=//')"
+                DISABLE=$(echo "$1" | sed 's/--disable=//')
                 SRPMIX_DISABLE_PLUGIN=$DISABLE
                 WRAP_OPTS="$WRAP_OPTS --disable=$DISABLE"
                 ;;
             --plugin-name=*)
-                PLUGIN_NAME="$(echo $1 | sed 's/--plugin-name=//')"
+                PLUGIN_NAME=$(echo "$1" | sed 's/--plugin-name=//')
                 WRAP_OPTS="$WRAP_OPTS --plugin-name=$PLUGIN_NAME"
                 ;;
             --type=*)
-                OPT_TYPE="$(echo $1 | sed 's/--type=//')"
+                OPT_TYPE=$(echo "$1" | sed 's/--type=//')
                 WRAP_OPTS="$WRAP_OPTS --type=$OPT_TYPE"
                 ;;
 	    --ignore-error)
@@ -111,7 +111,7 @@ function parse_arguments
 	        export SRPMIX_KEEP_ORIGINAL=yes
 		;;
 	    --output-dir=*)
-	        OUTPUT_DIR="$(echo $1 | sed 's/--output-dir=//')"
+	        OUTPUT_DIR=$(echo "$1" | sed 's/--output-dir=//')
 		if test -d "${OUTPUT_DIR}"; then
 		    OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
 		else
