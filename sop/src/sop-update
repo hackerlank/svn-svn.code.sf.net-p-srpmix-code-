@@ -109,6 +109,11 @@ function run_gc
 	| sed -e 's|.*/\([^/]*\)/\([^/]*\)$|\1 \2|' \
 	> ${dist_car_list}
 
+    touch ${efiles_plugin}
+    touch ${efiles_plugins}
+    touch ${efiles_archives}
+    touch ${efiles_bases}
+
     tail -n +2 ${dist} | tr ' ' '-' | while read dist_cadr; do
 	rpm -ql ${dist_cadr} \
 	    | grep '/packages/./' \
@@ -184,4 +189,4 @@ function main
     fi
 }
 
-main "$@"
+time main "$@"
