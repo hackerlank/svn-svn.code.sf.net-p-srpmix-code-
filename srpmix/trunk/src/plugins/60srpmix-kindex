@@ -125,13 +125,17 @@ function main
 		perarch_kernel=1
 		mkdir -p ${TMPDIR}/$t
 		cd ${PRE_BUILDDIR}/kernel-*/linux-*.${t}
-
+		
 
 		if ! make O=${TMPDIR}/$t TAGS; then
 		    return
 		fi
 		
-		make O=${TMPDIR}/$t tags
+		if ! make O=${TMPDIR}/$t tags; then
+		    return
+		fi
+		
+		make O=${TMPDIR}/$t cscope
 	    fi
 	done
 
@@ -145,7 +149,11 @@ function main
 			    continue
 			fi
 
-			make O=${TMPDIR}/generic tags
+			if ! make O=${TMPDIR}/generic tags; then
+			    continue
+			fi
+
+			make O=${TMPDIR}/generic cscope
 		    fi
 		fi
 	    done
@@ -158,14 +166,19 @@ function main
 		# Convert the absolute path to relative
 		sed -e 's|^/.*/pre-build|../../pre-build|' ${TMPDIR}/$t/TAGS \
 		    > ${PLUGINDIR}/${t}.TAGS
+		rm ${TMPDIR}/$t/TAGS
 	    fi
 	    if test -f ${TMPDIR}/$t/tags; then
 		sed -i -e 's|/[^\t]*/pre-build|../../pre-build|' ${TMPDIR}/$t/tags \
 		    > ${PLUGINDIR}/${t}.tags
+		rm ${TMPDIR}/$t/tags
 	    fi
+	    for x in ${TMPDIR}/$t/*; do
+		if test -f $x; then
+		    mv $x ${PLUGINDIR}/${t}.$(basename $x)
+		fi
+	    done
 	done
-
-	
     fi
 }
 

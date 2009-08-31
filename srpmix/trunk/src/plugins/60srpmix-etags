@@ -139,7 +139,7 @@ function main
 
     if ( ! test -e "${PLUGINDIR}/TAGS" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/TAGS"; then
-      run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
+	run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
     fi
 }
 

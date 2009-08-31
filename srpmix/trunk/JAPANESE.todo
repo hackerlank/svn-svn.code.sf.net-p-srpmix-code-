@@ -10,10 +10,10 @@ For version 4
 ** pluginを個別パッケージにさらに分解する。#
 *** パッケージ削除の順序によって/var/lib/srpmix/sources/a/avahi/0.6.25-3.fc11が残る。@
   sudo rpm -e  avahi-0.6.25-3.fc11-srpmix avahi-0.6.25-3.fc11-srpmix-plugins   avahi-0.6.25-3.fc11-srpmix-archives 
-** kindexでのcscopeのサポート
-** attachデータをpluginから作れるようにする。##
-** root権限がない場合のattachは？
-** gc-repo.scmでのattachmentの扱い
+
+** attachデータをpluginから作れるようにする。###
+** root権限がない場合のattachは？ ###
+** gc-repo.scmでのattachmentの扱い ###
 
 * live media ###
 ** mummify/slice ###
@@ -122,6 +122,7 @@ done
 ** gen repo file from name <done>
 ** installer<done>
 ** logを空にする、あるいはgzipする。<done>
+** kindexでのcscopeのサポート <maybe done>
 
 After version 4
 ========================================================================

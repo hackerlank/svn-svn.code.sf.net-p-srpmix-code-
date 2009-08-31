@@ -3,6 +3,9 @@
 	* src/plugins/60srpmix-cscope (run_cscope): store -k and -q
 	options of cscope to cscope.files.
 	Use bash as interpreter.
+	(main): Don't run cscope if the target package is kernel.
+
+	* src/plugins/60srpmix-kindex (main): Added cscope handler.
 
 2009-08-30  Masatake YAMATO  <yamato@redhat.com>
 
