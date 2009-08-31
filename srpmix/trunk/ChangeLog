@@ -1,3 +1,9 @@
+2009-08-31  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-cscope (run_cscope): store -k and -q
+	options of cscope to cscope.files.
+	Use bash as interpreter.
+
 2009-08-30  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-build: Don't use double quotes around process substitution at
