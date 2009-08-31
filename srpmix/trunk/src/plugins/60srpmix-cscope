@@ -31,6 +31,8 @@ ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
+SPEC=
+
 SRPMIX_CSCOPE_DEBUG=
 
 LIBSRPMIX=libsrpmix.sh
@@ -84,6 +86,7 @@ function parse_arguments
     ROOTDIR=$(cd $1;pwd)
     shift
 
+    SPEC=${ROOTDIR}/*.spec
     BUILDDIR=${ROOTDIR}/pre-build
     PLUGINDIR=${ROOTDIR}/plugins/cscope
     LOGFILE=${PLUGINDIR}/cscope-log.es

@@ -1,5 +1,7 @@
 2009-09-01  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/60srpmix-cscope (SPEC): Added new variable.
+
 	* src/libsrpmix.sh.in (srpmix_dirpkg_name): Suppress the output
 	from grep.
 
