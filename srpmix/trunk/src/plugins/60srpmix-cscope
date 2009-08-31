@@ -105,6 +105,8 @@ function run_cscope
 
     es_print "cscope-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
+#    echo \-k >  ${PLUGINDIR}/cscope.files
+#    echo \-q >> ${PLUGINDIR}/cscope.files
     grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 > ${PLUGINDIR}/cscope.files
     (cd $d && test -s ${PLUGINDIR}/cscope.files && \
 	${CSCOPE} -b -i "${PLUGINDIR}/cscope.files" -f $o )
