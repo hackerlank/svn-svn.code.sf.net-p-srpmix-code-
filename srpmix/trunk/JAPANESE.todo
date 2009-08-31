@@ -1,5 +1,12 @@
+** attachデータをpluginから作れるようにする。##
+** root権限がない場合のattachは？
+** gc-repo.scmでのattachmentの扱い
+** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
+** /usr/localに入れた場合でも正しく動作するように編成する。
+
 For version 4
 ========================================================================
+
 
 * External bug
 ** ctagsが無限ループに入る。
