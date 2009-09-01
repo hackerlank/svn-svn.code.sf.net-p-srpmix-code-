@@ -1,3 +1,11 @@
+2009-09-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.107.2.
+
+	* src/srpmix-attach (main): Support to install swrf package to home directory.
+	Not tested yet.
+	(SRPMIX_DB_OPTS): New option.
+
 2009-09-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-cscope (SPEC): Added new variable.

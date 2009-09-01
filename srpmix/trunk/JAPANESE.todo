@@ -1,39 +1,23 @@
+
 ** attachデータをpluginから作れるようにする。##
-** root権限がない場合のattachは？
+** recommendation package
+
 ** gc-repo.scmでのattachmentの扱い
-** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
+** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？ 
+   --- 期待通りだか混乱のもととなるので仕様を見直す。
 ** /usr/localに入れた場合でも正しく動作するように編成する。
+
+** compsの生成 <need check>
+** root権限がない場合のattachは？ <need check>
+
 
 For version 4
 ========================================================================
 
-
-* External bug
-** ctagsが無限ループに入る。
-** rpmがクラッシュする。
-** createrepoがおかしい。
-
-* pluginのAPIを強化する。
-** pluginを個別パッケージにさらに分解する。#
-*** パッケージ削除の順序によって/var/lib/srpmix/sources/a/avahi/0.6.25-3.fc11が残る。@
-  sudo rpm -e  avahi-0.6.25-3.fc11-srpmix avahi-0.6.25-3.fc11-srpmix-plugins   avahi-0.6.25-3.fc11-srpmix-archives 
-
-** attachデータをpluginから作れるようにする。###
-** root権限がない場合のattachは？ ###
-** gc-repo.scmでのattachmentの扱い ###
-
 * live media ###
 ** mummify/slice ###
-** compsの生成 ???
 ** repoをわける。--groupオプション?
    group-name,group-source-dir,group-output-dir,group-hooks
-
-
-* %kouji tracking
-** db, swrfのディレクトリを一階層深くする。
-* weakviewはmakeで作らせる。
-* # TODO: Parallel dir-pkg building  may conflicts
-
 
 * srpmix.org
 ** 全文検索
@@ -42,13 +26,27 @@ For version 4
 * ビルド率
 ** 環境変数をつかえるようにする。
 
+* External bug
+** rpmがクラッシュする。
+** createrepoがおかしい。
+** etagsが一度クラッシュしている。
+   php-5.3.0-6.fc12-srpmixの処理中であるが、再現しない。
+
+* pluginのAPIを強化する。
+** pluginを個別パッケージにさらに分解する。#
+*** パッケージ削除の順序によって/var/lib/srpmix/sources/a/avahi/0.6.25-3.fc11が残る。@
+  sudo rpm -e  avahi-0.6.25-3.fc11-srpmix avahi-0.6.25-3.fc11-srpmix-plugins   avahi-0.6.25-3.fc11-srpmix-archives 
+
+* %kouji tracking
+** db, swrfのディレクトリを一階層深くする。
+* weakviewはmakeで作らせる。
+* # TODO: Parallel dir-pkg building  may conflicts
+
 * その他
 ** .specを拡張子に持たないspecファイルの処理
 ** repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
 ** srpmixでdownloadしたsrc.rpmをキャッシュする。
 ** swrfの拡張子を確立する。???
-** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？
-** /usr/localに入れた場合でも正しく動作するように編成する。
 
 
 

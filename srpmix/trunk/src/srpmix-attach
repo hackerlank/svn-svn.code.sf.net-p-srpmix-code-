@@ -27,13 +27,19 @@ PKG_NAME=
 PKG_VERSION=0
 PKG_RELEASE=0
 OUTPUT_DIR=
+if test "`whoami`" = "root"; then
 OUTPUT_FORMAT=rpm
+else
+OUTPUT_FORMAT=swrf
+fi
 TARGET_PACKAGE=
 TARGET_VERSION=
 ATTACHMENT=
 
 SRPMIX_ATTACH_DEBUG=
+SRPMIX_DB_OPTS="${SRPMIX_DB_OPTS}"
 YUM_OPTS=
+
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -55,6 +61,14 @@ function print_usage
     echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=REL] \\ "
     echo "                [--output-dir=DIR [--output-format=swrf|rpm]] [--yum=YUMOPT] \\ "
     echo "                TARGET-PACKAGE TARGET-VERSION ATTACHMENT" 
+    echo ""
+    echo " TODO: "
+    echo "  srpmix-attach --output-dir=DIR --target-dir=DIR --use-plugin=NAME"
+    echo ""
+    echo ""
+    echo "Environment variables:"
+    echo "  SRPMIX_DB_OPTS"
+    
 }
 
 function parse_arguments
@@ -68,6 +82,7 @@ function parse_arguments
 	    --debug)
 		SRPMIX_ATTACH_DEBUG=yes
 		PS4="${PS4}[attach]"
+		SRPMIX_DB_OPTS="--debug ${SRPMIX_DB_OPTS}"
 		set -x
 		;;
 	    --pkg-name=*)
@@ -244,28 +259,42 @@ function main
     local swrf=$MY_TMPDIR/SWRFS/*
     if ! test -r ${swrf}; then
 	srpmix_abort "*** Failed to create swrf file: $swrf" 2>&1
-    elif test -n "$OUTPUT_DIR" && test ${OUTPUT_FORMAT} = swrf; then
-	mkdir -p $OUTPUT_DIR/${srchash}
-	mv $swrf $OUTPUT_DIR/${srchash}
-	return $?
+    fi
+
+    if test ${OUTPUT_FORMAT} = swrf; then
+	if test -n "$OUTPUT_DIR"; then
+	    mkdir -p $OUTPUT_DIR/${srchash}
+	    mv $swrf $OUTPUT_DIR/${srchash}
+	    return $?
+	else
+	    srpmix-db $SRPMIX_DB_OPTS -i $swrf
+	    return $?
+	fi
     fi
 
     create_rpm ${swrf}
     local rpm=$MY_TMPDIR/RPMS/noarch/*.noarch.rpm
     if ! test -r ${rpm}; then
 	srpmix_abort "*** Failed to create rpm file: $rpm" 2>&1
-    elif test -n "$OUTPUT_DIR" && test ${OUTPUT_FORMAT} = rpm; then
-	mkdir -p $OUTPUT_DIR/${srchash}
-	mv $swrf $OUTPUT_DIR/${srchash}
-	return $?
     fi
-
-    yum ${YUM_OPTS} localinstall -y --nogpgcheck $rpm
+    
+    if test ${OUTPUT_FORMAT} = rpm; then
+	if test -n "$OUTPUT_DIR"; then
+	    mkdir -p $OUTPUT_DIR/${srchash}
+	    mv ${rpm} $OUTPUT_DIR/${srchash}
+	    return $?
+	else
+	    yum ${YUM_OPTS} localinstall -y --nogpgcheck $rpm
+	    return $?
+	fi
+	
+    fi
+    
+    # ???
+    return 1
 }
 
-main $@
-exit $?
-
+time main $@
 
 # swrf
 # swrfbuild
