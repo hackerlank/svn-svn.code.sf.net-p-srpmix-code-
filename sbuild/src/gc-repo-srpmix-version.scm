@@ -25,6 +25,11 @@
 	 (hash-table-push! htable base (list file version))
 	 (loop (read-line)))
 	;; TODO: attachment
+	((rxmatch #/(.+-srpmix-plugin-.+)-([0-9].*)\.noarch\.rpm/ l)
+	 (file base version)
+	 (hash-table-push! htable base (list file version))
+	 (loop (read-line)))
+	;;
 	((rxmatch #/(.+srpmix-weakview-packages-[^-]+)-([0-9].*).noarch.rpm/ l)
 	 (file base version)
 	 (hash-table-push! htable base (list file version))

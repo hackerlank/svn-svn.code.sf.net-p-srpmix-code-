@@ -380,13 +380,24 @@ function create_comps
     local name=$2
 
     source $cf
+
+    if test -z "${GC}"; then
+	echo "No GC in $cf" 1>&2
+	return 1
+    fi
+
     local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping
     local repo_dir=${SOP_CRADLES_DIR}/${name}/repo
     for f in ${dist_mapping}/*.es; do
 	if test -f $f; then
 	    local body0=$(basename "$f" .es)
 	    local body=$(echo $body0 | tr . -)
-	    printf "(srpmix-group \"%s\")\n" "$body-${DATE}"
+
+	    if test ${GC} = yes && test "$body0" = "${name}" ; then
+		body="$body-${DATE}"
+	    fi
+
+	    printf "(srpmix-group \"%s\")\n" "$body"
 	    cat "$f"
 	fi
     done | gosh ${PKGDATADIR}/create-comps.scm > ${repo_dir}/comps.xml

@@ -43,7 +43,7 @@
        ((eq? (car es) 'in-repo)
 	(let ((name (cadr (memq :name (cdr es))))
 	      (file (cadr (memq :file (cdr es))))
-	      (pat  #/(.+-srpmix)-(archives|plugins)$/)
+	      (pat  #/(.+-srpmix)-(archives|plugins|plugin-.*)$/)
              )
 	  (let1 name (rxmatch-if (pat name) (#f body #f) body name)
               (unless (hash-table-get htable name #f)
