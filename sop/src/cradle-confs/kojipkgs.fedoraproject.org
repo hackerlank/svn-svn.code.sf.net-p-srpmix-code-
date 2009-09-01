@@ -7,4 +7,4 @@ DIST_MAPPING=yes
 INSTALL=no
 
 KOJI_HOST=kojipkgs.fedoraproject.org
-KOJI_DIST=dist-f12-maven
+KOJI_DIST=dist-rawhide
