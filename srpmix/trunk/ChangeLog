@@ -1,5 +1,14 @@
 2009-09-03  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-envelop (envelop_swrf): Remove newlines from %{Description}
+	returned from rpm -q.
+
+	* src/srpmix-wrap (wrap_srpm):  Ditto.
+	(create_plugin_spec): Ditto.
+	(create_core_spec): Ditto.
+
+2009-09-03  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/plugins/60srpmix-cscope (main): Handle kernel-2.4.spec.
 
 	* src/plugins/60srpmix-ctags (main): Handle kernel-2.4.spec.

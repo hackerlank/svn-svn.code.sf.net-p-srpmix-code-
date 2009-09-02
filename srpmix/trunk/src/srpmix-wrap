@@ -150,7 +150,8 @@ function create_core_spec
     local wrapped_name=
     local es_name=
 
-    pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_srpm)
+    pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_srpm \
+	 | tr "\n" " " )
     package=$(echo $pvrd | cut -d' ' -f1)
     version=$(echo $pvrd | cut -d' ' -f2)
     release=$(echo $pvrd | cut -d' ' -f3)
@@ -269,7 +270,8 @@ function create_plugin_spec
     target_swrf=$1
     plugins_name=$2
 
-    pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_swrf)
+    pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_swrf \
+	| tr "\n" " " )
     package=$(echo $pvrd | cut -d' ' -f1)
     version=$(echo $pvrd | cut -d' ' -f2)
     release=$(echo $pvrd | cut -d' ' -f3)
@@ -395,7 +397,8 @@ function wrap_srpm
     local wrapped_name=
     local es_name=
 
-    local pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target)
+    local pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target \
+	| tr "\n" " " )
     local package=$(echo $pvrd | cut -d' ' -f1)
     local version=$(echo $pvrd | cut -d' ' -f2)
     local release=$(echo $pvrd | cut -d' ' -f3)
