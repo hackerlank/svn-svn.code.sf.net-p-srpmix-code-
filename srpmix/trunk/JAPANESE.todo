@@ -2,17 +2,28 @@
 ** attachデータをpluginから作れるようにする。##
 ** recommendation package
 
-** gc-repo.scmでのattachmentの扱い
 ** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？ 
    --- 期待通りだか混乱のもととなるので仕様を見直す。
 ** /usr/localに入れた場合でも正しく動作するように編成する。
 
 ** compsの生成 <need check>
 ** root権限がない場合のattachは？ <need check>
+** gc-repo.scmでのattachmentの扱い <need check>
+
+* yum method
+** jpackage cradle: http://www.jpackage.org/yum.php #
+**  rpmfusion cradle: http://rpmfusion.org/ #
+** gc_method and download_method
+
+*** use <<<here-string
+
+*** weakviewのattachment
 
 
 For version 4
 ========================================================================
+
+
 
 * live media ###
 ** mummify/slice ###
@@ -131,6 +142,7 @@ done
 
 After version 4
 ========================================================================
+Generice Directory Structure Rendering Framework
 Improve spec arrange stage
 real package management
 extra backend
