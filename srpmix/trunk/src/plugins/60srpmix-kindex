@@ -116,6 +116,15 @@ function main
 	return 0
     fi
 
+    if test -f $SPEC; then
+	# something wrong
+	return 0
+    fi
+
+    if test $(basename $SPEC) = "kernel-2.4.spec"; then
+	return 0
+    fi
+
     perarch_kernel=
 # TODO: cscope, xen    
     if test -d "${PRE_BUILDDIR}" &&

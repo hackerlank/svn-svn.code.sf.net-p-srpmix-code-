@@ -1,3 +1,13 @@
+2009-09-03  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-cscope (main): Handle kernel-2.4.spec.
+
+	* src/plugins/60srpmix-ctags (main): Handle kernel-2.4.spec.
+
+	* src/plugins/60srpmix-etags (main): Handle kernel-2.4.spec.
+
+	* src/plugins/60srpmix-kindex (main): Don't handle kernel-2.4.spec.
+
 2009-09-02  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 3.107.2.

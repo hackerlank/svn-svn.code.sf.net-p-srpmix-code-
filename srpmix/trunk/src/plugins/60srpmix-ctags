@@ -122,7 +122,8 @@ function main
     parse_arguments "$@"
 
     if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \
-	$SPEC > /dev/null 2>&1; then
+	$SPEC > /dev/null 2>&1 \
+	&& test $(basename $SPEC) != "kernel-2.4.spec"; then
 	for x in ${BUILDDIR}/*/linux*/Makefile; do
 	    if test -f $x; then
 		if grep '\(^tags:\)\|\(tags \)' $x > /dev/null 2>&1; then
