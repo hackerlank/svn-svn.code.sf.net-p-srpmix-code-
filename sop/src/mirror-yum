@@ -1,0 +1,73 @@
+#!/bin/bash
+cf=$1
+log=$2
+
+source $cf
+
+if test -z "$YUM_REPOFILE"; then
+    echo "No YUM_REPOFILE in $1" 1>&2
+    exit 1
+fi
+
+if test -z "$YUM_REPONAME"; then
+    echo "No YUM_REPONAME in $1" 1>&2
+    exit 1
+fi
+
+
+function run_gc
+{
+    local new_srpm=$1
+
+    local pvr p v r
+    local PVR P V R
+
+    pvr=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE}" $new_srpm)
+    p=$(echo $pvr | cut -d' ' -f1)
+    v=$(echo $pvr | cut -d' ' -f2)
+    r=$(echo $pvr | cut -d' ' -f3)
+		
+    for f in $p-*.src.rpm; do
+	if test $f != $new_srpm; then
+	    PVR=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE}" $f)
+	    P=$(echo $PVR | cut -d' ' -f1)
+	    V=$(echo $PVR | cut -d' ' -f2)
+	    R=$(echo $PVR | cut -d' ' -f3)
+
+	    if test $p = $P; then
+		echo "(lcopy-yum gc \"$f\")" >> $log
+		rm -f $f
+	    fi
+	fi
+    done
+
+}
+
+function main
+{
+    local repofile_path
+    local srpm
+    local name
+
+
+    MY_TMPDIR=`mktemp -d`
+    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
+
+    local repofile_path="${MY_TMPDIR}/${YUM_REPONAME}.repo"
+    echo "$YUM_REPOFILE" > $repofile_path
+
+    reposync --urls --config=${repofile_path} --source --repoid=${YUM_REPONAME} \
+	| grep src.rpm \
+	| while read url; do
+	srpm=$(basename $url)
+	# TODO: Following test may not be needed; reposync may do.
+	if ! test -f ./${srpm}; then
+	    echo "(lcopy-yum new \"$srpm\")" >> $log
+	    name=${srpm/.src.rpm/}
+	    if yumdownloader -c ${repofile_path} --disablerepo='*' --enablerepo=${YUM_REPONAME} --source \
+		&& test -f /${srpm}; then
+		run_gc ${srpm}
+	    fi
+	fi
+    done
+}
