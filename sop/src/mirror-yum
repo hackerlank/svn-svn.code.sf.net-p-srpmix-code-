@@ -64,10 +64,12 @@ function main
 	if ! test -f ./${srpm}; then
 	    echo "(lcopy-yum new \"$srpm\")" >> $log
 	    name=${srpm/.src.rpm/}
-	    if yumdownloader -c ${repofile_path} --disablerepo='*' --enablerepo=${YUM_REPONAME} --source \
+	    if yumdownloader -c ${repofile_path} --disablerepo='*' --enablerepo=${YUM_REPONAME} --source ${name} \
 		&& test -f /${srpm}; then
 		run_gc ${srpm}
 	    fi
 	fi
     done
 }
+
+main "$@"
