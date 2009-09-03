@@ -1,0 +1,1 @@
+# http://download.opensuse.org/distribution/11.0/repo/src-oss/suse/src/
