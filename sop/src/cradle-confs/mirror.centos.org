@@ -1,7 +1,6 @@
 #!/bin/bash
 
-
-METHOD=ftp
+METHOD=wget
 ENABLE=no
 GC=no
 BACKUP=no
@@ -9,6 +8,8 @@ BUILD=no
 DIST_MAPPING=no
 INSTALL=no
 
-FTP_HOST=mirror.centos.org
-FTP_PATH=/centos/
-FTP_PATTERN='*.src.rpm'
+WGET_PROTOCOL=http
+WGET_HOST=mirror.centos.org
+WGET_PATH=/centos/
+WGET_PATTERN='*.src.rpm'
+WGET_CUT_DIRS=1

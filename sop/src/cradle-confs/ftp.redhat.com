@@ -1,5 +1,5 @@
 #!/bin/bash
-METHOD=ftp
+METHOD=wget
 ENABLE=yes
 GC=no
 BACKUP=no
@@ -7,7 +7,8 @@ BUILD=yes
 DIST_MAPPING=no
 INSTALL=no
 
-FTP_HOST=ftp.redhat.com
-FTP_PATH=/pub/redhat
-FTP_PATTERN='*.src.rpm'
-
+WGET_PROTOCOL=ftp
+WGET_HOST=ftp.redhat.com
+WGET_PATH=/pub/redhat
+WGET_PATTERN='*.src.rpm'
+WGET_CUT_DIRS=2

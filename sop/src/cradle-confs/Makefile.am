@@ -5,6 +5,9 @@ dist_cradleconf_DATA =				\
 	jpackage-generic                        \
 	rpmfusion-free-rawhide-source           \
 	user					\
+	\
 	mirror.centos.org                       \
+	\
+	download.opensuse.org                   \
 	\
 	$(NULL)
