@@ -11,8 +11,9 @@
 ** gc-repo.scmでのattachmentの扱い <need check>
 
 * yum method
-** jpackage cradle: http://www.jpackage.org/yum.php #
-**  rpmfusion cradle: http://rpmfusion.org/ #
+** jpackage cradle: http://www.jpackage.org/yum.php <need check>
+**  rpmfusion cradle: http://rpmfusion.org/   <need check>
+** iso method
 ** gc_method and download_method
 
 *** use <<<here-string
