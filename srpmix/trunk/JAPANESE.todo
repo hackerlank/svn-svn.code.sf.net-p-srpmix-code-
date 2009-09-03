@@ -1,6 +1,7 @@
-
 ** attachデータをpluginから作れるようにする。##
 ** recommendation package
+*** weakviewのattachment
+
 
 ** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？ 
    --- 期待通りだか混乱のもととなるので仕様を見直す。
@@ -17,9 +18,6 @@
 ** gc_method and download_method
 
 *** use <<<here-string
-
-*** weakviewのattachment
-
 
 For version 4
 ========================================================================

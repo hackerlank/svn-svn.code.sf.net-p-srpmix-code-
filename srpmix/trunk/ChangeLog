@@ -1,3 +1,8 @@
+2009-09-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (core_build): Added -t to mapfile to trailing line.
+	(dir_pkg_build): Always return 0.
+
 2009-09-03  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-envelop (envelop_swrf): Remove newlines from %{Description}

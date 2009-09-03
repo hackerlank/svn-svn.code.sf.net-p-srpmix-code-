@@ -232,7 +232,7 @@ function dirpkg_created_p
 function core_build
 {
     local xopt
-    mapfile xopt < <(opt_rules $TARGET_SRPM)
+    mapfile -t xopt < <(opt_rules $TARGET_SRPM)
     srpmix-build "${xopt[@]}" $SRPMIX_BUILD_OPTS --srpm=$TARGET_SRPM
 }
 
@@ -244,16 +244,14 @@ function dir_pkg_build
 	if ! dirpkg_installed_p $TARGET_SRPM; then
 	    mkdir -p $OUTPUT_DIR/dir-pkg/$p
 	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR/dir-pkg/$p
-	    return 0
 	fi
     else
 	if ! dirpkg_created_p $TARGET_SRPM $OUTPUT_DIR; then
 	    mkdir -p $OUTPUT_DIR/dir-pkg/$p
 	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR/dir-pkg/$p
-	    return 0
 	fi
     fi
-    return 1
+    return 0
 }
 
 function plugin_build
