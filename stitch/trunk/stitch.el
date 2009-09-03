@@ -1211,23 +1211,37 @@
     (pop-to-buffer b)))
 
 (defun stitch-edit-annotation-new (commit-func commit-args mode etype)
-  (stitch-edit-annotation-new-0 (format "*Annotation<%s:%d>*"
-					 (buffer-name (stitch-klist-value commit-args :buffer))
-					 (stitch-klist-value commit-args :point))
-				 (concat
-				  (propertize
-				   (format "File: %s\nPoint: %d\nKeywords: \n"
-					   (buffer-name (stitch-klist-value commit-args :buffer))
-					   (stitch-klist-value commit-args :point))
-				   'face 'stitch-annotation-edit-header
-				   'mouse-face 'highlight)
-				  "----\n")
-				 commit-func commit-args mode
-				 `(lambda (bstring)
-				    (list 'annotation :type ',etype
-						      :data bstring))
-				 (lambda (commit-args) 
-				   (stitch-read-keywords nil t))))
+  (let* ((buf  (stitch-klist-value commit-args :buffer))
+	 (bname (buffer-name buf))
+	 (dirp (with-current-buffer buf (eq major-mode 'dired-mode)))
+	 (elt (if dirp 
+		  (with-current-buffer buf 
+		    (goto-char (stitch-klist-value commit-args :point))
+		    (dired-get-filename t t))
+		(stitch-klist-value commit-args :point)
+		))
+	 )
+    (stitch-edit-annotation-new-0 (format "*Annotation<%s:%s>*"
+					  bname
+					  elt
+					  )
+				  (concat
+				   (propertize
+				    (format (if dirp
+						    "Directory: %s\nItem: %s\nKeywords: \n"
+						  "File: %s\nPoint: %d\nKeywords: \n")
+						bname
+						elt
+						)
+				    'face 'stitch-annotation-edit-header
+				    'mouse-face 'highlight)
+				   "----\n")
+				  commit-func commit-args mode
+				  `(lambda (bstring)
+				     (list 'annotation :type ',etype
+					   :data bstring))
+				  (lambda (commit-args) 
+				    (stitch-read-keywords nil t)))))
 
 (defun stitch-text-annotation-new (commit-func commit-args)
   (stitch-edit-annotation-new commit-func commit-args 'text-mode 'text))
