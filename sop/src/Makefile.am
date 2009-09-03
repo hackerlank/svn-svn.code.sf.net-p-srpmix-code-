@@ -8,6 +8,7 @@ dist_pkgdata_SCRIPTS= \
 	mirror-ftp    \
 	mirror-koji   \
 	mirror-user   \
+	mirror-yum    \
 	\
 	$(NULL)
 

@@ -1,13 +1,14 @@
 #!/bin/bash
+
+
 METHOD=ftp
-ENABLE=yes
+ENABLE=no
 GC=no
 BACKUP=no
-BUILD=yes
+BUILD=no
 DIST_MAPPING=no
 INSTALL=no
 
-FTP_HOST=ftp.redhat.com
-FTP_PATH=/pub/redhat
+FTP_HOST=mirror.centos.org
+FTP_PATH=/centos/
 FTP_PATTERN='*.src.rpm'
-

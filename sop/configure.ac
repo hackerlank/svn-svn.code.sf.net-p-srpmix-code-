@@ -29,6 +29,17 @@ if test "x$KOJI" = "x"; then
    AC_MSG_ERROR(koji not found); 
 fi
 
+AC_CHECK_PROGS([REPOSYNC],[reposync])
+if test "x$REPOSYNC" = "x"; then 
+   AC_MSG_ERROR(reposync not found); 
+fi
+
+AC_CHECK_PROGS([YUMDOWNLOADER],[yumdownloader])
+if test "x$YUMDOWNLOADER" = "x"; then 
+   AC_MSG_ERROR(yumdownloader not found); 
+fi
+
+
 AC_RPM_RELEASE
 
 AC_OUTPUT([

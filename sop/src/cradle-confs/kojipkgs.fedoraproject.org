@@ -1,3 +1,6 @@
+#!/bin/bash
+
+
 METHOD=koji
 ENABLE=yes
 GC=yes

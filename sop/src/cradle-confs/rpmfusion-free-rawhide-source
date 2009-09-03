@@ -1,0 +1,22 @@
+#!/bin/bash
+
+
+METHOD=yum
+ENABLE=yes
+GC=yes
+BACKUP=no
+BUILD=no
+DIST_MAPPING=yes
+INSTALL=no
+
+YUM_REPONAME=rpmfusion-free-rawhide-source
+YUM_REPOFILE=$(cat <<"EOF"
+[rpmfusion-free-rawhide-source]
+name=RPM Fusion for Fedora Rawhide - Free - Source
+#baseurl=http://download1.rpmfusion.org/free/fedora/development/source/SRPMS/
+mirrorlist=http://mirrors.rpmfusion.org/mirrorlist?repo=free-fedora-rawhide-source&arch=$basearch
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-latest-$basearch file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmfusion-free-fedora-rawhide-$basearch
+EOF
+)
