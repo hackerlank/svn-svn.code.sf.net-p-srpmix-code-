@@ -19,6 +19,9 @@
 
 *** use <<<here-string
 
+*** Do yum install some required packages in autogen.sh.
+
+
 For version 4
 ========================================================================
 
