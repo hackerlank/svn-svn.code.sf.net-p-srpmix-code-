@@ -64,7 +64,10 @@ function main
 	if ! test -f ./${srpm}; then
 	    echo "(lcopy-yum new \"$srpm\")" >> $log
 	    name=${srpm/.src.rpm/}
-	    if yumdownloader -c ${repofile_path} --disablerepo='*' --enablerepo=${YUM_REPONAME} --source ${name} \
+
+	    # yumdownloader doesn't work on RPMFUSION.
+	    if ( yumdownloader -c ${repofile_path} --disablerepo='*' --enablerepo=${YUM_REPONAME} --source ${name} \
+		 || wget $url; ) \
 		&& test -f /${srpm}; then
 		run_gc ${srpm}
 	    fi
