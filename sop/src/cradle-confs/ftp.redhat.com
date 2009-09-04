@@ -4,7 +4,7 @@ ENABLE=yes
 GC=no
 BACKUP=no
 BUILD=yes
-TYPE=src.rpm
+TYPE=srpm
 DIST_MAPPING=no
 INSTALL=no
 
