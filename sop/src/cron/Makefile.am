@@ -6,6 +6,7 @@ dist_crondaily_SCRIPTS =        \
         sop-030-backup				\
         sop-040-hardlink-backup			\
         sop-060-build                           \
+        sop-060-update                          \
         sop-080-hardlink-deployed               \
 	\
 	$(NULL)

@@ -15,6 +15,15 @@ else
     exit 1
 fi
 
+function backup0
+{
+    local name=$1
+    local dir=$2
+
+    mkdir -p ${SOP_BACKUP_DIR}/$name/$dir
+    rsync -auvH ${SOP_CRADLES_DIR}/$name/$dir ${SOP_BAKCUP_DIR}/$name/$dir 2>&1 \
+	|tee "${SOP_CRADLES_DIR}/$name/log/backup-$dir-$date"
+}
 function backup
 {
     local cf=$1/cf
@@ -30,12 +39,10 @@ function backup
     if test "$BACKUP" != yes; then
 	return 0
     fi
-    
-    mkdir -p ${SOP_BACKUP_DIR}/$name/mirror
-    rsync -auvH ${SOP_CRADLES_DIR}/$name/mirror ${SOP_BAKCUP_DIR}/$name/mirror 2>&1 \
-	|tee "${SOP_CRADLES_DIR}/$name/log/backup-$date"
 
+    backup0 $name mirror
 }
+
 function main
 {
     if test "x${SOP_ENABLE_BACKUP}" = x; then

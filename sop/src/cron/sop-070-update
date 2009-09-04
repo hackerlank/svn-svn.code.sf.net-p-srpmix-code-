@@ -1,0 +1,32 @@
+#!/bin/bash
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+SOPCONFDIR=/etc/sop
+CONF=sop.cf
+PKGDATADIR=/usr/share/sop
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    SOPCONFDIR=$1
+    source "$1/${CONF}"
+elif test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function main
+{
+    if test "x$SOP_ENABLE_BUILD" != xyes; then
+	return 0
+    fi
+
+    if test "x$SOP_ENABLE_UPDATE" != xyes; then
+	return 0
+    fi
+
+    sop-update
+}
+
+time main
+
