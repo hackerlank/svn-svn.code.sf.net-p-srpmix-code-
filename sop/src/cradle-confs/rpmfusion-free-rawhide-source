@@ -6,6 +6,7 @@ ENABLE=yes
 GC=yes
 BACKUP=no
 BUILD=no
+TYPE=src.rpm
 DIST_MAPPING=yes
 INSTALL=no
 

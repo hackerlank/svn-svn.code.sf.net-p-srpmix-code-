@@ -100,7 +100,7 @@ function mirror
 
 function main
 {
-    if test "x$SOP_ENABLE_MIRROR" = x; then
+    if test "x$SOP_ENABLE_MIRROR" != xyes; then
 	return 0
     fi
 
