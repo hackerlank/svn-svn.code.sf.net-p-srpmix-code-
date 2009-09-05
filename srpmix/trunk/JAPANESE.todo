@@ -1,5 +1,16 @@
 ** attachデータをpluginから作れるようにする。##
 ** recommendation package
+    #                                                                                                              
+    # libtool autoconf autoconf213 automake automake14 automake15 automake16 automake17                            
+    # gettext-devel                                                                                                
+    # glib-devel glib2-devel gtk2-devel gtk+-devel                                                                 
+    # * Extra langauge                                                                                             
+    # mono-devel ruby-devel perl-devel python-devel php-devel                                                      
+    # * Java                                                                                                       
+    # libgcj-devel jpackage-utils maven2                                                                           
+    # java-1.6.0-openjdk-devel                                                                                     
+    # eclipse
+
 *** weakviewのattachment
 
 

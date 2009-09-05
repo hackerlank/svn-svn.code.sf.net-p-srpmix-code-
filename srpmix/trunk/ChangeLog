@@ -1,3 +1,7 @@
+2009-09-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.108.0.
+
 2009-09-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix (core_build): Added -t to mapfile to trailing line.
