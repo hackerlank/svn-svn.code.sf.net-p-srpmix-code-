@@ -25,8 +25,9 @@ function run_yum
 {
     local cf=$1
     local repo_name=$2
-    local action=$3
-    local force=$4
+    local repo_file=$3
+    local action=$4
+    local force=$5
     
     source $cf
 
@@ -39,7 +40,7 @@ function run_yum
 	return 0
     fi
 
-    yum -y --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
+    yum -y -c ${repo_file} --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
     return $?
 }
 
@@ -150,14 +151,31 @@ function run_gc
 	rpm -e "$n"
     done
 }
+
+function run
+{
+    local mirror_name=$1
+    local protocol=$2
+    local force=$3
+    local cf
+    local repo_file
+    local repo_name
     
+    cf=${SOP_CRADLES_DIR}/$mirror_name/cf
+    if ! test -f $cf; then
+	echo "No such mirror: $mirror_name" 1>&2
+	return
+    fi
+
+    repo_file=${SOP_CRADLES_DIR}/${mirror_name}/file.repo
+    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
+    if ( run_yum "$cf" "$repo_name" "$repo_file" "install" $force ); then
+	( run_gc "$cf" $(echo $mirror_name | tr '.' '-') $force )
+    fi
+}
 function main
 {
-    local cf
-    local repo_name
     local protocol
-    local mirror_name
-
 
     protocol=file
 
@@ -165,26 +183,11 @@ function main
     if test $# = 0; then
 	for n in ${SOP_CRADLES_DIR}/*; do
 	    mirror_name=$(basename $n)
-	    cf=${SOP_CRADLES_DIR}/${mirror_name}/cf
-	    if ! test -f $cf; then
-		continue
-	    fi
-	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
-	    if ( run_yum "$cf" "$repo_name" "install" "no" ); then
-		( run_gc  "$cf" $(echo $mirror_name | tr '.' '-') "no")
-	    fi
+	    run $mirror_name $protocol "no"
 	done
     else
 	for mirror_name in "$@"; do
-	    cf=${SOP_CRADLES_DIR}/$mirror_name/cf
-	    if ! test -f $cf; then
-		echo "No such mirror: $mirror_name" 1>&2
-		continue
-	    fi
-	    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
-	    if ( run_yum "$cf" "$repo_name" "install" "yes" ); then
-		( run_gc "$cf" $(echo $mirror_name | tr '.' '-') "yes" )
-	    fi
+	    run $mirror_name $protocol "yes"
 	done
     fi
 }
