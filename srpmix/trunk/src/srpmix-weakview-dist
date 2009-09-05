@@ -148,6 +148,8 @@ rm -rf \$builddistdir
 %build
 builddistdir=%{_builddir}/$builddistdir_body
 
+mkdir -p \$builddistdir/plugins
+
 EOF
 
 # in %build

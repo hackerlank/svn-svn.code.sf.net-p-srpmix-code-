@@ -24,6 +24,8 @@ dist_bin_SCRIPTS =           \
 	srpmix-plugin                           \
 	srpmix-attach                           \
 	\
+	srpmix-weakview-dist-attach             \
+	\
         $(NULL)
 
 srpmixconfdir=$(sysconfdir)/srpmix

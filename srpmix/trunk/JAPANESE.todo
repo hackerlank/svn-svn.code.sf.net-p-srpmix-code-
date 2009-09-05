@@ -11,9 +11,6 @@
     # java-1.6.0-openjdk-devel                                                                                     
     # eclipse
 
-*** weakviewのattachment
-
-
 ** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？ 
    --- 期待通りだか混乱のもととなるので仕様を見直す。
 ** /usr/localに入れた場合でも正しく動作するように編成する。
@@ -23,8 +20,6 @@
 ** gc-repo.scmでのattachmentの扱い <need check>
 
 * yum method
-** jpackage cradle: http://www.jpackage.org/yum.php <need check>
-**  rpmfusion cradle: http://rpmfusion.org/   <need check>
 ** iso method
 ** gc_method and download_method
 
@@ -32,11 +27,12 @@
 
 *** Do yum install some required packages in autogen.sh.
 
+ctags crashed at
+
+5  0x0000000000412dc9 in createTagsForEntry (entryName=0x97e2c0 "gcc-2.96-20000731/libstdc++/config/dec-osf.ml") at main.c:303
 
 For version 4
 ========================================================================
-
-
 
 * live media ###
 ** mummify/slice ###
@@ -153,9 +149,15 @@ done
 ** logを空にする、あるいはgzipする。<done>
 ** kindexでのcscopeのサポート <maybe done>
 
+** jpackage cradle: http://www.jpackage.org/yum.php <done>
+**  rpmfusion cradle: http://rpmfusion.org/   <done>
+
+*** weakviewのattachment
+
+
 After version 4
 ========================================================================
 Generice Directory Structure Rendering Framework
-Improve spec arrange stage
+Improve spec arrange stage, and mock
 real package management
-extra backend
+extra backend for lcopy, deb, tar.gz...

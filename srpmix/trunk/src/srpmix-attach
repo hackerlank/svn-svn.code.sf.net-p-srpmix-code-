@@ -183,7 +183,7 @@ Prefix: /
 $PKG_NAME plugin information for package ${TARGET_PACKAGE}-${TARGET_VERSION}
 
 %prep
-rm -rf $RPM_BUILD_ROOT
+rm -rf \$RPM_BUILD_ROOT
 
 %build
 

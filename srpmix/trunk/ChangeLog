@@ -1,3 +1,15 @@
+2009-09-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-attach (create_swrf): Escape $ of $RPM_BUILD_ROOT.
+
+	* src/srpmix-weakview-dist-attach: New file.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-weakview-dist-attach.
+	* misc/specs/srpmix.spec(%files): Ditto.
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Introduce new directory
+	"plugins" under the per-dist directory.
+
 2009-09-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 3.108.0.
