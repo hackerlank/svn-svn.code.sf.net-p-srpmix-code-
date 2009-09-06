@@ -1,3 +1,10 @@
+2009-09-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-etags: Added command option --plugin-dir,
+	--log-file, and --force.
+
+	* src/plugins/60srpmix-ctags: Ditto.
+
 2009-09-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-attach (create_swrf): Escape $ of $RPM_BUILD_ROOT.

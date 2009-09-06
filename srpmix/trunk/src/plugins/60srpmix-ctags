@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ########################################################################
 #
@@ -35,6 +35,8 @@ SPEC=
 
 SRPMIX_CTAGS_DEBUG=
 
+FORCE=
+
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {
@@ -51,27 +53,36 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-ctags [--help|-h]"
-    echo "  srpmix-ctags [--debug] ROOTDIR"
+    echo "  srpmix-ctags [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
 function parse_arguments
 {
-    status=
+    local status=
 
 
     while [ $# -gt 0 ]; do
 	case "$1" in
-	    --help|-h)
+	    (--help|-h)
 		print_usage
 		exit 0
 		;;
-	    --debug)
+	    (--debug)
 		set -x
 		PS4="${PS4}[ctags]"
 		SRPMIX_CTAGS_DEBUG=yes
 		;;
-	    *)
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    (--force)
+	        FORCE=yes
+		;;
+	    (*)
 		break
 		;;
 	esac
@@ -89,10 +100,12 @@ function parse_arguments
 
     SPEC=${ROOTDIR}/*.spec
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/ctags
-    LOGFILE=${PLUGINDIR}/ctags-log.es
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/ctags}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/ctags-log.es}
 
-    if ! test -d "${BUILDDIR}"; then exit 0; fi
+    if ! test -d "${BUILDDIR}"; then 
+	exit 0; 
+    fi
 
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
@@ -101,9 +114,9 @@ function parse_arguments
 
 function run_ctags
 {
-    d=$1
-    o=$2
-    l=$3
+    local d=$1
+    local o=$2
+    local l=$3
 
 
     es_print ctags-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
@@ -135,7 +148,8 @@ function main
     fi
 
     if ( ! test -e "${PLUGINDIR}/tags" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/tags"; then
+       ( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/tags" ) || 
+       ( test "$FORCE" = yes ); then
       run_ctags "${BUILDDIR}" "${PLUGINDIR}/tags" $LOGFILE
     fi
 }

@@ -1,47 +1,36 @@
-** attachデータをpluginから作れるようにする。##
-** recommendation package
-    #                                                                                                              
-    # libtool autoconf autoconf213 automake automake14 automake15 automake16 automake17                            
-    # gettext-devel                                                                                                
-    # glib-devel glib2-devel gtk2-devel gtk+-devel                                                                 
-    # * Extra langauge                                                                                             
-    # mono-devel ruby-devel perl-devel python-devel php-devel                                                      
-    # * Java                                                                                                       
-    # libgcj-devel jpackage-utils maven2                                                                           
-    # java-1.6.0-openjdk-devel                                                                                     
-    # eclipse
+** attachデータをpluginから作れるようにする。###
 
-** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？ 
-   --- 期待通りだか混乱のもととなるので仕様を見直す。
-** /usr/localに入れた場合でも正しく動作するように編成する。
+  10srpmix-vanilla
+  50srpmix-coreutils
+  50srpmix-file
+  60srpmix-cscope
+  60srpmix-ctags <done>
+  60srpmix-doxygen
+  60srpmix-etags <done>
+  60srpmix-hyperestraier
+  60srpmix-kindex
+  60srpmix-xgettext
+  
+*** Do yum install some build/required packages in autogen.sh.
+
+* live media ##
+** mummify/slice ##
+** repoをわける。--groupオプション?
+   group-name,group-source-dir,group-output-dir,group-hooks
+
+* srpmix.org
+** 全文検索 #
+** ウェブインターフェイス
 
 ** compsの生成 <need check>
 ** root権限がない場合のattachは？ <need check>
 ** gc-repo.scmでのattachmentの扱い <need check>
 
-* yum method
-** iso method
-** gc_method and download_method
-
-*** use <<<here-string
-
-*** Do yum install some required packages in autogen.sh.
-
-ctags crashed at
-
-5  0x0000000000412dc9 in createTagsForEntry (entryName=0x97e2c0 "gcc-2.96-20000731/libstdc++/config/dec-osf.ml") at main.c:303
+** adduser brewbuilder
+* --make-rpm
 
 For version 4
 ========================================================================
-
-* live media ###
-** mummify/slice ###
-** repoをわける。--groupオプション?
-   group-name,group-source-dir,group-output-dir,group-hooks
-
-* srpmix.org
-** 全文検索
-** ウェブインターフェイス
 
 * ビルド率
 ** 環境変数をつかえるようにする。
@@ -51,6 +40,10 @@ For version 4
 ** createrepoがおかしい。
 ** etagsが一度クラッシュしている。
    php-5.3.0-6.fc12-srpmixの処理中であるが、再現しない。
+* ctags crashed at
+   5  0x0000000000412dc9 in createTagsForEntry \
+   (entryName=0x97e2c0 "gcc-2.96-20000731/libstdc++/config/dec-osf.ml") at main.c:303
+
 
 * pluginのAPIを強化する。
 ** pluginを個別パッケージにさらに分解する。#
@@ -66,9 +59,11 @@ For version 4
 ** .specを拡張子に持たないspecファイルの処理
 ** repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
 ** srpmixでdownloadしたsrc.rpmをキャッシュする。
-** swrfの拡張子を確立する。???
 
 
+** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？ 
+   --- 期待通りだか混乱のもととなるので仕様を見直す。
+** /usr/localに入れた場合でも正しく動作するように編成する。
 
 * primary.xml.gzの中のなぞのfile entry
 <package type="rpm">
@@ -102,6 +97,12 @@ For version 4
   </format>
 </package>
 
+*** use <<<here-string
+*** pfor
+
+* yum method
+** iso method
+** GCを汎用化する。gc_method and download_method
 
 done
 -------------------------------------------------------------------------------------
@@ -152,7 +153,19 @@ done
 ** jpackage cradle: http://www.jpackage.org/yum.php <done>
 **  rpmfusion cradle: http://rpmfusion.org/   <done>
 
-*** weakviewのattachment
+*** weakviewのattachment <done>
+
+** recommendation package <done>
+    #                                                                                                              
+    # libtool autoconf autoconf213 automake automake14 automake15 automake16 automake17                            
+    # gettext-devel                                                                                                
+    # glib-devel glib2-devel gtk2-devel gtk+-devel                                                                 
+    # * Extra langauge                                                                                             
+    # mono-devel ruby-devel perl-devel python-devel php-devel                                                      
+    # * Java                                                                                                       
+    # libgcj-devel jpackage-utils maven2                                                                           
+    # java-1.6.0-openjdk-devel                                                                                     
+    # eclipse
 
 
 After version 4
@@ -161,3 +174,4 @@ Generice Directory Structure Rendering Framework
 Improve spec arrange stage, and mock
 real package management
 extra backend for lcopy, deb, tar.gz...
+** swrfの拡張子を確立する。???

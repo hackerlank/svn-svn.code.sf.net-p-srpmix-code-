@@ -24,7 +24,7 @@
 	 (file base version)
 	 (hash-table-push! htable base (list file version))
 	 (loop (read-line)))
-	;; TODO: attachment
+	;; NOTE TESTED: attachment
 	((rxmatch #/(.+-srpmix-plugin-.+)-([0-9].*)\.noarch\.rpm/ l)
 	 (file base version)
 	 (hash-table-push! htable base (list file version))

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ########################################################################
 #
@@ -35,6 +35,8 @@ SPEC=
 
 SRPMIX_ETAGS_DEBUG=
 
+FORCE=
+
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {
@@ -53,27 +55,36 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
-    echo "  $0 [--debug] ROOTDIR"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
 function parse_arguments
 {
-    status=
+    local status=
 
 
     while [ $# -gt 0 ]; do
 	case "$1" in
-	    --help|-h)
+	    (--help|-h)
 		print_usage
 		exit 0
 		;;
-	    --debug)
+	    (--debug)
 		set -x
 		PS4="${PS4}[etags]"
 		SRPMIX_ETAGS_DEBUG=yes
 		;;
-	    *)
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    (--force)
+	        FORCE=yes
+		;;	    
+	    (*)
 		break
 		;;
 	esac
@@ -91,8 +102,8 @@ function parse_arguments
 
     SPEC=${ROOTDIR}/*.spec
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/etags
-    LOGFILE=${PLUGINDIR}/etags-log.es
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/etags}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/ctags-log.es}
 
     if ! test -d "${BUILDDIR}"; then exit 0; fi
 
@@ -103,9 +114,9 @@ function parse_arguments
 
 function run_etags
 {
-    d=$1
-    o=$2
-    l=$3
+    local d=$1
+    local o=$2
+    local l=$3
 
 
     es_print etags-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
@@ -139,7 +150,8 @@ function main
     fi
 
     if ( ! test -e "${PLUGINDIR}/TAGS" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/TAGS"; then
+       ( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/TAGS" ) ||
+       ( test "$FORCE" = yes ); then
 	run_etags "${BUILDDIR}" "${PLUGINDIR}/TAGS" $LOGFILE
     fi
 }
