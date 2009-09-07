@@ -29,6 +29,8 @@
 ** adduser brewbuilder
 * --make-rpm
 
+*  brewbuilder, mockbuild
+
 For version 4
 ========================================================================
 
