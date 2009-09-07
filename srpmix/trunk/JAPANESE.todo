@@ -177,3 +177,49 @@ Improve spec arrange stage, and mock
 real package management
 extra backend for lcopy, deb, tar.gz...
 ** swrfの拡張子を確立する。???
+
+
+
+
+26338/32570 - i/ipsec-tools-0.2.5-0.7.rhel3.5-srpmix-3.108.0-0.fc11.noarch.rpm  Traceback (most recent call last):
+  File "/usr/share/createrepo/genpkgmetadata.py", line 233, in <module>
+    main(sys.argv[1:])
+  File "/usr/share/createrepo/genpkgmetadata.py", line 207, in main
+    mdgen.doPkgMetadata()
+  File "/usr/lib/python2.6/site-packages/createrepo/__init__.py", line 364, in doPkgMetadata
+    self.writeMetadataDocs(packages)
+  File "/usr/lib/python2.6/site-packages/createrepo/__init__.py", line 527, in writeMetadataDocs
+    self.primaryfile.write(po.xml_dump_primary_metadata())
+  File "/usr/lib64/python2.6/gzip.py", line 197, in write
+    self.fileobj.write( self.compress.compress(data) )
+IOError: [Errno 5] Input/output error
+make: *** [repodata/primary.xml.gz] Error 1
+make: Leaving directory `/srv/sources/attic/cradles/ftp.redhat.com/repo'
++ for cradle in '${SOP_CRADLES_DIR}/*'
++ cf=/srv/sources/attic/cradles/jpackage-generic/cf
+++ basename /srv/sources/attic/cradles/jpackage-generic
++ name=jpackage-generic
++ test -z ftp.redhat.com
++ test ftp.redhat.com = jpackage-generic
++ for cradle in '${SOP_CRADLES_DIR}/*'
++ cf=/srv/sources/attic/cradles/kojipkgs.fedoraproject.org/cf
+++ basename /srv/sources/attic/cradles/kojipkgs.fedoraproject.org
++ name=kojipkgs.fedoraproject.org
++ test -z ftp.redhat.com
++ test ftp.redhat.com = kojipkgs.fedoraproject.org
++ for cradle in '${SOP_CRADLES_DIR}/*'
++ cf=/srv/sources/attic/cradles/rpmfusion-free-rawhide-source/cf
+++ basename /srv/sources/attic/cradles/rpmfusion-free-rawhide-source
++ name=rpmfusion-free-rawhide-source
++ test -z ftp.redhat.com
++ test ftp.redhat.com = rpmfusion-free-rawhide-source
++ for cradle in '${SOP_CRADLES_DIR}/*'
++ cf=/srv/sources/attic/cradles/user/cf
+++ basename /srv/sources/attic/cradles/user
++ name=user
++ test -z ftp.redhat.com
++ test ftp.redhat.com = user
+
+real    2648m25.477s
+user    5493m36.020s
+sys     4035m31.155s

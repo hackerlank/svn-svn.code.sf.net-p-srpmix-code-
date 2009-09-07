@@ -5,6 +5,8 @@
 
 	* src/plugins/60srpmix-ctags: Ditto.
 
+	* src/plugins/60srpmix-cscope: Ditto.
+
 2009-09-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-attach (create_swrf): Escape $ of $RPM_BUILD_ROOT.

@@ -35,6 +35,8 @@ SPEC=
 
 SRPMIX_CSCOPE_DEBUG=
 
+FORCE=
+
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {
@@ -49,8 +51,8 @@ try_source ${LIBSRPMIX}
 function print_usage
 {
     echo "Usage: "
-    echo "  $0 [--help|-h]"
-    echo "  $0 [--debug] ROOTDIR"
+    echo "  60srpmix-cscope [--help|-h]"
+    echo "  60srpmix-cscope [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
@@ -61,14 +63,23 @@ function parse_arguments
 
     while [ $# -gt 0 ]; do
 	case "$1" in
-	    --help|-h)
-		print_usage
+	    (--help|-h)
+		print_usage 
 		exit 0
 		;;
-	    --debug)
+	    (--debug)
 		set -x
 		PS4="${PS4}[cscope]"
 		SRPMIX_CSCOPE_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    (--force)
+	        FORCE=yes
 		;;
 	    *)
 		break
@@ -88,10 +99,12 @@ function parse_arguments
 
     SPEC=${ROOTDIR}/*.spec
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/cscope
-    LOGFILE=${PLUGINDIR}/cscope-log.es
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/ctags}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/ctags-log.es}
 
-    if ! test -d "${BUILDDIR}"; then exit 0; fi
+    if ! test -d "${BUILDDIR}"; then 
+	exit 0
+    fi
 
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
@@ -112,7 +125,12 @@ function run_cscope
     cp /dev/null $o
     echo \-k >  ${PLUGINDIR}/cscope.files
     echo \-q >> ${PLUGINDIR}/cscope.files
-    grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 >> ${PLUGINDIR}/cscope.files
+
+    if test -f ${PLUGINDIR}/../file/file-i; then
+	grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 >> ${PLUGINDIR}/cscope.files
+    else
+	:			# TODO: call srpmix-file
+    fi
 
     size=$(wc -c < ${PLUGINDIR}/cscope.files)
     
@@ -140,7 +158,8 @@ function main
     fi
 
     if ( ! test -e "${PLUGINDIR}/cscope.out" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/cscope.out"; then
+       ( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/cscope.out" ) ||
+       ( test "$FORCE" = yes ); then; then
         run_cscope "${ROOTDIR}" "${PLUGINDIR}/cscope.out" $LOGFILE
     fi
 }

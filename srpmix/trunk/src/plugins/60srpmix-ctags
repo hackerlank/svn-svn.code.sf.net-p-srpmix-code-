@@ -52,8 +52,8 @@ try_source ${LIBSRPMIX}
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-ctags [--help|-h]"
-    echo "  srpmix-ctags [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
+    echo "  60srpmix-ctags [--help|-h]"
+    echo "  60srpmix-ctags [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
@@ -104,7 +104,7 @@ function parse_arguments
     LOGFILE=${LOGFILE:-${PLUGINDIR}/ctags-log.es}
 
     if ! test -d "${BUILDDIR}"; then 
-	exit 0; 
+	exit 0
     fi
 
     if ! test -d "$PLUGINDIR"; then
