@@ -108,7 +108,7 @@ function parse_arguments
     fi
 
     if ! test -d "$PLUGINDIR"; then
-        mkdir -p $PLUGINDIR
+        mkdir -p "$PLUGINDIR"
     fi
 }
 
