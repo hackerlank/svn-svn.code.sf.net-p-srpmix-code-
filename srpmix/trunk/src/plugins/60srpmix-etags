@@ -22,6 +22,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
+NAME=etags
+
 
 ROOTDIR=
 ETAGS=etags
@@ -54,8 +56,9 @@ BLACKLIST='.*\.bib$\|unic-005\.tex$\|.*\.srpmix$'
 function print_usage
 {
     echo "Usage: "
-    echo "  60srpmix-etags [--help|-h]"
-    echo "  60srpmix-etags [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
+    echo "  $0 [--help|-h]"
+    echo "  $0 --name"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
@@ -66,13 +69,17 @@ function parse_arguments
 
     while [ $# -gt 0 ]; do
 	case "$1" in
-	    (--help|-h)
+	    --help|-h)
 		print_usage
 		exit 0
 		;;
-	    (--debug)
+	    --name)
+	        echo $NAME
+		exit 0
+		;;
+	    --debug)
 		set -x
-		PS4="${PS4}[etags]"
+		PS4="${PS4}[${NAME}]"
 		SRPMIX_ETAGS_DEBUG=yes
 		;;
 	    (--plugin-dir=*)
@@ -81,7 +88,7 @@ function parse_arguments
 	    (--log-file=*)
 	        LOGFILE=${1/--log-file=}
 		;;
-	    (--force)
+	    --force)
 	        FORCE=yes
 		;;	    
 	    (*)
@@ -102,8 +109,8 @@ function parse_arguments
 
     SPEC=${ROOTDIR}/*.spec
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/etags}
-    LOGFILE=${LOGFILE:-${PLUGINDIR}/ctags-log.es}
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
 
     if ! test -d "${BUILDDIR}"; then 
 	exit 0
@@ -135,8 +142,8 @@ function run_etags
 
 function main
 {
-    srpmix_verify_commands "${ETAGS}"
     parse_arguments "$@"
+    srpmix_verify_commands "${ETAGS}"
 
     if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \
 	$SPEC > /dev/null 2>&1 \

@@ -22,6 +22,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
+NAME=doxygen
+
 
 ROOTDIR=
 DOXYGEN=doxygen
@@ -48,6 +50,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
+    echo "  $0 --help"
     echo "  $0 [--debug] ROOTDIR"
     echo 
 }
@@ -61,6 +64,10 @@ function parse_arguments
 	case "$1" in
 	    --help|-h)
 		print_usage
+		exit 0
+		;;
+	    --name)
+		echo $NAME
 		exit 0
 		;;
 	    --debug)
@@ -118,8 +125,8 @@ function run_doxygen
 
 function main
 {
-    srpmix_verify_commands "${DOXYGEN}"
     parse_arguments "$@"
+    srpmix_verify_commands "${DOXYGEN}"
 
     if ( ! test -e "${PLUGINDIR}/html/index.html" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/html/index.html"; then

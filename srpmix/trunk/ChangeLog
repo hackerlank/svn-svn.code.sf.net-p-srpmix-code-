@@ -1,5 +1,12 @@
 2009-09-08  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/*srpmix-*: Added --name option.
+	Very external command after parsing arguments.
+
+	* src/srpmix-plugin (ROOTDIR): Use --name.
+
+2009-09-08  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-attach: Run a plugin directly.
 
 2009-09-07  Masatake YAMATO  <yamato@redhat.com>

@@ -22,6 +22,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
+NAME=ctags
+
 
 ROOTDIR=
 CTAGS=ctags
@@ -52,8 +54,9 @@ try_source ${LIBSRPMIX}
 function print_usage
 {
     echo "Usage: "
-    echo "  60srpmix-ctags [--help|-h]"
-    echo "  60srpmix-ctags [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
+    echo "  $0 [--help|-h]"
+    echo "  $0 --name"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
@@ -64,13 +67,17 @@ function parse_arguments
 
     while [ $# -gt 0 ]; do
 	case "$1" in
-	    (--help|-h)
+	    --help|-h)
 		print_usage
 		exit 0
 		;;
-	    (--debug)
+	    --name)
+	        echo $NAME
+		exit 0
+		;;
+	    --debug)
 		set -x
-		PS4="${PS4}[ctags]"
+		PS4="${PS4}[${NAME}]"
 		SRPMIX_CTAGS_DEBUG=yes
 		;;
 	    (--plugin-dir=*)
@@ -79,10 +86,10 @@ function parse_arguments
 	    (--log-file=*)
 	        LOGFILE=${1/--log-file=}
 		;;
-	    (--force)
+	    --force)
 	        FORCE=yes
 		;;
-	    (*)
+	    *)
 		break
 		;;
 	esac
@@ -100,8 +107,8 @@ function parse_arguments
 
     SPEC=${ROOTDIR}/*.spec
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/ctags}
-    LOGFILE=${LOGFILE:-${PLUGINDIR}/ctags-log.es}
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
 
     if ! test -d "${BUILDDIR}"; then 
 	exit 0
@@ -131,8 +138,8 @@ function run_ctags
 
 function main
 {
-    srpmix_verify_commands "${CTAGS}"
     parse_arguments "$@"
+    srpmix_verify_commands "${CTAGS}"
 
     if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \
 	$SPEC > /dev/null 2>&1 \

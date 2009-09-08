@@ -22,6 +22,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
+NAME=hyperestraier
+
 
 ROOTDIR=
 ESTCMD=estcmd
@@ -52,6 +54,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
+    echo "  $0 --name"
     echo "  $0 [--debug] ROOTDIR"
     echo 
 }
@@ -71,6 +74,10 @@ function parse_arguments
 		set -x
 		PS4="${PS4}[hyperestraier]"
 		SRPMIX_HYPERESTRAIER_DEBUG=yes
+		;;
+	    (--name)
+	        echo $NAME
+		exit 0
 		;;
 	    *)
 		break
@@ -146,8 +153,8 @@ function run_estcmd
 
 function main
 {
-    srpmix_verify_commands "${ESTCMD}"
     parse_arguments "$@"
+    srpmix_verify_commands "${ESTCMD}"
 
     if ( ! test -e "${PLUGINDIR}/idx" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/idx"; then

@@ -22,6 +22,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
+NAME=kindex
+
 
 ROOTDIR=
 
@@ -43,6 +45,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
+    echo "  $0 --name"
     echo "  $0 ROOTDIR"
     echo 
 }
@@ -56,6 +59,10 @@ function parse_arguments
 	case "$1" in
 	    --help|-h)
 		print_usage
+		exit 0
+		;;
+	    --name)
+		echo $NAME
 		exit 0
 		;;
 	    --debug)
@@ -107,8 +114,8 @@ function try_source
 
 function main
 {
-    srpmix_verify_commands make etags ctags
     parse_arguments "$@"
+    srpmix_verify_commands make etags ctags
 
 
     if !grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \

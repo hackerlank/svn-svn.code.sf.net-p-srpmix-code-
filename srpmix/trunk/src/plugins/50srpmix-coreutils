@@ -22,6 +22,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
+NAME=coreutils
 
 ROOTDIR=
 MD5SUM=md5sum
@@ -49,6 +50,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
+    echo "  $0 --name"
     echo "  $0 [--debug] ROOTDIR"
     echo 
 }
@@ -62,6 +64,10 @@ function parse_arguments
 	case "$1" in
 	    --help|-h)
 		print_usage
+		exit 0
+		;;
+	    --name)
+		echo $NAME
 		exit 0
 		;;
 	    --debug)
@@ -130,8 +136,8 @@ function run_wc
 
 function main
 {
-    srpmix_verify_commands "${MD5SUM}" "${WC}"
     parse_arguments "$@"
+    srpmix_verify_commands "${MD5SUM}" "${WC}"
 
     if ( ! test -e "${PLUGINDIR}/md5sum" ) ||
       test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/md5sum"; then

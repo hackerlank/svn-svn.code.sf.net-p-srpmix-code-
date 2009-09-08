@@ -22,6 +22,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ########################################################################
+NAME=vanilla
+
 
 ROOTDIR=
 
@@ -39,6 +41,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
+    echo "  $0 --name"
     echo "  $0 [--debug] ROOTDIR"
     echo 
 }
@@ -52,6 +55,10 @@ function parse_arguments
 	case "$1" in
 	    --help|-h)
 		print_usage
+		exit 0
+		;;
+	    --name)
+		echo $NAME
 		exit 0
 		;;
 	    --debug)
@@ -189,8 +196,10 @@ function main
 {
     o= 
     count=0
-    srpmix_verify_commands tar unzip fastjar gunzip bunzip2
+
     parse_arguments "$@"
+    srpmix_verify_commands tar unzip fastjar gunzip bunzip2
+
 
     if test -d ${PLUGINDIR}; then
 	count=$(ls ${PLUGINDIR} | wc -l)

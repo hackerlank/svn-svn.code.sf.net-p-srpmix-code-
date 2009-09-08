@@ -158,9 +158,9 @@ function list_plugin_candidates
 
 function list_plugins
 {
-    list_plugin_candidates | sort -n | while read base plugin
-    do
-        echo $base '=>' $plugin
+    local name
+    list_plugin_candidates | sort -n | while read base plugin; do
+	echo $($plugin --name) "=>" $plugin
     done
 }
 
