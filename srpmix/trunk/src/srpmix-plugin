@@ -43,8 +43,9 @@ ROOTDIR=a
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-plugin [--help|-h]"
-    echo "  srpmix-plugin [--list|-L]"
+    echo "  srpmix-plugin --help|-h"
+    echo "  srpmix-plugin --list|-L"
+    echo "  srpmix-plugin --path-for=PLUGIN"
     echo "  srpmix-plugin [--debug] [--enable=<plugins>] [--disable=<plugins>] [<ROOTDIR> ...]"
     echo 
     echo "<plugins> := <plugin0>[,<plugin1>...]"
@@ -83,6 +84,10 @@ function parse_arguments
             --list|-L)
 		list_plugins
 		exit 0
+		;;
+	    (--path-for=*)
+	        path_for ${1/--path-for=}
+		exit $?
 		;;
             # TODO: --freeze-into-rpm-package=DIR
 	    --debug)
@@ -166,6 +171,26 @@ function list_plugin_candidates
        ( is_enabled_plugin ${f} || is_enabled_plugin ${b} ) \
 	   && echo ${n} $p
     done
+}
+
+function path_for
+{
+    local expect=$1
+    local path=$(
+    list_plugin_candidates | while read name plugin; do
+	if test "$expect" = "$name"; then
+	    echo "${plugin}"
+	    exit 0
+	fi
+    done
+    )
+
+    if test -f "$path"; then
+	echo $path
+	return 0
+    else
+	return 1
+    fi
 }
 
 function list_plugins

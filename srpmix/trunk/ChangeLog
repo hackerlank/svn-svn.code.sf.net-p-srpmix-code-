@@ -1,5 +1,16 @@
 2009-09-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-plugin (path_for): Added new option --path-for=PLUGIN.
+
+	* src/srpmix-attach (parse_arguments): Improve error message.
+	(prepare_tarball): Added double quotes around the argument for test -n.
+	Added missing `=' between --plugin-dir option.
+	Implemented the case PLUGIN_NAME is given.
+	Prepare the output file for tar command in this function.
+	(create_swrf): Don't redirect the output of tar in this function.
+	
+2009-09-09  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-wrap (create_core_spec): Remove log files when building a package.
 
 	* src/srpmix-plugin (parse_arguments): Fix a syntax error in `case' statment.

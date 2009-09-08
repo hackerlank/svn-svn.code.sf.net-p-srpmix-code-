@@ -155,7 +155,7 @@ function parse_arguments
     elif test -x "${last}"; then
 	PLUGIN_ROOTDIR=$(srpmix_srcdir ${TARGET_PACKAGE} ${TARGET_VERSION})
 	if ! test -d ${PLUGIN_ROOTDIR}; then
-	    echo "No ROOTDIR for ${TARGET_PACKAGE}-${TARGET_VERSION} found" 1>&2
+	    echo "No ROOTDIR(${PLUGIN_ROOTDIR}) for ${TARGET_PACKAGE}-${TARGET_VERSION} found" 1>&2
 	    exit 1
 	fi
 	PLUGIN_EXEC="${last}"
@@ -163,7 +163,7 @@ function parse_arguments
     else
 	PLUGIN_ROOTDIR=$(srpmix_srcdir ${TARGET_PACKAGE} ${TARGET_VERSION})
 	if ! test -d ${PLUGIN_ROOTDIR}; then
-	    echo "No ROOTDIR for ${TARGET_PACKAGE}-${TARGET_VERSION} found" 1>&2
+	    echo "No ROOTDIR(${PLUGIN_ROOTDIR}) for ${TARGET_PACKAGE}-${TARGET_VERSION} found" 1>&2
 	    exit 1
 	fi
 	PLUGIN_NAME="${last}"
@@ -173,22 +173,32 @@ function parse_arguments
 
 function prepare_tarball
 {
+    local out=$1
     local tar_target
-    if test -n $ATTACHMENT; then
+    if test -n "$ATTACHMENT"; then
 	cd $(dirname $ATTACHMENT)
 	tar_target=$(basename $ATTACHMENT)
-    elif  test -n $PLUGIN_EXEC; then
+    elif  test -n "$PLUGIN_EXEC"; then
 	local plugin_dir=${MY_TMPDIR}/WORK/${PKG_NAME}
 	mkdir -p ${plugin_dir}
-	$PLUGIN_EXEC --plugin-dir ${plugin_dir} --log-file=/dev/stdout ${PLUGIN_ROOTDIR}
+	$PLUGIN_EXEC --plugin-dir=${plugin_dir} --log-file=/dev/stdout ${PLUGIN_ROOTDIR}
 	cd $(dirname ${plugin_dir})
 	tar_target=$(basename ${plugin_dir})
-    elif test -n $PLUGIN_NAME; then
-	# TODO
-	srpmix-plugin 		# TODO
+    elif test -n "$PLUGIN_NAME"; then
+	local plugin_exec=$(srpmix-plugin --path-for="$PLUGIN_NAME")
+	if test -n "${plugin_exec}"; then
+	    local plugin_dir=${MY_TMPDIR}/WORK/${PKG_NAME}
+	    mkdir -p ${plugin_dir}
+	    $plugin_exec --plugin-dir=${plugin_dir} --log-file=/dev/stdout ${PLUGIN_ROOTDIR}
+	    cd $(dirname ${plugin_dir})
+	    tar_target=$(basename ${plugin_dir})
+	else
+	    echo "Cannot find exec file for plugin name: $PLUGIN_NAME" 1>&2 
+	    exit 1
+	fi
     fi
 
-    tar -c --to-stdout $(basename $plugin_dir)
+    tar -c --to-stdout ${tar_target} > $out
 }
 
 function create_swrf
@@ -198,7 +208,7 @@ function create_swrf
     ( cd ${MY_TMPDIR} && mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES SWRFS)
     local sources_dir=${MY_TMPDIR}/SOURCES
 
-    ( prepare_tarball ) > ${sources_dir}/${PKG_NAME}.tar
+    ( prepare_tarball ${sources_dir}/${PKG_NAME}.tar )
     
     installdir=$(srpmix_installdir $TARGET_PACKAGE ${TARGET_VERSION})
     local spec_file=$MY_TMPDIR/SPECS/${pkg_full_name}.spec
@@ -269,7 +279,7 @@ function create_rpm
     local swrf=$1
     local opts="--output-dir=$MY_TMPDIR/SRPMS"
 
-    if test -n ${SRPMIX_ATTACH_DEBUG}; then
+    if test -n "${SRPMIX_ATTACH_DEBUG}"; then
 	opts="${opts} --debug"
     fi
     
