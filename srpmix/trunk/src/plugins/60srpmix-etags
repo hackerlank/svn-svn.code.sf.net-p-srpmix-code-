@@ -29,7 +29,6 @@ ROOTDIR=
 ETAGS=etags
 
 BUILDDIR=
-ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
@@ -90,8 +89,8 @@ function parse_arguments
 		;;
 	    --force)
 	        FORCE=yes
-		;;	    
-	    (*)
+		;;
+	    *)
 		break
 		;;
 	esac

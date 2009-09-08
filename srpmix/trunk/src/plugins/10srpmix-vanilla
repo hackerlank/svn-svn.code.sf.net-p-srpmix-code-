@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ########################################################################
 #
@@ -29,9 +29,14 @@ ROOTDIR=
 
 SOURCESDIR=
 LOGFILE=
+PLUGINDIR=
+
+
 LIBSRPMIX=libsrpmix.sh
 
 SRPMIX_VANIILA_DEBUG=
+
+FORCE=
 
 TMPDIR=/tmp/$(basename $0).$$
 mkdir -p $TMPDIR
@@ -42,13 +47,13 @@ function print_usage
     echo "Usage: "
     echo "  $0 [--help|-h]"
     echo "  $0 --name"
-    echo "  $0 [--debug] ROOTDIR"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
 function parse_arguments
 {
-    status=
+    local status=
 
 
     while [ $# -gt 0 ]; do
@@ -63,8 +68,18 @@ function parse_arguments
 		;;
 	    --debug)
 		set -x
-		PS4="${PS4}[vanilla]"
+		PS4="${PS4}[${NAME}]"
 		SRPMIX_VANIILA_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
+		# TODO, FORCE is not used now.
 		;;
 	    *)
 		break
@@ -86,16 +101,19 @@ function parse_arguments
     verify_directory ${ROOTDIR}
 
     SOURCESDIR=${ROOTDIR}/archives
-    PLUGINDIR=${ROOTDIR}/plugins/vanilla
-    LOGFILE=${PLUGINDIR}/vanilla-log.es
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
 
+    if ! test -d "$PLUGINDIR"; then
+        mkdir -p $PLUGINDIR
+    fi
 }
 
 function run_vanilla
 {
-    d=$1
-    o=$2
-    l=$3
+    local d=$1
+    local o=$2
+    local l=$3
     local report_to=/dev/null
 
     es_print vanilla-start --timestamp=\"`LANG=C date`\" --input=\"$d\" --output=\"$o\" | tee -a $l
@@ -194,8 +212,8 @@ function try_source
 
 function main
 {
-    o= 
-    count=0
+    local o= 
+    local count=0
 
     parse_arguments "$@"
     srpmix_verify_commands tar unzip fastjar gunzip bunzip2

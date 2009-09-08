@@ -1,5 +1,12 @@
 2009-09-08  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/*srpmix-*: Added --plugin-dir=,
+	--log-file=, and --force dir options.
+
+	* src/srpmix-plugin: Use shorter plugin names.
+
+2009-09-08  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/plugins/*srpmix-*: Added --name option.
 	Very external command after parsing arguments.
 

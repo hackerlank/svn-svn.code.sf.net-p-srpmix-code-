@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ########################################################################
 #
@@ -29,11 +29,12 @@ ROOTDIR=
 ESTCMD=estcmd
 
 BUILDDIR=
-ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
 SRPMIX_HYPERESTRAIER_DEBUG=
+
+FORCE=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -55,7 +56,7 @@ function print_usage
     echo "Usage: "
     echo "  $0 [--help|-h]"
     echo "  $0 --name"
-    echo "  $0 [--debug] ROOTDIR"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
@@ -70,14 +71,23 @@ function parse_arguments
 		print_usage
 		exit 0
 		;;
-	    --debug)
-		set -x
-		PS4="${PS4}[hyperestraier]"
-		SRPMIX_HYPERESTRAIER_DEBUG=yes
-		;;
-	    (--name)
+	    --name)
 	        echo $NAME
 		exit 0
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[${NAME}]"
+		SRPMIX_HYPERESTRAIER_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
 		;;
 	    *)
 		break
@@ -96,10 +106,12 @@ function parse_arguments
     shift
 
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/hyperestraier
-    LOGFILE=${PLUGINDIR}/hyperestraier-log.es
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
 
-    if ! test -d "${BUILDDIR}"; then exit 0; fi
+    if ! test -d "${BUILDDIR}"; then
+	exit 0
+    fi
 
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
@@ -141,9 +153,9 @@ function run_estcmd_gather
 
 function run_estcmd
 {
-    d=$1
-    o=$2
-    l=$3
+    local d=$1
+    local o=$2
+    local l=$3
 
     es_print "estcmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     run_estcmd_create $o | tee -a $l
@@ -157,7 +169,8 @@ function main
     srpmix_verify_commands "${ESTCMD}"
 
     if ( ! test -e "${PLUGINDIR}/idx" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/idx"; then
+	( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/idx" ) || 
+	( test ${FORCE} = yes ); then
         run_estcmd "${ROOTDIR}" "${PLUGINDIR}" "$LOGFILE"
     fi
 }

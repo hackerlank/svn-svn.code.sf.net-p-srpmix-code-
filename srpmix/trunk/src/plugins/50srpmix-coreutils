@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ########################################################################
 #
@@ -29,11 +29,12 @@ MD5SUM=md5sum
 WC=wc
 
 BUILDDIR=
-ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
 SRPMIX_COREUTILS_DEBUG=
+
+FORCE=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -51,13 +52,13 @@ function print_usage
     echo "Usage: "
     echo "  $0 [--help|-h]"
     echo "  $0 --name"
-    echo "  $0 [--debug] ROOTDIR"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
 function parse_arguments
 {
-    status=
+    local status=
 
 
     while [ $# -gt 0 ]; do
@@ -72,8 +73,17 @@ function parse_arguments
 		;;
 	    --debug)
 		set -x
-		PS4="${PS4}[coreutils]"
+		PS4="${PS4}[${NAME}]"
 		SRPMIX_COREUTILS_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
 		;;
 	    *)
 		break
@@ -92,10 +102,12 @@ function parse_arguments
     shift
 
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/coreutils
-    LOGFILE=${PLUGINDIR}/coreutils-log.es
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
 
-    if ! test -d "${BUILDDIR}"; then exit 0; fi
+    if ! test -d "${BUILDDIR}"; then 
+	exit 0
+    fi
 
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
@@ -104,10 +116,10 @@ function parse_arguments
 
 function run_cmd
 {
-    d=$1
-    o=$2
-    l=$3
-    cmd=$4
+    local d=$1
+    local o=$2
+    local l=$3
+    local cmd=$4
 
     es_print "$cmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
@@ -140,11 +152,13 @@ function main
     srpmix_verify_commands "${MD5SUM}" "${WC}"
 
     if ( ! test -e "${PLUGINDIR}/md5sum" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/md5sum"; then
+	( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/md5sum" ) ||
+	( test "$FORCE" = yes ) ; then
         run_md5sum "${ROOTDIR}" "${PLUGINDIR}/md5sum" $LOGFILE
     fi
     if ( ! test -e "${PLUGINDIR}/wc" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/wc"; then
+	( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/wc" ) ||
+	( test "$FORCE" = yes ) ; then
         LANG=C run_wc "${ROOTDIR}" "${PLUGINDIR}/wc" $LOGFILE
     fi
 }

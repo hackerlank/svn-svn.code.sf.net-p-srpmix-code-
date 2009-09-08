@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ########################################################################
 #
@@ -29,11 +29,12 @@ ROOTDIR=
 XGETTEXT=xgettext
 
 BUILDDIR=
-ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
 SRPMIX_XGETTEXT_DEBUG=
+
+FORCE=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -51,13 +52,13 @@ function print_usage
     echo "Usage: "
     echo "  $0 [--help|-h]"
     echo "  $0 --name"
-    echo "  $0 [--debug] ROOTDIR"
-    echo 
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
+    echo
 }
 
 function parse_arguments
 {
-    status=
+    local status=
 
 
     while [ $# -gt 0 ]; do
@@ -72,9 +73,19 @@ function parse_arguments
 		;;
 	    --debug)
 		set -x
-		PS4="${PS4}[xgettext]"
+		PS4="${PS4}[${NAME}]"
 		SRPMIX_XGETTEXT_DEBUG=yes
 		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
+		;;
+	    
 	    *)
 		break
 		;;
@@ -92,10 +103,12 @@ function parse_arguments
     shift
 
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/xgettext
-    LOGFILE=${PLUGINDIR}/xgettext-log.es
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
 
-    if ! test -d "${BUILDDIR}"; then exit 0; fi
+    if ! test -d "${BUILDDIR}"; then
+	exit 0
+    fi
 
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
@@ -138,7 +151,8 @@ function main
     srpmix_verify_commands "${XGETTEXT}"
 
     if ( ! test -e "${PLUGINDIR}/output.xgettext" ) ||
-	test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/xgettext.out"; then
+	( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/xgettext.out" ) ||
+	( test "$FORCE" = yes ); then
         run_xgettext "${ROOTDIR}" "${PLUGINDIR}/xgettext.out" $LOGFILE
     fi
 }

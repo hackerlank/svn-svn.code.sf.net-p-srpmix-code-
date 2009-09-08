@@ -1,17 +1,12 @@
-** attachデータをpluginから作れるようにする。###
-
-  10srpmix-vanilla
-  50srpmix-coreutils
-  50srpmix-file
-  60srpmix-cscope
-  60srpmix-ctags <done>
-  60srpmix-doxygen
-  60srpmix-etags <done>
-  60srpmix-hyperestraier
-  60srpmix-kindex
-  60srpmix-xgettext
+** attachデータをpluginから作れるようにする。<need check>
   
 *** Do yum install some build/required packages in autogen.sh.
+** adduser brewbuilder, mockbuild
+
+* --make-rpm
+
+* brewweb
+
 
 * live media ##
 ** mummify/slice ##
@@ -25,11 +20,6 @@
 ** compsの生成 <need check>
 ** root権限がない場合のattachは？ <need check>
 ** gc-repo.scmでのattachmentの扱い <need check>
-
-** adduser brewbuilder
-* --make-rpm
-
-*  brewbuilder, mockbuild
 
 For version 4
 ========================================================================

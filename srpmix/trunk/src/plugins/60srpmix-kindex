@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ########################################################################
 #
@@ -27,26 +27,43 @@ NAME=kindex
 
 ROOTDIR=
 
+
+BUILDDIR=
+LOGFILE=
+PLUGINDIR=
 SPEC=
-PRE_BUILDDIR=
-# LOGFILE=
-LIBSRPMIX=libsrpmix.sh
+
 
 TARGETS="i686 x86_64 ia64 ppc64"
 #TARGETS="i686 x86_64"
 
 SRPMIX_KINDEX_DEBUG=
 
+FORCE=
+
 TMPDIR=/tmp/$(basename $0).$$
 mkdir -p $TMPDIR
 trap "/bin/rm -rf $TMPDIR" 0
+
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
 
 function print_usage
 {
     echo "Usage: "
     echo "  $0 [--help|-h]"
     echo "  $0 --name"
-    echo "  $0 ROOTDIR"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
@@ -67,8 +84,17 @@ function parse_arguments
 		;;
 	    --debug)
 		set -x
-		PS4="${PS4}[kindex]"
+		PS4="${PS4}[${NAME}]"
 		SRPMIX_KINDEX_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
 		;;
 	    *)
 		break
@@ -89,10 +115,17 @@ function parse_arguments
     verify_directory ${ROOTDIR}
 
     SPEC=${ROOTDIR}/*.spec
-    PRE_BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/kindex
-#    LOGFILE=${PLUGINDIR}/kindex-log.es
+    BUILDDIR=${ROOTDIR}/pre-build
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
 
+    if ! test -d "${BUILDDIR}"; then
+	exit 0
+    fi
+
+    if ! test -d "$PLUGINDIR"; then
+        mkdir -p $PLUGINDIR
+    fi    
 }
 
 function verify_directory
@@ -103,19 +136,10 @@ function verify_directory
     fi
 }
 
-function try_source
-{
-    source $1
-    if test $? != 0; then
-	echo "*** ABORT...cannot find $1" 1>&2
-	exit 1
-    fi
-}
-
 function main
 {
     parse_arguments "$@"
-    srpmix_verify_commands make etags ctags
+    srpmix_verify_commands make etags ctags cscope
 
 
     if !grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \
@@ -134,13 +158,13 @@ function main
 
     perarch_kernel=
 # TODO: cscope, xen    
-    if test -d "${PRE_BUILDDIR}" &&
+    if test -d "${BUILDDIR}" &&
        ( ! test -d "${PLUGINDIR}" ); then
 	for t in $TARGETS; do
-	    if test -d ${PRE_BUILDDIR}/kernel-*/linux-*.${t}; then
+	    if test -d ${BUILDDIR}/kernel-*/linux-*.${t}; then
 		perarch_kernel=1
 		mkdir -p ${TMPDIR}/$t
-		cd ${PRE_BUILDDIR}/kernel-*/linux-*.${t}
+		cd ${BUILDDIR}/kernel-*/linux-*.${t}
 		
 
 		if ! make O=${TMPDIR}/$t TAGS; then
@@ -156,7 +180,7 @@ function main
 	done
 
 	if test "x${perarch_kernel}" = x; then
-	    for x in ${PRE_BUILDDIR}/kernel-*/linux*/Makefile; do
+	    for x in ${BUILDDIR}/kernel-*/linux*/Makefile; do
 		if test -f $x; then
 		    if grep '\(^TAGS:\)\|\( TAGS \)' $x > /dev/null 2>&1; then
 			mkdir -p ${TMPDIR}/generic
@@ -198,8 +222,6 @@ function main
     fi
 }
 
-
-try_source ${LIBSRPMIX}
 es_time main "$@"
 exit $?
 

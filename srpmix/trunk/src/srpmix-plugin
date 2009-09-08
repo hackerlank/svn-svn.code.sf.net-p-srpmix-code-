@@ -146,21 +146,34 @@ function is_enabled_plugin
 function list_plugin_candidates
 {
     local p
+    local f
+    local n
+
 
     find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort -n | while read plugin; do
-        is_enabled_plugin $(basename $plugin) && echo $(basename $plugin) $plugin
+	f=$(basename $plugin)
+	n=$($plugin --name)
+
+        ( is_enabled_plugin ${f} || is_enabled_plugin ${n} )
+	&& echo ${n} $plugin
     done
 
     for p in $SRPMIX_EXTRA_PLUGINS; do
-        is_enabled_plugin $(basename $p) && echo $(basename $p) $p
+	f=$(basename $p)
+	n=$($p --name)
+
+       ( is_enabled_plugin ${f} || is_enabled_plugin ${b} )
+       && echo ${n} $p
     done
 }
 
 function list_plugins
 {
     local name
-    list_plugin_candidates | sort -n | while read base plugin; do
-	echo $($plugin --name) "=>" $plugin
+    local plugin
+
+    list_plugin_candidates | sort -n | while read name plugin; do
+	echo ${name} "=>" ${plugin}
     done
 }
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ########################################################################
 #
@@ -29,11 +29,12 @@ ROOTDIR=
 FILE=file
 
 BUILDDIR=
-ETAGSDIR=
 LOGFILE=
 PLUGINDIR=
 
 SRPMIX_FILES_DEBUG=
+
+FORCE=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -51,13 +52,13 @@ function print_usage
     echo "Usage: "
     echo "  $0 [--help|-h]"
     echo "  $0 --name"
-    echo "  $0 [--debug] ROOTDIR"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
     echo 
 }
 
 function parse_arguments
 {
-    status=
+    local status=
 
 
     while [ $# -gt 0 ]; do
@@ -73,7 +74,16 @@ function parse_arguments
 	    --debug)
 		set -x
 		SRPMIX_FILES_DEBUG=yes
-		PS4="${PS4}[file]"
+		PS4="${PS4}[${NAME}]"
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
 		;;
 	    *)
 		break
@@ -92,10 +102,12 @@ function parse_arguments
     shift
 
     BUILDDIR=${ROOTDIR}/pre-build
-    PLUGINDIR=${ROOTDIR}/plugins/file
-    LOGFILE=${PLUGINDIR}/file-log.es
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
 
-    if ! test -d "${BUILDDIR}"; then exit 0; fi
+    if ! test -d "${BUILDDIR}"; then
+	exit 0
+    fi
 
     if ! test -d "$PLUGINDIR"; then
         mkdir -p $PLUGINDIR
@@ -104,10 +116,10 @@ function parse_arguments
 
 function run_file_cmd
 {
-    d=$1
-    o=$2
-    l=$3
-    cmd=$4
+    local d=$1
+    local o=$2
+    local l=$3
+    local cmd=$4
 
 
     es_print "$cmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
@@ -141,11 +153,13 @@ function main
     srpmix_verify_commands "${FILE}"
 
     if ( ! test -e "${PLUGINDIR}/file" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file"; then
+	( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file") ||
+	( test "${FORCE}" = yes ) ; then
         run_file "${ROOTDIR}" "${PLUGINDIR}/file" $LOGFILE
     fi
     if ( ! test -e "${PLUGINDIR}/file-i" ) ||
-      test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file-i"; then
+	(test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/file-i") || 
+	( test "${FORCE}" = yes ); then
         run_file_i "${ROOTDIR}" "${PLUGINDIR}/file-i" $LOGFILE
     fi
 }
