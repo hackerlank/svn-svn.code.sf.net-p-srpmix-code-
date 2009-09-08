@@ -38,6 +38,8 @@ SRPMIX_CSCOPE_DEBUG=
 
 FORCE=
 
+MY_TMPDIR=
+
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {
@@ -125,7 +127,7 @@ function run_cscope
     local o=$2
     local l=$3
     local size
-
+    local file_i
 
     es_print "cscope-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
@@ -133,10 +135,24 @@ function run_cscope
     echo \-q >> ${PLUGINDIR}/cscope.files
 
     if test -f ${PLUGINDIR}/../file/file-i; then
-	grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 >> ${PLUGINDIR}/cscope.files
+	file_i=${PLUGINDIR}/../file/file-i
     else
-	:			# TODO, RUN srpmix-file
+	local file_plugin_exec=$(srpmix-plugin --path-for=file)
+	local log_file=/dev/null
+
+	MY_TMPDIR=`mktemp -d`
+	trap "/bin/rm -rf ${MY_TMPDIR}" 0 
+
+	if test "$SRPMIX_CSCOPE_DEBUG" = yes; then
+	    log_file=/dev/stdout
+	fi
+	    
+	${file_plugin_exec} --plugin-dir=${MY_TMPDIR} --log-file=${log_file} $d
+	file_i=${MY_TMPDIR}/file-i
+	
     fi
+
+    grep $REGEX ${file_i} | grep pre-build | cut -d: -f1 >> ${PLUGINDIR}/cscope.files
 
     size=$(wc -c < ${PLUGINDIR}/cscope.files)
     

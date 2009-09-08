@@ -157,7 +157,7 @@ function main
     fi
 
     perarch_kernel=
-# TODO: cscope, xen    
+# TODO: xen    
     if test -d "${BUILDDIR}" &&
        ( ! test -d "${PLUGINDIR}" ); then
 	for t in $TARGETS; do

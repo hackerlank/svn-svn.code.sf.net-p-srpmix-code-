@@ -1,5 +1,8 @@
 2009-09-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/60srpmix-cscope (run_cscope): Handle the case when file-i
+	is not available.
+
 	* src/srpmix-plugin (path_for): Added new option --path-for=PLUGIN.
 
 	* src/srpmix-attach (parse_arguments): Improve error message.
