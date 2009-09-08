@@ -1,5 +1,7 @@
 2009-09-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-wrap (create_core_spec): Remove log files when building a package.
+
 	* src/srpmix-plugin (parse_arguments): Fix a syntax error in `case' statment.
 	(list_plugin_candidates): Added backslashs before &&.
 
