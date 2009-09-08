@@ -1,10 +1,8 @@
-*** Do yum install some build/required packages in autogen.sh.
+** Do yum install some build/required packages in autogen.sh.
 ** adduser brewbuilder, mockbuild
-
-* --make-rpm
+** --make-rpm
 
 * brewweb
-
 
 * live media ##
 ** mummify/slice ##
@@ -14,6 +12,7 @@
 * srpmix.org
 ** 全文検索 #
 ** ウェブインターフェイス
+
 
 ** compsの生成 <need check>
 ** root権限がない場合のattachは？ <need check>
