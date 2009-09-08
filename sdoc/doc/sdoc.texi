@@ -1,0 +1,21 @@
+\input texinfo @c -*-texinfo-*-
+
+@comment %**start of header
+@setfilename sdoc.info
+@include version.texi
+@settitle Using and building source code libraries
+@c @syncodeindex fn cp
+@c @syncodeindex vr cp
+@c @syncodeindex tp cp
+@comment %**end of header
+
+@setchapternewpage odd
+@ifinfo
+Copyright @copyright{} 2009 Masatake YAMATO
+Copyright @copyright{} 2009 Red hat, K.K.
+@end ifinfo
+
+@dircategory Understanding source code
+@direntry
+* Using and building source code libraries: (sdoc)       Using and building source code libraries
+@end direntry
