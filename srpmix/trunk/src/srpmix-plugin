@@ -68,7 +68,7 @@ function parse_arguments
 
     while [ $# -gt 0 ]; do
 	case "$1" in
-	    (--help|-h)
+	    --help|-h)
 		print_usage
 		exit 0
 		;;
@@ -80,12 +80,12 @@ function parse_arguments
                 arg=$(echo "$1" | sed 's/--disable=//' | tr , ' ')
                 DISABLE_PLUGIN="$DISABLE_PLUGIN $arg"
 		;;
-            (--list|-L)
+            --list|-L)
 		list_plugins
 		exit 0
 		;;
             # TODO: --freeze-into-rpm-package=DIR
-	    (--debug)
+	    --debug)
 	         SRPMIX_PLUGIN_DEBUG=yes
 		 PS4="${PS4}[plugin]"
                  set -x
@@ -94,7 +94,8 @@ function parse_arguments
 	        echo "No such option: $1" 1>&2
 		print_usage
 		exit 1
-	    (*)
+		;;
+	    *)
 		break
 		;;
 	esac
@@ -154,16 +155,16 @@ function list_plugin_candidates
 	f=$(basename $plugin)
 	n=$($plugin --name)
 
-        ( is_enabled_plugin ${f} || is_enabled_plugin ${n} )
-	&& echo ${n} $plugin
+        ( is_enabled_plugin ${f} || is_enabled_plugin ${n} ) \
+	    && echo ${n} $plugin
     done
 
     for p in $SRPMIX_EXTRA_PLUGINS; do
 	f=$(basename $p)
 	n=$($p --name)
 
-       ( is_enabled_plugin ${f} || is_enabled_plugin ${b} )
-       && echo ${n} $p
+       ( is_enabled_plugin ${f} || is_enabled_plugin ${b} ) \
+	   && echo ${n} $p
     done
 }
 

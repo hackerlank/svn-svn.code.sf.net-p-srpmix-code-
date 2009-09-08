@@ -1,3 +1,8 @@
+2009-09-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-plugin (parse_arguments): Fix a syntax error in `case' statment.
+	(list_plugin_candidates): Added backslashs before &&.
+
 2009-09-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/*srpmix-*: Added --plugin-dir=,
