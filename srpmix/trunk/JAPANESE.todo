@@ -1,3 +1,5 @@
+* top level plugin
+
 ** Do yum install some build/required packages in autogen.sh.
 ** adduser brewbuilder, mockbuild
 ** --make-rpm
