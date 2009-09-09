@@ -1,13 +1,7 @@
-
 repo --name=f10 --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-10&arch=i386
 repo --name=f10-update --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f10&arch=i386
 repo --name=f10-build --baseurl=http://koji.fedoraproject.org/repos/dist-f10-build/latest/i386/
 repo --name=srpmix --baseurl=file:/srv/sources/archives/srpmix/redhat-srpmix/
-
-#repo --name=f10 --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-10&arch=i386
-#repo --name=f10-update --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f10&arch=i386
-#repo --name=f10-build --baseurl=http://koji.fedoraproject.org/repos/dist-f10-build/latest/i386/
-#repo --name=srpmix --baseurl=http://gps.nrt.redhat.com/pub/sources-seed/srpmix-output-dir2/
 
 rootpw --iscrypted $1$kd3X1W.R$qCIIqc9tdijJmP6wzcjii/
 authconfig --enableshadow --enablemd5
