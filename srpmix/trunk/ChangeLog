@@ -1,5 +1,7 @@
 2009-09-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-package-attach: Renamed from srpmix-attach.
+
 	* misc/specs/srpmix-dir-base.SPEC.in (pluginsdir): Added new directory plugins.
 
 2009-09-09  Masatake YAMATO  <yamato@redhat.com>
@@ -15,7 +17,7 @@
 	Implemented the case PLUGIN_NAME is given.
 	Prepare the output file for tar command in this function.
 	(create_swrf): Don't redirect the output of tar in this function.
-	
+
 2009-09-09  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-wrap (create_core_spec): Remove log files when building a package.
