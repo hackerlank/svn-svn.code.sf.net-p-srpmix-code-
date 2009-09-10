@@ -42,6 +42,9 @@ mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}
 for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}/${c}; done
 # for each common directories
 
+pluginsdir=${rootdir}/plugins
+mkdir -p $RPM_BUILD_ROOT${pluginsdir}
+
 dbdir=${rootdir}/db
 mkdir -p $RPM_BUILD_ROOT${dbdir}
 for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${dbdir}/${c}; done

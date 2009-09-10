@@ -1,3 +1,7 @@
+2009-09-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix-dir-base.SPEC.in (pluginsdir): Added new directory plugins.
+
 2009-09-09  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-cscope (run_cscope): Handle the case when file-i
