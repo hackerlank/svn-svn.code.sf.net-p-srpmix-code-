@@ -33,7 +33,7 @@
 
 ;; libtool/config.* are now at libtool/config/config.*.
 (#/openldap.*/ "--rearrange-spec-command={ sed -e \'s|cp %{_datadir}/libtool/config\.{sub,guess} build/||\'; }")
-(#/nss_ldap-.*/ "--rearrange-spec-command={ sed -e \'s|/usr/share/libtool/config\.{guess,sub} \.||\'; }")
+(#/nss_ldap-.*/ "--rearrange-spec-command={ sed -e \'s|cp -f /usr/share/libtool/config\.{guess,sub} \.||\'; }")
 (#/star-.*/     "--rearrange-spec-command={ sed -e \'s|cp -f /usr/share/libtool/config\.sub conf/config\.sub||\'; }")
 
 ;; TEST
