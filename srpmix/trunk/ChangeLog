@@ -1,5 +1,11 @@
 2009-09-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/99default.scm: Added more rules.
+
+	* src/helpers/build-spec-rearrange (spec_file_hack): Handle patch: line.
+
+	* src/srpmix-rootdir-attach: New file.
+
 	* src/srpmix-package-attach: Renamed from srpmix-attach.
 
 	* misc/specs/srpmix-dir-base.SPEC.in (pluginsdir): Added new directory plugins.

@@ -2,7 +2,7 @@
 #
 ########################################################################
 #
-# srpmix-weakview-dist-attach: Make a dist level plugin package
+# srpmix-rootdir-attach: Make a root dir level plugin package
 #
 # Copyright (C) 2009 Masatake YAMATO
 #
@@ -27,10 +27,9 @@ PKG_NAME=
 PKG_VERSION=0
 PKG_RELEASE=0
 OUTPUT_DIR=
-TARGET_DIST=
 ATTACHMENT=
 
-SRPMIX_WEAKVIEW_DIST_ATTACH_DEBUG=
+SRPMIX_ROOTDIR_ATTACH_DEBUG=
 YUM_OPTS=
 
 DUMP_SPEC=
@@ -50,11 +49,11 @@ try_source ${LIBSRPMIX}
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-weakview-dist-attach [--help|-h]"
-    echo "  srpmix-weakview-dist-attach [--debug] [--dump-spec] \\ "
+    echo "  srpmix-rootdir-attach [--help|-h]"
+    echo "  srpmix-rootdir-attach [--debug] [--dump-spec] \\ "
     echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=REL] \\ "
     echo "                [--output-dir=DIR] [--yum=YUMOPT] \\"
-    echo "                DIST ATTACHMENT" 
+    echo "                ATTACHMENT" 
 }
 
 function parse_arguments
@@ -66,8 +65,8 @@ function parse_arguments
 	        exit 0
 	        ;;
 	    (--debug)
-	        SRPMIX_WEAKVIEW_DIST_ATTACH_DEBUG=yes
-	        PS4="${PS4}[dist-attach]"
+	        SRPMIX_ROOTDIR_ATTACH_DEBUG=yes
+	        PS4="${PS4}[rootdir]"
 	        set -x
 		;;
 	    (--dump-spec)
@@ -103,17 +102,10 @@ function parse_arguments
 	shift
     done
  
-    if test $# -ne 2; then
-	echo "*** Wrong number of arguments: " $# " (2 arguments are expected)" 1>&2
+    if test $# -ne 1; then
+	echo "*** Wrong number of arguments: " $# " (1 argument is expected)" 1>&2
 	print_usage 1>&2
 	exit 2
-    fi
-
-    TARGET_DIST="$1"
-    shift 1
-    
-    if [[ $TARGET_DIST =~ srpmix-weakview-dist-(.*) ]]; then
-	$TARGET_DIST=${BASH_REMATCH[1]}
     fi
 
     ATTACHMENT="$1"
@@ -129,16 +121,14 @@ function parse_arguments
 
 function create_spec
 {
-    local target_dist_full_name=$1
-    local pkg_full_name=$2
+    local pkg_full_name=$1
 
     local rootdir=${SRPMIX_VAR_DIR}
-    local distdir=${rootdir}/dists
-    local target_distdir=${rootdir}/dists/${TARGET_DIST}
-    local pluginsdir=${target_distdir}/plugins
+    local distdir=${rootdir}
+    local pluginsdir=${distdir}/plugins
 
     cat <<EOF
-Summary:  $PKG_NAME plugin information for srpmix weakview dist ${TARGET_DIST}
+Summary:  $PKG_NAME plugin information for srpmix
 Name: ${pkg_full_name}
 Version: ${PKG_VERSION}
 Release: ${PKG_RELEASE}%{?dist}
@@ -151,7 +141,7 @@ BuildRequires: tar
 Group: Software/Tools
 License: Unknown
 
-Requires: ${target_dist_full_name}
+Requires: srpmix-dir-base
 
 %define __os_install_post true
 
@@ -194,7 +184,7 @@ function prepare_tarball
 
 function build_rpm
 {
-    if test "${SRPMIX_WEAKVIEW_DIST_ATTACH_DEBUG}" = "yes"; then
+    if test "${SRPMIX_ROOTDIR_ATTACH_DEBUG}" = "yes"; then
 	PS4="${PS4}[rpmbuild]"
     fi
     ${RPMBUILD} --define "_topdir $MY_TMPDIR" -ba ${spec_file}
@@ -202,7 +192,6 @@ function build_rpm
 
 function main
 {
-    local target_dist_full_name
     local pkg_full_name
     local spec_file
 
@@ -213,15 +202,14 @@ function main
 
     if test -n "$SRPMIX_ATTACH_DEBUG"; then
 	trap 0
-	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-weakview-dist-attach"
+	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-rootdir-attach"
     fi
 
-    target_dist_full_name=srpmix-weakview-dist-${TARGET_DIST}
-    pkg_full_name=${target_dist_full_name}-${PKG_NAME}
+    pkg_full_name=srpmix-rootdir-${PKG_NAME}
 
     mkdir -p ${MY_TMPDIR}/SPECS
     spec_file=${MY_TMPDIR}/SPECS/${pkg_full_name}.spec
-    create_spec ${target_dist_full_name} ${pkg_full_name} > $spec_file
+    create_spec ${pkg_full_name} > $spec_file
     if test -n "$DUMP_SPEC"; then
 	cat $spec_file
 	return 0
@@ -237,9 +225,8 @@ function main
     fi
     
     if test -n "$OUTPUT_DIR"; then
-	# TODO
-	mkdir -p "$OUTPUT_DIR"/weakview
-	mv ${rpm} "$OUTPUT_DIR"/weakview
+	mkdir -p "$OUTPUT_DIR"
+	mv ${rpm} "$OUTPUT_DIR"
 	return $?
     else
 	yum ${YUM_OPTS} localinstall -y --nogpgcheck ${rpm}

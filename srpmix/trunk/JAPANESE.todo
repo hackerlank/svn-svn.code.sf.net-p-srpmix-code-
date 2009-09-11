@@ -1,4 +1,21 @@
-* top level plugin
+ls | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'   | less | while read X; do echo "$(ls | grep $X | wc -l): $X" ; done | sort -n | uniq 
+10: jbossts
+11: gnupg
+11: net-snmp
+12: jboss-seam
+12: kdelibs
+12: kdenetwork
+12: openmpi
+13: ghostscript
+14: jboss-cache
+15: GFS
+15: openoffice.org
+16: kdegraphics
+16: openoffice
+22: mysql
+31: rpmdb-redhat
+35: jbossas
+87: comps
 
 ** Do yum install some build/required packages in autogen.sh.
 ** adduser brewbuilder, mockbuild
@@ -159,6 +176,7 @@ done
     # java-1.6.0-openjdk-devel                                                                                     
     # eclipse
 
+* top level plugin <done>
 
 After version 4
 ========================================================================
