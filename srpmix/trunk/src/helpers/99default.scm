@@ -43,16 +43,15 @@
 (#/ghostscript-.*/     "--keep-original")
 (#/net-snmp-5.1.2-1.*/ "--keep-original")
 (#/pciutils-2.1.8-.*/ "--rearrange-spec-command={ sed -e \'s/^make OPT=\"$RPM_OPT_FLAGS\"$//\'; }")
-(#/gnupg-.*/          "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^aclocal.*$\\|^automake.*$//\'; }")
-(#/findutils-.*/      "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^libtoolize --force$\\|^aclocal$\\|^automake$//\'; }")
+(#/gnupg-.*/          dont-run-autotools)
+(#/findutils-.*/      dont-run-autotools)
 
-#(#/ibutils-1.*/        "--rearrange-spec-command={ sed -e \'s/%configure --with-osm=%{_prefix} \(--enable-ibmgtsim\)*//\'; }")
-(#/ibutils-1.*/        "--rearrange-spec-command={ sed -e \'s/^%configure/echo hacked-by-srpmix /\'; }")
+(#/ibutils-1.*/        dont-run-configure)
 (#/clumanager-1.0.*/   "--rearrange-spec-command={ sed -e \'s#^\./autogen\.sh$\\|^\./configure$##\'; }")
-(#/am-utils-6.*/       "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^libtoolize --force$\\|^aclocal$\\|^automake$//\'; }")
-(#/openib-1.*/         "--rearrange-spec-command={ sed -e \'s#^\./configure.*##\'; }" )
-(#/openmpi.*/          "--rearrange-spec-command={ sed -e \'s#^\./configure#echo hacked-by-srpmix #\'; }" )
-(#/opensm-.*/          "--rearrange-spec-command={ sed -e \'s#^\./configure#echo hacked-by-srpmix #\'; }" )
+(#/am-utils-6.*/       dont-run-autotools-and-configure)
+(#/openib-1.*/         dont-run-configure )
+(#/openmpi.*/          dont-run-configure )
+(#/opensm-.*/          dont-run-configure )
 
 ;; TEST
 ;; (#/SRPMIX-TEST/ "a" "b")

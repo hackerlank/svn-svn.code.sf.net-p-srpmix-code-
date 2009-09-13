@@ -14,15 +14,32 @@
 (define-method object-apply ((str0 <string>) (str1 <string>))
   (equal? str0 str1))
 
+(define header "--rearrange-spec-command={ sed ")
+(define hooter "; }")
+(define %configure "-e \'s#^%configure#cat hacked-by-srpmix ##\' ")
+(define configure  "-e \'s#^\./configure#cat hacked-by-srpmix ##\' ")
+(define autotools "-e \'s#^\\./autogen.sh.*\\|^autoheader.*\\|^aclocal.*\\|^libtoolize.*\\|^autoconf.*\\|^automake.*##\' ")
+
 (define (handle-alias x)
   (case x
     ('dont-run-autotools-and-configure
      (string-append
-      "--rearrange-spec-command={ sed "
-      "-e \'s#^autoheader.*\\|^aclocal.*\\|^libtoolize.*\\|^autoconf.*\\|^automake.*##\' "
-      "-e \'s#^%configure#cat hacked-by-srpmix ##\' "
-      "-e \'s#^\./configure#cat hacked-by-srpmix ##\' "
-      "; }"))
+      header
+      autotools
+      %configure
+      configure
+      footer))
+    ('dont-run-autotools
+     (string-append
+      header
+      autotools
+      footer))
+    ('dont-run-configure
+     (string-append
+      header
+      %configure
+      configure
+      footer))
     (else
      x)))
 
