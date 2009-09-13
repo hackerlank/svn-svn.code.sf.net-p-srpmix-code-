@@ -143,18 +143,21 @@ function default_target
 
 function guess_target
 {
-    local spec_file=$1
-    local line
-    local arch
+    local srpm_file=$1
 
-    if line=$(grep ^ExclusiveArch: $spec_file 2>/dev/null); then
-        # "ExclusiveArch: %{ix86}" in wine
-        arch=$(echo $line | sed -e 's/ExclusiveArch: \?\([-%{}_a-zA-Z0-9]\+\).*/\1/')
-	if test "x${arch}" = 'x%{ix86}'; then
-	    echo i386
-	else
-	    echo ${arch}
-	fi
+    local default=$(default_target)
+    local srpm_exclusive_arch
+    local archs
+
+    # TODO: Exclude arch.
+    srpm_exclusive_arch=$(rpm --nosignature -qp --queryformat "[%{EXCLUSIVEARCH} ]" "${srpm_file}")
+    if [[ -z "${srpm_exclusive_arch}" ]]; then
+	echo "$default"
+    elif [[ "${srpm_exclusive_arch}" ==  *"$default"* ]]; then
+	echo "$default"
+    else
+	read -a  archs <<<"${srpm_exclusive_arch}"
+	echo ${archs[0]}
     fi
 }
 
@@ -647,13 +650,8 @@ function srpm_deploy
     fi
 
     if test "${TARGET}" = '?'; then
-        TARGET=$(guess_target "${rootdir}/${SPECDIR}/${xspec_file}")
-        if test -z "${TARGET}"; then
-            TARGET=$(default_target)
-            verbose varset --TARGET=\""${TARGET}"\" --rule=default
-        else
-            verbose varset --TARGET=\""${TARGET}"\" --rule=guessing-from-ExclusiveArch
-        fi
+        TARGET=$(guess_target "${srpm_file}")
+        verbose varset --TARGET=\""${TARGET}"\"
     fi
 
     targets=$(echo "${TARGET}" | tr "," " " )

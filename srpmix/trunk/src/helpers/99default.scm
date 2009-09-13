@@ -26,6 +26,8 @@
 (#/pam-0.99.6.*/ "--rearrange-spec-command={ sed -e \"s/^autoreconf//\"; }")
 (#/shadow-utils-.*/ "--rearrange-spec-command={ sed -e \"s/^libtoolize -f$\\|^aclocal$\\|^autoheader$\\|^automake -a$\\|^autoconf$//\"; }")
 (#/mysql-.*/         "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
+(#/mysqlclient-.*/         "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
+
 
 ;; Don't run gcc_update --touch
 (#/gcc-.*/ "--rearrange-spec-command={ sed -e \'s/^.*gcc_update --touch.*$//\'; }")
@@ -33,7 +35,7 @@
 
 ;; libtool/config.* are now at libtool/config/config.*.
 (#/openldap.*/ "--rearrange-spec-command={ sed -e \'s|cp %{_datadir}/libtool/config\.{sub,guess} build/||\'; }")
-(#/nss_ldap-.*/ "--rearrange-spec-command={ sed -e \'s#cp -f /usr/share/libtool/config\.{guess,sub} \.##\' -e \'s/^aclocal$\\|^automake$\\|^autoheader$\\|^autoconf$//\' ; }")
+(#/nss_ldap-.*/ "--rearrange-spec-command={ sed -e \'s#cp -f /usr/share/libtool/config\.{guess,sub} \.##\' -e \'s/^aclocal$\\|^automake$\\|^autoheader$\\|^autoconf$//\' -e \'s#cp %{_datadir}/libtool/config.{sub,guess} nss_ldap-%{version}/##\' -e\'s#cp %{_datadir}/libtool/config.{sub,guess} pam_ldap-%{pam_ldap_version}/##\' ; }")
 (#/star-.*/     "--rearrange-spec-command={ sed -e \'s|cp -f /usr/share/libtool/config\.sub conf/config\.sub||\'; }")
 
 ;; TEST

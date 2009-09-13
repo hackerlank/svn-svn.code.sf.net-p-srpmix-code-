@@ -1,3 +1,11 @@
+2009-09-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (guess_target): Use src.rpm file instead of spec file
+	to guess the target architecture.
+
+	* src/helpers/99default.scm (#/mysqlclient-.*/): New rule.
+	(#/nss_ldap-.*/): Added more rules.
+
 2009-09-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/10srpmix-vanilla (TMPDIR): Use default value.
