@@ -1,5 +1,8 @@
 2009-09-14  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/build-opt-rules (handle-alias): Added function to
+	handle symbols in rules specially.
+
 	* src/srpmix-ix (guess_target): Use src.rpm file instead of spec file
 	to guess the target architecture.
 

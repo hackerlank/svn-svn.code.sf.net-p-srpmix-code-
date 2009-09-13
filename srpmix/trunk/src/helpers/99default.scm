@@ -23,10 +23,10 @@
 (#/util-linux-2\.13-0\.44\.el5/ "--rearrange-spec-command={ echo \"%define rhel 1\";cat; }")
 
 ;; Avoids to run autoreconf.
-(#/pam-0.99.6.*/ "--rearrange-spec-command={ sed -e \"s/^autoreconf//\"; }")
-(#/shadow-utils-.*/ "--rearrange-spec-command={ sed -e \"s/^libtoolize -f$\\|^aclocal$\\|^autoheader$\\|^automake -a$\\|^autoconf$//\"; }")
+(#/pam-0.99.6.*/     "--rearrange-spec-command={ sed -e \"s/^autoreconf//\"; }")
+(#/shadow-utils-.*/  "--rearrange-spec-command={ sed -e \"s/^libtoolize -f$\\|^aclocal$\\|^autoheader$\\|^automake -a$\\|^autoconf$//\"; }")
 (#/mysql-.*/         "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
-(#/mysqlclient-.*/         "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
+(#/mysqlclient-.*/   "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
 
 
 ;; Don't run gcc_update --touch
@@ -43,12 +43,13 @@
 (#/ghostscript-.*/     "--keep-original")
 (#/net-snmp-5.1.2-1.*/ "--keep-original")
 (#/pciutils-2.1.8-.*/ "--rearrange-spec-command={ sed -e \'s/^make OPT=\"$RPM_OPT_FLAGS\"$//\'; }")
-(#/gnupg-.*/          "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^aclocal$\\|^automake$//\'; }")
+(#/gnupg-.*/          "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^aclocal.*$\\|^automake.*$//\'; }")
 (#/findutils-.*/      "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^libtoolize --force$\\|^aclocal$\\|^automake$//\'; }")
 
-(#/ibutils-1.*/        "--rearrange-spec-command={ sed -e \'s/%configure --with-osm=%{_prefix} \(--enable-ibmgtsim\)*//\'; }")
+#(#/ibutils-1.*/        "--rearrange-spec-command={ sed -e \'s/%configure --with-osm=%{_prefix} \(--enable-ibmgtsim\)*//\'; }")
+(#/ibutils-1.*/        "--rearrange-spec-command={ sed -e \'s/^%configure/echo hacked-by-srpmix /\'; }")
 (#/clumanager-1.0.*/   "--rearrange-spec-command={ sed -e \'s#^\./autogen\.sh$\\|^\./configure$##\'; }")
-(#/am-utils-6.*/       "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$//\'; }")
+(#/am-utils-6.*/       "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^libtoolize --force$\\|^aclocal$\\|^automake$//\'; }")
 (#/openib-1.*/         "--rearrange-spec-command={ sed -e \'s#^\./configure.*##\'; }" )
 (#/openmpi.*/          "--rearrange-spec-command={ sed -e \'s#^\./configure#echo hacked-by-srpmix #\'; }" )
 (#/opensm-.*/          "--rearrange-spec-command={ sed -e \'s#^\./configure#echo hacked-by-srpmix #\'; }" )

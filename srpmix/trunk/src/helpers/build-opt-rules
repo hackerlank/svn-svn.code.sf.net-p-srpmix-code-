@@ -14,6 +14,18 @@
 (define-method object-apply ((str0 <string>) (str1 <string>))
   (equal? str0 str1))
 
+(define (handle-alias x)
+  (case x
+    ('dont-run-autotools-and-configure
+     (string-append
+      "--rearrange-spec-command={ sed "
+      "-e \'s#^autoheader.*\\|^aclocal.*\\|^libtoolize.*\\|^autoconf.*\\|^automake.*##\' "
+      "-e \'s#^%configure#cat hacked-by-srpmix ##\' "
+      "-e \'s#^\./configure#cat hacked-by-srpmix ##\' "
+      "; }"))
+    (else
+     x)))
+
 (define (main args)
   (let1 args (cdr args)
     (cond
@@ -34,5 +46,8 @@
 			       rules
 			       (loop (cons r rules) (read)))))))
 		     (return (list)))
-	(for-each (lambda (x) (display x) (newline)) result)
+	(for-each (lambda (x) 
+		    (display (handle-alias x))
+		    (newline)) 
+		  result)
 	(exit 0))))))
