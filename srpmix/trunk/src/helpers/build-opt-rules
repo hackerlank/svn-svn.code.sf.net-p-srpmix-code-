@@ -15,7 +15,7 @@
   (equal? str0 str1))
 
 (define header "--rearrange-spec-command={ sed ")
-(define hooter "; }")
+(define footer "; }")
 (define %configure "-e \'s#^%configure#cat hacked-by-srpmix ##\' ")
 (define configure  "-e \'s#^\./configure#cat hacked-by-srpmix ##\' ")
 (define autotools "-e \'s#^\\./autogen.sh.*\\|^autoheader.*\\|^aclocal.*\\|^libtoolize.*\\|^autoconf.*\\|^automake.*##\' ")
