@@ -18,7 +18,7 @@
 (define footer "; }")
 (define %configure "-e \'s#^%configure#cat hacked-by-srpmix ##\' ")
 (define configure  "-e \'s#^\./configure#cat hacked-by-srpmix ##\' ")
-(define autotools "-e \'s#^\\./autogen.sh.*\\|^autoheader.*\\|^aclocal.*\\|^libtoolize.*\\|^autoconf.*\\|^automake.*##\' ")
+(define autotools "-e \'s#^\\./autogen.sh.*\\|^\\./bootstrap.sh.*\\|^autoheader.*\\|^aclocal.*\\|^libtoolize.*\\|^autoconf.*\\|^automake.*##\' ")
 
 (define (handle-alias x)
   (case x
