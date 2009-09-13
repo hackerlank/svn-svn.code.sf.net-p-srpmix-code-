@@ -38,7 +38,7 @@ SRPMIX_VANIILA_DEBUG=
 
 FORCE=
 
-TMPDIR=/tmp/$(basename $0).$$
+TMPDIR=${TMPDIR}/tmp/srpmix-plugins/$(basename $0).$$
 mkdir -p $TMPDIR
 trap "/bin/rm -rf $TMPDIR" 0
 

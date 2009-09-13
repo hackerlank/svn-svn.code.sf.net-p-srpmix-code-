@@ -1,3 +1,11 @@
+2009-09-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (TMPDIR): Use default value.
+
+	* src/plugins/60srpmix-kindex (TMPDIR): Use default value.
+
+	* src/helpers/99default.scm: Added missing backslash before bars(|).
+
 2009-09-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/99default.scm (#/nss_ldap-.*/): Fix a typo.
