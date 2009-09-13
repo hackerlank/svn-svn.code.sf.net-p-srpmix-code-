@@ -13,7 +13,7 @@
 (#/yaboot-.*/ "--target=ppc")
 
 ;;
-(#/s390utils-1\.5\.3-17\.el5/ "--target=s390x --keep-original")
+(#/s390utils-1\.5\.3-17\.el5/ "--target=s390x" "--keep-original")
 (#/s390utils-.*/ "--target=s390")
 
 ;;
@@ -34,9 +34,24 @@
 
 
 ;; libtool/config.* are now at libtool/config/config.*.
-(#/openldap.*/ "--rearrange-spec-command={ sed -e \'s|cp %{_datadir}/libtool/config\.{sub,guess} build/||\'; }")
+(#/openldap.*/ "--rearrange-spec-command={ sed -e \'s|cp %{_datadir}/libtool/config\.{sub,guess} build/||\'; }"
+	       "--keep-original")
 (#/nss_ldap-.*/ "--rearrange-spec-command={ sed -e \'s#cp -f /usr/share/libtool/config\.{guess,sub} \.##\' -e \'s/^aclocal$\\|^automake$\\|^autoheader$\\|^autoconf$//\' -e \'s#cp %{_datadir}/libtool/config.{sub,guess} nss_ldap-%{version}/##\' -e\'s#cp %{_datadir}/libtool/config.{sub,guess} pam_ldap-%{pam_ldap_version}/##\' ; }")
 (#/star-.*/     "--rearrange-spec-command={ sed -e \'s|cp -f /usr/share/libtool/config\.sub conf/config\.sub||\'; }")
+
+;; TEST
+(#/ghostscript-.*/     "--keep-original")
+(#/net-snmp-5.1.2-1.*/ "--keep-original")
+(#/pciutils-2.1.8-.*/ "--rearrange-spec-command={ sed -e \'s/^make OPT=\"$RPM_OPT_FLAGS\"$//\'; }")
+(#/gnupg-.*/          "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^aclocal$\\|^automake$//\'; }")
+(#/findutils-.*/      "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$\\|^libtoolize --force$\\|^aclocal$\\|^automake$//\'; }")
+
+(#/ibutils-1.*/        "--rearrange-spec-command={ sed -e \'s/%configure --with-osm=%{_prefix} \(--enable-ibmgtsim\)*//\'; }")
+(#/clumanager-1.0.*/   "--rearrange-spec-command={ sed -e \'s#^\./autogen\.sh$\\|^\./configure$##\'; }")
+(#/am-utils-6.*/       "--rearrange-spec-command={ sed -e \'s/^autoheader$\\|^autoconf$//\'; }")
+(#/openib-1.*/         "--rearrange-spec-command={ sed -e \'s#^\./configure.*##\'; }" )
+(#/openmpi.*/          "--rearrange-spec-command={ sed -e \'s#^\./configure#echo hacked-by-srpmix #\'; }" )
+(#/opensm-.*/          "--rearrange-spec-command={ sed -e \'s#^\./configure#echo hacked-by-srpmix #\'; }" )
 
 ;; TEST
 ;; (#/SRPMIX-TEST/ "a" "b")

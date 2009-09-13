@@ -1,0 +1,312 @@
+#!/bin/bash
+#
+########################################################################
+#
+# sop-mummify: generate livecd iso image from srpmix repo
+#
+# Copyright (C) 2009 Tatsuo Kawasaki
+# Copyright (C) 2009 Masatake YAMATO
+#
+# Authors: Tatsuo Kawaski <kawasaki@redhat.com>
+#          Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+OUTPUT_DIR=.
+KS_FILE=
+DUMP_KS_FILE=
+LIVECD_CREATOR_OPTS=
+# fslabel
+
+SOPCONFDIR=/etc/sop
+CONF=sop.cf
+PKGDATADIR=/usr/share/sop
+
+
+if [ -f ${SOPCONFDIR}/${CONF} ]; then
+    source ${SOPCONFDIR}/${CONF}
+else
+#    echo "Cannot load ${CONF} file" 1>&2
+#    exit 1
+    :
+fi
+
+
+function print_usage
+{
+    echo "Usage: "
+    echo "   sop-mummify --help|-h"
+    echo "   sop-mummify --dump-ks-file"
+    echo "   sop-mummify [--output-dir=OUTPUT_DIR] [--livecd-creator=OPTS] [--ks-file=KS-FILE]"
+    
+}
+
+function parse_arguments
+{
+	while [ $# -gt 0 ]; do
+	    case "$1" in
+		--help|-h)
+		    print_usage
+		    exit 0
+		    ;;
+		(--output-dir=*)
+		    OUTPUT_DIR=${1/--output-dir=}
+		    if [ -d "${OUTPUT_DIR}" ]; then
+			OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
+		    else
+			echo "No such directory: ${OUTPUT_DIR}" 2>&1
+			exit 1
+		    fi
+		    ;;
+		(--livecd-creator=*)
+		    LIVECD_CREATOR_OPTS=${1/--livecd-creator=}
+		    ;;
+		--dump-ks-file)
+		    DUMP_KS_FILE=yes
+		    ;;
+		(--ks-file=*)
+		     KS_FILE=${1/--ks-file=}
+                     if [ -f "${KS_FILE}" ]; then
+			 if [ ${KS_FILE:0:1} != "/" ]; then
+			     KS_FILE=$(ls $(pwd)/${KS_FILE})
+			 fi
+		     else
+			 echo "No such file: ${KS_FILE}" 2>&1
+			 exit 1
+		     fi
+		     ;;
+		--*)
+		    echo "No such option: $1" 1>&2 
+		    print_usage  1>&2
+		    exit 1
+		    ;;
+		*)
+		    break
+		    ;;
+	    esac
+	    shift
+	done
+
+	if [ -n "${KS_FILE}" ] && [ -n "${DUMP_KS_FILE}" ]; then
+	    echo "Use either --ks-file= or --dump-ks-file" 1>&2
+	    print_usage 1>&2
+	    exit 1
+	fi
+}
+
+function create_ks_file
+{
+    local fssize=$1
+
+
+
+#
+# OS REPOS
+# 
+
+#    local arch=i386
+    local arch=x86_64
+    local ver=11
+# --ks-os
+# BASE_OS=
+    cat <<EOF    
+repo --name=f${ver}        --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-${ver}&arch=${arch}
+repo --name=f${ver}-update --mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f${ver}&arch=${arch}
+# repo --name=f${ver}-build --baseurl=http://koji.fedoraproject.org/repos/dist-f${ver}-build/latest/${arch}/
+EOF
+
+
+
+#
+# SRPMIX REPOS
+#
+    local cradle_name
+    local cradle_protocol=file
+    local repo_dir
+    local repo_name
+    for x in ${SOP_CRADLES_DIR}/*; do
+	if test -d $x/repo; then
+	    repo_dir=$x/repo
+	    cradle_name=$(basename $x | tr . -)
+	    repo_name="srpmix-${cradle_protocol}-${cradle_name}"
+	    cat <<EOF
+repo --name=${repo_name} --baseurl=file:${repo_dir}
+EOF
+	fi
+    done
+
+#
+# TODO: PASSWD
+#
+# --ks-rootpw
+# interactive
+cat <<"EOF"
+rootpw --iscrypted $1$kd3X1W.R$qCIIqc9tdijJmP6wzcjii/
+EOF
+
+cat <<EOF
+authconfig --enableshadow --enablemd5
+services --enabled=nfs,httpd
+EOF
+
+#
+# TODO: FILESYSTEM SIZE
+#
+# --ks-size
+# TODO: calculation is needed
+cat <<EOF
+part / --fstype ext2 --size=${fssize}
+EOF
+
+cat <<EOF
+firewall --service=ssh
+selinux --disabled
+EOF
+
+#
+# TODO: TIME ZONE
+#
+# --ks-tz
+cat <<EOF
+timezone --utc Asia/Tokyo
+EOF
+
+cat <<EOF
+%packages
+@core
+@base
+bash
+kernel
+passwd
+policycoreutils
+chkconfig
+authconfig
+rootfiles
+
+@web-server
+@ftp-server
+@smb-server
+
+# srpmix
+# srpmix-dir-pkg
+EOF
+
+#
+# TODO: PACKAGE SELECTION
+#
+# operators are needed
+#
+cat <<EOF
+#@srpmix-rhel* --optional
+#*-srpmix
+EOF
+
+cat <<EOF
+%end
+
+%post
+
+## Remove unnecessary files
+rm -rf   /usr/share/srpmix/swrfs
+mkdir -p /usr/share/srpmix/swrfs
+
+rm -rf   /var/lib/srpmix/db
+mkdir -p /var/lib/srpmix/db
+
+## Prepare sources directory
+# TODO: bind monut
+test -e /srv/sources && rm /srv/sources
+ln -s /var/lib/srpmix /srv/sources
+
+## Prepare services
+# NFS
+echo "/srv/sources	*(ro)" > /etc/exports
+
+# HTTP
+cat > /etc/httpd/conf.d/sop.conf <<'EOF0'
+Alias /sources /srv/sources
+<Location /sources>
+	Options Indexes FollowSymlinks
+</Location>
+EOF0
+
+# CIFS/SAMBA
+# TODO
+
+%end
+EOF
+}
+
+function mummify
+{
+    cd ${OUTPUT_DIR}
+    cp $KS_FILE .
+
+    # TODO
+    livecd-creator --config=${KS_FILE} \
+	${LIVECD_CREATOR_OPTS}
+
+    # TODO: Parse output to detect "No space left on device"
+    return $?
+}
+
+function main
+{
+    local create_ks_p=
+
+    local initial_size=750
+    local limit_size=25000
+    local current_size=
+
+
+    parse_arguments "$@"
+    if [ -z "$KS_FILE" ]; then
+	create_ks_p=yes
+    fi
+
+
+    while true; do
+	if [ "$create_ks_p" = yes ]; then
+	    # $KS_FILE must be an absolute path.
+	    KS_FILE=/tmp/foo.ks
+	    if [ -z "$current_size" ]; then
+		current_size=$initial_size
+	    else
+		(( current_size *= 2 ))
+	    fi
+	    if [ $current_size -gt $limit_size ]; then
+		echo "# *** Trial size($current_size) reaches the limit($limit_size)" 1>&2
+		return 1
+	    else
+		echo "# *** Trial size: $current_size"
+	    fi
+	
+	    create_ks_file $current_size > "$KS_FILE"
+	fi
+    
+	if [ "$DUMP_KS_FILE" = yes ]; then
+	    cat "$KS_FILE"
+	    exit 0
+	fi
+	
+	if ( mummify ); then
+	    echo "# *** Succeeded in size: $current_size"
+	    break
+	fi
+    done
+}
+    
+time main "$@"
