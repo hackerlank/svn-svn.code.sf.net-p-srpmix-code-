@@ -17,6 +17,8 @@ ls | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e
 35: jbossas
 87: comps
 
+** gc for blacklist.d
+
 ** Do yum install some build/required packages in autogen.sh.
 ** adduser brewbuilder, mockbuild
 ** --make-rpm
