@@ -244,7 +244,18 @@ Alias /sources /srv/sources
 EOF0
 
 # CIFS/SAMBA
-# TODO
+cat >> /etc/samba/smb.conf <<'SMBEOF'
+[sources]
+        comment = sources repository
+        public = yes
+        path = /srv/sources/
+        writable = no
+        guest ok = yes
+        browseable = yes
+SMBEOF
+#modify smb.conf
+sed -e "s/\(^\t.*\)\(security =\)\( .*\)/\1\2 share/g" /etc/samba/smb.conf  > /tmp/smb.confx
+sed -e "s/\(^\t.*\)\(workgroup =\)\( .*\)/\1\2 SOURCES/g" /tmp/smb.confx  > /etc/samba/smb.conf
 
 %end
 EOF
