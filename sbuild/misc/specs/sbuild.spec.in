@@ -13,7 +13,7 @@ Requires: make rsync srpmix gauche
 # My recommendation
 Requires: libtool autoconf autoconf213 automake automake14 automake15 automake16 automake17 
 Requires: gettext-devel intltool
-Requires: glib-devel glib2-devel gtk2-devel gtk+-devel
+Requires: glib-devel glib2-devel gtk2-devel gtk+-devel GConf2-devel
 
 Requires: mono-devel ruby-devel perl-devel python-devel php-devel 
 Requires: libgcj-devel jpackage-utils maven2 java-1.6.0-openjdk-devel 
