@@ -1,3 +1,6 @@
+SUBDIRS  = .
+SUBDIRS += builders
+
 sbuildconfdir=$(sysconfdir)/sbuild
 dist_sbuildconf_DATA = sbuild.cf
 

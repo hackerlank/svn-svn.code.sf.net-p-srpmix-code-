@@ -35,4 +35,5 @@ AC_OUTPUT([
 	misc/m4/Makefile
 	misc/makefiles/Makefile
 	src/Makefile
+	src/builders/Makefile
 	])

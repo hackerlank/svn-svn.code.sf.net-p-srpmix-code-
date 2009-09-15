@@ -4,6 +4,7 @@
 
 PKGCONFDIR=/etc/sbuild
 PKGDATADIR=/usr/share/sbuild
+BUILDERSDIR=${PKGDATADIR}/builders
 
 SBUILD_CONF=${PKGCONFDIR}/sbuild.cf
 SOP_CONF_DIR=/etc/sop
@@ -141,17 +142,6 @@ function run_make
 {
     local cf=$1
     local name=$2
-    local cradle_dir=${SOP_CRADLES_DIR}/${name}
-    local pkgs=${cradle_dir}/mirror-pkgs
-    local repo=${cradle_dir}/repo
-    local vpath=${cradle_dir}/mirror-vpath
-    local tstampdir
-    local mkfile
-
-    local h
-    local f
-    local all_h
-    local last_h
 
     source $cf
     if test -z "${BUILD}"; then
@@ -163,83 +153,18 @@ function run_make
 	return 0
     fi
 
-    if ! test -f ${pkgs}; then
-	echo "No mirror-pkgs found: ${pkgs}" 1>&2
+    if test -z "${TYPE}"; then
+	echo "No TYPE in $cf" 1>&2
 	return 1
     fi
 
-    if ! test -f ${vpath}; then
-	echo "No mirror-vpath found: ${vpath}" 1>&2
+    if [ -x "${BUILDERSDIR}"/"${TYPE}" ]; then
+	( "${BUILDERSDIR}"/"${TYPE}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" )
+	return $?
+    else
+	echo "No builder for ${TYPE}" 1>&2
 	return 1
     fi
-
-    tstampdir=${SBUILD_TSTAMPDIR}/$name
-    mkdir -p ${tstampdir}
-    mkfile=${tstampdir}/sbuild-${name}.mk
-    echo "include sbuild.mk"              > $mkfile
-    echo ""                               >> $mkfile
-
-
-    cat $pkgs | while read f; do
-	if [[ -z "$f" ]]; then
-	    break
-	fi
-	f=$(basename $f)
-	h=${f:0:1}
-
-	if [[ "x${h}" != "x${last_h}" ]]; then
-#           Cannot return the result to parent process.
-#	    all_h="$all_h $h"
-	    last_h=$h
-	    install -d ${tstampdir}/$h
-	    echo ""                                 >> $mkfile
-	    echo "sub-$h: \\"                       >> $mkfile
-	fi
-	echo " " ${f/.src.rpm/.src.log} '\'         >> $mkfile
-    done
-
-    all_h=$(cat ${pkgs} | sed -e 's/\(.\).*$/\1/' | uniq)
-    echo "" >> $mkfile
-    echo  "all: \\" >> $mkfile
-    for h in $all_h; do 
-	echo "sub-$h \\" >> $mkfile
-    done
-    echo "" >> $mkfile
-    
-    echo '#' for h in $all_h\; do  make  --makefile=$mkfile	\
-        --include-dir=${PKGDATADIR}				\
-        --keep-going						\
-        --environment-overrides					\
-	--directory=${tstampdir}/\$h			        \
-        --jobs=${SBUILD_JOBS}					\
-	--max-load=${SBUILD_LOAD}				\
-        TMPDIR=${SBUILD_TMPDIR}					\
-        OUTPUTDIR=${repo}			                \
-        VPATHFILE=${vpath}                                      \
-	BLACKLISTDIR=${tstampdir}/blacklist.d			\
-        RELEASE=${SBUILD_RELEASE}				\
-	DEBUG=${SBUILD_DEBUG}\; done        >> $mkfile
-
-    mkdir -p ${repo}
-    mkdir -p ${tstampdir}/blacklist.d
-    for h in $all_h; do 
-	echo "Processing $h"
-	make  --makefile=$mkfile			\
-              --include-dir=${PKGDATADIR}		\
-              --keep-going				\
-              --environment-overrides			\
-	      --directory=${tstampdir}/$h               \
-              --jobs=${SBUILD_JOBS}			\
-	      --max-load=${SBUILD_LOAD}			\
-              TMPDIR=${SBUILD_TMPDIR}			\
-              OUTPUTDIR=${repo}                         \
-              VPATHFILE=${vpath}                        \
-	      BLACKLISTDIR=${tstampdir}/blacklist.d     \
-              RELEASE=${SBUILD_RELEASE}			\
-	      DEBUG=${SBUILD_DEBUG}			\
-	      sub-$h
-    done
-
 }
 
 function run_rsync
