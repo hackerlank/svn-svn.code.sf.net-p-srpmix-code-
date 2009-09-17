@@ -1,5 +1,30 @@
 #!/bin/bash
-#!/bin/bash
+#
+########################################################################
+#
+# sop-080-hardlink-deployed --- Run hardlink on deployed source codes
+#
+# Copyright (C) 2008 Masato Taruishi
+# Copyright (C) 2009 Masatake YAMATO
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# This code is drived from srpmix.daily in srpmix.
+#
+#
+########################################################################
 
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 SOPCONFDIR=/etc/sop
@@ -18,17 +43,13 @@ fi
 
 function main
 {
-    local n
-
-    for x in ${SOP_SOURCES_DIR}/*; do
-	if test -d $x; then
-	    for y in $x/*; do
-		if test -d $y; then
-		    ( hardlink $y )
-		fi
-	    done
-	fi
-    done
+    find ${SOP_SOURCES_DIR}/*/*/ -maxdepth 1 -mtime 0 \
+	| grep -v "/\$"				      \
+	| xargs -d '\n' -n1 dirname                   \
+	| sort                                        \
+	| uniq                                        \
+	| xargs -d '\n' -n1 --verbose hardlink        
 }
 
-time main
+time main "$@"
+
