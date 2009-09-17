@@ -1,3 +1,7 @@
+2009-09-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix.daily: Return is sop is installed.
+
 2009-09-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/build-opt-rules (handle-alias): Added function to
