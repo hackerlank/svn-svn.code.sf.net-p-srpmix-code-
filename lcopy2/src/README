@@ -1,0 +1,5 @@
+lcopy: 
+lcopy-genconf:  cmdline  -> lcopy.es
+lcopy-checkout: lcopy.es -> archive
+lcopy-update:   archive  -> archive
+lcopy-envelop:  archive  -> srpm
