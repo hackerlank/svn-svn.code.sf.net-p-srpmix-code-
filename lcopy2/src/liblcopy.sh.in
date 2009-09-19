@@ -1,0 +1,80 @@
+#!/bin/bash
+# 
+#
+# liblcopy.sh: support shell functions for lcopy
+#
+# Copyright (C) 2007, 2009 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+LCOPY_VERSION=@VERSION@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libexecdir=@libexecdir@
+
+LCOPY_LIBEXECDIR=${LCOPY_LIBEXECDIR:-"${libexecdir}/lcopy"}
+LCOPY_BACKENDDIR=${LCOPY_BACKENDDIR:-"${LCOPY_LIBEXECDIR}/backends"}
+
+function lcopy_backends_list
+{
+    local backend
+    [ -d ${LCOPY_BACKENDDIR} ] && \
+	find ${LCOPY_BACKENDDIR} -perm +0100 -type f \
+	| sort \
+	| grep -v '~$' \
+	| while read backend; do echo $backend; done
+}	
+    
+
+function lcopy_backends_help
+{
+    local subcmd=$1
+    for b in $(lcopy_backends_list); do
+	lcopy_backend_help $b $subcmd
+    done
+}
+
+function lcopy_backend_call
+{
+    local vcs=$1
+    shift
+
+    local subcmd=$2
+    shift
+
+    ${LCOPY_BACKENDDIR}/$vcs $subcmd "$@"
+}
+
+function lcopy_backend_help
+{
+    local vcs=$1
+    local subcmd=$2
+
+    lcopy_backend_call $vcs help $subcmd
+}
+
+function lcopy_backend_genconf
+{
+    local vcs=$1
+    shift
+
+    lcopy_backend_call $vcs genconf "$@"
+}
+
+

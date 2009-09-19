@@ -1,0 +1,155 @@
+#!/bin/bash
+
+SUBCMDS="getconf help"
+
+
+#
+# HELP
+#
+function cvs_cmd_help_help
+{
+    cvs_cmd_help
+}
+
+function cvs_cmd_help
+{
+    local subcmd=$1
+    shift
+
+    if [ -z "$subcmd" ]; then
+	for s in $SUBCMDS; do
+	    cvs_cmd_help_$s
+	done
+    else
+	for s in $SUBCMDS; do
+	    if [ $s = $subcmd ]; then
+		cvs_cmd_help_$subcmd
+		break
+	    fi
+	done
+    fi
+}
+
+#
+# GETCONF
+# 
+function cvs_cmd_help_getconf
+{
+    echo "	" cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' MODULE 
+    echo "	" cvs -d :pserver:USER:PASSWD@HOST 'checkout|co' MODULE 
+    # 
+    echo "	" cvs -d:extssh:USER@HOST 'checkout|co'  MODULE 
+    echo "	" cvs -d :extssh:USER@HOST 'checkout|co'  MODULE 
+    echo ""
+    echo "	" 'do not use -P: -P is added automatically.'
+}
+
+function cvs_cmd_getconf
+{
+    local original=$@
+    local repo
+    local module
+
+    # 
+    # -d REPO
+    # 
+    local drepo="$1"
+    shift
+    if [ -z "${drepo}" ]; then
+	echo "broken cvs command line: too few argument" 1>&2
+	cvs_cmd_help getconf 1>&2
+	return 1
+    elif [ "-d" = "$drepo" ]; then
+	repo=$1
+	shift 1
+    elif [[ "${drepo}" == -d* ]]; then
+	repo=${drepo/-d/}
+    fi
+
+    if [ -z "${repo}" ]; then
+	echo "broken cvs command line: cannot find \"-d\" repository specification: $original" 1>&2
+	return 1
+    fi
+
+    local pserver_sepc="^:pserver:[a-zA-Z0-9]+:[a-zA-Z0-9]*@[-a-zA-Z0-9./:]+$"
+    local extssh_spec="^:extssh:[a-zA-Z0-9]+@[-a-zA-Z0-9./:]+$"
+    if  ! ( [[ "$repo" =~ "$pserver_sepc" ]] || [[ "$repo" =~ "$extssh_spec" ]] ); then
+	echo "broken cvs command line: unrecognizable repo specification: $repo" 1>&2
+	echo "expected repo specifications: " 1>&2
+	echo "	$pserver_sepc" 1>&2
+	echo "	$extssh_sepc" 1>&2
+	return 1
+    fi
+
+    #
+    # COMMAND
+    #
+    local cmd=$1
+    shift
+    if [ -z "$cmd" ]; then
+	echo "no command for checkout found" 1>&2
+	return 1
+    fi
+
+    if ! ( [ "$cmd" = "co" ] || [ "$cmd" = "checkout" ] ); then
+	echo "unknown command for checkout: $cmd" 1>&2
+	return 1
+    fi
+    
+    if [ "$1" = "-P" ] ; then
+	shift 1
+    fi
+
+    #
+    # MODULE
+    #
+    module=$1
+    local module_spec="[-_+a-zA-Z0-9]+"
+    shift
+
+    if [ -z "$module" ]; then
+	echo "NO MODULE given: $original" 1>&2
+	return 1
+    elif ! [[ "${module}" =~ "${module_spec}" ]]; then
+	echo "unacceptable module name: ${module}" 1>&2
+	echo "expected module specification: " 1>&2
+	echo "	$module_spec" 1>&2
+	return 1
+    fi
+
+    if [ "$1" = "-P" ] ; then
+	shift 1
+    fi
+
+    if [ $# -gt 0 ]; then
+	echo "too many argument: $@ IN $original" 1>&2
+	return 1
+    fi
+
+    printf "(cvs :repository \"%s\" :module \"%s\")\n" "${repo}" "${module}"
+    return 0
+}
+
+function main
+{
+    local cmd=$1
+    shift
+
+    if [ -z "$cmd" ]; then
+	echo "$0: no sub command given" 1>&2
+    fi
+
+
+    case "$cmd" in
+	"help")	    
+	    ;&
+	"genconf")  
+            cvs_cmd_"${cmd}" "$@"
+            ;;
+	*)
+    esac
+    
+    
+}
+
+main "$@"
