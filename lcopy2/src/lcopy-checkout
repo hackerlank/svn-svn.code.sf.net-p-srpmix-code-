@@ -152,11 +152,11 @@ function main
     status=$?
 
     if [ "$status" = "0" ]; then
-	transfer ${base_dir} 
-	return $?
-    else
-	return $status
+	lcopy_srpmix_plugin "${base_dir}"
+	transfer "${base_dir} "
+	status=$?
     fi
+    return $status
 }
 
 main "$@"
