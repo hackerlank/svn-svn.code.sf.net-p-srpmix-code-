@@ -38,7 +38,7 @@ function lcopy_backends_list
 	find ${LCOPY_BACKENDDIR} -perm +0100 -type f \
 	| sort \
 	| grep -v '~$' \
-	| while read backend; do echo $backend; done
+	| while read backend; do basename $backend; done
 }	
     
 
@@ -55,7 +55,7 @@ function lcopy_backend_call
     local vcs=$1
     shift
 
-    local subcmd=$2
+    local subcmd=$1
     shift
 
     ${LCOPY_BACKENDDIR}/$vcs $subcmd "$@"
@@ -77,4 +77,12 @@ function lcopy_backend_genconf
     lcopy_backend_call $vcs genconf "$@"
 }
 
+function lcopy_backend_checkout
+{
+    local vcs=$1
+    shift
 
+    lcopy_backend_call $vcs checkout "$@"
+}
+
+# PLUGIN

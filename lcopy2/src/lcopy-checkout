@@ -1,0 +1,162 @@
+#!/bin/bash
+
+source liblcopy.sh ||  exit 1
+
+
+OUTPUT_DIR=
+
+INPUT=
+LCOPY_VCS=
+LCOPY_PACKAGE=
+LCOPY_BRANCH=
+
+function print_usage
+{
+    echo "Usage: "
+    echo "$0 --help|-h"
+    echo "$0 [--output-dir=OUTPUT-DIR] FILE.lcopy"
+    echo ""
+    echo "(taking checkout configurations from stdin)"
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    (--output-dir=*)
+                OUTPUT_DIR=${1/--output-dir=}
+		if ! [ -d "$OUTPUT_DIR" ]; then
+		    echo "no such directory: $OUTPUT_DIR" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		
+		if ! [ -w "$OUTPUT_DIR" ]; then
+		    echo "cannot write to: $OUTPUT_DIR" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		    
+                ;;
+	    --*)
+		echo "unknown option: $1" 1>&2
+		print_usage 1>&2
+		exit 1
+		;;
+	    *)
+		INPUT=$1
+		shift
+
+		if ! [ -r "$INPUT" ]; then
+		    echo "cannot read: $INPUT" 1>&2
+		    exit 1
+		fi
+		break
+		;;
+	esac
+	shift
+    done
+
+    if [ -z "$INPUT" ]; then
+	echo "No lcopy file given" 1>&2
+	print_usage 1>&2
+	exit 1
+    fi
+
+    if [ "$#" -gt 0 ]; then
+	echo "Too many arguments: $@" 1>&2
+	print_usage 1>&2
+	exit 1
+    fi
+}
+
+function load_input
+{
+    source "$INPUT"
+
+    if [ -z "$LCOPY_VCS" ]; then
+	echo "No LCOPY_VCS in $INPUT" 2>&1
+	exit 1
+    else
+	local vcs_found
+	for v in $(lcopy_backends_list); do
+	    if [ "$LCOPY_VCS" = "$v" ] ;then
+		vcs_found=yes
+		break
+	    fi
+	done
+	if [ -z "$vcs_found" ]; then
+	    echo "unsupported vcs: $LCOPY_VCS" 1>&2
+	    exit 1
+	fi
+    fi
+
+    
+    if [ -z "$LCOPY_PACKAGE" ]; then
+	echo "No LCOPY_PACKAGE in $INPUT" 2>&1
+	exit 1
+    fi
+    
+    if [ -z "$LCOPY_BRANCH" ]; then
+	echo "No LCOPY_BRANCH in $INPUT" 2>&1
+	exit 1
+    fi
+}
+
+function transfer
+{
+    local from=$1
+    local to="${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}"
+    mkdir -p "${to}"
+    mv "${from}" "${to}/"
+
+    return $?
+}
+
+
+function main
+{
+    local my_tmpdir
+    local base_dir
+    local checkout_dir
+    local status
+
+    parse_arguments "$@"
+    load_input $INPUT
+
+    if [ -d "${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH}" ]; then
+	echo "${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH} already exits" 1>&2
+	return 1
+    fi
+
+    
+    my_tmpdir=`mktemp -d`
+    trap "chmod -R u+w $my_tmpdir; /bin/rm -rf $my_tmpdir" 0    
+
+    base_dir=${my_tmpdir}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH}
+    mkdir -p "${base_dir}"
+ 
+    echo $LCOPY_VERSION > ${base_dir}/LCOPY
+    cp $INPUT ${base_dir}/checkout.lcopy
+    checkout_dir=${base_dir}/pre-build
+    (cd ${base_dir}; ln -s ./pre-build ./archives)
+    mkdir ${base_dir}/plugins
+    (cd ${base_dir}; ln -s ./plugins/vanilla ./vanilla)
+    
+    #STATUS
+    lcopy_backend_checkout "$LCOPY_VCS" "$INPUT" "${checkout_dir}"
+    status=$?
+
+    if [ "$status" = "0" ]; then
+	transfer ${base_dir} 
+	return $?
+    else
+	return $status
+    fi
+}
+
+main "$@"

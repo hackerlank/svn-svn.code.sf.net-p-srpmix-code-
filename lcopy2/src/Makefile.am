@@ -7,6 +7,7 @@ CLEANFILES = $(bin_SCRIPTS)
 dist_bin_SCRIPTS =     \
 	\
         lcopy-genconf  \
+        lcopy-checkout \
 	\
         $(NULL)
 

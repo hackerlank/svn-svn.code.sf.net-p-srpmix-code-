@@ -1,27 +1,40 @@
 #!/bin/bash
 
-source liblcopy.sh &&  exit 1
-
-CONF_BRANCH=
-CONF_PACKAGE=
+source liblcopy.sh ||  exit 1
 
 
 function print_usage
 {
     echo "Usage: "
     echo "$0 --help|-h"
-    echo "$0 PACKAGE:BRANCH VCS-COMMANDS..."
+    echo "$0 [--output-dir=OUTPUT-DIR] PACKAGE:BRANCH VCS-COMMANDS..."
     echo ""
 
     echo "VCS-COMMANDS format:"
-    lcopy_backends_help checkout
+    lcopy_backends_help genconf
+}
+
+function print_conf
+{
+    local vcs="$1"
+    local package="$2"
+    local branch="$3"
+
+    printf "LCOPY_CF_VERSION=\"%s\"\n" $LCOPY_VERSION
+    printf "LCOPY_VCS=\"%s\"\n" $vcs
+    printf "LCOPY_PACKAGE=\"%s\"\n" $package
+    printf "LCOPY_BRANCH=\"%s\"\n" $branch
 }
 
 function main
 {
+    local original=$@
+    local output_dir
     local package_branch
+    local package
+    local branch
     local vcs
-    local conf
+    local vcs_args
     local status
 
 
@@ -31,7 +44,14 @@ function main
 		print_usage
 		exit 0
 		;;
-	    ;;
+	    (--output-dir=*)
+                output_dir=${1/--output-dir=}
+		if ! [ -d "$output_dir" ]; then
+		    echo "no such directory: $output_dir" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+                ;;
 	    --*)
 		echo "unknown option: $1" 1>&2
 		print_usage 1>&2
@@ -47,36 +67,63 @@ function main
     done
 
     if [ -z "$package_branch" ]; then
-	echo "given no package:branch: $@" 1>&2
+	echo "given no package:branch: $original" 1>&2
 	print_usage 1>&2
 	exit 1
     fi
     
-    if ! [[ "${package_branch}" =~ "([-a-zA-Z0-9]+)(:([-a-zA-Z0-9]+))?" ]]; then
-	echo "broken package:branch specification: ${package:branch}" 1>&2
+    if ! [[ "${package_branch}" =~ "^([-a-zA-Z0-9]+)(:([-a-zA-Z0-9]+))?$" ]]; then
+	echo "broken package:branch specification: ${package_branch}" 1>&2
 	print_usage 1>&2
 	exit 1
     else
-	CONF_PACKAGE=${BASH_REMATCH[1]}
-	CONF_BRANCH=${BASH_REMATCH[2]}
+	package=${BASH_REMATCH[1]}
+	branch=${BASH_REMATCH[3]}
     fi
     
+    if [ -z "${branch}" ]; then
+	branch=trunk
+    fi
+
     if [ $# -eq 0 ]; then
-	echo "given no vcs command: $@" 1>&2
+	echo "given no vcs command: $original" 1>&2
 	print_usage 1>&2
 	exit 1
     fi
 
     vcs=$1
     shift
+    local vcs_found
+    for v in $(lcopy_backends_list); do
+	if [ "$vcs" = "$v" ] ;then
+	    vcs_found=yes
+	    break
+	fi
+    done
+    if [ -z "$vcs_found" ]; then
+	echo "unsupported vcs: $vcs" 1>&2
+	print_usage 1>&2
+	exit 1
+    fi
 
-    conf=$(lcopy_backend_genconf $vcs "$@")
+    local output_file=/dev/stdout
+    if [ -n "$output_dir" ]; then
+	my_tmpdir=`mktemp -d`
+	trap "chmod -R u+w $my_tmpdir; /bin/rm -rf $my_tmpdir" 0    
+	output_file=$my_tmpdir/lcopy
+	#output_file=${output_dir}/"${package}:${branch}".es
+    fi
+
+    echo '# -*- shell-script -*-' > ${output_file}
+    lcopy_backend_genconf $vcs "$@" >> ${output_file}
     status=$?
 
     if [ $status = 0 ]; then
-	printf "(lcopy-checkout :package \"%s\" :branch \"%s\" :command %s)\n" \
-	    "$CONF_PACKAGE" "$CONF_BRANCH" "$conf"
-	return 0
+	print_conf "$vcs" "$package" "$branch" >> ${output_file}
+	if [ -n "$output_dir" ]; then
+	    mv ${output_file} ${output_dir}/"${package}:${branch}.lcopy"
+	fi
+	return $?
     else
 	return $status
     fi
