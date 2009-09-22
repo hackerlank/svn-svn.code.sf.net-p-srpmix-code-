@@ -58,7 +58,11 @@ function parse_arguments
     fi
     
     PKG_NAME=$1
-    OUTPUT_DIR=$2
+    OUTPUT_DIR=$2/dir-pkg/$(srpmix_srchash $PKG_NAME)
+    if ! mkdir -p ${OUTPUT_DIR}; then
+	echo "failed to craete mkdir: ${OUTPUT_DIR}" 1>&2
+	exit 1
+    fi
 }
 
 

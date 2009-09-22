@@ -242,13 +242,11 @@ function dir_pkg_build
     local p=$(srpmix_srchash $pkg_name)
     if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
 	if ! dirpkg_installed_p $TARGET_SRPM; then
-	    mkdir -p $OUTPUT_DIR/dir-pkg/$p
-	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR/dir-pkg/$p
+	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR
 	fi
     else
 	if ! dirpkg_created_p $TARGET_SRPM $OUTPUT_DIR; then
-	    mkdir -p $OUTPUT_DIR/dir-pkg/$p
-	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR/dir-pkg/$p
+	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR
 	fi
     fi
     return 0

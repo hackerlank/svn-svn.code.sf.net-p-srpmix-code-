@@ -1,5 +1,9 @@
 2009-09-22  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix: Don't create dir-pkg/srchash directory in this command.
+
+	* src/srpmix-dir-pkg: Create dir-pkg/srchash directory in this command.
+
 	* src/libsrpmix.sh.in (srpmix_archives_name): Renamed from archives_name.
 
 	* src/srpmix-build: Ditto.
