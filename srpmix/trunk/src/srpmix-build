@@ -171,7 +171,7 @@ function parse_arguments
     fi
 
     if test -n "${TARGET_SWRF}"; then
-	local archives_swrf=$(archives_name ${TARGET_SWRF})
+	local archives_swrf=$(srpmix_archives_name ${TARGET_SWRF})
         srpmix_cp ${TARGET_SWRF} ${MY_TMPDIR}/
 
 	# Plugins like vanilla may require the archives package, too.

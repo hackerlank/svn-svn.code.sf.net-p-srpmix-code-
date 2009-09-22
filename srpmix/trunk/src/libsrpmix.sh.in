@@ -575,6 +575,7 @@ function srpmix_create_swrf
 
 }
 
+# TODO srpmix_ prefix
 function is_enabled_plugin
 {
     local p
@@ -598,6 +599,7 @@ function is_enabled_plugin
     return 1
 }
 
+# TODO srpmix_ prefix
 function list_plugin_candidates
 {
     local p
@@ -612,6 +614,7 @@ function list_plugin_candidates
     done
 }
 
+# TODO srpmix_ prefix
 function list_plugins
 {
     list_plugin_candidates | sort -n | while read base plugin
@@ -620,7 +623,7 @@ function list_plugins
     done
 }
 
-function archives_name
+function srpmix_archives_name
 {
     echo $1 | sed -e "s/-srpmix-${SRPMIX_PKG_PATTERN}/-srpmix-archives-${SRPMIX_PKG_VERSION}/"
 }

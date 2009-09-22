@@ -308,7 +308,7 @@ Name: ${plugin_package_name}
 Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
 Source0: $(basename $target_swrf)
-Source1: $(archives_name $(basename $target_swrf))
+Source1: $(srpmix_archives_name $(basename $target_swrf))
 Autoreq: 0
 BuildRequires: $BUILD_REQUIRES
 Buildarch: $arch
@@ -454,7 +454,7 @@ function wrap_srpm
 
     srpmix_cp $target $TMPDIR/SOURCES/
     if test x"$OPT_TYPE" = xplugin; then
-	srpmix_cp $(archives_name $target) $TMPDIR/SOURCES/
+	srpmix_cp $(srpmix_archives_name $target) $TMPDIR/SOURCES/
     fi
     
     $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
@@ -463,7 +463,7 @@ function wrap_srpm
 
     rm -f $TMPDIR/SOURCES/`basename $target`
     if test x"$OPT_TYPE" = xplugin; then
-	rm -f $TMPDIR/SOURCES/$(basename $(archives_name $target))
+	rm -f $TMPDIR/SOURCES/$(basename $(srpmix_archives_name $target))
     fi
     echo "$es_name"
 

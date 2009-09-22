@@ -1,3 +1,11 @@
+2009-09-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/libsrpmix.sh.in (srpmix_archives_name): Renamed from archives_name.
+
+	* src/srpmix-build: Ditto.
+
+	* src/srpmix-wrap: Ditto.
+
 2009-09-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix.daily: Return is sop is installed.
