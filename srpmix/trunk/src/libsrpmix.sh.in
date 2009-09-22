@@ -174,7 +174,7 @@ function srpmix_swrfdir
 function srpmix_srchash
 {
     local p=$1
-    local b=$(basename "$p)
+    local b=$(basename "$p")
     echo ${b:0:1}
 #    echo $1 | sed -e 's/\([a-zA-Z0-9]\).*/\1/'
 }
