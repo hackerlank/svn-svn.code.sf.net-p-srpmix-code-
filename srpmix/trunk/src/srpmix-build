@@ -281,10 +281,9 @@ function main
     esac
 
     for p in $files; do
-	p0=$(basename $p)
-	p00=`srpmix_srchash $p0`
-	mkdir -p "${OUTPUT_DIR}/${p00}"
-	mv $p "${OUTPUT_DIR}/${p00}/"
+	p0=$(srpmix_srchash $p)
+	mkdir -p "${OUTPUT_DIR}/${p0}"
+	mv $p "${OUTPUT_DIR}/${p0}/"
     done
 
     # Notify again

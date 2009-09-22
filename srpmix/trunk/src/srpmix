@@ -213,8 +213,7 @@ function dirpkg_created_p
 {
     local srpm=$1
     local output_dir=$2
-    local b=$(basename $srpm)
-    local p=$(srpmix_srchash $b)
+    local p=$(srpmix_srchash $srpm)
     local f=${output_dir}/dir-pkg/$p/$(srpmix_dirpkg_name $srpm)-${SRPMIX_PKG_MAJOR_VERSION}*.rpm
 
     local r
@@ -305,11 +304,10 @@ function main
     esac
     if test "x$OUTPUT_DIR" != "x$MY_TMPDIR"; then
         for p in $outputs; do
-            p0=$(basename $p)
-            p00=`srpmix_srchash $p0`
-            mkdir -p "${OUTPUT_DIR}/${p00}"
+            p0=$(srpmix_srchash $p)
+            mkdir -p "${OUTPUT_DIR}/${p0}"
 	    # TODO: Parallel dir-pkg building  may conflicts
-            mv $p "${OUTPUT_DIR}/${p00}/"
+            mv $p "${OUTPUT_DIR}/${p0}/"
         done
     fi
     status=$?

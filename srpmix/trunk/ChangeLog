@@ -1,3 +1,12 @@
+2009-09-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (dirpkg_created_p): Dont' use basename.
+	(main): Ditto.
+	
+	* src/srpmix-build (main): Don't use basename.
+
+	* src/libsrpmix.sh.in (srpmix_srchash): Use basename.
+
 2009-09-22  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix: Don't create dir-pkg/srchash directory in this command.
