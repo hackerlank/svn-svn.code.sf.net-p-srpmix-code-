@@ -43,11 +43,11 @@ fi
 
 function main
 {
-    find ${SOP_SOURCES_DIR}/*/*/ -maxdepth 1 -mtime 0 \
-	| grep -v "/\$"				      \
-	| xargs -d '\n' -n1 dirname                   \
-	| sort                                        \
-	| uniq                                        \
+    find ${SOP_SOURCES_DIR}/*/*/ -maxdepth 1 -mtime 0 -type d	\
+	| grep -v "/\$"						\
+	| xargs -d '\n' -n1 dirname				\
+	| sort							\
+	| uniq							\
 	| xargs -d '\n' -n1 --verbose hardlink        
 }
 
