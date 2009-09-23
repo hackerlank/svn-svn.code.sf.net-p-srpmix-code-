@@ -3,7 +3,7 @@ Name: lcopy
 Version: @PACKAGE_VERSION@
 Release: 0
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
-Requires: cvs
+Requires: srpmix cvs
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root
