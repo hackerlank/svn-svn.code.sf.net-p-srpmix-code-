@@ -152,8 +152,8 @@ function cvs_cmd_checkout
     
     
     ( 
-	cd $(dirname ${output_dir})
-	cvs -d"${CVS_REPOSITORY}" checkout -P -d $(basename "${output_dir}") "${CVS_MODULE}"
+	cd ${output_dir}
+	cvs -d"${CVS_REPOSITORY}" checkout -P "${CVS_MODULE}"
     )
 
     return $?

@@ -141,8 +141,9 @@ function main
     echo $LCOPY_VERSION > ${base_dir}/LCOPY
     cp $INPUT ${base_dir}/checkout.lcopy
     checkout_dir=${base_dir}/pre-build
+    mkdir -p "${checkout_dir}"
     (cd ${base_dir}; ln -s ./pre-build ./archives)
-    mkdir ${base_dir}/plugins
+    mkdir -p ${base_dir}/plugins
     (cd ${base_dir}; ln -s ./plugins/vanilla ./vanilla)
     
     #STATUS
