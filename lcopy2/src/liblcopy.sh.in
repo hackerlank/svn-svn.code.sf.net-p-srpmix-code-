@@ -85,6 +85,13 @@ function lcopy_backend_checkout
     lcopy_backend_call $vcs checkout "$@"
 }
 
+function lcopy_backend_update
+{
+    local vcs=$1
+    shift
+    lcopy_backend_call $vcs update "$@"
+}
+
 function lcopy_srpmix_plugin
 {
     local base_dir=$1
@@ -93,3 +100,83 @@ function lcopy_srpmix_plugin
 	srpmix-plugin  ${base_dir}
     fi
 }
+
+function lcopy_verify_directory
+{
+    local dir=$1
+
+    if ! [ -d "$dir" ]; then
+	echo "cannot read: $dir" 1>&2
+	return 1
+    fi
+
+    if ! [ -f "$dir"/LCOPY ]; then
+	echo "cannot find LCOPY file under $dir" 1>&2
+	return 1
+    fi
+    if ! [ -w "$dir"/STATUS ]; then
+	echo "cannot write to STATUS file under $dir" 1>&2
+	return 1
+    fi
+    if ! [ -d "$dir"/pre-build ]; then
+	echo "cannot find pre-build directory under $dir" 1>&2
+	return 1
+    fi
+    if ! [ -w "$dir"/pre-build ]; then
+	echo "cannot write pre-build directory under $dir" 1>&2
+	return 1
+    fi
+
+    if ! [ -r "$dir"/checkout.lcopy ]; then
+	echo "cannot read checkout.lcopy file under $dir" 1>&2
+	return 1
+    fi
+
+
+    return 0
+}
+
+function lcopy_relative_path
+{
+    local from=${1:1}
+    local to=${2:1}
+
+    local froma
+    local toa
+    IFS=/ read -a froma <<< "$from"
+    IFS=/ read -a toa <<< "$to"
+    
+    local froml=$(( ${#froma[@]} - 1 ))
+    local tol="${#toa[@]}"
+    local min_len
+    if [ "$froml" -gt "$tol" ]; then
+	min_len="$tol"
+    else
+	min_len="$froml"
+    fi
+
+    local i
+    local common_index
+    for (( i = 0 ; i < min_len ; i++ )); do
+	if ! [ "${froma[$i]}" = "${toa[$i]}" ]; then
+	    break
+	fi
+    done
+    common_index=$i
+    
+    local relative_path=""
+    for (( i = common_index ; i < froml ; i++ )); do
+	relative_path=../${relative_path}
+    done
+    if [ -z "$relative_path" ]; then
+	relative_path=./
+    fi
+
+    for (( i = common_index ; i < tol ; i++ )); do
+	relative_path="${relative_path}${toa[$i]}/"
+    done
+    
+    echo ${relative_path/%\/}
+}
+
+

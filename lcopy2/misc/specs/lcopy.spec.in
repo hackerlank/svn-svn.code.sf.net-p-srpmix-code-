@@ -33,6 +33,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %{_bindir}/lcopy-genconf
 %{_bindir}/lcopy-checkout
+%{_bindir}/lcopy-update
+%{_bindir}/lcopy-envelop
+%{_bindir}/liblcopy.sh
 %{_libexecdir}/lcopy/backends/*
 
 %changelog

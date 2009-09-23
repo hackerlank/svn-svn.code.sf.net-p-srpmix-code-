@@ -159,6 +159,33 @@ function cvs_cmd_checkout
     return $?
 }
 
+#
+# UPDATE
+#
+function cvs_cmd_help_checkout
+{
+    echo "	" "cvs" "FILE.lcopy" "UPDATE-DIR"
+}
+
+function cvs_cmd_checkout
+{
+    local dir=$1
+    local input=$2
+    local update_dir=$3
+
+    cd "${update_dir}"
+
+    if cvs update -d | tee /tmp/cvs-update-$$; then
+	if grep "^[MU] "; then
+	    return 1
+	else
+	    return 0
+	fi
+    else
+	return 2
+    fi
+}
+
 function main
 {
     local cmd=$1

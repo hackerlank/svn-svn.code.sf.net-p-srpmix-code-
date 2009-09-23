@@ -8,6 +8,8 @@ dist_bin_SCRIPTS =     \
 	\
         lcopy-genconf  \
         lcopy-checkout \
+        lcopy-update   \
+        lcopy-envelop  \
 	\
         $(NULL)
 
