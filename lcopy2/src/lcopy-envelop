@@ -114,6 +114,23 @@ function package_full_name
 
     echo $(srpmix_build_wrapped_name "$package" "lcopy" "$branch")
 }
+
+function pkg_created_p
+{
+    local package=$1
+    local branch=$2
+    local output_dir=$3
+
+    local p=$(srpmix_srchash $package)
+    local f=${output_dir}/$p/$(package_full_name $package $branch)-${LCOPY_ENVELOP_VERSION}-${RELEASE}.noarch.rpm
+
+    local r
+    test -f $f
+    r=$?
+
+    return $r
+}
+
 function genspec
 {
     local root_dir=$1
@@ -231,17 +248,20 @@ function main
 	fi
     fi
     
-    local tmp_dir=`mktemp -d`
-    trap "chmod -R u+w $tmp_dir; /bin/rm -rf $tmp_dir" 0    
-    
-    local spec_file=$(package_full_name "$LCOPY_PACKAGE" "$LCOPY_BRANCH").spec
-    genspec "${ROOT_DIR}" "${LCOPY_PACKAGE}" "${LCOPY_BRANCH}" > ${tmp_dir}/$spec_file
-    if ! build ${tmp_dir}/$spec_file ${tmp_dir}; then
-	echo "### failed in rpmbuild" 1>&2
-	cat ${tmp_dir}/$spec_file 1>&2
-	exit 1
-    fi
 
+    if ! pkg_created_p "$LCOPY_PACKAGE" "$LCOPY_BRANCH" "$OUTPUT_DIR"; then
+	local tmp_dir=`mktemp -d`
+	trap "chmod -R u+w $tmp_dir; /bin/rm -rf $tmp_dir" 0    
+    
+	local spec_file=$(package_full_name "$LCOPY_PACKAGE" "$LCOPY_BRANCH").spec
+	genspec "${ROOT_DIR}" "${LCOPY_PACKAGE}" "${LCOPY_BRANCH}" > ${tmp_dir}/$spec_file
+	if ! build ${tmp_dir}/$spec_file ${tmp_dir}; then
+	    echo "### failed in rpmbuild" 1>&2
+	    cat ${tmp_dir}/$spec_file 1>&2
+	    exit 1
+	fi
+    fi
+    
     transfer $tmp_dir/RPMS/noarch/*.rpm ${OUTPUT_DIR}
 }
 

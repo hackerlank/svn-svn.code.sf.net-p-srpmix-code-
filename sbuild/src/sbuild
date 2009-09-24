@@ -138,7 +138,7 @@ function parse_arguments
 }
 
 
-function run_make
+function run_builder
 {
     local cf=$1
     local name=$2
@@ -182,8 +182,10 @@ function run_rsync
 	return 0
     fi
 
-    mkdir -p ${SOP_CRADLES_DIR}/${name}/blacklist
-    rsync -a ${SBUILD_TSTAMPDIR}/${name}/blacklist.d/ ${SOP_CRADLES_DIR}/${name}/blacklist
+    if [ -n ${SBUILD_TSTAMPDIR} ] && [ -d "${SBUILD_TSTAMPDIR}/${name}/blacklist.d/" ]; then
+	mkdir -p ${SOP_CRADLES_DIR}/${name}/blacklist
+	rsync -a ${SBUILD_TSTAMPDIR}/${name}/blacklist.d/ ${SOP_CRADLES_DIR}/${name}/blacklist
+    fi
 }
 
 function run_creterepo
@@ -395,7 +397,7 @@ function main
 
 	    if test -z "$CREATEREPO_ONLY" \
 		&& test -z "$SHORT_CUT"; then
-		( run_make $cf $name )
+		( run_builder $cf $name )
 		( run_rsync $cf $name )
 	    fi
 

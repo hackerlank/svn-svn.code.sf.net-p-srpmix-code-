@@ -1,0 +1,35 @@
+#!/bin/bash
+
+CF=$1
+NAME=$2
+SBUILD_CONF=$3
+SOP_CONF=$4
+DATE=$5
+
+
+
+source ${SBUILD_CONF}
+source ${SOP_CONF}
+
+function main
+{
+    local cf=$1
+    local name=$2
+
+    local cradle_dir=${SOP_CRADLES_DIR}/${name}
+    local repo=${cradle_dir}/repo
+    local mirror=${cradle_dir}/mirror
+    local log=${cradle_dir}/log/envelop-${DATE}.log
+    local checkout_lcopy
+    
+    for d in ${mirror}/*/*/*; do
+	if [ -d "$d" ]; then
+	    checkout_lcopy="${d}/checkout.lcopy"
+	    if [ -r "${checkout_lcopy}" ]; then
+		echo ${checkout_lcopy} >> ${log}
+		lcopy-envelop --output-dir=$repo "$d" "${checkout_lcopy}" >> ${log} 2>&1
+	    fi
+	fi
+    done 
+}
+time main "$CF" "$NAME"
