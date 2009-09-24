@@ -37,6 +37,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lcopy-envelop
 %{_bindir}/liblcopy.sh
 %{_libexecdir}/lcopy/backends/*
+%{_sysconfdir}/lcopy
 
 %changelog
 
