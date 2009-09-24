@@ -7,7 +7,7 @@ function print_usage
 {
     echo "Usage: "
     echo "$0 --help|-h"
-    echo "$0 [--output-dir=OUTPUT-DIR] PACKAGE:BRANCH VCS-COMMANDS..."
+    echo "$0 [--output-dir=OUTPUT-DIR] PACKAGE,BRANCH VCS-COMMANDS..."
     echo ""
 
     echo "VCS-COMMANDS format:"
@@ -67,13 +67,13 @@ function main
     done
 
     if [ -z "$package_branch" ]; then
-	echo "given no package:branch: $original" 1>&2
+	echo "given no package,branch: $original" 1>&2
 	print_usage 1>&2
 	exit 1
     fi
     
-    if ! [[ "${package_branch}" =~ "^([-a-zA-Z0-9]+)(:([-a-zA-Z0-9]+))?$" ]]; then
-	echo "broken package:branch specification: ${package_branch}" 1>&2
+    if ! [[ "${package_branch}" =~ "^([-a-zA-Z0-9]+)(,([-a-zA-Z0-9]+))?$" ]]; then
+	echo "broken package,branch specification: ${package_branch}" 1>&2
 	print_usage 1>&2
 	exit 1
     else
@@ -111,7 +111,7 @@ function main
 	my_tmpdir=`mktemp -d`
 	trap "chmod -R u+w $my_tmpdir; /bin/rm -rf $my_tmpdir" 0    
 	output_file=$my_tmpdir/lcopy
-	#output_file=${output_dir}/"${package}:${branch}".es
+	#output_file=${output_dir}/"${package},${branch}".es
     fi
 
     echo '# -*- shell-script -*-' > ${output_file}
@@ -121,7 +121,7 @@ function main
     if [ $status = 0 ]; then
 	print_conf "$vcs" "$package" "$branch" >> ${output_file}
 	if [ -n "$output_dir" ]; then
-	    mv ${output_file} ${output_dir}/"${package}:${branch}.lcopy"
+	    mv ${output_file} ${output_dir}/"${package},${branch}.lcopy"
 	fi
 	return $?
     else

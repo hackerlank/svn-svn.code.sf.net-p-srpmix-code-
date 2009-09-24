@@ -1,6 +1,6 @@
 confddir = $(sysconfdir)/lcopy/conf.d
 dist_confd_DATA = \
 	\
-	ddskk\:trunk.lcopy \
+	ddskk,trunk.lcopy \
 	\
 	$(NULL)

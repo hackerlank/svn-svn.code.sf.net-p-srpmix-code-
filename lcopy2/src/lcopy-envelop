@@ -151,7 +151,7 @@ function genspec
     local relative=$(lcopy_relative_path "$from" "$to")
 
     cat <<EOF
-Summary: Link for $package:$branch source code updated by lcopy
+Summary: Link for $package,$branch source code updated by lcopy
 Name: ${full_name}
 Version: ${LCOPY_ENVELOP_VERSION}
 Release: ${RELEASE}
@@ -169,7 +169,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 %define __os_install_post true
 
 %description
-Link for $package:$branch source code updated by lcopy
+Link for $package,$branch source code updated by lcopy
 
 %prep
 
