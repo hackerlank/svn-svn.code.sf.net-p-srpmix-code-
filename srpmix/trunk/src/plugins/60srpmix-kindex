@@ -142,7 +142,7 @@ function main
     srpmix_verify_commands make etags ctags cscope
 
 
-    if !grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \
+    if ! grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \
 	$SPEC > /dev/null 2>&1; then
 	return 0
     fi
