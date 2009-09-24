@@ -114,7 +114,9 @@ function main
 
     if [ -n "$ROOT_DIR" ]; then
 	for d in "$ROOT_DIR"/[a-zA-Z0-9]/*/*; do
-	    "$0" "$d"
+	    if [ -d "$d" ] && [ -w "$d" ]; then
+		"$0" "$d"
+	    fi
 	done
     else
 	update "$BASE_DIR"

@@ -1,0 +1,11 @@
+#!/bin/bash
+METHOD=lcopy-sys
+ENABLE=yes
+GC=no
+BACKUP=no
+BUILD=yes
+TYPE=lcopy
+DIST_MAPPING=no
+INSTALL=yes
+
+LCOPY_SYS_CONF_DIR=/etc/lcopy/conf.d

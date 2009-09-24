@@ -5,27 +5,27 @@ log=$2
 source $cf
 
 if test -z "$WGET_PROTOCOL"; then
-    echo "No WGET_PROTOCOL in $1" 1>&2
+    echo "No WGET_PROTOCOL in $cf" 1>&2
     exit 1
 fi
 
 if test -z "$WGET_HOST"; then
-    echo "No WGET_HOST in $1" 1>&2
+    echo "No WGET_HOST in $cf" 1>&2
     exit 1
 fi
 
 if test -z "$WGET_PATH"; then
-    echo "No WGET_PATH in $1" 1>&2
+    echo "No WGET_PATH in $cf" 1>&2
     exit 1
 fi
 
 if test -z "$WGET_PATTERN"; then
-    echo "No WGET_PATTERN in $1" 1>&2
+    echo "No WGET_PATTERN in $cf" 1>&2
     exit 1
 fi
 
 if test -z "$WGET_CUT_DIRS"; then
-    echo "No WGET_CUT_DIRS in $1" 1>&2
+    echo "No WGET_CUT_DIRS in $cf" 1>&2
     exit 1
 fi
 

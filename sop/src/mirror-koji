@@ -5,12 +5,12 @@ log=$2
 source $cf
 
 if test -z "$KOJI_HOST"; then
-    echo "No KOJI_HOST in $1" 1>&2
+    echo "No KOJI_HOST in $cf" 1>&2
     exit 1
 fi
 
 if test -z "$KOJI_DIST"; then
-    echo "No KOJI_DIST in $1" 1>&2
+    echo "No KOJI_DIST in $cf" 1>&2
     exit 1
 fi
 

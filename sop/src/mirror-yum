@@ -5,12 +5,12 @@ log=$2
 source $cf
 
 if test -z "$YUM_REPOFILE"; then
-    echo "No YUM_REPOFILE in $1" 1>&2
+    echo "No YUM_REPOFILE in $cf" 1>&2
     exit 1
 fi
 
 if test -z "$YUM_REPONAME"; then
-    echo "No YUM_REPONAME in $1" 1>&2
+    echo "No YUM_REPONAME in $cf" 1>&2
     exit 1
 fi
 

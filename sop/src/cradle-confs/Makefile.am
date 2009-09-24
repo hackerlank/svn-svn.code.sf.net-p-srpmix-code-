@@ -10,4 +10,6 @@ dist_cradleconf_DATA =				\
 	\
 	download.opensuse.org                   \
 	\
+	lcopy
+	\
 	$(NULL)

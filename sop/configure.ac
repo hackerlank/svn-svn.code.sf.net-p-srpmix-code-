@@ -39,6 +39,11 @@ if test "x$YUMDOWNLOADER" = "x"; then
    AC_MSG_ERROR(yumdownloader not found); 
 fi
 
+AC_CHECK_PROGS([LCOPY_UPDATE],[lcopy-update])
+if test "x$LCOPY_UPDATE" = "x"; then 
+   AC_MSG_ERROR(lcopu-update not found); 
+fi
+
 
 AC_RPM_RELEASE
 

@@ -1,0 +1,20 @@
+#!/bin/bash
+cf=$1
+log=$2
+
+source $cf
+
+if ! test -z "$LCOPY_SYS_CONF_DIR"; then
+    echo "No LCOPY_SYS_CONF_DIR in $cf" 1>&2
+    exit 1
+fi
+
+if ! test -d "$LCOPY_SYS_CONF_DIR"; then
+    return 0
+fi
+
+lcopy-update --root-dir=$(pwd)
+
+for c in "${LCOPY_SYS_CONF_DIR}"/*.lcopy; do
+    lcopy-checkout --no-error-message-if-existing $c 
+done
