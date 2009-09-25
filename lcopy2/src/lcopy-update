@@ -96,7 +96,7 @@ function update
 	fi
     fi
  
-    lcopy_backend_update ${vcs} ${lcopy_file} ${update_dir}
+    lcopy_backend_update ${LCOPY_VCS} ${lcopy_file} ${update_dir}
     status=$?
     echo $status > ${base_dir}/STATUS
 
