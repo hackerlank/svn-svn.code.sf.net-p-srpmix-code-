@@ -166,7 +166,7 @@ function main
 
     if [ "$status" = "0" ]; then
 	lcopy_srpmix_plugin "${base_dir}"
-	if transfer "${base_dir} "; then
+	if transfer "${base_dir}"; then
 	    status=0
 	else
 	    status=$ERROR
