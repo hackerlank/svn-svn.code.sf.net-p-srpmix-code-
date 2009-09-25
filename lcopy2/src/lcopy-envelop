@@ -145,7 +145,6 @@ function genspec
     local linkin_mark="^"
     local link="${linkin_mark}lcopy-${branch}"
     local hash=$(srpmix_srchash $package)
-
     local from=${LINKIN_ROOT_DIR}/${hash}/"${package}"/"${link}"
     local to=${root_dir}/${hash}/"${package}"/"${branch}"
     local relative=$(lcopy_relative_path "$from" "$to")

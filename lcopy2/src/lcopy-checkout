@@ -163,6 +163,7 @@ function main
     #STATUS
     lcopy_backend_checkout "$LCOPY_VCS" "$INPUT" "${checkout_dir}"
     status=$?
+    echo $status > ${base_dir}/STATUS
 
     if [ "$status" = "0" ]; then
 	lcopy_srpmix_plugin "${base_dir}"
