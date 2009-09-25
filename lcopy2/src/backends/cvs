@@ -162,12 +162,12 @@ function cvs_cmd_checkout
 #
 # UPDATE
 #
-function cvs_cmd_help_checkout
+function cvs_cmd_help_update
 {
     echo "	" "cvs" "FILE.lcopy" "UPDATE-DIR"
 }
 
-function cvs_cmd_checkout
+function cvs_cmd_update
 {
     local dir=$1
     local input=$2
@@ -176,7 +176,7 @@ function cvs_cmd_checkout
     cd "${update_dir}"
 
     if cvs update -d | tee /tmp/cvs-update-$$; then
-	if grep "^[MU] "; then
+	if grep "^[MU] /tmp/cvs-update-$$ > /dev/null"; then
 	    return 1
 	else
 	    return 0
