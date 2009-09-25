@@ -1,3 +1,7 @@
+2009-09-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in (plugin-vanilla): Added Group field.
+
 2009-09-24  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 3.109.0.
