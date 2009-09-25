@@ -4,7 +4,7 @@ log=$2
 
 source $cf
 
-if ! test -z "$LCOPY_SYS_CONF_DIR"; then
+if test -z "$LCOPY_SYS_CONF_DIR"; then
     echo "No LCOPY_SYS_CONF_DIR in $cf" 1>&2
     exit 1
 fi
