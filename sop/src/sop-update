@@ -45,6 +45,14 @@ function run_yum
     return $?
 }
 
+function erase_batch
+{
+    local file=$1
+
+    if [ -s ${file} ]; then
+	LANG=C sort ${file}   | uniq | xargs rpm -e
+    fi
+}
 function run_gc
 {
     set -x
@@ -143,10 +151,9 @@ function run_gc
 	rpm -e ${dist_cadr}
     done
 
-    LANG=C sort ${efiles_plugin}   | uniq | xargs rpm -e
-    LANG=C sort ${efiles_plugins}  | uniq | xargs rpm -e
-    LANG=C sort ${efiles_archives} | uniq | xargs rpm -e
-    LANG=C sort ${efiles_bases}    | uniq | xargs rpm -e
+    for x in ${efiles_plugin} ${efiles_plugins} ${efiles_archives} ${efiles_bases}; do
+	erase_batch "${x}"
+    done
 
     tail -n +2 ${packages} | tr ' ' '-' | while read n; do
 	rpm -e "$n"
