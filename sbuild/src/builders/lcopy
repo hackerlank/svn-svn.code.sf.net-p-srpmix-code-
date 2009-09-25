@@ -27,7 +27,7 @@ function main
 	    checkout_lcopy="${d}/checkout.lcopy"
 	    if [ -r "${checkout_lcopy}" ]; then
 		echo ${checkout_lcopy} >> ${log}
-		lcopy-envelop --output-dir=$repo "$d" "${checkout_lcopy}" >> ${log} 2>&1
+		lcopy-envelop --output-dir=$repo "${mirror}" "${checkout_lcopy}" >> ${log} 2>&1
 	    fi
 	fi
     done 
