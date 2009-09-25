@@ -74,7 +74,7 @@ function update
     local status
 
 
-    if source ${lcopy_file}; then
+    if ! source ${lcopy_file}; then
 	echo "failed to source ${lcopy_file}" 2>&1
 	exit 1
     fi
