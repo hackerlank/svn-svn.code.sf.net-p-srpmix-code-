@@ -1,14 +1,16 @@
 #!/bin/bash
 
-CVS_VERSION="0.0.0"
-SUBCMDS="genconf checkout update dirp rebirth genconf_format"
+BACKEND=cvs
+VERSION="0.0.0"
+
+source liblcopy_backends.sh || exit 1
 
 function write_spec
 {
     local repo=$1
     local module=$2
 
-    printf "CVS_CF_VERSION=\"%s\"\n" "${CVS_VERSION}"
+    common_write_spec 
     printf "CVS_REPOSITORY=\"%s\"\n" "${repo}"
     printf "CVS_MODULE=\"%s\"\n" "${module}"    
 }
@@ -57,38 +59,19 @@ function module_check
 #
 function cvs_help_help
 {
-    cvs_help
+    common_help_help "$@"
 }
 
 function cvs_help
 {
-    local subcmd=$1
-    shift
-
-    if [ -z "$subcmd" ]; then
-	for s in $SUBCMDS; do
-	    if type -t "cvs_help_$s" > /dev/null 2>&1; then
-		cvs_help_$s
-	    fi
-	done
-    else
-	for s in $SUBCMDS; do
-	    if [ $s = $subcmd ]; then
-		if type -t "cvs_help_$s" > /dev/null 2>&1; then
-		    cvs_help_$s
-		fi
-		break
-	    fi
-	done
-    fi
 }
 
 #
-# GENCONF
+# GENCONF_FORMAT
 # 
 function cvs_genconf_format
 {
-    cvs_help_genconf format
+    common_genconf_format "$@"
 }
 
 #
@@ -297,21 +280,8 @@ function cvs_rebirth
 
 function main
 {
-    local cmd=$1
-    shift
-
-    if [ -z "$cmd" ]; then
-	echo "$0: no sub command given" 1>&2
-    fi
-
-
-    if type -t "cvs_${cmd}" > /dev/null 2>&1; then
-        cvs_"${cmd}" "$@"
-	return $?	
-    else
-	echo "no such command: $cmd" 1>&2
-	return 1
-    fi
+    commont_main "$@"
+    return $?
 }
 
 main "$@"
