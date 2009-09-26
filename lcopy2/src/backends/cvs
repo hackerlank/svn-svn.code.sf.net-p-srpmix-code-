@@ -208,7 +208,7 @@ function cvs_update
 
     cd "${update_dir}"
 
-    if cvs update -d | tee /tmp/cvs-update-$$; then
+    if cvs update -d -P | tee /tmp/cvs-update-$$; then
 	if grep "^[MU] /tmp/cvs-update-$$ > /dev/null"; then
 	    return 1
 	else
