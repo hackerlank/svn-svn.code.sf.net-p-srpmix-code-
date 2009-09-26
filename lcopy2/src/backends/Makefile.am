@@ -6,5 +6,7 @@ dist_backends_SCRIPTS =   \
 	git \
 	svn \
 	bzr \
+	darcs \
+	mtn   \
 	\
 	$(NULL)
