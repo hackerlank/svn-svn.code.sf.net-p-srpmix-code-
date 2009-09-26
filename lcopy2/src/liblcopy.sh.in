@@ -77,6 +77,14 @@ function lcopy_backend_genconf
     lcopy_backend_call $vcs genconf "$@"
 }
 
+function lcopy_backend_genconf_format
+{
+    local vcs=$1
+    shift
+
+    lcopy_backend_call $vcs genconf_format
+}
+
 function lcopy_backend_checkout
 {
     local vcs=$1
@@ -90,6 +98,22 @@ function lcopy_backend_update
     local vcs=$1
     shift
     lcopy_backend_call $vcs update "$@"
+}
+
+function lcopy_backend_rebirth
+{
+    local vcs=$1
+    shift
+
+    lcopy_backend_call $vcs rebirth "$@"
+}
+
+function lcopy_backend_dirp
+{
+    local vcs=$1
+    shift
+
+    lcopy_backend_call $vcs dirp "$@"
 }
 
 function lcopy_srpmix_plugin
@@ -180,3 +204,14 @@ function lcopy_relative_path
 }
 
 
+function lcopy_print_conf
+{
+    local vcs="$1"
+    local package="$2"
+    local branch="$3"
+
+    printf "LCOPY_CF_VERSION=\"%s\"\n" $LCOPY_VERSION
+    printf "LCOPY_VCS=\"%s\"\n" $vcs
+    printf "LCOPY_PACKAGE=\"%s\"\n" $package
+    printf "LCOPY_BRANCH=\"%s\"\n" $branch
+}

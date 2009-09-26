@@ -11,19 +11,7 @@ function print_usage
     echo ""
 
     echo "VCS-COMMANDS format:"
-    lcopy_backends_help genconf
-}
-
-function print_conf
-{
-    local vcs="$1"
-    local package="$2"
-    local branch="$3"
-
-    printf "LCOPY_CF_VERSION=\"%s\"\n" $LCOPY_VERSION
-    printf "LCOPY_VCS=\"%s\"\n" $vcs
-    printf "LCOPY_PACKAGE=\"%s\"\n" $package
-    printf "LCOPY_BRANCH=\"%s\"\n" $branch
+    lcopy_backends_genconf_format
 }
 
 function main
@@ -119,7 +107,7 @@ function main
     status=$?
 
     if [ $status = 0 ]; then
-	print_conf "$vcs" "$package" "$branch" >> ${output_file}
+	lcopy_print_conf "$vcs" "$package" "$branch" >> ${output_file}
 	if [ -n "$output_dir" ]; then
 	    mv ${output_file} ${output_dir}/"${package},${branch}.lcopy"
 	fi

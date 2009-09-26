@@ -1,30 +1,82 @@
 #!/bin/bash
 
 CVS_VERSION="0.0.0"
-SUBCMDS="genconf help checkout"
+SUBCMDS="genconf checkout update dirp rebirth genconf_format"
 
+function write_spec
+{
+    local repo=$1
+    local module=$2
+
+    printf "CVS_CF_VERSION=\"%s\"\n" "${CVS_VERSION}"
+    printf "CVS_REPOSITORY=\"%s\"\n" "${repo}"
+    printf "CVS_MODULE=\"%s\"\n" "${module}"    
+}
+
+function repo_check
+{
+    local repo=$1
+
+    if [ -z "${repo}" ]; then
+	echo "broken cvs command line: cannot find \"-d\" repository specification: $original" 1>&2
+	return 1
+    fi
+
+    local pserver_spec="^:pserver:[a-zA-Z0-9]+:[a-zA-Z0-9]*@[-a-zA-Z0-9./:]+$"
+    local extssh_spec="^:extssh:[a-zA-Z0-9]+@[-a-zA-Z0-9./:]+$"
+    if  ! ( [[ "$repo" =~ "$pserver_spec" ]] || [[ "$repo" =~ "$extssh_spec" ]] ); then
+	echo "broken cvs command line: unrecognizable repo specification: $repo" 1>&2
+	echo "expected repo specifications: " 1>&2
+	echo "	$pserver_spec" 1>&2
+	echo "	$extssh_spec" 1>&2
+	return 1
+    else
+	return 0
+    fi
+}
+
+function module_check
+{
+    local module=$1
+
+    if [ -z "$module" ]; then
+	echo "NO MODULE given: $original" 1>&2
+	return 1
+    elif ! [[ "${module}" =~ "${module_spec}" ]]; then
+	echo "unacceptable module name: ${module}" 1>&2
+	echo "expected module specification: " 1>&2
+	echo "	$module_spec" 1>&2
+	return 1
+    else
+	return 0
+    fi
+}
 
 #
 # HELP
 #
-function cvs_cmd_help_help
+function cvs_help_help
 {
-    cvs_cmd_help
+    cvs_help
 }
 
-function cvs_cmd_help
+function cvs_help
 {
     local subcmd=$1
     shift
 
     if [ -z "$subcmd" ]; then
 	for s in $SUBCMDS; do
-	    cvs_cmd_help_$s
+	    if type -t "cvs_help_$s" > /dev/null 2>&1; then
+		cvs_help_$s
+	    fi
 	done
     else
 	for s in $SUBCMDS; do
 	    if [ $s = $subcmd ]; then
-		cvs_cmd_help_$subcmd
+		if type -t "cvs_help_$s" > /dev/null 2>&1; then
+		    cvs_help_$s
+		fi
 		break
 	    fi
 	done
@@ -34,17 +86,31 @@ function cvs_cmd_help
 #
 # GENCONF
 # 
-function cvs_cmd_help_genconf
+function cvs_genconf_format
 {
-    echo "	" cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' MODULE 
-    echo "	" cvs -d :pserver:USER:PASSWD@HOST 'checkout|co' MODULE 
-    # 
-    echo "	" cvs -d:extssh:USER@HOST 'checkout|co'  MODULE 
-    echo "	" cvs -d :extssh:USER@HOST 'checkout|co'  MODULE 
+    cvs_help_genconf format
+}
+
+#
+# GENCONF
+# 
+function cvs_help_genconf
+{
+    local prefix
+
+    if [ "$1" != "format" ]; then
+	prefix="$0 genconf"
+    fi
+
+    echo "	" ${prefix} cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' MODULE 
+    echo "	" ${prefix} cvs -d :pserver:USER:PASSWD@HOST 'checkout|co' MODULE 
+        # 
+    echo "	" ${prefix} cvs -d:extssh:USER@HOST 'checkout|co'  MODULE 
+    echo "	" ${prefix} cvs -d :extssh:USER@HOST 'checkout|co'  MODULE 
     echo "	" '(do not use -P: -P is added automatically.)'
 }
 
-function cvs_cmd_genconf
+function cvs_genconf
 {
     local original=$@
     local repo
@@ -57,7 +123,7 @@ function cvs_cmd_genconf
     shift
     if [ -z "${drepo}" ]; then
 	echo "broken cvs command line: too few argument" 1>&2
-	cvs_cmd_help genconf 1>&2
+	cvs_help genconf 1>&2
 	return 1
     elif [ "-d" = "$drepo" ]; then
 	repo=$1
@@ -66,18 +132,10 @@ function cvs_cmd_genconf
 	repo=${drepo/-d/}
     fi
 
-    if [ -z "${repo}" ]; then
-	echo "broken cvs command line: cannot find \"-d\" repository specification: $original" 1>&2
-	return 1
-    fi
-
-    local pserver_sepc="^:pserver:[a-zA-Z0-9]+:[a-zA-Z0-9]*@[-a-zA-Z0-9./:]+$"
-    local extssh_spec="^:extssh:[a-zA-Z0-9]+@[-a-zA-Z0-9./:]+$"
-    if  ! ( [[ "$repo" =~ "$pserver_sepc" ]] || [[ "$repo" =~ "$extssh_spec" ]] ); then
-	echo "broken cvs command line: unrecognizable repo specification: $repo" 1>&2
-	echo "expected repo specifications: " 1>&2
-	echo "	$pserver_sepc" 1>&2
-	echo "	$extssh_sepc" 1>&2
+    #
+    # REPO
+    # 
+    if ! repo_check "${repo}"; then
 	return 1
     fi
 
@@ -106,16 +164,11 @@ function cvs_cmd_genconf
     module=$1
     local module_spec="[-_+a-zA-Z0-9]+"
     shift
-
-    if [ -z "$module" ]; then
-	echo "NO MODULE given: $original" 1>&2
-	return 1
-    elif ! [[ "${module}" =~ "${module_spec}" ]]; then
-	echo "unacceptable module name: ${module}" 1>&2
-	echo "expected module specification: " 1>&2
-	echo "	$module_spec" 1>&2
+    if ! module_check "${module}"; then
 	return 1
     fi
+
+
 
     if [ "$1" = "-P" ] ; then
 	shift 1
@@ -126,22 +179,19 @@ function cvs_cmd_genconf
 	return 1
     fi
 
-    printf "CVS_CF_VERSION=\"%s\"\n" "${CVS_VERSION}"
-    printf "CVS_REPOSITORY=\"%s\"\n" "${repo}"
-    printf "CVS_MODULE=\"%s\"\n" "${module}"
-
+    write_spec "${repo}" "${module}"
     return 0
 }
 
 #
 # CHECKOUT
 #
-function cvs_cmd_help_checkout
+function cvs_help_checkout
 {
-    echo "	" "cvs" "FILE.lcopy" "OUTPUT-DIR"
+    echo "	$0 " "checkout" "FILE.lcopy" "OUTPUT-DIR"
 }
 
-function cvs_cmd_checkout
+function cvs_checkout
 {
     local input=$1
     local output_dir=$2
@@ -162,12 +212,12 @@ function cvs_cmd_checkout
 #
 # UPDATE
 #
-function cvs_cmd_help_update
+function cvs_help_update
 {
-    echo "	" "cvs" "FILE.lcopy" "UPDATE-DIR"
+    echo "	$0 " "update" "FILE.lcopy" "UPDATE-DIR"
 }
 
-function cvs_cmd_update
+function cvs_update
 {
     local dir=$1
     local input=$2
@@ -186,6 +236,65 @@ function cvs_cmd_update
     fi
 }
 
+#
+# DIRP
+# 
+function cvs_help_dirp
+{
+    echo "	$0 " "dirp" "[DIR]"
+}
+
+function cvs_dirp
+{
+    local dir=${1:-$(pwd)}
+    
+    test -d ${dir}/CVS
+}
+
+#
+# REBIRTH
+#
+function cvs_help_rebirth
+{
+    echo "	$0 " "rebirth" "[DIR]"
+}
+
+function cvs_rebirth
+{
+    local dir=${1:-$(pwd)}
+
+    if ! cvs_dirp ${dir}; then
+	echo "Not cvs directory: ${dir} " 1>&2
+	return 1
+    fi
+
+    cd $dir/CVS
+
+    local repo
+    if test -f Root; then
+	repo=$(cat Root)
+    else
+	echo "Cannot find Root file in $(pwd)" 1>&2
+	return 1
+    fi
+    if ! repo_check "${repo}"; then
+	return 1
+    fi
+
+    local module
+    if test -f Repository; then
+	module=$(cat Repository)
+    else
+	echo "Cannot find Repository file in $(pwd)" 1>&2	
+	return 1
+    fi
+    if ! module_check "${module}"; then
+	return 1
+    fi
+
+    write_spec "${repo}" "${module}"
+}
+
 function main
 {
     local cmd=$1
@@ -196,19 +305,13 @@ function main
     fi
 
 
-    case "$cmd" in
-	"help")	    
-	    ;&
-	"checkout")
-            ;&
-	"genconf")  
-            cvs_cmd_"${cmd}" "$@"
-	    return $?
-            ;;
-	*)
-    esac
-    
-    
+    if type -t "cvs_${cmd}" > /dev/null 2>&1; then
+        cvs_"${cmd}" "$@"
+	return $?	
+    else
+	echo "no such command: $cmd" 1>&2
+	return 1
+    fi
 }
 
 main "$@"

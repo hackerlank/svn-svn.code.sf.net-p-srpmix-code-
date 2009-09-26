@@ -11,6 +11,7 @@ dist_bin_SCRIPTS =     \
         lcopy-checkout \
         lcopy-update   \
         lcopy-envelop  \
+        lcopy-rebirth  \
 	\
         $(NULL)
 

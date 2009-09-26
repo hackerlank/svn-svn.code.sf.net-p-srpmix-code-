@@ -35,6 +35,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lcopy-checkout
 %{_bindir}/lcopy-update
 %{_bindir}/lcopy-envelop
+%{_bindir}/lcopy-rebirth
 %{_bindir}/liblcopy.sh
 %{_libexecdir}/lcopy/backends/*
 %{_sysconfdir}/lcopy
