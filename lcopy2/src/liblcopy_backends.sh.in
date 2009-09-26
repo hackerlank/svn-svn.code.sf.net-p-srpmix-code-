@@ -3,7 +3,7 @@
 # VERSION=
 
 
-SUBCMDS="genconf checkout update dirp rebirth genconf_format"
+COMMON_SUBCMDS="genconf checkout update dirp rebirth genconf_format"
 
 function common_help_help
 {
@@ -16,13 +16,13 @@ function common_help
     shift
 
     if [ -z "$subcmd" ]; then
-	for s in $SUBCMDS; do
+	for s in $COMMON_SUBCMDS; do
 	    if type -t "${BACKEND}_help_$s" > /dev/null 2>&1; then
 		${BACKEND}_help_$s
 	    fi
 	done
     else
-	for s in $SUBCMDS; do
+	for s in $COMMON_SUBCMDS; do
 	    if [ $s = $subcmd ]; then
 		if type -t "${BACKEND}_help_$s" > /dev/null 2>&1; then
 		    ${BACKEND}_help_$s
