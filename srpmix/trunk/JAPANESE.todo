@@ -34,6 +34,7 @@ ls | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e
 ** 全文検索 #
 ** ウェブインターフェイス
 
+* plugin for lcopy
 
 ** compsの生成 <need check>
 ** root権限がない場合のattachは？ <need check>
