@@ -151,11 +151,11 @@ function svn_update
     cd "${update_dir}"
 
     if common_spawn svn update | tee /tmp/svn-update-$$; then
-	# TODO
-	if grep "^[MU] /tmp/svn-update-$$ > /dev/null"; then
-	    return 1
-	else
+	if [ "$(wc -l < /tmp/svn-update-$$)" = 1 ] \
+	   LANG=C grep  'At revision' /tmp/svn-update-$$ > /dev/null 2>&1; then
 	    return 0
+	else
+	    return 1
 	fi
     else
 	return 2
