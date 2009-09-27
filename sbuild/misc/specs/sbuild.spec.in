@@ -7,7 +7,7 @@ Group: Development/Tools
 Buildarch: noarch
 Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Requires: make rsync srpmix gauche
+Requires: make rsync srpmix gauche lcopy
 
 
 # My recommendation

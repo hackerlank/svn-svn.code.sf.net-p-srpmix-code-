@@ -24,6 +24,11 @@ if test "x$RSYNC" = "x"; then
    AC_MSG_ERROR(rsync not found); 
 fi
 
+AC_CHECK_PROGS([LCOPY_ENVELOP], [lcopy-envelop])
+if test "x$LCOPY_ENVELOP" = "x"; then 
+   AC_MSG_ERROR(lcopy-envelop not found); 
+fi
+
 AC_RPM_RELEASE
 
 AC_OUTPUT([
