@@ -36,8 +36,8 @@ SRPMix Plugin for creating cscope indexes.
 
 
 %package plugin-kindex
-Summary: SRPMix Plugin for running make tags and make TAGS of kernel
-Requires: srpmix emacs-common ctags gcc
+Summary: SRPMix Plugin for running make tags, make TAGS and make cscope of kernel
+Requires: srpmix emacs-common ctags cscope
 Group: Development/Tools
 
 %description plugin-kindex
