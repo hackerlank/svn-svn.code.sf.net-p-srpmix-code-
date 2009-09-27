@@ -30,7 +30,7 @@ function repo_check
 	    [[ "$repo" =~ "$svn_spec" ]] ); then
 	echo "broken svn command line: unrecognizable repo specification: $repo" 1>&2
 	echo "expected repo specifications: " 1>&2
-	for s "$http_spec" "$https_spec" "$svn_spec"; do
+	for s in "$http_spec" "$https_spec" "$svn_spec"; do
 	    echo "	$s" 1>&2
 	done
 	return 1
@@ -72,7 +72,7 @@ function svn_help_genconf
     fi
 
     echo "	" ${prefix} svn 'checkout|co' URL
-    echo "	" "acceptable schema for URL: http://..., https://..., and svn://..."
+    echo "	" "(acceptable schema for URL: http://..., https://..., and svn://...)"
 }
 
 function svn_genconf
@@ -217,7 +217,7 @@ function svn_rebirth
 
 function main
 {
-    commont_main "$@"
+    common_main "$@"
     return $?
 }
 

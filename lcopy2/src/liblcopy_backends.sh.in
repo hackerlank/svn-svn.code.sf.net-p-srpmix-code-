@@ -40,7 +40,7 @@ function common_genconf_format
 
 function common_write_spec
 {
-    printf "${BACKEND}_CF_VERSION=\"%s\"\n" "${VERSION}"
+    printf "${BACKEND^^*}_CF_VERSION=\"%s\"\n" "${VERSION}"
 }
 
 function common_spawn

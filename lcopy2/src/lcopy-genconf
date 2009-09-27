@@ -11,7 +11,11 @@ function print_usage
     echo ""
 
     echo "VCS-COMMANDS format:"
-    lcopy_backend_genconf_format
+    for v in $(lcopy_backends_list); do
+	echo "[ $v backend ] "
+	lcopy_backend_genconf_format $v
+	echo
+    done
 }
 
 function main

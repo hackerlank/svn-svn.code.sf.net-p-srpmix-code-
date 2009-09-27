@@ -290,7 +290,7 @@ function cvs_rebirth
 
 function main
 {
-    commont_main "$@"
+    common_main "$@"
     return $?
 }
 
