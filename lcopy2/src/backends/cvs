@@ -20,7 +20,7 @@ function repo_check
     local repo=$1
 
     if [ -z "${repo}" ]; then
-	echo "broken cvs command line: cannot find \"-d\" repository specification: $original" 1>&2
+	echo "broken cvs command line: cannot find \"-d\" repository specification" 1>&2
 	return 1
     fi
 
@@ -64,6 +64,7 @@ function cvs_help_help
 
 function cvs_help
 {
+    common_help "$@"
 }
 
 #
@@ -182,11 +183,21 @@ function cvs_checkout
     if ! source "$input"; then
 	return 1
     fi
-    
+
+     if [ -z "${CVS_REPOSITORY}" ]; then
+	 echo "no CVS_REPOSITORY in $input" 1>&2
+	 return 1
+     fi
+
+    if [ -z "${CVS_MODULE}" ]; then
+	echo "no CVS_MODULE in $input" 1>&2
+	return 1
+    fi
     
     ( 
 	cd ${output_dir}
-	cvs -d"${CVS_REPOSITORY}" checkout -P "${CVS_MODULE}"
+
+	common_spawn cvs -d"${CVS_REPOSITORY}" checkout -P "${CVS_MODULE}"
     )
 
     return $?
@@ -202,13 +213,12 @@ function cvs_help_update
 
 function cvs_update
 {
-    local dir=$1
-    local input=$2
-    local update_dir=$3
+    local input=$1
+    local update_dir=$2
 
     cd "${update_dir}"
 
-    if cvs update -d -P | tee /tmp/cvs-update-$$; then
+    if common_spawn cvs update -d -P | tee /tmp/cvs-update-$$; then
 	if grep "^[MU] /tmp/cvs-update-$$ > /dev/null"; then
 	    return 1
 	else

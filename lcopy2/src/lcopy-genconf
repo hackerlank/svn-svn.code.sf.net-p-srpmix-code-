@@ -11,7 +11,7 @@ function print_usage
     echo ""
 
     echo "VCS-COMMANDS format:"
-    lcopy_backends_genconf_format
+    lcopy_backend_genconf_format
 }
 
 function main
