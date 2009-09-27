@@ -41,7 +41,7 @@ fi
 
 AC_CHECK_PROGS([LCOPY_UPDATE],[lcopy-update])
 if test "x$LCOPY_UPDATE" = "x"; then 
-   AC_MSG_ERROR(lcopu-update not found); 
+   AC_MSG_ERROR(lcopy-update not found); 
 fi
 
 
