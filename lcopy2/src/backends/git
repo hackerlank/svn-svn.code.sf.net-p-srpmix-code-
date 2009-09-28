@@ -152,7 +152,7 @@ function git_update
 
     if common_spawn git pull | tee /tmp/git-update-$$; then
 	if [ "$(wc -l < /tmp/git-update-$$)" = 1 ] \
-	   LANG=C grep  'At revision' /tmp/git-update-$$ > /dev/null 2>&1; then
+	   LANG=C grep  'Already up-to-date.' /tmp/git-update-$$ > /dev/null 2>&1; then
 	    return 0
 	else
 	    return 1
