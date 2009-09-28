@@ -64,7 +64,7 @@ function main
 	exit 1
     fi
     
-    if ! [[ "${package_branch}" =~ "^([-a-zA-Z0-9]+)(,([-a-zA-Z0-9]+))?$" ]]; then
+    if ! [[ "${package_branch}" =~ "^([-a-zA-Z0-9_]+)(,([-a-zA-Z0-9_]+))?$" ]]; then
 	echo "broken package,branch specification: ${package_branch}" 1>&2
 	print_usage 1>&2
 	exit 1

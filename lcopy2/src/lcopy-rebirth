@@ -2,7 +2,7 @@
 
 PACKAGE=
 BRANCH=trunk
-DIR=
+DIR=$(pwd)
 
 
 source liblcopy.sh ||  exit 1
@@ -11,7 +11,7 @@ function print_usage
 {
     echo "Usage: "
     echo "$0 --help|-h"
-    echo "$0 [--output-dir=OUTPUT-DIR] PACKAGE,BRANCH DIR"
+    echo "$0 [--output-dir=OUTPUT-DIR] PACKAGE,BRANCH [DIR]"
 }
 
 function parse_arguments
@@ -68,12 +68,13 @@ function parse_arguments
     local dir
     dir=$1
     shift
-    if ! [ -d "$dir" ]; then
-	echo "no such directory: $dir" 1>&2
+    if [ -n "$dir" ]; then
+	DIR=$dir
+    fi
+    if ! [ -d "$DIR" ]; then
+	echo "no such directory: $DIR" 1>&2
 	exit 1
     fi
-
-    DIR=$dir
 }
 
 function main

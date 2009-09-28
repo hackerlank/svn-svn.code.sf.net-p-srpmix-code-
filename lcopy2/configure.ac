@@ -1,7 +1,7 @@
 m4_define([pkg_name],    [lcopy])
 m4_define([pkg_major_version],[0])
 m4_define([pkg_minor_version],[2])
-m4_define([pkg_micro_version],[3])
+m4_define([pkg_micro_version],[4])
 m4_define([pkg_version],pkg_major_version.pkg_minor_version.pkg_micro_version)
 
 AC_INIT(pkg_name, pkg_version)
@@ -17,6 +17,26 @@ fi
 AC_PATH_PROG([_SRPMIX_], [srpmix])
 if test x$_SRPMIX_ = x; then
   AC_MSG_ERROR([Cannot find srpmix])
+fi			
+
+AC_PATH_PROG([_CVS_], [cvs])
+if test x$_CVS_ = x; then
+  AC_MSG_ERROR([Cannot find cvs])
+fi			
+
+AC_PATH_PROG([_SVN_], [svn])
+if test x$_SVN_ = x; then
+  AC_MSG_ERROR([Cannot find svn])
+fi			
+
+AC_PATH_PROG([_GIT_], [git])
+if test x$_GIT_ = x; then
+  AC_MSG_ERROR([Cannot find git])
+fi			
+
+AC_PATH_PROG([_HG_], [hg])
+if test x$_HG_ = x; then
+  AC_MSG_ERROR([Cannot find hg])
 fi			
 
 AC_RPM_RELEASE
