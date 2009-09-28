@@ -159,7 +159,12 @@ function run_builder
     fi
 
     if [ -x "${BUILDERSDIR}"/"${TYPE}" ]; then
-	( "${BUILDERSDIR}"/"${TYPE}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" )
+	( export SBUILD_JOBS
+	  export SBUILD_LOAD
+	  export SBUILD_TSTAMPDIR
+	  export SBUILD_RELEASE
+	  export SBUILD_DEBUG
+          "${BUILDERSDIR}"/"${TYPE}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" )
 	return $?
     else
 	echo "No builder for ${TYPE}" 1>&2
