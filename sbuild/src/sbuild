@@ -165,6 +165,7 @@ function run_builder
 	  export SBUILD_TSTAMPDIR="$SBUILD_TSTAMPDIR"
 	  export SBUILD_RELEASE="$SBUILD_RELEASE"
 	  export SBUILD_DEBUG="$SBUILD_DEBUG"
+	  export SBUILD_TMPDIR="$SBUILD_TMPDIR"
           "${BUILDERSDIR}"/"${TYPE}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" )
 	return $?
     else
