@@ -1,21 +1,25 @@
 m4_define([pkg_name],    [lcopy])
-m4_define([pkg_version], [0.2.2])
-
-
+m4_define([pkg_major_version],[0])
+m4_define([pkg_minor_version],[2])
+m4_define([pkg_micro_version],[3])
+m4_define([pkg_version],pkg_major_version.pkg_minor_version.pkg_micro_version)
 
 AC_INIT(pkg_name, pkg_version)
 AC_CONFIG_AUX_DIR(misc/ac-aux)
 AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
+AM_MAINTAINER_MODE
 
 AC_PATH_PROG([_BASH_],   [bash])
 if test "x$_BASH_" = x; then
    AC_MSG_ERROR([Cannot find bash])
 fi
 
-dnl AC_PATH_PROG([_SRPMIX_], [srpmix])
-dnl if test x$_SRPMIX_ = x; then
-dnl   AC_MSG_ERROR([Cannot find srpmix])
-dnl fi			
+AC_PATH_PROG([_SRPMIX_], [srpmix])
+if test x$_SRPMIX_ = x; then
+  AC_MSG_ERROR([Cannot find srpmix])
+fi			
+
+AC_RPM_RELEASE
 
 AC_OUTPUT([
            Makefile
@@ -31,4 +35,3 @@ AC_OUTPUT([
     	   src/liblcopy_backends.sh
     	   src/conf.d/Makefile
           ])
-

@@ -1,7 +1,7 @@
 Summary: Scripts to update local copies gettting from vcs repositories 
 Name: lcopy
 Version: @PACKAGE_VERSION@
-Release: 0
+Release: @RPM_RELEASE@
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 Requires: srpmix cvs
 Buildarch: noarch
