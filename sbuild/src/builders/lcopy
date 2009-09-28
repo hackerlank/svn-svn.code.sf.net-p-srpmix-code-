@@ -8,7 +8,6 @@ DATE=$5
 
 
 
-source ${SBUILD_CONF}
 source ${SOP_CONF}
 
 function main

@@ -159,11 +159,12 @@ function run_builder
     fi
 
     if [ -x "${BUILDERSDIR}"/"${TYPE}" ]; then
-	( export SBUILD_JOBS
-	  export SBUILD_LOAD
-	  export SBUILD_TSTAMPDIR
-	  export SBUILD_RELEASE
-	  export SBUILD_DEBUG
+	( set -x
+	  export SBUILD_JOBS="$SBUILD_JOBS"
+	  export SBUILD_LOAD="$SBUILD_LOAD"
+	  export SBUILD_TSTAMPDIR="$SBUILD_TSTAMPDIR"
+	  export SBUILD_RELEASE="$SBUILD_RELEASE"
+	  export SBUILD_DEBUG="$SBUILD_DEBUG"
           "${BUILDERSDIR}"/"${TYPE}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" )
 	return $?
     else
