@@ -72,7 +72,7 @@ function svn_help_genconf
     fi
 
     echo "	" ${prefix} svn 'checkout|co' URL
-    echo "	" "(acceptable schema for URL: http://..., https://..., and svn://...)"
+    echo "	" "(acceptable scheme for URL: http://..., https://..., and svn://...)"
 }
 
 function svn_genconf
