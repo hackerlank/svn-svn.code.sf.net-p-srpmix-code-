@@ -39,6 +39,16 @@ if test x$_HG_ = x; then
   AC_MSG_ERROR([Cannot find hg])
 fi			
 
+AC_PATH_PROG([_DARCS_], [darcs])
+if test x$_DARCS_ = x; then
+  AC_MSG_ERROR([Cannot find darcs])
+fi			
+
+AC_PATH_PROG([_BZR_], [bzr])
+if test x$_BZR_ = x; then
+  AC_MSG_ERROR([Cannot find bzr])
+fi			
+
 AC_RPM_RELEASE
 
 AC_OUTPUT([
