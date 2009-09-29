@@ -36,7 +36,7 @@ try_source ${LIBSRPMIX}
 
 
 OUTPUTDIR=
-TMPDIR=
+MY_TMPDIR=
 JUST_PRINT=
 DUMP_SPEC=
 # BUILD_REQUIRES="srpmix, rsync"
@@ -68,8 +68,8 @@ function print_usage
 
 function cleanup
 {
-    if test -d "$TMPDIR"; then
-        rm -rf $TMPDIR || true
+    if test -d "$MY_TMPDIR"; then
+        rm -rf $MY_TMPDIR || true
     fi
 }
 
@@ -428,7 +428,7 @@ function wrap_srpm
     fi
 
     if test "x${DUMP_SPEC}" = "x"; then
-	spec="$TMPDIR/SPECS/${wrapped_name}.spec"
+	spec="$MY_TMPDIR/SPECS/${wrapped_name}.spec"
     else
 	spec="/dev/stdout"
 	if test ! -w "${spec}"; then
@@ -452,18 +452,18 @@ function wrap_srpm
 	return
     fi
 
-    srpmix_cp $target $TMPDIR/SOURCES/
+    srpmix_cp $target $MY_TMPDIR/SOURCES/
     if test x"$OPT_TYPE" = xplugin; then
-	srpmix_cp $(srpmix_archives_name $target) $TMPDIR/SOURCES/
+	srpmix_cp $(srpmix_archives_name $target) $MY_TMPDIR/SOURCES/
     fi
     
-    $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
-    wrapped_srpm=$(/bin/ls $TMPDIR/SRPMS/*-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm)
+    $RPMBUILD --quiet --define "_topdir $MY_TMPDIR" -bs "$spec" > /dev/null
+    wrapped_srpm=$(/bin/ls $MY_TMPDIR/SRPMS/*-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm)
     mv "${wrapped_srpm}" "${OUTPUTDIR}"
 
-    rm -f $TMPDIR/SOURCES/`basename $target`
+    rm -f $MY_TMPDIR/SOURCES/`basename $target`
     if test x"$OPT_TYPE" = xplugin; then
-	rm -f $TMPDIR/SOURCES/$(basename $(srpmix_archives_name $target))
+	rm -f $MY_TMPDIR/SOURCES/$(basename $(srpmix_archives_name $target))
     fi
     echo "$es_name"
 
@@ -478,12 +478,12 @@ function main
 
     if test "x${JUST_PRINT}" = "x" \
 	-a "x${DUMP_SPEC}" = "x"; then
-	TMPDIR=`mktemp -d`
+	MY_TMPDIR=`mktemp -d`
 
 	if test "x${SRPMIX_WRAP_DEBUG}" = x; then
 	    trap cleanup 0
 	fi
-	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 
     for srpm in $srpms

@@ -36,7 +36,7 @@ try_source ${LIBSRPMIX}
 
 
 OUTPUTDIR=
-TMPDIR=
+MY_TMPDIR=
 DUMP_SPEC=
 SRPMIX_ENVEOP_DEBUG=
 PKGNAME=
@@ -57,8 +57,8 @@ function print_usage
 
 function cleanup
 {
-    if test -d "$TMPDIR"; then
-	rm -rf $TMPDIR || true
+    if test -d "$MY_TMPDIR"; then
+	rm -rf $MY_TMPDIR || true
     fi
 }
 
@@ -141,7 +141,7 @@ function envelop_swrf
     license=$($SWRFPM -qp --nosignature --queryformat "%{License}" $target_swrf)
 
     if test "x${DUMP_SPEC}" = "x"; then
-	spec="$TMPDIR/SPECS/${enveloped_name}.spec"
+	spec="$MY_TMPDIR/SPECS/${enveloped_name}.spec"
     else
 	spec="/dev/stdout"
 	if test ! -w "${spec}"; then
@@ -246,10 +246,10 @@ EOF
 	return
     fi
 
-    cp $target_swrf $TMPDIR/SOURCES/
-    $RPMBUILD --quiet --define "_topdir $TMPDIR" -bs "$spec" > /dev/null
-    mv $TMPDIR/SRPMS/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm "${OUTPUTDIR}"
-    rm $TMPDIR/SOURCES/`basename $target_swrf`
+    cp $target_swrf $MY_TMPDIR/SOURCES/
+    $RPMBUILD --quiet --define "_topdir $MY_TMPDIR" -bs "$spec" > /dev/null
+    mv $MY_TMPDIR/SRPMS/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm "${OUTPUTDIR}"
+    rm $MY_TMPDIR/SOURCES/`basename $target_swrf`
     echo "$es_name"
 
     es_print srpmix-envelop done \
@@ -262,9 +262,9 @@ function main
     parse_arguments "$@"
 
     if test "x${DUMP_SPEC}" = "x"; then
-	TMPDIR=`mktemp -d`
+	MY_TMPDIR=`mktemp -d`
 	trap cleanup 0
-	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 
     for swrf in $swrfs; do

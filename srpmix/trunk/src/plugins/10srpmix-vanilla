@@ -38,9 +38,9 @@ SRPMIX_VANIILA_DEBUG=
 
 FORCE=
 
-TMPDIR=${TMPDIR}/tmp/srpmix-plugins/$(basename $0).$$
-mkdir -p $TMPDIR
-trap "/bin/rm -rf $TMPDIR" 0
+MY_TMPDIR=${TMPDIR}/tmp/srpmix-plugins/$(basename $0).$$
+mkdir -p $MY_TMPDIR
+trap "/bin/rm -rf $MY_TMPDIR" 0
 
 function print_usage
 {
@@ -97,7 +97,7 @@ function parse_arguments
     ROOTDIR=$(cd $1;pwd)
     shift
 
-    cd ${TMPDIR}
+    cd ${MY_TMPDIR}
     verify_directory ${ROOTDIR}
 
     SOURCESDIR=${ROOTDIR}/archives
