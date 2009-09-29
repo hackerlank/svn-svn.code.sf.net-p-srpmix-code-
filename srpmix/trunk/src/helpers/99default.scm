@@ -25,7 +25,7 @@
 ;; Avoids to run autoreconf.
 (#/pam-0.99.6.*/     "--rearrange-spec-command={ sed -e \"s/^autoreconf//\"; }")
 (#/shadow-utils-.*/  "--rearrange-spec-command={ sed -e \"s/^libtoolize -f$\\|^aclocal$\\|^autoheader$\\|^automake -a$\\|^autoconf$//\"; }")
-(#/mysql-.*/         "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
+(#/mysql-.*/         dont-run-autotools)
 (#/mysqlclient-.*/   "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
 
 

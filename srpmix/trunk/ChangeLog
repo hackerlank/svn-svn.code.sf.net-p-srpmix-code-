@@ -1,3 +1,7 @@
+2009-09-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm (#/mysql-.*/): Use dont-run-autotools.
+
 2009-09-29  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-wrap: Use MY_TMPDIR instead of TMPDIR.
