@@ -26,7 +26,7 @@
 (#/pam-0.99.6.*/     "--rearrange-spec-command={ sed -e \"s/^autoreconf//\"; }")
 (#/shadow-utils-.*/  "--rearrange-spec-command={ sed -e \"s/^libtoolize -f$\\|^aclocal$\\|^autoheader$\\|^automake -a$\\|^autoconf$//\"; }")
 (#/mysql-.*/         dont-run-autotools)
-(#/mysqlclient-.*/   "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
+(#/mysqlclient.*/   "--rearrange-spec-command={ sed -e \"s/^libtoolize --force$\\|^aclocal$\\|^autoheader$\\|^automake$\\|^autoconf$//\"; }")
 
 
 ;; Don't run gcc_update --touch
