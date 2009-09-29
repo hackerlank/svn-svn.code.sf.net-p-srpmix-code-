@@ -200,9 +200,9 @@ function bzr_rebirth
     fi
 
     local bzr_parent_branch=$(echo $bzr_info | grep '  parent branch: ' | sed -e s's/  parent branch: //')
-    if [ -z "$bzr_parent_branch" ]; 
+    if [ -z "$bzr_parent_branch" ]; then
 	echo "cannot find parent branch field in output of bzr info (pwd: $(pwd))" 1>&2
-	return 
+	return 1
     fi
 
     local repo="${bzr_parent_branch}"

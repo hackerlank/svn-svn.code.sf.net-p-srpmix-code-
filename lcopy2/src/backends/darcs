@@ -200,9 +200,9 @@ function darcs_rebirth
     fi
 
     local darcs_default_remote=$(echo $darcs_repo | grep 'Default Remote: ' | sed -e s's/Default Remote: //')
-    if [ -z "$darcs_default_remote" ]; 
+    if [ -z "$darcs_default_remote" ]; then
 	echo "cannot find Default Remote field in output of darcs show repo (pwd: $(pwd))" 1>&2
-	return 
+	return 1
     fi
 
     local repo="${darcs_default_remote}"
