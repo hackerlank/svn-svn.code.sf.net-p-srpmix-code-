@@ -8,6 +8,10 @@
 
 	* src/plugins/10srpmix-vanilla: Ditto.
 
+	* src/srpmix-weakview-dist: Ditto.
+
+	* src/srpmix-weakview-packages: Ditto.
+
 2009-09-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in (plugin-kindex): Replace
