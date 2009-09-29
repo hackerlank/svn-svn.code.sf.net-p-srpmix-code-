@@ -36,7 +36,7 @@ try_source ${LIBSRPMIX}
 
 NAME=
 OUTPUTDIR=
-TMPDIR=
+MY_TMPDIR=
 DUMP_SPEC=
 
 # TODO: --srpm
@@ -51,8 +51,8 @@ function print_usage
 
 function cleanup
 {
-    if test -d "$TMPDIR"; then
-        rm -rf $TMPDIR || true
+    if test -d "$MY_TMPDIR"; then
+        rm -rf $MY_TMPDIR || true
     fi
 }
 
@@ -109,7 +109,7 @@ function create_dist_weakview
     name=$1
     shift
 
-    spec=$TMPDIR/SPECS/srpmix-weakview-dist-$name.spec
+    spec=$MY_TMPDIR/SPECS/srpmix-weakview-dist-$name.spec
     if test "x${DUMP_SPEC}" != "x"; then
 	spec="/dev/stdout"
 	if test ! -w "${spec}"; then
@@ -199,14 +199,14 @@ EOF
     if test "${MAKE_RPM}" = yes; then
 	build_flag=-ba
     fi
-    $RPMBUILD --nodeps --quiet --define "_topdir $TMPDIR" ${build_flag} $spec > /dev/null
+    $RPMBUILD --nodeps --quiet --define "_topdir $MY_TMPDIR" ${build_flag} $spec > /dev/null
 #    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*
     mkdir -p $OUTPUTDIR/weakview
 
-    local file=$TMPDIR/SRPMS/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm
+    local file=$MY_TMPDIR/SRPMS/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm
     if test "${MAKE_RPM}" = yes; then
-	find $TMPDIR
-	file=$TMPDIR/RPMS/noarch/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.noarch.rpm
+	find $MY_TMPDIR
+	file=$MY_TMPDIR/RPMS/noarch/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.noarch.rpm
     fi
     mv ${file} "${OUTPUTDIR}"/weakview
 
@@ -219,9 +219,9 @@ function main
     parse_arguments "$@"
 
     if test "x${DUMP_SPEC}" = "x"; then
-	TMPDIR=`mktemp -d`
+	MY_TMPDIR=`mktemp -d`
 	trap cleanup 0
-	install -d $TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 
     create_dist_weakview $NAME
