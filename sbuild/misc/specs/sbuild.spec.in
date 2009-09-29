@@ -19,7 +19,7 @@ Requires: mono-devel ruby-devel perl-devel python-devel php-devel
 Requires: libgcj-devel jpackage-utils maven2 java-1.6.0-openjdk-devel 
 Requires: saxon saxon-scripts eclipse bsh
 
-Requires: flex bison
+Requires: flex bison sharutils
 
 %description
 Script sets to build sources
