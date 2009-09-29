@@ -1,5 +1,10 @@
 2009-09-30  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/build-opt-rules (dont-run-autotools-and-configure-and-bootstrap):
+	New alias.
+	(bootstrap): New part.
+	(configure, %configre, autotools): Use echo instead of cat.
+
 	* src/helpers/99default.scm (#/mysql-.*/): Use dont-run-autotools.
 	(#/mysqlclient.*/): Remove the last `-'.
 

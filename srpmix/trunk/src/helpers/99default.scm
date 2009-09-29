@@ -48,7 +48,7 @@
 
 (#/ibutils-1.*/        dont-run-configure)
 (#/clumanager-1.0.*/   "--rearrange-spec-command={ sed -e \'s#^\./autogen\.sh$\\|^\./configure$##\'; }")
-(#/am-utils-6.*/       dont-run-autotools-and-configure)
+(#/am-utils-6.*/       dont-run-autotools-and-configure-and-bootstrap)
 (#/openib-1.*/         dont-run-configure )
 (#/openmpi.*/          dont-run-configure )
 (#/opensm-.*/          dont-run-configure )

@@ -16,12 +16,21 @@
 
 (define header "--rearrange-spec-command={ sed ")
 (define footer "; }")
-(define %configure "-e \'s#^%configure#cat hacked-by-srpmix ##\' ")
-(define configure  "-e \'s#^\./configure#cat hacked-by-srpmix ##\' ")
-(define autotools "-e \'s#^\\./autogen.sh.*\\|^\\./bootstrap.sh.*\\|^autoheader.*\\|^aclocal.*\\|^libtoolize.*\\|^autoconf.*\\|^automake.*##\' ")
+(define bootstrap  "-e \'s#^\./bootstrap#echo hacked-by-srpmix #\' ")
+(define %configure "-e \'s#^%configure#echo hacked-by-srpmix #\' ")
+(define configure  "-e \'s#^\./configure#echo hacked-by-srpmix #\' ")
+(define autotools "-e \'s#^\\./autogen.sh.*\\|^\\./bootstrap.sh.*\\|^autoheader.*\\|^aclocal.*\\|^libtoolize.*\\|^autoconf.*\\|^automake.*#echo hacked-by-srpmix #\' ")
 
 (define (handle-alias x)
   (case x
+    ('dont-run-autotools-and-configure-and-bootstrap
+     (string-append
+      header
+      bootstrap
+      autotools
+      %configure
+      configure
+      footer))
     ('dont-run-autotools-and-configure
      (string-append
       header
