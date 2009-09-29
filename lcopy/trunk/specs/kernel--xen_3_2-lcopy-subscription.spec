@@ -1,6 +1,6 @@
 %define lcopy_x_pkg   kernel
 %define lcopy_x_phash k
-%define lcopy_x_branch xen_3_2
+%define lcopy_x_branch xen-3_2
 %define lcopy_x_vcs hg
 %define lcopy_x_vcs_pkg mercurial
 %define lcopy_x_repo http://xenbits.xensource.com/xen-3.2-testing.hg
