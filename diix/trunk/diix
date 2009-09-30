@@ -77,6 +77,13 @@ function main
 	    echo "no such file: $input" 1>&2;
 	    exit 1
 	fi
+    elif [[ "$input" =~ '^http://' ]] || [[ "$input" =~ '^https://' ]] || [[ "$input" =~ '^ftp://' ]]; then
+	if wget -O "${tmpdir}/$(basename $input)" "$input"; then
+	    input=${tmpdir}/$(basename $input)
+	else
+	    echo "failed to download $input(via wget)" 1>&2
+	    exit 1
+	fi
     else
 	# TODO
 	local yum_opts
@@ -88,7 +95,7 @@ function main
 		exit 1
 	    fi
 	else
-	    echo "failed to download $input" 1>&2
+	    echo "failed to download $input(via yumdownloader)" 1>&2
 	    exit 1
 	fi
     fi
