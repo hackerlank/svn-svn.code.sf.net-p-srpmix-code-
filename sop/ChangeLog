@@ -1,0 +1,4 @@
+2009-10-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/mirror-yum (main): Remove unnessary / before run_gc.
+

@@ -68,7 +68,7 @@ function main
 	    # yumdownloader doesn't work on RPMFUSION.
 	    if ( yumdownloader -c ${repofile_path} --disablerepo='*' --enablerepo=${YUM_REPONAME} --source ${name} \
 		 || wget $url; ) \
-		&& test -f /${srpm}; then
+		&& test -f ${srpm}; then
 		run_gc ${srpm}
 	    fi
 	fi
