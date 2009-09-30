@@ -1,58 +1,101 @@
 #!/bin/bash
 
-TMP=`mktemp -d`
-
 function extract
 {
-    (cd $TMP; cpio -id; find . | while read a; do
-	    if file $a | grep ELF > /dev/null 2>&1; then
-		echo $a
+    local dir
+    dir=$1
+
+
+    (
+	cd $dir
+	cpio -id
+	find . | while read; do
+	    if file $REPLY | grep ELF > /dev/null 2>&1; then
+		echo $REPLY
 	    fi
-     done)
+	done
+    )
 }
 
 function convert
 {
+    local idir=$1
+    local odir=$2
+    local converter=$3
+    local ext=$4
     local i
     local o
-    
-    while read a; do
-	i=$TMP/$a
-	o=$1/$(echo $a | sed -e 's|\./|++|' -e 's|/|--|g')
-	
-	es $i $o
+
+    while read; do
+	i=$idir/$REPLY
+	t=${REPLY//\//^}
+        o=$odir/${t/./,}$4
+	"$converter" "$i" > "$o"
     done
 }
 
-function es
+function print_usage
 {
-    cp $1 $2
+    echo "Usage: "
+    echo "	$0 --help|-h"
+    echo "	$0 DEBUGINFO-RPM-FILE|DEBUGINFO-RPM-NAME [OUTPUT-DIR]"
 }
 
 function main
 {
+    if [ "$1" = --help ] || [ "$1" = -h ]; then
+	print_usage
+	exit 0
+    fi
 
-    local INPUT=$1
-    local OUTPUT=$2
 
-    trap "/bin/rm -rf $TMP" 0 
+    local input
+    input=$1
+    shift
 
-
-    if ! test -f "$INPUT"; then
-	echo no such file: $INPUT 1>&2;
+    if [ -z "$input" ]; then
+	echo "too few argument"
+	print_usage 1>&2
+	exit 1
+    fi
+    
+    local output
+    output=${1:-.}
+    shift
+    
+    mkdir -p "$output"
+    if ! [ -d "$output" ]; then
+	echo "cannot mkdir for output: $output" 1>&2
 	exit 1
     fi
 
-    if ! test -d "$OUTPUT"; then
-	mkdir "$OUTPUT"
-	if test "$?" != 0; then
-	    exit 2
+    tmpdir=$(mktemp -d)
+    trap "chmod -R u+w $tmpdir; /bin/rm -rf $tmpdir" 0    
+
+    if [[ "$input" =~ '\.rpm$' ]]; then
+	if ! [ -f "$input" ]; then
+	    echo "no such file: $input" 1>&2;
+	    exit 1
+	fi
+    else
+	# TODO
+	local yum_opts
+	if yumdownloader ${yum_opts} --destdir="${tmpdir}" $input; then
+	    if [ -f ${tmpdir}/${input}* ]; then
+		input=$(ls ${tmpdir}/${input}*)
+	    else
+		echo "cannot find $input retrieved by yumdownloader" 1>&2
+		exit 1
+	    fi
+	else
+	    echo "failed to download $input" 1>&2
+	    exit 1
 	fi
     fi
 
-
-    rpm2cpio $INPUT | extract | convert $OUTPUT
+    local converter=cat
+    local ext=
+    rpm2cpio $input | extract $tmpdir | convert $tmpdir $output $converter $ext
 }
-
 
 main "$@"
