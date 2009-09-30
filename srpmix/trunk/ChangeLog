@@ -1,3 +1,7 @@
+2009-10-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm (#/amanda-2.5.*/): New rule.
+
 2009-09-30  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/build-opt-rules (dont-run-autotools-and-configure-and-bootstrap):

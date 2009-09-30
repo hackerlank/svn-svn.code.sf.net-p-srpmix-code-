@@ -53,6 +53,7 @@
 (#/openmpi.*/          dont-run-configure )
 (#/opensm-.*/          dont-run-configure )
 
+(#/amanda-2.5.*/       dont-run-autotools)
 ;; TEST
 ;; (#/SRPMIX-TEST/ "a" "b")
 
