@@ -21,18 +21,17 @@ function convert
 {
     local idir=$1
     local odir=$2
-    local converter=$3
+    local conv=$3
     local ext=$4
     local i
     local o
     local t
 
-
     while read; do
 	i=$idir/$REPLY
 	t=${REPLY//\//^}
         o=$odir/${t/./,}$4
-	"$converter" "$i" > "$o"
+	"$conv" "$i" > "$o"
     done
 }
 
@@ -45,11 +44,32 @@ function print_usage
 
 function main
 {
-    if [ "$1" = --help ] || [ "$1" = -h ]; then
-	print_usage
-	exit 0
-    fi
+    local conv
+    local ext
 
+    while [ $# -gt 0] ; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    (--conv=*)
+	        conv=${1/--conv=}
+		;;
+	    (--ext=*)
+	        ext=.${1/--ext=}
+		;;
+	    (--*)
+	        echo "No such option: $1" 1>&2
+		print_usage
+		exit 1
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
 
     local input
     input=$1
@@ -101,10 +121,8 @@ function main
 	    exit 1
 	fi
     fi
-
-    local converter=cat
-    local ext=
-    rpm2cpio $input | extract $tmpdir | convert $tmpdir $output $converter $ext
+ 
+    rpm2cpio $input | extract $tmpdir | convert $tmpdir $output $conv $ext
 }
 
 main "$@"
