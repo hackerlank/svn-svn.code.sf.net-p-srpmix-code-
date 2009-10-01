@@ -25,6 +25,8 @@ function convert
     local ext=$4
     local i
     local o
+    local t
+
 
     while read; do
 	i=$idir/$REPLY
