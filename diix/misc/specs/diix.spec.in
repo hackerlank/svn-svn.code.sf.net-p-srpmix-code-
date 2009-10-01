@@ -1,0 +1,37 @@
+Summary: Picking up ELF files in a debug info file
+Name: diix
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPL
+Group: Development/Tools
+Buildarch: noarch
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: rpm cpio
+
+%description
+diix pics up ELF files in a debug info file.
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/diix
+
+%changelog
+* Wed Jun 10 2009 Masatake YAMATO <yamato@redhat.com> 0.0.0-0
+- Initial build.
+

@@ -31,7 +31,7 @@ function convert
 	i=$idir/$REPLY
 	t=${REPLY//\//^}
         o=$odir/${t/./,}$4
-	"$conv" "$i" > "$o"
+	$conv "$i" > "$o"
     done
 }
 
@@ -122,7 +122,7 @@ function main
 	fi
     fi
  
-    rpm2cpio $input | extract $tmpdir | convert $tmpdir $output $conv $ext
+    rpm2cpio $input | extract $tmpdir | convert $tmpdir $output "$conv" "$ext"
 }
 
 main "$@"
