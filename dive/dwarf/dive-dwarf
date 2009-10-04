@@ -1,0 +1,14 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+;; (libdwarves ...)
+;; (dive-dwarf query)
+(define (id->es compile-unit id)
+  )
+(define (es->id es)
+  )
+(define (register-id compile-unit id es)
+  )
+
+; (define-class <compile-unit> ()
+  
