@@ -68,7 +68,7 @@
 
 2009-09-18  Masatake YAMATO  <yamato@redhat.com>
 
-	* src/srpmix.daily: Return is sop is installed.
+	* src/srpmix.daily: Return if sop is installed.
 
 2009-09-14  Masatake YAMATO  <yamato@redhat.com>
 
