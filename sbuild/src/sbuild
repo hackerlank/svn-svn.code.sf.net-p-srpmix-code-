@@ -398,7 +398,7 @@ function main
     for cradle in ${SOP_CRADLES_DIR}/*; do
 	cf=${cradle}/cf
 	name=$(basename ${cradle})
-	
+
 	if test -z "$CRADLE" \
 	    || test "$CRADLE" = $name; then
 
@@ -415,7 +415,7 @@ function main
 		( create_repofile $cf $name )
 		( run_creterepo $cf $name )
 	    fi
-	fi
+	fi | tee ${cradle}/log/build-${DATE}.log
     done
 
     
