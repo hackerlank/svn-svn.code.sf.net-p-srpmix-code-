@@ -1,4 +1,0 @@
-2009-10-05  Masatake YAMATO  <yamato@redhat.com>
-
-	* sbuild (main): Log the building process.
-
