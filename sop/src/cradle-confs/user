@@ -5,7 +5,7 @@ BACKUP=no
 BUILD=no
 DIST_MAPPING=no
 INSTALL=no
-TYPE=srpm
+BUILDERS=srpmix
 
 USER_PATH=srpmix-request
 USER_PATTERN='*.src.rpm'

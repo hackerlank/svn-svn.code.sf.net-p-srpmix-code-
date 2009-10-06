@@ -4,7 +4,7 @@ ENABLE=yes
 GC=no
 BACKUP=no
 BUILD=yes
-TYPE=lcopy
+BUILDERS=lcopy
 DIST_MAPPING=no
 INSTALL=yes
 

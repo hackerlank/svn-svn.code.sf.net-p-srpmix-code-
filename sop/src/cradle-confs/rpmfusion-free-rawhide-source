@@ -6,7 +6,7 @@ ENABLE=yes
 GC=yes
 BACKUP=no
 BUILD=no
-TYPE=srpm
+BUILDERS=srpmix
 DIST_MAPPING=yes
 INSTALL=no
 

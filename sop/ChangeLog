@@ -1,3 +1,8 @@
+2009-10-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cradle-confs/* (BUILDERS): New variable, replacing
+	old TYPE variable.
+
 2009-10-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/mirror-yum (main): Remove unnessary / before run_gc.
