@@ -39,10 +39,11 @@ function main
 	return 1
     fi
 
+    # About the name, more work is needed.
     tstampdir=${SBUILD_TSTAMPDIR}/$name
     mkdir -p ${tstampdir}
-    mkfile=${tstampdir}/sbuild-${name}.mk
-    echo "include sbuild.mk"              > $mkfile
+    mkfile=${tstampdir}/srpmix-${name}.mk
+    echo "include srpmix.mk"              > $mkfile
     echo ""                               >> $mkfile
 
 

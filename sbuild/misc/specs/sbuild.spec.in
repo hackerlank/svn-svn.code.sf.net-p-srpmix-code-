@@ -1,4 +1,4 @@
-Summary: Script sets to builds sources
+Summary: Scripts set to builds sources
 Name: sbuild
 Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@

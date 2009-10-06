@@ -153,25 +153,27 @@ function run_builder
 	return 0
     fi
 
-    if test -z "${TYPE}"; then
-	echo "No TYPE in $cf" 1>&2
+    if test -z "${BUILDERS}"; then
+	echo "No BUILDERS in $cf" 1>&2
 	return 1
     fi
 
-    if [ -x "${BUILDERSDIR}"/"${TYPE}" ]; then
-	( set -x
-	  export SBUILD_JOBS="$SBUILD_JOBS"
-	  export SBUILD_LOAD="$SBUILD_LOAD"
-	  export SBUILD_TSTAMPDIR="$SBUILD_TSTAMPDIR"
-	  export SBUILD_RELEASE="$SBUILD_RELEASE"
-	  export SBUILD_DEBUG="$SBUILD_DEBUG"
-	  export SBUILD_TMPDIR="$SBUILD_TMPDIR"
-          "${BUILDERSDIR}"/"${TYPE}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" )
-	return $?
-    else
-	echo "No builder for ${TYPE}" 1>&2
-	return 1
-    fi
+    for b in ${BUILDERS//,/ }; do
+	if [ -x "${BUILDERSDIR}"/"${b}" ]; then
+	    ( set -x
+		export SBUILD_JOBS="$SBUILD_JOBS"
+		export SBUILD_LOAD="$SBUILD_LOAD"
+		export SBUILD_TSTAMPDIR="$SBUILD_TSTAMPDIR"
+		export SBUILD_RELEASE="$SBUILD_RELEASE"
+		export SBUILD_DEBUG="$SBUILD_DEBUG"
+		export SBUILD_TMPDIR="$SBUILD_TMPDIR"
+		"${BUILDERSDIR}"/"${b}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" )
+	    return $?
+	else
+	    echo "No builder for ${b}" 1>&2
+	    return 1
+	fi
+    done
 }
 
 function run_rsync

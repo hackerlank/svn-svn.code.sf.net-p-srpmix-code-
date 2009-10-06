@@ -1,0 +1,11 @@
+2009-10-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/builders/diix: Added stub.
+
+	* srpmix.mk: Renamed from sbuild.mk.
+
+	* src/builders/srpmix: Renamed from srpm.
+
+	* src/sbuild (run_builder): Use BUILDERS instead of TYPE.
+	Multiple builders in $BUILDERS are handled.
+

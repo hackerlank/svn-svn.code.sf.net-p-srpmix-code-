@@ -11,7 +11,7 @@ dist_bin_SCRIPTS=    \
 
 dist_pkgdata_SCRIPTS=				\
 	sbuild-createrepo.mk			\
-	sbuild.mk				\
+	srpmix.mk				\
 	gc-repo-srpmix-version.scm		\
 	gc-repo-pkg-version.scm			\
 	create-comps.scm                        \
