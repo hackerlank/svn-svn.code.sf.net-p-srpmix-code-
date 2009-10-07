@@ -259,9 +259,8 @@ function main
 	    cat ${tmp_dir}/$spec_file 1>&2
 	    exit 1
 	fi
+	transfer $tmp_dir/RPMS/noarch/*.rpm ${OUTPUT_DIR}
     fi
-    
-    transfer $tmp_dir/RPMS/noarch/*.rpm ${OUTPUT_DIR}
 }
 
 main "$@"

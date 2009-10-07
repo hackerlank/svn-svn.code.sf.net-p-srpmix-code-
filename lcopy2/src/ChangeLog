@@ -1,0 +1,5 @@
+2009-10-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* lcopy-envelop (main): Use $tmp_dir in the scope where
+	tmp_dir si defined.
+
