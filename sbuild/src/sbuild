@@ -14,7 +14,7 @@ DONT_CREATEREPO=
 CRADLE=
 
 SHORT_CUT=
-DATE=$(date +%Y%m%d)
+DATE=$(date --rfc-3339=date)
 
 function print_usage
 {

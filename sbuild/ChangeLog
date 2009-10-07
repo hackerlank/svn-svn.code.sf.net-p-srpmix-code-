@@ -1,5 +1,9 @@
 2009-10-07  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/sbuild (DATE): Change the date format to rfc-3339.
+
+2009-10-07  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/builders/diix: Added stub.
 
 	* srpmix.mk: Renamed from sbuild.mk.
