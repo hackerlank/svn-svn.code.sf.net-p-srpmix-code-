@@ -1,3 +1,12 @@
+2009-10-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.3.4.
+
+	* src/cradle-confs/jpackage-generic (YUM_REPOFILE): Updates to 5.0.
+	(YUM_REPONAME_UPDATE): Added new parameter.
+
+	* src/mirror-yum (main): Support `update' repository.
+
 2009-10-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cradle-confs/ftp.redhat.com (BUILDERS): Added diix stub.

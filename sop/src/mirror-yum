@@ -45,6 +45,7 @@ function run_gc
 
 function main
 {
+    set -x
     local repofile_path
     local srpm
     local name
@@ -56,7 +57,14 @@ function main
     local repofile_path="${MY_TMPDIR}/${YUM_REPONAME}.repo"
     echo "$YUM_REPOFILE" > $repofile_path
 
-    reposync --urls --config=${repofile_path} --source --repoid=${YUM_REPONAME} \
+    local update_repoid_flag
+    local update_enablerepo_flag
+    if [ -n "${YUM_REPONAME_UPDATE}" ]; then
+	update_repoid_flag="--repoid=${YUM_REPONAME_UPDATE}"
+	update_enablerepo_flag="--enablerepo=${YUM_REPONAME_UPDATE}"
+    fi
+
+    reposync --urls --config=${repofile_path} --source --repoid=${YUM_REPONAME} ${update_repoid_flag} \
 	| grep src.rpm \
 	| while read url; do
 	srpm=$(basename $url)
@@ -66,7 +74,11 @@ function main
 	    name=${srpm/.src.rpm/}
 
 	    # yumdownloader doesn't work on RPMFUSION.
-	    if ( yumdownloader -c ${repofile_path} --disablerepo='*' --enablerepo=${YUM_REPONAME} --source ${name} \
+	    if ( yumdownloader -c ${repofile_path} \
+		               --disablerepo='*'   \
+		               --enablerepo=${YUM_REPONAME} \
+		               ${update_enablerepo_flag} \
+                               --source ${name} \
 		 || wget $url; ) \
 		&& test -f ${srpm}; then
 		run_gc ${srpm}
