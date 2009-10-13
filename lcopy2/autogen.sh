@@ -9,3 +9,8 @@ aclocal -I misc/m4
 automake --add-missing --force-missing
 autoconf
 
+
+REQUIRED="cvs svn git mercurial darcs bzr"
+if which yum > /dev/null 2>&1; then
+    yum -y install ${REQUIRED}
+fi

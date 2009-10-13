@@ -1,0 +1,5 @@
+2009-10-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* autogen.sh: Install requried packages.
+
+
