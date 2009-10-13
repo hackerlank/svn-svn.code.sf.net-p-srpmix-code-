@@ -1,3 +1,7 @@
+2009-10-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* autogen.sh (REQUIRED): Install koji.
+
 2009-10-10  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.3.4.
