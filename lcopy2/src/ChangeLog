@@ -1,3 +1,7 @@
+2009-10-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* conf.d/qt-jambi,trunk.lcopy: Added new file.
+
 2009-10-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* lcopy-envelop (main): Use $tmp_dir in the scope where

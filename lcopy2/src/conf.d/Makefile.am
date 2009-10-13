@@ -8,5 +8,6 @@ dist_confd_DATA = \
 	gnash,trunk.lcopy			\
 	kernel,xen-3_2.lcopy			\
 	libvirt,trunk.lcopy                     \
+	qt-jambi,trunk.lcopy                    \
 	\
 	$(NULL)
