@@ -1,24 +1,6 @@
 confddir = $(sysconfdir)/lcopy/conf.d
 dist_confd_DATA = \
 	\
-A         ConsoleKit,trunk.lcopy
-A         anaconda,trunk.lcopy
-A         autoconf,trunk.lcopy
-A         automake,trunk.lcopy
-A         biwascheme,trunk.lcopy
-A         cairo,trunk.lcopy
-A         corosync,trunk.lcopy
-A         glib2,trunk.lcopy
-A         glibc,trunk.lcopy
-A         goocanvas,trunk.lcopy
-A         gstreamer,trunk.lcopy
-A         gtk2,trunk.lcopy
-A         hal,trunk.lcopy
-A         kernel,rt.lcopy
-A         kernel,trunk.lcopy
-A         man-pages,trunk.lcopy
-A         sos,trunk.lcopy
-A         wireshark,trunk.lcopy
 	ConsoleKit,trunk.lcopy \
 	anaconda,trunk.lcopy \
 	autoconf,trunk.lcopy \

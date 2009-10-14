@@ -1,3 +1,8 @@
+2009-10-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/conf.d/update.sh: Redirect the output of 
+	  update.sh to stderr.
+
 2009-10-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* autogen.sh: Install requried packages.

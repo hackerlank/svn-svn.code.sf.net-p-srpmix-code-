@@ -9,7 +9,7 @@ dist_confd_DATA = \
 EOF
 
 for x in $lcopies; do
-    svn    add   $(basename $x)
+    svn    add   $(basename $x) > /dev/stderr
     printf "	%s \\\\\n" $(basename $x)
 done
 echo '	\'
