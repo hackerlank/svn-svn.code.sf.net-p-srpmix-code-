@@ -1,3 +1,7 @@
+2009-10-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* sbuild-createrepo.mk (CREATEREPO_OPT): Don't use --update.
+
 2009-10-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sbuild (DATE): Change the date format to rfc-3339.
