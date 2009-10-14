@@ -134,7 +134,7 @@ function run_gc
 	diff -uN ${dist_cadr_list} ${dist_car_list} | grep -e '^-[^-].*' | sed -e 's/^-//' >  ${diff}
 	
 	cat ${diff} | while read p0 vr0; do
-	    fgrep -e "${p0}" ${all} | fgrep -e "${vr0}" > ${pkgs}
+	    fgrep -e "${p0}-${vr0}-srpmix" ${all} | grep -e "^${p0}" > ${pkgs}
 	    grep -e '.\+srpmix-plugin-.\+' ${pkgs}      | tr ' ' '-' | while read p; do
 		echo ${p} >> ${efiles_plugin}
 	    done
