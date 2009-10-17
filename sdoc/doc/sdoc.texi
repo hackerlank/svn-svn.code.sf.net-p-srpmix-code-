@@ -17,5 +17,26 @@ Copyright @copyright{} 2009 Red hat, K.K.
 
 @dircategory Understanding source code
 @direntry
-* Using and building source code libraries: (sdoc)       Using and building source code libraries
+* ソースコード基地の利用と運用: (sdoc)       ソースコード基地の利用と運用
 @end direntry
+
+@titlepage
+@title ソースコード基地の利用と運用
+@author Masatake YAMATO (@email{yamato@@redhat.com})
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 2009 Masatake YAMATO
+Copyright @copyright{} 2009 Red hat, K.K.
+@c @insertcopying
+@end titlepage
+
+@ifnottex
+@node Top
+@top ソースコード基地の利用と運用
+@end ifnottex
+
+その名が示す通りオープンソースソフトウェアの素晴しい点は、その利用者にソースコードの
+閲覧、変更、再配布を許している点にあります。
+
+@contents
+@bye
