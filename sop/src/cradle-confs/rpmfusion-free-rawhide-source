@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 METHOD=yum
 ENABLE=yes
 GC=yes
@@ -9,6 +7,8 @@ BUILD=no
 BUILDERS=srpmix
 DIST_MAPPING=yes
 INSTALL=no
+
+CREATEREPO_OPT=
 
 YUM_REPONAME=rpmfusion-free-rawhide-source
 YUM_REPOFILE=$(cat <<"EOF"

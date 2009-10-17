@@ -8,6 +8,8 @@ BUILDERS=srpmix,diix
 DIST_MAPPING=no
 INSTALL=no
 
+CREATEREPO_OPT=--update
+
 WGET_PROTOCOL=ftp
 WGET_HOST=ftp.redhat.com
 WGET_PATH=/pub/redhat

@@ -1,3 +1,7 @@
+2009-10-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cradle-confs/*: Added CREATEREPO_OPT parameter.
+
 2009-10-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-update (run_gc): Use grep and twice to choose the gc candidates.

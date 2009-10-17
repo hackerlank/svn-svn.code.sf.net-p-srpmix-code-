@@ -1,5 +1,4 @@
 #!/bin/bash
-
 METHOD=wget
 ENABLE=no
 GC=no
@@ -8,6 +7,8 @@ BUILD=no
 BUILDERS=srpmix
 DIST_MAPPING=no
 INSTALL=no
+
+CREATEREPO_OPT=--update
 
 WGET_PROTOCOL=http
 WGET_HOST=mirror.centos.org

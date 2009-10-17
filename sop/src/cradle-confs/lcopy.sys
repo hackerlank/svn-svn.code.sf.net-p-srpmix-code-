@@ -8,4 +8,6 @@ BUILDERS=lcopy
 DIST_MAPPING=no
 INSTALL=yes
 
+CREATEREPO_OPT=
+
 LCOPY_SYS_CONF_DIR=/etc/lcopy/conf.d
