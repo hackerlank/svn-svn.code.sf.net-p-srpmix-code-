@@ -20,6 +20,7 @@ git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git k
 git clone git://git.et.redhat.com/libvirt.git libvirt
 git clone git://git.kernel.org/pub/scm/docs/man-pages/man-pages.git man-pages
 svn checkout http://svn.fedorahosted.org/svn/sos/trunk/src sos
+svn checkout http://anonsvn.wireshark.org/wireshark/trunk/ wireshark
 
 
 NOT YET:
@@ -53,5 +54,4 @@ git clone git://git.savannah.gnu.org/texinfo.git texinfo
 svn checkout https://tomoe.svn.sourceforge.net/svnroot/tomoe/tomoe/trunk tomoe
 git clone git://git.kernel.org/pub/scm/utils/util-linux-ng/util-linux-ng.git util-linux-ng
 svn checkout svn://svn@svn.a-k-r.org/akr/wfo/trunk wfo
-svn checkout http://anonsvn.wireshark.org/wireshark/trunk/ wireshark
 git clone git://anongit.freedesktop.org/xorg/xserver xorg-x11-server

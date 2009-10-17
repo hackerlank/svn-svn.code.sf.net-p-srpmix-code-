@@ -1,3 +1,7 @@
+2009-10-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/lcopy.spec.in (Group): Specify %{_libexecdir}/lcopy/*
+	as install file instead of %{_libexecdir}/lcopy/backends.
 2009-10-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/conf.d/update.sh: Redirect the output of 
