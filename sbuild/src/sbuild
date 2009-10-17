@@ -191,9 +191,9 @@ function run_rsync
 	return 0
     fi
 
-    if [ -n ${SBUILD_TSTAMPDIR} ] && [ -d "${SBUILD_TSTAMPDIR}/${name}/blacklist.d/" ]; then
-	mkdir -p ${SOP_CRADLES_DIR}/${name}/blacklist
-	rsync -a ${SBUILD_TSTAMPDIR}/${name}/blacklist.d/ ${SOP_CRADLES_DIR}/${name}/blacklist
+    if [ -n ${SBUILD_TSTAMPDIR} ] && [ -d "${SBUILD_TSTAMPDIR}/${name}" ]; then
+	mkdir -p ${SOP_CRADLES_DIR}/${name}/sbuild
+	rsync -a ${SBUILD_TSTAMPDIR}/${name}/ ${SOP_CRADLES_DIR}/${name}/sbuild
     fi
 }
 
@@ -206,7 +206,7 @@ function run_creterepo
     source $cf
 
     if test -d ${repo}; then
-	${PKGDATADIR}/sbuild-createrepo.mk -C ${repo}
+	${PKGDATADIR}/sbuild-createrepo.mk CREATEREPO_OPTS="${CREATEREPO_OPTS}" -C ${repo}
     fi
 }
 

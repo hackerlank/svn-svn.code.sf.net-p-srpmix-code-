@@ -1,3 +1,14 @@
+2009-10-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.1.4.
+
+	* src/sbuild (run_creterepo): Pass $CREATEREPO_OPTS
+	to make.
+	(run_rsync): Copy sbuild direntry instead of blacklist dir.
+
+	* src/sbuild-createrepo.mk (CREATEREPO_OPTS): Renamed
+	from CREATEREPO_OPT.
+
 2009-10-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* sbuild-createrepo.mk (CREATEREPO_OPT): Don't use --update.
