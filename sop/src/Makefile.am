@@ -9,7 +9,8 @@ dist_pkgdata_SCRIPTS= \
 	mirror-koji   \
 	mirror-user   \
 	mirror-yum    \
-	mirror-lcopy-sys \
+	mirror-lcopy-sys  \
+	mirror-lcopy-user \
 	\
 	$(NULL)
 

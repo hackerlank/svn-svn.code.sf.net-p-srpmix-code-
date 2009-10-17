@@ -1,0 +1,17 @@
+#!/bin/bash
+METHOD=lcopy-user
+ENABLE=yes
+GC=no
+BACKUP=no
+BUILD=yes
+BUILDERS=lcopy
+DIST_MAPPING=no
+INSTALL=yes
+
+CREATEREPO_OPT=
+
+LCOPY_USER_PATH=lcopy-request
+LCOPY_USER_PATTERN='*.lcopy'
+
+
+

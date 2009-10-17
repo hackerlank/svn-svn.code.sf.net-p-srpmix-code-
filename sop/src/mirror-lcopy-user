@@ -1,0 +1,50 @@
+#!/bin/bash
+cf=$1
+log=$2
+
+source $cf
+
+if test -z "$LCOPY_USER_PATH"; then
+    echo "No LCOPY_USER_PATH in $cf" 1>&2
+    exit 1
+fi
+
+if test -z "$LCOPY_USER_PATTERN"; then
+    echo "No LCOPY_USER_PATTERN in $cf" 1>&2
+    exit 1
+fi
+
+lcopy-update --root-dir=$(pwd)
+
+function member_p
+{
+    local key=$1
+    shift
+
+    for x in $@; do
+	if [ $key = $x ]; then
+	    return 0
+	fi
+    done
+    return 1
+    
+}
+
+done=
+
+for h in /home/*; do
+    if [ -d $h ] && [ -d "$h/$LCOPY_USER_PATH" ]; then
+	for p in "$h/$LCOPY_USER_PATH"/$LCOPY_USER_PATTERN; do
+	    if test -r "$p"; then
+		p0=$(basename $p)
+		if ! member_p "$p0" $done; then
+		    lcopy-checkout --no-error-message-if-existing "$p"
+		    done="$p0 $done"
+		else
+		    echo "$p is duplicated: abort to mirror\n" 1>&2
+		fi
+	    fi
+	done
+    fi
+done
+	    

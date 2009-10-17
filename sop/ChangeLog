@@ -1,5 +1,9 @@
 2009-10-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/cradle-confs/lcopy.user: New cradle.
+
+	* src/mirror-lcopy-user: Implemented.
+
 	* src/cradle-confs/*: Added CREATEREPO_OPT parameter.
 
 2009-10-14  Masatake YAMATO  <yamato@redhat.com>
