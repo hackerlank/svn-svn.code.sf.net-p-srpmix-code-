@@ -15,6 +15,7 @@ CRADLE=
 
 SHORT_CUT=
 DATE=$(date --rfc-3339=date)
+DATE_FOR_LOG=$(sed -e "s/-//g" <<<$DATE)
 
 function print_usage
 {
@@ -417,7 +418,7 @@ function main
 		( create_repofile $cf $name )
 		( run_creterepo $cf $name )
 	    fi
-	fi | tee ${cradle}/log/build-${DATE}.log
+	fi | tee ${cradle}/log/build-${DATE_FOR_LOG}.log
     done
 
     

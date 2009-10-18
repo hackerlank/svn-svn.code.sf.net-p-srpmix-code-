@@ -1,3 +1,10 @@
+2009-10-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sbuild (DATE_FOR_LOG): New variable.
+	Use different date formats for log file name and weakview package
+	file names.
+	(main): Use DATE_FOR_LOG.
+
 2009-10-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.1.4.
