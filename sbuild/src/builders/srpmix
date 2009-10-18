@@ -41,7 +41,14 @@ function main
 
     # About the name, more work is needed.
     tstampdir=${SBUILD_TSTAMPDIR}/$name
-    mkdir -p ${tstampdir}
+    if [ ! -d "${tstampdir}" ]; then
+	if [ -d "${cradle_dir}"/sbuild ];
+	    cp -ar "${cradle_dir}"/sbuild "${tstampdir}"
+	else
+	    mkdir ${tstampdir}	    
+	fi
+    fi
+
     mkfile=${tstampdir}/srpmix-${name}.mk
     echo "include srpmix.mk"              > $mkfile
     echo ""                               >> $mkfile

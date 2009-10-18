@@ -1,5 +1,10 @@
 2009-10-19  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/builders/srpmix (main): If no tstampdir, use
+	the one in the cradle.
+
+2009-10-19  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: version 0.1.5.
 
 	* src/sbuild (DATE_FOR_LOG): New variable.
