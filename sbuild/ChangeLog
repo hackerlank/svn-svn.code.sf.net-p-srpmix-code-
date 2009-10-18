@@ -1,5 +1,7 @@
 2009-10-19  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.1.5.
+
 	* src/sbuild (DATE_FOR_LOG): New variable.
 	Use different date formats for log file name and weakview package
 	file names.
