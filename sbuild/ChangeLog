@@ -1,5 +1,7 @@
 2009-10-19  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.1.6.
+
 	* src/builders/srpmix (main): If no tstampdir, use
 	the one in the cradle.
 

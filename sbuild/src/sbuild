@@ -14,8 +14,8 @@ DONT_CREATEREPO=
 CRADLE=
 
 SHORT_CUT=
-DATE=$(date --rfc-3339=date)
-DATE_FOR_LOG=$(sed -e "s/-//g" <<<$DATE)
+DATE=$(date +%Y%m%d)
+DATE_FOR_LOG=$(date --rfc-3339=date)
 
 function print_usage
 {
