@@ -6,7 +6,7 @@ NAME=$2
 SBUILD_CONF=$3
 SOP_CONF=$4
 DATE=$5
-
+DATE_FOR_LOG=$6
 
 # source ${SBUILD_CONF}
 source ${SOP_CONF}

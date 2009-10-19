@@ -168,7 +168,7 @@ function run_builder
 		export SBUILD_RELEASE="$SBUILD_RELEASE"
 		export SBUILD_DEBUG="$SBUILD_DEBUG"
 		export SBUILD_TMPDIR="$SBUILD_TMPDIR"
-		"${BUILDERSDIR}"/"${b}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" )
+		"${BUILDERSDIR}"/"${b}" "$cf" "$name" "${SBUILD_CONF}" "${SOP_CONF_DIR}/sop.cf" "${DATE}" "${DATE_FOR_LOG}")
 	    return $?
 	else
 	    echo "No builder for ${b}" 1>&2
