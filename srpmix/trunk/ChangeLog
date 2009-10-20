@@ -1,7 +1,7 @@
 2009-10-20  Masatake YAMATO  <yamato@redhat.com>
-
-	* configure.ac: version 3.109.2.
-
+	
+	* configure.ac: version 3.110.0.
+	
 	* src/plugins/60srpmix-kindex (main): Check whether $SPEC
 	is available. Added necessary ! before test.
 
