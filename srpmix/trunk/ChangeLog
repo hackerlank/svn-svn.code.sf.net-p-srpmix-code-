@@ -1,5 +1,10 @@
 2009-10-20  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/60srpmix-kindex (main): Check whether $SPEC
+	is available. Added necessary ! before test.
+
+2009-10-20  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: version 3.109.1.
 
 	* src/srpmix.daily: Use rpm to check sop existence.
