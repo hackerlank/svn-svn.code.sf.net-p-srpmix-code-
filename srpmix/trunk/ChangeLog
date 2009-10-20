@@ -1,3 +1,7 @@
+2009-10-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix.daily: Use rpm to check sop existence.
+
 2009-10-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* autogen.sh: Instsall require packages.

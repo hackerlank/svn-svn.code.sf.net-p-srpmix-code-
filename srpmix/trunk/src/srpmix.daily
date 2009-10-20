@@ -25,12 +25,12 @@
 #
 ########################################################################
 
-if which sop > /dev/null 2>&1; then
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+
+if rpm -qi sop > /dev/null 2>&1; then
     echo "*** sop's cron job will do the same task" 2>&1
     return 0
 fi
-
-PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
 if test "x$FIND_OPTIONS" = "x"; then
   FIND_OPTIONS='-mtime 0'
