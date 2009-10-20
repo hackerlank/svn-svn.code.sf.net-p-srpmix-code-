@@ -42,7 +42,7 @@ function main
     # About the name, more work is needed.
     tstampdir=${SBUILD_TSTAMPDIR}/$name
     if [ ! -d "${tstampdir}" ]; then
-	if [ -d "${cradle_dir}"/sbuild ];
+	if [ -d "${cradle_dir}"/sbuild ]; then
 	    cp -ar "${cradle_dir}"/sbuild "${tstampdir}"
 	else
 	    mkdir ${tstampdir}	    

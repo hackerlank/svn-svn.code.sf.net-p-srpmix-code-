@@ -68,6 +68,9 @@ function prepare_conf
 
 function parse_arguments
 {
+    local tmpfs_size
+
+
     prepare_conf "$@"
 
     while [ $# -gt 0 ]; do
@@ -105,16 +108,7 @@ function parse_arguments
 	        DONT_CREATEREPO=yes
 		;;
 	    --use-tmpfs=*)
-	        local tmpfs_size=${1/--use-tmpfs=/}
-		mkdir -p ${SBUILD_TMPDIR}
-	        if { mount | grep ${SBUILD_TMPDIR}; } > /dev/null; then
-		    :
-		else
-		    if ! mount -t tmpfs -o size=${tmpfs_size}G tmpfs "${SBUILD_TMPDIR}"; then
-			echo "Failed in mounting tmpfs on "${SBUILD_TMPDIR}" with size ${tmpfs_size}G" 1>&2
-			exit 1
-		    fi
-		fi
+	        tmpfs_size=${1/--use-tmpfs=/}
 		;;
 	    --load=*)
 	        SBUILD_LOAD=${1/--load=/}
@@ -133,7 +127,19 @@ function parse_arguments
         esac
 	shift
     done
-    
+
+    mkdir -p ${SBUILD_TMPDIR}
+    if [ -n tmpfs_size ]; then
+	if { mount | grep ${SBUILD_TMPDIR}; } > /dev/null; then
+	    :
+	else
+	    if ! mount -t tmpfs -o size=${tmpfs_size}G tmpfs "${SBUILD_TMPDIR}"; then
+		echo "Failed in mounting tmpfs on "${SBUILD_TMPDIR}" with size ${tmpfs_size}G" 1>&2
+		exit 1
+	    fi
+	fi
+    fi    
+
     SBUILD_JOBS=${SBUILD_JOBS:-$(cat /proc/cpuinfo  | grep ^processor  | wc -l)}
     SBUILD_LOAD=${SBUILD_LOAD:-$(cat /proc/cpuinfo  | grep ^processor  | wc -l)}
 }

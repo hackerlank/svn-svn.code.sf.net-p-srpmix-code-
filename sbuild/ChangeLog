@@ -1,5 +1,13 @@
 2009-10-20  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.1.7.
+
+	* src/sbuild (parse_arguments): Create SBUILD_TMPDIR always.
+
+	* src/builders/srpmix (main): Fix a syntax error.
+
+2009-10-20  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/builders/lcopy (main): Use DATE_FOR_LOG.
 
 	* src/sbuild (run_builder): Pass DATE_FOR_LOG to builder.
