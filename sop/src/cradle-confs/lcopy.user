@@ -10,7 +10,7 @@ INSTALL=yes
 
 CREATEREPO_OPT=
 
-LCOPY_USER_PATH=lcopy-request
+LCOPY_USER_PATH=sop/lcopy
 LCOPY_USER_PATTERN='*.lcopy'
 
 

@@ -75,19 +75,29 @@ function mirror
 
     "${handler}" ${cf} "${log}"
 
+    if [ - z "$BUILDERS" ]; then
+	return
+    fi
+
     # TODO: share the code
-    find ${odir} -name '*.src.rpm'		\
-	| while read p; do dirname $p; done	\
-	| LANG=C sort				\
-	| uniq					\
-	> ${ndir}/.mirror-vpath
-    mv -f ${ndir}/.mirror-vpath ${ndir}/mirror-vpath
-    find ${odir} -name '*.src.rpm'		\
-	| while read p; do basename $p; done	\
-	| LANG=C sort			        \
-	| uniq					\
-	> ${ndir}/.mirror-pkgs
-    mv -f ${ndir}/.mirror-pkgs ${ndir}/mirror-pkgs
+
+
+    if [ "$BUILDERS" = srpmix ]; then
+	# TODO: This should be part of builder backend.
+	find ${odir} -name '*.src.rpm'		\
+	    | while read p; do dirname $p; done	\
+	    | LANG=C sort				\
+	    | uniq					\
+	    > ${ndir}/.mirror-vpath
+	mv -f ${ndir}/.mirror-vpath ${ndir}/mirror-vpath
+	find ${odir} -name '*.src.rpm'		\
+	    | while read p; do basename $p; done	\
+	    | LANG=C sort			        \
+	    | uniq					\
+	    > ${ndir}/.mirror-pkgs
+	mv -f ${ndir}/.mirror-pkgs ${ndir}/mirror-pkgs
+    fi
+    
 
     if test "${DIST_MAPPING}" = yes; then
 	mkdir -p ${ndir}/dist-mapping
@@ -96,6 +106,7 @@ function mirror
 	    > ${ndir}/dist-mapping/.${name}.es
 	mv -f ${ndir}/dist-mapping/.${name}.es ${ndir}/dist-mapping/${name}.es 
     fi
+
 }
 
 function main
