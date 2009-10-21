@@ -1,6 +1,6 @@
 * binariesからdist mappingの元を得る。
-* mirrorスクリプトだけ独立させる
-* srpmix-request -> sop-requestへ
+* mirrorスクリプトだけ独立させる<done>
+* srpmix-request -> sop/requestへ<done>
 * tarball
 
 ls | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'   | less | while read X; do echo "$(ls | grep $X | wc -l): $X" ; done | sort -n | uniq 

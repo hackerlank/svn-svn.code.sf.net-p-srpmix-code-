@@ -1,3 +1,8 @@
+2009-10-21  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-plugin (is_enabled_plugin): Use an argument as default return value.
+	(list_plugin_candidates): Tune the condition to choose the plugins.
+
 2009-10-20  Masatake YAMATO  <yamato@redhat.com>
 	
 	* configure.ac: version 3.110.0.

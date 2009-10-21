@@ -128,25 +128,25 @@ function verify_commands
 
 function is_enabled_plugin
 {
+    local target=$1
+    local default_result=$2
+
+
     local p
 
     for p in $ENABLE_PLUGIN; do
-        if test "x$p" = "x$1"; then
+        if test "x$p" = "x$target"; then
             return 0
         fi
     done
 
     for p in $DISABLE_PLUGIN; do
-        if test "x$p" = "x$1"; then
+        if test "x$p" = "x$target"; then
             return 1
         fi
     done
 
-    if test "x$ENABLE_PLUGIN" = "x"; then
-        return 0
-    fi
-
-    return 1
+    return $default_result
 }
 
 function list_plugin_candidates
@@ -160,7 +160,8 @@ function list_plugin_candidates
 	f=$(basename $plugin)
 	n=$($plugin --name)
 
-        ( is_enabled_plugin ${f} || is_enabled_plugin ${n} ) \
+        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
+	    || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
 	    && echo ${n} $plugin
     done
 
@@ -168,7 +169,8 @@ function list_plugin_candidates
 	f=$(basename $p)
 	n=$($p --name)
 
-       ( is_enabled_plugin ${f} || is_enabled_plugin ${b} ) \
+       ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${b} 1 ) \
+	   || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
 	   && echo ${n} $p
     done
 }
