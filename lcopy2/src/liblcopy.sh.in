@@ -85,6 +85,14 @@ function lcopy_backend_genconf_format
     lcopy_backend_call $vcs genconf_format
 }
 
+function lcopy_backend_prepare_archives
+{
+    local vcs=$1
+    shift
+
+    lcopy_backend_call $vcs prepare_archives "$@"
+}
+
 function lcopy_backend_checkout
 {
     local vcs=$1
@@ -121,7 +129,7 @@ function lcopy_srpmix_plugin
     local base_dir=$1
 
     if which srpmix-plugin > /dev/null 2>&1; then
-	srpmix-plugin  ${base_dir}
+	srpmix-plugin  --disable=vanilla ${base_dir}
     fi
 }
 

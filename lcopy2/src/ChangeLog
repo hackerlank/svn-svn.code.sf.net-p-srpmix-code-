@@ -1,3 +1,9 @@
+2009-10-21  Masatake YAMATO  <yamato@redhat.com>
+
+	* liblcopy.sh.in (lcopy_srpmix_plugin): Don't run vanilla plugin.
+
+	* */*: Introduce prepare_archives method.
+
 2009-10-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* conf.d/qt-jambi,trunk.lcopy: Added new file.

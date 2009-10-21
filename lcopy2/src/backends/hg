@@ -207,6 +207,19 @@ function hg_rebirth
     write_spec "${repo}"
 }
 
+#
+# PREPARE_ARCHIVERS
+#
+function hg_help_prepare_archives
+{
+    echo "	$0" "prepare_archives" "FILE.lcopy" "BASE-DIR"
+}
+
+function hg_prepare_archives
+{
+    common_prepare_archives "$@"
+}
+
 function main
 {
     common_main "$@"
