@@ -18,5 +18,6 @@ dist_bin_SCRIPTS =				\
 	sop-update				\
 	sop-mummify				\
 	sop-prepare				\
+	sop-mirror				\
 	\
 	$(NULL)

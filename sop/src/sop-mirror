@@ -1,0 +1,140 @@
+#!/bin/bash
+
+SOPCONFDIR=/etc/sop
+CONF=sop.cf
+PKGDATADIR=/usr/share/sop
+
+
+if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+    SOPCONFDIR=$1
+    source "$1/${CONF}"
+elif test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function print_usage
+{
+    echo "Usage: "
+    echo "	$0 --help|-h"
+    echo "	$0 [MIRROR_NAME...]"
+}
+
+function mirror
+{
+    local cf=$1/cf
+    local name=$(basename $1)
+
+    source $cf
+    if test -z "$METHOD"; then
+	echo "No METHOD found in $cf" 1>&2
+	return 1
+    fi
+    if test -z "$ENABLE"; then
+	echo "No ENABLE found in $cf" 1>&2
+	return 1
+    fi
+    if test -z "$GC"; then
+	echo "No GC found in $cf" 1>&2
+	return 1
+    fi
+    if test -z "$BACKUP"; then
+	echo "No BACKUP found in $cf" 1>&2
+	return 1
+    fi
+    if test -z "$DIST_MAPPING"; then
+	echo "No DIST_MAPPING found in $cf" 1>&2
+	return 1
+    fi
+    
+
+    if test $ENABLE != yes; then
+	return 0
+    fi
+
+
+    local handler="${PKGDATADIR}/mirror-${METHOD}"
+    local ndir="${SOP_CRADLES_DIR}/${name}"
+    local odir="${ndir}/mirror"
+    local ldir="${ndir}/log"
+    local date=$(date --rfc-3339=date)
+
+
+    if ! test -x "${handler}"; then
+	echo "No mirror handler for method: $method in $PKGDATADIR" 1>&2
+	return 1
+    fi
+
+    if ! test -d $odir; then
+	mkdir -p $odir
+    fi
+
+    if ! test -d $ldir; then
+	mkdir -p $ldir
+    fi
+
+
+    cd ${odir}
+
+    local log=${ldir}/mirror-${date}.log
+
+    "${handler}" ${cf} "${log}"
+
+    if [ - z "$BUILDERS" ]; then
+	return
+    fi
+
+    # TODO: share the code
+
+
+    if [ "$BUILDERS" = srpmix ]; then
+	# TODO: This should be part of builder backend.
+	find ${odir} -name '*.src.rpm'		\
+	    | while read p; do dirname $p; done	\
+	    | LANG=C sort				\
+	    | uniq					\
+	    > ${ndir}/.mirror-vpath
+	mv -f ${ndir}/.mirror-vpath ${ndir}/mirror-vpath
+	find ${odir} -name '*.src.rpm'		\
+	    | while read p; do basename $p; done	\
+	    | LANG=C sort			        \
+	    | uniq					\
+	    > ${ndir}/.mirror-pkgs
+	mv -f ${ndir}/.mirror-pkgs ${ndir}/mirror-pkgs
+    fi
+    
+
+    if test "${DIST_MAPPING}" = yes; then
+	mkdir -p ${ndir}/dist-mapping
+	find ${odir} -name '*.src.rpm' \
+	    | srpmix-wrap --just-print \
+	    > ${ndir}/dist-mapping/.${name}.es
+	mv -f ${ndir}/dist-mapping/.${name}.es ${ndir}/dist-mapping/${name}.es 
+    fi
+
+}
+
+function main
+{
+    if [ "$#" = 1 ] && ( [ "$1" = "-h" ] || [ "$1" = "--help" ] ); then
+	print_usage
+	return 0
+    fi
+
+    if test $# = 0; then
+	for d in ${SOP_CRADLES_DIR}/*; do
+	    mirror $d
+	done
+    else
+	for mirror_name in "$@"; do
+	    local d="${SOP_CRADLES_DIR}/${mirror_name}"
+	    if [ -d $d ]; then
+		mirror $d
+	    fi
+	done
+    fi
+}
+
+time main "$@"

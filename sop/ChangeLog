@@ -1,8 +1,13 @@
 2009-10-21  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/sop-mirror: New script.
+
+	* src/cron/sop-010-mirror: use sop-mirror.
+
+2009-10-21  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/cron/sop-010-mirror (mirror): Create mirror-vpath and mirror-pkgs
 	if BUILDER is srpmix.
-
 	* src/cradle-confs/lcopy.user (LCOPY_USER_PATH): Introduce indirect
 	directory sop.
 

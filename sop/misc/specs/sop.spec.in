@@ -34,6 +34,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/sop-update
 %{_bindir}/sop-mummify
 %{_bindir}/sop-prepare
+%{_bindir}/sop-mirror
 
 %dir %{_sysconfdir}/sop
 %config(noreplace) %{_sysconfdir}/sop/sop.cf
