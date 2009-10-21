@@ -1,5 +1,9 @@
 2009-10-22  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Check the existance of srpmix-plugin.
+
+	* src/backends/Makefile.am (dist_backends_SCRIPTS): Added wgetx.
+
 	* src/backends/wgettarx: Implemented.
 
 	* src/backends/hg (repo_check): Remove hg_spec.

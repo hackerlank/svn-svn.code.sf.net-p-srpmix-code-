@@ -8,5 +8,6 @@ dist_backends_SCRIPTS =   \
 	bzr \
 	darcs \
 	mtn   \
+	wgetx \
 	\
 	$(NULL)

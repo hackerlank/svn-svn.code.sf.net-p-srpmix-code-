@@ -49,6 +49,11 @@ if test x$_BZR_ = x; then
   AC_MSG_ERROR([Cannot find bzr])
 fi			
 
+AC_PATH_PROG([_SRPMIX_PLUGIN_], [srpmix-plugin])
+if test x$_SRPMIX_PLUGIN_ = x; then
+  AC_MSG_ERROR([Cannot find srpmix-plugin])
+fi			
+
 AC_RPM_RELEASE
 
 AC_OUTPUT([
