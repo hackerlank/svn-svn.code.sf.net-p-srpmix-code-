@@ -3,7 +3,7 @@
 # VERSION=
 
 
-COMMON_SUBCMDS="genconf checkout update dirp rebirth genconf_format prepare_archives"
+COMMON_SUBCMDS="genconf checkout update dirp rebirth genconf_format"
 
 function common_help_help
 {
@@ -43,19 +43,6 @@ function common_write_spec
     printf "${BACKEND^^*}_CF_VERSION=\"%s\"\n" "${VERSION}"
 }
 
-function common_prepare_archives
-{
-    local subcmd=$1
-    shift
-
-    local cf=$1
-    shift
-
-    local base_dir=$1
-    shift
-
-    (cd ${base_dir}; ln -s ./pre-build ./archives)
-}
 
 
 function lcopy_wait_timed

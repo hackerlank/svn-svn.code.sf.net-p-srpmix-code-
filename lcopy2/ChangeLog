@@ -1,7 +1,12 @@
+2009-10-21  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/liblcopy.sh.in (lcopy_srpmix_plugin): Disable vanilla plugin.
+
 2009-10-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/lcopy.spec.in (Group): Specify %{_libexecdir}/lcopy/*
 	as install file instead of %{_libexecdir}/lcopy/backends.
+
 2009-10-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/conf.d/update.sh: Redirect the output of 
@@ -11,4 +16,12 @@
 
 	* autogen.sh: Install requried packages.
 
+2009-10-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/conf.d/qt-jambi,trunk.lcopy: Added new file.
+
+2009-10-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/lcopy-envelop (main): Use $tmp_dir in the scope where
+	tmp_dir si defined.
 

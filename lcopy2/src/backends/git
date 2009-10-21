@@ -209,19 +209,6 @@ function git_rebirth
     write_spec "${repo}"
 }
 
-#
-# PREPARE_ARCHIVERS
-#
-function git_help_prepare_archives
-{
-    echo "	$0" "prepare_archives" "FILE.lcopy" "BASE-DIR"
-}
-
-function git_prepare_archives
-{
-    common_prepare_archives "$@"
-}
-
 function main
 {
     common_main "$@"

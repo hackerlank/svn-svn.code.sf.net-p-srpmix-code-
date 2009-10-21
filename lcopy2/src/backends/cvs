@@ -288,19 +288,6 @@ function cvs_rebirth
     write_spec "${repo}" "${module}"
 }
 
-#
-# PREPARE_ARCHIVERS
-#
-function cvs_help_prepare_archives
-{
-    echo "	$0" "prepare_archives" "FILE.lcopy" "BASE-DIR"
-}
-
-function cvs_prepare_archives
-{
-    common_prepare_archives "$@"
-}
-
 function main
 {
     common_main "$@"

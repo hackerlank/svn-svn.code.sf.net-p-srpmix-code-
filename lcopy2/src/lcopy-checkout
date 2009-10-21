@@ -154,19 +154,17 @@ function main
  
     echo $LCOPY_VERSION > ${base_dir}/LCOPY
     cp $INPUT ${base_dir}/checkout.lcopy
-
-
-    lcopy_backend_prepare_archives "$LCOPY_VCS" "$INPUT" "${base_dir}"
-
     checkout_dir=${base_dir}/pre-build
     mkdir -p "${checkout_dir}"
+    (cd ${base_dir}; ln -s ./pre-build ./archives)
+    mkdir -p ${base_dir}/plugins
+    (cd ${base_dir}; ln -s ./plugins/vanilla ./vanilla)
+    
+    #STATUS
     lcopy_backend_checkout "$LCOPY_VCS" "$INPUT" "${checkout_dir}"
     status=$?
     echo $status > ${base_dir}/STATUS
-        
-    (cd ${base_dir}; ln -s ./pre-build ./vanilla)
 
-    mkdir -p ${base_dir}/plugins
     if [ "$status" = "0" ]; then
 	lcopy_srpmix_plugin "${base_dir}"
 	if transfer "${base_dir}"; then
