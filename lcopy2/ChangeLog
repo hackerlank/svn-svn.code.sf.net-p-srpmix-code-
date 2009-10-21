@@ -1,5 +1,7 @@
 2009-10-22  Masatake YAMATO  <yamato@redhat.com>
 
+	* autogen.sh: Run yum if --bootstrap is given.
+
 	* configure.ac: Check the existance of srpmix-plugin.
 
 	* src/backends/Makefile.am (dist_backends_SCRIPTS): Added wgetx.
