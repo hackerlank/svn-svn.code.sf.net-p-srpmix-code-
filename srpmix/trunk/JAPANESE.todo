@@ -1,3 +1,8 @@
+* binariesからdist mappingの元を得る。
+* mirrorスクリプトだけ独立させる
+* srpmix-request -> sop-requestへ
+* tarball
+
 ls | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'   | less | while read X; do echo "$(ls | grep $X | wc -l): $X" ; done | sort -n | uniq 
 10: jbossts
 11: gnupg
@@ -325,7 +330,7 @@ ls | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e
 
 ** gc for blacklist.d
 
-** Do yum install some build/required packages in autogen.sh.
+** Do yum install some build/required packages in autogen.sh.: --bootstrap
 ** adduser brewbuilder, mockbuild
 ** --make-rpm
 
@@ -340,7 +345,7 @@ ls | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e
 ** 全文検索 #
 ** ウェブインターフェイス
 
-* plugin for lcopy
+* plugin for lcopy <done>
 
 ** compsの生成 <need check>
 ** root権限がない場合のattachは？ <need check>
