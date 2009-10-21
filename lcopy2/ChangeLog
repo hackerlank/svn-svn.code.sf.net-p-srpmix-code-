@@ -1,3 +1,9 @@
+2009-10-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/backends/wgettarx: Implemented.
+
+	* src/backends/hg (repo_check): Remove hg_spec.
+
 2009-10-21  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/lcopy-checkout (main): Don't create vanilla symlink.

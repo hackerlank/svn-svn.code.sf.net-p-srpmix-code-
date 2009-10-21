@@ -28,7 +28,7 @@ function repo_check
 	    [[ "$repo" =~ "$https_spec" ]] ); then
 	echo "broken hg command line: unrecognizable repo specification: $repo" 1>&2
 	echo "expected repo specifications: " 1>&2
-	for s in "$http_spec" "$https_spec" "$hg_spec"; do
+	for s in "$http_spec" "$https_spec"; do
 	    echo "	$s" 1>&2
 	done
 	return 1
