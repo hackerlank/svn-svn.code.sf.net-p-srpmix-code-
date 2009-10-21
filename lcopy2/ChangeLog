@@ -1,5 +1,8 @@
 2009-10-21  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/lcopy-checkout (main): Don't create vanilla symlink.
+	Create archives only if it doesn't exist.
+
 	* src/liblcopy.sh.in (lcopy_srpmix_plugin): Disable vanilla plugin.
 
 2009-10-18  Masatake YAMATO  <yamato@redhat.com>
