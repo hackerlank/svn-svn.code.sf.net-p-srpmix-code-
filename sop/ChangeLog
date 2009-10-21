@@ -1,3 +1,7 @@
+2009-10-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* autogen.sh: Run yum if --bootstrap is given.
+
 2009-10-21  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-mirror: New script.
