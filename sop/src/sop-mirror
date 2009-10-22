@@ -82,7 +82,7 @@ function mirror
 
     "${handler}" ${cf} "${log}"
 
-    if [ - z "$BUILDERS" ]; then
+    if [ -z "$BUILDERS" ]; then
 	return
     fi
 
