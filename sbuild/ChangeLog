@@ -1,5 +1,9 @@
 2009-10-23  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/builders/Makefile.am (dist_builders_SCRIPTS): Added nop.
+
+	* src/builders/nop: New file.
+
 	* src/builders/diix (main): Added stub.
 
 	* src/builders/tarball: Removed.
