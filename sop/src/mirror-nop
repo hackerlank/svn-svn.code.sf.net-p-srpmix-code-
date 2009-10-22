@@ -1,0 +1,6 @@
+#!/bin/bash
+cf=$1
+log=$2
+
+source $cf
+touch ${log}

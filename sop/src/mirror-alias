@@ -1,0 +1,35 @@
+#!/bin/bash
+cf=$1
+log=$2
+
+source $cf
+
+if [ -z "$ALIAS_ORIGINAL" ]; then
+    echo "No ALIAS_ORIGINAL in $cf" 1>&2
+    exit 1
+fi
+
+to0=../../$ALIAS_ORIGINAL
+if [ -d "$to0" ]; then
+    echo "No such dierctory: $to0" 1>&2
+    exit 1
+fi
+
+to=$to0/mirror
+
+if [ -L ./original ]; then
+    original=$(readlink ./original)
+    if ! [ "$original" = "$to" ]; then
+	rm -f ./original
+    elif ! [ -d "$original" ]; then
+	rm -f ./original
+    fi
+fi
+
+if ! [ -L ./original ]; then
+    ln -s $to .original
+    echo updated
+else
+    echo
+fi > ${log}
+

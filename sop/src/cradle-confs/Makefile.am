@@ -13,4 +13,6 @@ dist_cradleconf_DATA =				\
 	lcopy.sys				\
 	lcopy.user				\
 	\
+	diix-ftp.redhat.com			\
+	\
 	$(NULL)

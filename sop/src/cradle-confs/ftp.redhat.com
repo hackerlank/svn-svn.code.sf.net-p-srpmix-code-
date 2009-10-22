@@ -4,7 +4,7 @@ ENABLE=yes
 GC=no
 BACKUP=no
 BUILD=yes
-BUILDERS=srpmix,diix
+BUILDERS=srpmix
 DIST_MAPPING=no
 INSTALL=no
 

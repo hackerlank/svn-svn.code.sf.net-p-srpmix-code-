@@ -12,6 +12,9 @@ dist_pkgdata_SCRIPTS= \
 	mirror-lcopy-sys  \
 	mirror-lcopy-user \
 	\
+	mirror-alias      \
+	mirror-nop        \
+	\
 	$(NULL)
 
 dist_bin_SCRIPTS =				\
