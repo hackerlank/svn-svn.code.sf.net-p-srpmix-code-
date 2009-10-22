@@ -1,3 +1,8 @@
+2009-10-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/backends/wgetx (wgetx_checkout): Set repo.
+	Fix typos. Remove tar.gz in pre_build directory.
+
 2009-10-22  Masatake YAMATO  <yamato@redhat.com>
 
 	* autogen.sh: Run yum if --bootstrap is given.

@@ -126,9 +126,10 @@ function wgetx_checkout
 	echo "no WGETX_URL in $input" 1>&2
 	return 1
     fi
+    local repo="${WGETX_URL}"
 
     local pre_build=${output_dir}
-    local archievs=$(cd ${output_dir}/../archives; pwd)
+    local archives=$(mkdir ${output_dir}/../archives; cd ${output_dir}/../archives ; pwd)
     local rootdir=$(cd ${output_dir}/..; pwd)
     local vanilla=$(srpmix-plugin --path-for=vanilla)
     if ! [ -x "$vanilla" ]; then
@@ -136,7 +137,7 @@ function wgetx_checkout
 	return 1
     fi
 
-    mkdir -p $archievs
+    mkdir -p $archives
     if [[ "$repo" =~ "${file_spec}" ]]; then
 	local file=${repo/file:\/\//}
 	if ! [ -r "$file" ]; then
@@ -150,7 +151,7 @@ function wgetx_checkout
 	    return 1
 	fi
 
-	if ! cp -av "$file" $archievs; then
+	if ! cp -av "$file" $archives; then
 	    return $?
 	fi
     else
@@ -163,6 +164,10 @@ function wgetx_checkout
     
     ${vanilla} --plugin-dir="${pre_build}" ${rootdir}
     r=$?
+
+    if [ $r = 0 ]; then
+	rm ${pre_build}/$(basename $repo)
+    fi
 
     echo $repo > ${pre_build}/.wgetx
     return $r
