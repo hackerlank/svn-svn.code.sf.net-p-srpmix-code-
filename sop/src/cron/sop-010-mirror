@@ -23,7 +23,7 @@ function main
 
     for x in ${SOP_CRADLES_DIR}/*; do
 	if test -d $x; then
-	    local b=(basename $x)
+	    local b=$(basename $x)
 	    sop-mirror $b
 	fi
     done
