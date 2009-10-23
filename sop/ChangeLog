@@ -1,5 +1,9 @@
 2009-10-23  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.3.7.
+
+	* src/cradle-confs/* (CREATEREPO_OPTS): Renamed from CREATEREPO_OPT.
+
 	* src/sop-mirror (mirror): Remove unnecessary space.
 
 	* src/cradle-confs/ftp.redhat.com (BUILDERS): Remove diix.

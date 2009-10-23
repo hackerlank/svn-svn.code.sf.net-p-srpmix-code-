@@ -8,7 +8,7 @@ BUILDERS=srpmix
 DIST_MAPPING=no
 INSTALL=no
 
-CREATEREPO_OPT=--update
+CREATEREPO_OPTS=--update
 
 WGET_PROTOCOL=http
 WGET_HOST=mirror.centos.org

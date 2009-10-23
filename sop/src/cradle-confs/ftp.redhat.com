@@ -8,7 +8,7 @@ BUILDERS=srpmix
 DIST_MAPPING=no
 INSTALL=no
 
-CREATEREPO_OPT=--update
+CREATEREPO_OPTS=--update
 
 WGET_PROTOCOL=ftp
 WGET_HOST=ftp.redhat.com

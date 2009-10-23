@@ -8,6 +8,6 @@ BUILDERS=diix
 DIST_MAPPING=no
 INSTALL=no
 
-CREATEREPO_OPT=--update
+CREATEREPO_OPTS=--update
 
 ALIAS_ORIGINAL=ftp.redhat.com

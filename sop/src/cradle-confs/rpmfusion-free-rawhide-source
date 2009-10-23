@@ -8,7 +8,7 @@ BUILDERS=srpmix
 DIST_MAPPING=yes
 INSTALL=no
 
-CREATEREPO_OPT=
+CREATEREPO_OPTS=
 
 YUM_REPONAME=rpmfusion-free-rawhide-source
 YUM_REPOFILE=$(cat <<"EOF"
