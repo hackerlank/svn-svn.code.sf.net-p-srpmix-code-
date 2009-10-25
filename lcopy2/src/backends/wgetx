@@ -183,8 +183,18 @@ function wgetx_help_update
 
 function wgetx_update
 {
-    # TODO: If the target file doesn't exist, do checkout again.
-    return 0
+    local input=$1
+    local update_dir=$2    
+
+    if [ -d "$update_dir" ]; then
+	return 0
+    elif [ '*' = $(basename $update_dir) ]; then
+	if wgetx_checkout $input $(dirname $update_dir); then
+	    return 1
+	else
+	    return 0
+	fi
+    fi
 }
 
 #
