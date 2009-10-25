@@ -183,6 +183,7 @@ function wgetx_help_update
 
 function wgetx_update
 {
+    # TODO: If the target file doesn't exist, do checkout again.
     return 0
 }
 
