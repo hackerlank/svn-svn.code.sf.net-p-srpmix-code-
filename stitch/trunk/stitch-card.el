@@ -9,26 +9,34 @@
   (if stitch-card-current
       (setq stitch-card-current (cadr (member stitch-card-current stitch-card-forward-list)))
     (setq stitch-card-current (car stitch-card-forward-list)))
-  (when stitch-card-current
-    (let ((file (stitch-klist-value stitch-card-current :file)))
-      (stitch-target-jump stitch-card-current file)
-      (recenter))))
+  (if stitch-card-current
+      (let ((file (stitch-klist-value stitch-card-current :file)))
+	(stitch-target-jump stitch-card-current file)
+	(recenter)
+	(message "%s" file))
+    (setq stitch-card-current (car stitch-card-backward-list))
+    (message "%s" "<end>")))
+
 (defun stitch-card-prev ()
   (interactive)
   (when stitch-card-current
     (setq stitch-card-current (cadr (member stitch-card-current stitch-card-backward-list)))
-    (when stitch-card-current
-      (let ((file (stitch-klist-value stitch-card-current :file)))
-	(stitch-target-jump stitch-card-current file)
-	(recenter)))))
+    (if stitch-card-current
+	(let ((file (stitch-klist-value stitch-card-current :file)))
+	  (stitch-target-jump stitch-card-current file)
+	  (recenter)
+	  (message "%s" file))
+      (setq stitch-card-current (car stitch-card-forward-list))
+      (message "%s" "<end>"))))
 
 (defvar stitch-card-mode-map 
   (let ((map (make-sparse-keymap)))
     (define-key map " " 'stitch-card-next)
     (define-key map [backspace] 'stitch-card-prev)
+    (define-key map "q" 'stitch-card-mode)
     map))
     
-(define-minor-mode stitch-card 
+(define-minor-mode stitch-card-mode
   ""
   nil " StitchCard" stitch-card-mode-map :global t)
 
