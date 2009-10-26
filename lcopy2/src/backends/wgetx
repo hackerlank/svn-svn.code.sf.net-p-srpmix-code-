@@ -129,7 +129,7 @@ function wgetx_checkout
     local repo="${WGETX_URL}"
 
     local pre_build=${output_dir}
-    local archives=$(mkdir ${output_dir}/../archives; cd ${output_dir}/../archives ; pwd)
+    local archives=$(mkdir -p ${output_dir}/../archives; cd ${output_dir}/../archives ; pwd)
     local rootdir=$(cd ${output_dir}/..; pwd)
     local vanilla=$(srpmix-plugin --path-for=vanilla)
     if ! [ -x "$vanilla" ]; then

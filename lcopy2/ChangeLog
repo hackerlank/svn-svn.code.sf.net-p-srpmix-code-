@@ -2,6 +2,7 @@
 
 	* src/backends/wgetx (wgetx_update): Do check out if
 	pre-build directory is empty.
+	(wgetx_checkout::archives): Added -p to mkdir.
 
 2009-10-23  Masatake YAMATO  <yamato@redhat.com>
 
