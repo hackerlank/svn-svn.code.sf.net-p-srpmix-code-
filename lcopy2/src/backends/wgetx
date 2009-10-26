@@ -188,7 +188,7 @@ function wgetx_update
 
     if [ -d "$update_dir" ]; then
 	return 0
-    elif [ '*' = $(basename $update_dir) ]; then
+    elif [ '*' = "$(basename $update_dir)" ]; then
 	if wgetx_checkout $input $(dirname $update_dir); then
 	    return 1
 	else
