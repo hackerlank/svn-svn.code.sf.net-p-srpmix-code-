@@ -10,6 +10,7 @@ dist_confd_DATA = \
 	cairo,trunk.lcopy \
 	corosync,trunk.lcopy \
 	ddskk,trunk.lcopy \
+	emacs,trunk.lcopy \
 	gauche,trunk.lcopy \
 	gauche-mode,trunk.lcopy \
 	glib2,trunk.lcopy \
