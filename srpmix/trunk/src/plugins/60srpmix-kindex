@@ -122,10 +122,6 @@ function parse_arguments
     if ! test -d "${BUILDDIR}"; then
 	exit 0
     fi
-
-    if ! test -d "$PLUGINDIR"; then
-        mkdir -p $PLUGINDIR
-    fi    
 }
 
 function verify_directory

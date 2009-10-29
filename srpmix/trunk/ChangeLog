@@ -1,3 +1,10 @@
+2009-10-29  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.111.0.
+
+	* src/plugins/60srpmix-kindex (parse_arguments): Don't create kindex 
+	directory here. It is created in main function.
+
 2009-10-22  Masatake YAMATO  <yamato@redhat.com>
 
 	* autogen.sh: Run yum if --bootstrap is given.
