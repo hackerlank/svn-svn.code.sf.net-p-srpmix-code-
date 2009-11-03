@@ -25,6 +25,7 @@ dist_confd_DATA = \
 	kernel,xen-3_2.lcopy \
 	libvirt,trunk.lcopy \
 	man-pages,trunk.lcopy \
+	miniascape,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
 	sos,trunk.lcopy \
 	wireshark,trunk.lcopy \
