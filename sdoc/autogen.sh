@@ -1,4 +1,4 @@
 #!/bin/sh
-automake -a
 aclocal
+automake -a
 autoconf
