@@ -13,5 +13,5 @@ autoconf
 REQUIRED="cvs svn git mercurial darcs bzr"
 
 if [ -n "$1" ] && [ "$1" = --bootstrap] && which yum > /dev/null 2>&1; then
-    yum -y install ${REQUIRED}
+    sudo yum -y install ${REQUIRED}
 fi
