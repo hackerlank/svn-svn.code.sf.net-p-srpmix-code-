@@ -94,9 +94,10 @@ source code warehouseとは、あなたや同僚が読む可能性のあるソ�
 プディレクトリをNFSで共有しています。
 
 職場では@code{sources}という名前のホストがNFSサーバを担当しています。そ
-こでこの文章でも@code{sources}という名前をホスト名に使うことにします。
-早速マウントしてみましょう。
+こでこの文章でもNFSサーバを@code{sources}という名前をホスト名に使うこと
+にします。
 
+早速マウントしてみましょう。
 @example
 # mkdir -p /srv/sources
 # mount sources:/srv/sources /srv/sources
@@ -105,9 +106,9 @@ source code warehouseとは、あなたや同僚が読む可能性のあるソ�
 attic dists packages plugins sources
 @end example
 
-マウント先@file{/srv/sources}というマウント先は今のところ変更できません。
-複数の目的でシンボリックリンクを取り回す必要があったため、その名前が設置用プログラムに
-ハードコードされているためです。
+マウント先の名前@file{/srv/sources}は今のところ変更できません。複数の目
+的でシンボリックリンクを取り回す必要があったため、その名前が
+@package{sbuild}にハードコードされているためです。
 
 @menu
 * sources上のソースコード::
