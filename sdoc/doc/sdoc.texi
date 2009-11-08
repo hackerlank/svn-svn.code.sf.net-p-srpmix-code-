@@ -9,6 +9,9 @@
 @c @syncodeindex tp cp
 @comment %**end of header
 
+@alias package = command
+@alias cradle  = file
+
 @setchapternewpage odd
 @ifinfo
 Copyright @copyright{} 2009 Masatake YAMATO
@@ -17,11 +20,11 @@ Copyright @copyright{} 2009 Red hat, K.K.
 
 @dircategory Understanding source code
 @direntry
-* ソースコード基地の利用と運用: (sdoc)       ソースコード基地の利用と運用
+* source code warehouseの利用と運用: (sdoc)       source code warehouseの利用と運用
 @end direntry
 
 @titlepage
-@title ソースコード基地の利用と運用
+@title source code warehouseの利用と運用
 @author Masatake YAMATO (@email{yamato@@redhat.com})
 @page
 @vskip 0pt plus 1filll
@@ -32,58 +35,61 @@ Copyright @copyright{} 2009 Red hat, K.K.
 
 @ifnottex
 @node Top
-@top ソースコード基地の利用と運用
+@top source code warehouseの利用と運用
 @end ifnottex
 
-ソースコード基地とは、あなたや同僚が読む可能性のあるソースコードがある
-べきところに配置されていて、ダウンロード待ちもインストール待ちも、イン
-ストールされたファイル群を捜す手間も無く、ソフトウェアの動作について疑
-問に思ったその瞬間すぐにソースコードリーディングを開始できるような作業
-環境を指す筆者の造語です。
-ソースコードリーディングの嗜みがあれば、知的欲望を満す場所として、ある
-いは怒りの発散の場所として、ソースコード基地は理想的な環境です。
+source code warehouseとは、あなたや同僚が読む可能性のあるソースコードがある
+べきところに配置されていて、ダウンロード待ちもインストール待ちも無く、
+捜す手間を最小限に、ソフトウェアの動作について疑問に思ったその瞬間すぐ
+にソースコードリーディングを開始できるような作業環境を指す筆者の造語で
+す。
 
-そんな環境を実現できるでしょうか？ 筆者はオープンソースソフトウェア群か
-ら成るOSに対するサポート、コンサルテーション、トレーニングをサービスと
-して提供する会社に勤務する傍ら、4年を費して擬似的なソースコード基地を構
-築し、同僚とともに利用しています。
+そんな環境を実現できるでしょうか？
 
-「擬似的に」というのは以下のような意味です: (1) 読む可能性のある全ての
-ソフトウェアを知ることはできないので、業務の範囲で読む可能性がありかつ
-一般に入手可能なものを対象とした、(2) 疑問に思った瞬間にソースコードリー
-ディングを開始することはできないが、命名規則を十分に工夫したディレクト
-リ構造中にソースコードを配置し、それをNFSで共有することで、職場のネット
-ワークを利用している限り十分短い時間で開始できるようにした。
+筆者はオープンソースソフトウェア群から成るOS、ミドルウェアに対するサポー
+ト、コンサルテーション、トレーニングをサービスとして提供する会社に勤務
+する傍ら、4年を費して擬似的なsource code warehouseを構築し、同僚とともに利用
+しています。
 
-本文章ではまず、既に構築されたソースコード基地の利用方法を説明します。
-私の同僚であれば、ソースコード基地の利用方法だけを知っていれば、それだ
+「擬似的に」というのは以下のような意味です:
+
+@itemize @bullet
+@item 読む可能性のある全てのソフトウェアを知ることはできないので、業務の
+範囲で読む可能性がありかつ一般に入手可能なものを対象とした。
+
+@item 疑問に思った瞬間にソースコードリーディングを開始することはできな
+いが、命名規則を十分に工夫したディレクトリ構造中にソースコードを配置し、
+それをNFSで共有することで、職場のネットワークを利用している限り十分短い
+時間で開始できるようにした。
+@end itemize
+
+本文章ではまず、既に構築されたsource code warehouseの利用方法を説明します。
+私の同僚であれば、source code warehouseの利用方法だけを知っていれば、それだ
 けで便利ははずです。
 
-次に、ソースコード基地の設置、運用手順について説明します。設置、運用は
-プログラムを用いてある程度自動化できるようにまとめてあります。それらの
-プログラムと自動化が十分でない部分の注意について説明します。設置された
-ソースコード基地が無ければ自分で設置するしかありません。設置したソース
-コード基地にソースコードを追加していき規模が増してくると、さまざまなト
-ラブルが発生します。それらに対する対処方法も説明します。
+次に、source code warehouseの設置、運用手順について説明します。設置、運用は
+プログラム(@package{sbuild}, @package{sop})を用いてある程度自動化できて
+います。それらのプログラムと自動化が十分でない部分の注意について説明し
+ます。設置されたsource code warehouseが無ければ自分で設置するしかありません。
+設置したsource code warehouseにソースコードを追加していき規模が増してくると、
+さまざまなトラブルが発生します。それらに対する対処方法も説明します。
 
-最後にソースコード基地の拡張方法を説明します。設置、運用プログラムには、
+最後にsource code warehouseの拡張方法を説明します。設置、運用プログラムには、
 設置、運用処理のいつくかの箇所に、登録しておいたユーザ独自プログラムを
 実行するためのフック、プラグイン機構が用意されています。その機構を利用し
-てソースコード基地の様々な側面を拡張できます。
-
+てsource code warehouseの様々な側面を拡張できます。
 
 @menu
-* ソースコード基地の利用(共有ファイルシステム上)::
-* ソースコード基地の利用(ホームディレクトリ内)::
-* ソースコード基地の設置と保守::
-* ソースコード基地の拡張::
-* Index::
+* 利用(共有ファイルシステム上)::
+* 利用(ホームディレクトリ内)::
+* 設置と保守::
+* 拡張::
 @end menu
 
 @c =====================================================================
-@node ソースコード基地の利用(共有ファイルシステム上)
-@chapter ソースコード基地の利用(共有ファイルシステム上)
-「擬似的な」ソースコード基地では、十分に工夫した一貫した命名規則による
+@node 利用(共有ファイルシステム上)
+@chapter 利用(共有ファイルシステム上)
+「擬似的な」source code warehouseでは、十分に工夫した一貫した命名規則による
 ディレクトリ構造中にソースコードファイルの配置しています。そしてそのトッ
 プディレクトリをNFSで共有しています。
 
@@ -115,14 +121,14 @@ attic dists packages plugins sources
 @section sources上のソースコード
 @code{sources}上にどういった種類のソースコードが配置されるか、というの
 は設置時の設定によります。後に説明しますが、設置時の設定は
-@file{/srv/sources/attic/cradles}以下に格納されます。ここでは筆者が
-職場に設置したsourcesを例に説明します。
+@file{/srv/sources/attic/cradles}以下に格納されます。ここでは筆者が職場
+に設置したsourcesを例に説明します。
 
-sources上には重複も含めて1.5Tバイトほどのソースコードがあります。次の
-表に、ソースコードの取得先と取得対象種別、sourcesへの追加の方針を示します。
+sources上には重複も含めて1.5Tバイトほどのソースコードがあります。次の表
+に、ソースコードの取得先と取得対象種別、sourcesへの追加の方針を示します。
 
 @multitable @columnfractions .4 .4 .2
-@c @headitem 取得先 @tab 対象 @tab 追加方針
+@headitem 取得先 @tab 対象 @tab 追加方針
 
 @item ftp.redhat.com                @tab *.src.rpm @tab non-gc
 @item kojipkgs.fedoraproject.org    @tab *.src.rpm @tab gc
@@ -132,51 +138,92 @@ sources上には重複も含めて1.5Tバイトほどのソースコードがあ
 
 @end multitable
 
-sources設置プログラムの拡張機構を用いれば*src.rpm以外の方法でまとめられ
-たソースコードもsourcesに配置できるはずですが、もともとsourcesが筆者の
-業務に由来しているため、既にsourcesに配置されているソースコードのほとん
-どが*src.rpm形式で入手できるものばかりです。この*.src.rpmを展開の後、有
-用そうな後処理を加え、パッケージ間のディレクトリ名の衝突を避けて配置してあ
-ります。
+sources設置プログラム(@package{sbuild})の拡張機構を用いれば
+@file{*src.rpm}以外の方法でまとめられたソースコードもsourcesに配置でき
+るはずですが、もともとsourcesが筆者の業務に由来しているため、既に
+sourcesに配置されているソースコードのほとんどが@file{*src.rpm}形式で入
+手できるものばかりです。この@file{*src.rpm}を展開の後、有用そうな後処理
+を加え、パッケージ間のディレクトリ名の衝突を避けて配置してあります。
 
-運用用のプログラムは毎日取得先にある対象が更新されていなか調べています。
-追加方針にgcとある場合、同名のパッケージに対するソースコードの新しいバー
-ジョンが取得先でみつかった場合、sources上にある古いバージョンに対するソー
-スコードを削除して、新しいものを配置します。non-gcとある場合、古いバー
-ジョンを削除せずに、新しいバージョンを追加します。
+運用ためのプログラム(@package{sop})は毎日取得先にある対象が更新されてい
+ないか調べています。追加方針にgcとある場合、同名のパッケージに対するソー
+スコードの新しいバージョンが取得先でみつかった場合、sources上にある古い
+バージョンに対するソースコードを削除して、新しいものを配置します。
+non-gcとある場合、古いバージョンを削除せずに、新しいバージョンを追加し
+ます。
 
-例えば @code{foo}というパッケージを考えます。@code{sources}には
+例えば @package{foo}というパッケージを考えます。sourcesには
 @file{foo-1.1.src.rpm}のソースコードが既に配置済みだとします。ここで
-fooの取得先が@file{foo-1.2.src.rpm}の存在が検出されたとします。gcの場合
-@file{foo-1.1.src.rpm}の内容を配置した @file{foo/1.1}を削除の後
+fooの取得先にて@file{foo-1.2.src.rpm}の存在が検出されたとします。gcの場
+合@file{foo-1.1.src.rpm}の内容を配置した @file{foo/1.1}を削除の後
 @file{foo/1.2}を用意して、そこに@file{foo-1.2.src.rpm}の内容を配置しま
 す。一方non-gcの場合@file{foo/1.1}をそのままにして、@file{foo/1.2}を用
 意して、そこに@file{foo-1.2.src.rpm}の内容を配置します。
 
-@code{ftp.redhat.com}は、最も業務で頻繁に用いるはずです。最近アップデート
-されたパッケージよりは、(顧客の使う)古いバージョンに関する調査が頻発するので
-追加方針をnon-gcとしています。
+@cradle{ftp.redhat.com}は、最も業務で頻繁に用いるはずです。最近アップデー
+トされたパッケージよりは、(顧客の使う)古いバージョンに関する調査が頻発
+するので追加方針をnon-gcとしています。
 
-@code{kojipkgs.fedoraproject.org}, @code{www.jpackage.org},
-@code{rpmfusion-free-rawhide-source}は、必ずしも業務に必要ないかもしれ
-ませんが、最近のオープンソース世界の動向や、将来の製品候補のコードレベ
-ルで調査するのに役立つはずです。
+@cradle{kojipkgs.fedoraproject.org}, @cradle{www.jpackage.org},
+@cradle{rpmfusion-free-rawhide-source}は、必ずしも業務に必要ないかもし
+れませんが、最近のオープンソース世界の動向や、将来の製品候補のコードレ
+ベルで調査するのに役立つはずです。
 
-@code{lcopy.sys}は変り種です。唯一対象を*src.rpmとしません。lcopy.sysは
-ソースコードの入手にgit, svn, cvsといったバージョン管理システムを使いま
-す。入手先となるリポジトリはsources構築時に指定します。最初にチェックア
-ウトして、以降毎日アップデートします。現状では、linuxカーネルの開発元で
-あるgit.kernel.orgなどがリポジトリとして指定されています。特定のソフト
-ウェアの最新動向を追跡することができます。
+@cradle{lcopy.sys}は変り種です。唯一対象を@file{*src.rpm}としません。
+@cradle{lcopy.sys}はソースコードの入手に@command{git}, @command{svn},
+@command{cvs}といったバージョン管理システムを使います。入手先となるリポ
+ジトリはsources構築時に指定します。最初にチェックアウトして、以降毎日アッ
+プデートします。現状では、linuxカーネルの開発元であるgit.kernel.orgなど
+がリポジトリとして指定されています。特定のソフトウェアの最新動向を追跡
+することができます。
 
 入手先がどこであれ、十分に工夫した一貫した命名規則によるディレクトリ構
 造中にソースコードファイルを配置しているため、どのソフトウェア(あるいは
-パッケージ)のソースコードであれ、それを/srv/sourcesからみつけるのは容易
-です。以降その命名規則を説明します。
+パッケージ)のソースコードであれ、それを@file{/srv/sources}からみつける
+のは容易です。以降その命名規則を説明します。
 
 @node トップレベルのディレクトリ構造
 @section トップレベルのディレクトリ構造
-sources, packages, dists, plugins, attic
+トップレベルである@file{/srv/sources}には
+@file{sources}, @file{packages}, @file{dists}, @file{plugins}, @file{attic}
+の5つのディレクトリがあります。
+
+@menu
+* sources ディレクトリ::
+* dists ディレクトリ::
+* packages ディレクトリ::
+* plugins ディレクトリ::
+* attic ディレクトリ::
+@end menu
+
+@node sources ディレクトリ
+@subsection sources ディレクトリ
+ソースコードを参照したいパッケージの名前とバージョンについて正確に知っている場合、
+@file{sources}を使います。
+
+あるパッケージの名前を@emph{package-name}、バージョンを@emph{version-release}、
+パッケージの名前の最初の文字を@emph{p}としたとき、そのソースコードは以下の場所
+に配置されます。
+
+@cartouche
+@example
+/srv/sources/sources/@emph{p}/@emph{package-name}/@emph{version-release}
+@end example
+@end cartouche
+
+
+@node dists ディレクトリ
+@subsection dists ディレクトリ
+
+@node packages ディレクトリ
+@subsection packages ディレクトリ
+
+@node plugins ディレクトリ
+@subsection plugins ディレクトリ
+
+@node attic ディレクトリ
+@subsection attic ディレクトリ
+
 
 @node pvrのディレクトリ構造
 @section pvrのディレクトリ構造
@@ -187,15 +234,21 @@ archives
 vanilla
 plugins
 
+@node pvr/pluginsのディレクトリ構造
+@section pvr/pluginsのディレクトリ構造
+
 @node attic/cradlesのディレクトリ構造
 @section attic/cradlesのディレクトリ構造
 
-@node ソースコード基地の設置と保守
-@chapter ソースコード基地の設置と保守
+@node 利用(ホームディレクトリ内)
+@chapter 利用(ホームディレクトリ内)
+
+@node 設置と保守
+@chapter 設置と保守
 srpmix, sop, sbuild, lcopy
 
-@node ソースコード基地の拡張
-@chapter ソースコード基地の拡張
+@node 拡張
+@chapter 拡張
 srpmix: spec rewrite rules, package-plugins, dist-plugin, top-plugin
 sbuild: builder
 sop: mirror-engine
