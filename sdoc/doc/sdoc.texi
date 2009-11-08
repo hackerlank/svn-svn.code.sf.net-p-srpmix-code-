@@ -3,7 +3,7 @@
 @comment %**start of header
 @setfilename sdoc.info
 @include version.texi
-@settitle Using and building source code libraries
+@settitle Using, running and building source code warehouse
 @c @syncodeindex fn cp
 @c @syncodeindex vr cp
 @c @syncodeindex tp cp
@@ -199,22 +199,52 @@ fooの取得先にて@file{foo-1.2.src.rpm}の存在が検出されたとしま�
 
 @node sources ディレクトリ
 @subsection sources ディレクトリ
-ソースコードを参照したいパッケージの名前とバージョンについて正確に知っている場合、
-@file{sources}を使います。
+ソースコードを参照したいパッケージの名前とバージョン名について正確に知っ
+ている場合、@file{/srv/sources/sources}を使います。
 
-あるパッケージの名前を@emph{package-name}、バージョンを@emph{version-release}、
-パッケージの名前の最初の文字を@emph{p}としたとき、そのソースコードは以下の場所
-に配置されます。
+あるパッケージの名前を@emph{package}、バージョンを@emph{version}、パッ
+ケージの名前の最初の文字を@emph{p}としたとき、そのソースコードは以下の
+場所に配置されます。
 
 @cartouche
 @example
-/srv/sources/sources/@emph{p}/@emph{package-name}/@emph{version-release}
+/srv/sources/sources/@emph{p}/@emph{package}/@emph{version}
 @end example
 @end cartouche
 
+このディレクトリを特にパッケージに対する@dfn{pvrディレクトリ}を呼びます。
+src.rpmに由来するソースコードを@package{sbuild}で格納した場合、
+@emph{version}の部分は、そのsrc.rpmのバージョン名(version)とリリース名
+(release)をハイフンでつないだものになります。pvrの名はpackage,
+version, releaseの頭文字に由来します。
+
+例えば@package{kernel-2.6.31-12.fc12}の配置場所は
+@cartouche
+@example
+/srv/sources/sources/k/kernel/2.6.31-12.fc12/
+@end example
+@end cartouche
+となります。
+
+パッケージの名前の最初の文字を用いるのはsourcesに格納するパッケージの数
+が増えたときに、/srv/sources/sources以下のディレクトリが増えすぎて、一
+覧の取得が遅くなるのを避けるためです。
 
 @node dists ディレクトリ
 @subsection dists ディレクトリ
+ソースコードを調べたいパッケージについて、パッケージの名前とそれがどの
+ディストリビューションに含まれるかがわかっている場合、
+@file{/srv/sources/dists}を使います。
+
+あるパッケージの名前を@emph{package}、ディストリビューションの名称を
+@emph{distro}、パッケージの名前の最初の文字を@emph{p}としたとき、そのソー
+スコードは以下の場所に配置されます。
+
+@cartouche
+@example
+/srv/sources/dists/@emph{distro}/packages/@emph{p}/@emph{package}
+@end example
+@end cartouche
 
 @node packages ディレクトリ
 @subsection packages ディレクトリ
