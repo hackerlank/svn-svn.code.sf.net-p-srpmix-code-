@@ -65,7 +65,7 @@ source code warehouseとは、あなたや同僚が読む可能性のあるソ�
 
 本文章ではまず、既に構築されたsource code warehouseの利用方法を説明します。
 私の同僚であれば、source code warehouseの利用方法だけを知っていれば、それだ
-けで便利ははずです。
+けで便利なはずです。
 
 次に、source code warehouseの設置、運用手順について説明します。設置、運用は
 プログラム(@package{sbuild}, @package{sop})を用いてある程度自動化できて
