@@ -10,6 +10,8 @@
 @comment %**end of header
 
 @alias package = command
+@alias distro  = command
+@alias ver     = command
 @alias cradle  = file
 
 @setchapternewpage odd
@@ -122,7 +124,7 @@ attic dists packages plugins sources
 @section sources上のソースコード
 @code{sources}上にどういった種類のソースコードが配置されるか、というの
 は設置時の設定によります。後に説明しますが、設置時の設定は
-@file{/srv/sources/attic/cradles}以下に格納されます。ここでは筆者が職場
+@file{/srv/sources/attic/cradles}以下に配置されます。ここでは筆者が職場
 に設置したsourcesを例に説明します。
 
 sources上には重複も含めて1.5Tバイトほどのソースコードがあります。次の表
@@ -213,20 +215,20 @@ fooの取得先にて@file{foo-1.2.src.rpm}の存在が検出されたとしま�
 @end cartouche
 
 このディレクトリを特にパッケージに対する@dfn{pvrディレクトリ}を呼びます。
-src.rpmに由来するソースコードを@package{sbuild}で格納した場合、
+src.rpmに由来するソースコードを@package{sbuild}で配置した場合、
 @emph{version}の部分は、そのsrc.rpmのバージョン名(version)とリリース名
 (release)をハイフンでつないだものになります。pvrの名はpackage,
 version, releaseの頭文字に由来します。
 
 例えば@package{kernel-2.6.31-12.fc12}の配置場所は
 @cartouche
-@example
+@example 
 /srv/sources/sources/k/kernel/2.6.31-12.fc12/
 @end example
 @end cartouche
 となります。
 
-パッケージの名前の最初の文字を用いるのはsourcesに格納するパッケージの数
+パッケージの名前の最初の文字を用いるのはsourcesに配置するパッケージの数
 が増えたときに、/srv/sources/sources以下のディレクトリが増えすぎて、一
 覧の取得が遅くなるのを避けるためです。
 
@@ -246,11 +248,57 @@ version, releaseの頭文字に由来します。
 @end example
 @end cartouche
 
+例えば@distro{rhel5su4}の@package{kernel}の配置場所は
+@cartouche
+@example 
+/srv/sources/dists/rhel5su4/packages/k/kernel -> /srv/sources/sources/k/kernel/2.6.18-164.el5
+@end example
+@end cartouche
+となります。
+
+-> は@file{/srv/sources/dists/rhel5su4/packages/k/kernel}がシンボリックリンクであり、
+@file{/srv/sources/sources/k/kernel/2.6.18-164.el5}を指していることを意味します。
+
+@command{ls -l}として、シンボリックリンクの先を表示することで、パッケー
+ジの名前から、あるディストリビューションにおけるそのパッケージのバージョ
+ン名を知ることができます。上の例であれば、@command{ls -l
+/srv/sources/dists/rhel5su4/packages/k/kernel}とすることで、
+@distro{rhel5su4}の@package{kernel}のバージョンが@ver{2.6.18-164.el5}で
+あることがわかります。
+
+@file{/srv/sources/dists/@emph{distro}}にはさらに@file{dist-mapping.es}ファイルと
+@file{plugins}ディレクトリがあります。
+
+@file{dist-mapping.es}には、ディストリビューションとそれに属するパッケー
+ジの一覧がes expressionで格納されています(@pxref{es expression, es
+expression, es expression, es-lang-c-stdc99, es-lang-c-stdc99})。従って
+schemeインタプリタやes-lang-c-stdc99で読み出すことができます。実際、上
+で説明したシンボリックリンクの生成するために、Gauche schemeインタプリタ
+を使っています。@file{dist-mapping.es}中のes expressionは次のような形式
+を持ちます。
+@lisp
+(srpmix-wrap name 
+             :target-srpm  "@var{src.rpmの名前}"
+             :package      "@var{パッケージの名前}"
+             :version      "@var{パッケージ}"
+             :release      "@var{リリース}"
+             :wrapped-name "@var{srpmixコマンドでソースコードを梱包してできたパッケージの名前}")
+@end lisp
+
+@file{plugins}ディレクトリは、ディストリビューション毎に付加的な情報を
+追加配置できるよう用意してあります。外部コマンド
+@command{srpmix-weakview-dist-attach}で追加配置できます。現状では使われていま
+せんが、将来ディストリビューション毎の全文検索のためのインデックスファ
+イルなどを置く予定です(@ref{拡張})。
+
 @node packages ディレクトリ
 @subsection packages ディレクトリ
 
 @node plugins ディレクトリ
 @subsection plugins ディレクトリ
+ソースコード以外のsources全体に対する付加的な情報を追加配置できるよう用
+意してあります。外部コマンド@command{srpmix-rootdir-attach}で追加配置で
+きます。現状では使われていません(@ref{拡張})。
 
 @node attic ディレクトリ
 @subsection attic ディレクトリ
