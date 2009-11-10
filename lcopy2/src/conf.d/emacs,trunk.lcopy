@@ -1,8 +1,0 @@
-# -*- shell-script -*-
-CVS_CF_VERSION="0.0.0"
-CVS_REPOSITORY=":pserver:anonymous:@cvs.savannah.gnu.org:/sources/emacs"
-CVS_MODULE="emacs"
-LCOPY_CF_VERSION="0.2.5"
-LCOPY_VCS="cvs"
-LCOPY_PACKAGE="emacs"
-LCOPY_BRANCH="trunk"

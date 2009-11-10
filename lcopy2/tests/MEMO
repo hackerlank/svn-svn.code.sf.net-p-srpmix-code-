@@ -1,3 +1,0 @@
-lcopy-genconf ddskk/trunk cvs -d:pserver:guest:guest@openlab.jp:/circus/cvsroot checkout skk/main
-
-(lcopy-checkout :package "ddskk" :branch "trunk" :command (cvs :repository ":pserver:guest:guest@openlab.jp:/circus/cvsroot" :module "skk/main"))

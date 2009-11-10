@@ -1,7 +1,0 @@
-# -*- shell-script -*-
-SVN_CF_VERSION="0.0.0"
-SVN_REPOSITORY="https://gauche.svn.sourceforge.net/svnroot/gauche/Gauche/trunk"
-LCOPY_CF_VERSION="0.2.2"
-LCOPY_VCS="svn"
-LCOPY_PACKAGE="gauche"
-LCOPY_BRANCH="trunk"
