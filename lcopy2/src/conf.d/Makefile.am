@@ -28,6 +28,7 @@ dist_confd_DATA = \
 	miniascape,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
 	sos,trunk.lcopy \
+	util-linux-ng,trunk.lcopy \
 	wireshark,trunk.lcopy \
 	\
 	$(NULL)
