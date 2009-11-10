@@ -1,0 +1,3 @@
+2009-11-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/twig.spec.in (Requires): Added redhat-rpm-config.

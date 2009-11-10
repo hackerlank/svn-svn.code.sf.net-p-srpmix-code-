@@ -3,7 +3,7 @@ Name: twig
 Version: @PACKAGE_VERSION@
 Release: 0
 Source: twig-@PACKAGE_VERSION@.tar.bz2
-Requires: rpm-build
+Requires: rpm-build redhat-rpm-config
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root
