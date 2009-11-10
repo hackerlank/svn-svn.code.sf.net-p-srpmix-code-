@@ -1,0 +1,219 @@
+#!/bin/bash
+
+BACKEND=git
+VERSION="0.0.0"
+
+source liblcopy_backends.sh || exit 1
+
+function write_spec
+{
+    local repo=$1
+
+    common_write_spec 
+    printf "GIT_REPOSITORY=\"%s\"\n" "${repo}"
+}
+
+function repo_check
+{
+    local repo=$1
+
+    if [ -z "${repo}" ]; then
+	echo "broken git command line: cannot find repository specification" 1>&2
+	return 1
+    fi
+
+    local http_spec="^http://.*$"
+    local https_spec="^https://.*$"
+    local git_spec="^git://.*$"
+    if  ! ( [[ "$repo" =~ "$http_spec" ]]  || \
+	    [[ "$repo" =~ "$https_spec" ]] || \
+	    [[ "$repo" =~ "$git_spec" ]] ); then
+	echo "broken git command line: unrecognizable repo specification: $repo" 1>&2
+	echo "expected repo specifications: " 1>&2
+	for s in "$http_spec" "$https_spec" "$git_spec"; do
+	    echo "	$s" 1>&2
+	done
+	return 1
+    else
+	return 0
+    fi
+}
+
+#
+# HELP
+#
+function git_help_help
+{
+    common_help_help "$@"
+}
+
+function git_help
+{
+    common_help "$@"
+}
+
+#
+# GENCONF_FORMAT
+# 
+function git_genconf_format
+{
+    common_genconf_format "$@"
+}
+
+#
+# GENCONF
+# 
+function git_help_genconf
+{
+    local prefix
+
+    if [ "$1" != "format" ]; then
+	prefix="$0 genconf"
+    fi
+
+    echo "	" ${prefix} git 'clone' URL
+    echo "	" "(acceptable scheme for URL: http://..., https://..., and git://...)"
+}
+
+function git_genconf
+{
+    local original=$@
+    local cmd
+    local repo
+
+
+    if [ $# != 2 ]; then
+	echo "wrong number of arguments: $original" 1>&2
+	return 1
+    fi
+
+
+    cmd=$1
+    shift
+    if ! [ "$cmd" = "clone" ] ; then
+	echo "unknown command for clone: $cmd" 1>&2
+	return 1
+    fi
+    
+    repo=$1
+    shift
+    if ! repo_check "${repo}"; then
+	return 1
+    fi
+    write_spec "${repo}"
+    return 0
+}
+
+#
+# CHECKOUT
+#
+function git_help_checkout
+{
+    echo "	$0 " "checkout" "FILE.lcopy" "OUTPUT-DIR"
+}
+
+function git_checkout
+{
+    local input=$1
+    local output_dir=$2
+
+    if ! source "$input"; then
+	return 1
+    fi
+
+    if [ -z "${GIT_REPOSITORY}" ]; then
+	echo "no GIT_REPOSITORY in $input" 1>&2
+	return 1
+    fi
+
+    ( 
+	cd ${output_dir}
+
+	common_spawn git clone "${GIT_REPOSITORY}"
+    )
+
+    return $?
+}
+
+#
+# UPDATE
+#
+function git_help_update
+{
+    echo "	$0 " "update" "FILE.lcopy" "UPDATE-DIR"
+}
+
+function git_update
+{
+    local input=$1
+    local update_dir=$2
+
+    cd "${update_dir}"
+
+    if common_spawn git pull | tee /tmp/git-update-$$; then
+	if [ "$(wc -l < /tmp/git-update-$$)" = 1 ] \
+	   LANG=C grep  'Already up-to-date.' /tmp/git-update-$$ > /dev/null 2>&1; then
+	    return 0
+	else
+	    return 1
+	fi
+    else
+	return 2
+    fi
+}
+
+#
+# DIRP
+# 
+function git_help_dirp
+{
+    echo "	$0 " "dirp" "[DIR]"
+}
+
+function git_dirp
+{
+    local dir=${1:-$(pwd)}
+    
+    test -d ${dir}/.git
+}
+
+#
+# REBIRTH
+#
+function git_help_rebirth
+{
+    echo "	$0 " "rebirth" "[DIR]"
+}
+
+function git_rebirth
+{
+    local dir=${1:-$(pwd)}
+
+    if ! git_dirp ${dir}; then
+	echo "Not git directory: ${dir} " 1>&2
+	return 1
+    fi
+
+
+    local git_url=$(git config --get remote.origin.url)
+    if [ $? != 0 ]; then
+	echo "failed in git config invocation (pwd: $(pwd))" 1>&2
+	return 1
+    fi
+
+    local repo="${git_url}"
+    if ! repo_check "${repo}"; then
+	return 1
+    fi
+
+    write_spec "${repo}"
+}
+
+function main
+{
+    common_main "$@"
+    return $?
+}
+
+main "$@"
+exit $?

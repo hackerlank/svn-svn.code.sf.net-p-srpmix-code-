@@ -1,0 +1,181 @@
+#!/bin/bash
+
+source liblcopy.sh ||  exit 1
+
+
+OUTPUT_DIR=.
+
+INPUT=
+LCOPY_VCS=
+LCOPY_PACKAGE=
+LCOPY_BRANCH=
+NO_ERROR_MESSAGE_IF_EXISTING=
+
+readonly ERROR=1
+readonly EXISTED=2
+
+function print_usage
+{
+    echo "Usage: "
+    echo "$0 --help|-h"
+    echo "$0 [--output-dir=OUTPUT-DIR] [--no-error-message-if-existing] FILE.lcopy"
+    echo ""
+    echo "(taking checkout configurations from stdin)"
+    echo "Exit status: "
+    echo "	0: Successful"
+    echo "	1: Error"
+    echo "	2: Directory for checkout out to exists"
+    
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    (--output-dir=*)
+                OUTPUT_DIR=${1/--output-dir=}
+                ;;
+	    --no-error-message-if-existing)
+	        NO_ERROR_MESSAGE_IF_EXISTING=yes
+		;;
+	    --*)
+		echo "unknown option: $1" 1>&2
+		print_usage 1>&2
+		exit $ERROR
+		;;
+	    *)
+		INPUT=$1
+		shift
+
+		if ! [ -r "$INPUT" ]; then
+		    echo "cannot read: $INPUT" 1>&2
+		    exit $ERROR
+		fi
+		break
+		;;
+	esac
+	shift
+    done
+
+    if ! [ -d "$OUTPUT_DIR" ]; then
+	echo "no such directory: $OUTPUT_DIR" 1>&2
+	exit $ERROR
+    fi
+    
+    if ! [ -w "$OUTPUT_DIR" ]; then
+	echo "cannot write to: $OUTPUT_DIR" 1>&2
+	exit $ERROR
+    fi
+		  
+    if [ -z "$INPUT" ]; then
+	echo "no lcopy file given" 1>&2
+	print_usage 1>&2
+	exit $ERROR
+    fi
+
+    if [ "$#" -gt 0 ]; then
+	echo "too many arguments: $@" 1>&2
+	print_usage 1>&2
+	exit $ERROR
+    fi
+}
+
+function load_input
+{
+    source "$INPUT"
+
+    if [ -z "$LCOPY_VCS" ]; then
+	echo "no LCOPY_VCS in $INPUT" 2>&1
+	exit $ERROR
+    else
+	local vcs_found
+	for v in $(lcopy_backends_list); do
+	    if [ "$LCOPY_VCS" = "$v" ] ;then
+		vcs_found=yes
+		break
+	    fi
+	done
+	if [ -z "$vcs_found" ]; then
+	    echo "unsupported vcs: $LCOPY_VCS" 1>&2
+	    exit $ERROR
+	fi
+    fi
+
+    
+    if [ -z "$LCOPY_PACKAGE" ]; then
+	echo "no LCOPY_PACKAGE in $INPUT" 2>&1
+	exit $ERROR
+    fi
+    
+    if [ -z "$LCOPY_BRANCH" ]; then
+	echo "no LCOPY_BRANCH in $INPUT" 2>&1
+	exit $ERROR
+    fi
+}
+
+function transfer
+{
+    local from=$1
+    local to="${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}"
+    mkdir -p "${to}"
+    mv "${from}" "${to}/"
+
+    return $?
+}
+
+
+function main
+{
+    local my_tmpdir
+    local base_dir
+    local checkout_dir
+    local status
+
+    parse_arguments "$@"
+    load_input $INPUT
+
+    if [ -d "${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH}" ]; then
+	if [ "${NO_ERROR_MESSAGE_IF_EXISTING}" != "yes" ]; then
+	    echo "${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH} already exits" 1>&2
+	fi
+	return $EXISTED
+    fi
+
+    
+    my_tmpdir=`mktemp -d`
+    trap "chmod -R u+w $my_tmpdir; /bin/rm -rf $my_tmpdir" 0    
+
+    base_dir=${my_tmpdir}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH}
+    mkdir -p "${base_dir}"
+ 
+    echo $LCOPY_VERSION > ${base_dir}/LCOPY
+    cp $INPUT ${base_dir}/checkout.lcopy
+
+    checkout_dir=${base_dir}/pre-build
+    mkdir -p "${checkout_dir}"
+    #STATUS
+    lcopy_backend_checkout "$LCOPY_VCS" "$INPUT" "${checkout_dir}"
+    status=$?
+    echo $status > ${base_dir}/STATUS
+
+    if [ ! -e ${base_dir}/archives ]; then
+	(cd ${base_dir}; ln -s ./pre-build ./archives)
+    fi
+
+    mkdir -p ${base_dir}/plugins
+    if [ "$status" = "0" ]; then
+	lcopy_srpmix_plugin "${base_dir}"
+	if transfer "${base_dir}"; then
+	    status=0
+	else
+	    status=$ERROR
+	fi
+    fi
+    return $status
+}
+
+main "$@"

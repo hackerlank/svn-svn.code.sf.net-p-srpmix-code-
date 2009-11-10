@@ -1,0 +1,47 @@
+Summary: Scripts to update local copies gettting from vcs repositories 
+Name: lcopy
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+Source: lcopy-@PACKAGE_VERSION@.tar.bz2
+Requires: srpmix cvs subversion git mercurial darcs bzr
+Buildarch: noarch
+
+Buildroot: %{_tmppath}/%{name}-root
+License: GPL
+
+Group: Development/Tools
+
+%description
+Scripts to update local copies getting from vcs  repositories 
+
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%{_bindir}/lcopy-genconf
+%{_bindir}/lcopy-checkout
+%{_bindir}/lcopy-update
+%{_bindir}/lcopy-envelop
+%{_bindir}/lcopy-rebirth
+%{_bindir}/liblcopy.sh
+%{_bindir}/liblcopy_backends.sh
+%{_libexecdir}/lcopy/*
+%{_sysconfdir}/lcopy
+
+%changelog
+
+* Mon Aug 27 2007 Masatake YAMATO <yamato@redhat.com> - 0.1.0-0
+- First RPM build.
