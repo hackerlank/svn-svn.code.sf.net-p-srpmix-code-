@@ -293,6 +293,20 @@ schemeインタプリタやes-lang-c-stdc99で読み出すことができます�
 
 @node packages ディレクトリ
 @subsection packages ディレクトリ
+パッケージがどのディストリビューションに所属しているかを調べるのに
+@file{/srv/sources/packages}を使います。
+
+あるパッケージの名前を@emph{package}、パッケージの名前の最初の文字を
+@emph{p}としたとき、それが名称@emph{distro}を持つディストリビューション
+に含まれるとき、以下の場所にソースコードが配置されます。
+
+@cartouche
+@example
+/srv/sources/packages/@emph{p}/@emph{package}/@emph{distro}
+@end example
+@end cartouche
+
+
 
 @node plugins ディレクトリ
 @subsection plugins ディレクトリ
@@ -302,6 +316,7 @@ schemeインタプリタやes-lang-c-stdc99で読み出すことができます�
 
 @node attic ディレクトリ
 @subsection attic ディレクトリ
+このディレクトリにはsources自体の運用のためのファイルが配置されています。
 
 
 @node pvrのディレクトリ構造
