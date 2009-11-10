@@ -1,7 +1,0 @@
-LCOPY_USER=lcopy
-_LCOPY_PREFIX=/var/lib/lcopy
-LCOPY_DIR=${_LCOPY_PREFIX}/sources
-LCOPY_LOG=${_LCOPY_PREFIX}/log/lcopy-refresh.es 
-LCOPY_SRC=${_LCOPY_PREFIX}/
-LCOPY_DEST=
-
