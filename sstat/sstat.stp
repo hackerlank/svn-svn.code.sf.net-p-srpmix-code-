@@ -1,0 +1,43 @@
+#! /usr/bin/stap -g
+
+%{
+#include <linux/sunrpc/svc.h>
+#include <linux/nfsd/nfsd.h>
+%}
+
+function may_read_p:long(access:long) %{
+         THIS->__retvalue = (THIS->access == NFSD_MAY_READ)? 1: 0;
+%}
+
+function has_ipv4_addr:long(rqstp:long) %{
+         struct sockaddr_storage* sa_storage;
+         struct sockaddr_in*      sa_in;
+
+
+         if (((struct svc_rqst*)THIS->rqstp) == NULL)
+         {
+            THIS->__retvalue = 0;
+            return;
+         }
+
+         sa_storage = &(((struct svc_rqst*)THIS->rqstp)->rq_addr);
+         if (sa_storage->ss_family != AF_INET)
+         {
+            THIS->__retvalue = 0;
+            return;
+         }
+
+         sa_in = (struct sockaddr_in*)sa_storage;
+         THIS->__retvalue = sa_in->sin_addr.s_addr;
+         return;
+%}
+
+probe module("nfsd").function("nfsd_open") {
+        read_p = may_read_p($access);
+        addr   = has_ipv4_addr($rqstp);
+        if (read_p && addr)
+        {
+                printf("(nfsd-open :addr %d :path "?")\n", 
+	               addr);
+        }
+}
