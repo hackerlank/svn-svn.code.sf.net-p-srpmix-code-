@@ -6,61 +6,57 @@
 %}
 
 function may_read_p:long(access:long) %{
-         THIS->__retvalue = (THIS->access == NFSD_MAY_READ)? 1: 0;
+  THIS->__retvalue = (THIS->access == NFSD_MAY_READ)? 1: 0;
 %}
 
 function has_ipv4_addr:long(rqstp:long) %{
-         struct sockaddr_storage* sa_storage;
-         struct sockaddr_in*      sa_in;
+  struct sockaddr_storage* sa_storage;
+  struct sockaddr_in*      sa_in;
 
-          THIS->__retvalue = 0;
+  THIS->__retvalue = 0;
 
-         if (((struct svc_rqst*)THIS->rqstp) == NULL)
-             return;
+  if (((struct svc_rqst*)THIS->rqstp) == NULL)
+    return;
 
-         sa_storage = &(((struct svc_rqst*)THIS->rqstp)->rq_addr);
-         if (sa_storage->ss_family != AF_INET)
-            return;
+  sa_storage = &(((struct svc_rqst*)THIS->rqstp)->rq_addr);
+  if (sa_storage->ss_family != AF_INET)
+    return;
 
-         sa_in = (struct sockaddr_in*)sa_storage;
-         THIS->__retvalue = kread(&sa_in->sin_addr.s_addr);
-         CATCH_DEREF_FAULT();
-%}
-
-function has_path:string(fhp:long) %{
-          struct svc_fh *fhp = (struct svc_fh *)THIS->fhp;
-           struct dentry * dentry;
-         char   buf[512];
-          char*  p;
-
-           strlcpy (THIS->__retvalue, "", MAXSTRINGLEN);
-
-            if (fhp == NULL)
-                return;
-
-                     dentry = fhp->fh_dentry;
-                      if (dentry == NULL)
-                          return;
-
-                           p = dentry_path(dentry, buf, 511);
-                            if (IS_ERR(p))
-                                return;
-                                 strlcpy (THIS->__retvalue, buf, MAXSTRINGLEN);
+  sa_in = (struct sockaddr_in*)sa_storage;
+  THIS->__retvalue = kread(&sa_in->sin_addr.s_addr);
+  CATCH_DEREF_FAULT();
 %}
 
 function verify_r:long(r:long) %{
-          THIS->__retvalue = THIS->r?0: 1;
+  THIS->__retvalue = THIS->r? 0: 1;
+%}
+
+function get_dentry:long(filp:long) %{
+  struct file **filp = (struct file**)THIS->filp;
+
+  THIS->__retvalue = 0;
+
+  if (filp && *filp) {
+    THIS->__retvalue = (long)((*filp)->f_path.dentry);
+  }
 %}
 
 probe module("nfsd").function("nfsd_open").return {
-        successful = verify_r($return);
-        read_p = may_read_p($access);
-        addr   = has_ipv4_addr($rqstp);
-        path   = has_path($fhp);
-        if (successful && read_p && addr && (path != ""))
-        {
-                printf("(nfsd-open :addr %d :path \"%s\")\n",
-                               addr,
-                                       path);
-        }
+  successful = verify_r($return)
+
+  if (successful) {
+    read_p = may_read_p($access)
+    addr   = has_ipv4_addr($rqstp)
+    dentry = get_dentry($filp)
+    path   = ""
+
+    if (dentry) {
+      path = reverse_path_walk(dentry)
+    } 
+
+    if (read_p && addr && (path != "")) {
+      printf("%d %s\n", addr, path)
+    }
+
+  }
 }
