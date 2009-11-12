@@ -144,7 +144,7 @@ function main
     parse_arguments "$@"
     srpmix_verify_commands "${ETAGS}"
 
-    if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\)$' \
+    if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\|kernel%{\?variant}\)$' \
 	$SPEC > /dev/null 2>&1 \
 	&& test $(basename $SPEC) != "kernel-2.4.spec"; then
 	for x in ${BUILDDIR}/*/linux*/Makefile; do
