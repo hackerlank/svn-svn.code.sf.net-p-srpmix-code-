@@ -4,10 +4,6 @@
 
 (use gauche.net)
 
-(define (make-readable ip)
-  ;; (ip    (inet-address->string (string->number (match 1)) AF_INET))
-  ip)
-
 (define (complete partial)
   partial)
 
@@ -41,7 +37,9 @@
        ((equal? tmf tmf0)
 	(values port tmf))
        ((not tmf)
-	(values (open-output-file (format-port-name tmf0))
+	(values (open-output-file (format-port-name tmf0)
+				  :if-exists :append
+				  :buffering :line)
 		tmf0))
        (else
 	(close-output-port port)
