@@ -85,7 +85,7 @@
 
 ;; ANNOTATION
 ;; ==========
-;; (stitch-annotation :version 0
+;; (stitch-annotation  :version 0
 ;;                     :target-list (TARGET ...)
 ;;                     :annotation-list (ANNOTATION...)
 ;; 		       :date DATE
@@ -98,8 +98,13 @@
 ;; General format: (target :type TYPE &rest args)
 ;; ARGS depends on TYPE.
 ;;
-;; (target :type file :file PATH :point P [:which-func FUNCTION] [:line LINE])
+;; (target :type file :file PATH :point P [:which-func FUNCTION] [:line LINE] [:surround SURROUND])
 ;; (target :type directory :directory PATH :item FILE-or-SUBDIR)
+;;
+;; SURROUND
+;; ^^^^^^^^
+;; General format: (front-text this-text rear-text)
+;; 
 ;;
 ;; ANNOTATION
 ;; ^^^^^^^^^^
@@ -117,6 +122,15 @@
 ;;                 :date DATE
 ;;                 :full-name STRING
 ;;                 :mailing-address STRING)
+;;
+;; (define-keyword SYMBOL
+;;                 :version 0
+;;                 :subject STRING
+;;                 [:parent KEYWORD]
+;;                 :date DATE
+;;                 :full-name STRING
+;;                 :mailing-address STRING)
+;;
 ;;
 ;; TODO
 ;;
@@ -740,13 +754,19 @@
 (defun stitch-insert-annotation (buffer region annotation date full-name mailing-address keywords)
   (if (eq (car region) (cadr region))
       (stitch-insert-point-annotation buffer 
-				       (car region)
-				       annotation date full-name mailing-address keywords)
+				      (car region)
+				      annotation date full-name mailing-address keywords)
     (stitch-insert-region-annotation buffer
 				      (car region)
 				      (cadr region)
 				      (caddr region)
 				      annotation date full-name mailing-address keywords)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun stitch-target-rearrange-region (region klist buffer)
+  ;; TODO
+  region
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun stitch-insert-annotations (&optional buffer)
@@ -765,10 +785,11 @@
 	       (stitch-insert-annotation
 		;; (stitch-klist-value e :target)
 		(current-buffer)
-		(stitch-target-get-region (stitch-klist-value
-					    e
-					    :target)
+		(stitch-target-rearrange-region
+		 (stitch-target-get-region (stitch-klist-value e :target)
 					   file)
+		 e
+		 (current-buffer))
 		(stitch-klist-value e :annotation)
 		(stitch-klist-value e :date)
 		(stitch-klist-value e :full-name)
@@ -928,7 +949,7 @@
 
 ;; Stolen from file `intes.el.2'
 ;;;###autoload
-(defun current-line ()
+(defun stitch-current-line ()
   "Current line number of cursor."
   (+ (count-lines (point-min) (point))
      (if (= (current-column) 0) 1 0)))
@@ -937,18 +958,27 @@
   (condition-case nil
       (which-function)
     (error nil)))
+(defun stitch-current-surround (r0 r1)
+  (list (save-excursion (buffer-substring-no-properties r0
+					  (progn (forward-line -1) (point))))
+	(buffer-substring-no-properties r0 r1)
+	(save-excursion (buffer-substring-no-properties r1
+					  (progn (forward-line 1) (line-end-position))))))
 
 (defun stitch-file-target-new ()
   (let* ((func    (stitch-safe-which-function))
-	 (line    (save-restriction (widen) (current-line)))
+	 (line    (save-restriction (widen) (stitch-current-line)))
+	 (surround (save-restriction (widen) (stitch-current-surround (point) (point))))
 	 (target `(target :type file
 			  :file ,(stitch-buffer-file-name)
 			  :point ,(point)
 			  :coding-system ,buffer-file-coding-system
-			  :line ,line)))
+			  :line ,line
+			  :surround ,surround)))
     (if func
 	(stitch-klist-append target :which-func func)
       target)))
+
 (defun stitch-file-target-get-files (target)
   (list (stitch-klist-value target :file)))
 (defun stitch-file-target-get-point (target file)
@@ -990,17 +1020,20 @@
     (when (eq b e)
       (error "the region size is 0"))
     (let* ((func (stitch-safe-which-function))
-	   (line (save-restriction (widen) (current-line)))
+	   (line (save-restriction (widen) (stitch-current-line)))
+	   (surround (stitch-current-surround b e))
 	   (target `(target :type region
 			    :subtype file
 			    :file ,(stitch-buffer-file-name)
 			    :region (,b ,e)
 			    :coding-system ,buffer-file-coding-system
 			    :line ,line
+			    :surround ,surround
 			    :face ,(read-face-name "Face" 'stitch-marker))))
       (if func
 	  (stitch-klist-append target :which-func func)
 	target))))
+
 (defun stitch-region-target-get-files (target)
   (list (stitch-klist-value target :file)))
 (defun stitch-region-target-get-point (target file)
