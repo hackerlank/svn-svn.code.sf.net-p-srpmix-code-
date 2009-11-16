@@ -9,3 +9,14 @@ GPL2
 [eS expression <= query] 
 
 <es-src-dwarf>
+
+
+;;
+
+(dive-context :file FILE
+              :function FUNCTION
+	      :line     LINE
+	     [:symbol   SYMBOL])
+=> (dive-info-function :return-type
+                       :args ((type var)...))
+=> (dive-info-symbol   ???)
