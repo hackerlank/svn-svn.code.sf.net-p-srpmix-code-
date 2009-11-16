@@ -28,7 +28,7 @@
 PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
 if rpm -qi sop > /dev/null 2>&1; then
-    echo "*** sop's cron job will do the same task" 2>&1
+    echo "*** sop's cron job will do the same task" 1>&2
     return 0
 fi
 

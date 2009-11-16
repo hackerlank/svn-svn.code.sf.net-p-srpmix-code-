@@ -1,3 +1,7 @@
+2009-11-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix.daily: Print warning message to stderr.
+
 2009-11-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-kindex (main): Pass "kernel{?variant}" pattern
