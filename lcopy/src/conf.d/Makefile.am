@@ -27,7 +27,6 @@ dist_confd_DATA = \
 	libvirt,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
-	miniaspace,trunk.lcopy \
 	perg,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
 	sbuild,trunk.lcopy \
