@@ -5,21 +5,24 @@ source liblcopy.sh  || exit 1
 source libsrpmix.sh || exit 1
 
 LCOPY_ENVELOP_VERSION=${LCOPY_VERSION}
-LINKIN_ROOT_DIR=${SRPMIX_SOURCES_DIR}
+# LINKIN_ROOT_DIR=${SOP_SOURCES_DIR}
+# LINKIN_ROOT_DIR=${SRPMIX_SOURCES_DIR}
+LINKIN_ROOT_DIR=
 
 RELEASE=0
 ROOT_DIR=
 INPUT=
 OUTPUT_DIR=.
-# SOP_CONF_DIR=/etc/sop
+SOP_CONF_DIR=/etc/sop
 
 
 function print_usage
 {
     echo "Usage: "
     echo "$0 --help|-h"
-#    echo "$0 [--output-dir=OUTPUT-DIR] [--sop-conf-dir=SOP-CONF-DIR] LCOPY_ROOT_DIR FILE.lcopy"
-    echo "$0 [--output-dir=OUTPUT-DIR] LCOPY_ROOT_DIR FILE.lcopy"
+    echo "$0 [--output-dir=OUTPUT-DIR] LCOPY_ROOT_DIR LINKIN_ROOT_DIR FILE.lcopy"
+    echo "LCOPY_ROOT_DIR: the root directory where the source code is"
+    echo "LINKIN_ROOT_DIR: the root directory where the symbolic link is put"
 }
 
 function parse_arguments
@@ -33,9 +36,6 @@ function parse_arguments
 	    (--output-dir=*)
                 OUTPUT_DIR=${1/--output-dir=}
                 ;;
-#	    (--sop-conf-dir=*)
-#	        SOP_CONF_DIR=${1/--sop-conf-dir=}
-#		;;
 	    --*)
 		echo "unknown option: $1" 1>&2
 		print_usage 1>&2
@@ -58,16 +58,13 @@ function parse_arguments
 	exit 1
     fi
 	
-#    if ! [ -r "${SOP_CONF_DIR}/sop.cf" ]; then
-#	echo "cannot find sop.cf in ${SOP_CONF_DIR}" 1>&2
-#	exit 1
-#    fi
 
-    if [ $# -ne 2 ]; then
+    if [ $# -ne 3 ]; then
 	echo "wrong number of arguments: $@" 1>&2
 	print_usage 1>&2
 	exit 1
     fi
+
 
     ROOT_DIR=$1
     shift
@@ -76,6 +73,16 @@ function parse_arguments
 	exit 1
     fi
     ROOT_DIR=$(cd ${ROOT_DIR}; pwd)
+
+
+    LINKIN_ROOT_DIR=$1
+    shift
+    if ! [ -d "$LINKIN_ROOT_DIR" ]; then
+	echo "no such directory: $LINKIN_ROOT_DIR" 1>&2
+	exit 1
+    fi
+    LINKIN_ROOT_DIR=$(cd ${LINKIN_ROOT_DIR}; pwd)
+    
 
     INPUT=$1
     shift
@@ -223,12 +230,6 @@ function transfer
 function main
 {
     parse_arguments "$@"
-
-#    source "${SOP_CONF_DIR}/sop.cf" || exit 1
-#    if [ -z "${SOP_SOURCES_DIR}" ]; then
-#	echo "no SOP_SOURCES_DIR in ${SOP_CONF_DIR}/sop.cf" 1>&2
-#	exit 1
-#    fi
 
     source "${INPUT}"               || exit 1
     if [ -z "${LCOPY_PACKAGE}" ]; then

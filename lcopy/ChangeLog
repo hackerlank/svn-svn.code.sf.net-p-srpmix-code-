@@ -1,3 +1,7 @@
+2009-11-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/lcopy-envelop (parse_arguments): Added LINKIN_ROOT_DIR.
+
 2009-10-26  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/backends/wgetx (wgetx_update): Do check out if
