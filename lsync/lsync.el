@@ -4,6 +4,24 @@
 		     ("/tmp/inspect/mask02" 12)
 		     ("/tmp/inspect/mask03" 190)) "TEST"))
 
+(defvar lsync-kill-slot nil)
+(defun lsync-kill-save ()
+  (interactive)
+  (setq lsync-kill-slot
+	(list (buffer-file-name)
+	      (current-line)
+	      (buffer-substring-no-properties (line-beginning-position)
+					      (line-end-position)))))
+(defun lsync-yank ()
+  (interactive)
+  (print lsync-kill-slot (current-buffer)))
+  
+(define-key global-map [(hyper ?w)] 'lsync-kill-save)
+(define-key global-map [(hyper ?y)] 'lsync-yank)
+
+(defmacro lsync (lines annot)
+  `(lsync-show '(lsync ,lines ,annot)))
+
 (defun lsync-show (spec)
   (let ((ovs (mapcar (lambda (s)
 		      (let ((name (car s))

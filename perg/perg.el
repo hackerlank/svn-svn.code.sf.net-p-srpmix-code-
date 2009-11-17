@@ -7,8 +7,9 @@
 (defvar perg-log-lines nil)
 (defun perg (file pattern)
   (interactive (list
-		(or perg-database
-		    (call-interactively 'perg-set-database))
+		(if current-prefix-arg
+		    (call-interactively 'perg-set-database)
+		  perg-database )
 		(read-from-minibuffer "Log line: " nil
 				      nil nil 'perg-log-lines
 				      (buffer-substring (line-beginning-position)
