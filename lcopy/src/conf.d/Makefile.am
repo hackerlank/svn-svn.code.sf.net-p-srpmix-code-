@@ -27,6 +27,7 @@ dist_confd_DATA = \
 	libvirt,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
+	miniaspace,trunk.lcopy \
 	perg,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
 	sbuild,trunk.lcopy \
@@ -38,5 +39,6 @@ dist_confd_DATA = \
 	util-linux-ng,trunk.lcopy \
 	wireshark,trunk.lcopy \
 	with-log,trunk.lcopy \
+	xtrace,trunk.lcopy \
 	\
 	$(NULL)
