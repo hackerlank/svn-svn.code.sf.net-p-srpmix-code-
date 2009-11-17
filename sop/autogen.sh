@@ -11,6 +11,6 @@ autoconf
 
 REQUIRED=koji
 
-if if [ -n "$1" ] && [ "$1" = --bootstrap] && which yum > /dev/null 2>&1; then
+if [ -n "$1" ] && [ "$1" = --bootstrap] && which yum > /dev/null 2>&1; then
     yum -y install ${REQUIRED}
 fi
