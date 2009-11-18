@@ -58,3 +58,11 @@
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/cman/daemon/commands.c" :point 32464 :coding-system undecided-unix :line 1285 :surround ("	case CMAN_CMD_ISQUORATE:
 " "" "		return cluster_is_quorate;
 ") :which-func ("process_command"))) :annotation-list ((annotation :type text :data "この変数を見ればquorateかどうかわかる。")) :date "Wed Nov 18 11:20:06 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/cman/lib/libcman.h" :point 2306 :coding-system undecided-unix :line 62 :surround ("typedef enum {CMAN_REASON_PORTCLOSED,
+" "" "	      CMAN_REASON_STATECHANGE,
+              CMAN_REASON_PORTOPENED,")) (target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/cman/daemon/cnxman-socket.h" :point 4173 :coding-system undecided-unix :line 104 :surround ("#define EVENT_REASON_PORTCLOSED   0
+" "" "#define EVENT_REASON_STATECHANGE  1
+#define EVENT_REASON_PORTOPENED   2"))) :annotation-list ((annotation :type text :data "CMAN_REASON_STATECHANGE == EVENT_REASON_STATECHANGE")) :date "Wed Nov 18 12:03:31 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/group/daemon/cman.c" :point 3171 :coding-system undecided-unix :line 129 :surround ("		break;
+" "" "	case CMAN_REASON_STATECHANGE:
+		statechange();") :which-func ("cman_callback"))) :annotation-list ((annotation :type text :data "cman daemonのrecalculate_quorumから来る。")) :date "Wed Nov 18 12:05:46 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
