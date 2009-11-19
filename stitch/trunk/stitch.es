@@ -66,3 +66,6 @@
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/group/daemon/cman.c" :point 3171 :coding-system undecided-unix :line 129 :surround ("		break;
 " "" "	case CMAN_REASON_STATECHANGE:
 		statechange();") :which-func ("cman_callback"))) :annotation-list ((annotation :type text :data "cman daemonのrecalculate_quorumから来る。")) :date "Wed Nov 18 12:05:46 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/fence/fenced/agent.c" :point 6102 :coding-system undecided-unix :line 297 :surround ("
+" "" "	/* Mark it as fenced */
+	if (!cman_get_node(ch, 0, &node))") :which-func ("update_cman"))) :annotation-list ((annotation :type text :data "fencingが完了したことを伝えるために、cmanを呼ぶ。")) :date "Thu Nov 19 11:46:29 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
