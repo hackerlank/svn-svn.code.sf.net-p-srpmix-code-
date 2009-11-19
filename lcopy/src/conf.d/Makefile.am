@@ -35,6 +35,7 @@ dist_confd_DATA = \
 	sos,trunk.lcopy \
 	srpmix,trunk.lcopy \
 	stitch,trunk.lcopy \
+	trunk,cluster.lcopy \
 	twig,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
 	wireshark,trunk.lcopy \
