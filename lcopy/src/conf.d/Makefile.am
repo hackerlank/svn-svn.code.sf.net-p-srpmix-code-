@@ -19,6 +19,7 @@ dist_confd_DATA = \
 	goocanvas,trunk.lcopy \
 	gstreamer,trunk.lcopy \
 	gtk2,trunk.lcopy \
+	hachoir,trunk.lcopy \
 	hal,trunk.lcopy \
 	kernel,rt.lcopy \
 	kernel,trunk.lcopy \
