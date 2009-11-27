@@ -30,6 +30,7 @@ dist_confd_DATA = \
 	miniascape,trunk.lcopy \
 	perg,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
+	rpm,trunk.lcopy \
 	sbuild,trunk.lcopy \
 	sop,trunk.lcopy \
 	sos,trunk.lcopy \
@@ -38,6 +39,7 @@ dist_confd_DATA = \
 	trunk,cluster.lcopy \
 	twig,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
+	wfo,trunk.lcopy \
 	wireshark,trunk.lcopy \
 	with-log,trunk.lcopy \
 	xtrace,trunk.lcopy \

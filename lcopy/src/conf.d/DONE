@@ -21,6 +21,8 @@ git clone git://git.et.redhat.com/libvirt.git libvirt
 git clone git://git.kernel.org/pub/scm/docs/man-pages/man-pages.git man-pages
 svn checkout http://svn.fedorahosted.org/svn/sos/trunk/src sos
 svn checkout http://anonsvn.wireshark.org/wireshark/trunk/ wireshark
+svn checkout svn://svn@svn.a-k-r.org/akr/wfo/trunk wfo
+git clone http://rpm.org/git/rpm.git rpm
 
 
 NOT YET:
@@ -42,7 +44,6 @@ git clone http://git.debian.org/git/parted/parted.git parted
 git clone git://anongit.freedesktop.org/git/pixman pixman
 git clone git://anongit.freedesktop.org/PolicyKit PolicyKit
 git clone http://git.fedorahosted.org/git/rgmanager.git rgmanager
-git clone http://rpm.org/git/rpm.git rpm
 git clone http://rpm.org/git/rpm-python.git rpm
 git clone git://git.adiscon.com/git/rsyslog.git rsyslog
 git clone git://rubyforge.org/rtags.git rtags
@@ -53,5 +54,4 @@ svn checkout https://srpmix.svn.sourceforge.net/svnroot/srpmix srpmix
 git clone git://git.savannah.gnu.org/texinfo.git texinfo
 svn checkout https://tomoe.svn.sourceforge.net/svnroot/tomoe/tomoe/trunk tomoe
 git clone git://git.kernel.org/pub/scm/utils/util-linux-ng/util-linux-ng.git util-linux-ng
-svn checkout svn://svn@svn.a-k-r.org/akr/wfo/trunk wfo
 git clone git://anongit.freedesktop.org/xorg/xserver xorg-x11-server
