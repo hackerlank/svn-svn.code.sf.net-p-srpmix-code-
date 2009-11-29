@@ -1,1 +1,298 @@
 #!/bin/bash
+
+STPIN=sstat.stp
+GOSHIN=sstat-pre.scm
+SSTAT_DIR=/srv/sources/attic/sstat
+
+function main() {
+    local pid
+
+    mkdir -p $SSTAT_DIR || exit $?
+
+    daemon_init || exit 1
+
+    ( stap -g $STPIN | gosh $GOSHIN ) &
+    pid=$!
+
+    while [ true ]; do
+	daemon_termp
+	sleep 1
+    done    
+}
+
+#
+# (Derived from daemon-functions.sh)
+#
+# http://blog.apokalyptik.com/files/bash-daemon/daemon-functions.sh
+#
+## ################################ ##
+##                                  ##
+## daemon-functions.sh VERSION 0.1a ##
+##                                  ##
+## ################################ ##
+
+## Distrubuted under the GPL
+## http://www.gnu.org/licenses/gpl-3.0.txt
+
+## No warranty of any kind... May run 
+## off with your daughter. May explode
+## in a ball of smoke and fire. Might
+## work. Use at your own risk
+
+## #!/bin/bash
+##
+## # Example Usage: datelogger.sh
+## #	A sample daemon which simply logs the
+## #	date and time once per second.
+##
+## function payload() {
+##   while [ true ]; do
+##     checkforterm
+##     date
+##     sleep 1
+##   done
+## }
+##
+## source /path/to/daemon-functions.sh
+
+#TODO
+DAEMON_PARM_USE_SYSLOG=0
+
+DAEMON_CONST_PID=$$
+DAEMON_CONST_PATH=$(readlink -f $0)
+DAEMON_CONST_NAME=$(basename $DAEMON_CONST_PATH)
+
+DAEMON_CONST_ROOT=/var/run/${DAEMON_CONST_NAME}
+mkdir -p ${DAEMON_CONST_ROOT} || exit 1
+
+DAEMON_CONST_PIDFILE="$DAEMON_CONST_ROOT/$DAEMON_CONST_NAME.pid"
+DAEMON_CONST_KILLFILE="$DAEMON_CONST_ROOT/$DAEMON_CONST_NAME.kill"
+DAEMON_CONST_ERRFILE="$DAEMON_CONST_ROOT/$DAEMON_CONST_NAME.err"
+DAEMON_CONST_LOGFILE="$DAEMON_CONST_ROOT/$DAEMON_CONST_NAME.log"
+DAEMON_CONST_WAITFILE="$DAEMON_CONST_ROOT/$DAEMON_CONST_NAME.wait"
+DAEMON_CONST_BLOCKFILE="$DAEMON_CONST_ROOT/$DAEMON_CONST_NAME.block"
+
+DAEMON_CONST_WAITCOUNTMAX=30
+
+function daemon_print_usage()
+{
+    echo "Usage: "
+    echo -n "	$0 "
+    echo "[ start | stop | restart | stat | pause | resume | disable | enable | (log|stdout) | (err|stderr) ]"
+}
+
+function daemon_init()
+{
+    case $1 in
+	# TODO '?' may match any char.
+	help|?|--help|-h)
+	    daemon_print_usage
+	    exit 0
+	    ;;
+	pause|resume|restart|start|disable|enable|stop|log|stdout|err|stderr)
+	    daemon_cmd_$1 "$@"
+	    exit $?
+	    ;;
+	
+	_stat|_pid)
+	    daemon_cmd__$1 "$@"
+	    exit $?
+	    ;;
+
+	_run)
+	    if [ -n "$DAEMON_CONST_PAYLOAD" ]; then
+		daemon_daemonize
+		return $?
+	    else
+		echo '*** INTERNAL ERROR ***'    1>&2
+		echo "No DAEMON_CONST_PAYLOAD"         1>&2
+		exit 1
+	    fi
+	    ;;
+	*)
+	    echo "Invalid argument" 1>&2
+	    echo 1>&2
+	    $0 help 1>&2
+	    exit $?
+	    ;;
+    esac
+}
+
+function daemon_cmd_pause()
+{
+    touch $DAEMON_CONST_WAITFILE
+    return 0
+}
+
+function daemon_cmd_resume()
+{
+    rm $DAEMON_CONST_WAITFILE
+    return 0
+}
+
+function daemon_cmd_restart()
+{
+    $0 stop
+    $0 start
+    return $?
+}
+
+function daemon_cmd_start()
+{
+    if [ -f $DAEMON_CONST_BLOCKFILE ]; then
+	echo "Daemon execution has been disabled"
+	return 0
+    fi
+    setsid $0 _run &
+    echo "Daemon Started"
+    exec 0>&- # close stdin
+    exec 1>&- # close stdout
+    exec 2>&- # close stderr
+    return 0
+}
+
+function daemon_cmd_disable()
+{
+    touch $DAEMON_CONST_BLOCKFILE
+    $0 stop
+    return 0
+}
+
+function daemon_cmd_enable()
+{
+    if [ -f $DAEMON_CONST_BLOCKFILE ]; then 
+	rm $DAEMON_CONST_BLOCKFILE; 
+    fi
+    return 0
+}
+
+function daemon_cmd_stop()
+{
+    echo -n "Terminating daemon... "
+    $0 _stat 1>/dev/null 2>/dev/null
+    if [ $? -ne 0 ]; then
+	echo "process is not running"
+	return 0
+    fi
+    touch $DAEMON_CONST_KILLFILE
+    $0 _stat 1>/dev/null 2>/dev/null
+    local -i ecode=$?
+    local -i waitcount=0
+    if [ "$waitcountmax" = "" ]; then waitcountmax=$DAEMON_CONST_WAITCOUNTMAX; fi
+    while [ $ecode -eq 0 ]; do
+	sleep 1
+	let waitcount=$waitcount+1
+	if [ $waitcount -lt $waitcountmax ]; then
+	    $0 _stat 1>/dev/null 2>/dev/null
+	    ecode=$?
+	else
+	    ecode=1
+	fi
+    done
+    $0 _stat 1>/dev/null 2>/dev/null
+    if [ $? -eq 0 ]; then
+	$local pid=$(cat $DAEMON_CONST_PIDFILE)
+	kill $pid
+	rm $DAEMON_CONST_PIDFILE
+	rm $DAEMON_CONST_KILLFILE
+	echo "Process Killed"
+	echo $(date)" Terminating forcefully" >> $DAEMON_CONST_ERRFILE
+    else
+	echo "Process exited gracefully"
+    fi
+
+    return 0
+}
+
+function daemon_cmd_log()
+{
+    if [ -f $DAEMON_CONST_LOGFILE ]; then
+	tail -f $DAEMON_CONST_LOGFILE
+    else
+	echo "No stdout output yet"
+    fi
+    return 0
+}
+alias daemon_cmd_stdout=daemon_cmd_log
+
+function daemon_cmd_err()
+{
+    if [ -f $DAEMON_CONST_ERRFILE ]; then
+	tail -f $DAEMON_CONST_ERRFILE
+    else
+	echo "No stderr output yet"
+    fi
+    return 0
+    ;;
+}
+alias daemon_cmd_stderr=daemon_cmd_err
+
+function daemon_cmd__stat()
+{
+    if [ -f $DAEMON_CONST_BLOCKFILE ]; then
+	echo "Daemon execution disabled"
+    fi
+    if [ ! -f $DAEMON_CONST_PIDFILE ]; then
+	echo "$DAEMON_CONST_NAME is not running"
+	return 1
+    fi
+    pgrep -l -f "$DAEMON_CONST_NAME run" | grep -q -E "^$(cat $DAEMON_CONST_PIDFILE) " 
+    if [ $? -eq 0 ]; then
+	echo "$DAEMON_CONST_NAME is running with PID "$($0 _pid)
+	return 0
+    else
+	echo "$DAEMON_CONST_NAME is not running (PIDFILE mismatch)"
+	return 1
+    fi
+}
+
+function daemon_name__pid()
+{
+    if [ -f $DAEMON_CONST_PIDFILE ]; then
+	cat $DAEMON_CONST_PIDFILE
+    else
+	echo "No pidfile found"
+    fi
+    return 1
+}
+
+function daemon_daemonize() 
+{
+    cd /
+    umask 022 #     umask 0
+    echo $DAEMON_CONST_PID > $DAEMON_CONST_PIDFILE
+    exec 0>&-           # close stdin
+    exec 1>>$DAEMON_CONST_LOGFILE # redirect stdout
+    exec 2>>$DAEMON_CONST_ERRFILE # redirect stderr
+    echo $(date)" Daemonizing" >> $DAEMON_CONST_ERRFILE
+    return 0
+}
+
+function daemon_termp() 
+{
+    local -i sleepcount
+    local -i pos
+
+
+    if [ -f $DAEMON_CONST_KILLFILE ]; then
+	echo $(date)" Terminating gracefully" >> $DAEMON_CONST_ERRFILE
+	rm $DAEMON_CONST_PIDFILE
+	rm $DAEMON_CONST_KILLFILE
+	kill $DAEMON_CONST_PID
+	exit 0
+    fi
+
+    sleepcount=0
+    while [ -f $DAEMON_CONST_WAITFILE ]; do 
+	let sleepcount=$sleepcount+1
+	let pos=$sleepcount%10
+	if [ $pos -eq 0 ]; then
+	    echo $(date)" Sleeping..." | tee -a $DAEMON_CONST_ERRFILE
+	fi
+	if [ -f $DAEMON_CONST_KILLFILE ]; then
+	    rm $DAEMON_CONST_WAITFILE
+	    daemon_termp
+	fi
+	sleep 1
+    done
+}
