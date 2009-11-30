@@ -1,8 +1,8 @@
 #!/bin/bash
 
 PREFIX=/usr/share/sstat
-STPIN=${PREFIX}/sstat.stp
-GOSHIN=${PREFIX}/sstat-pre.scm
+STPIN=${STPIN:-${PREFIX}/sstat.stp}
+GOSHIN=${GOSHIN:-${PREFIX}/sstat-pre.scm}
 
 
 SOP_CONF_DIR=/etc/sop
