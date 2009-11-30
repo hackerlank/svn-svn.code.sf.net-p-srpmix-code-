@@ -17,7 +17,8 @@
 				      (map (cute ref <> 'addresses)
 					   (map sys-gethostbyname
 						(map inet-string->address 
-						     unacceptable-ip-list0))))))
+						     unacceptable-ip-list0))))
+			       equal?))
 	(acceptable-path-regex   (string->regexp acceptable-path-regex0))
 	(frequency-table         (make-hash-table 'eq?))
 	)
