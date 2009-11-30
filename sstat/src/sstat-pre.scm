@@ -13,10 +13,10 @@
 (define (build-acceptor unacceptable-ip-list0 acceptable-path-regex0)
   (let (
 	(unacceptable-ip-list (delete-duplicates 
-			       (apply 'append
-				      (map (cute ref <> 'addresses)
-					   (map sys-gethostbyname
-						(map inet-string->address 
+			       (map inet-string->address 
+				    (apply append
+					   (map (cute ref <> 'addresses)
+						(map sys-gethostbyname
 						     unacceptable-ip-list0))))
 			       equal?))
 	(acceptable-path-regex   (string->regexp acceptable-path-regex0))
@@ -53,7 +53,7 @@
        (acceptable-regex "acceptable-regex=s" #f)
        . ips)
     (if sstat-dir
-	(when file-is-directory? sstat-dir
+	(unless (file-is-directory? sstat-dir)
 	      (errorf "No such directory: ~a" sstat-dir))
 	(print-usage (car args) (current-error-port) 1))
     (unless acceptable-regex
@@ -62,7 +62,7 @@
     (let1 ips (if (member "127.0.0.1" ips)
 		  ips
 		  (reverse (cons "127.0.0.1" (reverse ips))))
-      (let1 accept? (build-acceptor ips)
+      (let1 accept? (build-acceptor ips acceptable-regex)
 	(run accept? sstat-dir)))))
 
 
