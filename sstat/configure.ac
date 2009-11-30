@@ -17,6 +17,9 @@ AC_SUBST(SSTAT_MAJOR_VERSION, pkg_major_version)
 AC_SUBST(SSTAT_MINOR_VERSION, pkg_minor_version)
 AC_SUBST(SSTAT_MICRO_VERSION, pkg_micro_version)
 
+
+
+
 AC_OUTPUT([
 	   Makefile
 	   misc/Makefile

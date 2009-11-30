@@ -1,8 +1,20 @@
 #!/bin/bash
 
-STPIN=sstat.stp
-GOSHIN=sstat-pre.scm
-SSTAT_DIR=/srv/sources/attic/sstat
+PREFIX=/usr/share/sstat
+STPIN=${PREFIX}/sstat.stp
+GOSHIN=${PREFIX}/sstat-pre.scm
+
+
+SOP_CONF_DIR=/etc/sop
+if ! source "${SOP_CONF_DIR}/sop.cf"; then
+    exit 1
+fi
+SSTAT_DIR=${SOP_ATTIC_DIR}/sstat
+
+
+if ! source "${SSTAT_CONF_DIR/sstat.cf}"; then
+    exit 1
+fi
 
 function main() {
     local pid
@@ -11,7 +23,12 @@ function main() {
 
     daemon_init || exit 1
 
-    ( stap -g $STPIN | gosh $GOSHIN ) &
+
+    ( stap -g $STPIN   \
+	| gosh $GOSHIN \
+	--sstat-dir="$SSTAT_DIR" \
+	--acceptable-regex="^var/lib/srpmix/sources/[0-9a-zA-Z]/[^/]+/[^/]+/.+" \
+	${SSTAT_UNACCEPTABLE_IP} ) &
     pid=$!
 
     while [ true ]; do
