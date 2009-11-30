@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 PREFIX=/usr/share/sstat
 STPIN=${STPIN:-${PREFIX}/sstat.stp}
 GOSHIN=${GOSHIN:-${PREFIX}/sstat-pre.scm}
@@ -12,27 +12,34 @@ fi
 SSTAT_DIR=${SOP_ATTIC_DIR}/sstat
 
 
-if ! source "${SSTAT_CONF_DIR/sstat.cf}"; then
-    exit 1
-fi
+#SSTAT_CONF_DIR=/etc/sstat
+#if ! source "${SSTAT_CONF_DIR/sstat.cf}"; then
+#    exit 1
+#fi
 
 function main() {
-    local pid
+    local gosh_pid
+    local stap_pid
+    local fifo=/tmp/sstat
 
     mkdir -p $SSTAT_DIR || exit $?
+    
+    if ! [ -p $fifo ]; then
+	mkfifo $fifo
+    fi
+    daemon_init "$@" || exit 1
 
-    daemon_init || exit 1
-
-
-    ( stap -g $STPIN   \
-	| gosh $GOSHIN \
+    gosh $GOSHIN \
 	--sstat-dir="$SSTAT_DIR" \
 	--acceptable-regex="^var/lib/srpmix/sources/[0-9a-zA-Z]/[^/]+/[^/]+/.+" \
-	${SSTAT_UNACCEPTABLE_IP} ) &
-    pid=$!
+	${SSTAT_UNACCEPTABLE_IP}  < $fifo &
+    gosh_pid=$!
+
+    stap -g $STPIN > $fifo &
+    stap_pid=$!
 
     while [ true ]; do
-	daemon_termp
+	daemon_termp "$stap_pid" "$gosh_pid" 
 	sleep 1
     done    
 }
@@ -112,19 +119,13 @@ function daemon_init()
 	    ;;
 	
 	_stat|_pid)
-	    daemon_cmd__$1 "$@"
+	    daemon_cmd_$1 "$@"
 	    exit $?
 	    ;;
 
 	_run)
-	    if [ -n "$DAEMON_CONST_PAYLOAD" ]; then
-		daemon_daemonize
-		return $?
-	    else
-		echo '*** INTERNAL ERROR ***'    1>&2
-		echo "No DAEMON_CONST_PAYLOAD"         1>&2
-		exit 1
-	    fi
+	    daemon_daemonize
+	    return $?
 	    ;;
 	*)
 	    echo "Invalid argument" 1>&2
@@ -208,7 +209,7 @@ function daemon_cmd_stop()
     done
     $0 _stat 1>/dev/null 2>/dev/null
     if [ $? -eq 0 ]; then
-	$local pid=$(cat $DAEMON_CONST_PIDFILE)
+	local pid=$(cat $DAEMON_CONST_PIDFILE)
 	kill $pid
 	rm $DAEMON_CONST_PIDFILE
 	rm $DAEMON_CONST_KILLFILE
@@ -240,8 +241,8 @@ function daemon_cmd_err()
 	echo "No stderr output yet"
     fi
     return 0
-    ;;
 }
+
 alias daemon_cmd_stderr=daemon_cmd_err
 
 function daemon_cmd__stat()
@@ -253,13 +254,13 @@ function daemon_cmd__stat()
 	echo "$DAEMON_CONST_NAME is not running"
 	return 1
     fi
-    pgrep -l -f "$DAEMON_CONST_NAME run" | grep -q -E "^$(cat $DAEMON_CONST_PIDFILE) " 
+    pgrep -l -f "$DAEMON_CONST_NAME _run" | grep -q -E "^$(cat $DAEMON_CONST_PIDFILE) " 
     if [ $? -eq 0 ]; then
 	echo "$DAEMON_CONST_NAME is running with PID "$($0 _pid)
 	return 0
     else
 	echo "$DAEMON_CONST_NAME is not running (PIDFILE mismatch)"
-	return 1
+	return 2
     fi
 }
 
@@ -295,6 +296,10 @@ function daemon_termp()
 	echo $(date)" Terminating gracefully" >> $DAEMON_CONST_ERRFILE
 	rm $DAEMON_CONST_PIDFILE
 	rm $DAEMON_CONST_KILLFILE
+
+	for p in "$@"; do
+	    kill $p
+	done
 	kill $DAEMON_CONST_PID
 	exit 0
     fi
@@ -308,8 +313,11 @@ function daemon_termp()
 	fi
 	if [ -f $DAEMON_CONST_KILLFILE ]; then
 	    rm $DAEMON_CONST_WAITFILE
-	    daemon_termp
+	    daemon_termp "$@"
 	fi
 	sleep 1
     done
 }
+
+
+main "$@"
