@@ -1,0 +1,45 @@
+Summary: Scripts set to record the file accesses to sources
+Name: sstat
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPL
+Group: Development/Tools
+Buildarch: noarch
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: gauche systemtap
+BuildRequires: gauche systemtap
+
+
+
+%description
+Scripts set to record the file accesses to sources
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{_sbindir}/sstat-pre
+%{_datadir}/sstat/*
+
+%config(noreplace) %{_sysconfdir}/sstat/sstat.cf
+%dir %{_localstatedir}/run/sstat
+
+
+%changelog
+* Tue Dec  1 2009 Masatake YAMATO <yamato@redhat.com> - 
+- Initial build.
+

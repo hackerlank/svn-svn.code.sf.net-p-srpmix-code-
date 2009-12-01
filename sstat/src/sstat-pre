@@ -1,49 +1,91 @@
 #!/bin/bash
-set -x
-PREFIX=/usr/share/sstat
-STPIN=${STPIN:-${PREFIX}/sstat.stp}
-GOSHIN=${GOSHIN:-${PREFIX}/sstat-pre.scm}
+
+if [ "${SSTAT_PRE_DEBUG" = yes ]; then
+    set -x
+fi
+
+PKGCONFDIR=/etc/sstat
+PKGDATADIR=/usr/share/sstat
+
+STPIN=${STPIN:-${PKGDATADIR}/sstat.stp}
+GOSHIN=${GOSHIN:-${PKGDATADIR}/sstat-pre.scm}
 
 
 SOP_CONF_DIR=/etc/sop
 if ! source "${SOP_CONF_DIR}/sop.cf"; then
     exit 1
 fi
-SSTAT_DIR=${SOP_ATTIC_DIR}/sstat
 
+SSTAT_CONF=${SSTAT_CONF:-${PKGCONFDIR}/sstat.cf
+if ! source "${SSTAT_CONF}"; then
+    exit 1
+fi
 
-#SSTAT_CONF_DIR=/etc/sstat
-#if ! source "${SSTAT_CONF_DIR/sstat.cf}"; then
-#    exit 1
-#fi
+function verify_host
+{
+    local ip=$1
 
-function main() {
-    local gosh_pid
-    local stap_pid
-
-    # TODO
-    local fifo=/tmp/sstat
-
-    mkdir -p $SSTAT_DIR || exit $?
-    
-    if ! [ -p $fifo ]; then
-	mkfifo $fifo
+    if [[ "$ip" =~ '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' ]]; then
+	return 0
     fi
-    daemon_init "$@" || exit 1
+    
+    if host $ip > /dev/null 2>/dev/null; then
+	return 0
+    else
+	return 1
+    fi
+}
+
+function sstat_start
+{
+    local -i gosh_pid
+    local -i stap_pid
+
+    local sstat_dir=$1
+    local sstat_fifo=$2
+
+
 
     gosh $GOSHIN \
-	--sstat-dir="$SSTAT_DIR" \
+	--sstat-dir="$sstat_dir" \
 	--acceptable-regex="^var/lib/srpmix/sources/[0-9a-zA-Z]/[^/]+/[^/]+/.+" \
-	${SSTAT_UNACCEPTABLE_IP}  < $fifo &
+	${SSTAT_UNACCEPTABLE_IP}  < $sstat_fifo &
     gosh_pid=$!
 
-    stap -g $STPIN > $fifo &
+    stap -g $STPIN > $sstat_fifo &
     stap_pid=$!
 
     while [ true ]; do
-	daemon_termp "$stap_pid" "$gosh_pid" 
+	daemon_termp --process="$stap_pid" --process="$gosh_pid" --file="$sstat_fifo"
 	sleep 1
-    done    
+    done        
+}
+
+function main
+{
+    local sstat_dir=${SOP_ATTIC_DIR}/sstat    
+    local sstat_fifo="$DAEMON_CONST_ROOT/$DAEMON_CONST_NAME.fifo"
+
+
+    if [ -n "${SSTAT_UNACCEPTABLE_IP}" ]; then
+	for ip in ${SSTAT_UNACCEPTABLE_IP}; do
+	    if ! verify_host $ip; then
+		echo "unknown host: $ip" 1>&2
+		return 1
+	    fi
+	done
+    fi
+
+    mkdir -p $sstat_dir || exit $?
+    
+    if ! [ -p $sstat_fifo ]; then
+	if ! mkfifo $sstat_fifo; then
+	    return 1
+	fi
+    fi
+
+    daemon_init "$@" || return 1
+    sstat_start "$sstat_dir" "$sstat_fifo"
 }
 
 #
@@ -288,16 +330,42 @@ function daemon_termp()
 {
     local -i sleepcount
     local -i pos
-
+    local -i pids
+    local -i files
 
     if [ -f $DAEMON_CONST_KILLFILE ]; then
 	echo $(date)" Terminating gracefully" >> $DAEMON_CONST_ERRFILE
 	rm $DAEMON_CONST_PIDFILE
 	rm $DAEMON_CONST_KILLFILE
 
-	for p in "$@"; do
-	    kill $p
+	while [ $# -gt 0 ]; do
+	    case "$1" in
+		(--process=*) 
+		pids="${1/--process=/} $pids"
+		;;
+		(--file=*)
+		files="${1/--file=/} $files"
+		;;
+		(*)
+		echo $(date)" wrong arguemnt for daemon_termp: $1" >> $DAEMON_CONST_ERRFILE
+		;;
+	    esac
+	    shift
 	done
+		
+	if [ -n "$pids" ]; do
+	    for p in $pids; do
+		kill "$p"
+	    done
+	fi
+	
+	if [ -n "$files" ]; do
+	    for f in $files; do
+		rm "$f"
+	    done
+	fi
+
+
 	kill $DAEMON_CONST_PID
 	exit 0
     fi

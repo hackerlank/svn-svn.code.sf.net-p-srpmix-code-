@@ -18,7 +18,7 @@ AC_SUBST(SSTAT_MINOR_VERSION, pkg_minor_version)
 AC_SUBST(SSTAT_MICRO_VERSION, pkg_micro_version)
 
 
-
+AC_RPM_RELEASE
 
 AC_OUTPUT([
 	   Makefile
@@ -27,6 +27,7 @@ AC_OUTPUT([
            misc/m4/Makefile
            misc/makefiles/Makefile
            misc/specs/Makefile
+           misc/specs/sstat.spec
 	   src/Makefile
 	   ])
 
