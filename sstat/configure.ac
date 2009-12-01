@@ -14,7 +14,6 @@ if test "x$STAP" = x; then
    AC_MSG_ERROR(stap not found)
 fi
 
-
 AC_CHECK_PROGS([GOSH],[gosh])
 if test "x$GOSH" = x; then
    AC_MSG_ERROR(gosh not found)
