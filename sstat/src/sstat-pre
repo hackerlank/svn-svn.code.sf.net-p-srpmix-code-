@@ -255,6 +255,9 @@ function daemon_cmd_stop()
     $0 stat 1>/dev/null 2>/dev/null
     if [ $? -eq 0 ]; then
 	local pid=$(cat $DAEMON_CONST_PIDFILE)
+	#
+	# TODO: Not enough
+	#
 	kill $pid
 	rm $DAEMON_CONST_PIDFILE
 	rm $DAEMON_CONST_KILLFILE
@@ -337,8 +340,8 @@ function daemon_termp()
 {
     local -i sleepcount
     local -i pos
-    local -i pids
-    local -i files
+    local pids
+    local files
 
     if [ -f $DAEMON_CONST_KILLFILE ]; then
 	echo $(date)" Terminating gracefully" >> $DAEMON_CONST_ERRFILE
