@@ -80,7 +80,7 @@
 	    (loop (read))))))))
 
 ;; /srv/sources/dates/$date/$user/[a-z]/$pkg...
-(define (link-dates output-dir name date driname basename)
+(define (link-dates output-dir name date dirname basename)
   (let* ((new-dir-path (format "~a/dates/~a/~a/~a"
 			       output-dir
 			       date
