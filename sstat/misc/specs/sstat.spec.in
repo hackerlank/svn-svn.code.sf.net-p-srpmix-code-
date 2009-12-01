@@ -41,6 +41,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_localstatedir}/run/sstat-pre
 
 
+%{_sysconfdir}/cron.hourly/sstat-post.cron
+
+
 %changelog
 * Tue Dec  1 2009 Masatake YAMATO <yamato@redhat.com> - 
 - Initial build.

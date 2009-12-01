@@ -23,3 +23,11 @@ dist_sstatconf_DATA = \
 
 sstatstaterundir=${localstatedir}/run/sstat-pre
 sstatstaterun_DATA=
+
+
+crondailydir=$(sysconfdir)/cron.hourly
+dist_crondaily_SCRIPTS = \
+	\
+	sstat-post.cron \
+	\
+	$(NULL)
