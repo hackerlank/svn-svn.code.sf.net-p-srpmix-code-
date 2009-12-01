@@ -79,10 +79,27 @@
 		  )))
 	    (loop (read))))))))
 
+;; /srv/sources/dates/$date/$user/[a-z]/$pkg...
 (define (link-dates output-dir name date driname basename)
-  
-  )
+  (let* ((new-dir-path (format "~a/dates/~a/~a/~a"
+			       output-dir
+			       date
+			       name
+			       dirname))
+	 (new-file-path (format "~a/~a" new-dir-path basename)))
+    (make-directory* new-dir-path)
+    (sys-chdir new-dir-path)
+    (unless (file-exists? new-file-path)
+      (sys-symlink (format "~asources/~a/~a" 
+			   (let1 n (+ 1 (string-count 
+					 (format "dates/~a/~a/~a" date name dirname)
+					 #\/))
+			     (apply string-append (make-list n "../")))
+			   dirname
+			   basename)
+		   new-file-path))))
 
+;; /srv/sources/users/$user/[a-z]/$pkg...
 (define (link-users output-dir name date dirname basename)
   (let* ((new-dir-path (format "~a/users/~a/~a"
 			       output-dir
