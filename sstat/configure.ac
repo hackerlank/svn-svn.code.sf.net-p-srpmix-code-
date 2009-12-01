@@ -9,9 +9,16 @@ AC_CONFIG_AUX_DIR(misc/ac-aux)
 AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
 AM_MAINTAINER_MODE
 
-AC_PATH_PROG([stap])
-AC_PATH_PROG([gosh])
+AC_CHECK_PROGS([STAP],[stap])
+if test "x$STAP" = x; then
+   AC_MSG_ERROR(stap not found)
+fi
 
+
+AC_CHECK_PROGS([GOSH],[gosh])
+if test "x$GOSH" = x; then
+   AC_MSG_ERROR(gosh not found)
+fi
 
 AC_SUBST(SSTAT_MAJOR_VERSION, pkg_major_version)
 AC_SUBST(SSTAT_MINOR_VERSION, pkg_minor_version)
