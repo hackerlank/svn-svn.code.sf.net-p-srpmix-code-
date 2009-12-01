@@ -1,3 +1,8 @@
+2009-12-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/backends/darcs (darcs_update): Use -gt to compare numbers
+	instead of '>'.  '>' didn't work.
+
 2009-11-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/lcopy-envelop (parse_arguments): Added LINKIN_ROOT_DIR.

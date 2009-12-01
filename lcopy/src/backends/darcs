@@ -149,7 +149,7 @@ function darcs_update
     cd "${update_dir}"
 
     if common_spawn darcs pull --all --no-test | tee /tmp/darcs-update-$$; then
-	if [ "$(wc -l < /tmp/darcs-update-$$)" > 1 ] \
+	if [ "$(wc -l < /tmp/darcs-update-$$)" -gt 1 ] \
 	   LANG=C grep  '^No remote changes to pull in!$' /tmp/darcs-update-$$ > /dev/null 2>&1; then
 	    return 0
 	else
