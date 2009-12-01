@@ -1,0 +1,27 @@
+#!/bin/sh
+
+PKGCONFDIR=/etc/sstat
+PKGDATADIR=/usr/share/sstat
+
+GOSHIN=${GOSHIN:-${PKGDATADIR}/sstat-post.scm}
+
+
+SOP_CONF_DIR=/etc/sop
+if ! source "${SOP_CONF_DIR}/sop.cf"; then
+    exit 1
+fi
+
+if ! [ -r "${GOSHIN}" ]; then
+    echo "cannot find sstat-post.scm" 1>&2
+    exit 1
+fi
+
+if ! [ -r "${PKGCONFDIR}/mapping.es" ]; then
+    echo "cannot find mapping.es" 1>&2
+    exit 1
+fi
+
+gosh ${GOSHIN} \
+     --data-dir="${SOP_ATTIC_DIR}/sstat" \
+     --output-dir="${SOP_DIR}" \
+     --mapping-file="${PKGCONFDIR}/mapping.es"

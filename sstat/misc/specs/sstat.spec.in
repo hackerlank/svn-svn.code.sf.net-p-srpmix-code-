@@ -7,7 +7,7 @@ Group: Development/Tools
 Buildarch: noarch
 Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Requires: gauche systemtap
+Requires: gauche systemtap sop
 BuildRequires: gauche systemtap
 
 
@@ -33,9 +33,11 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_sbindir}/sstat-pre
+%{_sbindir}/sstat-post
 %{_datadir}/sstat/*
 
 %config(noreplace) %{_sysconfdir}/sstat/sstat.cf
+%config(noreplace) %{_sysconfdir}/sstat/mapping.es
 %dir %{_localstatedir}/run/sstat-pre
 
 
