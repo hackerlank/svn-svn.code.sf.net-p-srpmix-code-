@@ -97,7 +97,7 @@
 	(make-directory* dir)
 	(sys-symlink (format "~a/sources/~a/~a" 
 			     (let1 n (string-count (format "users/~a/~a" name date) #\/)
-			       (append string-append (make-list n "../")))
+			       (apply string-append (make-list n "../")))
 			     dirname
 			     basename)
 		     (format "~a/~a" dirname basename))))))
