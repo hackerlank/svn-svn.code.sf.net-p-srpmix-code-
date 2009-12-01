@@ -224,6 +224,9 @@ function daemon_cmd_enable()
 
 function daemon_cmd_stop()
 {
+    local waitcountmax
+
+
     echo -n "Terminating daemon... "
     $0 stat 1>/dev/null 2>/dev/null
     if [ $? -ne 0 ]; then
@@ -234,7 +237,11 @@ function daemon_cmd_stop()
     $0 stat 1>/dev/null 2>/dev/null
     local -i ecode=$?
     local -i waitcount=0
-    if [ "$waitcountmax" = "" ]; then waitcountmax=$DAEMON_CONST_WAITCOUNTMAX; fi
+
+    if [ "$waitcountmax" = "" ]; then 
+	waitcountmax=$DAEMON_CONST_WAITCOUNTMAX; 
+    fi
+
     while [ $ecode -eq 0 ]; do
 	sleep 1
 	let waitcount=$waitcount+1
@@ -242,7 +249,7 @@ function daemon_cmd_stop()
 	    $0 stat 1>/dev/null 2>/dev/null
 	    ecode=$?
 	else
-	    ecode=1
+	    ecode=3
 	fi
     done
     $0 stat 1>/dev/null 2>/dev/null
