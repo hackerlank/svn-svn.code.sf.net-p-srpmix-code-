@@ -14,6 +14,13 @@ dist_sbin_SCRIPTS       =  \
 	$(NULL)
 
 
+initddir=$(sysconfdir)/init.d
+dist_initd_SCRIPTS = \
+	\
+	sstat \
+	\
+	$(NULL)
+
 sstatconfdir=$(sysconfdir)/sstat
 dist_sstatconf_DATA = \
 	sstat.cf \

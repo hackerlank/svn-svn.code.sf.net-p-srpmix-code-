@@ -1,0 +1,45 @@
+#! /bin/bash
+#
+# chkconfig: 345 99 1
+# description: Run sstat-pre
+#
+
+program=/usr/sbin/sstat-pre
+function start 
+{
+    echo -n $"Starting sstat: "	
+    $program start && success || failure
+    return $?
+}
+
+function stop
+{
+    echo -n $"Stopping sstat: "
+    $program stop && success || failure
+    return $?
+}	
+
+function extra
+{
+    $program $1
+    return $?
+}	
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart|status)
+  	extra $1
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|restart|status}"
+	exit 1
+	;;
+esac
+exit $?
+
+

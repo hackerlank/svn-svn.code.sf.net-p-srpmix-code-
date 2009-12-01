@@ -40,6 +40,7 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/sstat/mapping.es
 %dir %{_localstatedir}/run/sstat-pre
 
+%{_initrddir}/sstat
 
 %{_sysconfdir}/cron.hourly/sstat-post.cron
 
