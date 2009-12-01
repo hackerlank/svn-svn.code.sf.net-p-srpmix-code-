@@ -73,7 +73,7 @@
 		(let ((name (hash-table-get mapping ip (inet-address->string ip AF_INET)))
 		      (basename (sys-basename path))
 		      (dirname  (sys-dirname  path)))
-		  (when (file-is-regular? path)
+		  (when (file-is-regular? (format "/srv/sources/sources/~a" path))
 		    (link-dates output-dir name date dirname basename)
 		    (link-users output-dir name date dirname basename))
 		  )))
@@ -84,7 +84,7 @@
   )
 
 (define (link-users output-dir name date dirname basename)
-  (let* ((new-dir-path (format "~a/users//~a/~a"
+  (let* ((new-dir-path (format "~a/users/~a/~a"
 			       output-dir
 			       name
 			       dirname))
