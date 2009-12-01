@@ -11,3 +11,6 @@ sbin_SCRIPTS       =  \
 	\
 	$(NULL)
 
+
+sstatconfdir=$(sysconfdir)/sstat
+dist_sstatconf_DATA = sstat.cf

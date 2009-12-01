@@ -20,6 +20,8 @@ SSTAT_DIR=${SOP_ATTIC_DIR}/sstat
 function main() {
     local gosh_pid
     local stap_pid
+
+    # TODO
     local fifo=/tmp/sstat
 
     mkdir -p $SSTAT_DIR || exit $?
@@ -102,7 +104,7 @@ function daemon_print_usage()
 {
     echo "Usage: "
     echo -n "	$0 "
-    echo "[ start | stop | restart | stat | pause | resume | disable | enable | (log|stdout) | (err|stderr) ]"
+    echo "[start|stop|restart|stat|pid|pause|resume|disable|enable|(log|stdout)|(err|stderr)]"
 }
 
 function daemon_init()
@@ -113,16 +115,10 @@ function daemon_init()
 	    daemon_print_usage
 	    exit 0
 	    ;;
-	pause|resume|restart|start|disable|enable|stop|log|stdout|err|stderr)
+	pause|resume|restart|start|disable|enable|stop|log|stdout|err|stderr|stat|pid)
 	    daemon_cmd_$1 "$@"
 	    exit $?
 	    ;;
-	
-	_stat|_pid)
-	    daemon_cmd_$1 "$@"
-	    exit $?
-	    ;;
-
 	_run)
 	    daemon_daemonize
 	    return $?
@@ -187,13 +183,13 @@ function daemon_cmd_enable()
 function daemon_cmd_stop()
 {
     echo -n "Terminating daemon... "
-    $0 _stat 1>/dev/null 2>/dev/null
+    $0 stat 1>/dev/null 2>/dev/null
     if [ $? -ne 0 ]; then
 	echo "process is not running"
 	return 0
     fi
     touch $DAEMON_CONST_KILLFILE
-    $0 _stat 1>/dev/null 2>/dev/null
+    $0 stat 1>/dev/null 2>/dev/null
     local -i ecode=$?
     local -i waitcount=0
     if [ "$waitcountmax" = "" ]; then waitcountmax=$DAEMON_CONST_WAITCOUNTMAX; fi
@@ -201,13 +197,13 @@ function daemon_cmd_stop()
 	sleep 1
 	let waitcount=$waitcount+1
 	if [ $waitcount -lt $waitcountmax ]; then
-	    $0 _stat 1>/dev/null 2>/dev/null
+	    $0 stat 1>/dev/null 2>/dev/null
 	    ecode=$?
 	else
 	    ecode=1
 	fi
     done
-    $0 _stat 1>/dev/null 2>/dev/null
+    $0 stat 1>/dev/null 2>/dev/null
     if [ $? -eq 0 ]; then
 	local pid=$(cat $DAEMON_CONST_PIDFILE)
 	kill $pid
@@ -245,7 +241,7 @@ function daemon_cmd_err()
 
 alias daemon_cmd_stderr=daemon_cmd_err
 
-function daemon_cmd__stat()
+function daemon_cmd_stat()
 {
     if [ -f $DAEMON_CONST_BLOCKFILE ]; then
 	echo "Daemon execution disabled"
@@ -256,7 +252,7 @@ function daemon_cmd__stat()
     fi
     pgrep -l -f "$DAEMON_CONST_NAME _run" | grep -q -E "^$(cat $DAEMON_CONST_PIDFILE) " 
     if [ $? -eq 0 ]; then
-	echo "$DAEMON_CONST_NAME is running with PID "$($0 _pid)
+	echo "$DAEMON_CONST_NAME is running with PID "$($0 pid)
 	return 0
     else
 	echo "$DAEMON_CONST_NAME is not running (PIDFILE mismatch)"
@@ -264,14 +260,16 @@ function daemon_cmd__stat()
     fi
 }
 
-function daemon_name__pid()
+function daemon_name_pid()
 {
     if [ -f $DAEMON_CONST_PIDFILE ]; then
 	cat $DAEMON_CONST_PIDFILE
+	return 0
     else
 	echo "No pidfile found"
+	return 1
     fi
-    return 1
+
 }
 
 function daemon_daemonize() 
