@@ -73,39 +73,33 @@
 		(let ((name (hash-table-get mapping ip (inet-address->string ip AF_INET)))
 		      (basename (sys-basename path))
 		      (dirname  (sys-dirname  path)))
-		  (link-dates output-dir name date dirname basename)
-		  (link-users output-dir name date dirname basename)
+		  (when (file-is-regular? path)
+		    (link-dates output-dir name date dirname basename)
+		    (link-users output-dir name date dirname basename))
 		  )))
-	    (loop (read))
-	    ))))))
+	    (loop (read))))))))
 
 (define (link-dates output-dir name date driname basename)
-;  (make-directory* (format "~a/dates/~a/~a/"
-;			   output-dir
-;			   date
+  
   )
 
 (define (link-users output-dir name date dirname basename)
-  (let* ((path (build-path output-dir "sources" dirname basename))
-	 (regular? (file-is-regular? path)))
-    (when regular?
-	  (let* ((new-dir-path (format "~a/users/~a/~a/~a"
-				      output-dir
-				      name
-				      date
-				      dirname))
-		 (new-file-path (format "~a/~a" new-dir-path basename)))
-	    (make-directory* new-dir-path)
-	    (sys-chdir new-dir-path)
-	    (unless (file-exists? new-file-path)
-		    (sys-symlink (format "~asources/~a/~a" 
-					 (let1 n (+ 1 (string-count 
-						       (format "users/~a/~a/~a" name date dirname)
-						       #\/))
-					       (apply string-append (make-list n "../")))
-					 dirname
-					 basename)
-				 new-file-path))))))
+  (let* ((new-dir-path (format "~a/users//~a/~a"
+			       output-dir
+			       name
+			       dirname))
+	 (new-file-path (format "~a/~a" new-dir-path basename)))
+    (make-directory* new-dir-path)
+    (sys-chdir new-dir-path)
+    (unless (file-exists? new-file-path)
+      (sys-symlink (format "~asources/~a/~a" 
+			   (let1 n (+ 1 (string-count 
+					 (format "users/~a/~a" name dirname)
+					 #\/))
+			     (apply string-append (make-list n "../")))
+			   dirname
+			   basename)
+		   new-file-path))))
 
 ;; (sstat-mapping "host" "name")
 (define (load-mapping mapping-file)
