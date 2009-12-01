@@ -15,5 +15,5 @@ dist_sbin_SCRIPTS       =  \
 sstatconfdir=$(sysconfdir)/sstat
 dist_sstatconf_DATA = sstat.cf
 
-sstatstaterundir=${localstatedir}/run/sstat
+sstatstaterundir=${localstatedir}/run/sstat-pre
 sstatstaterun_DATA=
