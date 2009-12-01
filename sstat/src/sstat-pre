@@ -58,7 +58,7 @@ function sstat_start
     while [ true ]; do
 	if ! kill -s 0 $stap_pid; then
 	# TODO: Handle the case stap is dead.
-	    :
+	    $0 stop
 	fi
 	daemon_termp --process="$stap_pid" --process="$gosh_pid" --file="$sstat_fifo"
 	sleep 1
