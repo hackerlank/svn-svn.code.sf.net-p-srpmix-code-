@@ -9,7 +9,7 @@
   partial)
 
 
-(define delta 1)
+(define delta 3)
 (define (build-acceptor unacceptable-ip-list0 acceptable-path-regex0)
   (let (
 	(unacceptable-ip-list (delete-duplicates 
@@ -27,16 +27,9 @@
 	  #f
 	  (if (acceptable-path-regex file)
 	      ;; 
-	      (let1 last-access-time (hash-table-get frequency-table ip #f)
-		(if last-access-time
-		    (if (< delta (- time last-access-time))
-			(begin
-			  (hash-table-put! frequency-table ip time)
-			  #t)
-			#f)
-		    (begin
-		      (hash-table-put! frequency-table ip time)
-		      #t)))
+	      (let1 last-access-time (hash-table-get frequency-table ip 0)
+		(hash-table-put! frequency-table ip time)
+		(< delta (- time last-access-time)))
 	      #f)))))
 
 
