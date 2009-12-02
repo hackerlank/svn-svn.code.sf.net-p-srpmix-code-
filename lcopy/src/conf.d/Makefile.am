@@ -8,6 +8,7 @@ dist_confd_DATA = \
 	binutils,trunk.lcopy \
 	biwascheme,trunk.lcopy \
 	cairo,trunk.lcopy \
+	cluster,trunk.lcopy \
 	corosync,trunk.lcopy \
 	ddskk,trunk.lcopy \
 	emacs,trunk.lcopy \
@@ -36,7 +37,6 @@ dist_confd_DATA = \
 	sos,trunk.lcopy \
 	srpmix,trunk.lcopy \
 	stitch,trunk.lcopy \
-	trunk,cluster.lcopy \
 	twig,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
 	wfo,trunk.lcopy \
