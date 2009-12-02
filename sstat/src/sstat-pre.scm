@@ -109,5 +109,8 @@
 		tmf0))
        (else
 	(close-output-port port)
-	(values (open-output-file (format-port-name sstat-dir tmf0))
+	(values (open-output-file (format-port-name sstat-dir tmf0)
+				  :if-exists :append
+				  :buffering :line)
 		tmf0))))))
+
