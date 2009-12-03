@@ -11,9 +11,13 @@ dist_confd_DATA = \
 	cluster,trunk.lcopy \
 	corosync,trunk.lcopy \
 	ddskk,trunk.lcopy \
+	dlm,trunk.lcopy \
 	emacs,trunk.lcopy \
+	fence,trunk.lcopy \
+	fence-agents,trunk.lcopy \
 	gauche,trunk.lcopy \
 	gauche-mode,trunk.lcopy \
+	gfs2-utils,trunk.lcopy \
 	glib2,trunk.lcopy \
 	glibc,trunk.lcopy \
 	gnash,trunk.lcopy \
@@ -31,6 +35,8 @@ dist_confd_DATA = \
 	miniascape,trunk.lcopy \
 	perg,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
+	resource-agents,trunk.lcopy \
+	rgmanager,trunk.lcopy \
 	rpm,trunk.lcopy \
 	sbuild,trunk.lcopy \
 	sop,trunk.lcopy \
