@@ -439,7 +439,6 @@ main(int argc, char** argv)
 {
   const char* dev;
   int fd;
-  int blkssz;
   int r;
 
 
@@ -463,14 +462,7 @@ main(int argc, char** argv)
       return 2;
     }
 
-  r = ioctl(fd, BLKSSZGET, &blkssz);
-  if (r < 0)
-    {
-      perror("process_disk: ioctl(BLKSSZGET)");
-      return -1;
-    }
-
-  r = process_qdisk(fd, /*blkssz*/ 4096);
+  r = process_qdisk(fd, 4096);
   {
     off_t t;
 
