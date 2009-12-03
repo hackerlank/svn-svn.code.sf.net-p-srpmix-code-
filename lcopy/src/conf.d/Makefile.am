@@ -31,6 +31,7 @@ dist_confd_DATA = \
 	kernel,xen-3_2.lcopy \
 	lcopy,trunk.lcopy \
 	libvirt,trunk.lcopy \
+	lm-sensors,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
 	perg,trunk.lcopy \
