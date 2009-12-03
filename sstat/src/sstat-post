@@ -40,8 +40,18 @@ while [ $# -gt 0 ]; do
 	print_usage 0
 	;;
 	(--reset)
-	rm -rf -I "${SOP_DIR}/users"
-	rm -rf -I "${SOP_DIR}/dates"
+	local u="${SOP_DIR}/users"
+	local d="${SOP_DIR}/dates"
+
+	if [ -d "$u" ]; then
+	    echo "Removing target: $u"
+	    rm -rf -I "$u"
+	fi
+
+	if [ -d "$d" ]; then
+	    echo "Removing target: $d"
+	    rm -rf -I "$d"
+	fi
 	;;
 	(*)
 	echo "wrong argument: $1" 1>&2
