@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 PKGCONFDIR=/etc/sstat
 PKGDATADIR=/usr/share/sstat
@@ -20,6 +20,35 @@ if ! [ -r "${PKGCONFDIR}/mapping.es" ]; then
     echo "cannot find mapping.es" 1>&2
     exit 1
 fi
+
+
+function print_usag
+{
+    local status=$1
+    
+
+    echo "Usage: " 
+    echo "	$0 -h|--help"
+    echo "	$0 [--reset]"
+
+    exit $status
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+	(--help|-h)
+	print_usage 0
+	;;
+	(--reset)
+	rm -rf -i "${SOP_DIR}/users"
+	rm -rf -i "${SOP_DIR}/dates"
+	;;
+	(*)
+	echo "wrong argument: $1" 1>&2
+	print_usage 1 1>&2
+	;;
+    esac
+done
 
 gosh ${GOSHIN} \
      --data-dir="${SOP_ATTIC_DIR}/sstat" \
