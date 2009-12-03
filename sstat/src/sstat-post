@@ -22,7 +22,7 @@ if ! [ -r "${PKGCONFDIR}/mapping.es" ]; then
 fi
 
 
-function print_usag
+function print_usage
 {
     local status=$1
     
@@ -48,6 +48,7 @@ while [ $# -gt 0 ]; do
 	print_usage 1 1>&2
 	;;
     esac
+    shift
 done
 
 gosh ${GOSHIN} \
