@@ -34,34 +34,47 @@ function print_usage
     exit $status
 }
 
-while [ $# -gt 0 ]; do
-    case "$1" in
-	(--help|-h)
-	print_usage 0
-	;;
-	(--reset)
-	local u="${SOP_DIR}/users"
-	local d="${SOP_DIR}/dates"
 
-	if [ -d "$u" ]; then
-	    echo "Removing target: $u"
-	    rm -rf -I "$u"
-	fi
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    (--help|-h)
+	    print_usage 0
+	    ;;
+	    (--reset)
+	    local u="${SOP_DIR}/users"
+	    local d="${SOP_DIR}/dates"
 
-	if [ -d "$d" ]; then
-	    echo "Removing target: $d"
-	    rm -rf -I "$d"
-	fi
-	;;
-	(*)
-	echo "wrong argument: $1" 1>&2
-	print_usage 1 1>&2
-	;;
-    esac
-    shift
-done
+	    if [ -d "$u" ]; then
+		echo "Removing target: $u"
+		rm -rf -I "$u"
+	    fi
 
-gosh ${GOSHIN} \
-     --data-dir="${SOP_ATTIC_DIR}/sstat" \
-     --output-dir="${SOP_DIR}" \
-     --mapping-file="${PKGCONFDIR}/mapping.es"
+	    if [ -d "$d" ]; then
+		echo "Removing target: $d"
+		rm -rf -I "$d"
+	    fi
+	    ;;
+	    (*)
+	    echo "wrong argument: $1" 1>&2
+	    print_usage 1 1>&2
+	    ;;
+	esac
+	shift
+    done
+}
+
+
+function main
+{
+    parse_arguments "$@"
+
+    gosh ${GOSHIN} \
+	--data-dir="${SOP_ATTIC_DIR}/sstat" \
+	--output-dir="${SOP_DIR}" \
+	--mapping-file="${PKGCONFDIR}/mapping.es"
+}
+
+main "$@"
+
