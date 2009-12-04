@@ -14,7 +14,7 @@ dist_sbin_SCRIPTS       =  \
 	$(NULL)
 
 
-initddir=$(sysconfdir)/init.d
+initddir=$(sysconfdir)/rc.d/init.d
 dist_initd_SCRIPTS = \
 	\
 	sstat \
