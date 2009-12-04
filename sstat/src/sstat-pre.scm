@@ -88,7 +88,7 @@
 
 (define (log-port time port tmf sstat-dir)
   (let1 tm0 (sys-localtime time)
-    (let1 tmf0 (format "~d~d~d" 
+    (let1 tmf0 (format "~d~2,0d~2,'0d" 
 		       (+ (ref tm0 'year) 1900)
 		       (+ (ref tm0 'mon) 1)
 		       (ref tm0 'mday))
