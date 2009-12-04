@@ -370,6 +370,7 @@ function daemon_termp()
 	if [ -n "$pids" ]; then
 	    for p in $pids; do
 		kill "$p"
+		sleep 1
 	    done
 	fi
 	
