@@ -9,6 +9,10 @@ function may_read_p:long(access:long) %{
   THIS->__retvalue = (THIS->access == NFSD_MAY_READ)? 1: 0;
 %}
 
+function ifreg_p:long(type:long) %{
+  THIS->__retvalue = (THIS->type == S_IFREG)? 1: 0;
+%}
+
 function has_ipv4_addr:long(rqstp:long) %{
   struct sockaddr_storage* sa_storage;
   struct sockaddr_in*      sa_in;
@@ -44,20 +48,27 @@ function get_dentry:long(filp:long) %{
 
 probe module("nfsd").function("nfsd_open").return {
   successful = verify_r($return)
-
   if (successful) {
-    read_p = may_read_p($access)
-    addr   = has_ipv4_addr($rqstp)
-    dentry = get_dentry($filp)
-    path   = ""
 
-    if (dentry) {
-      path = reverse_path_walk(dentry)
-    } 
+    reg_p  = ifreg_p($type)
+    if (reg_p) {
 
-    if (read_p && addr && (path != "")) {
-      printf("%u %s\n", addr, path)
+      read_p = may_read_p($access)
+      if (read_p) {
+
+	addr   = has_ipv4_addr($rqstp)
+	if (addr) {
+
+	  dentry = get_dentry($filp)
+	  if (dentry) {
+
+	    path = reverse_path_walk(dentry)
+	    if (path != "") {
+	      printf("%u %s\n", addr, path)
+	    }
+	  }
+	}
+      }
     }
-
   }
 }
