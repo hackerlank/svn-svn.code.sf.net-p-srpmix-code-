@@ -1,52 +1,87 @@
-(defun tx-can-go-down   (s)
-  (memq (string-to-char s) '(?\( ?\{ ?\[))  
+(require 'regexp-opt)
+(defconst dive-tokenize-keywords-regex
+  (concat 
+   "^" 
+   (regexp-opt 
+    '(
+      "auto" "break" "case" "char" "const" "continue"		
+      "default" "do" "double" "else" "enum" "extern" "float"			
+      "for" "goto" "if" "int" "long" "register" "return"		
+      "short" "signed" "sizeof" "static" "struct" "switch" 
+      "typedef" "union" "unsigned" "void" "volatile" "while"
+      ))
+   "$"))
+
+(defun dive-tokenize-is-list (s)
+  (memq (string-to-char s) '(?\( ?\{ ?\[)))
+
+(defun dive-tokenize-is-symbol (s)
+  (string-match "^\\_<.*\\_>$" s))
+(defun dive-tokenize-is-string (s)
+  (string-match "^\".*\"$" s))
+(defun dive-tokenize-is-number (s)
+  (string-match "^-?[0-9]+$" s))
+(defun dive-tokenize-rest (s)
+  t)
+
+(defun dive-tokenize-is-keyword (s)
+  (string-match dive-tokenize-keywords-regex s)
   )
 
-(defun tx-calibrate-pos ()
+(defun dive-tokenize-calibrate-pos ()
   (forward-sexp 1)
   (backward-sexp 1))
 
-(defun tx-token (str b e)
-  (vector str b e))
+(defun dive-tokenize-token (str b e &optional type)
+  (vector str b e type))
 
-(defun tx-get-expressions00 (bias)
-  (tx-calibrate-pos)
+(defun dive-tokenize-get-expressions00 (bias)
+  (dive-tokenize-calibrate-pos)
   (let ((p (point)))
     (forward-sexp 1)
     (let ((s (buffer-substring-no-properties p (point))))
       (cond
        ((eobp)
-	(list (tx-token s
-			(+ p bias)
-			(+ (point) bias))))
-       ((tx-can-go-down s)
-	;;	(tx-get-expressions0 (substring s 1 -1) (+ (+ (- p 1) 1) bias) t)
+	(list (dive-tokenize-token s
+				   (+ p bias)
+				   (+ (point) bias))))
+       ((dive-tokenize-is-list s)
 	(let ((p+ (+ p bias))
 	      (l-  (1- (length s))))
 	  (append
-	   (list (tx-token (substring s 0 1) p+ (+ p+ 1)))
-	   (tx-get-expressions1 s (- p+ 1) t)
-	   (list (tx-token (substring s l-) 
-			   (+ p+ l-)
-			   (+ p+ l- 1)
-			   ))))
+	   (list (dive-tokenize-token (substring s 0 1) p+ (+ p+ 1)))
+	   (dive-tokenize-get-expressions1 s (- p+ 1) t)
+	   (list (dive-tokenize-token (substring s l-) 
+				      (+ p+ l-)
+				      (+ p+ l- 1)
+				      ))))
 	;;
 	)
-       (t
-	(tx-get-expressions1 s (+ (- p 1) bias))
+       ((dive-tokenize-is-symbol s)
+	(list (dive-tokenize-token s
+				   (+ p bias)
+				   (+ (point) bias)
+				   (if (dive-tokenize-is-keyword s) 'keyword 'symbol)
+				   )))
+       ((or (dive-tokenize-is-string s) (dive-tokenize-is-number s))
+	(list (dive-tokenize-token s
+				   (+ p bias)
+				   (+ (point) bias))))
+       ((dive-tokenize-rest s)
+	(dive-tokenize-get-expressions1 s (+ (- p 1) bias))
 	)))))
 
-(defun tx-get-expressions1 (in &optional bias downlist)
+(defun dive-tokenize-get-expressions1 (in &optional bias downlist)
   (let ((s0 (buffer-string))
 	(p0 (point)))
     (erase-buffer)
-    (let ((r (tx-get-expressions01 in bias downlist)))
+    (let ((r (dive-tokenize-get-expressions01 in bias downlist)))
       (erase-buffer)
       (insert s0)
       (goto-char p0)
       r)))
 
-(defun tx-get-expressions01 (in &optional bias downlist)
+(defun dive-tokenize-get-expressions01 (in &optional bias downlist)
   (insert in)
   (goto-char (point-min))
   (when downlist
@@ -54,7 +89,7 @@
   (let ((result (list)))
     (condition-case err
 	(while (not (eobp))
-	  (let ((r0 (tx-get-expressions00 (or bias 0))))
+	  (let ((r0 (dive-tokenize-get-expressions00 (or bias 0))))
 	    (if (equal (car (last r0)) (car (last result)))
 		(goto-char (point-max))
 	      (setq result (append result r0))
@@ -63,17 +98,17 @@
     result
     ))
 
-(defun tx-get-expressions0 (in &optional bias downlist)
+(defun dive-tokenize-get-expressions0 (in &optional bias downlist)
   (with-temp-buffer
     (c-mode)
-    (tx-get-expressions01 in bias downlist)
+    (dive-tokenize-get-expressions01 in bias downlist)
     ))
 
-(defun tx-get-expressions (in &optional bias)
-  (tx-get-expressions0 in bias))
+(defun dive-tokenize-get-expressions (in &optional bias)
+  (dive-tokenize-get-expressions0 in bias))
 
 (require 'which-func)
-(defun tx-get-expressions-here ()
+(defun dive-tokenize-get-expressions-here ()
   (let ((func (condition-case nil
 		  (which-function)
 		(error nil)))	)
@@ -89,5 +124,8 @@
 	(if range
 	    (if (and (<= (car range) (point))
 		     (<= (point) (cadr range)))
-		(tx-get-expressions (buffer-substring-no-properties (car range) (cadr range)) (car range))
+		(dive-tokenize-get-expressions (buffer-substring-no-properties 
+						(car range)
+						(cadr range)) 
+					       (car range))
 	      nil))))))
