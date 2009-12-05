@@ -32,7 +32,7 @@
   (forward-sexp 1)
   (backward-sexp 1))
 
-(defun dive-tokenize-token (str b e &optional type)
+(defun dive-tokenize-make-token (str b e &optional type)
   (vector str b e type))
 
 (defun dive-tokenize-get-expressions00 (bias)
@@ -42,29 +42,29 @@
     (let ((s (buffer-substring-no-properties p (point))))
       (cond
        ((eobp)
-	(list (dive-tokenize-token s
+	(list (dive-tokenize-make-token s
 				   (+ p bias)
 				   (+ (point) bias))))
        ((dive-tokenize-is-list s)
 	(let ((p+ (+ p bias))
 	      (l-  (1- (length s))))
 	  (append
-	   (list (dive-tokenize-token (substring s 0 1) p+ (+ p+ 1)))
+	   (list (dive-tokenize-make-token (substring s 0 1) p+ (+ p+ 1)))
 	   (dive-tokenize-get-expressions1 s (- p+ 1) t)
-	   (list (dive-tokenize-token (substring s l-) 
+	   (list (dive-tokenize-make-token (substring s l-) 
 				      (+ p+ l-)
 				      (+ p+ l- 1)
 				      ))))
 	;;
 	)
        ((dive-tokenize-is-symbol s)
-	(list (dive-tokenize-token s
+	(list (dive-tokenize-make-token s
 				   (+ p bias)
 				   (+ (point) bias)
 				   (if (dive-tokenize-is-keyword s) 'keyword 'symbol)
 				   )))
        ((or (dive-tokenize-is-string s) (dive-tokenize-is-number s))
-	(list (dive-tokenize-token s
+	(list (dive-tokenize-make-token s
 				   (+ p bias)
 				   (+ (point) bias))))
        ((dive-tokenize-rest s)
@@ -129,3 +129,5 @@
 						(cadr range)) 
 					       (car range))
 	      nil))))))
+
+(provide 'dive-tokenize)
