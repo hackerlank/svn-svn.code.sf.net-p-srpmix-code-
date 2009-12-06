@@ -41,10 +41,10 @@
     (forward-sexp 1)
     (let ((s (buffer-substring-no-properties p (point))))
       (cond
-       ((eobp)
-	(list (dive-tokenize-make-token s
-				   (+ p bias)
-				   (+ (point) bias))))
+;       ((eobp)
+;	(list (dive-tokenize-make-token s
+;				   (+ p bias)
+;				   (+ (point) bias))))
        ((dive-tokenize-is-list s)
 	(let ((p+ (+ p bias))
 	      (l-  (1- (length s))))
