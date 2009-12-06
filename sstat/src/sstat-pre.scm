@@ -20,16 +20,17 @@
 						     unacceptable-ip-list0))))
 			       equal?))
 	(acceptable-path-regex   (string->regexp acceptable-path-regex0))
-	(frequency-table         (make-hash-table 'eq?))
+	;(frequency-table         (make-hash-table 'eq?))
 	)
     (lambda (ip file time)
       (if (memq ip unacceptable-ip-list)
 	  #f
 	  (if (acceptable-path-regex file)
 	      ;; 
-	      (let1 last-access-time (hash-table-get frequency-table ip 0)
+	      #;(let1 last-access-time (hash-table-get frequency-table ip 0)
 		(hash-table-put! frequency-table ip time)
 		(< delta (- time last-access-time)))
+	      #t
 	      #f)))))
 
 
@@ -70,17 +71,16 @@
 	     (ip    "0.0.0.0")
 	     )
     (unless (eof-object? line)
-      (rxmatch-if (#/^([0-9]+) (.*)\/$/ line)
-	  (#f ip file)
+      (rxmatch-if (#/^([0-9]+) ([0-9]+) (.*)\/$/ line)
+	  (#f ip time file)
 	;; 
 	(let1 ip (string->number ip)
-	  (let1 time (sys-time)
-	    (when (accept? ip file time)
+	  (when (accept? ip file time)
 	      (receive (port tmf) (log-port time port tmf sstat-dir)
 		(write `(nfsd-open-pre :ip ,ip :time ,time :path ,file)
 		       port)
 		(newline port)
-		(loop (read-line) port tmf ip))))
+		(loop (read-line) port tmf ip)))
 	  (loop (read-line) port tmf ip))
 	(begin 
 	  (format (current-error-port) ";; Wrong input: ~s\n" line)
