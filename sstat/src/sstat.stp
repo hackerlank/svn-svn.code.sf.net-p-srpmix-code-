@@ -45,8 +45,6 @@ function get_dentry:long(filp:long) %{
   if (filp && *filp) {
     THIS->__retvalue = (long)((*filp)->f_path.dentry);
   }
-
-  CATCH_DEREF_FAULT();
 %}
 
 probe module("nfsd").function("nfsd_open").return {
