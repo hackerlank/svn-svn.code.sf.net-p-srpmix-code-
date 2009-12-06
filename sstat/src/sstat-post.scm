@@ -13,7 +13,7 @@
 (define (print-usage prog port status)
   (format #t "Usage :\n")
   (format #t "	~a -h|--help\n" prog)
-  (format #t "	~a --data-dir=DATADIR --output-dir=OUTPUTDIR [--mapping-file=MAPPINGFILE]\n")
+  (format #t "	~a [--debug] --data-dir=DATADIR --output-dir=OUTPUTDIR [--mapping-file=MAPPINGFILE]\n")
   (sys-exit status)
   )
 
@@ -23,6 +23,7 @@
        (data-dir     "data-dir=s"     #f)
        (output-dir   "output-dir=s"   #f)
        (mapping-file "mapping-file=s" #f)
+       (debug        "debug"          #f)
        . rest)
 
     ;; data-dir
@@ -48,7 +49,7 @@
     (let1 mapping (if mapping-file
 		      (load-mapping mapping-file)
 		      (make-hash-table 'eq?))
-      (for-each (cut link data-dir <> output-dir mapping)
+      (for-each (cut link data-dir <> output-dir mapping debug)
 		(directory-list data-dir 
 				:children? #t 
 				:add-path? #f 
@@ -56,7 +57,7 @@
 		))))
 
 (define delta 1)
-(define (link data-dir entry output-dir mapping)
+(define (link data-dir entry output-dir mapping debug)
   (rxmatch-let (#/sstat-([0-9]+)\.es/ entry)
       (#f date)
     (let1 per-user-table
@@ -91,48 +92,58 @@
 		      (dirname  (sys-dirname  path)))
 		 (when (> (- time last-time) delta)
 		   (set! last-time time)
-		   (link-dates output-dir user date dirname basename)
-		   (link-users output-dir user date dirname basename))))
+		   (link-dates output-dir user date dirname basename debug)
+		   (link-users output-dir user date dirname basename debug))))
 	     (reverse vs))))))))
 
 ;; /srv/sources/dates/$date/$user/[a-z]/$pkg...
-(define (link-dates output-dir user date dirname basename)
+(define (link-dates output-dir user date dirname basename debug)
   (let* ((new-dir-path (format "~a/dates/~a/~a/~a"
 			       output-dir
 			       date
 			       user
 			       dirname))
 	 (new-file-path (format "~a/~a" new-dir-path basename)))
-    (make-directory* new-dir-path)
-    (sys-chdir new-dir-path)
+    
+    (unless debug
+      (make-directory* new-dir-path)
+      (sys-chdir new-dir-path))
+
     (unless (file-exists? new-file-path)
-      (sys-symlink (format "~asources/~a/~a" 
-			   (let1 n (+ 1 (string-count 
-					 (format "dates/~a/~a/~a" date user dirname)
-					 #\/))
-			     (apply string-append (make-list n "../")))
-			   dirname
-			   basename)
-		   new-file-path))))
+      (let1 orignal (format "~asources/~a/~a" 
+			    (let1 n (+ 1 (string-count 
+					  (format "dates/~a/~a/~a" date user dirname)
+					  #\/))
+			      (apply string-append (make-list n "../")))
+			    dirname
+			    basename)
+	(when debug
+	  (format #t "<dates> ln -s ~s ~s\n" orignal new-file-path))
+	(unless debug
+	  (sys-symlink orignal new-file-path))))))
 
 ;; /srv/sources/users/$user/[a-z]/$pkg...
-(define (link-users output-dir user date dirname basename)
+(define (link-users output-dir user date dirname basename debug)
   (let* ((new-dir-path (format "~a/users/~a/~a"
 			       output-dir
 			       user
 			       dirname))
 	 (new-file-path (format "~a/~a" new-dir-path basename)))
-    (make-directory* new-dir-path)
-    (sys-chdir new-dir-path)
+    (unless debug
+      (make-directory* new-dir-path)
+      (sys-chdir new-dir-path))
     (unless (file-exists? new-file-path)
-      (sys-symlink (format "~asources/~a/~a" 
-			   (let1 n (+ 1 (string-count 
-					 (format "users/~a/~a" user dirname)
-					 #\/))
-			     (apply string-append (make-list n "../")))
-			   dirname
-			   basename)
-		   new-file-path))))
+      (let1 orignal (format "~asources/~a/~a" 
+			    (let1 n (+ 1 (string-count 
+					  (format "users/~a/~a" user dirname)
+					  #\/))
+			      (apply string-append (make-list n "../")))
+			    dirname
+			    basename)
+	(when debug
+	  (format #t "<users> ln -s ~s ~s\n" orignal new-file-path))
+	(unless debug
+	  (sys-symlink orignal new-file-path))))))
 
 ;; (sstat-mapping "host" "user")
 (define (load-mapping mapping-file)
