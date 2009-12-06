@@ -29,6 +29,7 @@ function has_ipv4_addr:long(rqstp:long) %{
   sa_in = (struct sockaddr_in*)sa_storage;
   THIS->__retvalue = kread(&sa_in->sin_addr.s_addr);
   THIS->__retvalue = ntohl(THIS->__retvalue);
+
   CATCH_DEREF_FAULT();
 %}
 
@@ -44,6 +45,8 @@ function get_dentry:long(filp:long) %{
   if (filp && *filp) {
     THIS->__retvalue = (long)((*filp)->f_path.dentry);
   }
+
+  CATCH_DEREF_FAULT();
 %}
 
 probe module("nfsd").function("nfsd_open").return {
@@ -64,7 +67,8 @@ probe module("nfsd").function("nfsd_open").return {
 
 	    path = reverse_path_walk(dentry)
 	    if (path != "") {
-	      printf("%u %s\n", addr, path)
+	      t = gettimeofday_s()
+	      printf("%u %u %s\n", addr, t, path)
 	    }
 	  }
 	}
