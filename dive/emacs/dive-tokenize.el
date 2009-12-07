@@ -107,20 +107,28 @@
 (defun dive-tokenize-get-expressions (in &optional bias)
   (dive-tokenize-get-expressions0 in bias))
 
+;; ENTRY POINT
 (require 'which-func)
 (defun dive-tokenize-get-expressions-here ()
   (let ((func (condition-case nil
 		  (which-function)
 		(error nil)))	)
     (when func
-      (let ((range (save-excursion (beginning-of-defun)
-				   (let ((b (point)))
-				     (let ((e (when (re-search-forward "{" nil t)
-						(end-of-defun)
-						(point))))
-				       (if e
-					   (list b e)
-					 nil))))))
+      (let ((range (save-excursion 
+		     (condition-case nil
+			 (beginning-of-defun)
+		       (error nil))
+		     (let ((b (point)))
+		       (let ((e (when (re-search-forward "{" nil t)
+				  (condition-case nil
+				      (progn
+					(end-of-defun)
+					(point))
+				    (error nil)))))
+					
+			 (if e
+			     (list b e)
+			   nil))))))
 	(if range
 	    (if (and (<= (car range) (point))
 		     (<= (point) (cadr range)))
