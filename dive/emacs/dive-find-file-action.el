@@ -8,4 +8,6 @@
   (when (string-match ".*/srv/sources/.*/pre-build/.*" (buffer-file-name))
     (set (make-local-variable 'dive-sources-buffer) t)))
 
+(dive-find-file-install-action)
+
 (provide 'dive-find-file-action)
