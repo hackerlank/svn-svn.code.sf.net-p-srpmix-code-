@@ -76,8 +76,8 @@
 					     ;; should be inlined
 					     (string-length "var/lib/srpmix/sources/"))))
 		      (when (file-is-regular? (format "/srv/sources/sources/~a" path))
-			(let1 uesr (hash-table-get mapping ip (inet-address->string ip AF_INET))
-			  (hash-table-push! per-user-table user `#(time date path)))))
+			(let1 user (hash-table-get mapping ip (inet-address->string ip AF_INET))
+			  (hash-table-push! per-user-table user `#(,time ,date ,path)))))
 		    (loop (read) per-user-table))))))
       
       (hash-table-for-each per-user-table
