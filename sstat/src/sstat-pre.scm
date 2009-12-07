@@ -8,8 +8,6 @@
 (define (complete partial)
   partial)
 
-
-(define delta 3)
 (define (build-acceptor unacceptable-ip-list0 acceptable-path-regex0)
   (let (
 	(unacceptable-ip-list (delete-duplicates 
@@ -20,17 +18,15 @@
 						     unacceptable-ip-list0))))
 			       equal?))
 	(acceptable-path-regex   (string->regexp acceptable-path-regex0))
-	;(frequency-table         (make-hash-table 'eq?))
+	(multiaccess-table        (make-hash-table 'eq?))
 	)
     (lambda (ip file time)
       (if (memq ip unacceptable-ip-list)
 	  #f
-	  (if (acceptable-path-regex file)
-	      ;; 
-	      #;(let1 last-access-time (hash-table-get frequency-table ip 0)
-		(hash-table-put! frequency-table ip time)
-		(< delta (- time last-access-time)))
-	      #t
+	  (if (let1 last-access-file (hash-table-get multiaccess-table ip #f)
+		(hash-table-put! multiaccess-table ip file)
+		(not (equal? last-access-file file)))
+	      (acceptable-path-regex file)
 	      #f)))))
 
 
