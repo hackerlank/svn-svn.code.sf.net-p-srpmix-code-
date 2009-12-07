@@ -74,7 +74,8 @@
       (rxmatch-if (#/^([0-9]+) ([0-9]+) (.*)\/$/ line)
 	  (#f ip time file)
 	;; 
-	(let1 ip (string->number ip)
+	(let ((ip (string->number ip))
+	      (time (string->number time)))
 	  (when (accept? ip file time)
 	      (receive (port tmf) (log-port time port tmf sstat-dir)
 		(write `(nfsd-open-pre :ip ,ip :time ,time :path ,file)
