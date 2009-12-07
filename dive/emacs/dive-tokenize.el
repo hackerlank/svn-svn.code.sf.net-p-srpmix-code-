@@ -49,12 +49,12 @@
 	(let ((p+ (+ p bias))
 	      (l-  (1- (length s))))
 	  (append
-	   (list (dive-tokenize-make-token (substring s 0 1) p+ (+ p+ 1)))
+	   (list (dive-tokenize-make-token (substring s 0 1) p+ (+ p+ 1) 'open))
 	   (dive-tokenize-get-expressions1 s (- p+ 1) t)
 	   (list (dive-tokenize-make-token (substring s l-) 
 				      (+ p+ l-)
 				      (+ p+ l- 1)
-				      ))))
+				      'close))))
 	;;
 	)
        ((dive-tokenize-is-symbol s)
