@@ -13,7 +13,7 @@
 (define (print-usage prog port status)
   (format #t "Usage :\n")
   (format #t "	~a -h|--help\n" prog)
-  (format #t "	~a [--debug] --data-dir=DATADIR --output-dir=OUTPUTDIR [--mapping-file=MAPPINGFILE]\n")
+  (format #t "	~a [--debug] --data-dir=DATADIR --output-dir=OUTPUTDIR [--mapping-file=MAPPINGFILE]\n" prog) 
   (sys-exit status)
   )
 
