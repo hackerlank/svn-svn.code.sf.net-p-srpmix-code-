@@ -37,4 +37,45 @@
 	(line (dive-context-current-line)))
     `(dive-context :file ,file :func ,func :line ,line)))
 
+(require 'dive-tokenize)
+
+(defvar dive-context-tokens nil)
+(defun dive-context-update ()
+  (unless (local-variable-p 'dive-context-tokens)
+    (set (make-local-variable 'dive-context-tokens)
+	 (make-hash-table :test 'equal)))
+  (let ((func (condition-case nil
+		  (which-function)
+		(error nil)))	)
+    (when func
+      (let ((range (save-excursion 
+		     (condition-case nil
+			 (beginning-of-defun)
+		       (error nil))
+		     (let ((b (point)))
+		       (let ((e (when (re-search-forward "{" nil t)
+				  (condition-case nil
+				      (progn
+					(end-of-defun)
+					(point))
+				    (error nil)))))
+					
+			 (if e
+			     (list b e)
+			   nil))))))
+	(if range
+	    (if (and (<= (car range) (point))
+		     (<= (point) (cadr range)))
+		(let ((tokens (gethash (car func) dive-context-tokens)))
+		  (if tokens
+		      tokens
+		    (setq tokens (dive-tokenize-get-expressions (buffer-substring-no-properties 
+								 (car range)
+								 (cadr range)) 
+								(car range)))
+		    (puthash (car func) tokens dive-context-tokens)
+		    tokens))
+	      nil)
+	  nil)))))
+
 (provide 'dive-context)

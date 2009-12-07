@@ -1,9 +1,8 @@
 (defun dive-idle-do ()
   (when (and (boundp 'dive-sources-buffer)
 	     dive-sources-buffer)
-    ;;
-    (message "->%s" (current-time-string))
-    (redisplay)))
+    (when (fboundp 'dive-context-update)
+      (dive-context-update))))
 
 (defvar dive-idle-id nil)
 (defun dive-idle-start ()

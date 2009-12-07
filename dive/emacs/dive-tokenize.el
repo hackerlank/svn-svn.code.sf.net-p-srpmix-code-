@@ -109,6 +109,7 @@
 
 ;; ENTRY POINT
 (require 'which-func)
+
 (defun dive-tokenize-get-expressions-here ()
   (let ((func (condition-case nil
 		  (which-function)
