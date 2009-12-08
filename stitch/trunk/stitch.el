@@ -1494,20 +1494,21 @@
 
 (defun stitch-list-annotation-about-keyword (keywords buffer-or-name need-erasing)
   (let ((and-set nil))
-    (fset 'and-set (lambda (s1 s2)
+    (fset 'or-set (lambda (s1 s2)
 		     (if (car s1)
-			 (and (member (car s1) s2)
-			      (and-set (cdr s1) s2))
-		       t)))
+			 (or (member (car s1) s2)
+			      (or-set (cdr s1) s2))
+		       nil)))
     (stitch-list-annotation-with-filter buffer-or-name
 					 (lambda (k e)
 					   (if keywords
-					       (and-set
+					       (or-set
 						keywords
 						(stitch-klist-value e :keywords))
 					     t))
 					 need-erasing
-					 nil)))
+					 (if (eq (length keywords) 1) nil t))))
+					     
 
 (defun stitch-list-annotation (all-filter)
   (interactive "P")
