@@ -27,7 +27,7 @@ if [ -L ./original ]; then
 fi
 
 if ! [ -L ./original ]; then
-    ln -s $to .original
+    ln -s $to ./original
     echo updated
 else
     echo
