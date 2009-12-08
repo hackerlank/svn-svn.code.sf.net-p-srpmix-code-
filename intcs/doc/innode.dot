@@ -107,14 +107,32 @@ digraph innode {
 		"fence_node_libccs.*"[shape=diamond,label="libccs.*"];
 	}
 
+//        subgraph clusterrgmanager {
+//		label="rgmanager";
         subgraph clusterclurgmgrd {
 		label="clurgmgrd";
 		"clurgmgrd_libcman.so"[shape=diamond,label="libcman.so"];
 		"clurgmgrd_libccs.*"[shape=diamond,label="libccs.*"];
 		"clurgmgrd_libdlm.so"[shape=diamond,label="libdlm.so"];
 		"clurgmgrd_libclulib.so"[shape=diamond,label="libclulib.so"];
+		"/var/run/cluster/rgmanager.sk"[shape=circle,label="/var/run/cluster/rgmanager.sk"];
 		// UNIX SOCKET???
 	}
+	subgraph clusterclusvcadm {
+		label="clusvcadm";
+		// "clusvcadm_libcman.so"[shape=diamond,label="libcman.so"];
+		"clusvcadm_libclulib.so"[shape=diamond,label="libclulib.so"];
+		"clusvcadm_libcman.so"[shape=diamond,label="libcman.so"];
+		
+        }
+	subgraph clusterclustat {
+		label="clustat";
+		// "clusvcadm_libcman.so"[shape=diamond,label="libcman.so"];
+		"clustat_libclulib.so"[shape=diamond,label="libclulib.so"];
+		"clustat_libcman.so"[shape=diamond,label="libcman.so"];
+		
+        }
+//	}
 	//
         // aisexec
 	//
@@ -199,8 +217,19 @@ digraph innode {
 	//
 	// clurgmgrd
 	//
-	"clurgmgrd_libcman.so"->"/var/lib/cman_client";
+	"clurgmgrd_libcman.so"->"/var/lib/cman_client"[label = "port = 47", fontsize=9]; 
 	"clurgmgrd_libccs.*"->"/var/run/cluster/ccsd.sock";
-	"clurgmgrd_libdlm.so"->"/dev/misc/dlm-contorol";
+	"clurgmgrd_libdlm.so"->"/dev/misc/dlm-contorol"[label="lockspace name = rgmanager", fontsize=9];
 	"clurgmgrd_libdlm.so"->"/dev/misc/dlm_default"; //???
+	"clurgmgrd_libclulib.so"->"/var/run/cluster/rgmanager.sk";
+	//
+	// clusvcadm
+	//
+	"clusvcadm_libclulib.so"->"/var/run/cluster/rgmanager.sk";
+	"clusvcadm_libcman.so"->"/var/lib/cman_client"; //???
+	//
+	// clustat
+	//
+	"clustat_libclulib.so"->"/var/run/cluster/rgmanager.sk";
+	"clustat_libcman.so"->"/var/lib/cman_client"; //???
 }
