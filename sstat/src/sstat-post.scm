@@ -59,7 +59,6 @@
 				      result)))
 		))))
 
-(define delta 1)
 (define (link data-dir entry output-dir mapping debug)
   (rxmatch-let (#/sstat-([0-9]+)\.es/ entry)
       (#f date)
@@ -80,24 +79,26 @@
 					     (string-length "var/lib/srpmix/sources/"))))
 		      (when (file-is-regular? (format "/srv/sources/sources/~a" path))
 			(let1 user (hash-table-get mapping ip (inet-address->string ip AF_INET))
-			  (hash-table-push! per-user-table user `#(,time ,date ,path)))))
+			  (let1 user-time (or (hash-table-get per-user-table user)
+					      (let1 user-time (make-hash-table 'eq?)
+						(hash-table-put! per-user-table user user-time)
+						user-time))
+			    (hash-table-push! user-time time `#(,date ,path)))
+			  )))
 		    (loop (read) per-user-table))))))
-      
       (hash-table-for-each per-user-table
-	(lambda (user vs)
-	  (let1 last-time 0
-	    (for-each
-	     (lambda (v)
-	       (let* ((time    (vector-ref v 0))
-		      (date    (vector-ref v 1))
-		      (path    (vector-ref v 2))
-		      (basename (sys-basename path))
-		      (dirname  (sys-dirname  path)))
-		 (when (> (- time last-time) delta)
-		   (set! last-time time)
-		   (link-dates output-dir user date dirname basename debug)
-		   (link-users output-dir user date dirname basename debug))))
-	     (reverse vs))))))))
+	(lambda (user user-time)
+	  (hash-table-for-each user-time
+	    (lambda (time vs)
+	      (when (eq? (length vs) 1)
+		(let1 v (car vs)
+		  (let* ((date    (vector-ref v 0))
+			 (path    (vector-ref v 1))
+			 (basename (sys-basename path))
+			 (dirname  (sys-dirname  path)))
+		    (link-dates output-dir user date dirname basename debug)
+		    (link-users output-dir user date dirname basename debug)))))))))))
+
 
 ;; /srv/sources/dates/$date/$user/[a-z]/$pkg...
 (define (link-dates output-dir user date dirname basename debug)
