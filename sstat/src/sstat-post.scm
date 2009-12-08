@@ -50,10 +50,13 @@
 		      (load-mapping mapping-file)
 		      (make-hash-table 'eq?))
       (for-each (cut link data-dir <> output-dir mapping debug)
-		(directory-list data-dir 
-				:children? #t 
-				:add-path? #f 
-				:filter #/^sstat-([0-9]+)\.es$/)
+		(directory-fold data-dir
+				(lambda (entry result)
+				  (if (#/sstat-([0-9]+)\.es$/ entry)
+				      (cons 
+				       (substring entry (+ 1 (string-length data-dir)) -1)
+				       result)
+				      result)))
 		))))
 
 (define delta 1)

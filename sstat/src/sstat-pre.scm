@@ -56,8 +56,10 @@
 	(run accept? sstat-dir)))))
 
 
-(define (format-port-name sstat-dir tmf)
-  (format "~a/sstat-~a.es" sstat-dir tmf))
+(define (format-port-name sstat-dir year month tmf)
+  (let1 dir (format "~a/~a/~a" sstat-dir year month)
+    (make-directory* dir)
+    (format "~a/sstat-~a.es" dir tmf)))
 
 
 (define (run accept? sstat-dir)
@@ -85,21 +87,23 @@
 
 (define (log-port time port tmf sstat-dir)
   (let1 tm0 (sys-localtime time)
-    (let1 tmf0 (format "~d~2,0d~2,'0d" 
+    (let ((tmf0 (format "~d~2,'0d~2,'0d" 
 		       (+ (ref tm0 'year) 1900)
 		       (+ (ref tm0 'mon) 1)
-		       (ref tm0 'mday))
+		       (ref tm0 'mday)))
+	  (y    (format "~d"      (+ (ref tm0 'year) 1900)))
+	  (m    (format "~2,'0d"  (+ (ref tm0 'mon) 1))))
       (cond
        ((equal? tmf tmf0)
 	(values port tmf))
        ((not tmf)
-	(values (open-output-file (format-port-name sstat-dir tmf0)
+	(values (open-output-file (format-port-name sstat-dir y m tmf0)
 				  :if-exists :append
 				  :buffering :line)
 		tmf0))
        (else
 	(close-output-port port)
-	(values (open-output-file (format-port-name sstat-dir tmf0)
+	(values (open-output-file (format-port-name sstat-dir y m tmf0)
 				  :if-exists :append
 				  :buffering :line)
 		tmf0))))))
