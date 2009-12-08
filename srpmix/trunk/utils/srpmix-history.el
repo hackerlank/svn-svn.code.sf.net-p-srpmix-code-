@@ -17,7 +17,10 @@
 
 (defconst srpmix-history-compare-script
   '(begin (use gauche.version)
-	  (write (sort (port->string-list (current-input-port)) 
+	  (use srfi-1)
+	  (write (sort (remove 
+			(string->regexp "^^.*")
+			(port->string-list (current-input-port)))
 		       version<?))))
 
 (defun srpmix-history-index-for (version varray)
