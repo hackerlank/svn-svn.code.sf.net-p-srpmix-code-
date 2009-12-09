@@ -56,7 +56,8 @@
 				      (cons 
 				       (substring entry (+ 1 (string-length data-dir)) -1)
 				       result)
-				      result)))
+				      result))
+				'())
 		))))
 
 (define (link data-dir entry output-dir mapping debug)
@@ -79,7 +80,7 @@
 					     (string-length "var/lib/srpmix/sources/"))))
 		      (when (file-is-regular? (format "/srv/sources/sources/~a" path))
 			(let1 user (hash-table-get mapping ip (inet-address->string ip AF_INET))
-			  (let1 user-time (or (hash-table-get per-user-table user)
+			  (let1 user-time (or (hash-table-get per-user-table user #f)
 					      (let1 user-time (make-hash-table 'eq?)
 						(hash-table-put! per-user-table user user-time)
 						user-time))

@@ -4,6 +4,8 @@
 (use gauche.net)
 (use gauche.parseopt)
 (use srfi-1)
+(use file.util)
+
 
 (define (complete partial)
   partial)
