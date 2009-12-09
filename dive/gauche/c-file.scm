@@ -37,9 +37,9 @@
 	(filename (cadr (memq :filename u)))
 	(language (cadr (memq :language u)))
 	)
-    (let1 d-o (or (ref (ref session 'debug-files) 'debug-file #f)
+    (let1 d-o (or (ref (ref session 'debug-files) filename #f)
 		(let1 d (make <debug-file> :name filename)
-		  (set! (ref (ref session 'debug-files) 'debug-file)
+		  (set! (ref (ref session 'debug-files) filename)
 			d)
 		  d))
       (set-compile-unit d-o (make <compile-unit> 
@@ -47,14 +47,23 @@
 			      :language language
 			      :debug-file d-o)))))
 
+(define (dump-debug-files session d)
+  (write (cons 'debug-files
+	       (hash-table-keys (ref session 'debug-files))))
+  (newline))
+
 (define (load-libdwarves session d)
   (case (car d)
     ('compile_unit
      (load-compile-unit session (cdr d))
      )
-    
     ))
 
+(define (dump session d)
+  (case (car d)
+    ('debug-files
+     (dump-debug-files session (cdr d))
+     )))
 
 (define (main args)
   (let1 session (make <session>)
@@ -63,10 +72,13 @@
 	(case (car r)
 	  ('libdwarves
 	   (load-libdwarves session (cdr r))
-	   ))
+	   )
+	  ('dump
+	   (dump session (cdr r)))
+	  )
 	(loop (read))
 	))
-    (hash-table-for-each 
+    #;(hash-table-for-each 
      (ref session 'debug-files)
      (lambda (k v)
        (format #t "~a:\n" (ref v 'name))
