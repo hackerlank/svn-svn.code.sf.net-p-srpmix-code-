@@ -655,6 +655,8 @@
   ""
   :group 'stitch)
 
+
+
 (defun stitch-stitch-by-line-and-col (buffer line col si-proc keywords)
   (stitch-stitch buffer (with-current-buffer buffer 
 			   (goto-line line)
@@ -671,6 +673,7 @@
 	(overlay-put o 'after-string si)
 	;;      (overlay-put o 'display `((margin left-margin) "XXX"))
 	(overlay-put o 'stitch-annotation t)
+	(overlay-put o 'stitch-master-string si)
 	(overlay-put o 'stitch-keywords keywords)))))
 
 (defun stitch-insert-point-annotation (buffer pos annotation date full-name mailing-address keywords)
@@ -686,6 +689,7 @@
 	(overlay-put o 'after-string si)
 	;;      (overlay-put o 'display `((margin left-margin) "XXX"))
 	(overlay-put o 'stitch-annotation t)
+	(overlay-put o 'stitch-master-string si)
 	(overlay-put o 'stitch-keywords keywords)))))
 
 ;;
@@ -798,18 +802,95 @@
 	     (nreverse (sort entry 'stitch-annotation-compare)))))))))
 
 
-(defun stitch-delete-annotations (&optional buffer)
+(defun stitch-walk-annotations (proc &optional buffer)
   (with-current-buffer (or buffer (current-buffer))
     (mapc
      (lambda (o)
        (when (overlay-get o 'stitch-annotation)
-	 (delete-overlay o)))
+	 (funcall proc o)))
      (overlays-in (point-min)
 		  (1+ (point-max))
 		  ))))
 
+(defun stitch-delete-annotations (&optional buffer)
+  (stitch-walk-annotations #'delete-overlay buffer))
+
+
+(defun stitch-char-shrinker (o)
+  (let ((master (overlay-get o 'stitch-master-string)))
+    (when master 
+      (let* ((current (overlay-get o 'after-string))
+	     (lcurrent (length current)))
+	;; Keep 1 byte
+	(when (< 1 lcurrent)
+	  (overlay-put o 'after-string
+		       (substring current 0 (1- lcurrent))))))))
+
+(defun stitch-char-enlarger (o)
+  (let ((master (overlay-get o 'stitch-master-string)))
+    (when master
+      (let* ((current (overlay-get o 'after-string))
+	     (lcurrent (length current))
+	     (lmaster  (length master)))
+	(when (< lcurrent lmaster)
+	  (overlay-put o 'after-string
+		       (substring master 0 (1+ lcurrent))))))))
+
+(defun stitch-line-shrinker (o)
+  (let ((master (overlay-get o 'stitch-master-string)))
+    (when master 
+      (let* ((current (overlay-get o 'after-string))
+	     (lcurrent (split-string current "\n"))
+	     (llcurrent (length lcurrent)))
+	(when (< 0 llcurrent)
+	  (overlay-put o 'after-string
+		       (mapconcat 
+			 (lambda (x) x)
+			 (reverse (cdr (reverse lcurrent)))
+			 "\n")))))))
+
+
+(defun stitch-line-enlarger (o)
+  (let ((master (overlay-get o 'stitch-master-string)))
+    (when master 
+      (let* ((current (overlay-get o 'after-string))
+	     (lcurrent (split-string current "\n"))
+	     (llcurrent (length lcurrent))
+	     (lmaster (split-string master "\n"))
+	     (llmaster (length lmaster)))
+	(when (< llcurrent llmaster)
+	  (overlay-put o 'after-string
+		       (mapconcat 
+			(lambda (x) x)
+			(reverse (nthcdr (- (- llmaster llcurrent) 1) (reverse lmaster)))
+			"\n")
+		       ))))))
+
+(defun stitch-shrink-annotations (&optional buffer)
+  (interactive)
+  (stitch-walk-annotations (lambda (o) 
+			     (let ((shrinker (overlay-get o 'stitch-shrinker)))
+			       (if shrinker
+				   (funcall shrinker o)
+				 (stitch-line-shrinker o))))
+			       buffer))
+
+(defun stitch-enlarge-annotations (&optional buffer)
+  (interactive)
+  (stitch-walk-annotations (lambda (o) 
+			     (let ((enlarger (overlay-get o 'stitch-enlarger)))
+			       (if enlarger
+				   (funcall enlarger o) 
+				 (stitch-line-enlarger o))))
+			       buffer))
+
+(define-key global-map [(shift mouse-4)] 'stitch-shrink-annotations)
+(define-key global-map [(shift mouse-5)] 'stitch-enlarge-annotations)
+
+
 (defun stitch-reload-annotations (&optional all-buffer just-rerender)
   (interactive "P")
+  
   (mapcar
    'stitch-delete-annotations
    (if all-buffer (buffer-list) (list (current-buffer))))
