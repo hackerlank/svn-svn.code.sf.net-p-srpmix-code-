@@ -44,6 +44,9 @@
   (unless (local-variable-p 'dive-context-tokens)
     (set (make-local-variable 'dive-context-tokens)
 	 (make-hash-table :test 'equal)))
+    (unless (local-variable-p 'dive-context-function)
+    (set (make-local-variable 'dive-context-function)
+	 nil))
   (let ((func (condition-case nil
 		  (which-function)
 		(error nil)))	)
@@ -76,6 +79,11 @@
 		    (puthash (car func) tokens dive-context-tokens)
 		    tokens))
 	      nil)
-	  nil)))))
+	  nil))
+      (unless (equal dive-context-function func)
+	(setq dive-context-function func)
+	;; TODO
+	))))
+
 
 (provide 'dive-context)
