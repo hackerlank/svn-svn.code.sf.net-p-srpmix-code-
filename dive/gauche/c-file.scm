@@ -6,13 +6,14 @@
 (define-class <session> ()
   (
    (debug-files :init-form (make-hash-table 'equal?))
-   (ids         :init-form (make-hash-table 'eq?))
+   (current)
    ))
 
 (define-class <debug-file> ()
   (
    (name :init-keyword :name)
    (current)
+   (ids         :init-form (make-hash-table 'eq?))
    (compile-units :init-form (make-hash-table 'equal?)) 
    ))
 
@@ -24,8 +25,8 @@
    ))
   
 
-(define-method set-compile-unit ((debug-file <debug-file>)
-				 (compile-unit <compile-unit>))
+(define-method set-compile-unit! ((debug-file <debug-file>)
+				  (compile-unit <compile-unit>))
   (set! (ref (ref debug-file 'compile-units) 
 	     (ref compile-unit 'name)) 
 	compile-unit)
@@ -42,7 +43,7 @@
 		  (set! (ref (ref session 'debug-files) filename)
 			d)
 		  d))
-      (set-compile-unit d-o (make <compile-unit> 
+      (set-compile-unit! d-o (make <compile-unit> 
 			      :name name
 			      :language language
 			      :debug-file d-o)))))
