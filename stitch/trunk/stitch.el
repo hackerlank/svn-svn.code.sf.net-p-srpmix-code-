@@ -847,7 +847,9 @@
 		       (mapconcat 
 			 (lambda (x) x)
 			 (reverse (cdr (reverse lcurrent)))
-			 "\n")))))))
+			 (propertize
+			  "\n"
+			  'face 'stitch-annotation-base))))))))
 
 
 (defun stitch-line-enlarger (o)
@@ -863,7 +865,9 @@
 		       (mapconcat 
 			(lambda (x) x)
 			(reverse (nthcdr (- (- llmaster llcurrent) 1) (reverse lmaster)))
-			"\n")
+			(propertize
+			 "\n"
+			 'face 'stitch-annotation-base))
 		       ))))))
 
 (defun stitch-shrink-annotations (&optional buffer)
