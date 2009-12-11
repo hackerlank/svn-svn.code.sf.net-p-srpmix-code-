@@ -674,7 +674,8 @@
 	;;      (overlay-put o 'display `((margin left-margin) "XXX"))
 	(overlay-put o 'stitch-annotation t)
 	(overlay-put o 'stitch-master-string si)
-	(overlay-put o 'stitch-keywords keywords)))))
+	(overlay-put o 'stitch-keywords keywords)
+	o))))
 
 (defun stitch-insert-point-annotation (buffer pos annotation date full-name mailing-address keywords)
   (with-current-buffer buffer
@@ -690,7 +691,8 @@
 	;;      (overlay-put o 'display `((margin left-margin) "XXX"))
 	(overlay-put o 'stitch-annotation t)
 	(overlay-put o 'stitch-master-string si)
-	(overlay-put o 'stitch-keywords keywords)))))
+	(overlay-put o 'stitch-keywords keywords)
+	o))))
 
 ;;
 ;;(require 'skk)
@@ -845,11 +847,11 @@
 	(when (< 0 llcurrent)
 	  (overlay-put o 'after-string
 		       (mapconcat 
-			 (lambda (x) x)
-			 (reverse (cdr (reverse lcurrent)))
-			 (propertize
-			  "\n"
-			  'face 'stitch-annotation-base))))))))
+			(lambda (x) x)
+			(reverse (cdr (reverse lcurrent)))
+			(propertize
+			 "\n"
+			 'face 'stitch-annotation-base))))))))
 
 
 (defun stitch-line-enlarger (o)
@@ -863,12 +865,11 @@
 	(when (< llcurrent llmaster)
 	  (overlay-put o 'after-string
 		       (mapconcat 
-			(lambda (x) x)
-			(reverse (nthcdr (- (- llmaster llcurrent) 1) (reverse lmaster)))
-			(propertize
-			 "\n"
-			 'face 'stitch-annotation-base))
-		       ))))))
+			 (lambda (x) x)
+			 (reverse (nthcdr (- (- llmaster llcurrent) 1) (reverse lmaster)))
+			 (propertize
+			  "\n"
+			  'face 'stitch-annotation-base))))))))
 
 (defun stitch-shrink-annotations (&optional buffer)
   (interactive)
