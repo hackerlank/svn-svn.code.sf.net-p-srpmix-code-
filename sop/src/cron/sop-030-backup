@@ -15,15 +15,29 @@ else
     exit 1
 fi
 
-function backup0
+function backup_f
+{
+    local name=$1
+    local file=$2
+
+    if [ -f ${SOP_CRADLES_DIR}/$name/$file ]; then
+	cp -a ${SOP_CRADLES_DIR}/$name/$file ${SOP_BACKUP_DIR}/$name/$file
+    fi
+}
+
+function backup_d
 {
     local name=$1
     local dir=$2
 
-    mkdir -p ${SOP_BACKUP_DIR}/$name/$dir
-    rsync -auvH ${SOP_CRADLES_DIR}/$name/$dir ${SOP_BACKUP_DIR}/$name/$dir 2>&1 \
+    
+    if [ -d ${SOP_CRADLES_DIR}/$name/$dir ]; then
+	mkdir -p ${SOP_BACKUP_DIR}/$name/$dir
+	rsync -auvH ${SOP_CRADLES_DIR}/$name/$dir ${SOP_BACKUP_DIR}/$name/$dir 2>&1 
 	| tee "${SOP_CRADLES_DIR}/$name/log/backup-$dir-$date"
+    fi
 }
+
 function backup
 {
     local cf=$1/cf
@@ -40,7 +54,13 @@ function backup
 	return 0
     fi
 
-    backup0 $name mirror $date
+    for d in mirror sbuild repo dist-mapping; do
+	backup_d $name $d $date
+    done
+
+    for f in cf file.repo mirror-pkgs mirror-vpath; do
+	backup_f $name  $f $date
+    done
 }
 
 function main
