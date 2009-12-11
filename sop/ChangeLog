@@ -1,3 +1,8 @@
+2009-12-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cron/sop-030-backup (backup): Pass $date to backup0.
+	(bacckup0): Fix a typo(BAKCUP -> BACKUP).
+
 2009-10-23  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.3.7.
