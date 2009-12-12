@@ -1,4 +1,6 @@
 (require 'which-func)
+(require 'dive-tokenize)
+(require 'dive-valley)
 
 ;; =====================================================================
 ;; Stolen from file `misc-func.el' by Drew Adams.
@@ -31,59 +33,62 @@
       (which-function)
     (error nil)))
 
-(defun dive-context ()
-  (let ((file (buffer-file-name))
-	(func (dive-context-which-function))
-	(line (dive-context-current-line)))
-    `(dive-context :file ,file :func ,func :line ,line)))
-
-(require 'dive-tokenize)
-
-(defvar dive-context-tokens nil)
+(defvar dive-context-contexts nil)
+(defvar dive-context-function nil)
 (defun dive-context-update ()
-  (unless (local-variable-p 'dive-context-tokens)
-    (set (make-local-variable 'dive-context-tokens)
+  (unless (local-variable-p 'dive-context-contexts)
+    (set (make-local-variable 'dive-context-contexts)
 	 (make-hash-table :test 'equal)))
-    (unless (local-variable-p 'dive-context-function)
+  (unless (local-variable-p 'dive-context-function)
     (set (make-local-variable 'dive-context-function)
 	 nil))
-  (let ((func (condition-case nil
-		  (which-function)
-		(error nil)))	)
-    (when func
-      (let ((range (save-excursion 
-		     (condition-case nil
-			 (beginning-of-defun)
-		       (error nil))
-		     (let ((b (point)))
-		       (let ((e (when (re-search-forward "{" nil t)
-				  (condition-case nil
-				      (progn
-					(end-of-defun)
-					(point))
-				    (error nil)))))
-					
-			 (if e
-			     (list b e)
-			   nil))))))
-	(if range
-	    (if (and (<= (car range) (point))
-		     (<= (point) (cadr range)))
-		(let ((tokens (gethash (car func) dive-context-tokens)))
-		  (if tokens
-		      tokens
-		    (setq tokens (dive-tokenize-get-expressions (buffer-substring-no-properties 
-								 (car range)
-								 (cadr range)) 
-								(car range)))
-		    (puthash (car func) tokens dive-context-tokens)
-		    tokens))
-	      nil)
-	  nil))
-      (unless (equal dive-context-function func)
-	(setq dive-context-function func)
-	;; TODO
-	))))
+  (let* ((func (car (dive-context-which-function)))
+	 (context (when func
+		    (let ((range (save-excursion 
+				   (condition-case nil
+				       (beginning-of-defun)
+				     (error nil))
+				   (let ((b (point)))
+				     (let ((e (when (re-search-forward "{" nil t)
+						(condition-case nil
+						    (progn
+						      (end-of-defun)
+						      (point))
+						  (error nil)))))
+				       
+				       (if e
+					   (list b e)
+					 nil))))))
+		      (if range
+			  (if (and (<= (car range) (point))
+				   (<= (point) (cadr range)))
+			      (let ((context (gethash func dive-context-contexts)))
+				(if context
+				    context
+				  (let* ((tokens (dive-tokenize-get-expressions (buffer-substring-no-properties 
+										 (car range)
+										 (cadr range)) 
+										(car range)))
+					 (valley (dive-valley-new tokens (current-buffer))))
+				    (setq context `(dive-context 
+						    :file-name ,(buffer-file-name)
+						    :line ,(dive-context-current-line)
+						    :function ,func
+						    :start ,(car range)
+						    :end ,(cadr range)
+						    :token ,tokens
+						    :valley ,valley))
+				    (puthash func context dive-context-contexts)
+				    context)))
+			    (setq func nil)
+			    nil)
+			(setq func nil)
+			nil)))))
+    (unless (equal dive-context-function func)
+      (setq dive-context-function func)
+      ;; TODO
+      )
+    context))
 
 
 (provide 'dive-context)

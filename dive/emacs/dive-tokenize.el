@@ -32,6 +32,10 @@
   (forward-sexp 1)
   (backward-sexp 1))
 
+(defun dive-tokenize-token-type (token)
+  (aref token 3))
+(defun dive-tokenize-token-expression (token)
+  (aref token 0))
 (defun dive-tokenize-make-token (str b e &optional type)
   (vector str b e type))
 
