@@ -36,6 +36,10 @@
   (aref token 3))
 (defun dive-tokenize-token-expression (token)
   (aref token 0))
+(defun dive-tokenize-token-start (token)
+  (aref token 1))
+(defun dive-tokenize-token-end (token)
+  (aref token 2))
 (defun dive-tokenize-make-token (str b e &optional type)
   (vector str b e type))
 

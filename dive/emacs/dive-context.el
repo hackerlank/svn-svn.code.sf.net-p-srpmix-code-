@@ -36,6 +36,7 @@
 (defvar dive-context-contexts nil)
 (defvar dive-context-function nil)
 (defun dive-context-update ()
+  (interactive)
   (unless (local-variable-p 'dive-context-contexts)
     (set (make-local-variable 'dive-context-contexts)
 	 (make-hash-table :test 'equal)))
@@ -77,7 +78,9 @@
 						    :start ,(car range)
 						    :end ,(cadr range)
 						    :token ,tokens
-						    :valley ,valley))
+						    :valley ,valley
+						    :valley-current-depth 0
+						    ))
 				    (puthash func context dive-context-contexts)
 				    context)))
 			    (setq func nil)
@@ -90,5 +93,28 @@
       )
     context))
 
+(defun dive-context-show ()
+  (interactive)
+  (when dive-context-function
+    (let ((context (gethash dive-context-function dive-context-contexts)))
+      (when context
+	(let ((valley (cadr (memq :valley context)))
+	      (valley-current-depth (cadr (memq :valley-current-depth context))))
+	  (let ((new-depth (dive-valley-show valley valley-current-depth)))
+	    (setcar (cdr (memq :valley-current-depth context)) new-depth)))))))
+
+(defun dive-context-hide ()
+  (interactive)
+  (when dive-context-function
+    (let ((context (gethash dive-context-function dive-context-contexts)))
+      (when context
+	(let ((valley (cadr (memq :valley context)))
+	      (valley-current-depth (cadr (memq :valley-current-depth context))))
+	  (let ((new-depth (dive-valley-hide valley valley-current-depth)))
+	    (setcar (cdr (memq :valley-current-depth context)) new-depth)))))))
+
+
+(define-key global-map [(s-left)] 'dive-context-hide)
+(define-key global-map [(s-rigth)] 'dive-context-show)
 
 (provide 'dive-context)
