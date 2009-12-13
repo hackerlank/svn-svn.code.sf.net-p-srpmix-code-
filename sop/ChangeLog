@@ -1,3 +1,7 @@
+2009-12-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cron/sop-030-backup (backup_d): Added a missing backslash.
+
 2009-12-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cron/sop-030-backup (backup): Pass $date to backup0.
