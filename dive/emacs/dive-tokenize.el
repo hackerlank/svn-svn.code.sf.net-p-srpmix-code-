@@ -1,3 +1,4 @@
+(require 'assoc)
 (require 'regexp-opt)
 (defconst dive-tokenize-keywords-regex
   (concat 
@@ -40,8 +41,28 @@
   (aref token 1))
 (defun dive-tokenize-token-end (token)
   (aref token 2))
+
+(defun dive-tokenize-token-aget (token key)
+  (aget (aref token 4) key))
+
+(defun dive-tokenize-token-aput (token key value)
+  ;; TODO
+  (aset token 4 (cons (cons key value) (aref token 4))))
+
 (defun dive-tokenize-make-token (str b e &optional type)
-  (vector str b e type))
+  (vector 
+   (cond
+    ((eq type 'keyword) 
+     (intern str))
+    ((or (eq type 'open)
+	 (eq type 'close))
+     (string-to-char str)
+     )
+    (t
+     str))
+   b e type
+   (list)
+   ))
 
 (defun dive-tokenize-get-expressions00 (bias)
   (dive-tokenize-calibrate-pos)
@@ -69,7 +90,7 @@
 	(list (dive-tokenize-make-token s
 				   (+ p bias)
 				   (+ (point) bias)
-				   (if (dive-tokenize-is-keyword s) 'keyword 'symbol)
+				   (if (dive-tokenize-is-keyword s) 'keyword 'identifier)
 				   )))
        ((or (dive-tokenize-is-string s) (dive-tokenize-is-number s))
 	(list (dive-tokenize-make-token s

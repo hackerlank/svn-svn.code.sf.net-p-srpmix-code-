@@ -27,6 +27,8 @@
     (?\< 
      (eq close-char ?\>))))
 
+(defconst dive-valley-marker (propertize "@"
+					 'face 'mode-line-inactive))
 (defun dive-valley-show (valley current-depth)
   (let ((l (length valley)))
     (cond
@@ -40,7 +42,9 @@
 	 (lambda (v)
 	   (let ((o (aref v 2)))
 	     (when o
-	       (overlay-put o 'invisible nil))))
+	       (overlay-put o 'invisible nil)
+	       (overlay-put o 'before-string nil)
+	       )))
 	 vs))
       l)
      (t
@@ -49,7 +53,9 @@
 	 (lambda (v)
 	   (let ((o (aref v 2)))
 	     (when o
-	       (overlay-put o 'invisible nil))))
+	       (overlay-put o 'invisible nil)
+	       (overlay-put o 'before-string nil)
+	       )))
 	 vs))
       (let ((vs (aref valley (1+ current-depth))))
 	(mapc
@@ -59,7 +65,12 @@
 					       (1- (dive-tokenize-token-start (aref v 1))))))
 			  (aset v 2 o)
 			  o))))
-	     (overlay-put o 'invisible t)))
+	     (unless  (dive-tokenize-token-aget (aref v 0) 'after-keyword)
+	       (overlay-put o 'invisible t)
+	       (unless (eq (dive-tokenize-token-end (aref v 0))
+			   (dive-tokenize-token-start (aref v 1)))
+		 (overlay-put o 'before-string dive-valley-marker)))
+	     ))
 	 vs))
       (1+ current-depth)
       )
@@ -82,7 +93,12 @@
 					       (1- (dive-tokenize-token-start (aref v 1))))))
 			  (aset v 2 o)
 			  o))))
-	     (overlay-put o 'invisible t)))
+	     (unless  (dive-tokenize-token-aget (aref v 0) 'after-keyword)
+	       (overlay-put o 'invisible t)
+	       (unless (eq (dive-tokenize-token-end (aref v 0))
+			   (dive-tokenize-token-start (aref v 1)))
+		 (overlay-put o 'before-string dive-valley-marker)))
+	     ))
 	 vs))
       (1- l))
      (t
@@ -91,7 +107,9 @@
 	 (lambda (v)
 	   (let ((o (aref v 2)))
 	     (when o
-	       (overlay-put o 'invisible nil))))
+	       (overlay-put o 'invisible nil)
+	       (overlay-put o 'before-string nil)
+	       )))
 	 vs))
       (let ((vs (aref valley (1- current-depth))))
 	(mapc
@@ -101,7 +119,12 @@
 					       (1- (dive-tokenize-token-start (aref v 1))))))
 			  (aset v 2 o)
 			  o))))
-	     (overlay-put o 'invisible t)))
+	     (unless  (dive-tokenize-token-aget (aref v 0) 'after-keyword)
+	       (overlay-put o 'invisible t)
+	       (unless (eq (dive-tokenize-token-end (aref v 0))
+			   (dive-tokenize-token-start (aref v 1)))
+		 (overlay-put o 'before-string dive-valley-marker)))
+	     ))
 	 vs))
       (1- current-depth)))))
 
@@ -111,25 +134,39 @@
 	  (depth 0)
 	  (valley (make-vector 
 		   (dive-valley-estimate-depth tokens)
-		   nil)))
+		   nil))
+	  (after-keyword nil))
       (mapc
        (lambda (token)
 	 (case (dive-tokenize-token-type token)
+	   ('keyword
+	    (when (memq  (dive-tokenize-token-expression token)
+			 '(if while for))
+	      (setq after-keyword t)
+	      )
+	    )
 	   ('open
 	    (push token stack)
 	    (setq depth (1+ depth))
+	    (when after-keyword
+	      (dive-tokenize-token-aput token 'after-keyword t))
+	    (setq after-keyword nil)
 	    )
 	   ('close
+	    (setq after-keyword nil)
 	    (let ((close token)
 		  (open  (pop stack)))
 	      (if (and open 
 		       (dive-valley-pair-p 
-			(string-to-char (dive-tokenize-token-expression open))
-			(string-to-char (dive-tokenize-token-expression close))))
+			(dive-tokenize-token-expression open)
+			(dive-tokenize-token-expression close)))
 		  (aset valley depth
 			(cons  `[,open ,close ,nil] (aref valley depth)))
 		(throw 'unblance-sytax nil))
-	      (setq depth (1- depth))))))
+	      (setq depth (1- depth))))
+	   (t
+	    (setq after-keyword nil))
+	   ))
        tokens)
       (if (and (zerop depth)
 	       (null stack))

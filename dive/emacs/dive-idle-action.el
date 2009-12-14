@@ -18,4 +18,5 @@
 	     (setq dive-idle-id nil))
     (message "Dive idle already stopped")))
 
+(dive-idle-start)
 (provide 'dive-idle-action)

@@ -30,7 +30,10 @@
 ;; =====================================================================
 (defun dive-context-which-function ()
   (condition-case nil
-      (which-function)
+      (let ((f (which-function)))
+	(if (consp f)
+	    (car f)
+	  f))
     (error nil)))
 
 (defvar dive-context-contexts nil)
@@ -43,7 +46,7 @@
   (unless (local-variable-p 'dive-context-function)
     (set (make-local-variable 'dive-context-function)
 	 nil))
-  (let* ((func (car (dive-context-which-function)))
+  (let* ((func (dive-context-which-function))
 	 (context (when func
 		    (let ((range (save-excursion 
 				   (condition-case nil
@@ -116,5 +119,11 @@
 
 (define-key global-map [(s-left)] 'dive-context-hide)
 (define-key global-map [(s-rigth)] 'dive-context-show)
+
+(define-key global-map [(control mouse-4)] 'dive-context-hide)
+(define-key global-map [(control mouse-5)] 'dive-context-show)
+
+(define-key global-map [(hyper ?\[)] 'dive-context-hide)
+(define-key global-map [(hyper ?\])] 'dive-context-show)
 
 (provide 'dive-context)
