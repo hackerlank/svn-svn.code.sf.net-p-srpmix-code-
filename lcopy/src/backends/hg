@@ -145,10 +145,12 @@ function hg_update
 {
     local input=$1
     local update_dir=$2
+    local log=/dev/null
+
 
     cd "${update_dir}"
 
-    if common_spawn hg pull | tee /tmp/hg-update-$$; then
+    if common_spawn hg pull | tee $log; then
 	if [ "$(wc -l < /tmp/hg-update-$$)" -gt 1 ] \
 	   LANG=C grep  '^no changes found$' /tmp/hg-update-$$ > /dev/null 2>&1; then
 	    return 0

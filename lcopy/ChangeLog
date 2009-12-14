@@ -1,3 +1,8 @@
+2009-12-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/backends/* (*_update): Don't create a log file.
+	Use /dev/null.
+
 2009-12-02  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/backends/darcs (darcs_update): Use -gt to compare numbers

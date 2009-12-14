@@ -215,10 +215,12 @@ function cvs_update
 {
     local input=$1
     local update_dir=$2
+    local log=/dev/null
+
 
     cd "${update_dir}"
 
-    if common_spawn cvs update -d -P | tee /tmp/cvs-update-$$; then
+    if common_spawn cvs update -d -P | tee $log; then
 	if grep "^[MU]" /tmp/cvs-update-$$ > /dev/null 2>&1; then
 	    return 1
 	else

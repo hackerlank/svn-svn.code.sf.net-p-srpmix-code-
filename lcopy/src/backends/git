@@ -147,10 +147,12 @@ function git_update
 {
     local input=$1
     local update_dir=$2
+    local log=/dev/null
+
 
     cd "${update_dir}"
 
-    if common_spawn git pull | tee /tmp/git-update-$$; then
+    if common_spawn git pull | tee $log; then
 	if [ "$(wc -l < /tmp/git-update-$$)" = 1 ] \
 	   LANG=C grep  'Already up-to-date.' /tmp/git-update-$$ > /dev/null 2>&1; then
 	    return 0
