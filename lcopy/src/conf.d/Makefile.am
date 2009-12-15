@@ -34,6 +34,7 @@ dist_confd_DATA = \
 	lm-sensors,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
+	openais,trunk.lcopy \
 	perg,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
 	resource-agents,trunk.lcopy \
