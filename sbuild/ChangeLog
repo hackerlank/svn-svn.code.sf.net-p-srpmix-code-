@@ -1,3 +1,7 @@
+2009-12-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sbuild (run_rsync): Pass --delete to rsync.
+
 2009-11-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/builders/lcopy (main): Pass SOP_SOURCES_DIR to lcopy-envelop.

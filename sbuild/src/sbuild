@@ -200,7 +200,7 @@ function run_rsync
 
     if [ -n ${SBUILD_TSTAMPDIR} ] && [ -d "${SBUILD_TSTAMPDIR}/${name}" ]; then
 	mkdir -p ${SOP_CRADLES_DIR}/${name}/sbuild
-	rsync -a ${SBUILD_TSTAMPDIR}/${name}/ ${SOP_CRADLES_DIR}/${name}/sbuild
+	rsync -a --delete ${SBUILD_TSTAMPDIR}/${name}/ ${SOP_CRADLES_DIR}/${name}/sbuild
     fi
 }
 
