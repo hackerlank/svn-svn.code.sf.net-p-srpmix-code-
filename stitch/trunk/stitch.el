@@ -892,6 +892,9 @@
 (define-key global-map [(shift mouse-4)] 'stitch-shrink-annotations)
 (define-key global-map [(shift mouse-5)] 'stitch-enlarge-annotations)
 
+(define-key global-map [(hyper ?\{)] 'stitch-shrink-annotations)
+(define-key global-map [(hyper ?\})] 'stitch-enlarge-annotations)
+
 
 (defun stitch-reload-annotations (&optional all-buffer just-rerender)
   (interactive "P")
