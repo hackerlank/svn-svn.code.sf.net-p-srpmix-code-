@@ -27,8 +27,11 @@
     (?\< 
      (eq close-char ?\>))))
 
-(defconst dive-valley-marker (propertize "@"
-					 'face 'mode-line-inactive))
+(defconst dive-valley-marker (propertize "..."
+					 'face 
+					 ;'mode-line-inactive
+					 'normal
+					 ))
 (defun dive-valley-show (valley current-depth)
   (let ((l (length valley)))
     (cond

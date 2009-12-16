@@ -99,6 +99,7 @@
 (defun dive-context-show ()
   (interactive)
   (when dive-context-function
+    (dive-context-update)
     (let ((context (gethash dive-context-function dive-context-contexts)))
       (when context
 	(let ((valley (cadr (memq :valley context)))
@@ -108,6 +109,7 @@
 
 (defun dive-context-hide ()
   (interactive)
+  (dive-context-update)
   (when dive-context-function
     (let ((context (gethash dive-context-function dive-context-contexts)))
       (when context
