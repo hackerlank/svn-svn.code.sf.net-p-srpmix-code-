@@ -234,7 +234,7 @@ print_usage(char* progname, FILE* stream)
 {
   fprintf(stream, "Usage: \n");
   fprintf(stream, "	%s -h\n", progname);
-  fprintf(stream, "	%s DEVICE\n", progname);
+  fprintf(stream, "	%s DEVICE|FILE\n", progname);
 }
 
 int
@@ -324,7 +324,8 @@ process_status_block(char *buf, int i)
 	 (ps->ps_state == S_EVICT)?  "S_EVICT":
 	 (ps->ps_state == S_INIT)?   "S_INIT":
 	 (ps->ps_state == S_RUN)?    "S_RUN":
-	 (ps->ps_state == S_MASTER)? "S_MASTER": "UNKOWN");
+	 (ps->ps_state == S_MASTER)? "S_MASTER": 
+	                             "UNKOWN");
   printf("Padding<1>: %u\n", ps->pad1[0]);
   printf("Score: %u\n",      ps->ps_score);
   printf("Score max: %u\n",      ps->ps_scoremax);
@@ -338,11 +339,12 @@ process_status_block(char *buf, int i)
   printf("Incarnation: %lu\n",  ps->ps_incarnation);
 
   printf("Msg: %u(%s)\n", ps->ps_msg,
-	 (ps->ps_msg == M_NONE) ? "M_NONE":
-	 (ps->ps_msg == M_BID) ? "M_BID":
-	 (ps->ps_msg == M_ACK) ? "M_ACK":
-	 (ps->ps_msg == M_NACK) ? "M_NACK":
-	 (ps->ps_msg == M_MASK) ? "M_MASK": "UNKOWN");
+	 (ps->ps_msg == M_NONE) ? "M_NONE" :
+	 (ps->ps_msg == M_BID)  ? "M_BID"  :
+	 (ps->ps_msg == M_ACK)  ? "M_ACK"  :
+	 (ps->ps_msg == M_NACK) ? "M_NACK" :
+	 (ps->ps_msg == M_MASK) ? "M_MASK" : 
+	                          "UNKOWN"  );
   printf("Seq: %u\n", ps->ps_seq);
   printf("Arg: %u\n", ps->ps_arg);
 
@@ -350,12 +352,32 @@ process_status_block(char *buf, int i)
   int x;
   printf("Mask: \n");
   for (x = (sizeof(memb_mask_t)-1); x >= 0; x--)
-    printf("<%d>	%02x\n", x, ps->ps_mask[x]);
+    {
+      printf("<%d>	%02x\n", x, ps->ps_mask[x]);
+
+      int i;
+      uint8_t u = ps->ps_mask[x];
+      for (i = 0; i < 8; i++) 
+	{
+	  printf("<<%d>> %d \n", i, (u & 0x1)? 1: 0);
+	  u >>= 1;
+	}
+    }
   printf("\n");
 
   printf("Master mask: \n");
   for (x = (sizeof(memb_mask_t)-1); x >= 0; x--)
-    printf("<%d>	%02x\n", x, ps->ps_master_mask[x]);
+    {
+      printf("<%d>	%02x\n", x, ps->ps_master_mask[x]);
+      
+      int i;
+      uint8_t u = ps->ps_mask[x];
+      for (i = 0; i < 8; i++) 
+	{
+	  printf("<<%d>> %d \n", i, (u & 0x1)? 1: 0);
+	  u >>= 1;
+	}
+    }
   printf("\n");
   
   return 0;
