@@ -136,7 +136,7 @@
   (let* ((new-dir-path-body  (format "package->user/~a/~a" dirname basename))
 	 (new-dir-path       (format "~a/~a" output-dir new-dir-path-body))
 	 (new-file-path-user (format "~a/~a" new-dir-path user))
-	 (new-file-path-file (format "~a/~a" new-dir-path "FILE")))
+	 )
     (unless debug
       (make-directory* new-dir-path)
       (sys-chdir new-dir-path))
@@ -152,25 +152,11 @@
 				basename)
 	(when debug
 	  (format #t
-		  "[package->user:user] ln -s ~s ~s\n"
+		  "[package->user] ln -s ~s ~s\n"
 		  original-user 
 		  new-file-path-user))
 	(unless debug
-	  (sys-symlink original-user new-file-path-user)))
-    ;;
-    (unless (file-exists? new-file-path-file)
-      (let1 original-file (format "~asources/~a/~a" 
-			    (let1 n (+ 1 (string-count new-dir-path-body #\/))
-			      (apply string-append (make-list n "../")))
-			    dirname
-			    basename)
-	(when debug
-	  (format #t
-		  "[package->user:FILE] ln -s ~s ~s\n"
-		  original-file 
-		  new-file-path-file))
-	(unless debug
-	  (sys-symlink original-file new-file-path-file))))))
+	  (sys-symlink original-user new-file-path-user)))))
 
 ;; (sstat-mapping "host" "user")
 (define (load-mapping mapping-file)
