@@ -139,7 +139,7 @@
 				  user)
 	(when debug
 	  (format #t
-		  "[package->user:user] ln -s -s ~s\n"
+		  "[package->user:user] ln -s ~s ~s\n"
 		  original-user 
 		  new-file-path-user))
 	(unless debug
@@ -152,7 +152,7 @@
 			    basename)
 	(when debug
 	  (format #t
-		  "[package->user:FILE] ln -s -s ~s\n"
+		  "[package->user:FILE] ln -s ~s ~s\n"
 		  original-file 
 		  new-file-path-file))
 	(unless debug
