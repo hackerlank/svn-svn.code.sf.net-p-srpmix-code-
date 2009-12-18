@@ -101,9 +101,17 @@
 		    (link:package->user output-dir user date dirname basename debug)))))))))))
 
 
+(define (date->directory date)
+  (format "~a/~a/~a"
+	  (substring date 0 4)
+	  (substring date 4 6)
+	  (substring date 6 -1)))
 ;; user->date->package
 (define (link:user->package output-dir user date dirname basename debug)
-  (let* ((new-dir-path-body (format "user->package/~a/~a/~a" user date (substring dirname 2 -1)))
+  (let* ((new-dir-path-body (format "user->package/~a/~a/~a" 
+				    user
+				    (date->directory date)
+				    (substring dirname 2 -1)))
 	 (new-dir-path (format "~a/~a"
 			       output-dir
 			       new-dir-path-body))
@@ -127,23 +135,29 @@
 (define (link:package->user output-dir user date dirname basename debug)
   (let* ((new-dir-path-body  (format "package->user/~a/~a" dirname basename))
 	 (new-dir-path       (format "~a/~a" output-dir new-dir-path-body))
-	 (new-file-path-user (format "~a/~a-~a" new-dir-path date user))
+	 (new-file-path-user (format "~a/~a" new-dir-path user))
 	 (new-file-path-file (format "~a/~a" new-dir-path "FILE")))
     (unless debug
       (make-directory* new-dir-path)
       (sys-chdir new-dir-path))
-    (unless (file-exists? new-file-path-user)
-      (let1 original-user (format "~auser->package/~a"
-				  (let1 n (+ 1 (string-count new-dir-path-body #\/))
-				    (apply string-append (make-list n "../")))
-				  user)
+    ;;
+    (when (file-exists? new-file-path-user)
+      (sys-unlink new-file-path-user))
+    (let1 original-user (format "~auser->package/~a/~a/~a/~a"
+				(let1 n (+ 1 (string-count new-dir-path-body #\/))
+				  (apply string-append (make-list n "../")))
+				user
+				(date->directory date)
+				(substring dirname 2 -1)
+				basename)
 	(when debug
 	  (format #t
 		  "[package->user:user] ln -s ~s ~s\n"
 		  original-user 
 		  new-file-path-user))
-	(unless debug
-	  (sys-symlink original-user new-file-path-user))))
+	(unless debugug
+	  (sys-symlink original-user new-file-path-user)))
+    ;;
     (unless (file-exists? new-file-path-file)
       (let1 original-file (format "~asources/~a/~a" 
 			    (let1 n (+ 1 (string-count new-dir-path-body #\/))
