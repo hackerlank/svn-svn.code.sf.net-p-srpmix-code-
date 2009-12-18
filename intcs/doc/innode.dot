@@ -1,7 +1,7 @@
 // fdp
 digraph innode {
-	graph[fontsize=9,label="Innode connections",rankdir=RL];	
-	node[fontsize=9];
+	graph[fontsize=6,label="Innode connections",rankdir=RL];	
+	node[fontsize=6];
 
         subgraph clusterkernel  {
 		label = "kernel"
@@ -132,6 +132,12 @@ digraph innode {
 		"clustat_libcman.so"[shape=diamond,label="libcman.so"];
 		
         }
+	subgraph clusterclvmd {
+		label="clvmd";
+		"clvmd_libcman.so"[shape=diamond,label="libcman.so"];
+		"clvmd_libdlm.so" [shape=diamond,label="libdlm.so"];
+		
+	}
 //	}
 	//
         // aisexec
@@ -217,9 +223,9 @@ digraph innode {
 	//
 	// clurgmgrd
 	//
-	"clurgmgrd_libcman.so"->"/var/lib/cman_client"[label = "port = 47", fontsize=9]; 
+	"clurgmgrd_libcman.so"->"/var/lib/cman_client"[taillabel = "port=47", fontsize=7]; 
 	"clurgmgrd_libccs.*"->"/var/run/cluster/ccsd.sock";
-	"clurgmgrd_libdlm.so"->"/dev/misc/dlm-contorol"[label="lockspace name = rgmanager", fontsize=9];
+	"clurgmgrd_libdlm.so"->"/dev/misc/dlm-contorol"[taillabel ="lockspace name=rgmanager", fontsize=7];
 	"clurgmgrd_libdlm.so"->"/dev/misc/dlm_default"; //???
 	"clurgmgrd_libclulib.so"->"/var/run/cluster/rgmanager.sk";
 	//
@@ -232,4 +238,10 @@ digraph innode {
 	//
 	"clustat_libclulib.so"->"/var/run/cluster/rgmanager.sk";
 	"clustat_libcman.so"->"/var/lib/cman_client"; //???
+	//
+	// clvmd
+	//
+	"clvmd_libcman.so"->"/var/lib/cman_client"[taillabel = "port=11", fontsize=7]; 
+	"clvmd_libdlm.so"->"/dev/misc/dlm-contorol"[taillabel ="lockspace name=clvmd", fontsize=7];
+	"clvmd_libdlm.so"->"/dev/misc/dlm_default"; //???
 }
