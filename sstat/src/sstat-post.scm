@@ -155,7 +155,7 @@
 		  "[package->user:user] ln -s ~s ~s\n"
 		  original-user 
 		  new-file-path-user))
-	(unless debugug
+	(unless debug
 	  (sys-symlink original-user new-file-path-user)))
     ;;
     (unless (file-exists? new-file-path-file)
