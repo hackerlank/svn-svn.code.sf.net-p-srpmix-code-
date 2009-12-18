@@ -97,65 +97,66 @@
 			 (path    (vector-ref v 1))
 			 (basename (sys-basename path))
 			 (dirname  (sys-dirname  path)))
-		    (link-dates   output-dir user date dirname basename debug)
-		    (link-users   output-dir user date dirname basename debug)
-		    (link-secruos output-dir user date dirname basename debug)
-		    ))))))))))
+		    (link:user->package output-dir user date dirname basename debug)
+		    (link:package->user output-dir user date dirname basename debug)))))))))))
 
 
-;; /srv/sources/dates/$date/$user/[a-z]/$pkg...
-(define (link-dates output-dir user date dirname basename debug)
-  (let* ((new-dir-path (format "~a/dates/~a/~a/~a"
+;; user->date->package
+(define (link:user->package output-dir user date dirname basename debug)
+  (let* ((new-dir-path-body (format "user->package/~a/~a/~a" user date (substring dirname 2 -1)))
+	 (new-dir-path (format "~a/~a"
 			       output-dir
-			       date
-			       user
-			       dirname))
+			       new-dir-path-body))
 	 (new-file-path (format "~a/~a" new-dir-path basename)))
-    
-    (unless debug
-      (make-directory* new-dir-path)
-      (sys-chdir new-dir-path))
 
-    (unless (file-exists? new-file-path)
-      (let1 orignal (format "~asources/~a/~a" 
-			    (let1 n (+ 1 (string-count 
-					  (format "dates/~a/~a/~a" date user dirname)
-					  #\/))
-			      (apply string-append (make-list n "../")))
-			    dirname
-			    basename)
-	(when debug
-	  (format #t "<dates> ln -s ~s ~s\n" orignal new-file-path))
-	(unless debug
-	  (sys-symlink orignal new-file-path))))))
-
-;; /srv/sources/users/$user/[a-z]/$pkg...
-(define (link-users output-dir user date dirname basename debug)
-  (let* ((new-dir-path (format "~a/users/~a/~a"
-			       output-dir
-			       user
-			       dirname))
-	 (new-file-path (format "~a/~a" new-dir-path basename)))
     (unless debug
       (make-directory* new-dir-path)
       (sys-chdir new-dir-path))
     (unless (file-exists? new-file-path)
-      (let1 orignal (format "~asources/~a/~a" 
-			    (let1 n (+ 1 (string-count 
-					  (format "users/~a/~a" user dirname)
-					  #\/))
+      (let1 original (format "~asources/~a/~a" 
+			    (let1 n (+ 1 (string-count new-dir-path-body #\/))
 			      (apply string-append (make-list n "../")))
 			    dirname
 			    basename)
 	(when debug
-	  (format #t "<users> ln -s ~s ~s\n" orignal new-file-path))
+	  (format #t "[user->package] ln -s ~s ~s\n" original new-file-path))
 	(unless debug
-	  (sys-symlink orignal new-file-path))))))
+	  (sys-symlink original new-file-path))))))
 
-;; /srv/sources/secruos/[a-z]/$pkg/.../file/name -> 
-(define (link-secruos output-dir user date dirname basename debug)
-  ;; TODO
-  )
+;; package->user
+(define (link:package->user output-dir user date dirname basename debug)
+  (let* ((new-dir-path-body  (format "package->user/~a/~a" dirname basename)
+	 (new-dir-path       (format "~a/~a" output-dir new-dir-path-body)))
+	 (new-file-path-user (format "~a/~a-~a" new-dir-path date user))
+	 (new-file-path-file (format "~a/~a" new-dir-path "FILE")))
+    (unless debug
+      (make-directory* new-dir-path)
+      (sys-chdir new-dir-path))
+    (unless (file-exists? new-file-path-user)
+      (let1 original-user (format "~auser->package/~a"
+				  (let1 n (+ 1 (string-count new-dir-path-body #\/))
+				    (apply string-append (make-list n "../")))
+				  user)
+	(when debug
+	  (format #t
+		  "[package->user:user] ln -s -s ~s\n"
+		  original-user 
+		  new-file-path-user))
+	(unless debug
+	  (sys-symlink original-user new-file-path-user))))
+    (unless (file-exists? new-file-path-file)
+      (let1 original-file (format "~asources/~a/~a" 
+			    (let1 n (+ 1 (string-count new-dir-path-body #\/))
+			      (apply string-append (make-list n "../")))
+			    dirname
+			    basename)
+	(when debug
+	  (format #t
+		  "[package->user:FILE] ln -s -s ~s\n"
+		  original-file 
+		  new-file-path-file))
+	(unless debug
+	  (sys-symlink original-file new-file-path-file))))))
 
 ;; (sstat-mapping "host" "user")
 (define (load-mapping mapping-file)
