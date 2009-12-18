@@ -125,8 +125,8 @@
 
 ;; package->user
 (define (link:package->user output-dir user date dirname basename debug)
-  (let* ((new-dir-path-body  (format "package->user/~a/~a" dirname basename)
-	 (new-dir-path       (format "~a/~a" output-dir new-dir-path-body)))
+  (let* ((new-dir-path-body  (format "package->user/~a/~a" dirname basename))
+	 (new-dir-path       (format "~a/~a" output-dir new-dir-path-body))
 	 (new-file-path-user (format "~a/~a-~a" new-dir-path date user))
 	 (new-file-path-file (format "~a/~a" new-dir-path "FILE")))
     (unless debug
