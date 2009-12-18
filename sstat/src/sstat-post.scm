@@ -97,8 +97,10 @@
 			 (path    (vector-ref v 1))
 			 (basename (sys-basename path))
 			 (dirname  (sys-dirname  path)))
-		    (link-dates output-dir user date dirname basename debug)
-		    (link-users output-dir user date dirname basename debug)))))))))))
+		    (link-dates   output-dir user date dirname basename debug)
+		    (link-users   output-dir user date dirname basename debug)
+		    (link-secruos output-dir user date dirname basename debug)
+		    ))))))))))
 
 
 ;; /srv/sources/dates/$date/$user/[a-z]/$pkg...
@@ -149,6 +151,11 @@
 	  (format #t "<users> ln -s ~s ~s\n" orignal new-file-path))
 	(unless debug
 	  (sys-symlink orignal new-file-path))))))
+
+;; /srv/sources/secruos/[a-z]/$pkg/.../file/name -> 
+(define (link-secruos output-dir user date dirname basename debug)
+  ;; TODO
+  )
 
 ;; (sstat-mapping "host" "user")
 (define (load-mapping mapping-file)
