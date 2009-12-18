@@ -371,7 +371,7 @@ process_status_block(char *buf, int i)
       printf("<%d>	%02x\n", x, ps->ps_master_mask[x]);
       
       int i;
-      uint8_t u = ps->ps_mask[x];
+      uint8_t u = ps->ps_master_mask[x];
       for (i = 0; i < 8; i++) 
 	{
 	  printf("<<%d>> %d \n", i, (u & 0x1)? 1: 0);
