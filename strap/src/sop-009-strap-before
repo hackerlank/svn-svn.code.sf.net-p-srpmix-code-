@@ -1,0 +1,4 @@
+#!/bin/bash
+
+CF=/etc/strap/strap.cf
+BEFORE_DIR=/var/tmp/strap-before
