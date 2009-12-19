@@ -11,7 +11,7 @@
 
 (define (do-store tmp-dir req)
   (let-keywords req ((pattern #f))
-    (when pattern
+    (when (and pattern (string? pattern))
       (for-each
        (lambda (f)
 	 (copy-directory* f (build-path tmp-dir f)))
@@ -21,7 +21,18 @@
   (let-keywords req ((pattern #f)
 		     (mail-to #f)
 		     (subject #f))
-    ))
+    (when (and pattern (string? pattern)
+	       mail-to (list? mail-to) (string? (car mail-to))
+	       subject (string? subject))
+      (let1 diff (map
+		  (lambda (f)
+		    (let ((new (build-path root-dir f))
+			  (old (build-path original-dir f)))
+		      (run-diff old new)
+		      ))
+		  (glob pattern))
+      (let1 changed? (memq #t 
+      )))
 
 (define (main args)
   (when (< (lengt args) 2)
@@ -57,6 +68,7 @@
 	(unless (file-is-directory? original-dir)
 	  (format (current-error-port) "~a is not directory\n" original-dir)
 	  (exit 1))
+	(current-directory root-dir)
 	(let loop ((r (read)))
 	  (unless (eof-object? r)
 	    (do-diff root-dir original-dir r)
