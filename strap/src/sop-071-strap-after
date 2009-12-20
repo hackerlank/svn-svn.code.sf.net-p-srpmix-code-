@@ -1,0 +1,19 @@
+#!/bin/bash
+
+TRAP_REQUESTS=/etc/strap/*.es
+TMP_DIR=/var/tmp/strap
+
+SOP_CF=/etc/sop/sop.cf
+if ! source $SOP_CF; then
+    echo "Failed to read $SOP_CF" 1>&2
+    exit 1
+fi
+
+if [ -z "$SOP_DIR" ]; then
+    echo "Cannot find SOP_DIR" 1>&2
+    exit 1
+fi
+
+for x in $TRAP_REQUESTS; do
+    cat $x
+done | gosh /usr/share/strap/strap.scm diff $SOP_DIR $TMP_DIR
