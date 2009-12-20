@@ -1,3 +1,12 @@
+2009-12-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/liblcopy.sh.in (lcopy_print_conf): Record LCOPY_UPDATE.
+
+	* src/lcopy-update (update): Don't update if $LCOPY_UPDATE
+	is NO.
+
+	* src/lcopy-genconf (main): Added new option --no-update.
+
 2009-12-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/backends/* (*_update): Don't create a log file.

@@ -209,9 +209,12 @@ function lcopy_print_conf
     local vcs="$1"
     local package="$2"
     local branch="$3"
+    local update="$4"
+
 
     printf "LCOPY_CF_VERSION=\"%s\"\n" $LCOPY_VERSION
     printf "LCOPY_VCS=\"%s\"\n" $vcs
     printf "LCOPY_PACKAGE=\"%s\"\n" $package
     printf "LCOPY_BRANCH=\"%s\"\n" $branch
+    printf "LCOPY_UPDATE=\"%s\"\n" $update
 }

@@ -79,6 +79,10 @@ function update
 	exit 1
     fi
 
+    if [ "$LCOPY_UPDATE" = "no" ]; then
+	exit 0
+    fi
+
     if [ -z "$LCOPY_VCS" ]; then
 	echo "No LCOPY_VCS in ${lcopy_file}" 2>&1
 	exit 1

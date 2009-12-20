@@ -22,6 +22,7 @@ function main
 {
     local original=$@
     local output_dir
+    local update=YES
     local package_branch
     local package
     local branch
@@ -44,6 +45,9 @@ function main
 		    exit 1
 		fi
                 ;;
+	    (--no-update)
+	    	update=no
+		;;
 	    --*)
 		echo "unknown option: $1" 1>&2
 		print_usage 1>&2
@@ -111,7 +115,7 @@ function main
     status=$?
 
     if [ $status = 0 ]; then
-	lcopy_print_conf "$vcs" "$package" "$branch" >> ${output_file}
+	lcopy_print_conf "$vcs" "$package" "$branch" "$update" >> ${output_file}
 	if [ -n "$output_dir" ]; then
 	    mv ${output_file} ${output_dir}/"${package},${branch}.lcopy"
 	fi
