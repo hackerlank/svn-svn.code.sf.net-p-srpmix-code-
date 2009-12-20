@@ -8,7 +8,7 @@ Design Doc
 		:branch		"brch"
 		:command-line	"cmdline"
 		:update		#t or #f
-		:generator	"manual"|"prelcopy-jboss"|"..." )
+		:generated-by	"manual"|"prelcopy-jboss"|"..." )
 
 * package	
 パッケージ名(sourcesのディレクトリに配置される名前)
@@ -27,11 +27,8 @@ svn co http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP07/
 #t ... 更新チェックする
 #f ... 更新チェックしない(一度だけチェックアウトする。一度リリースされたら変更されることのないもの(tags以下のものなど))
 
-* generator	
+* generated-by
 何によりconf.d以下のファイルを生成したかを示すもの
 例)
 "manual" ... 手入力によりgenconfを実行したもの(手動でconf.d以下のファイルを生成したもの)
 "prelcopy-xxx" ... prelcopyよりxxxというルールで、genconfを実行したもの(自動でconf.d以下のファイルを生成したもの)
-
-
-
