@@ -22,11 +22,12 @@ COMP_URL="jbossas"
 PKG_NAME="JBossEAP"
 PATTERN="trunk"
 cat <<EOS 
-(prelcopy 	:package "$PKG_NAME"
-		:branch "$PATTERN"
-		:command-line "svn co ${REPOS_BASE_URL}/$COMP_URL/$PATTERN"
-		:update #t
-		:generated-by "${0##*/}" ) 
+(prelcopy 	:package 	"$PKG_NAME"
+		:branch 	"$PATTERN"
+		:command-line 	"svn co ${REPOS_BASE_URL}/$COMP_URL/$PATTERN"
+		:update 	#t
+		:generated-by 	"${0##*/}"	 ) 
+
 EOS
 #######################
 
@@ -39,11 +40,12 @@ PATTERN="JBPAPP_._._._GA"
 for m in $(curl -silent ${REPOS_BASE_URL}/${COMP_URL}/tags/|sed -nre "s,.*href=\"(${PATTERN}[^\"]*)/\".*,\1,p")
 do
 cat <<EOS 
-(prelcopy 	:package "$PKG_NAME"
-		:branch "$m"
-		:command-line "svn co ${REPOS_BASE_URL}/${COMP_URL}/tags/$m"
-		:update #f
-		:generated-by "${0##*/}" ) 
+(prelcopy 	:package	"$PKG_NAME"
+		:branch		"$m"
+		:command-line	"svn co ${REPOS_BASE_URL}/${COMP_URL}/tags/$m"
+		:update		#f
+		:generated-by	"${0##*/}"	) 
+
 EOS
 done
 #######################
