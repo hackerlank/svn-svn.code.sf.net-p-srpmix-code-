@@ -210,11 +210,12 @@ function lcopy_print_conf
     local package="$2"
     local branch="$3"
     local update="$4"
-
+    local generator="$5"
 
     printf "LCOPY_CF_VERSION=\"%s\"\n" $LCOPY_VERSION
     printf "LCOPY_VCS=\"%s\"\n" $vcs
     printf "LCOPY_PACKAGE=\"%s\"\n" $package
     printf "LCOPY_BRANCH=\"%s\"\n" $branch
     printf "LCOPY_UPDATE=\"%s\"\n" $update
+    printf "LCOPY_GENERATOR=\"%s\"\n" "$generator"
 }

@@ -2,12 +2,14 @@
 
 	* configure.ac: Version 0.2.6.
 
-	* src/liblcopy.sh.in (lcopy_print_conf): Record LCOPY_UPDATE.
+	* src/liblcopy.sh.in (lcopy_print_conf): Record LCOPY_UPDATE
+	and LCOPY_GENERATOR.
 
 	* src/lcopy-update (update): Don't update if $LCOPY_UPDATE
 	is NO.
 
-	* src/lcopy-genconf (main): Added new option --no-update.
+	* src/lcopy-genconf (main): Added new option --no-update
+	and --generator.
 
 2009-12-14  Masatake YAMATO  <yamato@redhat.com>
 
