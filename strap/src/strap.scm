@@ -1,4 +1,5 @@
 (use file.util)
+(use gauche.process)
 ;; (strap :pattern GLOB-PATTERN :mail-to (...) :subject "...")
 
 ;; "store" ROOT-DIR TMP-DIR 
@@ -17,6 +18,14 @@
 	 (copy-directory* f (build-path tmp-dir f)))
        (glob pattern)))))
 
+(define (do-mail mail-to subject file)
+  (with-output-to-process `(mailx -s ,subject ,@mail-to)
+			    (lambda ()
+			      (with-input-from-file file
+				(lambda ()
+				  (let loop ((l (read-line)))
+				    (display l)))))))
+
 (define (do-diff root-dir original-dir req)
   (let-keywords req ((pattern #f)
 		     (mail-to #f)
@@ -24,15 +33,22 @@
     (when (and pattern (string? pattern)
 	       mail-to (list? mail-to) (string? (car mail-to))
 	       subject (string? subject))
-      (let1 diff (map
-		  (lambda (f)
-		    (let ((new (build-path root-dir f))
-			  (old (build-path original-dir f)))
-		      (run-diff old new)
-		      ))
-		  (glob pattern))
-      (let1 changed? (memq #t 
-      )))
+      (receive (port file) (sys-mkstemp "strap")
+	(for-each
+	 (lambda (f)
+	   (let ((new (build-path root-dir f))
+		 (old (build-path original-dir f)))
+	     (with-input-process `(diff -ruN old new)
+	       (lambda ()
+		 (let loop ((l (read-line)))
+		   (unless (eof-object? l)
+		     (display l port)))))))
+	 (glob pattern))
+	(close-output-port port)
+	(when (< 0 (file-size file))
+	  (do-mail mail-to subject file))
+	(delete-files (list file))))))
+
 
 (define (main args)
   (when (< (lengt args) 2)
