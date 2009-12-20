@@ -1,0 +1,48 @@
+Changelog 
+
+* 2009-12-20 Hack-festo-memo 
+
+[Design doc]
+
+* prelcopy-rules ディレクトリ以下に作成
+
+* 以下のS式の形式で標準出力にアウトプット(prelcopyが処理して、genconfに渡してくれる)
+
+　( prelcopy	:package	"pkg"
+		:branch	"brch"
+		:command-line	"cmdline"
+		:update	#t or #f
+		:generator	"manual"|"prelcopy-jboss"|"..." )
+
+* package	
+パッケージ名(sourcesのディレクトリに配置される名前)
+
+* branch	
+パッケージのバージョン(trunk,tagsなどわかりやすいバージョン名)
+
+* command-line	
+パッケージを取得するコマンド
+例)
+svn co http://anonsvn.jboss.org/repos/jbossas/trunk/
+svn co http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP07/ 
+
+* update
+更新チェックするかどうかのフラグ
+true  ... 更新チェックする
+false ... 更新チェックしない(一度だけチェックアウトする。一度リリースされたら変更されることのないもの(tags以下のものなど))
+
+* generator	
+何によりconf.d以下のファイルを生成したかを示すもの
+例)
+"manual" ... 手入力によりgenconfを実行したもの(手動でconf.d以下のファイルを生成したもの)
+"prelcopy-xxx" ... prelcopyよりxxxというルールで、genconfを実行したもの(自動でconf.d以下のファイルを生成したもの)
+
+
+
+
+
+
+
+
+
+
