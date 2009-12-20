@@ -144,7 +144,7 @@
 	 (case (dive-tokenize-token-type token)
 	   ('keyword
 	    (when (memq  (dive-tokenize-token-expression token)
-			 '(if while for))
+			 '(if while for switch))
 	      (setq after-keyword t)
 	      )
 	    )
