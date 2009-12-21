@@ -8,7 +8,7 @@
   (format #t "Usage: \n")
   (format #t "	~a store ROOT-DIR TMP-DIR\n" prog)
   (format #t "	~a diff  ROOT-DIR ORIGINAL-DIR\n" prog)
-  (exit store))
+  (exit status))
 
 (define (do-store tmp-dir req)
   (let-keywords req ((pattern #f))
