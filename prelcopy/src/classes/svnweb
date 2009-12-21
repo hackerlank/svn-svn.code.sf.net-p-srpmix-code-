@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+########################################################################
+#
+# svnweb prelcopy class
+#
+# Copyright (C) 2009 Masafumi Miura
+# Copyright (C) 2009 Masatake YAMATO
+#
+########################################################################
+
+# SVNWEB_BASE_URL
+# SVNWEB_COMPONENT_LIST
+# SVNWEB_PACKAGE_DICT
+# SVNWEB_TYPE=trunk|tag
+# SVNWEB_ACCEPTABLE_TAG_REGEXP
+
+function print_help
+{
+    echo "Usage: "
+    echo "$0 PRELCOPY-FILE"
+    exit $1
+}
+
+function handle_trunk
+{
+    if [ -z "$SVNWEB_BASE_URL" ]; then
+	echo "No value for SVNWEB_BASE_URL\n" 1>&2
+	return 1
+    fi
+
+    cat <<EOF
+...
+EOF
+}
+
+function main
+{
+    if [ $# != 1 ]; then
+	print_help 1 1>&2
+    fi
+
+    if ! source $1; then
+	return $?
+    fi
+
+    if [ -z "$SVNWEB_TYPE" ]; then
+	echo "No value for SVNWEB_TYPE\n" 1>&2
+	return 1
+    fi
+
+    if [ "$SVNWEB_TYPE" != trunk && "$SVNEWB_TYPE" != tag ]; then
+	echo "SVNWEB_TYPE is neither trunk nor tag\n" 1>&2
+	return 1
+    fi
+
+    if [ "$SVNWEB_TYPE" = trunk ]; then
+	handle_trunk
+    else
+	handle_tag
+    fi
+
+    return $?
+}
+
+main "$@"
