@@ -54,13 +54,13 @@
 
 
 (define (main args)
-  (when (< (lengt args) 2)
+  (when (< (length args) 2)
     (with-output-to-port (current-error-port)
       (cute print-usage (car args) 1)))
   (let1 action (cadr args)
     (cond
      ((equal? action "store")
-      (unless (eq? (lengt args) 4)
+      (unless (eq? (length args) 4)
 	(print-usage (car args) 1))
       (let ((root-dir (caddr args))
 	    (tmp-dir  (cadddr args)))
@@ -77,7 +77,7 @@
 	    (loop (read))
 	    ))))
      ((equal? action "diff")
-      (unless (eq? (lengt args) 4)
+      (unless (eq? (length args) 4)
 	(print-usage (car args) 1))
       (let ((root-dir (caddr args))
 	    (original-dir  (cadddr args)))
