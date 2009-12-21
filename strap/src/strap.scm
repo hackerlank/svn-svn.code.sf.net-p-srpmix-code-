@@ -11,11 +11,14 @@
   (exit status))
 
 (define (do-store tmp-dir req)
-  (let-keywords req ((pattern #f))
+  (let-keywords req ((pattern #f) . req)
     (when (and pattern (string? pattern))
       (for-each
        (lambda (f)
-	 (copy-directory* f (build-path tmp-dir f)))
+	 (when (file-exists? f)
+	       (let1 to (build-path tmp-dir (substring f 1 -1))
+		     (make-directory* (sys-dirname to))
+		     (copy-directory* f to))))
        (glob pattern)))))
 
 (define (do-mail mail-to subject file)
@@ -73,7 +76,7 @@
 	(current-directory root-dir)
 	(let loop ((r (read)))
 	  (unless (eof-object? r)
-	    (do-store tmp-dir r)
+	    (do-store tmp-dir (cdr r))
 	    (loop (read))
 	    ))))
      ((equal? action "diff")
@@ -90,7 +93,7 @@
 	(current-directory root-dir)
 	(let loop ((r (read)))
 	  (unless (eof-object? r)
-	    (do-diff root-dir original-dir r)
+	    (do-diff root-dir original-dir (cdr r))
 	    (loop (read))
 	    ))))
      (else
