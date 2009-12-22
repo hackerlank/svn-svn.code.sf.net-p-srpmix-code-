@@ -7,13 +7,27 @@
 # Copyright (C) 2009 Masafumi Miura
 # Copyright (C) 2009 Masatake YAMATO
 #
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 ########################################################################
 
-# SVNWEB_BASE_URL
-# SVNWEB_COMPONENT_LIST
-# SVNWEB_PACKAGE_DICT
-# SVNWEB_TYPE=trunk|tag
-# SVNWEB_ACCEPTABLE_TAG_REGEXP
+# SVNWEB_BASE_URL=URL
+# SVNWEB_COMPONENT_LIST=(c0 c1 c2...)
+
+# SVNWEB_PACKAGE_DICT[c]=PACKAGE
+# SVNWEB_TYPE_DICT[c]=trunk|tag|both
+# SVNWEB_ACCEPTABLE_TAG_PATTERN_DICT[c]=PATTERN
 
 function print_help
 {
@@ -24,15 +38,73 @@ function print_help
 
 function handle_trunk
 {
+    local conf=$1
+    local c
+    local t
+    local p
+
     if [ -z "$SVNWEB_BASE_URL" ]; then
 	echo "No value for SVNWEB_BASE_URL\n" 1>&2
 	return 1
     fi
 
-    cat <<EOF
-...
+    for c in ${SVNWEB_COMPONENT_LIST[@]}; do
+	t=${SVNWEB_TYPE_DICT[$c]}
+	if [ "$t" = trunk ] || [ "$t" = both ]; then
+	    p=${SVNWEB_PACKAGE_DICT[$c]}
+	    if [ -z "$p" ]; then
+		p=$c
+	    fi
+	    cat <<EOF
+(prelcopy :package "$p"
+          :branch  "trunk"
+          :command-line "svn checkout ${SVNWEB_BASE_URL}/$c/trunk
+	  :update #t
+          :generated-by "${0##*/}+$conf")
 EOF
+	fi
+    done
 }
+
+function handle_tag
+{
+    local conf=$1
+    local c
+    local b
+    local t
+    local p
+
+    if [ -z "$SVNWEB_BASE_URL" ]; then
+	echo "No value for SVNWEB_BASE_URL\n" 1>&2
+	return 1
+    fi
+
+
+    for c in ${SVNWEB_COMPONENT_LIST[@]}; do
+	t=${SVNWEB_TYPE_DICT[$c]}
+	if [ "$t" = tag ] || [ "$t" = both ]; then
+	
+	    p=${SVNWEB_PACKAGE_DICT[$c]}
+	    if [ -z "$p" ]; then
+		p=$c
+	    fi
+	    
+	    for b in $(curl -silent ${SVNWEB_BASE_URL}/$c/tags/ | \
+		sed -nre "s,.*href=\"(${SVNWEB_ACCEPTABLE_TAG_PATTERN_DICT[$c]}[^\"]*)/\".*,\1,p"); do
+		
+		cat <<EOF
+(prelcopy :package "$p"
+          :branch  "$b"
+          :command-line "svn checkout ${SVNWEB_BASE_URL}/$c/tags/$b"
+	  :update #f
+          :generated-by "${0##*/}+$conf")
+EOF
+	    done
+	fi
+    done
+}
+
+
 
 function main
 {
@@ -44,23 +116,11 @@ function main
 	return $?
     fi
 
-    if [ -z "$SVNWEB_TYPE" ]; then
-	echo "No value for SVNWEB_TYPE\n" 1>&2
-	return 1
-    fi
-
-    if [ "$SVNWEB_TYPE" != trunk && "$SVNEWB_TYPE" != tag ]; then
-	echo "SVNWEB_TYPE is neither trunk nor tag\n" 1>&2
-	return 1
-    fi
-
-    if [ "$SVNWEB_TYPE" = trunk ]; then
-	handle_trunk
-    else
-	handle_tag
-    fi
+    handle_trunk $(basename $1)
+    handle_tag $(basename $1)
 
     return $?
 }
+
 
 main "$@"
