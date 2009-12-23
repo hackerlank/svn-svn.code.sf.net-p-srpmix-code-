@@ -3,7 +3,8 @@ Name: lcopy
 Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
-Requires: srpmix cvs subversion git mercurial darcs bzr
+Requires: cvs subversion git mercurial darcs bzr
+# Requires: srpmix
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root

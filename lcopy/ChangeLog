@@ -1,3 +1,8 @@
+2009-12-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/lcopy.spec.in (Requires): Remove srpmix.
+	Using srpmix-plugin in lcopy is optional.
+
 2009-12-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.6.
