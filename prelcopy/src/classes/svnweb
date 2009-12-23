@@ -58,7 +58,7 @@ function handle_trunk
 	    cat <<EOF
 (prelcopy :package "$p"
           :branch  "trunk"
-          :command-line "svn checkout ${SVNWEB_BASE_URL}/$c/trunk
+          :command-line "svn checkout ${SVNWEB_BASE_URL}/$c/trunk"
 	  :update #t
           :generated-by "${0##*/}+$conf")
 EOF

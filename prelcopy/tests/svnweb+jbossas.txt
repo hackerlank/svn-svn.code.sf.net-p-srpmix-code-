@@ -1,0 +1,115 @@
+(prelcopy :package "JBossEAP"
+          :branch  "trunk"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/trunk"
+	  :update #t
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_CP01"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_CP01"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_CP02"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_CP02"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_CP03"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_CP03"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_CP04"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_CP04"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_CP05"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_CP05"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_CP06"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_CP06"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_CP07"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_CP07"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_CP08"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_CP08"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_2_0_GA_buildpatches"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA_buildpatches"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP01"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP01"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP02"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP02"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP02_FP01"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP02_FP01"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP03"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP03"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP03_FP01"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP03_FP01"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP04"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP04"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP04_FP01"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP04_FP01"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP05"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP05"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP06"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP06"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_4_3_0_GA_CP07"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_3_0_GA_CP07"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
+(prelcopy :package "JBossEAP"
+          :branch  "JBPAPP_5_0_0_GA"
+          :command-line "svn checkout http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_5_0_0_GA"
+	  :update #f
+          :generated-by "svnweb+jbossas.prelcopy")
