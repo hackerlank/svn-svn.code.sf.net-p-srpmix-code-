@@ -1,4 +1,6 @@
 # -*- sh -*-
+PRELCOPY_CLASS=svnweb
+
 SVNWEB_BASE_URL=http://anonsvn.jboss.org/repos
 
 SVNWEB_COMPONENT_LIST=( jbossas )
@@ -6,4 +8,5 @@ SVNWEB_COMPONENT_LIST=( jbossas )
 
 SVNWEB_PACKAGE_DICT[jbossas]=JBossEAP
 SVNWEB_TYPE_DICT[jbossas]=both
-SVNWEB_ACCEPTABLE_TAG_PATTERN_DICT[jbossas]="JBPAPP_._._._GA"
+SVNWEB_ACCEPTABLE_TAG_REGEXP[jbossas]="^JBPAPP_[0-9]+_[0-9]+_[0-9]+_GA"
+# SVNWEB_UNACCEPTABLE_TAG_REGEXP[jbossas]="^$"
