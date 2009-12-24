@@ -57,8 +57,7 @@
 				       (substring entry (+ 1 (string-length data-dir)) -1)
 				       result)
 				      result))
-				'())
-		))))
+				'())))))
 
 (define (link data-dir entry output-dir mapping debug)
   (rxmatch-let (#/sstat-([0-9]+)\.es/ entry)
@@ -97,9 +96,10 @@
 			 (path    (vector-ref v 1))
 			 (basename (sys-basename path))
 			 (dirname  (sys-dirname  path)))
-		    (link:user->date->package output-dir user date dirname basename debug)
-		    (link:package->user output-dir user date dirname basename debug)
-		    ;;(link:date->user->package output-dir user date dirname basename debug)
+		    (for-each (cute <> output-dir user date dirname basename debug)
+			      (list link:user->date->package
+				    link:package->user
+				    link:date->user->package))
 		    ))))))))))
 
 
@@ -108,6 +108,7 @@
 	  (substring date 0 4)
 	  (substring date 4 6)
 	  (substring date 6 -1)))
+
 ;; user->date->package
 (define (link:user->date->package output-dir user date dirname basename debug)
   (let* ((new-dir-path-body (format "user->date->package/~a/~a/~a" 
@@ -124,7 +125,7 @@
       (sys-chdir new-dir-path))
     (unless (file-exists? new-file-path)
       (let1 original (format "~asources/~a/~a" 
-			    (let1 n (+ 1 (string-count new-dir-path-body #\/))
+			     (let1 n (+ 1 (string-count new-dir-path-body #\/))
 			      (apply string-append (make-list n "../")))
 			    dirname
 			    basename)
@@ -159,6 +160,30 @@
 		  new-file-path-user))
 	(unless debug
 	  (sys-symlink original-user new-file-path-user)))))
+
+;; date->user->package
+(define (link:date->user->package output-dir user date dirname basename debug)
+  (let* ((new-dir-path-body (format "date->user->package/~a/~a/~a"
+				    (date->directory date)
+				    user
+				    (substring dirname 2 -1)))
+	 (new-dir-path (format "~a/~a"
+			       output-dir
+			       new-dir-path-body))
+	 (new-file-path (format "~a/~a" new-dir-path basename)))
+    (unless debug
+      (make-directory* new-dir-path)
+      (sys-chdir new-dir-path))
+    (unless (file-exists? new-file-path)
+      (let1 original (format "~asources/~a/~a"
+			     (let1 n (+ 1 (string-count new-dir-path-body #\/))
+			       (apply string-append (make-list n "../")))
+			     dirname
+			     basename)
+	(when debug
+	  (format #t "[date->user->package] ln -s ~s ~s\n" original new-file-path))
+	(unless debug
+	  (sys-symlink original new-file-path))))))
 
 ;; (sstat-mapping "host" "user")
 (define (load-mapping mapping-file)
