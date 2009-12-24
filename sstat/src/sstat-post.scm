@@ -111,7 +111,7 @@
 
 ;; user->date->package
 (define (link:user->date->package output-dir user date dirname basename debug)
-  (let* ((new-dir-path-body (format "user->date->package/~a/~a/~a" 
+  (let* ((new-dir-path-body (format "sstat/user->date->package/~a/~a/~a" 
 				    user
 				    (date->directory date)
 				    (substring dirname 2 -1)))
@@ -136,7 +136,7 @@
 
 ;; package->user
 (define (link:package->user output-dir user date dirname basename debug)
-  (let* ((new-dir-path-body  (format "package->user/~a/~a" dirname basename))
+  (let* ((new-dir-path-body  (format "sstat/package->user/~a/~a" dirname basename))
 	 (new-dir-path       (format "~a/~a" output-dir new-dir-path-body))
 	 (new-file-path-user (format "~a/~a" new-dir-path user))
 	 )
@@ -146,7 +146,7 @@
     ;;
     (when (file-exists? new-file-path-user)
       (sys-unlink new-file-path-user))
-    (let1 original-user (format "~auser->date->package/~a/~a/~a/~a"
+    (let1 original-user (format "~asstat/user->date->package/~a/~a/~a/~a"
 				(let1 n (+ 1 (string-count new-dir-path-body #\/))
 				  (apply string-append (make-list n "../")))
 				user
@@ -163,7 +163,7 @@
 
 ;; date->user->package
 (define (link:date->user->package output-dir user date dirname basename debug)
-  (let* ((new-dir-path-body (format "date->user->package/~a/~a/~a"
+  (let* ((new-dir-path-body (format "sstat/date->user->package/~a/~a/~a"
 				    (date->directory date)
 				    user
 				    (substring dirname 2 -1)))
