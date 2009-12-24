@@ -43,24 +43,16 @@ function parse_arguments
 	    print_usage 0
 	    ;;
 	    (--reset)
-	    local u="${SOP_DIR}/"'user->date->package'
-	    local p="${SOP_DIR}/"'package->user'
-	    local d="${SOP_DIR}/"'date->user->package'
-
-	    if [ -d "$u" ]; then
-		echo "Removing target: $u"
-		rm -rf -I "$u"
-	    fi
-
-	    if [ -d "$p" ]; then
-		echo "Removing target: $p"
-		rm -rf -I "$p"
-	    fi
-
-	    if [ -d "$d" ]; then
-		echo "Removing target: $d"
-		rm -rf -I "$d"
-	    fi
+	    for x in \
+		"${SOP_DIR}/"'stat/user->date->package' \
+		"${SOP_DIR}/"'stat/package->user'       \
+		"${SOP_DIR}/"'stat/date->user->package' \
+		; do
+		if [ -d "$x" ]; then
+		    echo "Removing target: $x"
+		    rm -rf -I "$x"
+		fi
+	    done
 	    ;;
 	    (*)
 	    echo "wrong argument: $1" 1>&2
