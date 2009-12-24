@@ -1,9 +1,12 @@
 (use file.util)
 (use gauche.process)
-;; (strap :pattern GLOB-PATTERN :mail-to (...) :subject "...")
+
+;; (strap :pattern GLOB-PATTERN :mail-to (...) :subject "..." [:description "..."])
 
 ;; "store" ROOT-DIR TMP-DIR 
 ;; "diff"  ROOT-DIR ORIGINAL-DIR
+
+
 (define (print-usage prog status)
   (format #t "Usage: \n")
   (format #t "	~a store ROOT-DIR TMP-DIR\n" prog)
@@ -23,11 +26,16 @@
 			 (copy-directory* f to))))
 		   (glob pattern)))))
 
-(define (do-mail mail-to subject file)
-  (with-output-to-process `(mailx -s ,(format "[strap] ~a" subject) ,@mail-to)
+(define (do-mail mail-to subject file description)
+  (with-output-to-process `(mailx -r "dont-reply-strap-scm@srpmix.org" -s ,(format "[strap] ~a" subject) ,@mail-to)
     (lambda ()
       (with-input-from-file file
 	(lambda ()
+	  (when description
+	    (display description)
+	    (newline)
+	    (newline)
+	    )
 	  (let loop ((l (read-line)))
 	    (unless (eof-object? l)
 	      (display l)
@@ -35,9 +43,12 @@
 	      (loop (read-line)))))))))
 
 (define (do-diff root-dir original-dir req)
-  (let-keywords req ((pattern #f)
+  (let-keywords req (
+		     (pattern #f)
 		     (mail-to #f)
-		     (subject #f))
+		     (subject #f)
+		     (description #f)
+		     )
 		(when (and pattern (string? pattern)
 			   mail-to (list? mail-to) (string? (car mail-to))
 			   subject (string? subject))
@@ -56,7 +67,7 @@
 						  :on-abnormal-exit (lambda (stat)
 								      (close-output-port port)
 								      (when (< 0 (file-size file))
-									(do-mail mail-to subject file))
+									(do-mail mail-to subject file description))
 								      (delete-files (list file))))))
 		     (glob pattern))
 		    ))))
