@@ -97,8 +97,10 @@
 			 (path    (vector-ref v 1))
 			 (basename (sys-basename path))
 			 (dirname  (sys-dirname  path)))
-		    (link:user->package output-dir user date dirname basename debug)
-		    (link:package->user output-dir user date dirname basename debug)))))))))))
+		    (link:user->date->package output-dir user date dirname basename debug)
+		    (link:package->user output-dir user date dirname basename debug)
+		    ;;(link:date->user->package output-dir user date dirname basename debug)
+		    ))))))))))
 
 
 (define (date->directory date)
@@ -107,8 +109,8 @@
 	  (substring date 4 6)
 	  (substring date 6 -1)))
 ;; user->date->package
-(define (link:user->package output-dir user date dirname basename debug)
-  (let* ((new-dir-path-body (format "user->package/~a/~a/~a" 
+(define (link:user->date->package output-dir user date dirname basename debug)
+  (let* ((new-dir-path-body (format "user->date->package/~a/~a/~a" 
 				    user
 				    (date->directory date)
 				    (substring dirname 2 -1)))
@@ -127,7 +129,7 @@
 			    dirname
 			    basename)
 	(when debug
-	  (format #t "[user->package] ln -s ~s ~s\n" original new-file-path))
+	  (format #t "[user->date->package] ln -s ~s ~s\n" original new-file-path))
 	(unless debug
 	  (sys-symlink original new-file-path))))))
 
@@ -143,7 +145,7 @@
     ;;
     (when (file-exists? new-file-path-user)
       (sys-unlink new-file-path-user))
-    (let1 original-user (format "~auser->package/~a/~a/~a/~a"
+    (let1 original-user (format "~auser->date->package/~a/~a/~a/~a"
 				(let1 n (+ 1 (string-count new-dir-path-body #\/))
 				  (apply string-append (make-list n "../")))
 				user

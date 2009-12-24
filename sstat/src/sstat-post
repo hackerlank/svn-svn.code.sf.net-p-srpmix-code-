@@ -43,7 +43,7 @@ function parse_arguments
 	    print_usage 0
 	    ;;
 	    (--reset)
-	    local u="${SOP_DIR}/"'user->package'
+	    local u="${SOP_DIR}/"'user->date->package'
 	    local p="${SOP_DIR}/"'package->user'
 
 	    if [ -d "$u" ]; then
