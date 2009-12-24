@@ -33,7 +33,11 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_sysconfdir}/cron.daily/sop-009-strap-before
 %{_sysconfdir}/cron.daily/sop-071-strap-after
+
+%dir %{_datadir}/strap
 %{_datadir}/strap/strap.scm
+
+%dir %{_sysconfdir}/strap
 %config(noreplace) %{_sysconfdir}/strap/*.es
 
 %changelog
