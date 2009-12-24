@@ -15,5 +15,5 @@ if [ -z "$SOP_DIR" ]; then
 fi
 
 for x in $TRAP_REQUESTS; do
-    cat $x
+    test -f $x && cat $x
 done | gosh /usr/share/strap/strap.scm store $SOP_DIR $TMP_DIR
