@@ -44,9 +44,9 @@ function parse_arguments
 	    ;;
 	    (--reset)
 	    for x in \
-		"${SOP_DIR}/"'stat/user->date->package' \
-		"${SOP_DIR}/"'stat/package->user'       \
-		"${SOP_DIR}/"'stat/date->user->package' \
+		"${SOP_DIR}/"'sstat/user->date->package' \
+		"${SOP_DIR}/"'sstat/package->user'       \
+		"${SOP_DIR}/"'sstat/date->user->package' \
 		; do
 		if [ -d "$x" ]; then
 		    echo "Removing target: $x"
