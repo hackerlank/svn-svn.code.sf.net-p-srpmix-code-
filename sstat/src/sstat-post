@@ -45,6 +45,7 @@ function parse_arguments
 	    (--reset)
 	    local u="${SOP_DIR}/"'user->date->package'
 	    local p="${SOP_DIR}/"'package->user'
+	    local d="${SOP_DIR}/"'date->user->package'
 
 	    if [ -d "$u" ]; then
 		echo "Removing target: $u"
@@ -54,6 +55,11 @@ function parse_arguments
 	    if [ -d "$p" ]; then
 		echo "Removing target: $p"
 		rm -rf -I "$p"
+	    fi
+
+	    if [ -d "$d" ]; then
+		echo "Removing target: $d"
+		rm -rf -I "$d"
 	    fi
 	    ;;
 	    (*)
