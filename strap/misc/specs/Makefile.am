@@ -1,0 +1,1 @@
+EXTRA_DIST=strap.spec

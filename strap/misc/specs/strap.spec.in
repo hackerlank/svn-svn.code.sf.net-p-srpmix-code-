@@ -1,0 +1,42 @@
+Summary: Scripts set to notify file modification on sources via e-mail
+Name: strap
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPL
+Group: Development/Tools
+Buildarch: noarch
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: gauche mailx sop
+
+
+
+%description
+Scripts set to record the file accesses to sources
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{_sysconfdir}/cron.daily/sop-009-strap-before
+%{_sysconfdir}/cron.daily/sop-071-strap-after
+%{_datadir}/strap/strap.scm
+%config(noreplace) %{_sysconfdir}/strap/*.es
+
+%changelog
+* Tue Dec  1 2009 Masatake YAMATO <yamato@redhat.com> - 
+- Initial build.
+
