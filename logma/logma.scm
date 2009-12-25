@@ -44,7 +44,7 @@
 (define var-log-message-line-regex
   #/^([A-Z][a-z][a-z] [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) ([^\[\]\/]+)(\[[0-9]+\])?: (.*)$/)
 
-(define emit-log-line (date host cmd pid msg)
+(define (emit-log-line date host cmd pid msg)
   (format #t
 	  "~a ~a ~a ~a: ~a\n"
 	  date
