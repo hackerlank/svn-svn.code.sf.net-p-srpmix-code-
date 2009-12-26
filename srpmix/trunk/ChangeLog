@@ -1,3 +1,10 @@
+2009-12-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Use srpmix_list_plugins.
+
+	* src/libsrpmix.sh.in (srpmix_list_plugins): Renaemd from list_plugins.
+	Added shell bang.
+
 2009-11-16  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix.daily: Print warning message to stderr.

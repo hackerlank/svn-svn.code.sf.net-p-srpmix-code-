@@ -294,7 +294,7 @@ function create_plugin_spec
         buildarch="noarch"
     fi
 
-    for plugin in `list_plugins`
+    for plugin in `srpmix_list_plugins`
     do
       enable_plugin="$enable_plugin,$(basename $plugin)"
     done

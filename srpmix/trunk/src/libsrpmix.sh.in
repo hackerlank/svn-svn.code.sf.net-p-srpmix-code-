@@ -1,3 +1,4 @@
+#!/bin/bash
 ########################################################################
 #
 # libsrpmix.sh: support shell functions for srpmix
@@ -616,11 +617,11 @@ function list_plugin_candidates
     done
 }
 
-# TODO srpmix_ prefix
-function list_plugins
+function srpmix_list_plugins
 {
-    list_plugin_candidates | sort -n | while read base plugin
-    do
+    local mapping=$1
+
+    list_plugin_candidates | sort -n | while read base plugin; do
         echo $plugin
     done
 }
