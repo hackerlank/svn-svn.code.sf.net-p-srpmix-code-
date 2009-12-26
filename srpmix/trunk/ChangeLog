@@ -1,5 +1,12 @@
 2009-12-27  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/libsrpmix.sh.in (SRPMIX_OUTPUT_FORMAT): Define SRPMIX_OUTPUT_FORMAT.
+	Introduce SRPMIX_ROOT_USER.
+
+	* src/srpmix-package-attach: Replave $OUTPUT_FORMAT with $SRPMIX_OUTPUT_FORMAT.
+
+	* src/srpmix: Ditto.
+
 	* src/srpmix-wrap (create_plugin_spec): Don't enable plugin which
 	name has _ as prefix.
 

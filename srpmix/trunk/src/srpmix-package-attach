@@ -27,11 +27,7 @@ PKG_NAME=
 PKG_VERSION=0
 PKG_RELEASE=0
 OUTPUT_DIR=
-if test "`whoami`" = "root"; then
-OUTPUT_FORMAT=rpm
-else
-OUTPUT_FORMAT=swrf
-fi
+
 TARGET_PACKAGE=
 TARGET_VERSION=
 ATTACHMENT=
@@ -110,12 +106,12 @@ function parse_arguments
 		OUTPUT_DIR=$(cd $OUTPUT_DIR && pwd)
 		;;
             (--output-format=*)
-	        OUTPUT_FORMAT=${1/--output-format=}
-		case "${OUTPUT_FORMAT}" in
+	        SRPMIX_OUTPUT_FORMAT=${1/--output-format=}
+		case "${SRPMIX_OUTPUT_FORMAT}" in
 		    rpm|swrf)
 			;;
 		    *)
-			echo "*** Unknow output format: " "${OUTPUT_FORMAT}" 1>&2
+			echo "*** Unknow output format: " "${SRPMIX_OUTPUT_FORMAT}" 1>&2
 			print_usage 1>&2
 			exit 2
 			;;
@@ -311,7 +307,7 @@ function main
 	srpmix_abort "*** Failed to create swrf file: $swrf" 2>&1
     fi
 
-    if test ${OUTPUT_FORMAT} = swrf; then
+    if test ${SRPMIX_OUTPUT_FORMAT} = swrf; then
 	if test -n "$OUTPUT_DIR"; then
 	    mkdir -p $OUTPUT_DIR/${srchash}
 	    mv $swrf $OUTPUT_DIR/${srchash}
@@ -328,7 +324,7 @@ function main
 	srpmix_abort "*** Failed to create rpm file: $rpm" 2>&1
     fi
     
-    if test ${OUTPUT_FORMAT} = rpm; then
+    if test ${SRPMIX_OUTPUT_FORMAT} = rpm; then
 	if test -n "$OUTPUT_DIR"; then
 	    mkdir -p $OUTPUT_DIR/${srchash}
 	    mv ${rpm} $OUTPUT_DIR/${srchash}
