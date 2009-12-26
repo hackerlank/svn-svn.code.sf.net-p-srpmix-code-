@@ -59,6 +59,7 @@ function print_usage
     echo "  srpmix-package-attach [--debug] \\ "
     echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=REL] \\ "
     echo "                [--output-dir=DIR [--output-format=swrf|rpm]] [--yum=YUMOPT] \\ "
+    echo "                [--srpmix-var-dir=DIR] \\ "
     echo "                TARGET-PACKAGE TARGET-VERSION ATTACHMENT|PLUGIN-EXEC|PLUGIN-NAME" 
     echo ""
     echo "ATTACHMENT:  A directory containing data to be attached to."
@@ -69,7 +70,10 @@ function print_usage
     echo ""
     echo "Environment variables:"
     echo "  SRPMIX_DB_OPTS"
-    
+    echo "  SRPMIX_ROOT_USER"
+    echo ""
+    echo "Example:"
+    echo "	SRPMIX_ROOT_USER=yamato srpmix-package-attach --srpmix-var-dir=/srv/sources --output-dir=/tmp/z zsh 4.2.6-3.el5 hyperestraier"
 }
 
 function parse_arguments
@@ -116,6 +120,10 @@ function parse_arguments
 			exit 2
 			;;
 		esac
+		;;
+	    (--srpmix-var-dir=*)
+	        SRPMIX_VAR_DIR=${1/--srpmix-var-dir=}
+		srpmix_reset_var_dir "$SRPMIX_VAR_DIR"
 		;;
 	    (--yum=*)
 	        YUM_OPTS=$(echo $1 | sed 's/--yum=//')

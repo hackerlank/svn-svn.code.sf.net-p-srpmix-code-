@@ -153,18 +153,22 @@ function envelop_swrf
 
     case ${enveloped_name} in
 	*-srpmix-plugins)
+	    summary=$($SWRFPM -qp --nosignature --queryformat "%{Summary}" $target_swrf)
 	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-plugins/\1-srpmix/')
 	    ;;
 	*-srpmix-plugin-*)
+	    summary=$($SWRFPM -qp --nosignature --queryformat "%{Summary}" $target_swrf)
 	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-plugin-.*/\1-srpmix/')
 	    ;;
 	*-srpmix-archives)
+	    summary=$($SWRFPM -qp --nosignature --queryformat "%{Summary}" $target_swrf)
 	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-archives/\1-srpmix/')
 	    ;;
 	*)
 	    if test "x$PKGNAME" = x; then
 		srpmix_abort "No --package-name is given"
 	    fi
+	    summary="Source code for $package with canonical directory layout"
 	    req_pkg=$(srpmix_dirpkg_name $PKGNAME)
 	    ;;
     esac
@@ -172,7 +176,7 @@ function envelop_swrf
 # About %pre, %post and %preun, See
 # http://www.vinelinux.org/manuals/making-rpm-9.html
     cat > "$spec" <<EOF
-Summary: Source code for $package with canonical directory layout
+Summary: $summary
 Name: ${enveloped_name}
 Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}

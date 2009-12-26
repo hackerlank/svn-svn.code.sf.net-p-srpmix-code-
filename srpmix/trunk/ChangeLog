@@ -1,5 +1,12 @@
 2009-12-27  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-package-attach (parse_arguments): Introduce an option
+	--srpmix-var-dir.
+
+	* src/srpmix-envelop (envelop_swrf): Taking summary from swrf.
+
+2009-12-27  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/libsrpmix.sh.in (SRPMIX_OUTPUT_FORMAT): Define SRPMIX_OUTPUT_FORMAT.
 	Introduce SRPMIX_ROOT_USER.
 
