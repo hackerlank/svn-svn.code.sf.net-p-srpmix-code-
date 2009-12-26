@@ -1,11 +1,13 @@
 plugindir = $(pkgdatadir)/plugins
 
-EXTRA_DIST = 60srpmix-etags			\
+EXTRA_DIST = \
+	60srpmix-etags			        \
 	60srpmix-ctags				\
 	60srpmix-cscope				\
 	60srpmix-doxygen			\
-	60srpmix-hyperestraier                  \
 	60srpmix-xgettext                       \
+	\
+	_60srpmix-hyperestraier                 \
 	\
 	$(NULL)
 
@@ -28,7 +30,7 @@ plugin_SCRIPTS += 60srpmix-doxygen
 endif
 
 if SRPMIX_ENABLE_PLUGIN_hyperestraier
-plugin_SCRIPTS += 60srpmix-hyperestraier
+plugin_SCRIPTS += _60srpmix-hyperestraier
 endif
 
 if SRPMIX_ENABLE_PLUGIN_xgettext

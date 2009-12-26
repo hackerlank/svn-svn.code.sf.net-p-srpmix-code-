@@ -1,0 +1,179 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-hyperestraier: Create hyperestraier index
+#
+# Copyright (C) 2009 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+NAME=hyperestraier
+
+
+ROOTDIR=
+ESTCMD=estcmd
+
+BUILDDIR=
+LOGFILE=
+PLUGINDIR=
+
+SRPMIX_HYPERESTRAIER_DEBUG=
+
+FORCE=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+SRPMIX_HYPERESTRAIER_CREATE_OPTIONS=
+SRPMIX_HYPERESTRAIER_FILTER_DIR=/usr/share/hyperestraier/filter
+SRPMIX_HYPERESTRAIER_GATHER_OPTIONS="-apn -cm -sd -ft -fx html H@$SRPMIX_HYPERESTRAIER_FILTER_DIR/estfxasis"
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  $0 [--help|-h]"
+    echo "  $0 --name"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
+    echo 
+}
+
+function parse_arguments
+{
+    status=
+
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name)
+	        echo $NAME
+		exit 0
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[${NAME}]"
+		SRPMIX_HYPERESTRAIER_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test $# -ne 1; then
+	echo "wrong number of argument" 1>&2
+	print_usage 1>&2
+	srpmix_abort
+    fi
+
+    ROOTDIR=$(cd $1;pwd)
+    shift
+
+    BUILDDIR=${ROOTDIR}/pre-build
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
+
+    if ! test -d "${BUILDDIR}"; then
+	exit 0
+    fi
+
+    if ! test -d "$PLUGINDIR"; then
+        mkdir -p $PLUGINDIR
+    fi
+}
+
+# list_files <source root dir>
+function list_files() {
+
+  if test -f "$1/plugins/file/file-i"; then
+    cat "$1/plugins/file/file-i" |
+      grep 'pre-build'  |
+      grep -v ' image/' |
+      grep -v ' application/x-elc' |
+      grep -v ' application/octet-stream' |
+      grep -v ' audio/' |
+      grep -v ' video/' |
+      cut -d: -f1 | sed 's!^\./!!'
+  else
+    ( cd $1 && find -L pre-build -not -type d )
+  fi
+
+}
+
+# run_estcmd_create <plugindir>
+function run_estcmd_create
+{
+    if ! test -d "$1/idx"; then
+        install -d $1/idx &&
+           estcmd create $SRPMIX_HYPERESTRAIER_CREATE_OPTIONS $1/idx
+    fi
+}
+
+# run_estcmd_gather <sourcedir> <plugindir>
+function run_estcmd_gather
+{
+    ( cd $1 && list_files . | estcmd gather $SRPMIX_HYPERESTRAIER_GATHER_OPTIONS $2/idx - )
+}
+
+function run_estcmd
+{
+    local d=$1
+    local o=$2
+    local l=$3
+
+    es_print "estcmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    run_estcmd_create $o | tee -a $l
+    run_estcmd_gather $d $o | tee -a $l
+    es_print "estcmd-end" --status=$? --timestamp=\"`LANG=C date`\" | tee -a $l
+}
+
+function main
+{
+    parse_arguments "$@"
+    srpmix_verify_commands "${ESTCMD}"
+
+    if ( ! test -e "${PLUGINDIR}/idx" ) ||
+	( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/idx" ) || 
+	( test ${FORCE} = yes ); then
+        run_estcmd "${ROOTDIR}" "${PLUGINDIR}" "$LOGFILE"
+    fi
+}
+
+es_time main "$@"
+exit $?

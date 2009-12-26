@@ -296,7 +296,9 @@ function create_plugin_spec
 
     for plugin in `srpmix_list_plugins`
     do
-      enable_plugin="$enable_plugin,$(basename $plugin)"
+	if ! [[ "$plugin" =~ "^_.*" ]]; then
+	    enable_plugin="$enable_plugin,$(basename $plugin)"
+	fi
     done
     if test "x$enable_plugin" != "x"; then
       enable_plugin="--enable='$enable_plugin'"

@@ -1,5 +1,13 @@
 2009-12-27  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-wrap (create_plugin_spec): Don't enable plugin which
+	name has _ as prefix.
+
+	* misc/specs/srpmix.spec.in (hyperestraier): Reactivate.
+
+	* src/plugins/Makefile.am: Added _ as prefix for
+	60srpmix-hyperestraier.
+
 	* src/srpmix-wrap (create_plugin_spec): Use srpmix_list_plugins.
 
 	* src/libsrpmix.sh.in (srpmix_list_plugins): Renaemd from list_plugins.
