@@ -1,8 +1,11 @@
 buildersdir=$(pkgdatadir)/builders
 dist_builders_SCRIPTS= \
-	srpmix         \
-	lcopy          \
-	diix	       \
-	nop	       \
+	\
+	srpmix             \
+	lcopy              \
+	diix	           \
+	run-package-plugin \
+	\
+	nop	           \
 	\
 	$(NULL)

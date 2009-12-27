@@ -1,0 +1,96 @@
+#!/bin/bash
+PKGDATADIR=/usr/share/sbuild
+
+CF=$1
+NAME=$2
+SBUILD_CONF=$3
+SOP_CONF=$4
+DATE=$5
+DATE_FOR_LOG=$6
+
+# source ${SBUILD_CONF}
+source ${SOP_CONF}
+
+# RUN_PLUGIN_NAME
+# RUN_PLUGIN_TARGETS=regexp|dists
+# RUN_PLUGIN_REGEXP=
+# RUN_PLUGIN_DISTS=
+
+function run
+{
+    local var_dir=$1
+    local output_dir=$2
+    local pkg=$3
+    local ver=$4
+    local plugin=$5
+
+    echo --srpmix-var-dir="${var_dir}" --output-dir="${output_dir}" "$pkg" "$ver" "$plugin"
+}
+
+
+function main
+{
+    local cf=$1
+    local name=$2
+
+    if ! source $cf; then
+	echo "Cannot load configuration file: $cf" 1>&2
+	return 1
+    fi
+
+    if [ -z "$RUN_PLUGIN_NAME" ]; then
+	echo "No RUN_PLUGIN_NAME found" 1>&2
+	return 1
+    fi
+
+    if [ "$RUN_PLUGIN_TARGETS" = regexp ]; then
+	if [ -z "$RUN_PLUGIN_REGEXP" ]; then
+	    echo "No RUN_PLUGIN_REGEXP is given" 1>&2
+	    return 1
+	fi
+    elif [ "$RUN_PLUGIN_TARGETS" = dists ]; then
+	:
+    else
+	echo "Unknown RUN_PLUGIN_TARGETS: $RUN_PLUGIN_TARGETS" 1>&2
+	return 1
+    fi
+    
+    if ! (srpmix-plugin --list | grep "^$RUN_PLUGIN_NAME" 2>&1 > /dev/null); then
+	echo "No such plugin: $RUN_PLUGIN_NAME" 1>&2
+	return 1
+    fi
+
+    local cradle_dir=${SOP_CRADLES_DIR}/${name}
+    local repo=${cradle_dir}/repo
+    mkdir -p "$repo"
+    local log=${cradle_dir}/log/run-plugin-${DATE_FOR_LOG}.log
+
+    
+#   bash -x srpmix-package-attach --srpmix-var-dir=/srv/sources --output-dir=/tmp/z zsh 4.2.6-3.el5 hyperestraier    
+
+    local pkg
+    local ver
+    case ${RUN_PLUGIN_NAME} in
+	dists)
+	    local d
+	    for d in $RUN_PLUGIN_DISTS; do
+		if ! [ -d "${SOP_DIR}"/dists/$d ]; then
+		    continue
+		fi
+		
+		local s
+		for s in "${SOP_DIR}"/dists/$d/packages/[a-zA-Z0-9]/*; do
+		    if ! [ -d $(dirname $s)/$(readlink $s) ]; then
+			continue
+		    fi
+		    local tmp
+		    ver=$(basename $(readlink $s))
+		    pkg=$(basename $(dirname $(readlink $s)))
+		    run "${SOP_DIR}" "$repo" "$pkg" "$ver" "${RUN_PLUGIN_NAME}" >> "${log}" 2>&1
+		done
+	    done
+	    ;;
+	regexp)
+	    ;;
+    esac
+}
