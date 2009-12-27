@@ -86,7 +86,10 @@ function main
 		    local tmp
 		    ver=$(basename $(readlink $s))
 		    pkg=$(basename $(dirname $(readlink $s)))
-		    run "${SOP_DIR}" "$repo" "$pkg" "$ver" "${RUN_PLUGIN_NAME}" >> "${log}" 2>&1
+
+		    if ! [ -f "$pkg-$ver-srpmix-plugin-${RUN_PLUGIN_NAME}.*".noarch.rpm; then
+			run "${SOP_DIR}" "$repo" "$pkg" "$ver" "${RUN_PLUGIN_NAME}" >> "${log}" 2>&1
+		    fi
 		done
 	    done
 	    ;;
