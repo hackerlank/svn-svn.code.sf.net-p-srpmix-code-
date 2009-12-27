@@ -1,5 +1,9 @@
 2009-12-28  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/sbuild (main): Continue if $cradle doesn't specify a
+	directory.
+	Introduce new option --force.
+
 	* src/builders/Makefile.am (dist_builders_SCRIPTS): Added
 	run-package-plugin.
 

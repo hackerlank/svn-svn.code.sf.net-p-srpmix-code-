@@ -14,6 +14,7 @@ DONT_CREATEREPO=
 CRADLE=
 
 SHORT_CUT=
+FORCE=
 DATE=$(date +%Y%m%d)
 DATE_FOR_LOG=$(date --rfc-3339=date)
 
@@ -34,6 +35,10 @@ function print_usage
     echo "         [--jobs=J]"
     echo "         [--load=L]"
     echo "         [--short-cut]"
+    echo "         [--force]"
+    echo ""
+    echo "If --force is given, BUILD=no specification in the "
+    echo "cradle conf is ignored."
 }
 
 function prepare_conf
@@ -115,10 +120,12 @@ function parse_arguments
 		;;
 	    --jobs=*)
 	        SBUILD_JOBS=${1/--jobs=/}
-
 		;;
 	    --short-cut)
 	        SHORT_CUT=yes
+		;;
+            --force)
+	        FORCE=yes
 		;;
             *)
 	        print_usage 1>&2
@@ -157,7 +164,9 @@ function run_builder
     fi
 
     if test "${BUILD}" != yes; then
-	return 0
+	if [ ${FORCE} != yes ]; then
+	    return 0
+	fi
     fi
 
     if test -z "${BUILDERS}"; then
@@ -195,7 +204,9 @@ function run_rsync
     fi
 
     if test "${BUILD}" != yes; then
-	return 0
+	if [ ${FORCE} != yes ]; then
+	    return 0
+	fi
     fi
 
     if [ -n ${SBUILD_TSTAMPDIR} ] && [ -d "${SBUILD_TSTAMPDIR}/${name}" ]; then
@@ -243,7 +254,9 @@ function repogc
     fi
 
     if test ${BUILD} != yes; then
-	return 0
+	if [ ${FORCE} != yes ]; then
+	    return 0
+	fi
     fi
 
     local dist_mapping=${SOP_CRADLES_DIR}/${name}/dist-mapping/${name}.es
@@ -284,7 +297,9 @@ function create_weakview
     fi
     
     if test ${BUILD} != yes; then
-	return 0
+	if [ ${FORCE} != yes ]; then
+	    return 0
+	fi
     fi
 
     local repo=${SOP_CRADLES_DIR}/${name}/repo
@@ -405,6 +420,11 @@ function main
     parse_arguments "$@"
 
     for cradle in ${SOP_CRADLES_DIR}/*; do
+
+	if ! [ -d "$cradle" ]; then
+	    continue
+	fi
+
 	cf=${cradle}/cf
 	name=$(basename ${cradle})
 
