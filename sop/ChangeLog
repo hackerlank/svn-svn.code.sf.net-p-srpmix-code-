@@ -1,3 +1,8 @@
+2009-12-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cradle-confs/hyperestraier.pkg (RUN_PLUGIN_DISTS): Added new
+	cradle configuration.
+
 2009-12-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cron/sop-030-backup (backup_d): Added a missing backslash.

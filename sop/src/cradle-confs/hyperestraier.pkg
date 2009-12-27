@@ -1,0 +1,15 @@
+#!/bin/bash
+METHOD=nop
+ENABLE=no
+GC=no
+BACKUP=no
+BUILD=no
+BUILDERS=run-package-plugin
+DIST_MAPPING=no
+INSTALL=no
+
+CREATEREPO_OPTS=--update
+
+RUN_PLUGIN_NAME=hyperestraier
+RUN_PLUGIN_TARGETS=dists
+RUN_PLUGIN_DISTS="cs3u8 cs4u0"

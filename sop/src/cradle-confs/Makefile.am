@@ -15,4 +15,6 @@ dist_cradleconf_DATA =				\
 	\
 	diix-ftp.redhat.com			\
 	\
+	hyperestraier.pkg			\
+	\
 	$(NULL)
