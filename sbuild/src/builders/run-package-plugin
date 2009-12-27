@@ -24,7 +24,7 @@ function run
     local ver=$4
     local plugin=$5
 
-    echo --srpmix-var-dir="${var_dir}" --output-dir="${output_dir}" "$pkg" "$ver" "$plugin"
+    srpmix-package-attach --srpmix-var-dir="${var_dir}" --output-dir="${output_dir}" "$pkg" "$ver" "$plugin"
 }
 
 
@@ -70,7 +70,7 @@ function main
 
     local pkg
     local ver
-    case ${RUN_PLUGIN_NAME} in
+    case "${RUN_PLUGIN_TARGETS}" in
 	dists)
 	    local d
 	    for d in $RUN_PLUGIN_DISTS; do
@@ -94,3 +94,5 @@ function main
 	    ;;
     esac
 }
+
+main "$@"
