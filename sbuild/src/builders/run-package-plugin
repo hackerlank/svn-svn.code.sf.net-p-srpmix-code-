@@ -87,7 +87,9 @@ function main
 		    ver=$(basename $(readlink $s))
 		    pkg=$(basename $(dirname $(readlink $s)))
 
+		    # TODO: srpmix version
 		    if ! [ -f "$pkg-$ver-srpmix-plugin-${RUN_PLUGIN_NAME}.*".noarch.rpm; then
+			echo applying "${RUN_PLUGIN_NAME}" on "$pkg" "$ver"
 			run "${SOP_DIR}" "$repo" "$pkg" "$ver" "${RUN_PLUGIN_NAME}" >> "${log}" 2>&1
 		    fi
 		done
