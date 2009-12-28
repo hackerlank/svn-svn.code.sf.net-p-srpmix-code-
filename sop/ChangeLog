@@ -1,5 +1,9 @@
 2009-12-28  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.3.8.
+
+2009-12-28  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/cradle-confs/hyperestraier.pkg (RUN_PLUGIN_DISTS): Added new
 	cradle configuration.
 
