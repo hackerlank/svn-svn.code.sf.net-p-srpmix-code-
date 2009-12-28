@@ -1,5 +1,9 @@
 2009-12-28  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/builders/run-package-plugin (main): Added missing `]'.
+
+2009-12-28  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: version 0.1.8.
 
 	* src/sbuild (main): Continue if $cradle doesn't specify a
