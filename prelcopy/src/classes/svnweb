@@ -22,12 +22,20 @@
 
 ########################################################################
 
-# SVNWEB_BASE_URL=URL
+# SVNWEB_BASE_URL=url
+SVNWEB_BASE_URL=
+
 # SVNWEB_COMPONENT_LIST=(c0 c1 c2...)
+declare -a SVNWEB_COMPONENT_LIST
 
 # SVNWEB_PACKAGE_DICT[c]=PACKAGE
+declare -A SVNWEB_PACKAGE_DICT
+
 # SVNWEB_TYPE_DICT[c]=trunk|tag|both
-# SVNWEB_ACCEPTABLE_TAG_REGEXP[c]=PATTERN
+declare -A SVNWEB_TYPE_DICT
+
+# SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT[c]=PATTERN
+declare -A SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT
 
 function print_help
 {
@@ -71,7 +79,7 @@ function acceptable_p
     local u=$1
     local c=$2
 
-    [[ "$u" =~ "${SVNWEB_ACCEPTABLE_TAG_REGEXP[$c]}" ]]
+    [[ "$u" =~ "${SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT[$c]}" ]]
     return $?
 }
 

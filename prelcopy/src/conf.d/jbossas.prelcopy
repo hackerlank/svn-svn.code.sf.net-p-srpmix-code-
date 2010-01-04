@@ -3,10 +3,20 @@ PRELCOPY_CLASS=svnweb
 
 SVNWEB_BASE_URL=http://anonsvn.jboss.org/repos
 
+#SVNWEB_COMPONENT=
+#SVNWEB_PACKAGE=
+#SVNWEB_TYPE=
+#SVNWEB_TAG_ACCEPTABLE_REGEXP=
+
+# SVNWEB_COMPONENT_LIST=( jbossas "hibernate/core" )
 SVNWEB_COMPONENT_LIST=( jbossas )
 
 
-SVNWEB_PACKAGE_DICT[jbossas]=JBossEAP
-SVNWEB_TYPE_DICT[jbossas]=both
-SVNWEB_ACCEPTABLE_TAG_REGEXP[jbossas]="^JBPAPP_[0-9]+_[0-9]+_[0-9]+_GA"
+SVNWEB_PACKAGE_DICT["jbossas"]=JBossEAP
+SVNWEB_TYPE_DICT["jbossas"]=both
+SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT["jbossas"]="^JBPAPP_[0-9]+_[0-9]+_[0-9]+_GA"
 # SVNWEB_UNACCEPTABLE_TAG_REGEXP[jbossas]="^$"
+
+# SVNWEB_PACKAGE_DICT["hibernate/core"]=hibernate-core
+# SVNWEB_TYPE_DICT["hibernate/core"]=both
+# SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT["hibernate/core"]="^JBOSS_EAP_3_2_4_SP.*"
