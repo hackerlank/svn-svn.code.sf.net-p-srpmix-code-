@@ -41,7 +41,7 @@ function run_yum
 	return 0
     fi
 
-    yum -y -c ${repo_file} --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
+    yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
     return $?
 }
 
