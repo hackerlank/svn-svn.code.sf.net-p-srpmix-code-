@@ -41,25 +41,22 @@ function run_yum
 	return 0
     fi
 
-    if [ -z "$EXTRA_CRADLES" ]; then
-	yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
-    else
+    local enablerepos="--enablerepo=${repo_name}"
+    if [ -n "$EXTRA_CRADLES" ]; then
 	local repo_file0="${repo_file}"
 	repo_file="${MY_TMPDIR}"/tmp.repo
 
-	local enablerepos
-
 	cat "${repo_file0}" >> ${repo_file}
-	enablerepos="--enablerepo=${repo_name}"
-
 	local protocol="file"
 
 	for rf in $EXTRA_CRADLES; do
 	    cat $(build_repo_file_name $rf) >> ${repo_file}
 	    enablerepos="${enablerepos} --enablerepo=$(build_repo_name $rf $protocol)"
 	done
-	yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' $enablerepos ${action} '*srpmix*'
+	
     fi
+    yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' $enablerepos ${action} '*srpmix*'
+
     return $?
 }
 
