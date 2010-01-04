@@ -45,7 +45,7 @@ function run_yum
 	yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
     else
 	local repo_file0="${repo_file}"
-	${repo_file}="${MY_TMPDIR}"/tmp.repo
+	repo_file="${MY_TMPDIR}"/tmp.repo
 
 	local enablerepos
 
