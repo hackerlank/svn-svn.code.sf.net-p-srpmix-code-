@@ -31,8 +31,8 @@ declare -a SVNWEB_COMPONENT_LIST
 # SVNWEB_PACKAGE_DICT[c]=PACKAGE
 declare -A SVNWEB_PACKAGE_DICT
 
-# SVNWEB_TYPE_DICT[c]=trunk|tag|both
-declare -A SVNWEB_TYPE_DICT
+# SVNWEB_TYPES_DICT[c]="trunk tag"
+declare -A SVNWEB_TYPES_DICT
 
 # SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT[c]=PATTERN
 declare -A SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT
@@ -49,6 +49,7 @@ function handle_trunk
     local conf=$1
     local c
     local t
+    local t0
     local p
 
     if [ -z "$SVNWEB_BASE_URL" ]; then
@@ -57,20 +58,22 @@ function handle_trunk
     fi
 
     for c in ${SVNWEB_COMPONENT_LIST[@]}; do
-	t=${SVNWEB_TYPE_DICT[$c]}
-	if [ "$t" = trunk ] || [ "$t" = both ]; then
-	    p=${SVNWEB_PACKAGE_DICT[$c]}
-	    if [ -z "$p" ]; then
-		p=$c
-	    fi
-	    cat <<EOF
+	t=${SVNWEB_TYPES_DICT[$c]}
+	for t0 in $t; do
+	    if [ "$t0" = trunk ]; then
+		p=${SVNWEB_PACKAGE_DICT[$c]}
+		if [ -z "$p" ]; then
+		    p=$c
+		fi
+		cat <<EOF
 (prelcopy :package "$p"
           :branch  "trunk"
           :command-line "svn checkout ${SVNWEB_BASE_URL}/$c/trunk"
 	  :update #t
           :generated-by "${0##*/}+$conf")
 EOF
-	fi
+	    fi
+	done
     done
 }
 
@@ -89,6 +92,7 @@ function handle_tag
     local c
     local b
     local t
+    local t0
     local p
     local u
 
@@ -100,29 +104,32 @@ function handle_tag
 
 
     for c in ${SVNWEB_COMPONENT_LIST[@]}; do
-	t=${SVNWEB_TYPE_DICT[$c]}
-	if [ "$t" = tag ] || [ "$t" = both ]; then
+	t=${SVNWEB_TYPES_DICT[$c]}
 	
-	    p=${SVNWEB_PACKAGE_DICT[$c]}
-	    if [ -z "$p" ]; then
-		p=$c
-	    fi
+	for t0 in $t; do
+	    if [ "$t0" = tag ]; then
+	
+		p=${SVNWEB_PACKAGE_DICT[$c]}
+		if [ -z "$p" ]; then
+		    p=$c
+		fi
 	    
-	    for u in $(curl -silent ${SVNWEB_BASE_URL}/$c/tags/ | \
-		sed -nre "s,.*href=\"([^\"]+)/\".*,\1,p"); do
-		
-		if acceptable_p "$u" "$c"; then
-		    b="$u"
-		    cat <<EOF
+		for u in $(curl -silent ${SVNWEB_BASE_URL}/$c/tags/ | \
+		    sed -nre "s,.*href=\"([^\"]+)/\".*,\1,p"); do
+		    
+		    if acceptable_p "$u" "$c"; then
+			b="$u"
+			cat <<EOF
 (prelcopy :package "$p"
           :branch  "$b"
           :command-line "svn checkout ${SVNWEB_BASE_URL}/$c/tags/$b"
 	  :update #f
           :generated-by "${0##*/}+$conf")
 EOF
-		fi
-	    done
-	fi
+		    fi
+		done
+	    fi
+	done
     done
 }
 
@@ -136,6 +143,13 @@ function main
 
     if ! source $1; then
 	return $?
+    fi
+
+    if [ -z "$SVNWEB_COMPONENT_LIST" ]; then
+	SVNWEB_COMPONENT_LIST=( "$SVNWEB_COMPONENT" )
+	SVNWEB_PACKAGE_DICT["$SVNWEB_COMPONENT"]="$SVNWEB_PACKAGE"
+	SVNWEB_TYPES_DICT["$SVNWEB_COMPONENT"]="$SVNWEB_TYPES"
+	SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT["$SVNWEB_COMPONENT"]="$SVNWEB_TAG_ACCEPTABLE_REGEXP"
     fi
 
     handle_trunk $(basename $1)
