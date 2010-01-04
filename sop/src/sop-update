@@ -47,11 +47,14 @@ function run_yum
 	local repo_file0="${repo_file}"
 	${repo_file}="${MY_TMPDIR}"/tmp.repo
 
-	local repo_name0=${repo_name}
 	local enablerepos
+
+	cat "${repo_file0}" >> ${repo_file}
+	enablerepos="--enablerepo=${repo_name}"
+
 	local protocol="file"
 
-	for rf in "${repo_file0}" $EXTRA_CRADLES; do
+	for rf in $EXTRA_CRADLES; do
 	    cat $(build_repo_file_name $rf) >> ${repo_file}
 	    enablerepos="${enablerepos} --enablerepo=$(build_repo_name $rf $protocol)"
 	done
