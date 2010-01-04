@@ -1,0 +1,26 @@
+#!/bin/bash
+cf=$1
+log=$2
+
+source $cf
+
+if test -z "$PRELCOPY_SYS_CONF_DIR"; then
+    echo "No LCOPY_SYS_CONF_DIR in $cf" 1>&2
+    exit 1
+fi
+
+if ! test -d "$PRELCOPY_SYS_CONF_DIR"; then
+    return 0
+fi
+
+lcopy-update --root-dir=$(pwd)
+
+for c in "${PRELCOPY_SYS_CONF_DIR}"/*.prelcopy; do
+    prelcopy --output-dir=$tmpdir $c 
+
+    for d in $tmpdir/*.lcopy; do
+    	if [ -d "$f" ]; then
+            lcopy-checkout --no-error-message-if-existing $f
+	fi
+    done
+done
