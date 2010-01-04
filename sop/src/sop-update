@@ -41,7 +41,22 @@ function run_yum
 	return 0
     fi
 
-    yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
+    if [ -z "$EXTRA_CRADLES" ]; then
+	yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' --enablerepo=${repo_name} ${action} '*srpmix*'
+    else
+	local repo_file0="${repo_file}"
+	${repo_file}="${MY_TMPDIR}"/tmp.repo
+
+	local repo_name0=${repo_name}
+	local enablerepos
+	local protocol="file"
+
+	for rf in "${repo_file0}" $EXTRA_CRADLES; do
+	    cat $(build_repo_file_name $rf) >> ${repo_file}
+	    enablerepos="${enablerepos} --enablerepo=$(build_repo_name $rf $protocol)"
+	done
+	yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' $enablerepos ${action} '*srpmix*'
+    fi
     return $?
 }
 
@@ -56,9 +71,6 @@ function erase_batch
 function run_gc
 {
     set -x
-
-    MY_TMPDIR=`mktemp -d`
-    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
 
 
     local cf=$1
@@ -160,6 +172,21 @@ function run_gc
     done
 }
 
+function build_repo_file_name
+{
+    local name=$1
+
+    echo ${SOP_CRADLES_DIR}/${name}/file.repo
+}
+
+function build_repo_name
+{
+    local name=$1
+    local protocol=$2
+
+    echo srpmix-$protocol-$(echo $name | tr '.' '-')
+}
+
 function run
 {
     local mirror_name=$1
@@ -180,8 +207,9 @@ function run
 
     log=${SOP_CRADLES_DIR}/${mirror_name}/log/update-${date}.log
 
-    repo_file=${SOP_CRADLES_DIR}/${mirror_name}/file.repo
-    repo_name=srpmix-$protocol-$(echo $mirror_name | tr '.' '-')
+    repo_file=$(build_repo_file_name ${mirror_name})
+    repo_name=$(build_repo_name $mirror_name $protocol)
+
     if ( run_yum "$cf" "$repo_name" "$repo_file" "install" $force ) > "${log}" 2>&1 ; then
 	( run_gc "$cf" $(echo $mirror_name | tr '.' '-') $force ) >> "${log}" 2>&1
     fi
@@ -197,6 +225,8 @@ function main
 
     protocol=file
 
+    MY_TMPDIR=`mktemp -d`
+    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
 
     if test $# = 0; then
 	for n in ${SOP_CRADLES_DIR}/*; do

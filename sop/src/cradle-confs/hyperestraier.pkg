@@ -8,6 +8,8 @@ BUILDERS=run-package-plugin
 DIST_MAPPING=no
 INSTALL=no
 
+EXTRA_CRADLES="ftp.redhat.com"
+
 CREATEREPO_OPTS=--update
 
 RUN_PLUGIN_NAME=hyperestraier

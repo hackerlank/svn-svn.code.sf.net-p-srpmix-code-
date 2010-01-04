@@ -1,6 +1,12 @@
 2010-01-04  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.3.9.
+
 	* src/sop-update (run_yum): Added --nogpgcheck to yum.
+	(run_yum): Added EXTRA_CRADLES support.
+
+	* src/cradle-confs/hyperestraier.pkg (EXTRA_CRADLES): Added
+	ftp.redhat.com.
 
 2009-12-28  Masatake YAMATO  <yamato@redhat.com>
 
@@ -46,7 +52,7 @@
 
 	* src/cron/sop-010-mirror (main): Added missingv $.
 
-	* autogen.sh: oRun yum if --bootstrap is given.
+	* autogen.sh: Run yum if --bootstrap is given.
 
 2009-10-21  Masatake YAMATO  <yamato@redhat.com>
 
