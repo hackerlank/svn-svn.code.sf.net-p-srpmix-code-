@@ -1,0 +1,16 @@
+#!/bin/bash
+if ! source $1; then
+    exit 1
+fi
+
+if [ -z "$PRELCOPY_CLASS" ]; then
+    exit 1
+fi
+
+classfile="/usr/libexec/prelcopy/classes/$PRELCOPY_CLASS"
+if ! [ -f "$classfile" ]; then
+    exit 1
+fi
+
+"$classfile" $1 | gosh scm --output-dir=OUTPUT-DIR
+
