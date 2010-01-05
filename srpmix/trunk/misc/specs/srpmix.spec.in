@@ -134,6 +134,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/srpmix/plugins/50srpmix-file
 %{_datadir}/srpmix/plugins/60srpmix-etags
 
+%dir %{_datadir}/srpmix/dist-plugins
+
+
 %{_datadir}/srpmix/utils
 
 %{_datadir}/srpmix/helpers
@@ -165,6 +168,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plugin-hyperestraier
 %{_datadir}/srpmix/plugins/_60srpmix-hyperestraier
+%{_datadir}/srpmix/dist-plugins/hyperestraier
 
 %files plugin-xgettext
 %{_datadir}/srpmix/plugins/60srpmix-xgettext

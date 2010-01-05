@@ -1,5 +1,7 @@
 2010-01-06  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Added dist-plugins.
+
 	* src/srpmix-weakview-dist-attach: If ATTACHMENT is an executable,
 	it is invoked to create attachment data before packaging.
 

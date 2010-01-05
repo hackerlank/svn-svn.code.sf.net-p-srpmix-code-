@@ -1,4 +1,4 @@
-SUBDIRS = plugins helpers
+SUBDIRS = plugins dist-plugins helpers
 
 bin_SCRIPTS=libsrpmix.sh
 CLEANFILES = $(bin_SCRIPTS)

@@ -77,6 +77,7 @@ AC_OUTPUT([
            src/libsrpmix.sh
            src/Makefile
            src/plugins/Makefile
+           src/dist-plugins/Makefile
            src/helpers/Makefile
            doc/Makefile
            utils/Makefile
