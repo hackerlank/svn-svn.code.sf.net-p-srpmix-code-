@@ -1,3 +1,8 @@
+2010-01-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-package-attach (parse_arguments): Added missing option 
+	--pkg-release.
+
 2009-12-27  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-package-attach (parse_arguments): Introduce an option

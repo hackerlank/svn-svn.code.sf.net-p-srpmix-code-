@@ -99,8 +99,8 @@ function parse_arguments
 	    (--pkg-version=*)
                 PKG_VERSION=${1/--pkg-version=}
 		;;
-	    (--pkg-version=*)
-                PKG_VERSION=${1/--pkg-version=}
+	    (--pkg-release=*)
+                PKG_RELEASE=${1/--pkg-release=}
 		;;
 	    (--output-dir=*)
 	        OUTPUT_DIR=${1/--output-dir=}
