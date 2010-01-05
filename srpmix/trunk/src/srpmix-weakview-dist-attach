@@ -29,6 +29,7 @@ PKG_RELEASE=0
 OUTPUT_DIR=
 TARGET_DIST=
 ATTACHMENT=
+EXECUTABLE=
 
 SRPMIX_WEAKVIEW_DIST_ATTACH_DEBUG=
 YUM_OPTS=
@@ -55,10 +56,27 @@ function print_usage
     echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=REL] \\ "
     echo "                [--output-dir=DIR] [--yum=YUMOPT] \\"
     echo "                DIST ATTACHMENT" 
+    echo ""
+    echo "ATTACHMENT: a directory or an executable."
+    echo "             If it is a directory, it is used as an attachment directly."
+    echo "             If it is an executable, the executable is invoked to create a "
+    echo "             directory(ATTACHMENT-DIR), which is used as an attachment. " 
+    echo "             The executable(EXE) is invoked with form: "
+    echo ""
+    echo "                    EXE DIST ATTACHMENT-DIR"
+    echo ""
+    echo "             Here ATTACHMENT-DIR is created by srpmix-weakview-dist-attach before "
+    echo "             invoking EXE."
+    echo ""
+    echo "Environment variables:"
+    echo "  SRPMIX_ROOT_USER"
 }
 
 function parse_arguments
 {
+    local r=0
+
+
     while [ $# -gt 0 ]; do
 	case "$1" in
 	    (--help|-h) 
@@ -117,14 +135,20 @@ function parse_arguments
     fi
 
     ATTACHMENT="$1"
-    if test -d "${ATTACHMENT}"; then
+    if [ -d "${ATTACHMENT}" ]; then
 	ATTACHMENT=$(cd $1 && pwd)
+    elif [ -x "${ATTACHMENT}" ]; then
+	EXECUTABLE=${ATTACHMENT}
+	r=1
     else
-	:			# TODO
+	echo "$ATTACHMENT is not a directory nor executable" 1>&2
+	exit 3
     fi
     shift 1
 
     : ${PKG_NAME:=$(basename ${ATTACHMENT})}
+
+    return $r
 }
 
 function create_spec
@@ -192,7 +216,7 @@ function prepare_tarball
     tar -c --to-stdout $(basename $ATTACHMENT) > $tarfile
 }
 
-function build_rpm
+function create_rpm
 {
     if test "${SRPMIX_WEAKVIEW_DIST_ATTACH_DEBUG}" = "yes"; then
 	PS4="${PS4}[rpmbuild]"
@@ -205,8 +229,9 @@ function main
     local target_dist_full_name
     local pkg_full_name
     local spec_file
-
+    local need_invokation
     parse_arguments "$@"
+    need_invokation=$?
 
     MY_TMPDIR=`mktemp -d`
     trap "/bin/rm -rf ${MY_TMPDIR}" 0
@@ -214,6 +239,15 @@ function main
     if test -n "$SRPMIX_ATTACH_DEBUG"; then
 	trap 0
 	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-weakview-dist-attach"
+    fi
+    
+    if [ $need_invokation != 0 ]; then
+	ATTACHMENT=${MY_TMPDIR}/$(basename ${ATTACHMENT})
+	mkdir -p "${ATTACHMENT}"
+	if ! ${EXECUTABLE} ${TARGET_DIST} "${ATTACHMENT}"; then
+	    echo "Failed to create attachment contents: ${EXECUTABLE} ${TARGET_DIST} ${ATTACHMENT}" 1>&2
+	    return 1
+	fi
     fi
 
     target_dist_full_name=srpmix-weakview-dist-${TARGET_DIST}
@@ -230,7 +264,7 @@ function main
     mkdir -p ${MY_TMPDIR}/{RPMS,SRPMS,BUILD,BUILDROOT,SOURCES}
     (prepare_tarball ${MY_TMPDIR}/SOURCES/${PKG_NAME}.tar)
 
-    (build_rpm ${spec_file})
+    (create_rpm ${spec_file})
     local rpm=${MY_TMPDIR}/RPMS/noarch/*.noarch.rpm
     if ! test -r ${rpm}; then
 	srpmix_abort "*** Failed to create rpm file: $rpm" 2>&1
