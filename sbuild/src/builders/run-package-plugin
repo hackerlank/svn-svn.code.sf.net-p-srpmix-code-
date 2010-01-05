@@ -28,6 +28,15 @@ function run
 }
 
 
+function run_dist
+{
+    local repo=$1
+    local dist=$2
+    local plugin=$3
+
+    return 0
+}
+
 function main
 {
     local cf=$1
@@ -68,10 +77,16 @@ function main
     
 #   bash -x srpmix-package-attach --srpmix-var-dir=/srv/sources --output-dir=/tmp/z zsh 4.2.6-3.el5 hyperestraier    
 
-    local pkg
-    local ver
     case "${RUN_PLUGIN_TARGETS}" in
 	dists)
+	    local pkg
+	    local ver
+	    local p
+
+	    local n_pkg=0
+	    local n_deployed=0
+	    local paths
+
 	    local d
 	    for d in $RUN_PLUGIN_DISTS; do
 		if ! [ -d "${SOP_DIR}"/dists/$d ]; then
@@ -83,16 +98,31 @@ function main
 		    if ! [ -d $(dirname $s)/$(readlink $s) ]; then
 			continue
 		    fi
-		    local tmp
+
 		    ver=$(basename $(readlink $s))
 		    pkg=$(basename $(dirname $(readlink $s)))
-
+		    p=${pkg:0:1}
 		    # TODO: srpmix version
-		    if ! [ -f "$pkg-$ver-srpmix-plugin-${RUN_PLUGIN_NAME}.*".noarch.rpm ]; then
+		    if ! [ -f "$repo"/$p/"$pkg-$ver-srpmix-plugin-${RUN_PLUGIN_NAME}.*".noarch.rpm ]; then
 			echo applying "${RUN_PLUGIN_NAME}" on "$pkg" "$ver"
 			run "${SOP_DIR}" "$repo" "$pkg" "$ver" "${RUN_PLUGIN_NAME}" >> "${log}" 2>&1
 		    fi
+
+		    local path
+		    path="${SOP_SOURCES_DIR}/$p/$pkg/$ver/plugins/${RUN_PLUGIN_NAME}"
+		    paths[$n_pkg]="$path"
+		    (( n_pkg += 1 ))
+		    if [ -d "$path" ]; then
+			(( n_deployed += 1 ))
+		    fi
+
 		done
+		if [ "$n_deployed" = "$n_pkg" ]; then
+		    # post processing
+		    for path in ${paths[@]}; do
+			echo $path 
+		    done | run_dist "$repo" "$d" "${RUN_PLUGIN_NAME}" >> "${log}" 2>&1
+		fi
 	    done
 	    ;;
 	regexp)
