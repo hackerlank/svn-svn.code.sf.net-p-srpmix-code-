@@ -15,7 +15,7 @@ function try_source
 }
 try_source ${LIBSRPMIX}
 if [ -n $VAR_DIR ]; then
-    srpmix_reset_var_dir "VAR_DIR"
+    srpmix_reset_var_dir "$VAR_DIR"
 fi
 
 function verify_arguments
