@@ -40,7 +40,7 @@ function verify_arguments
 function verify_idx_dirs
 {
     local d
-    for d in "${SRPMIX_VAR_DIR}/dists/$DIST/packages/*/*/plugins/hyperestraier/idx"; do
+    for d in ${SRPMIX_VAR_DIR}/dists/$DIST/packages/*/*/plugins/hyperestraier/idx; do
 	if ! [  -d $d ]; then
 	    return 1
 	fi
@@ -65,7 +65,7 @@ function merge
     local d
     
 
-    for d in "${SRPMIX_VAR_DIR}/dists/$DIST/packages/*/*/plugins/hyperestraier/idx"; do
+    for d in ${SRPMIX_VAR_DIR}/dists/$DIST/packages/*/*/plugins/hyperestraier/idx; do
 	if [ -d $d ]; then
 	    if ! estcmd merge $idx_dir $d; then
 		{ 
