@@ -1,0 +1,16 @@
+#!/bin/bash
+METHOD=nop
+ENABLE=no
+GC=no
+BACKUP=no
+BUILD=no
+BUILDERS=run-weakview-dist-plugin
+DIST_MAPPING=no
+INSTALL=no
+
+EXTRA_CRADLES="ftp.redhat.com"
+
+CREATEREPO_OPTS=--update
+
+RUN_PLUGIN_NAME=hyperestraier
+RUN_PLUGIN_DISTS="cs3u8 cs4u0"

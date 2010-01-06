@@ -16,5 +16,6 @@ dist_cradleconf_DATA =				\
 	diix-ftp.redhat.com			\
 	\
 	hyperestraier.pkg			\
+	hyperestraier.weakview-dist		\
 	\
 	$(NULL)
