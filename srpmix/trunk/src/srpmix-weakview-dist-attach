@@ -55,6 +55,7 @@ function print_usage
     echo "  srpmix-weakview-dist-attach [--debug] [--dump-spec] \\ "
     echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=REL] \\ "
     echo "                [--output-dir=DIR] [--yum=YUMOPT] \\"
+    echo "                [--srpmix-var-dir=DIR] \\ "
     echo "                DIST ATTACHMENT" 
     echo ""
     echo "ATTACHMENT: a directory or an executable."
@@ -107,6 +108,10 @@ function parse_arguments
 		fi
 		OUTPUT_DIR=$(cd $OUTPUT_DIR && pwd)
 		;;
+	    (--srpmix-var-dir=*)
+	        SRPMIX_VAR_DIR=${1/--srpmix-var-dir=}
+		srpmix_reset_var_dir "$SRPMIX_VAR_DIR"
+		;;
 	    (--yum=*)
 	        YUM_OPTS=$(echo $1 | sed 's/--yum=//')
 		;;		
@@ -139,6 +144,9 @@ function parse_arguments
 	ATTACHMENT=$(cd $1 && pwd)
     elif [ -x "${ATTACHMENT}" ]; then
 	EXECUTABLE=${ATTACHMENT}
+	r=1
+    elif [ -x "${SRPMIX_DIST_PLUGIN_DIR}/${ATTACHMENT}" ]; then
+	EXECUTABLE="${SRPMIX_DIST_PLUGIN_DIR}/${ATTACHMENT}"
 	r=1
     else
 	echo "$ATTACHMENT is not a directory nor executable" 1>&2
@@ -240,7 +248,15 @@ function main
 	trap 0
 	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-weakview-dist-attach"
     fi
-    
+
+
+    #
+    # DIST PLUGIN EXPECTED PROTOCOL
+    #
+    # ${EXECUTABLE} ${TARGET_DIST} "${ATTACHMENT}"
+    #
+    # Return 0 if it is successfully exected.
+    #
     if [ $need_invokation != 0 ]; then
 	ATTACHMENT=${MY_TMPDIR}/$(basename ${ATTACHMENT})
 	mkdir -p "${ATTACHMENT}"

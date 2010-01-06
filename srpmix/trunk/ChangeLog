@@ -1,5 +1,16 @@
 2010-01-06  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-weakview-dist-attach (parse_arguments): Added --var-dir
+	option.
+	(parse_arguments): Make plugins under dist-plugins usable from 
+	srpmix-weakview-dist-attach command.
+
+	* src/libsrpmix.sh.in (SRPMIX_DIST_PLUGIN_DIR): Added new const.
+
+	* src/dist-plugins/hyperestraier: Implemented.
+
+2010-01-06  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: Added dist-plugins.
 
 	* src/srpmix-weakview-dist-attach: If ATTACHMENT is an executable,
