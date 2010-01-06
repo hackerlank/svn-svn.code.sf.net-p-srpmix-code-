@@ -54,10 +54,10 @@ function main
     fi
 
     for d in $RUN_PLUGIN_DISTS; do
-	if [ -d "${SOP_DIR}/dists/$d" ]; then
+	if ! [ -d "${SOP_DIR}/dists/$d" ]; then
 	    echo "No such directory: ${SOP_DIR}/dists/${d}" 1>&2
 	    return 1
-	elif [ -d "${SOP_DIR}/dists/${d}/plugins" ]; then
+	elif ! [ -d "${SOP_DIR}/dists/${d}/plugins" ]; then
 	    echo "No such directory: ${SOP_DIR}/dists/${d}/plugins" 1>&2
 	    return 1
 	fi
