@@ -63,8 +63,7 @@
 	  (or cmd "")
 	  (or pid "")
 	  (if pid ":" "")
-	  msg
-	  ))
+	  msg))
 
 (define (do-adjust args)
   (let* ((delta (let1 d (string->number (cadr args))
@@ -76,28 +75,33 @@
 	 (rearrange-date$ (cute rearrange-date <> delta year)))
     (let loop ((l (read-line-safe)))
       (unless (eof-object? l)
-	(rxmatch-cond
-	  ((var-log-message-line-regex l)
-	   (#f date host cmd pid msg)
-	   (emit-log-line (rearrange-date$ date) 
-			  host 
-			  cmd
-			  pid
-			  msg))
-	  ((var-log-message-repeated-line-regex l)
-	   (#f date host msg)
-	   (emit-log-line (rearrange-date$ date) 
-			  host 
-			  #f
-			  #f
-			  msg))
-	  ((var-log-message-signal-line-regex l)
-	   (#f date host msg)
-	   (emit-log-line (rearrange-date$ date) 
-			  host 
-			  #f
-			  #f
-			  msg)))
+	(let1 d (rxmatch-cond
+		  ((var-log-message-line-regex l)
+		   (#f date host cmd pid msg)
+		   (list (rearrange-date$ date) 
+			 host 
+			 cmd
+			 pid
+			 msg))
+		  ((var-log-message-repeated-line-regex l)
+		   (#f date host msg)
+		   (list (rearrange-date$ date) 
+			 host 
+			 #f
+			 #f
+			 msg))
+		  ((var-log-message-signal-line-regex l)
+		   (#f date host msg)
+		   (list (rearrange-date$ date) 
+			 host 
+			 #f
+			 #f
+			 msg))
+		  (else
+		   #?=l
+		   #f))
+	  (when d
+	    (apply emit-log-line d)))
 	(loop (read-line-safe))))))
 
 (define (do-sort args)
