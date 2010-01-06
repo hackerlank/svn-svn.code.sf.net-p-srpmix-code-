@@ -164,7 +164,7 @@ function run_builder
     fi
 
     if test "${BUILD}" != yes; then
-	if [ ${FORCE} != yes ]; then
+	if [ "${FORCE}" != yes ]; then
 	    return 0
 	fi
     fi
@@ -204,7 +204,7 @@ function run_rsync
     fi
 
     if test "${BUILD}" != yes; then
-	if [ ${FORCE} != yes ]; then
+	if [ "${FORCE}" != yes ]; then
 	    return 0
 	fi
     fi
@@ -253,8 +253,8 @@ function repogc
 	return 0
     fi
 
-    if test ${BUILD} != yes; then
-	if [ ${FORCE} != yes ]; then
+    if test "${BUILD}" != yes; then
+	if [ "${FORCE}" != yes ]; then
 	    return 0
 	fi
     fi
@@ -296,8 +296,8 @@ function create_weakview
 	return 1
     fi
     
-    if test ${BUILD} != yes; then
-	if [ ${FORCE} != yes ]; then
+    if test "${BUILD}" != yes; then
+	if [ "${FORCE}" != yes ]; then
 	    return 0
 	fi
     fi
