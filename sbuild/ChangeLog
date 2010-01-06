@@ -1,14 +1,18 @@
-2010-01-04  Masatake YAMATO  <yamato@redhat.com>
+2010-01-07  Masatake YAMATO  <yamato@redhat.com>
 
-	* src/sbuild: Put double quotes around arguments
-	for `['.
+	* src/builders/run-package-plugin: Remove unused code.
 
 2010-01-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/builders/run-weakview-dist-plugin: New file.
 
 	* src/builders/Makefile.am (dist_builders_SCRIPTS): Added run-weakview-dist-plugin.
-	
+
+2010-01-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sbuild: Put double quotes around arguments
+	for `['.
+
 2009-12-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/builders/run-package-plugin (main): Added missing `]'.
