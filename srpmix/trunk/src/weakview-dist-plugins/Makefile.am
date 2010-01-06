@@ -1,4 +1,4 @@
-plugindir = $(pkgdatadir)/dist-plugins
+plugindir = $(pkgdatadir)/weakview-dist-plugins
 
 plugin_SCRIPTS =
 
