@@ -168,7 +168,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plugin-hyperestraier
 %{_datadir}/srpmix/plugins/_60srpmix-hyperestraier
-%{_datadir}/srpmix/dist-plugins/hyperestraier
+%{_datadir}/srpmix/weakview-dist-plugins/hyperestraier
 
 %files plugin-xgettext
 %{_datadir}/srpmix/plugins/60srpmix-xgettext
