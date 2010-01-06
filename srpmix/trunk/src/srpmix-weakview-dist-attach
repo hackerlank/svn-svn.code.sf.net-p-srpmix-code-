@@ -253,14 +253,14 @@ function main
     #
     # DIST PLUGIN EXPECTED PROTOCOL
     #
-    # ${EXECUTABLE} ${TARGET_DIST} "${ATTACHMENT}"
+    # ${EXECUTABLE} ${TARGET_DIST} "${ATTACHMENT}" ["${SRPMIX_VAR_DIR}"]
     #
     # Return 0 if it is successfully exected.
     #
     if [ $need_invokation != 0 ]; then
 	ATTACHMENT=${MY_TMPDIR}/$(basename ${ATTACHMENT})
 	mkdir -p "${ATTACHMENT}"
-	if ! ${EXECUTABLE} ${TARGET_DIST} "${ATTACHMENT}"; then
+	if ! ${EXECUTABLE} ${TARGET_DIST} "${ATTACHMENT}" "${SRPMIX_VAR_DIR}"; then
 	    echo "Failed to create attachment contents: ${EXECUTABLE} ${TARGET_DIST} ${ATTACHMENT}" 1>&2
 	    return 1
 	fi

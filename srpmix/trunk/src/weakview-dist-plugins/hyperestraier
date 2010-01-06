@@ -1,7 +1,22 @@
 #!/bin/bash
 DIST=$1
 DIR=$2
+VAR_DIR=$3
 
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+if [ -n $VAR_DIR ]; then
+    srpmix_reset_var_dir "VAR_DIR"
+fi
 
 function verify_arguments
 {
