@@ -1,4 +1,4 @@
-SUBDIRS = plugins dist-plugins helpers
+SUBDIRS = plugins weakview-dist-plugins helpers
 
 bin_SCRIPTS=libsrpmix.sh
 CLEANFILES = $(bin_SCRIPTS)
