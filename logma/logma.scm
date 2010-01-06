@@ -1,3 +1,7 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+;;
 ;;; logma.scm --- simple log manipulator
 ;;
 ;;  Copyright (C) 2009 Red Hat, Inc. All rights reserved.
@@ -29,10 +33,19 @@
 
 (define (print-help prog status)
   (display "Usage: \n")
-  (format #t "	gosh ~s adjust DELTA < /var/log/messages\n" prog)
-  (format #t "	cat /var/log/messages0 /var/log/messages1 /var/log/messages2 | gosh ~s sort \n" prog)
-  (format #t "	gosh ~s help\n" prog)
-  (format #t "	gosh ~s --help\n" prog)
+  (newline)
+  (format #t "  * adjusting time\n")
+  (newline)
+  (format #t "	  gosh ~s adjust DURATION < /var/log/messages\n" prog)
+  (newline)
+  (format #t "  * merging multiple logs\n")
+  (newline)
+  (format #t "	  cat /var/log/messages0 /var/log/messages1 /var/log/messages2 ... | gosh ~s sort \n" prog)
+  (newline)
+  (format #t "  * help\n")
+  (newline)
+  (format #t "	  gosh ~s help|-h|--help\n" prog)
+  (newline)
   (exit status))
 
 (define (string->date+year date-string year)
@@ -153,6 +166,9 @@
 	    (time<? (car a) (car b))))))))
 
 
+;;
+;; read-line/nl is taken from gauche/mime.scm.
+;; 
 ;;;
 ;;; mime.scm - parsing MIME (rfc2045) message
 ;;;  
