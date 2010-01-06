@@ -61,7 +61,7 @@ function main
 	    echo "No such directory: ${SOP_DIR}/dists/${d}/plugins" 1>&2
 	    return 1
 	fi
-    fi
+    done
 
     local cradle_dir=${SOP_CRADLES_DIR}/${name}
     local repo=${cradle_dir}/repo
