@@ -145,8 +145,8 @@ function parse_arguments
     elif [ -x "${ATTACHMENT}" ]; then
 	EXECUTABLE=${ATTACHMENT}
 	r=1
-    elif [ -x "${SRPMIX_DIST_PLUGIN_DIR}/${ATTACHMENT}" ]; then
-	EXECUTABLE="${SRPMIX_DIST_PLUGIN_DIR}/${ATTACHMENT}"
+    elif [ -x "${SRPMIX_WEAKVIEW_DIST_PLUGIN_DIR}/${ATTACHMENT}" ]; then
+	EXECUTABLE="${SRPMIX_WEAKVIEW_DIST_PLUGIN_DIR}/${ATTACHMENT}"
 	r=1
     else
 	echo "$ATTACHMENT is not a directory nor executable" 1>&2

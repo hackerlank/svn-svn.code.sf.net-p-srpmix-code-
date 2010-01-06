@@ -134,7 +134,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/srpmix/plugins/50srpmix-file
 %{_datadir}/srpmix/plugins/60srpmix-etags
 
-%dir %{_datadir}/srpmix/dist-plugins
+%dir %{_datadir}/srpmix/weakview-dist-plugins
 
 
 %{_datadir}/srpmix/utils
