@@ -1,0 +1,79 @@
+#!/bin/bash
+PKGDATADIR=/usr/share/sbuild
+
+CF=$1
+NAME=$2
+SBUILD_CONF=$3
+SOP_CONF=$4
+DATE=$5
+DATE_FOR_LOG=$6
+
+# source ${SBUILD_CONF}
+source ${SOP_CONF}
+
+# RUN_PLUGIN_NAME
+# RUN_PLUGIN_DISTS=
+
+function run
+{
+    local var_dir=$1
+    local output_dir=$2
+    local dist=$3
+    local plugin=$4
+
+
+    srpmix-weakview-dist-attach \
+	--srpmix-var-dir="${var_dir}" \
+	--output-dir="${output_dir}"  \
+	"$dist" \
+	"$plugin"
+
+    return $?
+}
+
+function main
+{
+    local cf=$1
+    local name=$2
+    local d
+
+
+    if ! source $cf; then
+	echo "Cannot load configuration file: $cf" 1>&2
+	return 1
+    fi
+
+    if [ -z "$RUN_PLUGIN_NAME" ]; then
+	echo "No RUN_PLUGIN_NAME found" 1>&2
+	return 1
+    fi
+    
+    if [ -z "$RUN_PLUGIN_DISTS" ]; then
+	echo "No RUN_PLUGIN_DISTS found" 1>&2
+	return 1
+    fi
+
+    for d in $RUN_PLUGIN_DISTS; do
+	if [ -d "${SOP_DIR}/dists/$d" ]; then
+	    echo "No such directory: ${SOP_DIR}/dists/${d}" 1>&2
+	    return 1
+	elif [ -d "${SOP_DIR}/dists/${d}/plugins" ]; then
+	    echo "No such directory: ${SOP_DIR}/dists/${d}/plugins" 1>&2
+	    return 1
+	fi
+    fi
+
+    local cradle_dir=${SOP_CRADLES_DIR}/${name}
+    local repo=${cradle_dir}/repo
+    mkdir -p "$repo"
+
+
+    for d in $RUN_PLUGIN_DISTS; do
+	local log="${cradle_dir}/log/run-weakview-dist-plugin-$d-${DATE_FOR_LOG}.log"
+	run "${SOP_DIR}" "$repo" "${d}" "${RUN_PLUGIN_NAME}" >> "${log}" 2>&1
+    done
+
+    return $?
+}
+
+time main "$@"
