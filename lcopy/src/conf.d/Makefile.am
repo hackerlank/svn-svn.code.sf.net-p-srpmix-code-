@@ -11,6 +11,7 @@ dist_confd_DATA = \
 	cluster,trunk.lcopy \
 	corosync,trunk.lcopy \
 	ddskk,trunk.lcopy \
+	device-mapper-multipath,trunk.lcopy \
 	dlm,trunk.lcopy \
 	emacs,trunk.lcopy \
 	fence,trunk.lcopy \
