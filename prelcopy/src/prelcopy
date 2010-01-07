@@ -1,16 +1,85 @@
 #!/bin/bash
-if ! source $1; then
+
+SCM=/usr/share/prelcopy/prelcopy.scm
+if ! [ -r $SCM ]; then
+    echo "Cannot find prelcopy.scm" 1>&2
     exit 1
 fi
 
-if [ -z "$PRELCOPY_CLASS" ]; then
-    exit 1
-fi
+CF=
+OUTPUT_DIR=
 
-classfile="/usr/libexec/prelcopy/classes/$PRELCOPY_CLASS"
-if ! [ -f "$classfile" ]; then
-    exit 1
-fi
+function print_usage
+{
+    echo "Usage: "
+    echo "	$0 [--output-dir=OUTPUT-DIR] CF.prelcopy"
+    echo "      $0 --help"
 
-"$classfile" $1 | gosh scm --output-dir=OUTPUT-DIR
+    exit $1
+}
 
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage 0
+		;;
+	    (--output-dir=*)
+	        OUTPUT_DIR=${1/--output-dir=}
+		if [ -d "${OUTPUT_DIR}" ]; then
+		    OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
+		else
+		    echo "No such directory: ${OUTPUT_DIR}" 2>&1
+		    exit 1
+		fi
+	        ;;
+	    --*)
+		echo "No such option: $1" 1>&2 
+		print_usage 1 1>&2
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift 1
+    done
+
+    if [ -z "$1" ]; then
+	print_usage 1 1>&2
+    fi
+
+    CF=$1
+    shift 1
+
+    if ! [ -z "$1" ]; then
+	echo "Too many arguments" 1>&2
+	print_usage 1 1>&2
+    fi
+}
+
+function main
+{
+    local classfile
+
+
+    parse_arguments "$@"
+  
+    if ! source $CF; then
+	exit 1
+    elif [ -z "$PRELCOPY_CLASS" ]; then
+	echo "No PRELCOPY_CLASS" 1>&2
+	exit 1
+    fi
+
+    classfile="/usr/libexec/prelcopy/classes/$PRELCOPY_CLASS"    
+    if ! [ -x "$classfile" ]; then
+	echo "No such class: $classfile" 1>&2
+	exit 1
+    fi
+
+    
+    "$classfile" $CF | gosh $SCM $OUTPUT_DIR
+}
+
+main "$@"
