@@ -1,4 +1,30 @@
 #!/bin/bash
+########################################################################
+#
+# srpmix-ix: Install and eXpand source rpms
+#
+# Copyright (C) 2010 Red Hat, Inc.
+# Copyright (C) 2010 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+
+
 
 IDX=
 PHRASE=
@@ -14,7 +40,7 @@ function print_help
     echo "	hgrep /srv/sources/dists/rhel5su4/packages/k/kernel/plugins/hyperestraier/idx \"Ingo\""
     echo "	hgrep rhel5su4 \"Ingo\""
     echo "	hgrep rhel5su4 kernel \"Ingo\""
-    echo "      hgrep rhel5su4 kernel glibc \"waitpid\""
+    echo "	hgrep rhel5su4 kernel glibc \"waitpid\""
     echo ""
 
     exit $1
@@ -23,7 +49,7 @@ function print_help
 function parse_arguments
 {
     if   [ "$#" = 1 ]; then
-	if [ $1 = "--help" ] || [ $1 = "-h" ] ; then
+	if [ "$1" = "--help" ] || [ "$1" = "-h" ] ; then
 	    print_help 0 1>&2
 	else
 	    print_help 1 1>&2
@@ -31,7 +57,7 @@ function parse_arguments
     elif [ "$#" = 2 ]; then
 	IDX="$1"
 	if ! [ -d $IDX ]; then
-	    IDX=/srv/sources/dists/$IDX/plugin/hyperestraier/idx
+	    IDX=/srv/sources/dists/$IDX/plugins/hyperestraier/idx
 	    if ! [ -d $IDX ]; then
 		echo "No such directory: $IDX" 1>&2
 		exit 1
@@ -68,7 +94,8 @@ function main
 
     for i in $IDX; do
 	estcmd search -max 10000 -vu "$i" "$PHRASE" 2>&1 \
-	    | grep -e 'file:///' | sed -e 's#[0-9]\+	file://##' \
+	    | grep --color=never -e 'file:///' \
+	    | sed -e 's#[0-9]\+	file://##' \
 	    | xargs -n 1 grep -nH -e "$PHRASE"
 	r0=$?
 
