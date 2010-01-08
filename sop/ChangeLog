@@ -1,5 +1,7 @@
 2010-01-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/mirror-prelcopy-sys: Don't use `local' in top level.
+
 	* src/cradle-confs/prelcopy.sys: New file.
 
 	* src/mirror-prelcopy-sys: Renamed from mirror-prelcopy.

@@ -15,17 +15,17 @@ fi
 
 lcopy-update --root-dir=$(pwd)
 
-local MY_TMPDIR=`mktemp -d`
+MY_TMPDIR=`mktemp -d`
 trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
 
 for c in "${PRELCOPY_SYS_CONF_DIR}"/*.prelcopy; do
     
-    local tmpdir=$MY_TMPDIR/$(basename $c .prelcopy)
+    tmpdir=$MY_TMPDIR/$(basename $c .prelcopy)
     mkdir -p $tmpdir
 
     prelcopy --output-dir=$tmpdir $c 
-    for d in $tmpdir/*.lcopy; do
-    	if [ -d "$f" ]; then
+    for f in $tmpdir/*.lcopy; do
+    	if [ -f "$f" ]; then
             lcopy-checkout --no-error-message-if-existing $f
 	fi
     done
