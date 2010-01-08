@@ -29,7 +29,7 @@ function main
     local vcs
     local vcs_args
     local status
-    local generated-by="manual"
+    local generated_by="manual"
 
 
     while [ $# -gt 0 ]; do
@@ -50,7 +50,7 @@ function main
 	    	update=no
 		;;
 	    (--generated-by=*)
-	    	generated-by=${1/--generated-by=}
+	    	generated_by=${1/--generated-by=}
 	        ;;
 	    --*)
 		echo "unknown option: $1" 1>&2
