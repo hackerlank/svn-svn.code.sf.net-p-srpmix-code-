@@ -7,7 +7,7 @@ function print_usage
 {
     echo "Usage: "
     echo "$0 --help|-h"
-    echo "$0 [--output-dir=OUTPUT-DIR] [--no-update] [--generator=GENERATOR] PACKAGE,BRANCH VCS-COMMANDS..."
+    echo "$0 [--output-dir=OUTPUT-DIR] [--no-update] [--generated-by=GENERATED-BY] PACKAGE,BRANCH VCS-COMMANDS..."
     echo ""
 
     echo "VCS-COMMANDS format:"
@@ -29,7 +29,7 @@ function main
     local vcs
     local vcs_args
     local status
-    local generator="manual"
+    local generated-by="manual"
 
 
     while [ $# -gt 0 ]; do
@@ -49,8 +49,8 @@ function main
 	    (--no-update)
 	    	update=no
 		;;
-	    (--generator=*)
-	    	generator=${1/--generator=}
+	    (--generated-by=*)
+	    	generated-by=${1/--generated-by=}
 	        ;;
 	    --*)
 		echo "unknown option: $1" 1>&2

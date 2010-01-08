@@ -1,3 +1,7 @@
+2010-01-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/lcopy-genconf: Rename --generator to --generated-by.
+
 2009-12-23  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/lcopy.spec.in (Requires): Remove srpmix.
