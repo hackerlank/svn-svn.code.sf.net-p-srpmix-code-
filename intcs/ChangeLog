@@ -1,0 +1,5 @@
+2010-01-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* doc/innode.dot: Move "/dev/misc/lock_dlm_plock" from clustergfs
+	to clusterdlm. Suggested by Kazuo Moriwaka <moriwaka@redhat.com>.
+

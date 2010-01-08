@@ -1,4 +1,8 @@
-// fdp
+/*
+ * Copyright (C) 2010 Red Hat, Inc.
+ * Copyright (C) 2010 Masatake YAMATO
+ */
+ 
 digraph innode {
 	graph[fontsize=6,label="Innode connections",rankdir=RL];	
 	node[fontsize=6];
@@ -12,10 +16,10 @@ digraph innode {
 			label="dlm";
 			"/dev/misc/dlm-contorol"[shape=circle];
 			"/dev/misc/dlm_default"[shape=circle];
+			"/dev/misc/lock_dlm_plock"[shape=circle];
 		}
 		subgraph clustergfs {
 			label="gfs";
-			"/dev/misc/lock_dlm_plock"[shape=circle];
 		}
         }
 	
