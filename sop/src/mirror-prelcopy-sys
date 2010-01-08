@@ -5,7 +5,7 @@ log=$2
 source $cf
 
 if test -z "$PRELCOPY_SYS_CONF_DIR"; then
-    echo "No LCOPY_SYS_CONF_DIR in $cf" 1>&2
+    echo "No PRELCOPY_SYS_CONF_DIR in $cf" 1>&2
     exit 1
 fi
 

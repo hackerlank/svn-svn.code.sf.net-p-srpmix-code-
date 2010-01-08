@@ -9,8 +9,10 @@ dist_pkgdata_SCRIPTS= \
 	mirror-koji   \
 	mirror-user   \
 	mirror-yum    \
-	mirror-lcopy-sys  \
-	mirror-lcopy-user \
+	mirror-lcopy-sys    \
+	mirror-lcopy-user   \
+	\
+	mirror-prelcopy-sys \
 	\
 	mirror-alias      \
 	mirror-nop        \

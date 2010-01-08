@@ -1,0 +1,14 @@
+#!/bin/bash
+METHOD=prelcopy-sys
+ENABLE=yes
+GC=no
+BACKUP=no
+BUILD=yes
+BUILDERS=lcopy
+# TODO
+DIST_MAPPING=no
+INSTALL=yes
+
+CREATEREPO_OPTS=
+
+PRELCOPY_SYS_CONF_DIR=/etc/prelcopy/conf.d

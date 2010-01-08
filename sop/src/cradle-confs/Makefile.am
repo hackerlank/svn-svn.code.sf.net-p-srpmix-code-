@@ -13,6 +13,8 @@ dist_cradleconf_DATA =				\
 	lcopy.sys				\
 	lcopy.user				\
 	\
+	prelcopy.sys				\
+	\
 	diix-ftp.redhat.com			\
 	\
 	hyperestraier.pkg			\

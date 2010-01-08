@@ -1,3 +1,9 @@
+2010-01-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cradle-confs/prelcopy.sys: New file.
+
+	* src/mirror-prelcopy-sys: Renamed from mirror-prelcopy.
+
 2010-01-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/mirror-prelcopy: Create a temporary directory.
