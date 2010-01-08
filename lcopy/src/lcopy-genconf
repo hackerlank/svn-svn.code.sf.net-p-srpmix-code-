@@ -22,7 +22,7 @@ function main
 {
     local original=$@
     local output_dir
-    local update=YES
+    local update=yes
     local package_branch
     local package
     local branch
@@ -119,7 +119,7 @@ function main
     status=$?
 
     if [ $status = 0 ]; then
-	lcopy_print_conf "$vcs" "$package" "$branch" "$update" "$manual" >> ${output_file}
+	lcopy_print_conf "$vcs" "$package" "$branch" "$update" "$generated_by" >> ${output_file}
 	if [ -n "$output_dir" ]; then
 	    mv ${output_file} ${output_dir}/"${package},${branch}.lcopy"
 	fi
