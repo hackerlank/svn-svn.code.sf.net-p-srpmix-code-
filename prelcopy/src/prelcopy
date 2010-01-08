@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCM=/usr/share/prelcopy/prelcopy.scm
+SCM=/usr/libexec/prelcopy/prelcopy.scm
 CF=
 OUTPUT_DIR=
 CLASSES_DIR=/usr/libexec/prelcopy/classes

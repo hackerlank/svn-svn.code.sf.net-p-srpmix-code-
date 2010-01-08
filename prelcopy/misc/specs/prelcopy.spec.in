@@ -1,0 +1,40 @@
+Summary: Prestage for lcopy-genconf
+Name: prelcopy
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPL
+Group: Development/Tools
+Buildarch: noarch
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: gauche curl
+BuildRequires: gauche curl
+
+%description
+Prestage for lcopy-genconf
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/prelcopy
+%{_sysconfdir}/prelcopy
+%{_libexecdir}/prelcopy/*
+
+%changelog
+* Fri Jan  8 2010 Masatake YAMATO <yamato@redhat.com> - 
+- Initial build.
+
