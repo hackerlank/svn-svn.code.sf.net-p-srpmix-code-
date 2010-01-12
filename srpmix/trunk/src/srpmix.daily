@@ -29,7 +29,7 @@ PATH=/bin:/usr/bin:/sbin:/usr/sbin
 
 if rpm -qi sop > /dev/null 2>&1; then
     echo "*** sop's cron job will do the same task" 1>&2
-    return 0
+    exit 0
 fi
 
 if test "x$FIND_OPTIONS" = "x"; then
