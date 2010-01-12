@@ -44,6 +44,12 @@ dist_confd_DATA = \
 	sbuild,trunk.lcopy \
 	sop,trunk.lcopy \
 	sos,trunk.lcopy \
+	spice,qxl.lcopy \
+	spice,trunk.lcopy \
+	spice,vdesktop.lcopy \
+	spice,vdi_agent.lcopy \
+	spice,vdi_port.lcopy \
+	spice,vdi_slirp.lcopy \
 	srpmix,trunk.lcopy \
 	stitch,trunk.lcopy \
 	twig,trunk.lcopy \
