@@ -1,3 +1,8 @@
+2010-01-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Apply basename before
+	checking the name of plugins starting "_".
+
 2010-01-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix.daily: Use exit instead of return.
