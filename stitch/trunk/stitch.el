@@ -248,7 +248,7 @@
 (defun stitch-buffer-file-name (&optional buffer)
   (with-current-buffer (or buffer (current-buffer))
     (or (buffer-file-name)
-	(and (eq major-mode 'dired-mode) dired-directory)
+	(and (eq major-mode 'dired-mode) (expand-file-name dired-directory))
 	(when (eq major-mode 'rfc-index-mode) (buffer-name)))))
 
 (defun stitch-make-completion-string-list (hash)
@@ -333,9 +333,10 @@
        ((< (cadr et1) (cadr et2)) t)
        (t
 	(equal (stitch-klist-value e1 :full-name)
-		    (stitch-get-user-full-name))))))))
+	       (stitch-get-user-full-name))))))))
 
 (defvar stitch-annotations (make-hash-table :test 'equal))
+(defvar stitch-annotations-fuzzy (make-hash-table :test 'equal))
 (defvar stitch-keywords    (make-hash-table :test 'eq))
 
 ;;
@@ -617,15 +618,18 @@
 					   annotation-home)
   (mapc
    (lambda (file)
-     (let ((entry (gethash file stitch-annotations ())))
-       (puthash file (cons (list :target target
-				 :annotation annotation
-				 :date date
-				 :full-name full-name
-				 :mailing-address mailing-address
-				 :keywords keywords
-				 :annotation-home annotation-home) entry)
-	       stitch-annotations)))
+     (let* ((entry (gethash file stitch-annotations ()))
+	    (entry (cons (list :registered-as file
+			       :target target
+			       :annotation annotation
+			       :date date
+			       :full-name full-name
+			       :mailing-address mailing-address
+			       :keywords keywords
+			       :annotation-home annotation-home) entry)))
+       (puthash file entry stitch-annotations)
+       (when (stitch-klist-value target :surround)
+	 (puthash (file-name-nondirectory file) entry stitch-annotations-fuzzy))))
      (stitch-target-get-files target)))
 
 (defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
@@ -769,12 +773,6 @@
 				      annotation date full-name mailing-address keywords)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun stitch-target-rearrange-region (region klist buffer)
-  ;; TODO
-  region
-  )
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun stitch-insert-annotations (&optional buffer)
   ;; Checking (boundp 'dirname) here is quite dirty hack.
   ;; See `dired-readin'. `dired-after-readin-hook' called twice for
@@ -786,23 +784,82 @@
       (let ((file (stitch-buffer-file-name (current-buffer))))
 	(when file
 	  (let ((entry (gethash file stitch-annotations nil)))
-	    (mapcar
+	    (mapc
 	     (lambda (e)
 	       (stitch-insert-annotation
 		;; (stitch-klist-value e :target)
 		(current-buffer)
-		(stitch-target-rearrange-region
-		 (stitch-target-get-region (stitch-klist-value e :target)
-					   file)
-		 e
-		 (current-buffer))
+		(stitch-target-get-region (stitch-klist-value e :target)
+					  file)
 		(stitch-klist-value e :annotation)
 		(stitch-klist-value e :date)
 		(stitch-klist-value e :full-name)
 		(stitch-klist-value e :mailing-address)
 		(stitch-klist-value e :keywords)))
-	     (nreverse (sort entry 'stitch-annotation-compare)))))))))
+	     (nreverse (sort entry 'stitch-annotation-compare))))
+	  (let ((base-name (file-name-nondirectory file)))
+	    ;; TODO: Directory fuzzy insertion is not supported now.
+	    (unless (equal base-name "")
+	      (let ((entry (gethash base-name stitch-annotations-fuzzy nil)))
+		(mapc
+		 (lambda (e)
+		   (unless  (equal (stitch-klist-value e :registered-as) file)
+		     (let ((region (stitch-search-region 
+				    (current-buffer)
+				    (stitch-klist-value e :target)
+				    )))
+		       (when region
+			 (stitch-insert-annotation
+			  ;; (stitch-klist-value e :target)
+			  (current-buffer)
+			  region
+			  (stitch-klist-value e :annotation)
+			  (stitch-klist-value e :date)
+			  (stitch-klist-value e :full-name)
+			  (stitch-klist-value e :mailing-address)
+			  (stitch-klist-value e :keywords))))))
+		 (nreverse (sort entry 'stitch-annotation-compare)))))))))))
 
+(defun stitch-search-make-search-text (r b f)
+  (let ((newline ""))
+    (let ((rb (if (equal r "")
+		  b
+		(if (equal b "")
+		    r
+		  (concat r newline b)))))
+      (if (equal rb "")
+	  f
+	(if (equal f "")
+	    rb
+	  (concat rb newline f))))))
+
+(defun stitch-search-region (buffer target)
+  ;; TODO: Directory fuzzy insertion is not supported now.
+  (with-current-buffer buffer
+    (when (eq (stitch-klist-value target :type) 'file)
+      (let* ((point (stitch-klist-value target :point))
+	     (surround (stitch-klist-value target :surround))
+	     (surround-text (stitch-search-make-search-text 
+			     (car surround)
+			     (cadr surround)
+			     (caddr surround)))
+	     (extra-length (length (car surround)))
+	     )
+	(save-excursion
+	  (goto-char (point-max))
+	  (let ((points (list)))
+	    (while (search-backward surround-text nil t)
+	      (setq points (cons (+ (point) extra-length) points)))
+	    (let ((delta (point-max))
+		  nearest)
+	      (while points
+		(when (< (abs (- point (car points))) delta)
+		  (setq delta (- point (car points))
+			nearest (car points)))
+		(setq points (cdr points)))
+	      (when nearest
+		(list nearest nearest)))))))))
+		
 
 (defun stitch-walk-annotations (proc &optional buffer)
   (with-current-buffer (or buffer (current-buffer))
@@ -904,6 +961,7 @@
    (if all-buffer (buffer-list) (list (current-buffer))))
   (unless just-rerender
     (setq stitch-annotations (make-hash-table :test 'equal))
+    (setq stitch-annotations-fuzzy (make-hash-table :test 'equal))
     (setq stitch-keywords (make-hash-table :test 'eq))
     (stitch-load-annotations))
   (mapcar
@@ -932,11 +990,11 @@
 	   (mapc
 	      (lambda (annotation)
 		  (stitch-register-annotation target
-					       annotation
-					       date full-name
-					       mailing-list
-					       keywords
-					       (list file-name start end)))
+					      annotation
+					      date full-name
+					      mailing-list
+					      keywords
+					      (list file-name start end)))
 	      annotation-list))
 	 target-list)
 	))
