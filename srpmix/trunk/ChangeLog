@@ -1,3 +1,7 @@
+2010-01-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Added missing `;'.
+
 2010-01-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-wrap (create_plugin_spec): Apply basename before

@@ -294,7 +294,7 @@ function create_plugin_spec
         buildarch="noarch"
     fi
 
-    for plugin in `srpmix_list_plugins` do
+    for plugin in `srpmix_list_plugins`; do
 	plugin=$(basename $plugin)
 	if ! [[ "$plugin" =~ "^_.*" ]]; then
 	    enable_plugin="$enable_plugin,$plugin"
