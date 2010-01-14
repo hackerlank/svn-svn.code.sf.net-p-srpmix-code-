@@ -1,5 +1,9 @@
 2010-01-14  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 3.112.0.
+
+	* src/srpmix-plugin: Remove --disable= option.
+
 	* src/srpmix-wrap (create_plugin_spec): Added missing `;'.
 
 2010-01-13  Masatake YAMATO  <yamato@redhat.com>

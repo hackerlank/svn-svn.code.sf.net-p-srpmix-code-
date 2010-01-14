@@ -37,8 +37,7 @@ function try_source
 }
 try_source ${LIBSRPMIX}
 
-
-ROOTDIR=a
+ROOTDIRS=
 
 function print_usage
 {
@@ -46,7 +45,8 @@ function print_usage
     echo "  srpmix-plugin --help|-h"
     echo "  srpmix-plugin --list|-L"
     echo "  srpmix-plugin --path-for=PLUGIN"
-    echo "  srpmix-plugin [--debug] [--enable=<plugins>] [--disable=<plugins>] [<ROOTDIR> ...]"
+#    echo "  srpmix-plugin [--debug] [--enable=<plugins>] [--disable=<plugins>] [<ROOTDIR> ...]"
+    echo "  srpmix-plugin [--debug] [--enable=<plugins>] [<ROOTDIR> ...]"
     echo 
     echo "<plugins> := <plugin0>[,<plugin1>...]"
     echo 
@@ -77,10 +77,10 @@ function parse_arguments
                 arg=$(echo "$1" | sed 's/--enable=//' | tr , ' ')
                 ENABLE_PLUGIN="$ENABLE_PLUGIN $arg"
 		;;
-            (--disable=*)
-                arg=$(echo "$1" | sed 's/--disable=//' | tr , ' ')
-                DISABLE_PLUGIN="$DISABLE_PLUGIN $arg"
-		;;
+#            (--disable=*)
+#                arg=$(echo "$1" | sed 's/--disable=//' | tr , ' ')
+#                DISABLE_PLUGIN="$DISABLE_PLUGIN $arg"
+#		;;
             --list|-L)
 		list_plugins
 		exit 0
@@ -140,11 +140,11 @@ function is_enabled_plugin
         fi
     done
 
-    for p in $DISABLE_PLUGIN; do
-        if test "x$p" = "x$target"; then
-            return 1
-        fi
-    done
+#    for p in $DISABLE_PLUGIN; do
+#        if test "x$p" = "x$target"; then
+#            return 1
+#        fi
+#    done
 
     return $default_result
 }
@@ -160,8 +160,10 @@ function list_plugin_candidates
 	f=$(basename $plugin)
 	n=$($plugin --name)
 
-        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
-	    || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
+#        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
+#	    || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
+#	    && echo ${n} $plugin
+        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) 
 	    && echo ${n} $plugin
     done
 
@@ -169,9 +171,11 @@ function list_plugin_candidates
 	f=$(basename $p)
 	n=$($p --name)
 
-       ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${b} 1 ) \
-	   || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
-	   && echo ${n} $p
+#       ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
+#	   || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
+#	   && echo ${n} $p
+	( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
+	    && echo ${n} $p
     done
 }
 
