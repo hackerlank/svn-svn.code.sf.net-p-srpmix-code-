@@ -163,7 +163,7 @@ function list_plugin_candidates
 #        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
 #	    || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
 #	    && echo ${n} $plugin
-        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) 
+        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 )  \
 	    && echo ${n} $plugin
     done
 
