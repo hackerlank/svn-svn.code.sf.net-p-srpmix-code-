@@ -1,3 +1,5 @@
+* nvreを保存するようにすること
+
 * 'grep -nH -e 'error: Package already exists: %package debuginfo' *'
 
 * rhel3のvanilla
