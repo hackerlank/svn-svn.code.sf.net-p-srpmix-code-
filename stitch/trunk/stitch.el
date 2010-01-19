@@ -1938,8 +1938,27 @@
 (define-key ctl-x-map    "Ag"  'stitch-reload-annotations)
 (define-key ctl-x-map    "At"  'stitch-toggle-annotation)
 
-
-
+;;
+(defvar stitch-menu (make-sparse-keymap "Stitch"))
+(define-key-after global-map [menu-bar stitch] (cons "Stitch"stitch-menu))
+(define-key-after stitch-menu [make-text-memo]
+  '(menu-item "Make Text Memorandum..." stitch-annotate-text))
+(define-key-after stitch-menu [make-generic-memo]
+  '(menu-item "Make Generic Memorandum..." stitch-annotate))
+(define-key-after stitch-menu [separator-0] '("--"))
+(define-key-after stitch-menu [list-memo]
+  '(menu-item "List Memorandum..." stitch-list-annotation))
+(define-key-after stitch-menu [next-memo]
+  '(menu-item "Next Memorandum" stitch-next-annotation))
+(define-key-after stitch-menu [prev-memo]
+  '(menu-item "Previous Memorandum" stitch-previous-annotation))
+(define-key-after stitch-menu [toggle-hide/show-memo]
+  '(menu-item "Toggle Hide/Show Memorandums" stitch-toggle-annotation))
+(define-key-after stitch-menu [separator-1] '("--"))
+(define-key-after stitch-menu [reload-memos]
+  '(menu-item "Reload Memorandums" stitch-reload-annotations))
+(define-key-after stitch-menu [eidt-memo-file]
+  '(menu-item "Edit Memorandums File" stitch-find-annotation-file))
 
 ;;
 ;; Navigation
