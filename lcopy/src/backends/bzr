@@ -145,19 +145,22 @@ function bzr_update
 {
     local input=$1
     local update_dir=$2
-    local log=/dev/null
+    local log=/tmp/bzr-update-$$
 
 
     cd "${update_dir}"
 
     if common_spawn bzr update | tee $log; then
-	if [ "$(wc -l < /tmp/bzr-update-$$)" = 1 ] \
-	   LANG=C grep  '^No revisions to pull.$' /tmp/bzr-update-$$ > /dev/null 2>&1; then
+	if [ "$(wc -l < $log)" = 1 ] && \
+	   LANG=C grep  '^No revisions to pull.$' $log > /dev/null 2>&1; then
+	    rm -f $log
 	    return 0
 	else
+	    rm -f $log
 	    return 1
 	fi
     else
+	rm -f $log
 	return 2
     fi
 }

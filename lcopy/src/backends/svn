@@ -147,19 +147,22 @@ function svn_update
 {
     local input=$1
     local update_dir=$2
-    local log=/dev/null
+    local log=/tmp/svn-update-$$
 
 
     cd "${update_dir}"
 
     if common_spawn svn update | tee $log; then
-	if [ "$(wc -l < /tmp/svn-update-$$)" = 1 ] \
-	   LANG=C grep  'At revision' /tmp/svn-update-$$ > /dev/null 2>&1; then
+	if [ "$(wc -l < $log)" = 1 ] && \
+	   LANG=C grep  'At revision' $log > /dev/null 2>&1; then
+	    rm -f $log
 	    return 0
 	else
+	    rm -f $log
 	    return 1
 	fi
     else
+	rm -f $log
 	return 2
     fi
 }

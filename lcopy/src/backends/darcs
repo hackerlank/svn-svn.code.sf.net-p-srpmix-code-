@@ -145,19 +145,22 @@ function darcs_update
 {
     local input=$1
     local update_dir=$2
-    local log=/dev/null
+    local log=/tmp/darcs-update-$$
 
 
     cd "${update_dir}"
 
     if common_spawn darcs pull --all --no-test | tee $log; then
-	if [ "$(wc -l < /tmp/darcs-update-$$)" -gt 1 ] \
-	   LANG=C grep  '^No remote changes to pull in!$' /tmp/darcs-update-$$ > /dev/null 2>&1; then
+	if [ "$(wc -l < $log)" -gt 1 ] && \
+	   LANG=C grep  '^No remote changes to pull in!$' $log > /dev/null 2>&1; then
+	    rm -f $log
 	    return 0
 	else
+	    rm -f $log
 	    return 1
 	fi
     else
+	rm -f $log
 	return 2
     fi
 }
