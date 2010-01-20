@@ -618,18 +618,22 @@
 					   annotation-home)
   (mapc
    (lambda (file)
-     (let* ((entry (gethash file stitch-annotations ()))
-	    (entry (cons (list :registered-as file
+     (let ((entry (list :registered-as file
 			       :target target
 			       :annotation annotation
 			       :date date
 			       :full-name full-name
 			       :mailing-address mailing-address
 			       :keywords keywords
-			       :annotation-home annotation-home) entry)))
-       (puthash file entry stitch-annotations)
+			       :annotation-home annotation-home)))
+       (puthash file 
+		(cons entry (gethash file stitch-annotations ()))
+		stitch-annotations)
        (when (stitch-klist-value target :surround)
-	 (puthash (file-name-nondirectory file) entry stitch-annotations-fuzzy))))
+	 (let ((base-name (file-name-nondirectory file)))
+	   (puthash base-name
+		    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
+		    stitch-annotations-fuzzy)))))
      (stitch-target-get-files target)))
 
 (defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
@@ -2002,7 +2006,6 @@
 (define-minor-mode stitch-annotation-mode
   "Toggle activating and deactivating stitch-annotation related key map."
   :group 'stitch
-  :lighter " Stitch"
-  )
+  :lighter " Stitch")
 
 (provide 'stitch)
