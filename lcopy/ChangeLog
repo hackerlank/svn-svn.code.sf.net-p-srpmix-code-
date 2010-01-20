@@ -1,3 +1,7 @@
+2010-01-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/lcopy-update (parse_arguments): Fix a typo.
+
 2010-01-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/lcopy-genconf: Rename --generator to --generated-by.
