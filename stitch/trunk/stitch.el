@@ -783,31 +783,34 @@
     (with-current-buffer (or buffer (current-buffer))
       (let ((file (stitch-buffer-file-name (current-buffer))))
 	(when file
-	  (let ((entry (gethash file stitch-annotations nil)))
-	    (mapc
-	     (lambda (e)
-	       (stitch-insert-annotation
-		;; (stitch-klist-value e :target)
-		(current-buffer)
-		(stitch-target-get-region (stitch-klist-value e :target)
-					  file)
-		(stitch-klist-value e :annotation)
-		(stitch-klist-value e :date)
-		(stitch-klist-value e :full-name)
-		(stitch-klist-value e :mailing-address)
-		(stitch-klist-value e :keywords)))
-	     (nreverse (sort entry 'stitch-annotation-compare))))
+	  (when (with-current-buffer (current-buffer)  buffer-file-read-only)
+	    (let ((entry (gethash file stitch-annotations nil)))
+	      (mapc
+	       (lambda (e)
+		 (stitch-insert-annotation
+		  ;; (stitch-klist-value e :target)
+		  (current-buffer)
+		  (stitch-target-get-region (stitch-klist-value e :target)
+					    file)
+		  (stitch-klist-value e :annotation)
+		  (stitch-klist-value e :date)
+		  (stitch-klist-value e :full-name)
+		  (stitch-klist-value e :mailing-address)
+		  (stitch-klist-value e :keywords)))
+	       (nreverse (sort entry 'stitch-annotation-compare)))))
 	  (let ((base-name (file-name-nondirectory file)))
 	    ;; TODO: Directory fuzzy insertion is not supported now.
 	    (unless (equal base-name "")
 	      (let ((entry (gethash base-name stitch-annotations-fuzzy nil)))
 		(mapc
 		 (lambda (e)
-		   (unless  (equal (stitch-klist-value e :registered-as) file)
+		   (unless  (and (equal (stitch-klist-value e :registered-as) file)
+				 (with-current-buffer (current-buffer) buffer-file-read-only)
+				 )
 		     (let ((region (stitch-search-region 
 				    (current-buffer)
 				    (stitch-klist-value e :target)
-				    )))
+				    )))	       
 		       (when region
 			 (stitch-insert-annotation
 			  ;; (stitch-klist-value e :target)
@@ -845,20 +848,21 @@
 			     (caddr surround)))
 	     (extra-length (length (car surround)))
 	     )
-	(save-excursion
-	  (goto-char (point-max))
-	  (let ((points (list)))
-	    (while (search-backward surround-text nil t)
-	      (setq points (cons (+ (point) extra-length) points)))
-	    (let ((delta (point-max))
-		  nearest)
-	      (while points
-		(when (< (abs (- point (car points))) delta)
-		  (setq delta (- point (car points))
-			nearest (car points)))
-		(setq points (cdr points)))
-	      (when nearest
-		(list nearest nearest)))))))))
+	(when surround
+	  (save-excursion
+	    (goto-char (point-max))
+	    (let ((points (list)))
+	      (while (search-backward surround-text nil t)
+		(setq points (cons (+ (point) extra-length) points)))
+	      (let ((delta (point-max))
+		    nearest)
+		(while points
+		  (when (< (abs (- point (car points))) delta)
+		    (setq delta (- point (car points))
+			  nearest (car points)))
+		  (setq points (cdr points)))
+		(when nearest
+		  (list nearest nearest))))))))))
 		
 
 (defun stitch-walk-annotations (proc &optional buffer)
