@@ -610,22 +610,22 @@
 				    date full-name mailing-address keywords
 				    home-r)
        ;;
-       (stitch-insert-annotation   b r
+       (stitch-insert-annotation0   b r
 				    annotation date full-name mailing-address keywords))
      target-list buffers regions)))
 
 (defun stitch-register-annotation (target annotation date full-name mailing-address keywords
-					   annotation-home)
+					  annotation-home)
   (mapc
    (lambda (file)
      (let ((entry (list :registered-as file
-			       :target target
-			       :annotation annotation
-			       :date date
-			       :full-name full-name
-			       :mailing-address mailing-address
-			       :keywords keywords
-			       :annotation-home annotation-home)))
+			:target target
+			:annotation annotation
+			:date date
+			:full-name full-name
+			:mailing-address mailing-address
+			:keywords keywords
+			:annotation-home annotation-home)))
        (puthash file 
 		(cons entry (gethash file stitch-annotations ()))
 		stitch-annotations)
@@ -634,7 +634,7 @@
 	   (puthash base-name
 		    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
 		    stitch-annotations-fuzzy)))))
-     (stitch-target-get-files target)))
+   (stitch-target-get-files target)))
 
 (defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
   (stitch-with-current-file stitch-annotation-file
@@ -764,8 +764,38 @@
 	(overlay-put o 'stitch-annotation t)
 	(overlay-put o 'stitch-keywords keywords)))))
 
+(defun stitch-insert-annotation-strict (file entry)
+  (when (with-current-buffer (current-buffer)  buffer-file-read-only)
+    (stitch-insert-annotation0
+     ;; (stitch-klist-value e :target)
+     (current-buffer)
+     (stitch-target-get-region (stitch-klist-value entry :target)
+			       file)
+     (stitch-klist-value entry :annotation)
+     (stitch-klist-value entry :date)
+     (stitch-klist-value entry :full-name)
+     (stitch-klist-value entry :mailing-address)
+     (stitch-klist-value entry :keywords))))
 
-(defun stitch-insert-annotation (buffer region annotation date full-name mailing-address keywords)
+(defun stitch-insert-annotation-fuzzy (file entry)
+  (unless (file-directory-p file)
+    (unless (and (equal (stitch-klist-value entry :registered-as) file)
+		 (with-current-buffer (current-buffer) buffer-file-read-only))
+      (let ((region (stitch-search-region 
+		     (current-buffer)
+		     (stitch-klist-value entry :target))))
+	(when region
+	  (stitch-insert-annotation0
+	   ;; (stitch-klist-value e :target)
+	   (current-buffer)
+	   region
+	   (stitch-klist-value entry :annotation)
+	   (stitch-klist-value entry :date)
+	   (stitch-klist-value entry :full-name)
+	   (stitch-klist-value entry :mailing-address)
+	   (stitch-klist-value entry :keywords)))))))
+
+(defun stitch-insert-annotation0 (buffer region annotation date full-name mailing-address keywords)
   (if (eq (car region) (cadr region))
       (stitch-insert-point-annotation buffer 
 				      (car region)
@@ -787,45 +817,16 @@
     (with-current-buffer (or buffer (current-buffer))
       (let ((file (stitch-buffer-file-name (current-buffer))))
 	(when file
-	  (when (with-current-buffer (current-buffer)  buffer-file-read-only)
-	    (let ((entry (gethash file stitch-annotations nil)))
-	      (mapc
-	       (lambda (e)
-		 (stitch-insert-annotation
-		  ;; (stitch-klist-value e :target)
-		  (current-buffer)
-		  (stitch-target-get-region (stitch-klist-value e :target)
-					    file)
-		  (stitch-klist-value e :annotation)
-		  (stitch-klist-value e :date)
-		  (stitch-klist-value e :full-name)
-		  (stitch-klist-value e :mailing-address)
-		  (stitch-klist-value e :keywords)))
-	       (nreverse (sort entry 'stitch-annotation-compare)))))
-	  (let ((base-name (file-name-nondirectory file)))
-	    ;; TODO: Directory fuzzy insertion is not supported now.
-	    (unless (equal base-name "")
-	      (let ((entry (gethash base-name stitch-annotations-fuzzy nil)))
-		(mapc
-		 (lambda (e)
-		   (unless  (and (equal (stitch-klist-value e :registered-as) file)
-				 (with-current-buffer (current-buffer) buffer-file-read-only)
-				 )
-		     (let ((region (stitch-search-region 
-				    (current-buffer)
-				    (stitch-klist-value e :target)
-				    )))	       
-		       (when region
-			 (stitch-insert-annotation
-			  ;; (stitch-klist-value e :target)
-			  (current-buffer)
-			  region
-			  (stitch-klist-value e :annotation)
-			  (stitch-klist-value e :date)
-			  (stitch-klist-value e :full-name)
-			  (stitch-klist-value e :mailing-address)
-			  (stitch-klist-value e :keywords))))))
-		 (nreverse (sort entry 'stitch-annotation-compare)))))))))))
+	  (let ((entries (gethash file stitch-annotations nil)))
+	    (mapc
+	     (lambda (entry) (stitch-insert-annotation-strict file entry))
+	     ;; TODO: This should be done in registration
+	     (nreverse (sort entries 'stitch-annotation-compare))))
+	  (let ((entries (gethash (file-name-nondirectory file) stitch-annotations-fuzzy nil)))
+	    (mapc
+	     (lambda (entry) (stitch-insert-annotation-fuzzy file entry))
+	     ;; TODO: This should be done in registration
+	     (nreverse (sort entries 'stitch-annotation-compare)))))))))
 
 (defun stitch-search-make-search-text (r b f)
   (let ((newline ""))
