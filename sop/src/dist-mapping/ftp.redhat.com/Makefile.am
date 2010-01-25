@@ -11,6 +11,8 @@ ds7.es	  ovirt093.es	 rhel3u1.es  rhel3u9.es  rhel4u7.es                     \
 \
 rhel5su4.es  \
 rhcmsys8.es  \
+rhcmsys7u2.es \
+rhcmsys7u3.es \
 \
 $(NULL)
 

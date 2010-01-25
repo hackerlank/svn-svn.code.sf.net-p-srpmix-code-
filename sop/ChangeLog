@@ -1,6 +1,11 @@
 2010-01-25  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA): Added dist mapping
+	for rhcmsys7u[23].
+
+2010-01-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA): Added dist mapping
 	for rhcmsys8.
 
 2010-01-09  Masatake YAMATO  <yamato@redhat.com>
