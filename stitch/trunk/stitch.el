@@ -159,6 +159,14 @@
   "Base face used to highlight anntations in source code."
   :group 'stitch)
 
+(defface stitch-annotation-fuzzy
+  '((((background light)) 
+     (:background "gray70" :italic t))
+    (((background dark)) 
+     (:background "gray30" :italic t)))
+  "Similar to stitch-annotation-base but used in fuzzy matched anntations."
+  :group 'stitch)
+
 (defface stitch-annotation-date
   '((t (:inherit (change-log-date stitch-annotation-base))))
   "Face used to highlight date in anntations."
@@ -294,17 +302,18 @@
 		(stitch-read-keywords prefix multi t)
 	      ())))))
 
-(defun stitch-make-annotation-header (date full-name mailing-address)
-  (if stitch-annotation-inline-show-header
-		  (concat
-		   (propertize date 'face 'stitch-annotation-date)
-		   (propertize "  " 'face 'stitch-annotation-base)
-		   (propertize full-name 'face 'stitch-annotation-name)
-		   (propertize "  <" 'face 'stitch-annotation-base)
-		   (propertize mailing-address 'face 'stitch-annotation-email)
-		   (propertize ">" 'face 'stitch-annotation-base)
-		   (propertize "\n\n" 'face 'stitch-annotation-base))
-		""))
+(defun stitch-make-annotation-header (date full-name mailing-address fuzzy?)
+  (let ((base-face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base)))
+    (if stitch-annotation-inline-show-header
+	(concat
+	 (propertize date 'face 'stitch-annotation-date)
+	 (propertize "  " 'face base-face)
+	 (propertize full-name 'face 'stitch-annotation-name)
+	 (propertize "  <" 'face base-face)
+	 (propertize mailing-address 'face 'stitch-annotation-email)
+	 (propertize ">" 'face base-face)
+	 (propertize "\n\n" 'face base-face))
+      "")))
 
 (defmacro stitch-with-current-file (f &rest body)
   `(let* ((loaded (get-file-buffer ,f))
@@ -435,11 +444,16 @@
 (defun stitch-annotation-save-form (annotation)
   (stitch-annotation-invoke-method annotation :save-form))
 
-(defun stitch-annotation-inline-format (annotation overlay
-						    date full-name mailing-address)
+(defun stitch-annotation-inline-format (annotation 
+					overlay
+					date 
+					full-name
+					mailing-address
+					fuzzy?)
   (stitch-annotation-invoke-method annotation :inline-format
-				    overlay
-				    date full-name mailing-address))
+				   overlay
+				   date full-name mailing-address
+				   fuzzy?))
 
 (defun stitch-annotation-list-format (annotation)
   (stitch-annotation-invoke-method annotation :list-format))
@@ -578,13 +592,13 @@
 					       target-list
 					       (list))))
 				(stitch-commit-annotation data
-							   target-list
-							   date
-							   full-name
-							   mailing-address
-							   buffers
-							   regions
-							   post-data)))))
+							  target-list
+							  date
+							  full-name
+							  mailing-address
+							  buffers
+							  regions
+							  post-data)))))
 	     (commit-args `(:target ,target
 			    :date   ,date
 			    :full-name ,full-name
@@ -597,26 +611,28 @@
 				commit-args)))))
 
 (defun stitch-commit-annotation (annotation
-				  target-list
-				  date full-name mailing-address
-				  buffers regions
-				  keywords)
+				 target-list
+				 date full-name mailing-address
+				 buffers regions
+				 keywords)
   (let ((home-r (stitch-save-annotation
 		 (mapcar 'stitch-target-save-form target-list)
 		 annotation date full-name mailing-address keywords)))
     (mapcar*
      (lambda (target b r)
+       ;; TODO
        (stitch-register-annotation target annotation
-				    date full-name mailing-address keywords
-				    home-r)
+				   date full-name mailing-address keywords
+				   home-r)
        ;;
        (stitch-insert-annotation0   b r
-				    annotation date full-name mailing-address keywords))
+				    annotation date full-name mailing-address keywords nil))
      target-list buffers regions)))
+
 
 (defun stitch-register-annotation (target annotation date full-name mailing-address keywords
 					  annotation-home)
-  (mapc
+  (mapcar
    (lambda (file)
      (let ((entry (list :registered-as file
 			:target target
@@ -633,7 +649,8 @@
 	 (let ((base-name (file-name-nondirectory file)))
 	   (puthash base-name
 		    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
-		    stitch-annotations-fuzzy)))))
+		    stitch-annotations-fuzzy)))
+       entry))
    (stitch-target-get-files target)))
 
 (defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
@@ -685,7 +702,7 @@
 	(overlay-put o 'stitch-keywords keywords)
 	o))))
 
-(defun stitch-insert-point-annotation (buffer pos annotation date full-name mailing-address keywords)
+(defun stitch-insert-point-annotation (buffer pos annotation date full-name mailing-address keywords fuzzy?)
   (with-current-buffer buffer
     (when (<= pos (point-max))
       (let* ((o (make-overlay pos pos buffer))
@@ -693,7 +710,8 @@
 						   o
 						   date
 						   full-name
-						   mailing-address)))
+						   mailing-address
+						   fuzzy?)))
 	;; FILTER the SI length here.
 	(overlay-put o 'after-string si)
 	;;      (overlay-put o 'display `((margin left-margin) "XXX"))
@@ -732,15 +750,16 @@
 					 ))
 	      (setq overlays nil))))))))
 
-(defun stitch-insert-region-annotation (buffer start end face annotation date full-name mailing-address keywords)
+(defun stitch-insert-region-annotation (buffer start end face annotation date full-name mailing-address keywords fuzzy?)
   (with-current-buffer buffer
     (when (<= end (point-max))
       (let* ((o (make-overlay start end buffer))
 	     (si (stitch-annotation-inline-format annotation
-						   o
-						   date
-						   full-name
-						   mailing-address)))
+						  o
+						  date
+						  full-name
+						  mailing-address
+						  fuzzy?)))
 	;; FILTER the SI length here.
 	(overlay-put o 'help-echo-string si)
 	;(overlay-put o 'mouse-face 'highlight)
@@ -775,7 +794,8 @@
      (stitch-klist-value entry :date)
      (stitch-klist-value entry :full-name)
      (stitch-klist-value entry :mailing-address)
-     (stitch-klist-value entry :keywords))))
+     (stitch-klist-value entry :keywords)
+     nil)))
 
 (defun stitch-insert-annotation-fuzzy (file entry)
   (unless (file-directory-p file)
@@ -793,18 +813,39 @@
 	   (stitch-klist-value entry :date)
 	   (stitch-klist-value entry :full-name)
 	   (stitch-klist-value entry :mailing-address)
-	   (stitch-klist-value entry :keywords)))))))
+	   (stitch-klist-value entry :keywords)
+	   t))))))
 
-(defun stitch-insert-annotation0 (buffer region annotation date full-name mailing-address keywords)
+(defun stitch-insert-annotation0 (buffer region annotation date full-name mailing-address keywords fuzzy?)
   (if (eq (car region) (cadr region))
       (stitch-insert-point-annotation buffer 
 				      (car region)
-				      annotation date full-name mailing-address keywords)
+				      annotation date full-name mailing-address keywords fuzzy?)
     (stitch-insert-region-annotation buffer
 				      (car region)
 				      (cadr region)
 				      (caddr region)
-				      annotation date full-name mailing-address keywords)))
+				      annotation date full-name mailing-address keywords fuzzy?)))
+
+(defun stitch-insert-annotations-strict (buffer)
+  (with-current-buffer buffer
+    (let ((file (stitch-buffer-file-name (current-buffer))))
+      (when file
+	(let ((entries (gethash file stitch-annotations nil)))
+	  (mapc
+	   (lambda (entry) (stitch-insert-annotation-strict file entry))
+	   ;; TODO: This should be done in registration
+	   (nreverse (sort entries 'stitch-annotation-compare))))))))
+
+(defun stitch-insert-annotations-fuzzy (buffer)
+  (with-current-buffer buffer
+    (let ((file (stitch-buffer-file-name (current-buffer))))
+      (when file
+	(let ((entries (gethash (file-name-nondirectory file) stitch-annotations-fuzzy nil)))
+	    (mapc
+	     (lambda (entry) (stitch-insert-annotation-fuzzy file entry))
+	     ;; TODO: This should be done in registration
+	     (nreverse (sort entries 'stitch-annotation-compare))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun stitch-insert-annotations (&optional buffer)
@@ -815,18 +856,8 @@
 	    (not (boundp 'dirname))
 	    (boundp 'failed))
     (with-current-buffer (or buffer (current-buffer))
-      (let ((file (stitch-buffer-file-name (current-buffer))))
-	(when file
-	  (let ((entries (gethash file stitch-annotations nil)))
-	    (mapc
-	     (lambda (entry) (stitch-insert-annotation-strict file entry))
-	     ;; TODO: This should be done in registration
-	     (nreverse (sort entries 'stitch-annotation-compare))))
-	  (let ((entries (gethash (file-name-nondirectory file) stitch-annotations-fuzzy nil)))
-	    (mapc
-	     (lambda (entry) (stitch-insert-annotation-fuzzy file entry))
-	     ;; TODO: This should be done in registration
-	     (nreverse (sort entries 'stitch-annotation-compare)))))))))
+      (stitch-insert-annotations-strict (current-buffer))
+      (stitch-insert-annotations-fuzzy (current-buffer)))))
 
 (defun stitch-search-make-search-text (r b f)
   (let ((newline ""))
@@ -917,6 +948,7 @@
 			(reverse (cdr (reverse lcurrent)))
 			(propertize
 			 "\n"
+			 ;; TODO: ??? fazy
 			 'face 'stitch-annotation-base))))))))
 
 
@@ -935,6 +967,7 @@
 			 (reverse (nthcdr (- (- llmaster llcurrent) 1) (reverse lmaster)))
 			 (propertize
 			  "\n"
+			  ;; TODO: ??? fazy
 			  'face 'stitch-annotation-base))))))))
 
 (defun stitch-shrink-annotations (&optional buffer)
@@ -1313,19 +1346,20 @@
 	   current-prefix-arg))
 
 (defun stitch-oneline-annotation-inline-format (annotation
-						 overlay
-						 date full-name mailing-address)
+						overlay
+						date full-name mailing-address
+						fuzzy?)
   (let ((pos (overlay-start overlay)))
     (let* ((b (char-before pos)))
       (concat ;; TODO
-	      (stitch-make-annotation-header date full-name mailing-address)
+	      (stitch-make-annotation-header date full-name mailing-address fuzzy?)
 	      ;;
 	      (propertize
 	       (stitch-klist-value annotation :data)
 	       'face 'stitch-annotation-body)
 	      (propertize
 	       "\n"
-	       'face 'stitch-annotation-base)))))
+	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
 
 (defun stitch-oneline-annotation-list-format (annotation)
   (stitch-klist-value annotation :data))
@@ -1436,8 +1470,9 @@
   (stitch-edit-annotation-new commit-func commit-args 'text-mode 'text))
 
 (defun stitch-text-annotation-inline-format (annotation
-						 overlay
-						 date full-name mailing-address)
+					     overlay
+					     date full-name mailing-address
+					     fuzzy?)
   (let ((pos (overlay-start overlay)))
     (let* ((b (char-before pos))
 	   (bn (or (eq b ?\n) (not b)))
@@ -1445,8 +1480,8 @@
       (concat (propertize
 	       (concat (if (eq major-mode 'dired-mode) "" "\n")
 		       (if bn "" "\n" ))
-	       'face 'stitch-annotation-base)
-	      (stitch-make-annotation-header date full-name mailing-address)
+	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))
+	      (stitch-make-annotation-header date full-name mailing-address fuzzy?)
 	      (propertize
 	       (stitch-klist-value annotation :data)
 	       'face 'stitch-annotation-body)
@@ -1454,7 +1489,7 @@
 	       (concat
 		(if (eq major-mode 'dired-mode) "" "\n")
 		(if an "" "\n" ))
-	       'face 'stitch-annotation-base)))))
+	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
 
 (defun stitch-text-annotation-list-format (annotation)
   (stitch-klist-value annotation :data))
@@ -1472,15 +1507,17 @@
 ;; Graphviz Common
 ;;
 (defun stitch-graphviz-annotation-inline-format (cmd
-						  annotation
-						  overlay
-						  date full-name mailing-address)
+						 annotation
+						 overlay
+						 date full-name mailing-address
+						 fuzzy?)
   (let ((pos (overlay-start overlay)))
     (let* ((b (char-before pos))
 	   (bn (or (eq b ?\n) (not b)))
 	   (an (eq (char-after pos) ?\n)))
-      (concat (propertize (concat "\n" (if bn "" "\n" )) 'face 'stitch-annotation-base)
-	      (stitch-make-annotation-header date full-name mailing-address)
+      (concat (propertize (concat "\n" (if bn "" "\n" )) 
+			  'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))
+	      (stitch-make-annotation-header date full-name mailing-address fuzzy?)
 	      (propertize
 	       " "
 	       'display (stitch-graphviz-create-image (stitch-klist-value annotation :data)
@@ -1490,7 +1527,7 @@
 	       (concat
 		"\n"
 		(if an "" "\n" ))
-	       'face 'stitch-annotation-base)))))
+	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
 
 (defun stitch-graphviz-annotation-list-format (annotation cmd)
   (concat "\n"
@@ -1532,12 +1569,14 @@
 				    (quote ,(intern (format "graphviz-%S" cmd)))))
      ;;
      (defun ,(intern (format "stitch-%S-annotation-inline-format" cmd)) (annotation
-									  overlay
-									  date full-name mailing-address)
+									 overlay
+									 date full-name mailing-address
+									 fuzzy?)
        (stitch-graphviz-annotation-inline-format ,(symbol-name cmd)
 						  annotation
 						  overlay
-						  date full-name mailing-address))
+						  date full-name mailing-address
+						  fuzzy?))
      (defun ,(intern (format "stitch-%S-annotation-list-format" cmd)) (annotation)
        (stitch-graphviz-annotation-list-format annotation ,(symbol-name cmd)))
      (stitch-register-annotation-handler
@@ -1564,13 +1603,15 @@
 (defun stitch-mscgen-annotation-new (commit-func commit-args)
   (stitch-edit-annotation-new commit-func commit-args 'graphviz-dot-mode 'mscgen))
 (defun stitch-mscgen-annotation-inline-format (annotation
-						overlay
-						date full-name mailing-address)
+					       overlay
+					       date full-name mailing-address
+					       fuzzy?)
   (stitch-graphviz-annotation-inline-format
    'stitch-mscgen-make-command-line
    annotation
    overlay
-   date full-name mailing-address))
+   date full-name mailing-address
+   fuzzy?))
 
 (defun stitch-mscgen-annotation-list-format (annotation)
   (stitch-graphviz-annotation-list-format annotation
@@ -1614,13 +1655,15 @@
    pngfile))
 
 (defun stitch-groff-annotation-inline-format (annotation
-					     overlay
-					     date full-name mailing-address)
+					      overlay
+					      date full-name mailing-address
+					      fuzzy?)
   (stitch-graphviz-annotation-inline-format
    'stitch-groff-make-command-line
    annotation
    overlay
-   date full-name mailing-address))
+   date full-name mailing-address
+   fuzzy?))
 
 (defun stitch-groff-annotation-list-format (annotation)
   (stitch-graphviz-annotation-list-format
@@ -1709,7 +1752,8 @@
 	      (concat (stitch-make-annotation-header
 		       (stitch-klist-value e :date)
 		       (stitch-klist-value e :full-name)
-		       (stitch-klist-value e :mailing-address))
+		       (stitch-klist-value e :mailing-address)
+		       nil)
 		      (let ((file (file-name-nondirectory k)))
 			(propertize (concat
 				     (if (equal "" file)
@@ -1896,7 +1940,7 @@
 		      (stitch-klist-value e :date)
 		      (stitch-klist-value e :full-name)
 		      (stitch-klist-value e :mailing-address)
-		      )))
+		      nil)))
 	   (let ((p (point)))
 	     (insert "\n")
 	     (insert (stitch-klist-value e :subject))
@@ -1957,10 +2001,12 @@
 (define-key-after stitch-menu [separator-0] '("--"))
 (define-key-after stitch-menu [list-memo]
   '(menu-item "List Memorandum..." stitch-list-annotation))
-(define-key-after stitch-menu [next-memo]
-  '(menu-item "Next Memorandum" stitch-next-annotation))
+
 (define-key-after stitch-menu [prev-memo]
   '(menu-item "Previous Memorandum" stitch-previous-annotation))
+(define-key-after stitch-menu [next-memo]
+  '(menu-item "Next Memorandum" stitch-next-annotation))
+
 (define-key-after stitch-menu [toggle-hide/show-memo]
   '(menu-item "Toggle Hide/Show Memorandums" stitch-toggle-annotation))
 (define-key-after stitch-menu [separator-1] '("--"))
