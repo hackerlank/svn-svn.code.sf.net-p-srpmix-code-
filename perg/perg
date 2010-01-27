@@ -3,7 +3,8 @@ log=$1
 shift
 max=30
 
-{ cat "$@" ; echo "(log " \""$2"\" ")"; } \
+{ cat "$@" | es-src-xgettext use-stdin ; echo "(log " \""$log"\" ")"; } \
   | es-filter-filelines \
-  | es-filter-spout :filelines :fileline $max\
+  | es-filter-spout :filelines :fileline $max \
   | es-dest-grep '(:fileline :file)' '(:fileline :line)' '(:fileline :msg)' '(1)'
+

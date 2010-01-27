@@ -18,5 +18,5 @@
 		(if (string-match "\\(.*\\)/plugins.*" file)
 		    (format "cd %s; " (expand-file-name (match-string 1 file)))
 		  "")
-		pattern file))
+		pattern file)))
 (provide 'perg)
