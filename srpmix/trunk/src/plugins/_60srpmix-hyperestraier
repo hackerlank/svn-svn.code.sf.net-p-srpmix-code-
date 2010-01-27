@@ -134,6 +134,9 @@ function list_files() {
     ( cd $1 && find -L pre-build -not -type d )
   fi
 
+  if test -f "$1/specs.spec"; then
+      echo specs.spec
+  fi
 }
 
 # run_estcmd_create <plugindir>
