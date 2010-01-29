@@ -1,10 +1,78 @@
-#!/bin/sh
-log=$1
-shift
-max=30
+#!/bin/bash
+FORMAT=grep
+LIMIT=30
+LOG=
+XGETTEXTS=
 
-{ cat "$@" | es-src-xgettext use-stdin ; echo "(log " \""$log"\" ")"; } \
-  | es-filter-filelines \
-  | es-filter-spout :filelines :fileline $max \
-  | es-dest-grep '(:fileline :file)' '(:fileline :line)' '(:fileline :msg)' '(1)'
+function print_usage
+{
+    echo "Usage: "
+    echo "	$0 --help|-h"
+    echo "	$0 [--format=es|grep] [--limit=N] PATTERN|- XGETTEXT.OUT..."
+}
 
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    (--format=*)
+		FORMAT=${1/--format=}
+		if [ "$FORMAT" = "es" ] || [ "$FORMAT" = "grep" ]; then
+		    :
+		else
+		    print_usage 1>&2
+		    exit 1
+		fi
+		;;
+	    (--limit=*)
+                LIMIT=${1/--limit=}
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if [ $# -lt 2 ]; then
+	print_usage 1>&2
+	exit 1
+    fi
+
+    LOG=$1
+    shift
+    XGETTEXTS=$@
+}
+
+function main
+{
+    parse_arguments "$@"
+    
+    {
+	{ cat $XGETTEXTS | es-src-xgettext use-stdin; }
+	if [ "$LOG" = "-" ]; then
+	    while read; do
+		echo "(log " \""$REPLY"\" ")"
+	    done
+	else
+	    echo "(log " \""$LOG"\" ")"
+	fi
+    } | {
+	es-filter-filelines
+    } | {
+	if [ "$FORMAT" = "es" ]; then
+	    cat
+	elif [ "$FORMAT" = "grep" ]; then
+	    es-filter-spout :filelines :fileline $LIMIT \
+		| es-dest-grep '(:fileline :file)' '(:fileline :line)' '(:fileline :msg)' '(1)'
+	else
+	    :
+	fi
+    }
+}
+
+main "$@"
