@@ -26,7 +26,7 @@ done | LANG=C sort | uniq > $FS
 
 RPMS=/tmp/sop-gc-rpms
 touch $RPMS
-for x in $(rpm -qa | grep -e -srpmix | grep -v -e srpmix-plugin  | grep -v -e srpmix-archives); do
+for x in $(rpm -qa | grep -e -srpmix | grep -v -e srpmix-plugin  | grep -v -e srpmix-archives | grep -v -e -lcopy-); do
     echo $x | sed -e 's/-srpmix.*$//'
 done | LANG=C sort | uniq > $RPMS
 
@@ -34,7 +34,7 @@ MIRROR=/tmp/sop-gc-mirror
 touch $MIRROR
 for d in ${SOP_CRADLES_DIR}/*/mirror; do
     for s in $(find $d -type f | grep 'src.rpm$'); do
-	rpm -qp --queryformat "%{NAME} %{VERSION}-%{RELEASE}\n" $s
+	rpm -qp --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" $s
     done
 done | LANG=C sort | uniq > $MIRROR
 
@@ -45,10 +45,10 @@ function report
     mirror=$3
     
     echo FS level garbage:
-    diff $rpms $fs | grep ^+
+    diff -ruN $rpms $fs | grep ^+
 
     echo RPM level garbage:
-    diff $mirror $rpms
+    diff -ruN $mirror $rpms
 }
 
 
