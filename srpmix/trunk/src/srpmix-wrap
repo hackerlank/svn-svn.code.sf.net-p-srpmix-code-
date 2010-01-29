@@ -104,7 +104,7 @@ function parse_arguments
 	        SRPMIX_ENABLE_PLUGIN=$(echo $1 | sed 's/--enable=//')
 		;;
             --disable=*)
-	        SRPMIX_ENABLE_PLUGIN=$(echo $1 | sed 's/--disable=//')
+	        SRPMIX_DISABLE_PLUGIN=$(echo $1 | sed 's/--disable=//')
 		;;
             --plugin-name=*)
 	        OPT_PLUGIN_NAME=$(echo $1 | sed 's/--plugin-name=//')
@@ -331,8 +331,8 @@ if test -d %{_builddir}/%{name}; then
   rm -rf %{_builddir}/%{name}
 fi
 mkdir -p %{_builddir}/%{name}
-srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR -i %{SOURCE0}
-srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR -i %{SOURCE1}
+srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --ignoresize -i %{SOURCE0}
+srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --ignoresize -i %{SOURCE1}
 
 %build
 touch %{_builddir}/%{name}/.run-plugin

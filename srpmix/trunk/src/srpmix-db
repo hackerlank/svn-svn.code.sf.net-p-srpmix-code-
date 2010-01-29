@@ -7,7 +7,7 @@ COMMAND=
 QUIET=
 SRPMIX_DB_DEBUG=
 SWRFPM_OPTS=
-
+IGNORESIZE=
 LIBSRPMIX=libsrpmix.sh
 
 
@@ -25,7 +25,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db -h|--help"
-    echo "  srpmix-db [--debug] [--hardlink] [--root=ROOT] [--quite|-q] -i|--install SWRF..."
+    echo "  srpmix-db [--debug] [--hardlink] [--root=ROOT] [--quite|-q] [--ignoresize] -i|--install SWRF..."
     echo "  srpmix-db [--debug] [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
     echo "  srpmix-db [--debug] -l|--list"
     echo
@@ -79,6 +79,10 @@ function parse_arguments
 		;;
 	    --hardlink)
 	        SRPMIX_DO_HARDLINK=yes
+		shift 1
+		;;
+            --ignoresize)
+	        IGNORESIZE=--ignoresize
 		shift 1
 		;;
 	    --debug)
@@ -167,6 +171,7 @@ function do_install
 	    --nodeps \
 	    --dbpath "$SRPMIX_VAR_DIR"/"$db" \
 	    --prefix "$SRPMIX_VAR_DIR" \
+	    $IGNORESIZE \
 	    "$package"
 
 

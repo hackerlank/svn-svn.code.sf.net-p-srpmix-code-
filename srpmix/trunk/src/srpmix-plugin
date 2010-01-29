@@ -160,11 +160,15 @@ function list_plugin_candidates
 	f=$(basename $plugin)
 	n=$($plugin --name)
 
+	    if [ -n "$ENABLE_PLUGIN" ]; then
 #        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
 #	    || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
 #	    && echo ${n} $plugin
-        ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 )  \
-	    && echo ${n} $plugin
+		( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 )  \
+		    && echo ${n} $plugin
+	    else
+		echo ${n} $plugin
+	    fi
     done
 
     for p in $SRPMIX_EXTRA_PLUGINS; do
@@ -174,8 +178,12 @@ function list_plugin_candidates
 #       ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
 #	   || ( is_enabled_plugin ${f} 0 && is_enabled_plugin ${n} 0 ) \
 #	   && echo ${n} $p
-	( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
-	    && echo ${n} $p
+	if [ -n "$ENABLE_PLUGIN" ]; then
+	    ( is_enabled_plugin ${f} 1 || is_enabled_plugin ${n} 1 ) \
+		&& echo ${n} $p
+	else
+	    echo ${n} $p
+	fi
     done
 }
 

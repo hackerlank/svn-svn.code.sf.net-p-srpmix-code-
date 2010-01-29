@@ -1,3 +1,15 @@
+2010-01-29  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.113.0.
+
+	* src/srpmix-plugin (list_plugin_candidates): List all plugins if
+	ENABLE_PLUGIN is not specified.
+	
+	* src/srpmix-db (print_usage): Added --ignoresize option.
+
+	* src/srpmix-wrap (parse_arguments): Fix a typo
+	about SRPMIX_DISABLE_PLUGIN.
+
 2010-01-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/_60srpmix-hyperestraier (list_files): Addes specs.spec.
