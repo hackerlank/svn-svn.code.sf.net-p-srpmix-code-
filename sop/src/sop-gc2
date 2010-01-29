@@ -12,11 +12,11 @@ else
     echo "Cannot load ${CONF} file" 1>&2
     exit 1
 fi
-
-if false; then
+echo ${SOP_SOURCES_DIR}
+exit 1
 FS=/tmp/sop-gc-fs
 touch $FS
-for x in ${SOP_SOURCES_DIR}/[0-9a-zA-Z]/*/pre-build; do
+for x in ${SOP_SOURCES_DIR}/[0-9a-zA-Z]/*/*/pre-build; do
     if ! [[ "$x" =~ '.*\^.*' ]]; then
 	echo $x
     fi
@@ -27,11 +27,11 @@ touch $RPMS
 for x in $(rpm -qa | grep -e -srpmix | grep -v -e srpmix-plugin  | grep -v -e srpmix-archives); do
     echo $x
 done | LANG=C sort > $RPMS
-fi
+
 MIRROR=/tmp/sop-gc-mirror
 touch $MIRROR
 for d in ${SOP_CRADLES_DIR}/*/mirror; do
-    for s in $(find $d -type f | grep src.rpm); do
+    for s in $(find $d -type f | grep 'src.rpm$'); do
 	rpm -qp --queryformat "%{NAME} %{VERSION}-%{RELEASE}" $s
     done
 done | LANG=C sort > $MIRROR
