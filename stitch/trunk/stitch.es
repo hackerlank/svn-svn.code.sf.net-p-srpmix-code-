@@ -66,3 +66,6 @@
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/fence/fenced/agent.c" :point 6102 :coding-system undecided-unix :line 297 :surround ("
 " "" "	/* Mark it as fenced */
 	if (!cman_get_node(ch, 0, &node))") :which-func ("update_cman"))) :annotation-list ((annotation :type text :data "fencingが完了したことを伝えるために、cmanを呼ぶ。")) :date "Thu Nov 19 11:46:29 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/r/readline/6.0-3.fc12/pre-build/readline-6.0/text.c" :point 9679 :coding-system undecided-unix :line 435 :surround ("/* Move forward a word.  We do what Emacs does.  Handles multibyte chars. */
+" "" "int
+rl_forward_word (count, key)") :which-func ("rl_end_of_line"))) :annotation-list ((annotation :type text :data "forward char")) :date "Wed Jan 20 02:50:01 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (readline-subword))
