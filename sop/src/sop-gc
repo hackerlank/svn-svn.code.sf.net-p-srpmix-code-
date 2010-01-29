@@ -37,3 +37,19 @@ for d in ${SOP_CRADLES_DIR}/*/mirror; do
 	rpm -qp --queryformat "%{NAME} %{VERSION}-%{RELEASE}\n" $s
     done
 done | LANG=C sort | uniq > $MIRROR
+
+function report
+{
+    fs=$1
+    rpms=$2
+    mirror=$3
+    
+    echo FS level garbage:
+    diff $rpms $fs | grep ^+
+
+    echo RPM level garbage:
+    diff $mirror $rpms
+}
+
+
+report $FS $RPMS $MIRROR | tee /tmp/sop-gc-report
