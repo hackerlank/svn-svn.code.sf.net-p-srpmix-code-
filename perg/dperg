@@ -1,0 +1,193 @@
+;; -*- scheme -*-
+(use file.util)
+(use gauche.parseopt)
+(use gauche.process)
+(use gauche.selector)
+(use es.src.syslog)
+(use es.dest.syslog)
+(use text.html-lite)
+(use text.tree)
+
+(debug-print-width #f)
+
+(define (show-help prog n)
+  (format #t "~a [--limit=N] [--format=es|html] DIST < /var/log/message\n" prog)
+  (exit n))
+
+
+(define (cmd->package cmd dist)
+  (cond
+   ((equal? cmd "kernel")
+    (values "kernel" "2.6.33-0.20.rc5.git0.fc13"))
+   ((equal? cmd "rsyslogd")
+    (values "rsyslog" "4.4.2-3.fc13"))
+   ((equal? cmd "dhclient")
+    (values "dhcp" "4.1.1-1.fc13")
+    )
+   (else
+    (values #f #f))))
+
+(define (package-version->xgettxt pkg ver)
+  (if pkg
+      (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
+	      (substring pkg 0 1)
+	      pkg
+	      ver)
+      #f))
+
+(define-class <perg> ()
+  ((package-version :init-keyword :package-version)
+   (logs     :init-form    (list))))
+
+(define perg-cmd "./perg")
+(define-method run ((perg <perg>) (limit <integer>))
+  (let ((xgettext (if (symbol? (ref perg 'package-version))
+		      (ref perg 'package-version)
+		      (apply package-version->xgettxt (ref perg 'package-version))))
+	(limit-flag (format "--limit=~d" limit)))
+    (cond
+     ((and (string? xgettext)
+	   (file-is-readable? xgettext))
+      (let1 proc (run-process #?=`(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
+			      :input :pipe
+			      :output :pipe)
+	(values proc
+		(process-input proc)
+		(process-output proc)
+		)))
+     (else
+      (values #f #f #f)))))
+
+(define-method push-log! ((perg <perg>) log)
+  (push! (ref perg 'logs) log))
+(define-method pop-log! ((perg <perg>))
+  (pop! (ref perg 'logs)))
+(define-method empty? ((perg <perg>))
+  (null? (ref perg 'logs)))
+
+(define-method add-log! (pergs log dist)
+  (let1 cmd-k (memq :cmd log)
+    (let1 cmd (if cmd-k 
+		 (or (cadr cmd-k) 'not-given)
+		 'raw)
+      (let1 perg (or (hash-table-get pergs cmd #f)
+		     (let1 perg (make <perg> :package-version
+				      (if (string? cmd)
+					  (receive (pkg ver) (cmd->package cmd dist)
+			 		    (list pkg ver)
+					    )
+					  cmd))
+		       (hash-table-put! pergs cmd perg)
+		       perg))
+	(push-log! perg log)))))
+
+
+(define (attach-line-number log n)
+  (reverse (cons n (cons :line-number (reverse log)))))
+
+
+(define (prepare-pergs dist)
+  (let loop ((l (read-line))
+	     (n 0)
+	     (pergs (make-hash-table 'equal?)))
+    (if (eof-object? l)
+	pergs
+	(let1 log ((with-module es.src.syslog syslog) l)
+	  (add-log! pergs (attach-line-number log n) dist)
+	  (loop (read-line) (+ n 1) pergs)))))
+
+(define-method run (pergs limit)
+  (let ((selector (make <selector>))
+	(n-procs 0)
+	(result   (list)))
+    (for-each
+     (lambda (perg)
+       (receive (proc write-target read-target) (run perg limit)
+	 (if proc
+	     (begin
+	       (set! n-procs (+ n-procs 1))
+	       (selector-add! selector write-target
+			      (lambda (output flag)
+				(let1 log (pop-log! perg)
+				  ;(display (cadr (memq :msg log)) output)
+				  (write `(log ,(cadr (memq :msg log)) 
+					       :date ,(cadr (memq :date log))
+					       :host ,(cadr (memq :host log))
+					       :cmd  ,(cadr (memq :cmd log))
+					       :pid  ,(cadr (memq :pid log))
+					       :line-number ,(cadr (memq :line-number log))
+					       :package-version ,(ref perg 'package-version)
+					       ) 
+					 output)
+				  (newline output)
+				  (when (empty? perg)
+				    (selector-delete! selector output #f #f)
+				    (close-output-port output))))
+			      '(w))
+	       (selector-add! selector read-target
+			      (lambda (input flag)
+				(let1 log (read input)
+				  (if (eof-object? log)
+				      (begin (selector-delete! selector input #f #f)
+					     (close-input-port input)
+					     (process-wait proc)
+					     (set! n-procs (- n-procs 1)))
+				      (push! result log))))
+			      '(r)))
+	     (until (empty? perg)
+	       (let1 log (pop-log! perg)
+		 (push! result log))))))
+     (hash-table-values pergs))
+    (let loop ()
+      (when (< 0 n-procs)
+	(selector-select selector)
+	(loop)))
+    (sort result
+	  (lambda (a b)
+	    (< (cadr (memq :line-number a))
+	       (cadr (memq :line-number b)))))))
+
+(define (log->syslog log)
+  (cons 'syslog (cons :msg (cdr log))))
+
+(define (report results fmt)
+  (case fmt
+    ('es
+     (for-each
+      (lambda (r)
+	(write r)
+	(newline))
+      results))
+    ('html
+     (display
+      (tree->string
+     (html:html
+      (map
+       (lambda (r)
+	 (case (car r)
+	   ('log 
+	    (list (html:pre (html-escape-string
+			     ((with-module es.dest.syslog syslog) (log->syslog r))))
+		  ;(html:pre "\n")
+		  )
+	    )
+	   ('syslog
+	    (list (html:pre (html-escape-string 
+			((with-module es.dest.syslog syslog) r)))
+		  ;(html:pre "\n")
+		  ))))
+       results)))))))
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cut show-help name 0))
+       (limit "limit=i" 3)
+       (report-format "format=y" 'html)
+       . rest)
+    (if (eq? (length rest) 1)
+	(report (run (prepare-pergs (car rest)) limit)
+		report-format)
+	(with-output-to-port (current-error-port)
+	  (lambda ()
+	    (show-help (car args) 1))))))
+

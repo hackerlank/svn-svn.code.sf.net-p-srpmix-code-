@@ -8,7 +8,7 @@ function print_usage
 {
     echo "Usage: "
     echo "	$0 --help|-h"
-    echo "	$0 [--format=es|grep] [--limit=N] PATTERN|- XGETTEXT.OUT..."
+    echo "	$0 [--format=es|grep] [--limit=N] PATTERN|-|= XGETTEXT.OUT..."
 }
 
 function parse_arguments
@@ -57,6 +57,10 @@ function main
 	if [ "$LOG" = "-" ]; then
 	    while read; do
 		echo "(log " \""$REPLY"\" ")"
+	    done
+	elif [ "$LOG" = "=" ]; then
+	    while read; do
+		echo "$REPLY"
 	    done
 	else
 	    echo "(log " \""$LOG"\" ")"
