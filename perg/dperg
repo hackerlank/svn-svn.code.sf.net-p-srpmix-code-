@@ -7,6 +7,8 @@
 (use es.dest.syslog)
 (use text.html-lite)
 (use text.tree)
+(use srfi-1)
+
 
 (debug-print-width #f)
 
@@ -150,7 +152,15 @@
 (define (log->syslog log)
   (cons 'syslog (cons :msg (cdr log))))
 
-(define (report results fmt)
+(define (make-href package version file line)
+  (format "file:///srv/sources/sources/~a/~a/~a/~a"
+	  (substring package 0 1)
+	  package
+	  version
+	  file
+	  ))
+
+(define (report results fmt limit)
   (case fmt
     ('es
      (for-each
@@ -161,32 +171,57 @@
     ('html
      (display
       (tree->string
-     (html:html
-      (map
-       (lambda (r)
-	 (case (car r)
-	   ('log 
-	    (list (html:pre (html-escape-string
-			     ((with-module es.dest.syslog syslog) (log->syslog r))))
-		  ;(html:pre "\n")
-		  )
-	    )
+       (html:html
+	(map
+	 (lambda (r)
+	   (case (car r)
+	     ('log 
+	      (let* ((filelines (cadr (memq :filelines r)))
+		     (n-filelines (length filelines))
+		     (log-line ((with-module es.dest.syslog syslog) (log->syslog r)))
+		     (log-line-len (string-length log-line))
+		     (package-version (cadr (memq :package-version r))))
+		(list (html:pre 
+		       (html:a :href "" (format "[~d]" n-filelines))
+		       (string-append " "
+				      (html-escape-string
+				       log-line)))
+		      (html:table :border #f
+				  (map 
+				   (lambda (xgettext)
+				     (html:tr
+				      (html:th (html:pre (format "~d/~d" 
+								 (cadr (memq :match-chars xgettext))
+								 log-line-len)))
+				      (html:td (html:a :href (make-href 
+							      (car package-version)
+							      (cadr package-version)
+							      (cadr (memq :file xgettext))
+							      (cadr (memq :line xgettext)))
+						       (html:pre (cadr (memq :msg xgettext)))))
+				      ))
+				   (if (< limit n-filelines)
+				       (take filelines limit)
+				       filelines))
+				  ))))
 	   ('syslog
-	    (list (html:pre (html-escape-string 
-			((with-module es.dest.syslog syslog) r)))
-		  ;(html:pre "\n")
+	    (list (html:pre 
+		   (string-append "[ ] "
+				  (html-escape-string 
+				   ((with-module es.dest.syslog syslog) r))))
 		  ))))
-       results)))))))
+	results)))))))
 
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cut show-help name 0))
-       (limit "limit=i" 3)
+       (limit "limit=i" 10)
        (report-format "format=y" 'html)
        . rest)
     (if (eq? (length rest) 1)
 	(report (run (prepare-pergs (car rest)) limit)
-		report-format)
+		report-format
+		limit)
 	(with-output-to-port (current-error-port)
 	  (lambda ()
 	    (show-help (car args) 1))))))
