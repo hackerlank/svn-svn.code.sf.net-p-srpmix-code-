@@ -160,6 +160,42 @@
 	  file
 	  ))
 
+(define (report-log r limit)
+  (let* ((filelines (cadr (memq :filelines r)))
+	 (n-filelines (length filelines))
+	 (log-line ((with-module es.dest.syslog syslog) (log->syslog r)))
+	 (log-line-len (string-length log-line))
+	 (package-version (cadr (memq :package-version r))))
+    (list (html:pre 
+	   (html:a :href "" (format "[~d]" n-filelines))
+	   (string-append " "
+			  (html-escape-string
+			   log-line)))
+	  (html:table :border #f
+		      (map 
+		       (lambda (xgettext)
+			 (html:tr
+			  (html:th (html:pre (format "~d/~d" 
+						     (cadr (memq :match-chars xgettext))
+						     log-line-len)))
+			  (html:td (html:a :href (make-href 
+						  (car package-version)
+						  (cadr package-version)
+						  (cadr (memq :file xgettext))
+						  (cadr (memq :line xgettext)))
+					   (html:pre (cadr (memq :msg xgettext)))))
+			  ))
+		       (if (< limit n-filelines)
+			   (take filelines limit)
+			   filelines))
+		      ))))
+
+(define (report-syslog r limit)
+  (list (html:pre 
+	 (string-append "[ ] "
+			(html-escape-string 
+			 ((with-module es.dest.syslog syslog) r))))))
+
 (define (report results fmt limit)
   (case fmt
     ('es
@@ -175,42 +211,10 @@
 	(map
 	 (lambda (r)
 	   (case (car r)
-	     ('log 
-	      (let* ((filelines (cadr (memq :filelines r)))
-		     (n-filelines (length filelines))
-		     (log-line ((with-module es.dest.syslog syslog) (log->syslog r)))
-		     (log-line-len (string-length log-line))
-		     (package-version (cadr (memq :package-version r))))
-		(list (html:pre 
-		       (html:a :href "" (format "[~d]" n-filelines))
-		       (string-append " "
-				      (html-escape-string
-				       log-line)))
-		      (html:table :border #f
-				  (map 
-				   (lambda (xgettext)
-				     (html:tr
-				      (html:th (html:pre (format "~d/~d" 
-								 (cadr (memq :match-chars xgettext))
-								 log-line-len)))
-				      (html:td (html:a :href (make-href 
-							      (car package-version)
-							      (cadr package-version)
-							      (cadr (memq :file xgettext))
-							      (cadr (memq :line xgettext)))
-						       (html:pre (cadr (memq :msg xgettext)))))
-				      ))
-				   (if (< limit n-filelines)
-				       (take filelines limit)
-				       filelines))
-				  ))))
-	   ('syslog
-	    (list (html:pre 
-		   (string-append "[ ] "
-				  (html-escape-string 
-				   ((with-module es.dest.syslog syslog) r))))
-		  ))))
-	results)))))))
+	     ('log (report-log r limit))
+	     ('syslog (report-syslog r limit))))
+	 results))))
+     )))
 
 (define (main args)
   (let-args (cdr args)
