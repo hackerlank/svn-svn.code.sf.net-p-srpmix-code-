@@ -14,9 +14,10 @@
 				      nil nil 'perg-log-lines
 				      (buffer-substring (line-beginning-position)
 							(line-end-position)))))
-  (grep (format "%sperg '%s' %s" 
+  (grep (format "%sperg %s %s" 
 		(if (string-match "\\(.*\\)/plugins.*" file)
 		    (format "cd %s; " (expand-file-name (match-string 1 file)))
 		  "")
-		pattern file)))
+		(shell-quote-argument pattern)
+		file)))
 (provide 'perg)
