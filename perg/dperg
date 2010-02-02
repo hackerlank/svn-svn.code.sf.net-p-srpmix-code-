@@ -26,6 +26,8 @@
    ((equal? cmd "dhclient")
     (values "dhcp" "4.1.1-1.fc13")
     )
+   ((equal? cmd "pulseaudio")
+    (values "pulseaudio" "0.9.21-5.fc13"))
    (else
     (values #f #f))))
 
@@ -50,7 +52,7 @@
     (cond
      ((and (string? xgettext)
 	   (file-is-readable? xgettext))
-      (let1 proc (run-process #?=`(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
+      (let1 proc (run-process `(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
 			      :input :pipe
 			      :output :pipe)
 	(values proc
@@ -89,14 +91,14 @@
 
 
 (define (prepare-pergs dist)
-  (let loop ((l (read-line))
+  (let loop ((raw-log (read-line))
 	     (n 0)
 	     (pergs (make-hash-table 'equal?)))
-    (if (eof-object? l)
-	pergs
-	(let1 log ((with-module es.src.syslog syslog) l)
-	  (add-log! pergs (attach-line-number log n) dist)
-	  (loop (read-line) (+ n 1) pergs)))))
+      (if (eof-object? raw-log)
+	  pergs
+	  (let1 log ((with-module es.src.syslog syslog) raw-log)
+	    (add-log! pergs (attach-line-number log n) dist)
+	    (loop (read-line) (+ n 1) pergs)))))
 
 (define-method run (pergs limit)
   (let ((selector (make <selector>))
@@ -166,29 +168,47 @@
 	 (log-line ((with-module es.dest.syslog syslog) (log->syslog r)))
 	 (log-line-len (string-length log-line))
 	 (package-version (cadr (memq :package-version r))))
-    (list (html:pre 
-	   (html:a :href "" (format "[~d]" n-filelines))
-	   (string-append " "
-			  (html-escape-string
-			   log-line)))
-	  (html:table :border #f
-		      (map 
-		       (lambda (xgettext)
-			 (html:tr
-			  (html:th (html:pre (format "~d/~d" 
-						     (cadr (memq :match-chars xgettext))
-						     log-line-len)))
-			  (html:td (html:a :href (make-href 
-						  (car package-version)
-						  (cadr package-version)
-						  (cadr (memq :file xgettext))
-						  (cadr (memq :line xgettext)))
-					   (html:pre (cadr (memq :msg xgettext)))))
-			  ))
-		       (if (< limit n-filelines)
-			   (take filelines limit)
-			   filelines))
-		      ))))
+    (html:html
+     (html:head
+      (html:script :language"JavaScript"
+       
+       )
+      )
+     (html:body
+      (html:pre :class "log"
+       (html:a :href "" (format "[~d]" n-filelines))
+       (string-append " "
+		      (html-escape-string
+		       log-line)))
+      (html:table :class "package-version"
+       (html:tr
+	(html:td (html:pre (car package-version)))
+	(html:td (html:pre (cadr package-version)))))
+      (html:table :border #f :class "xgettext"
+		  (map 
+		   (lambda (xgettext)
+		     (html:tr
+		      (html:th (html:pre (format "~d/~d" 
+						 (cadr (memq :match-chars xgettext))
+						 log-line-len)))
+		      (html:td (html:pre (html:a :href (make-href 
+							(car package-version)
+							(cadr package-version)
+							(cadr (memq :file xgettext))
+							(cadr (memq :line xgettext)))
+						 (cadr (memq :msg xgettext)))))
+					;(html:td (html:pre (car package-version)))
+					;(html:td (html:pre (cadr package-version)))
+		      (html:td (html:pre (format "~a:~d" 
+						 (cadr (memq :file xgettext))
+						 (cadr (memq :line xgettext))
+						 )))
+		      ))
+		   (if (< limit n-filelines)
+		       (take filelines limit)
+		       filelines))
+		  ))
+     )))
 
 (define (report-syslog r limit)
   (list (html:pre 
