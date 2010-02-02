@@ -55,15 +55,11 @@ function main
     {
 	{ cat $XGETTEXTS | es-src-xgettext use-stdin; }
 	if [ "$LOG" = "-" ]; then
-	    while read; do
-		echo "(log " \""$REPLY"\" ")"
-	    done
+	    gosh -e '(port-for-each (lambda (l) (write `(log ,l)) (newline)) read-line)'
 	elif [ "$LOG" = "=" ]; then
-	    while read; do
-		echo "$REPLY"
-	    done
+	    cat
 	else
-	    echo "(log " \""$LOG"\" ")"
+	    echo "$LOG" | gosh -e '(begin (write `(log ,(read-line))) (newline))'
 	fi
     } | {
 	es-filter-filelines
