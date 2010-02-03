@@ -1,3 +1,4 @@
+
 ;; -*- scheme -*-
 (use file.util)
 (use gauche.parseopt)
@@ -8,6 +9,9 @@
 (use text.html-lite)
 (use text.tree)
 (use srfi-1)
+
+(define basename->packages (make-hash-table 'equal?))
+(load "./hash.scm")
 
 
 (debug-print-width #f)
@@ -20,16 +24,19 @@
 (define (cmd->package cmd dist)
   (cond
    ((equal? cmd "kernel")
-    (values "kernel" "2.6.33-0.20.rc5.git0.fc13"))
+    (values "kernel" "2.6.18-164.el5"))
    ((equal? cmd "rsyslogd")
-    (values "rsyslog" "4.4.2-3.fc13"))
+    (values "rsyslog" "2.0.6-1.el5"))
    ((equal? cmd "dhclient")
-    (values "dhcp" "4.1.1-1.fc13")
+    (values "dhcp" "3.0.5-21.el5")
     )
    ((equal? cmd "pulseaudio")
     (values "pulseaudio" "0.9.21-5.fc13"))
    (else
-    (values #f #f))))
+    (let1 pv (hash-table-get basename->packages cmd #f)
+      (if pv
+	  (apply values (car pv))
+	  (values #f #f))))))
 
 (define (package-version->xgettxt pkg ver)
   (if pkg
@@ -41,7 +48,16 @@
 
 (define-class <perg> ()
   ((package-version :init-keyword :package-version)
-   (logs     :init-form    (list))))
+   (logs     :init-form    (list))
+   (unsolved :init-form    (make-tree-map equal? 
+					  (lambda (a b)
+					    (unless (string? a)
+					      #?=b)
+					    (>= (string-length a) 
+						(string-length b)))))
+   (in-process :init-form (make-hash-table 'equal?))
+   (resolved :init-form    (make-hash-table 'equal?))
+   ))
 
 (define perg-cmd "./perg")
 (define-method run ((perg <perg>) (limit <integer>))
@@ -63,11 +79,51 @@
       (values #f #f #f)))))
 
 (define-method push-log! ((perg <perg>) log)
-  (push! (ref perg 'logs) log))
+  ;;
+  (push! (ref perg 'logs) log)
+  (unless (string? (cadr (memq :msg log)))
+    log)
+  (tree-map-push! (ref perg 'unsolved) (cadr (memq :msg log)) log)
+  )
+
 (define-method pop-log! ((perg <perg>))
-  (pop! (ref perg 'logs)))
+  (let1 r (tree-map-pop-min! (ref perg 'unsolved))
+	(hash-table-put! (ref perg 'in-process) (car r) (cdr r))
+	(car (cdr r))))
+
+(define-method empty! ((perg <perg>))
+  (tree-map-clear! (ref perg 'unsolved)))
+
 (define-method empty? ((perg <perg>))
-  (null? (ref perg 'logs)))
+  (not (tree-map-min (ref perg 'unsolved))))
+
+
+(define-method resolved ((perg <perg>) resolved-data)
+  (let1 logs (hash-table-get (ref perg 'in-process) (cadr resolved-data) #f)
+    (map
+     (lambda (log)
+       (let1 resolved-data (list-copy resolved-data)
+	 (set-car! (cdr (memq :date resolved-data))
+		   (cadr (memq :date log)))
+	 (set-car! (cdr (memq :host resolved-data))
+		   (cadr (memq :host log)))
+	 (set-car! (cdr (memq :cmd resolved-data))
+		   (cadr (memq :cmd log)))
+	 (set-car! (cdr (memq :pid resolved-data))
+		   (cadr (memq :pid log)))
+	 (set-car! (cdr (memq :line-number resolved-data))
+		   (cadr (memq :line-number log)))
+	 (write (list '+ (cadr (memq :package-version resolved-data))
+		      (cadr (memq :line-number resolved-data))) (current-error-port))
+	 (newline (current-error-port))
+	 resolved-data
+	 ))
+     logs)))
+
+(define-method resolved? ((perg <perg>) msg)
+  (hash-table-get (ref perg 'resolved) msg #f)
+  )
+
 
 (define-method add-log! (pergs log dist)
   (let1 cmd-k (memq :cmd log)
@@ -84,7 +140,6 @@
 		       (hash-table-put! pergs cmd perg)
 		       perg))
 	(push-log! perg log)))))
-
 
 (define (attach-line-number log n)
   (reverse (cons n (cons :line-number (reverse log)))))
@@ -113,20 +168,29 @@
 	       (selector-add! selector write-target
 			      (lambda (output flag)
 				(let1 log (pop-log! perg)
-				  ;(display (cadr (memq :msg log)) output)
-				  (write `(log ,(cadr (memq :msg log)) 
-					       :date ,(cadr (memq :date log))
-					       :host ,(cadr (memq :host log))
-					       :cmd  ,(cadr (memq :cmd log))
-					       :pid  ,(cadr (memq :pid log))
-					       :line-number ,(cadr (memq :line-number log))
-					       :package-version ,(ref perg 'package-version)
-					       ) 
-					 output)
-				  (newline output)
-				  (when (empty? perg)
-				    (selector-delete! selector output #f #f)
-				    (close-output-port output))))
+				  (guard (e
+					  (else (begin (selector-delete! selector output #f #f)
+						       (empty! perg))))
+					 (begin	
+					   (write `(log ,(cadr (memq :msg log)) 
+							:date ,(cadr (memq :date log))
+							:host ,(cadr (memq :host log))
+							:cmd  ,(cadr (memq :cmd log))
+							:pid  ,(cadr (memq :pid log))
+							:line-number ,(cadr (memq :line-number log))
+							:package-version ,(ref perg 'package-version)
+							) 
+						  output)
+					   (newline output)
+					   ))
+				  (write (list '- (ref perg 'package-version)
+					       (cadr (memq :line-number log))) (current-error-port))
+				  (newline (current-error-port))
+				  )
+				(when (empty? perg)
+				  (ref perg 'package-version)
+				  (selector-delete! selector output #f #f)
+				  (close-output-port output)))
 			      '(w))
 	       (selector-add! selector read-target
 			      (lambda (input flag)
@@ -136,16 +200,24 @@
 					     (close-input-port input)
 					     (process-wait proc)
 					     (set! n-procs (- n-procs 1)))
-				      (push! result log))))
+				      (let1 filelines (cadr (memq :filelines log))
+					(when (< limit (length filelines))
+					  (set-car! (cdr (memq :filelines log)) (take filelines limit))
+					  )
+					(set! result (append (resolved perg log) result))
+					(write (list (cadr (memq :package-version log))
+						     (cadr (memq :line-number log))) (current-error-port))
+					(newline (current-error-port))
+					)
+				      )))
 			      '(r)))
-	     (until (empty? perg)
-	       (let1 log (pop-log! perg)
-		 (push! result log))))))
+	     (set! result (append (ref perg 'logs) result)))))
      (hash-table-values pergs))
     (let loop ()
       (when (< 0 n-procs)
-	(selector-select selector)
-	(loop)))
+	(let1 result (selector-select selector)
+	  (unless (eq? result 0)
+	    (loop)))))
     (sort result
 	  (lambda (a b)
 	    (< (cadr (memq :line-number a))
@@ -166,7 +238,7 @@
   (let* ((filelines (cadr (memq :filelines r)))
 	 (n-filelines (length filelines))
 	 (log-line ((with-module es.dest.syslog syslog) (log->syslog r)))
-	 (log-line-len (string-length log-line))
+	 (log-line-len (string-length (cadr r)))
 	 (package-version (cadr (memq :package-version r))))
     (html:html
      (html:head
@@ -207,7 +279,9 @@
 		   (if (< limit n-filelines)
 		       (take filelines limit)
 		       filelines))
-		  ))
+		  )
+      (html:hr)
+      )
      )))
 
 (define (report-syslog r limit)
@@ -249,4 +323,3 @@
 	(with-output-to-port (current-error-port)
 	  (lambda ()
 	    (show-help (car args) 1))))))
-
