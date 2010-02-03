@@ -79,6 +79,11 @@ function parse_arguments
     fi
 }
 
+function decode_uri
+{
+    gosh ${GOSH} -b -e '(begin (use rfc.uri) (uri-decode) (exit 0))'
+}
+
 function main
 {
     local r=1
@@ -92,10 +97,19 @@ function main
 	return 1
     fi
 
+    local decode_uri
+    if which gosh > /dev/null 2>&1; then
+	decode_uri=decode_uri
+    else
+	decode_uri=cat
+    fi
+
     for i in $IDX; do
 	estcmd search -max 10000 -vu "$i" "$PHRASE" 2>&1 \
 	    | grep --color=never -e 'file:///' \
 	    | sed -e 's#[0-9]\+	file://##' \
+	    | $decode_uri  \
+	    | tee /tmp/foo \
 	    | xargs -n 1 grep -nH -e "$PHRASE"
 	r0=$?
 
