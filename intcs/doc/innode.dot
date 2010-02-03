@@ -43,8 +43,10 @@ digraph innode {
 	}
 	subgraph clusterccsd {
  		label = "ccsd";
-		"127.0.0.1:50006"[shape=circle];
-		"/var/run/cluster/ccsd.sock"[shape=circle];
+		"127.0.0.1:50006<frontend_port>"[shape=circle];
+		"127.0.0.1:50007<backend_port>"[shape=circle];
+		"127.0.0.1:50008<cluster_base_port>"[shape=circle];
+		"/var/run/cluster/ccsd.sock"[shape=circle]; //local
 		"ccsd_libcman.so"[shape=diamond,label="libcman.so"];
         }
 	subgraph clusterqdiskd {
@@ -97,7 +99,9 @@ digraph innode {
 
         subgraph clusterccstool {
 		label = "ccs_tool";
-		"ccs_tool_libccs.*"[shape=diamond,label="libccs.*"]; 
+		"ccs_tool_libccs.*"[shape=diamond,label="libccs.*"];
+		"ccs_tool_update.c"[shape=diamond,label="update.c"]
+		"ccs_tool_cnx_mgr.c"[shape=diamond,label="cnx_mgr.c"]
 	}
 
         subgraph clusterdlmtool {
@@ -120,7 +124,7 @@ digraph innode {
 		"clurgmgrd_libdlm.so"[shape=diamond,label="libdlm.so"];
 		"clurgmgrd_libclulib.so"[shape=diamond,label="libclulib.so"];
 		"/var/run/cluster/rgmanager.sk"[shape=circle,label="/var/run/cluster/rgmanager.sk"];
-		// UNIX SOCKET???
+		// UNIX SOCKET???cnx_mgr.c
 	}
 	subgraph clusterclusvcadm {
 		label="clusvcadm";
@@ -213,7 +217,12 @@ digraph innode {
 	//
 	// ccs_tool
 	//
+	/* See cman/// ccs/lib/libccs.c::setup_interface() */
 	"ccs_tool_libccs.*"->"/var/run/cluster/ccsd.sock";
+	"ccs_tool_libccs.*"->"127.0.0.1:50006<frontend_port>"[label="receiving request"];
+	"ccs_tool_update.c"->"127.0.0.1:50008<cluster_base_port>"[label="updating config, other nodes"];
+	"ccs_tool_cnx_mgr.c"->"127.0.0.1:50007<backend_port>"[label="receiving broadcast request"];
+	
 	//
 	// dlm_tool
 	//
