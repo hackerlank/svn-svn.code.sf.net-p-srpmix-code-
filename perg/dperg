@@ -59,23 +59,33 @@
    ))
 
 (define perg-cmd "./perg")
+(define (run-perg xgettext limit)
+  (let ((limit-flag (format "--limit=~d" limit)))
+    (run-process `(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
+			      :input :pipe
+			      :output :pipe)
+    ))
+
+(define-method estimate-mp ((perg <perg>) xgettext)
+  (if (equal? "kernel" (car (ref perg 'package-version)))
+      2
+      1))
+
 (define-method run ((perg <perg>) (limit <integer>))
-  (let ((xgettext (if (symbol? (ref perg 'package-version))
-		      (ref perg 'package-version)
-		      (apply package-version->xgettxt (ref perg 'package-version))))
-	(limit-flag (format "--limit=~d" limit)))
+  (let* ((xgettext (if (symbol? (ref perg 'package-version))
+		       (ref perg 'package-version)
+		       (apply package-version->xgettxt (ref perg 'package-version))))
+	 (mp       (estimate-mp perg xgettext))
+	 (run-perg$ (cute run-perg xgettext limit)))
     (cond
      ((and (string? xgettext)
 	   (file-is-readable? xgettext))
-      (let1 proc (run-process `(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
-			      :input :pipe
-			      :output :pipe)
-	(values proc
-		(process-input proc)
-		(process-output proc)
-		)))
+      (let1 procs (map (lambda (_) (run-perg$)) (iota mp))
+	(values procs
+		(map process-input procs)
+		(map process-output procs))))
      (else
-      (values #f #f #f)))))
+      (values (list) (list) (list))))))
 
 (define-method push-log! ((perg <perg>) log)
   ;;
@@ -87,8 +97,11 @@
 
 (define-method pop-log! ((perg <perg>))
   (let1 r (tree-map-pop-min! (ref perg 'unsolved))
-	(hash-table-put! (ref perg 'in-process) (car r) (cdr r))
-	(car (cdr r))))
+    (if r 
+	(begin
+	  (hash-table-put! (ref perg 'in-process) (car r) (cdr r))
+	  (car (cdr r)))
+	#f)))
 
 (define-method empty! ((perg <perg>))
   (tree-map-clear! (ref perg 'unsolved)))
@@ -120,12 +133,12 @@
   (hash-table-get (ref perg 'resolved) msg #f)
   )
 
-
-(define-method add-log! (pergs log dist)
+(define-method add-log! (pergs log linum dist)
   (let1 cmd-k (memq :cmd log)
-    (let1 cmd (if cmd-k 
-		 (or (cadr cmd-k) 'not-given)
-		 'raw)
+    (let* ((cmd (if cmd-k 
+		   (or (cadr cmd-k) 'not-given)
+		   'raw))
+	   )
       (let1 perg (or (hash-table-get pergs cmd #f)
 		     (let1 perg (make <perg> :package-version
 				      (if (string? cmd)
@@ -135,11 +148,10 @@
 					  cmd))
 		       (hash-table-put! pergs cmd perg)
 		       perg))
-	(push-log! perg log)))))
+	(push-log! perg (attach-line-number log linum))))))
 
 (define (attach-line-number log n)
   (reverse (cons n (cons :line-number (reverse log)))))
-
 
 (define (prepare-pergs dist)
   (let loop ((raw-log (read-line))
@@ -148,56 +160,79 @@
       (if (eof-object? raw-log)
 	  pergs
 	  (let1 log ((with-module es.src.syslog syslog) raw-log)
-	    (add-log! pergs (attach-line-number log n) dist)
+	    (add-log! pergs log n dist)
 	    (loop (read-line) (+ n 1) pergs)))))
 
 (define (writeln r oport)
   (write r oport)
   (newline oport))
 
-(define-method run (pergs limit)
+;; (take-group '((:msg "a") (:msg "a") (:msg "a") (:msg "b") (:msg "b") (:msg "c") (:msg "c") (:msg "d") (:msg "d") ) 3)
+(define (take-group filelines limit)
+  (if (null? filelines)
+      filelines
+      (let1 get-msg (lambda (xgettext) (cadr (memq :msg xgettext)))
+	(let loop ((key          (get-msg (car filelines)))
+		   (candidate    (car filelines))
+		   (rest         (cdr filelines))
+		   (result       (list))
+		   (n            0))
+	  (cond
+	   ((eq? n limit)
+	    (reverse result))
+	   ((equal? (get-msg candidate) key)
+	    (if (null? rest)
+		(reverse (cons candidate result))
+		(loop key (car rest) (cdr rest) (cons candidate result) n)))
+	   (else
+	    (loop (get-msg candidate) candidate rest result (+ n 1))))))))
+
+(define-method run (pergs limit-group limit-list)
   (let ((selector (make <selector>))
 	(n-procs 0)
 	(result   (list)))
     (for-each
      (lambda (perg)
-       (receive (proc write-target read-target) (run perg limit)
-	 (if proc
-	     (begin
-	       (set! n-procs (+ n-procs 1))
-	       (selector-add! selector write-target
-			      (lambda (output flag)
-				(let1 log (pop-log! perg)
-				  (guard (e
-					  (else (begin (selector-delete! selector output #f #f)
-						       (empty! perg))))
-				    (writeln `(log ,(cadr (memq :msg log)) 
-						   :date ,(cadr (memq :date log))
-						   :host ,(cadr (memq :host log))
-						   :cmd  ,(cadr (memq :cmd log))
-						   :pid  ,(cadr (memq :pid log))
-						   :line-number ,(cadr (memq :line-number log))
-						   :package-version ,(ref perg 'package-version)) 
-					     output)))
-				(when (empty? perg)
-				  (ref perg 'package-version)
-				  (selector-delete! selector output #f #f)
-				  (close-output-port output)))
-			      '(w))
-	       (selector-add! selector read-target
-			      (lambda (input flag)
-				(let1 log (read input)
-				  (if (eof-object? log)
-				      (begin (selector-delete! selector input #f #f)
-					     (close-input-port input)
-					     (process-wait proc)
-					     (set! n-procs (- n-procs 1)))
-				      (let1 filelines (cadr (memq :filelines log))
-					(when (< limit (length filelines))
-					  (set-car! (cdr (memq :filelines log)) (take filelines limit)))
-					(set! result (append (resolved perg log) result))))))
-			      '(r)))
-	     (set! result (append (ref perg 'logs) result)))))
+       (receive (procs write-targets read-targets) (run perg limit-list)
+	 (if (null? procs)
+	     (set! result (append (ref perg 'logs) result))
+	     (for-each 
+	      (lambda (proc write-target read-target)
+		(set! n-procs (+ n-procs 1))
+		(selector-add! selector write-target
+			       (lambda (output flag)
+				 (let1 log (pop-log! perg)
+				   (when log
+				     (guard (e
+					     (else (begin (selector-delete! selector output #f #f)
+							  (empty! perg))))
+				       (writeln `(log ,(cadr (memq :msg log)) 
+						      :date ,(cadr (memq :date log))
+						      :host ,(cadr (memq :host log))
+						      :cmd  ,(cadr (memq :cmd log))
+						      :pid  ,(cadr (memq :pid log))
+						      :line-number ,(cadr (memq :line-number log))
+						      :package-version ,(ref perg 'package-version)) 
+						output))))
+				 (when (empty? perg)
+				   (ref perg 'package-version)
+				   (selector-delete! selector output #f #f)
+				   (close-output-port output)))
+			       '(w))
+		(selector-add! selector read-target
+			       (lambda (input flag)
+				 (let1 log (read input)
+				   (if (eof-object? log)
+				       (begin (selector-delete! selector input #f #f)
+					      (close-input-port input)
+					      (process-wait proc)
+					      (set! n-procs (- n-procs 1)))
+				       (let1 filelines (cadr (memq :filelines log))
+					 (set-car! (cdr (memq :filelines log)) 
+						   (take-group filelines limit-group))
+					 (set! result (append (resolved perg log) result))))))
+			       '(r)))
+	     procs write-targets read-targets))))
      (hash-table-values pergs))
     (let loop ()
       (when (< 0 n-procs)
@@ -227,7 +262,7 @@
 	  )
 
 
-(define (report-log r limit)
+(define (report-log r)
   (let* ((filelines (cadr (memq :filelines r)))
 	 (n-filelines (length filelines))
 	 (log-line ((with-module es.dest.syslog syslog) (log->syslog r)))
@@ -264,22 +299,20 @@
 						(cadr (memq :line xgettext))
 						)))
 		     ))
-		  (if (< limit n-filelines)
-		      (take filelines limit)
-		      filelines))
+		  filelines)
 		 )
      (html:hr)
      )
     ))
 
-(define (report-syslog r limit)
+(define (report-syslog r)
   (list (html:pre 
 	 (string-append "[ ] "
 			(html-escape-string 
 			 ((with-module es.dest.syslog syslog) r))))
 	(html:hr)))
 
-(define (report results fmt limit)
+(define (report results fmt)
   (case fmt
     ('es
      (for-each
@@ -296,21 +329,22 @@
 	  (map
 	   (lambda (r)
 	     (case (car r)
-	       ('log (report-log r limit))
-	       ('syslog (report-syslog r limit))))
+	       ('log (report-log r))
+	       ('syslog (report-syslog r))))
 	   results)))
        )))))
 
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cut show-help name 0))
-       (limit "limit=i" 15)
+       (limit-list "limit-list=i" 100)
+       (limit-group "limit-group=i" 10)
        (report-format "format=y" 'html)
        . rest)
     (if (eq? (length rest) 1)
-	(report (run (prepare-pergs (car rest)) limit)
+	(report (run (prepare-pergs (car rest)) limit-group limit-list)
 		report-format
-		limit)
+		)
 	(with-output-to-port (current-error-port)
 	  (lambda ()
 	    (show-help (car args) 1))))))
