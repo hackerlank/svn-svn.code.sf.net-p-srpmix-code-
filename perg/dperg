@@ -286,20 +286,19 @@
 	(html:head
 	 (html:script :language"JavaScript"
 		      ))
-	(html:html
-	 (html:body
-	(map
-	 (lambda (r)
-	   (case (car r)
-	     ('log (report-log r limit))
-	     ('syslog (report-syslog r limit))))
-	 results))))
-     )))))
+	(html:body
+	  (map
+	   (lambda (r)
+	     (case (car r)
+	       ('log (report-log r limit))
+	       ('syslog (report-syslog r limit))))
+	   results)))
+       )))))
 
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cut show-help name 0))
-       (limit "limit=i" 10)
+       (limit "limit=i" 15)
        (report-format "format=y" 'html)
        . rest)
     (if (eq? (length rest) 1)
