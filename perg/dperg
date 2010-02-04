@@ -1,4 +1,3 @@
-
 ;; -*- scheme -*-
 (use file.util)
 (use gauche.parseopt)
@@ -214,12 +213,19 @@
   (cons 'syslog (cons :msg (cdr log))))
 
 (define (make-href package version file line)
-  (format "file:///srv/sources/sources/~a/~a/~a/~a"
+  ;http://srpmix.org/api/browse.cgi?path=dists/centos5u2/packages/k/kernel/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/arch/x86_64/kernel/audit.c&display=font-lock#linum:25
+  (format "http://srpmix.org/api/browse.cgi?path=dists/centos5u2/packages/~a/~a/~a&display=font-lock#linum:~d"
+	  (substring package 0 1)
+	  package
+	  file
+	  line))
+  #;(format "file:///srv/sources/sources/~a/~a/~a/~a"
 	  (substring package 0 1)
 	  package
 	  version
 	  file
-	  ))
+	  )
+
 
 (define (report-log r limit)
   (let* ((filelines (cadr (memq :filelines r)))
@@ -242,7 +248,7 @@
 		 (map 
 		  (lambda (xgettext)
 		    (html:tr
-		     (html:th (html:pre (format "~d/~d" 
+		     (html:th (html:pre (format "~,,,,5s/~d" 
 						(cadr (memq :match-chars xgettext))
 						log-line-len)))
 		     (html:td (html:pre (html:a :href (make-href 
