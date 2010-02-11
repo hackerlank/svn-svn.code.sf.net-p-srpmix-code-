@@ -16,7 +16,7 @@
 (debug-print-width #f)
 
 (define (show-help prog n)
-  (format #t "~a [--limit=N] [--format=es|html] DIST < /var/log/message\n" prog)
+  (format #t "~a [--limit-group=N] [--limit-list=N] [--format=es|html] DIST < /var/log/message\n" prog)
   (exit n))
 
 
@@ -68,7 +68,7 @@
 
 (define-method estimate-mp ((perg <perg>) xgettext)
   (if (equal? "kernel" (car (ref perg 'package-version)))
-      2
+      XFORK
       1))
 
 (define-method run ((perg <perg>) (limit <integer>))
@@ -262,12 +262,42 @@
 	  )
 
 
+(define (report-log-group groups package version log-line-len)
+  (map
+   (lambda (group)
+     (let* ((head (car group))
+	    (msg (cadr (memq :msg head)))
+	    (score (cadr (memq :match-chars head))))
+       (html:tr
+	(html:th :valign "top" 
+		 (html:pre (format "~,,,,5s/~d ~s" 
+				   score
+				   log-line-len
+				   (html-escape-string msg)))
+		 (html:td
+		  (map 
+		   (lambda (xgettext)
+		     (html:ul
+		      (html:li (html:pre (html:a :href (make-href 
+							package
+							version
+							(cadr (memq :file xgettext))
+							(cadr (memq :line xgettext)))
+						 (format "~a:~d" 
+							 (cadr (memq :file xgettext))
+							 (cadr (memq :line xgettext))
+							 ))))))
+		   group))))))
+   groups))
+
 (define (report-log r)
   (let* ((filelines (cadr (memq :filelines r)))
 	 (n-filelines (length filelines))
 	 (log-line ((with-module es.dest.syslog syslog) (log->syslog r)))
 	 (log-line-len (string-length (cadr r)))
-	 (package-version (cadr (memq :package-version r))))
+	 (package-version (cadr (memq :package-version r)))
+	 (package (car package-version))
+	 (version (cadr package-version)))
 
     (list
      (html:pre :class "log"
@@ -275,35 +305,33 @@
 	       (string-append " "
 			      (html-escape-string
 			       log-line)))
-     (html:table :class "package-version"
-		 (html:tr
-		  (html:td (html:pre (car package-version)))
-		  (html:td (html:pre (cadr package-version)))))
      (html:table :border #f :class "xgettext"
-		 (map 
-		  (lambda (xgettext)
-		    (html:tr
-		     (html:th (html:pre (format "~,,,,5s/~d" 
-						(cadr (memq :match-chars xgettext))
-						log-line-len)))
-		     (html:td (html:pre (html:a :href (make-href 
-						       (car package-version)
-						       (cadr package-version)
-						       (cadr (memq :file xgettext))
-						       (cadr (memq :line xgettext)))
-						(cadr (memq :msg xgettext)))))
-					;(html:td (html:pre (car package-version)))
-					;(html:td (html:pre (cadr package-version)))
-		     (html:td (html:pre (format "~a:~d" 
-						(cadr (memq :file xgettext))
-						(cadr (memq :line xgettext))
-						)))
-		     ))
-		  filelines)
+		 (html:caption :align "top" (html:pre (format "~a/~a"
+							      package
+							      version)))
+		 (report-log-group 
+		  (let1 get-msg (lambda (xgettext) 
+				  (cadr (memq :msg xgettext)))
+		    (let loop ((filelines filelines)
+			       (result (list))
+			       (current-group (list))
+			       (msg #f))
+		      (if (null? filelines)
+			  (reverse (cons (reverse current-group) result))
+			  (if msg
+			      (let ((xgettext (car filelines))
+				    (filelines (cdr filelines)))
+				(if (equal? msg (get-msg xgettext))
+				    (loop filelines result (cons xgettext current-group) msg)
+				    (loop filelines (cons (reverse current-group) result) 
+					  (list xgettext)
+					  (get-msg xgettext))))
+			      (loop filelines result current-group (get-msg (car filelines)))))))
+		  package
+		  version
+		  log-line-len)
 		 )
-     (html:hr)
-     )
-    ))
+     (html:hr))))
 
 (define (report-syslog r)
   (list (html:pre 
@@ -334,13 +362,16 @@
 	   results)))
        )))))
 
+(define XFORK 1)
 (define (main args)
   (let-args (cdr args)
-      ((help "h|help" => (cut show-help name 0))
+      ((help "h|help" => (cute show-help (car args) 0))
+       (xfork "xfork=i" 1)
        (limit-list "limit-list=i" 100)
        (limit-group "limit-group=i" 10)
        (report-format "format=y" 'html)
        . rest)
+    (set! XFORK xfork)
     (if (eq? (length rest) 1)
 	(report (run (prepare-pergs (car rest)) limit-group limit-list)
 		report-format
