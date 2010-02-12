@@ -11,8 +11,6 @@
 (use srfi-1)
 
 (define basename->packages (make-hash-table 'equal?))
-(load "./hash.scm" :error-if-not-found #f)
-
 
 (debug-print-width #f)
 
@@ -21,7 +19,7 @@
   (exit n))
 
 
-(define (cmd->package cmd dist)
+(define (cmd->srpm cmd dist)
   (cond
    ((equal? cmd "kernel")
     (values "kernel" "2.6.18-164.el5"))
@@ -34,11 +32,13 @@
    (else
     (let1 pv (hash-table-get basename->packages cmd #f)
       (if pv
+	  ;;
 	  (apply values (car pv))
 	  (begin 
 	    (format (current-error-port) ";; package for ~s is unknown\n" cmd)
 	    (values #f #f))
-	  )))))
+	  )))
+   ))
 
 (define (package-version->xgettxt pkg ver)
   (if pkg
@@ -143,7 +143,7 @@
       (let1 perg (or (hash-table-get pergs cmd #f)
 		     (let1 perg (make <perg> :package-version
 				      (if (string? cmd)
-					  (receive (pkg ver) (cmd->package cmd dist)
+					  (receive (pkg ver) (cmd->srpm cmd dist)
 			 		    (list pkg ver)
 					    )
 					  cmd))
@@ -154,7 +154,10 @@
 (define (attach-line-number log n)
   (reverse (cons n (cons :line-number (reverse log)))))
 
+;;
 (define (prepare-pergs dist)
+  (load (format "/srv/sourecs/dists/~a/plugins/dperg/mperg-rhel5su4-basename-package-hash.scm"
+		dist))
   (let loop ((raw-log (read-line))
 	     (n 0)
 	     (pergs (make-hash-table 'equal?)))
