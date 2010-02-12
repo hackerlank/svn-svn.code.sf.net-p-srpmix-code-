@@ -1,3 +1,9 @@
+2010-02-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA): Added ds8u1.
+
+	* src/dist-mapping/ftp.redhat.com/ds8u1.es: New file.
+
 2010-02-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cradle-confs/Makefile.am (dist_cradleconf_DATA): Added plaecholder.
