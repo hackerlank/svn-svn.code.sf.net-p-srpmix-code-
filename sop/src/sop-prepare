@@ -4,7 +4,13 @@ SOPCONFDIR=/etc/sop
 CONF=sop.cf
 PKGDATADIR=/usr/share/sop
 
-if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
+if [ -z "$1" ] ; then
+    print_usage 1>&2
+    exit 1
+elif [ "--help" = "$1" ] || [ "-h" = "$1" ]; then
+    print_usage
+    exit 0
+elif [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
     SOPCONFDIR=$1
     source "$1/${CONF}"
 elif test -f ${SOPCONFDIR}/${CONF}; then
