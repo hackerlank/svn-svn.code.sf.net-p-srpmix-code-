@@ -13,7 +13,7 @@
 (debug-print-width #f)
 
 (define (show-help prog n)
-  (format #t "~a [--limit-group=N] [--limit-list=N] [--format=es|html] DIST < /var/log/message\n" prog)
+  (format #t "~a [--limit-group=N] [--limit-list=N] [--url-format=http://...] [--format=es|html] DIST < /var/log/message\n" prog)
   (exit n))
 
 (define (cmd->srpm cmd dist)
@@ -253,10 +253,17 @@
 (define (log->syslog log)
   (cons 'syslog (cons :msg (cdr log))))
 
+(define url-format #f)
 (define (make-href package version file line)
-  (format "http://srpmix.org/api/browse.cgi?path=dists/centos5u2/packages/~a/~a/~a&display=font-lock#linum:~d"
+  #;(format "http://srpmix.org/api/browse.cgi?path=dists/centos5u2/packages/~a/~a/~a&display=font-lock#linum:~d"
 	  (substring package 0 1)
 	  package
+	  file
+	  line)
+  (format url-format
+	  (substring package 0 1)
+	  package
+	  version
 	  file
 	  line)
   )
@@ -415,8 +422,10 @@
        (limit-list "limit-list=i" 100)
        (limit-group "limit-group=i" 10)
        (report-format "format=y" 'html)
+       (url-fmt "url-format=s" #f)
        . rest)
     (set! XFORK xfork)
+    (set! url-format url-fmt)
     (if (eq? (length rest) 1)
 	(report (run (prepare-pergs (car rest)) limit-group limit-list)
 		report-format
