@@ -344,9 +344,13 @@
 			      (let ((xgettext (car filelines))
 				    (filelines (cdr filelines)))
 				(if (equal? msg (get-msg xgettext))
-				    (loop filelines result (cons xgettext current-group) msg)
-				    (loop filelines (cons (reverse current-group) result) 
-					  (list xgettext)
+				    (loop filelines 
+					  result
+					  (cons xgettext current-group)
+					  msg)
+				    (loop filelines
+					  (cons (reverse current-group) result) 
+					  (list)
 					  (get-msg xgettext))))
 			      (loop filelines result current-group (get-msg (car filelines)))))))
 		  package
