@@ -271,10 +271,11 @@ function srpmix_cp
 
 function srpmix_chmod
 {
-    if test -e "${rootdir}/${SOURCEDIR}/${srpm_name}"; then
-	chmod -R a+r $1
-	find $1 -type d -print0 | xargs -0 -e chmod a+x
-	chmod -R u+w $1
+    local d=$1
+    if test -e "$d"; then
+	chmod -R a+r $d
+	find $d -type d -print0 | xargs -0 -e chmod a+x
+	chmod -R u+w $d
     fi
 }
 
