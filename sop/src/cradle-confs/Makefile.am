@@ -20,4 +20,6 @@ dist_cradleconf_DATA =				\
 	hyperestraier.pkg			\
 	hyperestraier.weakview-dist		\
 	\
+	placeholder				\
+	\
 	$(NULL)

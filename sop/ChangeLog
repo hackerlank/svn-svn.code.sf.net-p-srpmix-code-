@@ -1,5 +1,9 @@
 2010-02-12  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/cradle-confs/Makefile.am (dist_cradleconf_DATA): Added plaecholder.
+
+	* src/cradle-confs/placeholder: New file.
+
 	* src/sop-prepare: Added -h and --help options.
 
 2010-01-25  Masatake YAMATO  <yamato@redhat.com>

@@ -1,0 +1,9 @@
+#!/bin/bash
+METHOD=nop
+ENABLE=no
+GC=no
+BACKUP=no
+BUILD=no
+BUILDERS=nop
+DIST_MAPPING=no
+INSTALL=no
