@@ -10,35 +10,34 @@
 (use text.tree)
 (use srfi-1)
 
-(define basename->packages (make-hash-table 'equal?))
-
 (debug-print-width #f)
 
 (define (show-help prog n)
   (format #t "~a [--limit-group=N] [--limit-list=N] [--format=es|html] DIST < /var/log/message\n" prog)
   (exit n))
 
-
 (define (cmd->srpm cmd dist)
-  (cond
-   ((equal? cmd "kernel")
-    (values "kernel" "2.6.18-164.el5"))
-   ((equal? cmd "rsyslogd")
-    (values "rsyslog" "2.0.6-1.el5"))
-   ((equal? cmd "dhclient")
-    (values "dhcp" "3.0.5-21.el5"))
-   ((equal? cmd "pulseaudio")
-    (values "pulseaudio" "0.9.21-5.fc13"))
-   (else
-    (let1 pv (hash-table-get basename->packages cmd #f)
-      (if pv
-	  ;;
-	  (apply values (car pv))
-	  (begin 
-	    (format (current-error-port) ";; package for ~s is unknown\n" cmd)
-	    (values #f #f))
-	  )))
-   ))
+  (let1 resolver "./list-srpmnames-by-file.sh"
+    (let1 o (process-output->string-list 
+	     `(,resolver
+	       ,(format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist)
+	       ,cmd))
+      (if (null? o)
+	  (values #f #f)
+	  (apply values (let loop ((candidates o))
+			  (if (null? candidates)
+			      (list #f #f)
+			      (let1 p (car candidates)
+				(let1 v (guard (e
+						(else #f))
+					       (sys-readlink (format "/srv/sources/dists/~a/packages/~a/~a"
+								     dist
+								     (substring p 0 1)
+								     p)))
+				  (if v
+				      (list p (sys-basename v))
+				      (loop (cdr candidates)))))))
+		 )))))
 
 (define (package-version->xgettxt pkg ver)
   (if pkg
@@ -68,9 +67,14 @@
     ))
 
 (define-method estimate-mp ((perg <perg>) xgettext)
-  (if (equal? "kernel" (car (ref perg 'package-version)))
-      XFORK
-      1))
+  (let1 pv (ref perg 'package-version)
+    (cond
+     ((list? pv)
+      (if (equal? "kernel" (car pv))
+	  XFORK
+	  1))
+     (else
+      1))))
 
 (define-method run ((perg <perg>) (limit <integer>))
   (let* ((xgettext (if (symbol? (ref perg 'package-version))
@@ -156,8 +160,6 @@
 
 ;;
 (define (prepare-pergs dist)
-  (load (format "/srv/sourecs/dists/~a/plugins/dperg/mperg-rhel5su4-basename-package-hash.scm"
-		dist))
   (let loop ((raw-log (read-line))
 	     (n 0)
 	     (pergs (make-hash-table 'equal?)))
@@ -252,19 +254,12 @@
   (cons 'syslog (cons :msg (cdr log))))
 
 (define (make-href package version file line)
-  ;http://srpmix.org/api/browse.cgi?path=dists/centos5u2/packages/k/kernel/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/arch/x86_64/kernel/audit.c&display=font-lock#linum:25
   (format "http://srpmix.org/api/browse.cgi?path=dists/centos5u2/packages/~a/~a/~a&display=font-lock#linum:~d"
 	  (substring package 0 1)
 	  package
 	  file
-	  line))
-  #;(format "file:///srv/sources/sources/~a/~a/~a/~a"
-	  (substring package 0 1)
-	  package
-	  version
-	  file
-	  )
-
+	  line)
+  )
 
 (define (report-log-group groups package version log-line-len log-line-number)
   (map-with-index
@@ -335,7 +330,9 @@
 			       (current-group (list))
 			       (msg #f))
 		      (if (null? filelines)
-			  (reverse (cons (reverse current-group) result))
+			  (if (null? current-group)
+			      (reverse result)
+			      (reverse (cons (reverse current-group) result)))
 			  (if msg
 			      (let ((xgettext (car filelines))
 				    (filelines (cdr filelines)))
@@ -350,14 +347,16 @@
 		  log-line-len
 		  log-line-number)
 		 )
-     (html:hr))))
+     #;(html:hr)
+     )))
 
 (define (report-syslog r)
   (list (html:pre 
 	 (string-append "[ ] "
 			(html-escape-string 
 			 ((with-module es.dest.syslog syslog) r))))
-	(html:hr)))
+	#;(html:hr))
+  )
 
 ;; Taken from http://www.kanaya440.com/contents/tips/javascript/012.html
 (define toggle-script
@@ -370,7 +369,7 @@
 (define highlight-script
   "function highlight(ch) {
     var obj=document.all && document.all(ch) || document.getElementById && document.getElementById(ch);
-    if(obj && obj.style) obj.style.backgroundColor= \"green\";
+    if(obj && obj.style) obj.style.backgroundColor= \"gold\";
 }")
 
 (define unhighlight-script
