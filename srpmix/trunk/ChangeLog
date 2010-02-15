@@ -1,3 +1,9 @@
+2010-02-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-kindex (main): Don't use spec file name
+	to detect 2.4 kernel. Use kversion definition in the spec file
+	instead.
+	
 2010-02-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/libsrpmix.sh.in (srpmix_chmod): Don't refer

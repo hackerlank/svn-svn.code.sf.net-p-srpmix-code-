@@ -148,7 +148,8 @@ function main
 	return 0
     fi
 
-    if test $(basename $SPEC) = "kernel-2.4.spec"; then
+    if grep '^%define kversion 2\.4' \
+	$SPEC > /dev/null 2>&1; then
 	return 0
     fi
 
