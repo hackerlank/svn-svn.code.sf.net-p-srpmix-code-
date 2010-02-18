@@ -1,0 +1,31 @@
+#!/bin/bash
+
+function report
+{
+    local x
+
+    echo "### Pattern: " "$1" " ###"
+    for x in *.log; do
+	grep -l "$1" $x
+    done
+}
+
+for x in \
+    "Package already exists: %package" \
+    "second %pre"                      \
+    "AC_COMPILE_IFELSE was called before AC_USE_SYSTEM_EXTENSIONS" \
+    'C compiler cannot create executables' \
+    'C++ compiler cannot create executables' \
+    'configure: error: OSM: Fail to recognize vendor type' \
+    'If this token and others are legitimate, please use m4_pattern_allow' \
+    'Usage: jar {ctxui}\[vfm0Me\] \[jar-file\] \[manifest-file\] \[entry-point\] \[-C dir\] file' \
+    \
+    ; do
+    report "$x"
+    echo
+done
+
+#    '+ \[swrfbuild]/usr/bin/patch --verbose --verbose -p1 --fuzz=2
+# error: Bad exit status from /var/tmp/rpm-tmp\..* (%prep)' \
+	
+    
