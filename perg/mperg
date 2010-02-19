@@ -330,6 +330,7 @@
      (html:table :border #f :class "xgettext" :id (format "xgettext-~d" log-line-number)
 		 :style "display: none;"
 		 (report-log-group 
+		  ;;
 		  (let1 get-msg (lambda (xgettext) 
 				  (cadr (memq :msg xgettext)))
 		    (let loop ((filelines filelines)
@@ -348,7 +349,7 @@
 					  result
 					  (cons xgettext current-group)
 					  msg)
-				    (loop filelines
+				    (loop (cons xgettext filelines)
 					  (cons (reverse current-group) result) 
 					  (list)
 					  (get-msg xgettext))))
