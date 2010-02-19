@@ -4,6 +4,12 @@ SOPCONFDIR=/etc/sop
 CONF=sop.cf
 PKGDATADIR=/usr/share/sop
 
+function print_usage
+{
+    echo "Usage: "
+    echo "	sop-prepare CRADLE-CONF [NAME] [DIST-MAPPING-DIR]"
+}
+
 if [ -z "$1" ] ; then
     print_usage 1>&2
     exit 1
@@ -19,12 +25,6 @@ else
     echo "Cannot load ${CONF} file" 1>&2
     exit 1
 fi
-
-function print_usage
-{
-    echo "Usage: "
-    echo "	sop-prepare CRADLE-CONF [NAME] [DIST-MAPPING-DIR]"
-}
 
 function main
 {
