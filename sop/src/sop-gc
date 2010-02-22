@@ -45,10 +45,16 @@ function report
     mirror=$3
     
     echo FS level garbage:
-    diff -ruN $rpms $fs | grep ^+
+    diff -ruN $rpms $fs | grep ^+[0-9a-zA-Z] | while read; do
+	# Just rm
+	
+    done
 
     echo RPM level garbage:
-    diff -ruN $mirror $rpms
+    diff -ruN $mirror $rpms | grep ^+[0-9a-zA-Z] | while read; do
+	echo $REPLY
+    done
+	 
 }
 
 
