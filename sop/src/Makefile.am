@@ -24,5 +24,6 @@ dist_bin_SCRIPTS =				\
 	sop-mummify				\
 	sop-prepare				\
 	sop-mirror				\
+	sop-garbages				\
 	\
 	$(NULL)
