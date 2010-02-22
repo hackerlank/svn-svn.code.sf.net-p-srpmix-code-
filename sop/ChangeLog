@@ -1,3 +1,7 @@
+2010-02-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sop-*: Don't use $1 as the pass for sop.cf.
+
 2010-02-19  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-prepare (print_usage): Move to the head of

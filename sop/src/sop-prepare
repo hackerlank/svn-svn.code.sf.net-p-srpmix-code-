@@ -16,9 +16,6 @@ if [ -z "$1" ] ; then
 elif [ "--help" = "$1" ] || [ "-h" = "$1" ]; then
     print_usage
     exit 0
-elif [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
-    SOPCONFDIR=$1
-    source "$1/${CONF}"
 elif test -f ${SOPCONFDIR}/${CONF}; then
     source ${SOPCONFDIR}/${CONF}
 else

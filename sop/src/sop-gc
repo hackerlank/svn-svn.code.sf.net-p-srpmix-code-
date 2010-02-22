@@ -3,15 +3,19 @@
 SOPCONFDIR=/etc/sop
 CONF=sop.cf
 
-if [ "x$1" != x ] && [ -r "$1/${CONF}" ]; then
-    SOPCONFDIR=$1
-    source "$1/${CONF}"
-elif test -f ${SOPCONFDIR}/${CONF}; then
+function print_usage
+{
+    echo "Usage: "
+    echo "	$0 [--help|-h]"
+}
+
+if test -f ${SOPCONFDIR}/${CONF}; then
     source ${SOPCONFDIR}/${CONF}
 else
     echo "Cannot load ${CONF} file" 1>&2
     exit 1
 fi
+
 
 FS=/tmp/sop-gc-fs
 touch $FS
@@ -40,11 +44,11 @@ done | LANG=C sort | uniq > $MIRROR
 
 function report
 {
-    fs=$1
-    rpms=$2
-    mirror=$3
+    local fs=$1
+    local rpms=$2
+    local mirror=$3
     
-    echo FS level garbage:
+    echo '#' File system level garbage:
     diff -ruN $rpms $fs | grep ^+[0-9a-zA-Z] | while read; do
 	# Just rm
 	
