@@ -1,0 +1,95 @@
+#!/bin/bash
+
+SOPCONFDIR=/etc/sop
+CONF=sop.cf
+
+function print_usage
+{
+    echo "Usage: "
+    echo "	$0 [--help|-h]"
+}
+
+if test -f ${SOPCONFDIR}/${CONF}; then
+    source ${SOPCONFDIR}/${CONF}
+else
+    echo "Cannot load ${CONF} file" 1>&2
+    exit 1
+fi
+
+function report
+{
+    local fs=$1
+    local swrfs=$2
+    local mirror=$3
+    
+    echo '#' File system level garbage:
+    diff -ruN $swrfs $fs | grep ^+[0-9a-zA-Z] | while read; do
+	echo $REPLY
+    done
+
+    echo Swrf level garbage:
+    diff -ruN $mirror $swrfs | grep ^+[0-9a-zA-Z] | while read; do
+	echo $REPLY
+    done
+	 
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_uasge
+		exit 0
+		;;
+	esac
+	shift
+    done
+}
+
+function main
+{
+    local tempdir
+
+    parse_arguments "$@"
+    tempdir=`mktemp -d`
+    if $? != 0; then
+	exit 1
+    fi
+    trap "chmod -R u+w $tempdir; /bin/rm -rf $tempdir" 0    
+
+    
+    local list_in_fs=/$tempdir/fs
+    touch $list_in_fs
+
+    for x in ${SOP_SOURCES_DIR}/[0-9a-zA-Z]/*/*/pre-build; do
+	if ! [[ "$x" =~ '.*\^.*' ]]; then
+	    echo $x | \
+		sed -e "s#${SOP_SOURCES_DIR}/[0-9a-zA-Z]/##" | \
+		sed -e "s#/pre-build##" | \
+		sed -e "s#/#-#" 
+	fi
+    done | LANG=C sort | uniq > $list_in_fs
+
+
+    local list_swrf=/$tempdir/swrf
+    touch $list_swrf
+
+    for x in $(rpm -qa | grep -e -srpmix | grep -v -e srpmix-plugin  | grep -v -e srpmix-archives | grep -v -e -lcopy-); do
+	echo $x | sed -e 's/-srpmix.*$//'
+    done | LANG=C sort | uniq > $list_swrf
+
+
+    local list_in_mirrors=/$tempdir/mirrors
+    touch $list_in_mirrors
+    for d in ${SOP_CRADLES_DIR}/*/mirror; do
+	for s in $(find $d -type f | grep 'src.rpm$'); do
+	    rpm -qp --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" $s
+	done
+    done | LANG=C sort | uniq > $list_in_mirrors
+
+
+    report $list_in_fs $list_swrf $list_in_fs
+}
+
+time main "$@"
