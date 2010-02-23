@@ -1356,7 +1356,7 @@
 	      ;;
 	      (propertize
 	       (stitch-klist-value annotation :data)
-	       'face 'stitch-annotation-body)
+	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-body))
 	      (propertize
 	       "\n"
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
