@@ -89,7 +89,7 @@ function main
     done | LANG=C sort | uniq > $list_in_mirrors
 
 
-    report $list_in_fs $list_swrf $list_in_fs
+    report $list_in_fs $list_swrf $list_in_mirrors
 }
 
 time main "$@"
