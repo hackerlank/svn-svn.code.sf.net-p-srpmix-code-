@@ -800,7 +800,8 @@
 (defun stitch-insert-annotation-fuzzy (file entry)
   (unless (file-directory-p file)
     (unless (and (equal (stitch-klist-value entry :registered-as) file)
-		 (with-current-buffer (current-buffer) buffer-file-read-only))
+		 ;(with-current-buffer (current-buffer) buffer-file-read-only)
+		 )
       (let ((region (stitch-search-region 
 		     (current-buffer)
 		     (stitch-klist-value entry :target))))
@@ -842,10 +843,10 @@
     (let ((file (stitch-buffer-file-name (current-buffer))))
       (when file
 	(let ((entries (gethash (file-name-nondirectory file) stitch-annotations-fuzzy nil)))
-	    (mapc
-	     (lambda (entry) (stitch-insert-annotation-fuzzy file entry))
-	     ;; TODO: This should be done in registration
-	     (nreverse (sort entries 'stitch-annotation-compare))))))))
+	  (mapc
+	   (lambda (entry) (stitch-insert-annotation-fuzzy file entry))
+	   ;; TODO: This should be done in registration
+	   (nreverse (sort entries 'stitch-annotation-compare))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun stitch-insert-annotations (&optional buffer)
@@ -1484,7 +1485,7 @@
 	      (stitch-make-annotation-header date full-name mailing-address fuzzy?)
 	      (propertize
 	       (stitch-klist-value annotation :data)
-	       'face 'stitch-annotation-body)
+	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-body))
 	      (propertize
 	       (concat
 		(if (eq major-mode 'dired-mode) "" "\n")
