@@ -40,6 +40,7 @@ dist_confd_DATA = \
 	qt-jambi,trunk.lcopy \
 	resource-agents,trunk.lcopy \
 	rgmanager,trunk.lcopy \
+	rpm,rpm5.lcopy \
 	rpm,trunk.lcopy \
 	sbuild,trunk.lcopy \
 	sop,trunk.lcopy \
