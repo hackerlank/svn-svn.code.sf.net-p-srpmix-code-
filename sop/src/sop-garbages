@@ -22,16 +22,35 @@ function report
     local swrfs=$2
     local mirror=$3
     
-    echo '#' File system level garbage:
+    local swrf_files=""
+
+
+    echo '#' "File system level garbages:"
     diff -ruN $swrfs $fs | grep ^+[0-9a-zA-Z] | while read; do
-	echo $REPLY
+	local candidate="${REPLY:1}"
+	local c
+	local swrfs_alive=no
+	for c in /usr/share/srpmix/swrfs/${candidate:0:1}/${candidate}-*.swrf; do
+	    if [ -f $c ]; then
+		swrfs_alive=yes
+		swrf_files="$swrf_files $candidate"
+	    fi
+	done
+	if [ $swrfs_alive = no ]; then
+	    echo $candidate
+	fi
+    done
+    
+    echo '#' "Swrf file level garbages:"
+    for c in $swrf_files; do
+	echo $c
     done
 
-    echo Swrf level garbage:
+    
+    echo '#' "RPM level garbages:"
     diff -ruN $mirror $swrfs | grep ^+[0-9a-zA-Z] | while read; do
-	echo $REPLY
+	echo ${REPLY:1}
     done
-	 
 }
 
 function parse_arguments
