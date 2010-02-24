@@ -14,3 +14,9 @@ $ bash classes/svnweb  conf.d/jbossas.prelcopy
 
 See tests/svnweb+jbossas.txt about expected output.
 
+
+TODO:
+
+mercurial - http://hg.openjdk.java.net
+git - ...
+
