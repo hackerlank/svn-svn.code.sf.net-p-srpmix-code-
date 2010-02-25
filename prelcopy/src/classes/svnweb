@@ -86,11 +86,17 @@ function acceptable_p
     return $?
 }
 
+function wash_branch
+{
+    echo $1 | tr . _
+}
+
 function handle_tag
 {
     local conf=$1
     local c
     local b
+    local d
     local t
     local t0
     local p
@@ -118,11 +124,12 @@ function handle_tag
 		    sed -nre "s,.*href=\"([^\"]+)/\".*,\1,p"); do
 		    
 		    if acceptable_p "$u" "$c"; then
-			b="$u"
+			b=$(wash_branch "$u")
+			d="$u"
 			cat <<EOF
 (prelcopy :package "$p"
           :branch  "$b"
-          :command-line "svn checkout ${SVNWEB_BASE_URL}/$c/tags/$b"
+          :command-line "svn checkout ${SVNWEB_BASE_URL}/$c/tags/$d"
 	  :update #f
           :generated-by "${0##*/}+$conf")
 EOF
