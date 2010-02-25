@@ -1,0 +1,10 @@
+# -*- sh -*-
+PRELCOPY_CLASS=svnweb
+
+SVNWEB_BASE_URL=http://anonsvn.jboss.org/repos
+
+# Single target
+SVNWEB_COMPONENT=mod_cluster
+SVNWEB_PACKAGE=mod_cluster
+SVNWEB_TYPES="trunk tag"
+SVNWEB_TAG_ACCEPTABLE_REGEXP="^[0-9]+\.[0-9]+\.[0-9]+\.GA"
