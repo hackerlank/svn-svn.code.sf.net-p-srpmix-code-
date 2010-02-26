@@ -165,7 +165,7 @@
 	     (pergs (make-hash-table 'equal?)))
       (if (eof-object? raw-log)
 	  pergs
-	  (let1 log ((with-module es.src.syslog syslog) raw-log)
+	  (let1 log (syslog<-es raw-log)
 	    (add-log! pergs log n dist)
 	    (loop (read-line) (+ n 1) pergs)))))
 
@@ -250,7 +250,7 @@
 	    (< (cadr (memq :line-number a))
 	       (cadr (memq :line-number b)))))))
 
-(define (log->syslog log)
+(define (log<-es log)
   (cons 'syslog (cons :msg (cdr log))))
 
 (define url-format #f)
@@ -312,17 +312,26 @@
   (let* ((filelines (cadr (memq :filelines r)))
 	 (n-filelines (length filelines))
 	 (log-line-number (cadr (memq :line-number r)))
-	 (log-line ((with-module es.dest.syslog syslog) (log->syslog r)))
+	 (log-line (es<-syslog (log<-es r)))
+
+	 ;; http://forum.codecall.net/javascript/1931-javascript-analog-clock.html
+	 (date (cadr (memq :date r)))
+
 	 (log-line-len (string-length (cadr r)))
 	 (package-version (cadr (memq :package-version r)))
 	 (package (car package-version))
 	 (version (cadr package-version)))
-
     (list
      (html:pre :class "log" 
 	       :id (format "class-~d" log-line-number)
-	       :onclick (format "toggle('~a');" (format "xgettext-~d" log-line-number))
-	       :onmouseover (format "highlight('~a');" (format "class-~d" log-line-number))
+	       :onclick (format "toggle('~a')" 
+				(format "xgettext-~d" log-line-number))
+	       :onmouseover (let1 m (#/([0-9][0-9]):([0-9][0-9]):([0-9][0-9])/ date)
+			      (format "highlight('~a'); clock(~d, ~d, ~d);" 
+				    (format "class-~d" log-line-number)
+				    (m 1)
+				    (m 2)
+				    (m 3)))
 	       :onmouseout (format "unhighlight('~a');" (format "class-~d" log-line-number))
 	       (string-append (format "[~a/~a]" package version)
 			      " "
@@ -390,6 +399,10 @@
     if(obj && obj.style) obj.style.backgroundColor= \"white\";
 }")
 
+(define clock-script
+  "")
+
+
 (define (report results fmt)
   (case fmt
     ('es
@@ -409,6 +422,8 @@
 		       highlight-script
 		       "\n"
 		       unhighlight-script
+		       "\n"
+		       clock-script
 		       )))
 	(html:body
 	 (map
