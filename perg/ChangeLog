@@ -1,0 +1,5 @@
+2010-03-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Added PKG_CHECK_EXISTS(...).
+
+
