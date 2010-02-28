@@ -1,0 +1,50 @@
+Summary: Perg algorithm implementation
+Name: perg
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPLv3
+Group: Development/Tools
+Buildarch: noarch
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+Requires: bash
+Requires: gauche
+Requires: emacs
+Requires: es-src-syslog, es-dest-syslog
+Requires: es-dest-grep
+Requires: es-src-xgettext
+Requires: es-filter-generic
+Requires: es-filter-filelines
+
+%description
+Perg algorithm implementation
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/perg
+%{_libdir}/pkgconfig/perg.pc
+%doc COPYING README
+
+%{_datadir}/emacs/site-lisp/perg.el
+%{_datadir}/emacs/site-lisp/perg.elc
+
+%changelog
+* Wed Jun 10 2009 Masatake YAMATO <yamato@redhat.com> 0.0.0-0
+- Initial build.
+

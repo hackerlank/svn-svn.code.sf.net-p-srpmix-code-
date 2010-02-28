@@ -1,0 +1,2 @@
+SUBDIRS =  cmds
+SUBDIRS += emacs
