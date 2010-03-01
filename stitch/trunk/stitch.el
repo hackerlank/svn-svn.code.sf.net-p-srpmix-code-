@@ -193,7 +193,7 @@
   :group 'stitch)
 
 (defface stitch-annotation-summary-title
-  '((t (:background "azure2")))
+  '((t (:background "gray20")))
   "Face used to highlight the header of annotation editing buffer."
   :group 'stitch)
 
@@ -1948,7 +1948,7 @@
 	     (insert "\n")
 	     (insert "\n")
 	     (put-text-property p (point) 'face 'stitch-annotation-summary-title)
-	     (put-text-property p (point) 'mouse-face 'highlight)
+	     ;(put-text-property p (point) 'mouse-face 'highlight)
 	     ))
 	 kentries)))
     (when key
@@ -1999,6 +1999,7 @@
   '(menu-item "Make Text Memorandum..." stitch-annotate-text))
 (define-key-after stitch-menu [make-generic-memo]
   '(menu-item "Make Generic Memorandum..." stitch-annotate))
+
 (define-key-after stitch-menu [separator-0] '("--"))
 (define-key-after stitch-menu [list-memo]
   '(menu-item "List Memorandum..." stitch-list-annotation))
@@ -2015,6 +2016,12 @@
   '(menu-item "Reload Memorandums" stitch-reload-annotations))
 (define-key-after stitch-menu [eidt-memo-file]
   '(menu-item "Edit Memorandums File" stitch-find-annotation-file))
+
+(define-key-after stitch-menu [separator-2] '("--"))
+(define-key-after stitch-menu [make-meta-memo]
+  '(menu-item "Make Memorandum for Memorandum..." stitch-annotate-meta))
+(define-key-after stitch-menu [report]
+  '(menu-item "Report about keyword..." stitch-report-about-keyword))
 
 ;;
 ;; Navigation
