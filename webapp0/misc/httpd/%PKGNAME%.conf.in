@@ -1,4 +1,0 @@
-<Directory "@WWWDIR@">
-    AddHandler cgi-script .cgi
-    Options ExecCGI FollowSymlinks
-</Directory>
