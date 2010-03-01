@@ -1,4 +1,4 @@
 SUBDIRS = .
-SUBDIRS += base
 SUBDIRS += data
+SUBDIRS += base
 
