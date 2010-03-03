@@ -6,3 +6,4 @@ _PAM_LOGFILEのデフォルトは
 存在しなければstderrにログを出す。
 
 pam_rootok.soにdebugをつけると /var/log/messagesにログが出る。
+/var/log/secureかも。
