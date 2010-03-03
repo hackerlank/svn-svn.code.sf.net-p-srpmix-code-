@@ -6,4 +6,5 @@ _PAM_LOGFILEのデフォルトは
 存在しなければstderrにログを出す。
 
 pam_rootok.soにdebugをつけると /var/log/messagesにログが出る。
-/var/log/secureかも。
+/var/log/secureかも。openlogするときにLOG_AUTHあるいはLOG_AUTHPRIVしていると
+/var/log/secureに行く /etc/syslog.confに記載がある。
