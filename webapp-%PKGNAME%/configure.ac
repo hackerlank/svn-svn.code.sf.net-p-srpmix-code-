@@ -7,11 +7,25 @@ AC_PROG_LN_S
 PKG_PROG_PKG_CONFIG
 AC_RPM_RELEASE
 
+
 wwwdir=/srv/www/%PKGNAME%
 AC_ARG_WITH([wwwdir],
   [AS_HELP_STRING([--with-wwwdir],[WWW data topdir. default=$wwwdir])],
      [wwwdir=$withval])
 AC_SUBST([WWWDIR],[$wwwdir])
+
+
+drootdir=`dirname $wwwdir`
+AC_SUBST([DROOTDIR], [$drootdir])
+
+
+vhost_servername=%PKGNAME%.com
+AC_SUBST([VHOST_SERVERNAME], [$vhost_servername])
+
+
+AC_SUBST_FILE([vhost_conf])
+vhost_conf=$builddir/misc/httpd/vhost_conf
+
 
 AC_OUTPUT([
 	   Makefile
@@ -27,6 +41,7 @@ AC_OUTPUT([
 	   misc/pkgconfig/Makefile
 	   misc/pkgconfig/%PKGNAME%.pc
 	   misc/httpd/Makefile
+	   misc/httpd/vhost.conf
 	   misc/httpd/%PKGNAME%.conf
 	   tests/Makefile
 	  ])
