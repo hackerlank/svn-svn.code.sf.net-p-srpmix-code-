@@ -1,6 +1,6 @@
-NameVirtualHost *:80
+NameVirtualHost *:@VHOST_PORT@
 
-<VirtualHost *:80>
-    DocumentRoot @DROOTDIR@
+<VirtualHost *:@VHOST_PORT@>
+    DocumentRoot @VHOST_DOCROOT@
     ServerName @VHOST_SERVERNAME@
 </VirtualHost>
