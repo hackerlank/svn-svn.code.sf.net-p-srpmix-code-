@@ -38,6 +38,7 @@ fi
 %defattr(-,root,root,-)
 %doc COPYING README
 %config %{_sysconfdir}/httpd/conf.d/*
+%dir @WWWDIR@
 @WWWDIR@/*
 %{_libexecdir}/@PACKAGE@/*
 %{_libdir}/pkgconfig/@PACKAGE@.pc
