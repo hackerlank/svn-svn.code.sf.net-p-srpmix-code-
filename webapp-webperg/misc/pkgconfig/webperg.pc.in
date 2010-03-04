@@ -1,0 +1,5 @@
+prefix=@prefix@
+
+Name: @PACKAGE@
+Description: Searcing the location of source code from syslog output
+Version: @VERSION@

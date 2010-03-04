@@ -1,0 +1,6 @@
+NameVirtualHost *:@VHOST_PORT@
+
+<VirtualHost *:@VHOST_PORT@>
+    DocumentRoot @VHOST_DOCROOT@
+    ServerName @VHOST_SERVERNAME@
+</VirtualHost>

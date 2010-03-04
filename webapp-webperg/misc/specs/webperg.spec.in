@@ -1,4 +1,4 @@
-Summary: %DESC%
+Summary: Searcing the location of source code from syslog output
 Name: @PACKAGE@
 Version: @VERSION@
 Release: @RPM_RELEASE@
@@ -10,9 +10,12 @@ License: GPLv3
 Group: Development/System
 Requires(post): /sbin/service
 Requires: httpd
+Requires: perg
+Requires: gauche
+Requires: sqlite
 
 %description
-%DESC%
+Searcing the location of source code from syslog output
 
 %package @SPEC_CONFIG@
 Summary: httpd configuration for @PACKAGE@(@CONFIG configuration)
