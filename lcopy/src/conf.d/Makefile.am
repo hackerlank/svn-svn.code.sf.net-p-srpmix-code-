@@ -27,6 +27,7 @@ dist_confd_DATA = \
 	gtk2,trunk.lcopy \
 	hachoir,trunk.lcopy \
 	hal,trunk.lcopy \
+	httpclient,trunk.lcopy \
 	kernel,rt.lcopy \
 	kernel,trunk.lcopy \
 	kernel,xen-3_2.lcopy \
@@ -36,6 +37,7 @@ dist_confd_DATA = \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
 	openais,trunk.lcopy \
+	openid4java,trunk.lcopy \
 	perg,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
 	resource-agents,trunk.lcopy \
