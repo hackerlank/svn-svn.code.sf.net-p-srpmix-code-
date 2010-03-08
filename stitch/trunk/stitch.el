@@ -1047,7 +1047,11 @@
 				(stitch-klist-value r :date)
 				(stitch-klist-value r :full-name)
 				(stitch-klist-value r :mailing-address)
-				(stitch-klist-value r :keywords))))
+				(stitch-klist-value r :keywords)))
+     ((eq (car r) 'material)
+      ;; (material FILE :keywords (KEYWORDS...))
+      )
+     )
     r))
 
 (defun stitch-build-file-list (file-and-dir-list seed)
