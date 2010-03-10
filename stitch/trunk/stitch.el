@@ -1511,11 +1511,10 @@
 ;;
 ;; Graphviz Common
 ;;
-(defun stitch-graphviz-annotation-inline-format (cmd
-						 annotation
-						 overlay
-						 date full-name mailing-address
-						 fuzzy?)
+(defun stitch-generic-image-annotation-inline-format (image
+						      overlay
+						      date full-name mailing-address
+						      fuzzy?)
   (let ((pos (overlay-start overlay)))
     (let* ((b (char-before pos))
 	   (bn (or (eq b ?\n) (not b)))
@@ -1525,8 +1524,7 @@
 	      (stitch-make-annotation-header date full-name mailing-address fuzzy?)
 	      (propertize
 	       " "
-	       'display (stitch-graphviz-create-image (stitch-klist-value annotation :data)
-						       cmd))
+	       'display image)
 	      ;;
 	      (propertize
 	       (concat
@@ -1534,13 +1532,31 @@
 		(if an "" "\n" ))
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
 
-(defun stitch-graphviz-annotation-list-format (annotation cmd)
+(defun stitch-generic-image-annotation-list-format (image)
   (concat "\n"
 	  (propertize
 	   " "
-	   'display (stitch-graphviz-create-image (stitch-klist-value annotation :data)
-						   cmd))
+	   'display image)
 	  "\n"))
+
+(defun stitch-graphviz-annotation-inline-format (cmd
+						 annotation
+						 overlay
+						 date full-name mailing-address
+						 fuzzy?)
+  (let ((image (stitch-graphviz-create-image (stitch-klist-value annotation :data)
+						       cmd)))
+    (stitch-generic-image-annotation-inline-format image
+						   overlay
+						   date
+						   full-name
+						   mailing-address
+						   fuzzy?)))
+
+(defun stitch-graphviz-annotation-list-format (annotation cmd)
+  (stitch-generic-image-annotation-list-format 
+   (stitch-graphviz-create-image (stitch-klist-value annotation :data)
+				 cmd)))
 
 (defun stitch-graphviz-make-command-line (cmd dotfile pngfile)
   (if (stringp cmd)
@@ -1629,6 +1645,83 @@
    :save-form     stitch-generic-annotation-save-form
    :inline-format stitch-mscgen-annotation-inline-format
    :list-format   stitch-mscgen-annotation-list-format))
+
+;;
+;; WebImage
+;;
+(defun stitch-webimage-annotation-new (commit-func commit-args)
+  (let* ((url (read-from-minibuffer "URL: "))
+	 (md5 (stitch-webimage-make-cache-name url))
+	 (status 
+	  (or (file-exists-p md5)
+	      (stitch-webimage-annotation-retrieve url md5))))
+    (if status
+	(funcall commit-func
+		 `(annotation :type webimage
+			      :data ,url)
+		 commit-args
+		 (cons 'webimage (stitch-read-keywords "Commit with" t))
+		 current-prefix-arg)
+      (error "cannot return retrieve: %s" url))))
+
+
+(defconst stitch-webimage-cache-dir (let ((d (expand-file-name "~/.stitch-webimage")))
+				      (or (file-exists-p d)
+					  (make-directory d))
+				      d))
+
+(defun stitch-webimage-make-command-line (url output)
+  (format "curl --output %s %s" output url))
+
+(defun stitch-webimage-annotation-retrieve (url output)
+  (let ((status (shell-command (stitch-webimage-make-command-line url output))))
+    (if (eq status 0)
+	t
+      nil)))
+
+(defun stitch-webimage-make-cache-name (url)
+  (expand-file-name (format "%s.%s"
+			    (md5 url) 
+			    (file-name-extension url)) 
+		    stitch-webimage-cache-dir))
+
+(defun stitch-webimage-create-image (annotation)
+  (let* ((url (stitch-klist-value annotation :data))
+	 (md5 (stitch-webimage-make-cache-name url))
+	 (file (if (file-exists-p md5)
+		   md5
+		 (if (stitch-webimage-annotation-retrieve url md5)
+		     md5
+		   nil))))
+    (if file
+	(create-image file)
+      nil)))
+
+(defun stitch-webimage-annotation-inline-format (annotation
+						 overlay
+						 date full-name mailing-address
+						 fuzzy?)
+  (let ((i (stitch-webimage-create-image annotation)))
+    (when i
+      (stitch-generic-image-annotation-inline-format i
+						     overlay
+						     date
+						     full-name
+						     mailing-address
+						     fuzzy?))))
+
+(defun stitch-webimage-annotation-list-format (annotation)
+  (let ((i (stitch-webimage-create-image annotation)))
+    (when i 
+  (stitch-generic-image-annotation-list-format i))))
+
+(stitch-register-annotation-handler
+ 'webimage
+ '(:make          stitch-webimage-annotation-new
+   :load          stitch-generic-annotation-load
+   :save-form     stitch-generic-annotation-save-form
+   :inline-format stitch-webimage-annotation-inline-format
+   :list-format   stitch-webimage-annotation-list-format))
 
 ;;
 ;; Table rendering with tbl
