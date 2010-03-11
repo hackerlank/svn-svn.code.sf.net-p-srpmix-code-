@@ -154,20 +154,67 @@
 (define-class <director> ()
   ((dist :init-keyword :dist)
    (max-group :init-keyword :max-group)
-   (basenasem->srpms :init-keyword :basename->srpms)
-   (mpergs :init-form (make-hash-table 'equal?))
-   (unmperg-lines :init-form (list))
+   (basename->srpms :init-keyword :basename->srpms)
+   (basenames :init-form (make-hash-table 'equal?))
+   (packages  :init-form (make-hash-table 'equal?))
+   (lines :init-form (list))
    ))
 
+(define-class <basename> ()
+  ((packages :init-keyword :packages)
+   (uniq-logs :init-form (make-hash-table 'equal?))
+   ))
 
-			   
-(define-method resolve ((director <director>)
-			line-string
-			line-number
+(define-class <package> ()
+  ((dist :init-keyword :dist)
+   (pkgname :init-keyword :pkgname)))
+
+(define-method make-package ((director <director>) 
+			     (pkgname <string>))
+  (let1 pkg (make <package> 
+	      :dist (ref director 'dist)
+	      :pkgname pkgname)
+    (set! (ref director 'packages pkgname) pkg)
+    pkg))
+
+(define-method packages-for-basename ((director <director>) 
+				      (basename <string>))
+  (let loop ((candidates ((ref director 'basename->srpms) basename))
+	     (exists (ref director 'packages))
+	     (result (list)))
+    (if (null? candidates)
+	result
+	(let* ((c (car candidates))
+	       (pkg (or (ref exists (car candidates) #f)
+			(make-package director c))))
+	  (loop (cdr candidates) exists (cons pkg result))))))
+
+(define-method make-basename ((director <director>)
+			      (basename <string>))
+  (let1 obj (make <basename> 
+	      :init-keyword (packages-for-basename director basename)
+		  )
+    (set! (ref director 'basenames) basename obj)
+    b))
+
+(define-method resolve ((basename <basename>)
+			syslog
 			printer)
-  (let1 syslog (es<-syslog line-string)
-    (if (memq :raw syslog)
-	...)))
+  ...
+  )
+(define-method resolve ((director <director>)
+			log-line
+			printer)
+  (let1 syslog (kattach (es<-syslog line-string) :result (list))
+    (push! director 'lines syslog)
+    (unless (memq :raw syslog)
+      (let1 cmd (kget syslog :cmd)
+	(when cmd
+	  (let1 basename (or (ref (ref director 'basenames) cmd #f)
+			     (make-basename director cmd))
+	    (resolve basename syslog printer)))))))
+	      
+		    
 
 (define (main args)
   (let-args (cdr args)
@@ -180,15 +227,13 @@
 		     :dist dist
 		     :max-group max-group
 		     :basename->srpms (cute basename->srpms <> dist))
-      (let loop ((l (read-line))
-		 (i 0))
+      (let loop ((l (read-line)))
 	(unless (eof-object? l)
 	  (resolve director 
 		   l 
-		   i
 		   (lambda (elt)
 		     (write elt)
 		     (newline)))
-	  (loop (read-line) (+ i 1)))))))
+	  (loop (read-line)))))))
 
 
