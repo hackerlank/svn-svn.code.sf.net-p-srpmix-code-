@@ -149,8 +149,6 @@
 		      (loop (cdr pkgs) (cons (list pkg (sys-basename verdir)) result))
 		      (loop (cdr pkg ) result)))))))))
 
-
-
 (define-class <director> ()
   ((dist :init-keyword :dist)
    (max-group :init-keyword :max-group)
@@ -197,11 +195,17 @@
     (set! (ref director 'basenames) basename obj)
     b))
 
+(define-method resolve ((package  <package>)
+			syslog)
+  ...
+  )
 (define-method resolve ((basename <basename>)
 			syslog
 			printer)
-  ...
-  )
+  (for-each
+   (cute resolve <> syslog)
+  (ref basename 'packages)))
+
 (define-method resolve ((director <director>)
 			log-line
 			printer)
