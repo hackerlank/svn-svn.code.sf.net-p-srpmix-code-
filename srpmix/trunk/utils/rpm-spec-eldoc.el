@@ -23,6 +23,6 @@
 	      (puthash num r rpm-spec-eldoc-hash)
 	      r)))
        (t
-	nil)))))
+	"")))))
 
 (provide 'rpm-spec-eldoc)
