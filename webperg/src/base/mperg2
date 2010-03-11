@@ -1,0 +1,194 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
+;; Copyright (C) 2010 Masatake YAMATO
+
+;; This library is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This library is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this library.  If not, see <http://www.gnu.org/licenses/>.
+;;
+;; Author: Masatake YAMATO <yamato@redhat.com>
+;;
+(use file.util)
+(use gauche.sequence)
+(use gauche.parseopt)
+(use gauche.process)
+(use gauche.selector)
+(use es.src.syslog)
+(use es.dest.syslog)
+(use text.html-lite)
+(use text.tree)
+(use srfi-1)
+
+(define kget
+  (case-lambda
+   ((klist key default)
+    (cond
+     ((null? klist) default)
+     ((eq? (car klist) key) (cadr klist))
+     (else (kget (cdr klist) key default))))
+   ((klist key)
+    (kget klist key #f))))
+
+(define (kget-default$ default-klist)
+  (lambda (klist key)
+    (kget klist key (kget default-klist key))))
+
+;; TODO: khave?
+;; TODO: multiple
+(define (kattach klist key value)
+  ;; fold?
+  (reverse (cons value (cons key (reverse klist)))))
+
+(define (kreplace klist key value)
+  (reverse (let loop ((input klist)
+		      (result (list)))
+	     (cond
+	      ((null? input) result)
+	      ((eq? (car input) key)
+	       (loop (if (null? (cdr input))
+			 (list)
+			 (cddr input))
+		     (cons value (cons key result)))
+	       )
+	      (else
+	       (loop (cdr input) (cons (car input) result)))))))
+
+(define (kupdate klist key proc)
+  (reverse (let loop ((input klist)
+		      (result (list)))
+	     (cond
+	      ((null? input) result)
+	      ((eq? (car input) key)
+	       (loop (if (null? (cdr input))
+			 (list)
+			 (cddr input))
+		     (cons (proc (cadr input)) (cons key result)))
+	       )
+	      (else
+	       (loop (cdr input) (cons (car input) result)))))))
+
+
+(define (kdrop klist key)
+  (reverse (let loop ((input klist)
+		      (result (list)))
+	     (cond
+	      ((null? input) result)
+	      ((eq? (car input) key)
+	       (if (null? (cdr input))
+		   ;; broken klist
+		   result
+		   (loop (cddr input) result)))
+	      (else
+	       (loop (cdr input) (cons (car input) result)))))))
+
+(define kget&drop
+  (case-lambda
+   ((klist key default)
+    (let loop ((klist        klist)
+	       (result-klist (list))
+	       (result-value default))
+      (if (null? klist)
+	  (values result-value (reverse! result-klist))
+	  (if (eq? key (car klist))
+	      (loop (cddr klist)
+		    result-klist
+		    (cadr klist))
+	      (loop (cdr klist)
+		    (cons (car klist) result-klist)
+		    result-value)))))
+   ((klist key)
+    (kget&drop klist key #f))))
+
+;; gosh> (ktranspose '(foo :a (bar 1 2 3) :b (fox "a" "b" "c")) :b)
+;; (fox "a" "b" "c" :b! (foo :a (bar 1 2 3)))
+;; gosh> (ktranspose '(foo :a (bar 1 2 3) :b (fox "a" "b" "c")) :b :enter)
+;; (fox "a" "b" "c" :enter (foo :a (bar 1 2 3)))
+;; gosh> (ktranspose (ktranspose '(foo :a (bar 1 2 3) :b (fox "a" "b" "c")) :b :enter) :enter :b)
+;; (foo :a (bar 1 2 3) :b (fox "a" "b" "c"))
+;; gosh> 
+(define ktranspose 
+  (case-lambda
+   ((klist key-pull key-push)
+    (receive (new old) (kget&drop klist key-pull)
+	      (kattach new key-push old)))
+   ((klist key-pull)
+    (ktranspose klist 
+		key-pull
+		(make-keyword (string-append (x->string key-pull) "!"))))))
+
+
+(define (basename->srpms basename dist resolver)
+  (let1 pkgs (process-output->string-list 
+	      `(,resolver
+		,(format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist)
+		,basename))
+    (if (null? pkgs)
+	(list)
+	(let loop ((pkgs pkgs)
+		   (result (list)))
+	  (if (null? pkgs)
+	      result
+	      (let1 pkg (car pkgs)
+		(let1 verdir (guard (e (else #f))
+				 (sys-readlink (format "/srv/sources/dists/~a/packages/~a/~a"
+						       dist
+						       (substring pkg 0 1)
+						       pkg)))
+		  (if verdir
+		      (loop (cdr pkgs) (cons (list pkg (sys-basename verdir)) result))
+		      (loop (cdr pkg ) result)))))))))
+
+
+
+(define-class <director> ()
+  ((dist :init-keyword :dist)
+   (max-group :init-keyword :max-group)
+   (basenasem->srpms :init-keyword :basename->srpms)
+   (mpergs :init-form (make-hash-table 'equal?))
+   (unmperg-lines :init-form (list))
+   ))
+
+
+			   
+(define-method resolve ((director <director>)
+			line-string
+			line-number
+			printer)
+  (let1 syslog (es<-syslog line-string)
+    (if (memq :raw syslog)
+	...)))
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cute show-help (car args) 0))
+       (dist "dist=s" "rhel5su4")
+       (max-group "max-group=i" 10)
+       (basename->srpms "basename-to-srpm=s" "./list-srpmnames-by-file.sh"
+			=> (lambda (resulver) (cute basename->srpms <> <> resolver))))
+    (let1 director (make <director>
+		     :dist dist
+		     :max-group max-group
+		     :basename->srpms (cute basename->srpms <> dist))
+      (let loop ((l (read-line))
+		 (i 0))
+	(unless (eof-object? l)
+	  (resolve director 
+		   l 
+		   i
+		   (lambda (elt)
+		     (write elt)
+		     (newline)))
+	  (loop (read-line) (+ i 1)))))))
+
+
