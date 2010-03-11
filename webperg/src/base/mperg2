@@ -29,6 +29,8 @@
 (use text.html-lite)
 (use text.tree)
 (use srfi-1)
+(use util.queue)
+
 
 (define kget
   (case-lambda
@@ -128,7 +130,7 @@
 		(make-keyword (string-append (x->string key-pull) "!"))))))
 
 
-(define (basename->srpms basename dist resolver)
+(define (basename->srpms basename dist resolver depth)
   (let1 pkgs (process-output->string-list 
 	      `(,resolver
 		,(format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist)
@@ -151,11 +153,12 @@
 
 (define-class <director> ()
   ((dist :init-keyword :dist)
-   (max-group :init-keyword :max-group)
+   (max-groups :init-keyword :max-groups)
    (basename->srpms :init-keyword :basename->srpms)
    (basenames :init-form (make-hash-table 'equal?))
    (packages  :init-form (make-hash-table 'equal?))
    (lines :init-form (list))
+   (selector :init-form (make <selector>))
    ))
 
 (define-class <basename> ()
@@ -165,14 +168,23 @@
 
 (define-class <package> ()
   ((dist :init-keyword :dist)
-   (pkgname :init-keyword :pkgname)))
+   (pkgname :init-keyword :pkgname)
+   (out-queue :init-form (make-queue))
+   ))
+
+(define-method boot ((package <package>))
+  ;; loading xgettext
+  pkg)
 
 (define-method make-package ((director <director>) 
 			     (pkgname <string>))
   (let1 pkg (make <package> 
 	      :dist (ref director 'dist)
 	      :pkgname pkgname)
-    (set! (ref director 'packages pkgname) pkg)
+    (set! (ref (ref director 'packages) pkgname) pkg)
+    (receive (to-pergs from-pergs perg-procs) (boot pkg)
+      ...				;selector add
+      )
     pkg))
 
 (define-method packages-for-basename ((director <director>) 
@@ -189,55 +201,72 @@
 
 (define-method make-basename ((director <director>)
 			      (basename <string>))
-  (let1 obj (make <basename> 
-	      :init-keyword (packages-for-basename director basename)
-		  )
-    (set! (ref director 'basenames) basename obj)
+  (let1 b (make <basename> 
+	    :init-keyword (packages-for-basename director basename)
+	    )
+    (set! (ref director 'basenames) basename b)
     b))
 
-(define-method resolve ((package  <package>)
+(define-method prepare ((package  <package>)
 			syslog)
-  ...
-  )
-(define-method resolve ((basename <basename>)
-			syslog
-			printer)
-  (for-each
-   (cute resolve <> syslog)
-  (ref basename 'packages)))
+  (enqueue! (ref package 'out-queue) syslog))
 
-(define-method resolve ((director <director>)
-			log-line
-			printer)
+(define-method resolve ((basename <basename>)
+			syslog)
+  (let* ((log-line (kget syslog :msg))
+	 (uniq-logs (ref basename 'uniq-logs)))
+    (unless (ref uniq-logs log-line)
+      (set! (ref uniq-logs log-line) 
+	    (make-tree-map equal? 
+			   (lambda () ...comparing score)))
+      (for-each
+       (cute prepare <> syslog)
+       (ref basename 'packages)))))
+
+(define-method prepare ((director <director>)
+			log-line)
   (let1 syslog (kattach (es<-syslog line-string) :result (list))
     (push! director 'lines syslog)
     (unless (memq :raw syslog)
-      (let1 cmd (kget syslog :cmd)
-	(when cmd
-	  (let1 basename (or (ref (ref director 'basenames) cmd #f)
-			     (make-basename director cmd))
-	    (resolve basename syslog printer)))))))
+      (let1 basename (kget syslog :cmd)
+	(when basename
+	  (let1 b (or (ref (ref director 'basenames) basename #f)
+		      (make-basename director basename))
+	    (prepare basename syslog)))))))
 	      
 		    
+
+(define (show-help prog n)
+  (format #t "~a --help" prog)
+  (format #t "~a [--basename--to-srpm=RESOLVER] [--max-groups=N] [--dist=DIST] [--depth=N] < /var/log/message\n" prog)
+  (exit n))
+
+(define-method resolve ((director <director>))
+  ...
+  director)
+
+(define-method report ((director <director>))
+  ...
+  )
 
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help (car args) 0))
        (dist "dist=s" "rhel5su4")
-       (max-group "max-group=i" 10)
-       (basename->srpms "basename-to-srpm=s" "./list-srpmnames-by-file.sh"
-			=> (lambda (resulver) (cute basename->srpms <> <> resolver))))
-    (let1 director (make <director>
-		     :dist dist
-		     :max-group max-group
-		     :basename->srpms (cute basename->srpms <> dist))
-      (let loop ((l (read-line)))
-	(unless (eof-object? l)
-	  (resolve director 
-		   l 
-		   (lambda (elt)
-		     (write elt)
-		     (newline)))
-	  (loop (read-line)))))))
+       (max-groups "max-groups=i" 10)
+       (depth "depth=i" 1)
+       (basename-to-srpms "basename-to-srpm=s" "./list-srpmnames-by-file.sh"))
+    (report (resolve (let loop ((l (read-line))
+				(director (make <director>
+					    :dist dist
+					    :max-groups max-groups
+					    :basename->srpms (cute basename->srpms
+								   <> 
+								   dist
+								   basename-to-srpm
+								   depth))))
+		       (unless (eof-object? l)
+			 (prepare director l)
+			 (loop (read-line))))))))
 
 
