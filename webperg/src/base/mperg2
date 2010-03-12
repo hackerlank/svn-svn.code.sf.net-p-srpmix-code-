@@ -245,7 +245,8 @@
 				  (equal? (cadr k1) (cadr k2))))
 			   (lambda (k1 k2)
 			     (and (>= (car k1) (car k2))
-				  (string< (cadr k1) (cadr k2))))
+				  ;(string< (cadr k1) (cadr k2))
+				  ))
 			     ))
       (for-each
        (cute prepare <> syslog)
@@ -267,6 +268,7 @@
   (write r oport)
   (newline oport))
 
+;; FIXME: Take :match-chars into account.
 (define (take-group filelines limit)
   (if (null? filelines)
       filelines
@@ -379,10 +381,25 @@
   (format #t "[_] ~a\n" (kget rawlog :raw)))
 (define-method report-syslog ((director <director>)
 			      syslog
-			      tree-map)
-  (format #t "[+] ~a\n" (kget syslog :msg)
-	  
-	  ))
+			      fileliens)
+  (format #t "[+] ~a\n" (kget syslog :msg))
+  (for-each
+   (lambda (max-chars_msg-filelines)
+     (let* ((h (car max-chars_msg-filelines))
+	    (t (cdr max-chars_msg-filelines)))
+       (format #t "	<~d>~s\n" (car h) (cadr h))
+       (for-each 
+	(lambda (fileline)
+	  (format #t "		~a,~a,~a,~s\n" 
+		  (kget fileline :package)
+		  (kget fileline :version)
+		  (kget fileline :file)
+		  (kget fileline :line))
+	  )
+	t)
+       ))
+   fileliens))
+
 
 
 (define (dequeue-safe! queue . default)
@@ -390,7 +407,26 @@
     (if (queue-empty? queue)
 	default
 	(dequeue! queue))))
-      
+
+(define (take-higher-groups tree-map max-groups)
+  (let1 alist (tree-map->alist tree-map)
+    (if (null? alist)
+	alist
+	(let ((max-groups (+ max-groups 1))
+	      (max-match-chars (car (car (car alist)))))
+	  (let loop ((queue (make-queue))
+		     (alist alist)
+		     (max-groups max-groups)
+		     (max-match-chars max-match-chars))
+	    (if (or (null? alist) (eq? max-groups 0))
+		(dequeue-all! queue)
+		(let* ((elt (car alist))
+		       (match-chars (car (car elt))))
+		  (enqueue! queue elt)
+		  (if (> max-match-chars match-chars)
+		      (loop queue (cdr alist) (- max-groups 1) match-chars)
+		      (loop queue (cdr alist) max-groups max-match-chars)))))))))
+
 (define-method report ((director <director>))
   (let ((queue (ref director 'logs))
 	(max-groups (ref director 'max-groups)))
@@ -405,7 +441,12 @@
 			      (kget syslog :cmd))
 			     'uniq-logs)
 			    (kget syslog :msg))
-	      (report-syslog director syslog tree-map)))
+	      (report-syslog director 
+			     syslog
+			     (take-higher-groups 
+			      tree-map
+			      max-groups
+			      ))))
 	(loop (dequeue-safe! queue))))))
 
 (define (show-help prog n)
