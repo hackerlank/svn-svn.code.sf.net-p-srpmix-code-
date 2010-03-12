@@ -29,6 +29,7 @@
 (use text.html-lite)
 (use text.tree)
 (use srfi-1)
+(use srfi-13)
 (use util.queue)
 
 (debug-print-width #f)
@@ -189,7 +190,7 @@
 	;; FIXME make parametric
 	(limit 20))
     (let ((limit-flag (format "--limit=~d" limit)))
-      (let1 proc (run-process #?=`(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
+      (let1 proc (run-process `(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
 			      :input :pipe
 			      :output :pipe)
 	(push! (ref package 'pergs) proc)
@@ -239,8 +240,13 @@
 	 (uniq-logs (ref basename 'uniq-logs)))
     (unless (ref uniq-logs log-line #f)
       (set! (ref uniq-logs log-line) 
-	    (make-tree-map equal? 
-			   (lambda () '|...comparing score|)))
+	    (make-tree-map (lambda (k1 k2)
+			     (and (eq? (car k1) (car k2))
+				  (equal? (cadr k1) (cadr k2))))
+			   (lambda (k1 k2)
+			     (and (>= (car k1) (car k2))
+				  (string< (cadr k1) (cadr k2))))
+			     ))
       (for-each
        (cute prepare <> syslog)
        (ref basename 'packages)))))
@@ -261,14 +267,46 @@
   (write r oport)
   (newline oport))
 
+(define (take-group filelines limit)
+  (if (null? filelines)
+      filelines
+      (let1 get-msg (lambda (xgettext) (kget xgettext :msg))
+	(let loop ((key          (get-msg (car filelines)))
+		   (candidate    (car filelines))
+		   (rest         (cdr filelines))
+		   (result       (list))
+		   (n            0))
+	  (cond
+	   ((eq? n limit)
+	    (reverse result))
+	   ((equal? (get-msg candidate) key)
+	    (if (null? rest)
+		(reverse (cons candidate result))
+		(loop key (car rest) (cdr rest) (cons candidate result) n)))
+	   (else
+	    (loop (get-msg candidate) candidate rest result (+ n 1))))))))
+
 (define-method resolve ((basename <basename>)
 			(uniq-log <string>)
 			filelines
-			max-groups)
+			max-groups
+			pkgname
+			version)
   ;; Pick higher rank upto MAX-GROUPS.
   ;; Put them to the tree-map.
-  (list uniq-log filelines)
-  )
+  (let ((filelines (take-group filelines max-groups))
+	(extra     (list :package pkgname :version version))
+	(tree-map  (ref (ref basename 'uniq-logs) uniq-log)))
+    (for-each
+     (lambda (fileline)
+       (let* ((match-chars (kget fileline :match-chars))
+	      (msg (kget fileline :msg))
+	      (key (list match-chars msg)))
+	 (tree-map-push! tree-map key 
+			 (append! fileline extra))
+	 ))
+     filelines)))
+
 
 (define-method resolve ((director <director>))
   (let ((selector (ref director 'selector))
@@ -288,7 +326,10 @@
 			       (guard (e
 				       (else (dequeue-all! queue)))
 				      (writeln `(log ,(kget syslog :msg)
-						     :basename ,(kget syslog :cmd))
+						     :basename ,(kget syslog :cmd)
+						     ;; :pkgname and :version can
+						     ;; be attached here
+						     )
 					       output-port)))
 			     (when (queue-empty? queue)
 			       (selector-delete! selector output-port #f #f)
@@ -308,10 +349,12 @@
 					(close-input-port input-port)
 					(set! n-input-ports (- n-input-ports 1)))
 				 (resolve (ref (ref director 'basenames) 
-						 (kget log+filelines :basename))
+					       (kget log+filelines :basename))
 					  (cadr log+filelines)
 					  (kget log+filelines :filelines)
 					  (ref director 'max-groups)
+					  (ref package 'pkgname)
+					  (ref package 'version)
 					  ))))
 
 			 '(r)))
@@ -331,10 +374,39 @@
 	(ref package 'pergs)))))
   director)
 
+(define-method report-raw ((director <director>)
+			   rawlog)
+  (format #t "[_] ~a\n" (kget rawlog :raw)))
+(define-method report-syslog ((director <director>)
+			      syslog
+			      tree-map)
+  (format #t "[+] ~a\n" (kget syslog :msg)
+	  
+	  ))
 
+
+(define (dequeue-safe! queue . default)
+  (let1 default (if (null? default) #f  default)
+    (if (queue-empty? queue)
+	default
+	(dequeue! queue))))
+      
 (define-method report ((director <director>))
-  '|...|
-  )
+  (let ((queue (ref director 'logs))
+	(max-groups (ref director 'max-groups)))
+    (let loop ((syslog (dequeue-safe! queue)))
+      (when syslog
+	(if (memq :raw syslog)
+	    (report-raw director syslog)
+	    (let1 tree-map (ref 
+			    (ref 
+			     (ref 
+			      (ref director 'basenames)
+			      (kget syslog :cmd))
+			     'uniq-logs)
+			    (kget syslog :msg))
+	      (report-syslog director syslog tree-map)))
+	(loop (dequeue-safe! queue))))))
 
 (define (show-help prog n)
   (format #t "~a --help" prog)
