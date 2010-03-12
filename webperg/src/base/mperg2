@@ -31,6 +31,35 @@
 (use srfi-1)
 (use util.queue)
 
+(debug-print-width #f)
+
+
+(define perg-cmd "perg")
+(define (package-version->xgettxt pkg ver)
+  (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
+	      (substring pkg 0 1)
+	      pkg
+	      ver))
+(define (basename->srpms basename dist resolver depth)
+  (let1 pkgs (process-output->string-list 
+	      `(,resolver
+		,(format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist)
+		,basename))
+    (if (null? pkgs)
+	(list)
+	(let loop ((pkgs pkgs)
+		   (result (list)))
+	  (if (null? pkgs)
+	      result
+	      (let1 pkg (car pkgs)
+		(let1 verdir (guard (e (else #f))
+				 (sys-readlink (format "/srv/sources/dists/~a/packages/~a/~a"
+						       dist
+						       (substring pkg 0 1)
+						       pkg)))
+		  (if verdir
+		      (loop (cdr pkgs) (cons (list pkg (sys-basename verdir)) result))
+		      (loop (cdr pkg ) result)))))))))
 
 (define kget
   (case-lambda
@@ -129,35 +158,13 @@
 		key-pull
 		(make-keyword (string-append (x->string key-pull) "!"))))))
 
-
-(define (basename->srpms basename dist resolver depth)
-  (let1 pkgs (process-output->string-list 
-	      `(,resolver
-		,(format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist)
-		,basename))
-    (if (null? pkgs)
-	(list)
-	(let loop ((pkgs pkgs)
-		   (result (list)))
-	  (if (null? pkgs)
-	      result
-	      (let1 pkg (car pkgs)
-		(let1 verdir (guard (e (else #f))
-				 (sys-readlink (format "/srv/sources/dists/~a/packages/~a/~a"
-						       dist
-						       (substring pkg 0 1)
-						       pkg)))
-		  (if verdir
-		      (loop (cdr pkgs) (cons (list pkg (sys-basename verdir)) result))
-		      (loop (cdr pkg ) result)))))))))
-
 (define-class <director> ()
   ((dist :init-keyword :dist)
    (max-groups :init-keyword :max-groups)
    (basename->srpms :init-keyword :basename->srpms)
    (basenames :init-form (make-hash-table 'equal?))
    (packages  :init-form (make-hash-table 'equal?))
-   (lines :init-form (list))
+   (logs      :init-form (make-queue))
    (selector :init-form (make <selector>))
    ))
 
@@ -169,22 +176,37 @@
 (define-class <package> ()
   ((dist :init-keyword :dist)
    (pkgname :init-keyword :pkgname)
-   (out-queue :init-form (make-queue))
+   (version :init-keyword :version)
+   (to-perg-queue :init-form (make-queue))
+   (pergs :init-form (list))
+   (to-pergs-ports :init-form (list))
+   (from-pergs-ports :init-form (list))
    ))
 
 (define-method boot ((package <package>))
-  ;; loading xgettext
-  pkg)
+  (let ((xgettext (package-version->xgettxt (ref package 'pkgname)
+					    (ref package 'version)))
+	;; FIXME make parametric
+	(limit 20))
+    (let ((limit-flag (format "--limit=~d" limit)))
+      (let1 proc (run-process #?=`(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
+			      :input :pipe
+			      :output :pipe)
+	(push! (ref package 'pergs) proc)
+	(push! (ref package 'to-pergs-ports) (process-input proc))
+	(push! (ref package 'from-pergs-ports) (process-output proc))))))
+		
 
 (define-method make-package ((director <director>) 
-			     (pkgname <string>))
+			     (pkgname <string>)
+			     (version <string>))
   (let1 pkg (make <package> 
 	      :dist (ref director 'dist)
-	      :pkgname pkgname)
+	      :pkgname pkgname
+	      :version version)
+    ;; FIXME: This needs guard.
+    (boot pkg)
     (set! (ref (ref director 'packages) pkgname) pkg)
-    (receive (to-pergs from-pergs perg-procs) (boot pkg)
-      ...				;selector add
-      )
     pkg))
 
 (define-method packages-for-basename ((director <director>) 
@@ -195,59 +217,129 @@
     (if (null? candidates)
 	result
 	(let* ((c (car candidates))
-	       (pkg (or (ref exists (car candidates) #f)
-			(make-package director c))))
+	       (pkg (or (ref exists (car c) #f)
+			(make-package director (car c) (cadr c)))))
 	  (loop (cdr candidates) exists (cons pkg result))))))
 
 (define-method make-basename ((director <director>)
 			      (basename <string>))
   (let1 b (make <basename> 
-	    :init-keyword (packages-for-basename director basename)
+	    :packages (packages-for-basename director basename)
 	    )
-    (set! (ref director 'basenames) basename b)
+    (set! (ref (ref director 'basenames)  basename)  b)
     b))
 
 (define-method prepare ((package  <package>)
 			syslog)
-  (enqueue! (ref package 'out-queue) syslog))
+  (enqueue! (ref package 'to-perg-queue) syslog))
 
-(define-method resolve ((basename <basename>)
+(define-method prepare ((basename <basename>)
 			syslog)
   (let* ((log-line (kget syslog :msg))
 	 (uniq-logs (ref basename 'uniq-logs)))
-    (unless (ref uniq-logs log-line)
+    (unless (ref uniq-logs log-line #f)
       (set! (ref uniq-logs log-line) 
 	    (make-tree-map equal? 
-			   (lambda () ...comparing score)))
+			   (lambda () '|...comparing score|)))
       (for-each
        (cute prepare <> syslog)
        (ref basename 'packages)))))
 
 (define-method prepare ((director <director>)
 			log-line)
-  (let1 syslog (kattach (es<-syslog line-string) :result (list))
-    (push! director 'lines syslog)
+  (let1 syslog (kattach (es<-syslog log-line) :result (list))
+    (enqueue! (ref director 'logs) syslog)
     (unless (memq :raw syslog)
       (let1 basename (kget syslog :cmd)
 	(when basename
 	  (let1 b (or (ref (ref director 'basenames) basename #f)
 		      (make-basename director basename))
-	    (prepare basename syslog)))))))
-	      
-		    
+	    (prepare b syslog)))))
+    director))
+
+(define (writeln r oport)
+  (write r oport)
+  (newline oport))
+
+(define-method resolve ((basename <basename>)
+			(uniq-log <string>)
+			filelines
+			max-groups)
+  ;; Pick higher rank upto MAX-GROUPS.
+  ;; Put them to the tree-map.
+  (list uniq-log filelines)
+  )
+
+(define-method resolve ((director <director>))
+  (let ((selector (ref director 'selector))
+	(n-output-ports 0)
+	(n-input-ports 0))
+    (hash-table-for-each
+     (ref director 'packages)
+     (lambda (k package)
+       (for-each
+	(lambda (to-perg-port)
+	  (set! n-output-ports (+ n-output-ports 1))
+	  (selector-add! selector to-perg-port
+			 (lambda (output-port flag)
+			   (let* ((queue (ref package 'to-perg-queue))
+				  (syslog (dequeue! queue)))
+			     (when syslog
+			       (guard (e
+				       (else (dequeue-all! queue)))
+				      (writeln `(log ,(kget syslog :msg)
+						     :basename ,(kget syslog :cmd))
+					       output-port)))
+			     (when (queue-empty? queue)
+			       (selector-delete! selector output-port #f #f)
+			       (close-output-port output-port)
+			       (set! n-output-ports (- n-output-ports 1))
+			       )))
+			 '(w)))
+	(ref package 'to-pergs-ports))
+       (for-each
+	(lambda (from-perg-port)
+	  (set! n-input-ports (+ n-input-ports 1))
+	  (selector-add! selector from-perg-port
+			 (lambda (input-port flag)
+			   (let1 log+filelines (read input-port)
+			     (if (eof-object? log+filelines)
+				 (begin (selector-delete! selector input-port #f #f)
+					(close-input-port input-port)
+					(set! n-input-ports (- n-input-ports 1)))
+				 (resolve (ref (ref director 'basenames) 
+						 (kget log+filelines :basename))
+					  (cadr log+filelines)
+					  (kget log+filelines :filelines)
+					  (ref director 'max-groups)
+					  ))))
+
+			 '(r)))
+	(ref package 'from-pergs-ports))
+       ))
+    (let loop ()
+      (when (or (< 0 n-output-ports)
+		(< 0 n-input-ports))
+	(let1 status (selector-select selector)
+	  (unless (eq? status 0)
+	    (loop)))))
+    (hash-table-for-each
+     (ref director 'packages)
+     (lambda (k package)
+       (for-each 
+	process-wait
+	(ref package 'pergs)))))
+  director)
+
+
+(define-method report ((director <director>))
+  '|...|
+  )
 
 (define (show-help prog n)
   (format #t "~a --help" prog)
   (format #t "~a [--basename--to-srpm=RESOLVER] [--max-groups=N] [--dist=DIST] [--depth=N] < /var/log/message\n" prog)
   (exit n))
-
-(define-method resolve ((director <director>))
-  ...
-  director)
-
-(define-method report ((director <director>))
-  ...
-  )
 
 (define (main args)
   (let-args (cdr args)
@@ -263,10 +355,11 @@
 					    :basename->srpms (cute basename->srpms
 								   <> 
 								   dist
-								   basename-to-srpm
+								   basename-to-srpms
 								   depth))))
-		       (unless (eof-object? l)
-			 (prepare director l)
-			 (loop (read-line))))))))
+		       (if (eof-object? l)
+			   director
+			   (loop (read-line) 
+				 (prepare director l))))))))
 
 

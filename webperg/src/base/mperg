@@ -202,6 +202,7 @@
   (newline oport))
 
 ;; (take-group '((:msg "a") (:msg "a") (:msg "a") (:msg "b") (:msg "b") (:msg "c") (:msg "c") (:msg "d") (:msg "d") ) 3)
+;; => ((:msg "a") (:msg "a") (:msg "a") (:msg "b") (:msg "b") (:msg "c") (:msg "c"))
 (define (take-group filelines limit)
   (if (null? filelines)
       filelines
@@ -249,7 +250,6 @@
 						      :package-version ,(ref perg 'package-version)) 
 						output))))
 				 (when (empty? perg)
-				   (ref perg 'package-version)
 				   (selector-delete! selector output #f #f)
 				   (close-output-port output)))
 			       '(w))
