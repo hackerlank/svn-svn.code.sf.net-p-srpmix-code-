@@ -1512,6 +1512,7 @@
 ;; Graphviz Common
 ;;
 (defun stitch-generic-image-annotation-inline-format (image
+						      footer
 						      overlay
 						      date full-name mailing-address
 						      fuzzy?)
@@ -1529,17 +1530,21 @@
 	      (propertize
 	       (concat
 		"\n"
+		(or footer "")
 		(if an "" "\n" ))
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
 
-(defun stitch-generic-image-annotation-list-format (image)
+(defun stitch-generic-image-annotation-list-format (image footer)
   (concat "\n"
 	  (propertize
 	   " "
 	   'display image)
-	  "\n"))
+	  "\n"
+	  (or (concat footer "\n") "")
+	  ))
 
 (defun stitch-graphviz-annotation-inline-format (cmd
+						 footer
 						 annotation
 						 overlay
 						 date full-name mailing-address
@@ -1547,6 +1552,7 @@
   (let ((image (stitch-graphviz-create-image (stitch-klist-value annotation :data)
 						       cmd)))
     (stitch-generic-image-annotation-inline-format image
+						   nil
 						   overlay
 						   date
 						   full-name
@@ -1704,6 +1710,7 @@
   (let ((i (stitch-webimage-create-image annotation)))
     (when i
       (stitch-generic-image-annotation-inline-format i
+						     (stitch-klist-value annotation :data)
 						     overlay
 						     date
 						     full-name
@@ -1713,7 +1720,8 @@
 (defun stitch-webimage-annotation-list-format (annotation)
   (let ((i (stitch-webimage-create-image annotation)))
     (when i 
-  (stitch-generic-image-annotation-list-format i))))
+      (stitch-generic-image-annotation-list-format i 
+						   (stitch-klist-value annotation :data)))))
 
 (stitch-register-annotation-handler
  'webimage
