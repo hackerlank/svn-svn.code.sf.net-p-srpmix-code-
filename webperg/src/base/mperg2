@@ -247,7 +247,7 @@
 
 (define-method prepare ((director <director>)
 			log-line)
-  (let1 syslog (kattach (es<-syslog log-line) :result (list))
+  (let1 syslog (es<-syslog log-line)
     (enqueue! (ref director 'logs) syslog)
     (unless (memq :raw syslog)
       (let1 basename (kget syslog :cmd)
