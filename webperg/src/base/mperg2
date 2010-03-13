@@ -19,18 +19,20 @@
 ;;
 ;; Author: Masatake YAMATO <yamato@redhat.com>
 ;;
-(use file.util)
+(use srfi-1)
+(use srfi-13)
+
 (use gauche.sequence)
 (use gauche.parseopt)
 (use gauche.process)
+(use gauche.threads)
 (use gauche.selector)
+
+(use file.util)
+(use util.queue)
+
 (use es.src.syslog)
 (use es.dest.syslog)
-(use text.html-lite)
-(use text.tree)
-(use srfi-1)
-(use srfi-13)
-(use util.queue)
 
 (debug-print-width #f)
 
@@ -172,7 +174,6 @@
    (basenames :init-form (make-hash-table 'equal?))
    (packages  :init-form (make-hash-table 'equal?))
    (logs      :init-form (make-queue))
-   (selector :init-form (make <selector>))
    ))
 
 (define-class <basename> ()
@@ -317,7 +318,8 @@
 
 
 (define-method resolve ((director <director>))
-  (let ((selector (ref director 'selector))
+  (let ((output-selector (make <selector>))
+	(input-selector  (make <selector>))
 	(n-output-ports 0)
 	(n-input-ports 0))
     (hash-table-for-each
@@ -326,7 +328,7 @@
        (for-each
 	(lambda (to-perg-port)
 	  (set! n-output-ports (+ n-output-ports 1))
-	  (selector-add! selector to-perg-port
+	  (selector-add! output-selector to-perg-port
 			 (lambda (output-port flag)
 			   (let* ((queue (ref package 'to-perg-queue))
 				  (syslog (dequeue! queue)))
@@ -340,7 +342,7 @@
 						     )
 					       output-port)))
 			     (when (queue-empty? queue)
-			       (selector-delete! selector output-port #f #f)
+			       (selector-delete! output-selector output-port #f #f)
 			       (close-output-port output-port)
 			       (set! n-output-ports (- n-output-ports 1))
 			       )))
@@ -349,11 +351,11 @@
        (for-each
 	(lambda (from-perg-port)
 	  (set! n-input-ports (+ n-input-ports 1))
-	  (selector-add! selector from-perg-port
+	  (selector-add! input-selector from-perg-port
 			 (lambda (input-port flag)
 			   (let1 log+filelines (read input-port)
 			     (if (eof-object? log+filelines)
-				 (begin (selector-delete! selector input-port #f #f)
+				 (begin (selector-delete! input-selector input-port #f #f)
 					(close-input-port input-port)
 					(set! n-input-ports (- n-input-ports 1)))
 				 (resolve (ref (ref director 'basenames) 
@@ -368,12 +370,24 @@
 			 '(r)))
 	(ref package 'from-pergs-ports))
        ))
-    (let loop ()
-      (when (or (< 0 n-output-ports)
-		(< 0 n-input-ports))
-	(let1 status (selector-select selector)
-	  (unless (eq? status 0)
-	    (loop)))))
+    ;;
+    (let ((output-thread (make-thread (rec (loop)
+					   (when (< 0 n-output-ports)
+					     (let1 status (selector-select output-selector)
+					       (unless (eq? status 0)
+						 (loop)))))
+				      "output-thread"))
+	  (input-thread (make-thread (rec (loop)
+					  (when (< 0 n-input-ports)
+					    (let1 status (selector-select input-selector)
+					      (unless (eq? status 0)
+						(loop)))))
+				     "input-thread")))
+      (thread-start! output-thread)
+      (thread-start! input-thread)
+      (thread-join! output-thread)
+      (thread-join! input-thread))
+    ;;
     (hash-table-for-each
      (ref director 'packages)
      (lambda (k package)
