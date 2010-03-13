@@ -52,9 +52,10 @@ fi
 %dir @WWWDIR@
 @WWWDIR@/*
 %dir %{_libexecdir}/@PACKAGE@/
-%{_libexecdir}/@PACKAGE@/*
+%{_libexecdir}/@PACKAGE@/webperg.cgi
 %{_libdir}/pkgconfig/@PACKAGE@.pc
-
+%{_bindir}/mperg->html
+%{_datadir}/gauche/site/lib/mperg->html.scm
 
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*
