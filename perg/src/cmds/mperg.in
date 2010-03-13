@@ -492,7 +492,7 @@
       ((help "h|help" => (cute show-help (car args) 0))
        (dist "dist=s" "rhel5su4")
        (max-groups "max-groups=i" 10)
-       (basename-to-srpms "basename-to-srpm=s" "./list-srpmnames-by-file.sh"))
+       (basename-to-srpms "basename-to-srpm=s" "@prefix@/libexec/perg/list-srpmnames-by-file.sh"))
     (report (resolve (let loop ((l (read-line-safe))
 				(director (make <director>
 					    :dist dist

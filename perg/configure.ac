@@ -1,6 +1,6 @@
 m4_define([pkg_name],[perg])
 m4_define([pkg_major_version],[0])
-m4_define([pkg_minor_version],[0])
+m4_define([pkg_minor_version],[1])
 m4_define([pkg_micro_version],[0])
 m4_define([pkg_version],pkg_major_version.pkg_minor_version.pkg_micro_version)
 
@@ -39,6 +39,7 @@ AC_OUTPUT([
 	misc/pkgconfig/perg.pc
 	src/Makefile
 	src/cmds/Makefile
+	src/cmds/mperg
 	src/emacs/Makefile
 	tests/Makefile
 	])

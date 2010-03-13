@@ -6,7 +6,7 @@ License: GPLv3
 Group: Development/Tools
 Buildarch: noarch
 Source0: %{name}-%{version}.tar.bz2
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 Requires: bash
 Requires: gauche
@@ -45,8 +45,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/perg.pc
 %doc COPYING README
 
-%dir %{_libexecdir}/@PACKAGE@/
-%{_libexecdir}/@PACKAGE@/*
+%dir %{_libexecdir}/perg/
+%{_libexecdir}/perg/*
 
 %{_datadir}/emacs/site-lisp/perg.el
 %{_datadir}/emacs/site-lisp/perg.elc

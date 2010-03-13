@@ -5,5 +5,5 @@ dist_bin_SCRIPTS= \
 	\
 	$(NULL)
 
-pkglibexecdir = @libexecdir@/perg
+pkglibexecdir = ${libexecdir}/perg
 dist_pkglibexec_SCRIPTS = list-srpmnames-by-file.sh
