@@ -144,6 +144,8 @@
 
 ;; gosh> (ktranspose '(foo :a (bar 1 2 3) :b (fox "a" "b" "c")) :b)
 ;; (fox "a" "b" "c" :b! (foo :a (bar 1 2 3)))
+;; gosh > (ktranspose '(fox "a" "b" "c" :b! (foo :a (bar 1 2 3))) :b!)
+;; (foo :a (bar 1 2 3) :b (fox "a" "b" "c"))
 ;; gosh> (ktranspose '(foo :a (bar 1 2 3) :b (fox "a" "b" "c")) :b :enter)
 ;; (fox "a" "b" "c" :enter (foo :a (bar 1 2 3)))
 ;; gosh> (ktranspose (ktranspose '(foo :a (bar 1 2 3) :b (fox "a" "b" "c")) :b :enter) :enter :b)
@@ -153,11 +155,15 @@
   (case-lambda
    ((klist key-pull key-push)
     (receive (new old) (kget&drop klist key-pull)
-	      (kattach new key-push old)))
+      (kattach new key-push old)))
    ((klist key-pull)
     (ktranspose klist 
 		key-pull
-		(make-keyword (string-append (x->string key-pull) "!"))))))
+		(make-keyword (let1 key-pull-string (x->string key-pull)
+				(rxmatch-if (#/(.*)!$/ key-pull-string)
+				    (#f body)
+				  body
+				  (string-append key-pull-string "!"))))))))
 
 (define-class <director> ()
   ((dist :init-keyword :dist)
@@ -378,11 +384,14 @@
 
 (define-method report-raw ((director <director>)
 			   rawlog)
-  (format #t "[_] ~a\n" (kget rawlog :raw)))
+  #|(format #t "[_] ~a\n" (kget rawlog :raw))|#
+  (writeln rawlog)
+  )
 (define-method report-syslog ((director <director>)
 			      syslog
 			      fileliens)
-  (format #t "[+] ~a\n" (kget syslog :msg))
+  (writeln (kattach syslog :filelines fileliens))
+  #|(format #t "[+] ~a\n" (kget syslog :msg))
   (for-each
    (lambda (max-chars_msg-filelines)
      (let* ((h (car max-chars_msg-filelines))
@@ -398,7 +407,8 @@
 	  )
 	t)
        ))
-   fileliens))
+   fileliens)
+  #|)
 
 
 
