@@ -23,11 +23,10 @@
 (use text.html-lite)
 (use gauche.process)
 (use file.util)
+(use mperg->html)
 
 
-(define webperg-libexec-dir "@libexecdir@/webperg")
 (define srcview "@SRCVIEW@")
-
 
 (cgi-main
  (lambda (params)
@@ -35,36 +34,42 @@
 	 (syslog (cgi-get-parameter "syslog" params :convert x->string)))
      (list
       (cgi-header)
-      (html-doctype)
       (if syslog
-	  (list 
-	   (let1 mperg (run-process `(,(string-append webperg-libexec-dir "/" "mperg")
-				      ,(string-append "--resolver=" webperg-libexec-dir "/" "list-srpmnames-by-file.sh")
-				      ,(string-append "--url-format=" srcview)
-				      "--format=html"
-				      ,dist)
-				    :input :pipe
-				    :output :pipe)
-	     (let1 p (process-input mperg)
-	       (display syslog p)
-	       (close-output-port p)
-	       )
-	     (let* ((p (process-output mperg))
-		    (str (port->string p)))
-	       (close-input-port p)
-	       (process-wait mperg)
-	       str
-	     )))
-	  (html:html
-	   (html:head (html:title "webperg"))
-	   (html:div "Choose a distribution and paste your /var/log/messages")
-	   (html:body (html:form
-		       (html:p (html:select :name "dist" :size 1
-					    (map
-					     (pa$ html:option)
-					     (reverse (directory-list "/srv/sources/dists" 
-								      :children? #t 
-								      :filter (lambda (x) (#/rhel[0-9].*/ x)))))))
-		       (html:p (html:textarea :rows 10 :cols 128 :name "syslog"))
-		       (html:p (html:input :type "submit" :name "submit" :value "perg them"))))))))))
+	  (result-page dist syslog)
+	  (cover-page)
+	 )))))
+
+(define (cover-page)
+  (list
+   (html-doctype)
+   (html:html
+    (html:head (html:title "webperg"))
+    (html:div "Choose a distribution and paste your /var/log/messages")
+    (html:body (html:form
+		(html:p (html:select :name "dist" :size 1
+				     (map
+				      (pa$ html:option)
+				      (enumerate-dists))))
+		(html:p (html:textarea :rows 10 :cols 128 :name "syslog"))
+		(html:p (html:input :type "submit" :name "submit" :value "perg them")))))))
+
+(define (enumerate-dists)
+  (reverse (directory-list "/srv/sources/dists" 
+			   :children? #t 
+			   :filter #/rhel[0-9].*/)))
+
+
+(define (result-page dist syslog)
+  (let1 mperg (run-process `(mperg "--dist" ,dist)
+			   :input :pipe
+			   :output :pipe)
+    (let1 p (process-input mperg)
+      (display syslog p)
+      (close-output-port p))
+    (let1 p (process-output mperg)
+      (let1 html (mperg->html p dist)
+	(close-input-port p)
+	(process-wait mperg)
+	html))))
+
 
