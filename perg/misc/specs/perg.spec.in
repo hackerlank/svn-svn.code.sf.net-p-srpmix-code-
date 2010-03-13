@@ -17,6 +17,9 @@ Requires: es-src-xgettext
 Requires: es-filter-generic
 Requires: es-filter-filelines
 
+# mperg requires this.
+Requires: sqlite
+
 %description
 Perg algorithm implementation
 
@@ -38,8 +41,12 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_bindir}/perg
+%{_bindir}/mperg
 %{_libdir}/pkgconfig/perg.pc
 %doc COPYING README
+
+%dir %{_libexecdir}/@PACKAGE@/
+%{_libexecdir}/@PACKAGE@/*
 
 %{_datadir}/emacs/site-lisp/perg.el
 %{_datadir}/emacs/site-lisp/perg.elc
