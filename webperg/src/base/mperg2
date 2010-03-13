@@ -465,13 +465,21 @@
   (format #t "~a [--basename--to-srpm=RESOLVER] [--max-groups=N] [--dist=DIST] < /var/log/message\n" prog)
   (exit n))
 
+(define (read-line-safe . port)
+  (let1 port (if (null? port)
+		 (current-input-port)
+		 (car port))
+    (guard (e
+	    (else #f))
+	   (read-line port))))
+
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help (car args) 0))
        (dist "dist=s" "rhel5su4")
        (max-groups "max-groups=i" 10)
        (basename-to-srpms "basename-to-srpm=s" "./list-srpmnames-by-file.sh"))
-    (report (resolve (let loop ((l (read-line))
+    (report (resolve (let loop ((l (read-line-safe))
 				(director (make <director>
 					    :dist dist
 					    :max-groups max-groups
@@ -482,7 +490,9 @@
 								   ))))
 		       (if (eof-object? l)
 			   director
-			   (loop (read-line) 
-				 (prepare director l))))))))
+			   (loop (read-line-safe) 
+				 (if l
+				     (prepare director l)
+				     director))))))))
 
 
