@@ -64,7 +64,9 @@
 					 (list input-rpms output-rpms)
 					 (let1 new-rpm (car temp-rpms)
 					   (let1 in-output? (member new-rpm output-rpms)
-					     (merge (if in-output? input-rpms (cons new-rpm input-rpms))
+					     (merge input-rpms 
+						    ;; Don't use this now.
+						    ;;(if in-output? input-rpms (cons new-rpm input-rpms))
 						    (if in-output? output-rpms (cons new-rpm output-rpms))
 						    (cdr temp-rpms))))))))))
       (let1 srpms (apply lset-union equal? (map 

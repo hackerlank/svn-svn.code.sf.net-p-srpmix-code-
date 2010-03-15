@@ -3,7 +3,8 @@
 # Copyright (C) 2010 Satoru SATOH <satoru.satoh@gmail.com>
 # Lincense: GPLv3+
 #
- 
+# http://github.com/ssato/rpmkit/blob/master/list-requires-by-package-name.sh
+# 
 set -e
 #set -x
  
