@@ -1,4 +1,4 @@
-AC_INIT([webperg], [0.0.0])
+AC_INIT([webperg], [0.1.0])
 AC_CONFIG_AUX_DIR([misc/ac-aux])
 AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
 AC_CONFIG_MACRO_DIR([misc/m4])
