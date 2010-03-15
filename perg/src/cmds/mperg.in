@@ -45,26 +45,48 @@
 	      pkg
 	      ver))
 
-(define (basename->srpms basename dist resolver)
-  (let1 pkgs (process-output->string-list 
-	      `(,resolver
-		,(format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist)
-		,basename))
-    (if (null? pkgs)
-	(list)
-	(let loop ((pkgs pkgs)
-		   (result (list)))
-	  (if (null? pkgs)
-	      result
-	      (let1 pkg (car pkgs)
-		(let1 verdir (guard (e (else #f))
-				 (sys-readlink (format "/srv/sources/dists/~a/packages/~a/~a"
-						       dist
-						       (substring pkg 0 1)
-						       pkg)))
-		  (if verdir
-		      (loop (cdr pkgs) (cons (list pkg (sys-basename verdir)) result))
-		      (loop (cdr pkg ) result)))))))))
+(define (basename->srpm-paths basename dist libexec-dir)
+  (let* ((file->rpms (build-path libexec-dir "list-rpmnames-by-file.sh"))
+	 (rpm->rpms  (build-path libexec-dir "list-requires-by-package-name.sh"))
+	 (rpm->srpms (build-path libexec-dir "list-srpmnames-by-package-name.sh"))
+	 (db (format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist)))
+    (let1 rpms (let loop ((input-rpms (process-output->string-list `(,file->rpms ,db ,basename)))
+			  (output-rpms (list)))
+		 (if (null? input-rpms)
+		     output-rpms
+		     (let1 temp-rpms (process-output->string-list `(,rpm->rpms ,db ,(car input-rpms)))
+		       (apply loop (let merge ((input-rpms (cdr input-rpms))
+					       (output-rpms (if (member (car input-rpms) output-rpms)
+								output-rpms
+								(cons (car input-rpms) output-rpms)))
+					       (temp-rpms temp-rpms))
+				     (if (null? temp-rpms)
+					 (list input-rpms output-rpms)
+					 (let1 new-rpm (car temp-rpms)
+					   (let1 in-output? (member new-rpm output-rpms)
+					     (merge (if in-output? input-rpms (cons new-rpm input-rpms))
+						    (if in-output? output-rpms (cons new-rpm output-rpms))
+						    (cdr temp-rpms))))))))))
+      (let1 srpms (apply lset-union equal? (map 
+					    (lambda (rpm) 
+					      (process-output->string-list `(,rpm->srpms ,db ,rpm)))
+						rpms))
+	(if (null? srpms)
+	    (list)
+	    (let loop ((srpms srpms)
+		       (result (list)))
+	      (if (null? srpms)
+		  result
+		  (let1 srpm (car srpms)
+		    (let1 verdir (guard (e (else #f))
+					(sys-readlink (format "/srv/sources/dists/~a/packages/~a/~a"
+							      dist
+							      (substring srpm 0 1)
+							      srpm)))
+		      (if verdir
+			  (loop (cdr srpms)  (cons (list srpm (sys-basename verdir))
+						   result))
+			  (loop (cdr srpms)  result)))))))))))
 
 (define kget
   (case-lambda
@@ -172,7 +194,7 @@
 (define-class <director> ()
   ((dist :init-keyword :dist)
    (max-groups :init-keyword :max-groups)
-   (basename->srpms :init-keyword :basename->srpms)
+   (basename->srpm-paths :init-keyword :basename->srpm-paths)
    (basenames :init-form (make-hash-table 'equal?))
    (packages  :init-form (make-hash-table 'equal?))
    (logs      :init-form (make-queue))
@@ -198,13 +220,14 @@
 					    (ref package 'version)))
 	;; FIXME make parametric
 	(limit 20))
-    (let ((limit-flag (format "--limit=~d" limit)))
-      (let1 proc (run-process `(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
-			      :input :pipe
-			      :output :pipe)
-	(push! (ref package 'pergs) proc)
-	(push! (ref package 'to-pergs-ports) (process-input proc))
-	(push! (ref package 'from-pergs-ports) (process-output proc))))))
+    (when (file-is-readable? xgettext)
+      (let ((limit-flag (format "--limit=~d" limit)))
+	(let1 proc (run-process `(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
+				:input :pipe
+				:output :pipe)
+	  (push! (ref package 'pergs) proc)
+	  (push! (ref package 'to-pergs-ports) (process-input proc))
+	  (push! (ref package 'from-pergs-ports) (process-output proc)))))))
 		
 
 (define-method make-package ((director <director>) 
@@ -221,7 +244,7 @@
 
 (define-method packages-for-basename ((director <director>) 
 				      (basename <string>))
-  (let loop ((candidates ((ref director 'basename->srpms) basename))
+  (let loop ((candidates ((ref director 'basename->srpm-paths) basename))
 	     (exists (ref director 'packages))
 	     (result (list)))
     (if (null? candidates)
@@ -477,8 +500,10 @@
 	(loop (dequeue-safe! queue))))))
 
 (define (show-help prog n)
-  (format #t "~a --help" prog)
-  (format #t "~a [--basename--to-srpm=RESOLVER] [--max-groups=N] [--dist=DIST] < /var/log/message\n" prog)
+  (format #t "~a --help\n" prog)
+  (format #t "~a [--libexec-dir=LIBEXECDIR(=~s)] [--max-groups=N] [--dist=DIST] < /var/log/message\n" 
+	  prog
+	  "@prefix@/libexec/perg")
   (exit n))
 
 (define (read-line-safe . port)
@@ -494,15 +519,16 @@
       ((help "h|help" => (cute show-help (car args) 0))
        (dist "dist=s" "rhel5su4")
        (max-groups "max-groups=i" 10)
-       (basename-to-srpms "basename-to-srpm=s" "@prefix@/libexec/perg/list-srpmnames-by-file.sh"))
+       (libexec-dir "libexec-dir=s" "@prefix@/libexec/perg")
+       )
     (report (resolve (let loop ((l (read-line-safe))
 				(director (make <director>
 					    :dist dist
 					    :max-groups max-groups
-					    :basename->srpms (cute basename->srpms
+					    :basename->srpm-paths (cute basename->srpm-paths
 								   <> 
 								   dist
-								   basename-to-srpms
+								   libexec-dir
 								   ))))
 		       (if (eof-object? l)
 			   director
@@ -510,5 +536,3 @@
 				 (if l
 				     (prepare director l)
 				     director))))))))
-
-
