@@ -38,11 +38,13 @@
 
 
 (define perg-cmd "perg")
+
 (define (package-version->xgettxt pkg ver)
   (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
 	      (substring pkg 0 1)
 	      pkg
 	      ver))
+
 (define (basename->srpms basename dist resolver)
   (let1 pkgs (process-output->string-list 
 	      `(,resolver

@@ -6,4 +6,9 @@ dist_bin_SCRIPTS= \
 	$(NULL)
 
 pkglibexecdir = ${libexecdir}/perg
-dist_pkglibexec_SCRIPTS = list-srpmnames-by-file.sh
+dist_pkglibexec_SCRIPTS = \
+	list-srpmnames-by-file.sh        \
+	list-requires-by-package-name.sh \
+	\
+	$(NULL)
+
