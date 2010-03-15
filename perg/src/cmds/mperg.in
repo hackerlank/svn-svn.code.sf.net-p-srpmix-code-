@@ -49,30 +49,37 @@
   (let* ((file->rpms (build-path libexec-dir "list-rpmnames-by-file.sh"))
 	 (rpm->rpms  (build-path libexec-dir "list-requires-by-package-name.sh"))
 	 (rpm->srpms (build-path libexec-dir "list-srpmnames-by-package-name.sh"))
-	 (db (format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist)))
-    (let1 rpms (let loop ((input-rpms (process-output->string-list `(,file->rpms ,db ,basename)))
-			  (output-rpms (list)))
-		 (if (null? input-rpms)
-		     output-rpms
-		     (let1 temp-rpms (process-output->string-list `(,rpm->rpms ,db ,(car input-rpms)))
-		       (apply loop (let merge ((input-rpms (cdr input-rpms))
-					       (output-rpms (if (member (car input-rpms) output-rpms)
-								output-rpms
-								(cons (car input-rpms) output-rpms)))
-					       (temp-rpms temp-rpms))
-				     (if (null? temp-rpms)
-					 (list input-rpms output-rpms)
-					 (let1 new-rpm (car temp-rpms)
-					   (let1 in-output? (member new-rpm output-rpms)
-					     (merge input-rpms 
-						    ;; Don't use this now.
-						    ;;(if in-output? input-rpms (cons new-rpm input-rpms))
-						    (if in-output? output-rpms (cons new-rpm output-rpms))
-						    (cdr temp-rpms))))))))))
+	 (db (format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist))
+	 (bad-guys '("kernel" "glibc" "bash")))
+    (let1 rpms 
+	(cond
+	 ((equal? "kernel" basename) (list "kernel"))
+	 (else
+	  (let loop ((input-rpms (process-output->string-list `(,file->rpms ,db ,basename)))
+		      (output-rpms (list)))
+	     (if (null? input-rpms)
+		 output-rpms
+		 (let1 temp-rpms (process-output->string-list `(,rpm->rpms ,db ,(car input-rpms)))
+		   (apply loop (let merge ((input-rpms (cdr input-rpms))
+					   (output-rpms (if (member (car input-rpms) output-rpms)
+							    output-rpms
+							    (cons (car input-rpms) output-rpms)))
+					   (temp-rpms temp-rpms))
+				 (if (null? temp-rpms)
+				     (list input-rpms output-rpms)
+				     (let1 new-rpm (car temp-rpms)
+				       (let1 in-output? (or (member new-rpm output-rpms)
+							    (member new-rpm bad-guys))
+					 (merge input-rpms 
+						;; Don't use this now.
+						;;(if in-output? input-rpms (cons new-rpm input-rpms))
+						(if in-output? output-rpms (cons new-rpm output-rpms))
+						(cdr temp-rpms))))))))))))
+
       (let1 srpms (apply lset-union equal? (map 
 					    (lambda (rpm) 
 					      (process-output->string-list `(,rpm->srpms ,db ,rpm)))
-						rpms))
+					    rpms))
 	(if (null? srpms)
 	    (list)
 	    (let loop ((srpms srpms)
