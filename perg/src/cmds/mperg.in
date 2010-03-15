@@ -53,7 +53,7 @@
 	 (bad-guys '("kernel" "glibc" "bash")))
     (let1 rpms 
 	(cond
-	 ((equal? "kernel" basename) (list "kernel"))
+	 ((equal? "kernel" basename) (list basename))
 	 (else
 	  (let loop ((input-rpms (process-output->string-list `(,file->rpms ,db ,basename)))
 		      (output-rpms (list)))
