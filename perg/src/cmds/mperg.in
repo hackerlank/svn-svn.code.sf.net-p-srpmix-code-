@@ -51,7 +51,7 @@
 		  "bash"
 		  "initscripts"
 		  "mkinitrd"
-		  )
+		  ))
   
 (define (basename->srpm-paths basename dist libexec-dir)
   (let* ((file->rpms (build-path libexec-dir "list-rpmnames-by-file.sh"))
