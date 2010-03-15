@@ -2,9 +2,18 @@
 #| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
 (use mperg->html)
+(use gauche.parseopt)
+
+(define (show-help prog n)
+  (format #t "~a --help\n" prog)
+  (format #t "~a --srcview=URLFORMAT\n" prog)
+  (exit n))
 
 (define (main args)
-  (display 
-   (tree->string 
-       (mperg->html (current-input-port) "fedora11")))
-  (newline))
+  (let-args (cdr args)
+      ((help "h|help" => (cute show-help (car args) 0))
+       (srcview "srcview=s" ""))
+    (display 
+     (tree->string 
+      (mperg->html (current-input-port) "fedora11" srcview)))
+    (newline)))

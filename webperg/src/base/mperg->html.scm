@@ -67,7 +67,7 @@
 	(cadr kdr)
 	#f)))
 
-(define (mperg->html input-port dist)
+(define (mperg->html input-port dist srcview)
   (list
    (html-doctype)
    (html:html
@@ -81,7 +81,7 @@
 	  (cond
 	   ((kget r :raw) (raw->html r logline-number dist))
 	   ((null? (kget r :filelines)) (unsolved->html r logline-number dist))
-	   (else (syslog->html r logline-number dist))))
+	   (else (syslog->html r logline-number dist srcview))))
 	(pa$ read input-port)))))))
 
 
@@ -104,9 +104,12 @@
 (define (js fn arg1)
   (format "~a('~a')" (x->string fn) arg1))
 
-(define (make-fileline-href package version file line dist)
-  ""
-  )
+(define (make-fileline-href srcview package version file line dist)
+  (cond
+   ((string? srcview)
+    (format srcview (substring package 0 1) package version file line))
+   (else
+    "")))
 
 (define (make-sources-path package version file line dist)
   (format "/srv/sources/sources/~a/~a/~a/~a:~d"
@@ -116,7 +119,7 @@
 	  file
 	  line))
 
-(define (syslog->html r l dist)
+(define (syslog->html r l dist srcview)
   (let* (
 	 (log-string (syslog<-es r))
 	 (filelines (kget r :filelines))
@@ -167,7 +170,7 @@
 							    dist)
 					     (html:li (html:pre 
 						       (html:a 
-						      :href (apply make-fileline-href args)
+						      :href (apply make-fileline-href srcview args)
 						      (apply make-sources-path args))))))
 					(cdr msg)))
 				       )))))

@@ -28,17 +28,6 @@
 
 (define srcview "@SRCVIEW@")
 
-(cgi-main
- (lambda (params)
-   (let ((dist (or (cgi-get-parameter "dist" params :convert x->string) "rhel5su4"))
-	 (syslog (cgi-get-parameter "syslog" params :convert x->string)))
-     (list
-      (cgi-header)
-      (if syslog
-	  (result-page dist syslog)
-	  (cover-page)
-	 )))))
-
 (define (cover-page)
   (list
    (html-doctype)
@@ -59,7 +48,7 @@
 			   :filter #/rhel[0-9].*/)))
 
 
-(define (result-page dist syslog)
+(define (result-page dist syslog srcview)
   (let1 mperg (run-process `(mperg "--dist" ,dist)
 			   :input :pipe
 			   :output :pipe)
@@ -67,9 +56,20 @@
       (display syslog p)
       (close-output-port p))
     (let1 p (process-output mperg)
-      (let1 html (mperg->html p dist)
+      (let1 html (mperg->html p dist srcview)
 	(close-input-port p)
 	(process-wait mperg)
 	html))))
 
 
+
+(cgi-main
+ (lambda (params)
+   (let ((dist (or (cgi-get-parameter "dist" params :convert x->string) "rhel5su4"))
+	 (syslog (cgi-get-parameter "syslog" params :convert x->string)))
+     (list
+      (cgi-header)
+      (if syslog
+	  (result-page dist syslog srcview)
+	  (cover-page)
+	 )))))
