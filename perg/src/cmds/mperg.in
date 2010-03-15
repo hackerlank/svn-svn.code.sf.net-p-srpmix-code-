@@ -50,10 +50,17 @@
 	 (rpm->rpms  (build-path libexec-dir "list-requires-by-package-name.sh"))
 	 (rpm->srpms (build-path libexec-dir "list-srpmnames-by-package-name.sh"))
 	 (db (format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist))
-	 (bad-guys '("kernel" "glibc" "bash")))
+	 (fat-guys? (lambda (pkg) (any identity (map 
+						 (lambda (test)
+						   (cond
+						    ((string? test) (equal? test pkg))
+						    ((is-a? test <regexp>) (test pkg))
+						    (else #f)))
+						 '(#/^kernel.*/ "glibc" "bash"))))))
     (let1 rpms 
 	(cond
-	 ((equal? "kernel" basename) (list basename))
+	 ;; kernel-xen???
+	 ((#/^kernel.*/ basename) (list basename))
 	 (else
 	  (let loop ((input-rpms (process-output->string-list `(,file->rpms ,db ,basename)))
 		      (output-rpms (list)))
@@ -69,7 +76,7 @@
 				     (list input-rpms output-rpms)
 				     (let1 new-rpm (car temp-rpms)
 				       (let1 in-output? (or (member new-rpm output-rpms)
-							    (member new-rpm bad-guys))
+							    (fat-guys? new-rpm))
 					 (merge input-rpms 
 						;; Don't use this now.
 						;;(if in-output? input-rpms (cons new-rpm input-rpms))
