@@ -30,7 +30,7 @@
 (define srcview "@SRCVIEW@")
 (define max-groups 5)
 (define max-log-lines 30)
-(define max-log-columns 300)
+(define max-log-columns 250)
 
 (define (cover-page)
   (list
@@ -45,7 +45,10 @@
 				      (enumerate-dists))))
 		(html:p (html:textarea :rows 10 :cols 128 :name "syslog"))
 		(html:p (list (html:input :type "submit" :name "submit" :value "Locate them")))
-		(html:p (list (html:input :type "checkbox" :name "debug" :value "#t") "debug"))
+		(html:p (list 
+			 (format "max groups: ~a, max log lines: ~a, max log columns: ~a, "
+				 max-groups max-log-lines max-log-columns)
+			 (html:input :type "checkbox" :name "debug" :value "#t") "debug"))
 		)))))
 
 (define (enumerate-dists)

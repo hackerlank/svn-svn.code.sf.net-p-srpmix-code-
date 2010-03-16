@@ -79,8 +79,10 @@
 	(lambda (r)
 	  (set! logline-number (+ logline-number 1))
 	  (cond
-	   ((kget r :raw) (raw->html r logline-number dist))
-	   ((null? (kget r :filelines)) (unsolved->html r logline-number dist))
+	   ((or (kget r :raw) (not (kget r :cmd))) 
+	    (raw->html r logline-number dist))
+	   ((null? (kget r :filelines))
+	    (unsolved->html r logline-number dist))
 	   (else (syslog->html r logline-number dist srcview))))
 	(pa$ read input-port)))))))
 

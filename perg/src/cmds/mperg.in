@@ -512,21 +512,23 @@
 	(max-groups (ref director 'max-groups)))
     (let loop ((syslog (dequeue-safe! queue)))
       (when syslog
-	(if (memq :raw syslog)
-	    (report-raw director syslog)
-	    (let1 tree-map (ref 
-			    (ref 
-			     (ref 
-			      (ref director 'basenames)
-			      (kget syslog :cmd))
-			     'uniq-logs)
-			    (kget syslog :msg))
-	      (report-syslog director 
-			     syslog
-			     (take-higher-groups 
-			      tree-map
-			      max-groups
-			      ))))
+	(cond
+	 ((or (memq :raw syslog) (not (kget syslog :cmd)))
+	  (report-raw director syslog))
+	 (else
+	  (let1 tree-map (ref 
+			  (ref 
+			   (ref 
+			    (ref director 'basenames)
+			    (kget syslog :cmd))
+			   'uniq-logs)
+			  (kget syslog :msg))
+	    (report-syslog director 
+			   syslog
+			   (take-higher-groups 
+			    tree-map
+			    max-groups
+			    )))))
 	(loop (dequeue-safe! queue))))))
 
 (define (show-help prog n)
