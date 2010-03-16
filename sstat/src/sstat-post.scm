@@ -59,7 +59,9 @@
 				  (rxmatch-if (#/sstat-([0-9]+)\.es$/ entry)
 				      (#f date)
 				    (let1 date (string->date date "~Y~m~d")
-				      (if (or (< (ref (time-difference today date) 'second)
+				      (if (or (< (ref (time-difference 
+						       (date->time-monotonic today)
+						       (date->time-monotonic date)) 'second)
 						 (* 2 24 60 60))
 					      full-build)
 					  (cons 

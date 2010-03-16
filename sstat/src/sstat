@@ -4,6 +4,8 @@
 # description: Run sstat-pre
 #
 
+source /etc/init.d/functions
+
 program=/usr/sbin/sstat-pre
 function start 
 {
