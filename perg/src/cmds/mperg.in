@@ -52,9 +52,22 @@
 		  "initscripts"
 		  "mkinitrd"
 		  ))
-  
+
+
+(define basename-laundry-table (hash-table 'equal? 
+					   '("mountd" . "rpc.mountd")))
+
+(define (basename-laundry basename)
+  (or (ref basename-laundry-table basename #f)
+      (let1 m (#/^([^(]+)\([^)]+\)/ basename)
+	(if m
+	    (m 1)
+	    #f))
+      basename))
+
 (define (basename->srpm-paths basename dist libexec-dir)
-  (let* ((file->rpms (build-path libexec-dir "list-rpmnames-by-file.sh"))
+  (let* ((basename   (basename-laundry basename))
+	 (file->rpms (build-path libexec-dir "list-rpmnames-by-file.sh"))
 	 (rpm->rpms  (build-path libexec-dir "list-requires-by-package-name.sh"))
 	 (rpm->srpms (build-path libexec-dir "list-srpmnames-by-package-name.sh"))
 	 (db (format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist))
