@@ -24,9 +24,13 @@
 (use gauche.process)
 (use file.util)
 (use mperg->html)
+(use srfi-1)
 
 
 (define srcview "@SRCVIEW@")
+(define max-groups 5)
+(define max-log-lines 30)
+(define max-log-columns 300)
 
 (define (cover-page)
   (list
@@ -38,11 +42,11 @@
 		(html:p (html:select :name "dist" :size 1
 				     (map
 				      (pa$ html:option)
-				      (enumerate-dists)))
-			(html:input :type "checkbox" :name "debug" "Debug mode")
-			)
+				      (enumerate-dists))))
 		(html:p (html:textarea :rows 10 :cols 128 :name "syslog"))
-		(html:p (html:input :type "submit" :name "submit" :value "perg them")))))))
+		(html:p (list (html:input :type "submit" :name "submit" :value "Locate them")))
+		(html:p (list (html:input :type "checkbox" :name "debug" :value "#t") "debug"))
+		)))))
 
 (define (enumerate-dists)
   (reverse (directory-list "/srv/sources/dists" 
@@ -50,17 +54,32 @@
 			   :filter #/rhel[0-9].*/)))
 
 
-(define (result-page dist syslog srcview)
+(define (prepare syslog p)
+  (for-each
+   (lambda (line)
+     (display (if (> (string-length line) max-log-columns)
+		  (substring line 0 max-log-columns)
+		  line)
+		p)
+       (newline p))
+   (let1 syslog-lines (string-split syslog #\newline)
+     (if (> (length syslog-lines) max-log-lines)
+	 (take syslog-lines max-log-lines)
+	 syslog-lines))))
+
+(define (result-page dist syslog srcview debug)
   (let1 mperg (run-process `(mperg 
 			     "--dist" ,dist
-			     ,(format #t "--max-groups=~a" 5))
+			     ,(format "--max-groups=~a" max-groups))
 			   :input :pipe
 			   :output :pipe)
     (let1 p (process-input mperg)
-      (display syslog p)
+      (prepare syslog p)
       (close-output-port p))
     (let1 p (process-output mperg)
-      (let1 html (mperg->html p dist srcview)
+      (let1 html (if debug 
+		     (html:pre (html-escape-string (port->string p)))
+		     (mperg->html p dist srcview))
 	(close-input-port p)
 	(process-wait mperg)
 	html))))
@@ -70,10 +89,11 @@
 (cgi-main
  (lambda (params)
    (let ((dist (or (cgi-get-parameter "dist" params :convert x->string) "rhel5su4"))
-	 (syslog (cgi-get-parameter "syslog" params :convert x->string)))
+	 (syslog (cgi-get-parameter "syslog" params :convert x->string))
+	 (debug  (cgi-get-parameter "debug" params)))
      (list
       (cgi-header)
       (if syslog
-	  (result-page dist syslog srcview)
+	  (result-page dist syslog srcview debug)
 	  (cover-page)
 	 )))))
