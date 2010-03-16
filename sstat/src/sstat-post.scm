@@ -8,6 +8,8 @@
 (use file.util)
 (use srfi-1)
 (use srfi-13)
+(use srfi-19)
+
 
 ;; input: --data-dir=DATADIR --output-dir=OUTPUTDIR --mapping-file=MAPPING
 (define (print-usage prog port status)
@@ -23,6 +25,7 @@
        (data-dir     "data-dir=s"     #f)
        (output-dir   "output-dir=s"   #f)
        (mapping-file "mapping-file=s" #f)
+       (full-build   "full-build"     #f)
        (debug        "debug"          #f)
        . rest)
 
@@ -46,16 +49,25 @@
 	       (not (file-is-readable? mapping-file)))
       (format (current-error-port) "cannot read mapping file: \n" mapping-file))
     ;;
-    (let1 mapping (if mapping-file
-		      (load-mapping mapping-file)
-		      (make-hash-table 'eq?))
+    (let ((mapping (if mapping-file
+		       (load-mapping mapping-file)
+		       (make-hash-table 'eq?)))
+	  (today (current-date)))
       (for-each (cut link data-dir <> output-dir mapping debug)
 		(directory-fold data-dir
 				(lambda (entry result)
-				  (if (#/sstat-([0-9]+)\.es$/ entry)
-				      (cons 
-				       (substring entry (+ 1 (string-length data-dir)) -1)
-				       result)
+				  (rxmatch-if (#/sstat-([0-9]+)\.es$/ entry)
+				      (#f date)
+				    (let1 date (string->date date "~Y~m~d")
+				      (if (or (< (ref (time-difference today date) 'second)
+						 (* 2 24 60 60))
+					      full-build)
+					  (cons 
+					   ;;
+					   (substring entry (+ 1 (string-length data-dir)) -1)
+					   ;;
+					   result)
+					  result))
 				      result))
 				'())))))
 
@@ -78,12 +90,17 @@
 					     ;; should be inlined
 					     (string-length "var/lib/srpmix/sources/"))))
 		      (when (file-is-regular? (format "/srv/sources/sources/~a" path))
-			(let1 user (hash-table-get mapping ip (inet-address->string ip AF_INET))
-			  (let1 user-time (or (hash-table-get per-user-table user #f)
-					      (let1 user-time (make-hash-table 'eq?)
-						(hash-table-put! per-user-table user user-time)
-						user-time))
-			    (hash-table-push! user-time time `#(,date ,path)))
+			(let1 user (hash-table-get mapping ip 
+						   ;; only if the user is available on the mapping.
+						   #f 
+						   #;(inet-address->string ip AF_INET)
+						   )
+			  (when user
+			    (let1 user-time (or (hash-table-get per-user-table user #f)
+						(let1 user-time (make-hash-table 'eq?)
+						  (hash-table-put! per-user-table user user-time)
+						  user-time))
+			      (hash-table-push! user-time time `#(,date ,path))))
 			  )))
 		    (loop (read) per-user-table))))))
       (hash-table-for-each per-user-table

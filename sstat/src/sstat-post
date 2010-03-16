@@ -1,5 +1,6 @@
 #!/bin/bash
 
+GOSHIN_ARGS=
 PKGCONFDIR=/etc/sstat
 PKGDATADIR=/usr/share/sstat
 
@@ -29,7 +30,7 @@ function print_usage
 
     echo "Usage: " 
     echo "	$0 -h|--help"
-    echo "	$0 [--reset]"
+    echo "	$0 [--reset] [--full-build]"
 
     exit $status
 }
@@ -54,6 +55,9 @@ function parse_arguments
 		fi
 	    done
 	    ;;
+	    (--full-build)
+	    GOSHIN_ARGS="--full-build $GOSHIN_ARGS"
+	    ;;
 	    (*)
 	    echo "wrong argument: $1" 1>&2
 	    print_usage 1 1>&2
@@ -71,7 +75,8 @@ function main
     gosh ${GOSHIN} \
 	--data-dir="${SOP_ATTIC_DIR}/sstat" \
 	--output-dir="${SOP_DIR}" \
-	--mapping-file="${PKGCONFDIR}/mapping.es"
+	--mapping-file="${PKGCONFDIR}/mapping.es" \
+	$GOSHIN_ARGS
 }
 
 main "$@"

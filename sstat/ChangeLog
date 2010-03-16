@@ -1,0 +1,12 @@
+2010-03-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.3.0.
+
+	* sstat-post (print_usage): Added --full-build option.
+
+	* sstat-post.scm (link): Use users only if they are in 
+	the mapping table.
+	(main): Build directory only past two days.
+	Added --full-build option.
+	
+
