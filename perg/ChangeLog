@@ -1,3 +1,7 @@
+2010-03-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cmds/mperg.in (prepare): Use eqv?.
+
 2010-03-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cmds: Added mperg.

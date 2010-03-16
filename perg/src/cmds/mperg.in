@@ -311,7 +311,7 @@
     (unless (ref uniq-logs log-line #f)
       (set! (ref uniq-logs log-line) 
 	    (make-tree-map (lambda (k1 k2)
-			     (and (eq? (car k1) (car k2))
+			     (and (eqv? (car k1) (car k2))
 				  (equal? (cadr k1) (cadr k2))))
 			   (lambda (k1 k2)
 			     (and (>= (car k1) (car k2))
