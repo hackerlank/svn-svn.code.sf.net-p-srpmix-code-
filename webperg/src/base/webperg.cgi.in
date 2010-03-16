@@ -38,7 +38,9 @@
 		(html:p (html:select :name "dist" :size 1
 				     (map
 				      (pa$ html:option)
-				      (enumerate-dists))))
+				      (enumerate-dists)))
+			(html:input :type "checkbox" :name "debug" "Debug mode")
+			)
 		(html:p (html:textarea :rows 10 :cols 128 :name "syslog"))
 		(html:p (html:input :type "submit" :name "submit" :value "perg them")))))))
 
@@ -49,7 +51,9 @@
 
 
 (define (result-page dist syslog srcview)
-  (let1 mperg (run-process `(mperg "--dist" ,dist)
+  (let1 mperg (run-process `(mperg 
+			     "--dist" ,dist
+			     ,(format #t "--max-groups=~a" 5))
 			   :input :pipe
 			   :output :pipe)
     (let1 p (process-input mperg)

@@ -13,6 +13,7 @@ Requires: httpd
 Requires: perg
 Requires: gauche
 Requires: sqlite
+Buildarch: noarch
 
 %description
 Searcing the location of source code from syslog output
