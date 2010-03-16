@@ -1,4 +1,4 @@
-(define-class <record> ()
+(define-class <fd> ()
   ((open-call :init-keyword :open-call)
    (open-args :init-keyword :open-args)
    (close-depth :init-value #f)
@@ -15,7 +15,7 @@
 	    #f)))
 
 (define (record-open ht fd call raw-data)
-  (let1 record (make <record> :open-call call :open-args raw-data)
+  (let1 record (make <fd> :open-call call :open-args raw-data)
 	(hash-table-push! ht fd record)))
 
 (define (record-close ht fd depth)

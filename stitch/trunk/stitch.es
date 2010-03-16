@@ -69,3 +69,6 @@
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/r/readline/6.0-3.fc12/pre-build/readline-6.0/text.c" :point 9679 :coding-system undecided-unix :line 435 :surround ("/* Move forward a word.  We do what Emacs does.  Handles multibyte chars. */
 " "" "int
 rl_forward_word (count, key)") :which-func ("rl_end_of_line"))) :annotation-list ((annotation :type text :data "forward char")) :date "Wed Jan 20 02:50:01 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (readline-subword))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/o/openssh/4.3p2-36.el5_4.4/pre-build/openssh-4.3p2/auth.c" :point 7400 :coding-system undecided-unix :line 251 :surround ("
+" "" "	authlog(\"%s %s for %s%.100s from %.200s port %d%s\",
+	    authmsg,") :which-func ("auth_log"))) :annotation-list ((annotation :type text :data "%.100sで長すぎる名前の入力を遮断している。")) :date "Tue Mar 16 02:17:03 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (just-reading security))
