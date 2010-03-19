@@ -53,8 +53,8 @@
 (define asyncload-script
   "function asyncload (id, url) {
          if ($(id) != null) {
-           // $(id).load(url);
-           $(id).load('index.html');
+           $(id).load(url);
+           // $(id).load('index.html');
          }
 }")
 
@@ -77,7 +77,7 @@
 	(cadr kdr)
 	#f)))
 
-(define (mperg->html input-port dist exclude-archs srcview)
+(define (mperg->html input-port dist exclude-archs srcview preview)
   (list
    (html-doctype)
    (html:html
@@ -96,7 +96,7 @@
 	    (raw->html r logline-number dist))
 	   ((null? (kget r :filelines))
 	    (unsolved->html r logline-number dist))
-	   (else (syslog->html r logline-number dist exclude-archs srcview))))
+	   (else (syslog->html r logline-number dist exclude-archs srcview preview))))
 	(pa$ read input-port)))))))
 
 
@@ -144,10 +144,10 @@
 	  file
 	  line))
 
-(define (fileline->js id fileline)
+(define (fileline->js id fileline preview)
   (let1 url (apply format 
 		   ;; TODO
-		   "http://localhost/srcsearch/srcview.cgi?src_path=~a/~a/~a/~a&start=~a&end=~a"
+		   preview
 		   (substring (kget fileline :package) 0 1)
 		   (kget fileline :package)
 		   (kget fileline :version)
@@ -161,7 +161,7 @@
 		     ))
     (js 'asyncload id url)))
 
-(define (syslog->html r l dist exclude-archs srcview)
+(define (syslog->html r l dist exclude-archs srcview preview)
   (let* (
 	 (log-string (syslog<-es r))
 	 (filelines (kget r :filelines))
@@ -208,7 +208,8 @@
 						      (string-append 
 						       "#"
 						       (source-id$ fileline-index))
-						      fileline))
+						      fileline
+						      preview))
 						   (cdr msg)
 						   ))))
 				 :onmouseover (js 'highlight msg-id)

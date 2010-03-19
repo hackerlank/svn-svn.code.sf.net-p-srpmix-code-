@@ -35,6 +35,13 @@ AC_ARG_WITH([srcview],
 AC_SUBST([SRCVIEW],[$srcview])
 args_for_configure_in_spec="${args_for_configure_in_spec} --with-srcview='$srcview'"
 
+AC_ARG_WITH([preview],
+  AS_HELP_STRING([--with-preview=preview],[preview cgi path]),
+  preview=$with_preview,
+  AC_MSG_ERROR([No preview is given]))
+AC_SUBST([PREVIEW],[$preview])
+args_for_configure_in_spec="${args_for_configure_in_spec} --with-preview='$preview'"
+
 AC_ARG_ENABLE([vhost],
    [AS_HELP_STRING([--enable-vhost],[Add vhost configuration to httpd configuration file.])])
 if test x"$enable_vhost" = xno; then
