@@ -16,5 +16,5 @@
        (srcview "srcview=s" ""))
     (display 
      (tree->string 
-      (mperg->html (current-input-port) "fedora11" srcview)))
+      (mperg->html (current-input-port) "fedora11" (list "i686" "vanilla") srcview)))
     (newline)))

@@ -31,6 +31,7 @@
 (define max-groups 5)
 (define max-log-lines 30)
 (define max-log-columns 250)
+(define archs (list "x86_64" "i686" "vanilla"))
 
 (define (cover-page)
   (list
@@ -39,10 +40,14 @@
     (html:head (html:title "webperg"))
     (html:div "Choose a distribution and paste your /var/log/messages")
     (html:body (html:form
-		(html:p (html:select :name "dist" :size 1
-				     (map
-				      (pa$ html:option)
-				      (enumerate-dists))))
+		(html:p (list (html:select :name "dist" :size 1
+					   (map
+					    (pa$ html:option)
+					    (enumerate-dists)))
+			      (html:select :name "arch" :size 1
+					   (map (pa$ html:option)
+						archs))
+			      ))
 		(html:p (html:textarea :rows 10 :cols 128 :name "syslog"))
 		(html:p (list (html:input :type "submit" :name "submit" :value "Locate them")))
 		(html:p (list 
@@ -70,7 +75,7 @@
 	 (take syslog-lines max-log-lines)
 	 syslog-lines))))
 
-(define (result-page dist syslog srcview debug)
+(define (result-page dist arch syslog srcview debug)
   (let1 mperg (run-process `(mperg 
 			     "--dist" ,dist
 			     ,(format "--max-groups=~a" max-groups))
@@ -82,7 +87,7 @@
     (let1 p (process-output mperg)
       (let1 html (if debug 
 		     (html:pre (html-escape-string (port->string p)))
-		     (mperg->html p dist srcview))
+		     (mperg->html p dist (delete arch archs) srcview))
 	(close-input-port p)
 	(process-wait mperg)
 	html))))
@@ -92,11 +97,12 @@
 (cgi-main
  (lambda (params)
    (let ((dist (or (cgi-get-parameter "dist" params :convert x->string) "rhel5su4"))
+	 (arch (or (cgi-get-parameter "arch" params :convert x->string) "x86_64"))
 	 (syslog (cgi-get-parameter "syslog" params :convert x->string))
 	 (debug  (cgi-get-parameter "debug" params)))
      (list
       (cgi-header)
       (if syslog
-	  (result-page dist syslog srcview debug)
+	  (result-page dist arch syslog srcview debug)
 	  (cover-page)
 	 )))))

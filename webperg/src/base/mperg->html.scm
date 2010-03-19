@@ -23,6 +23,7 @@
   (use es.dest.syslog)
   (use gauche.sequence)
   (use text.tree)
+  (use srfi-1)
   (export mperg->html))
 (select-module mperg->html)
 
@@ -51,9 +52,10 @@
 
 (define asyncload-script
   "function asyncload (id, url) {
-      jQuery(id).ready(function() {
-         jQuery(id).load(url);
-      });
+         if ($(id) != null) {
+           // $(id).load(url);
+           $(id).load('index.html');
+         }
 }")
 
 (define (javascript-block)
@@ -75,7 +77,7 @@
 	(cadr kdr)
 	#f)))
 
-(define (mperg->html input-port dist srcview)
+(define (mperg->html input-port dist exclude-archs srcview)
   (list
    (html-doctype)
    (html:html
@@ -94,7 +96,7 @@
 	    (raw->html r logline-number dist))
 	   ((null? (kget r :filelines))
 	    (unsolved->html r logline-number dist))
-	   (else (syslog->html r logline-number dist srcview))))
+	   (else (syslog->html r logline-number dist exclude-archs srcview))))
 	(pa$ read input-port)))))))
 
 
@@ -145,7 +147,7 @@
 (define (fileline->js id fileline)
   (let1 url (apply format 
 		   ;; TODO
-		   XXX
+		   "http://localhost/srcsearch/srcview.cgi?src_path=~a/~a/~a/~a&start=~a&end=~a"
 		   (substring (kget fileline :package) 0 1)
 		   (kget fileline :package)
 		   (kget fileline :version)
@@ -159,7 +161,7 @@
 		     ))
     (js 'asyncload id url)))
 
-(define (syslog->html r l dist srcview)
+(define (syslog->html r l dist exclude-archs srcview)
   (let* (
 	 (log-string (syslog<-es r))
 	 (filelines (kget r :filelines))
@@ -171,12 +173,12 @@
      (html:pre (html:span :class "resolution-level" "[*]")
 	       (html:span " ")
 	       (html:span :class "solved-logline"
-			 :id logline-id
-			 :onclick (js 'toggle msgblock-id)
-			 :onmouseover (js 'highlight logline-id)
-			 :onmouseout (js 'unhighlight logline-id)
-			 (html-escape-string 
-			  log-string)))
+			  :id logline-id
+			  :onclick (js 'toggle msgblock-id)
+			  :onmouseover (js 'highlight logline-id)
+			  :onmouseout (js 'unhighlight logline-id)
+			  (html-escape-string 
+			   log-string)))
      (html:table :border #f 
 		 :class "msgblock"
 		 :id msgblock-id
@@ -184,55 +186,77 @@
 		 (map-with-index
 		  (lambda (msg-index msg)
 		    (let* ((msg-id (format "msg-~d-~d" l msg-index) )
-			   (filelineblock-id (format "filelineblock-~d-~d" l msg-index))
-			   (source-id$ (pa$ format "#source-~d-~d-~d" l msg-index)))
-		    (html:tr
-		     (html:th :valign "top" :align "left" 
-			      (html:pre
-			       :class "msg"
-			       :id msg-id
-			       :onclick (apply string-append
-					       (intersperse ";"
-							    (cons (js 'toggle filelineblock-id)
-								  (map-with-index
-								   (lambda (fileline-index fileline)
-								     (fileline->js (source-id$ fileline-index)
-										   fileline))
-								   (cdr msg)
-								   ))))
-			       :onmouseover (js 'highlight msg-id)
-			       :onmouseout (js 'unhighlight msg-id)
-			       (format "[~,,,,5s/~d] ~s" 
-				       (car (car msg))
-				       (string-length log-string)
-				       (cadr (car msg))))
-			      (html:td :class "filelineblock"
-				       :id filelineblock-id
-				       :style "display: none;"
-				       (html:dl
-
-					(map-with-index
-					 (lambda (fileline-index fileline)
-					   (let1 args (list (kget fileline :package)
-							    (kget fileline :version)
-							    (kget fileline :file)
-							    (kget fileline :line)
-							    dist)
-					     (list 
-					      (html:dt (html:pre 
-							(html:a 
-							 :href (apply make-fileline-href srcview args)
-							 (apply make-sources-path args))))
-					      (html:dd
-					       (html:div :id (source-id$ fileline-index)
-							 (html:img :src "loading.gif")
-						)
-					       )
-					      )))
-					(cdr msg))
-
-					)
-				       )))))
+			   (filelineblock-id (format "filelineblock-~d-~d" 
+						     l 
+						     msg-index))
+			   (source-id$ (pa$ format "source-~d-~d-~d"
+					    l
+					    msg-index)))
+		      (html:tr
+		       (html:th :valign "top" :align "left" 
+				(html:pre
+				 :class "msg"
+				 :id msg-id
+				 :onclick (apply 
+					   string-append
+					   (intersperse 
+					    ";"
+					    (cons (js 'toggle filelineblock-id)
+						  (map-with-index
+						   (lambda (fileline-index fileline)
+						     (fileline->js
+						      (string-append 
+						       "#"
+						       (source-id$ fileline-index))
+						      fileline))
+						   (cdr msg)
+						   ))))
+				 :onmouseover (js 'highlight msg-id)
+				 :onmouseout (js 'unhighlight msg-id)
+				 (format "[~,,,,5s/~d] ~s" 
+					 (car (car msg))
+					 (string-length log-string)
+					 (cadr (car msg))))
+				(html:td :class "filelineblock"
+					 :id filelineblock-id
+					 :style "display: none;"
+					 (html:dl
+					  (reverse
+					   (fold-with-index
+					    (lambda (fileline-index fileline kdr)
+					      (let* ((package (kget fileline :package))
+						     (file    (kget fileline :file))
+						     (args (list package
+								 (kget fileline :version)
+								 file
+								 (kget fileline :line)
+								 dist)))
+						(if (and (equal? package "kernel")
+							 ((string->regexp 
+							   (apply string-append 
+								  (intersperse 
+								   "|" 
+								   (map (cute string-append 
+									      ".*" <> "/") 
+									exclude-archs)))) file))
+						    kdr
+						    (cons* 
+						     (html:dd
+						      (html:div :id (source-id$ fileline-index)
+								(html:img :src "loading.gif")
+								))
+						     (html:dt (html:pre 
+							       (html:a 
+								:href (apply 
+								       make-fileline-href 
+								       srcview
+								       args)
+								(apply make-sources-path 
+								       args))))
+						     kdr))))
+					    (list)
+					    (cdr msg)))
+					  ))))))
 		  filelines)))))
 
 
