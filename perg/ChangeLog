@@ -1,3 +1,8 @@
+2010-03-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cmds/mperg.in (basename->srpm-paths): Make the 
+	db name parameterize.
+
 2010-03-16  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cmds/mperg.in (prepare): Use eqv?.

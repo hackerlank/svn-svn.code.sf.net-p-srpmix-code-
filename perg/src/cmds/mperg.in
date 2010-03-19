@@ -70,7 +70,10 @@
 	 (file->rpms (build-path libexec-dir "list-rpmnames-by-file.sh"))
 	 (rpm->rpms  (build-path libexec-dir "list-requires-by-package-name.sh"))
 	 (rpm->srpms (build-path libexec-dir "list-srpmnames-by-package-name.sh"))
-	 (db (format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-5.sqlite" dist))
+	 (db (format "/srv/sources/dists/~a/plugins/rpms2sqldb/rhel-i386-~d.sqlite" 
+		     dist
+		     ((#/rhel([0-9]).*/ dist) 1)
+		     ))
 	 (fat-guys? (lambda (pkg) (any identity (map 
 						 (lambda (test)
 						   (cond
