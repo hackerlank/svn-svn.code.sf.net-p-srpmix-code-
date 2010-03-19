@@ -784,7 +784,11 @@
 	(overlay-put o 'stitch-keywords keywords)))))
 
 (defun stitch-insert-annotation-strict (file entry)
-  (when (with-current-buffer (current-buffer)  buffer-file-read-only)
+  (when (with-current-buffer (current-buffer)  
+	  (or buffer-file-read-only
+	      buffer-read-only
+	      ;; t
+	      ))
     (stitch-insert-annotation0
      ;; (stitch-klist-value e :target)
      (current-buffer)
@@ -800,7 +804,10 @@
 (defun stitch-insert-annotation-fuzzy (file entry)
   (unless (file-directory-p file)
     (unless (and (equal (stitch-klist-value entry :registered-as) file)
-		 ;(with-current-buffer (current-buffer) buffer-file-read-only)
+		 (with-current-buffer (current-buffer) (or buffer-file-read-only
+							   buffer-read-only
+							   ;; t
+							   ))
 		 )
       (let ((region (stitch-search-region 
 		     (current-buffer)
@@ -1084,7 +1091,7 @@
 					     (list))))
      (if (member file file-list)
 	 ;;
-	 ;; It seems that there are hash tabel bugs in GNU Emacs.
+	 ;; It seems that there are hash table bugs in GNU Emacs.
 	 ;; So I shuffle what I'll do.
 	 ;;
 	 (reverse file-list)
