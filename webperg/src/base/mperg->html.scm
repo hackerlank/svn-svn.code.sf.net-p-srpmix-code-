@@ -49,6 +49,13 @@
     if(obj && obj.style) obj.style.backgroundColor= \"white\";
 }")
 
+(define asyncload-script
+  "function asyncload (id, url) {
+      jQuery(id).ready(function() {
+         jQuery(id).load(url);
+      });
+}")
+
 (define (javascript-block)
   (html:script :language "JavaScript"
 	       :type "text/javascript"
@@ -58,6 +65,7 @@
 				     ,toggle-script
 				     ,highlight-script
 				     ,unhighlight-script
+				     ,asyncload-script
 				     ;; clock-script
 				     )))))
 
@@ -72,6 +80,9 @@
    (html-doctype)
    (html:html
     (html:head
+     (html:script :src "jquery.js" :type "text/javascript")
+     (html:script :src "jquery.ui.tabs.js" :type "text/javascript")
+     (html:link :href  "ui.tabs.css" :media "all" :type "text/css" :rel "stylesheet")
      (javascript-block))
     (html:body
      (let1 logline-number -1
@@ -103,8 +114,18 @@
 	     (html-escape-string 
 	      (syslog<-es r)))))
 
-(define (js fn arg1)
-  (format "~a('~a')" (x->string fn) arg1))
+;; gosh> (js "load" "1" "2" 3 )
+;; "load('1', '2', '3')"
+;; gosh> (js "load" "1" )
+;; "load('1')"
+;; gosh> (js "load" )
+;; "load()"
+;; gosh> 
+(define (js fn . args)
+  (format "~a(~a)" (x->string fn) 
+	  (apply string-append (intersperse ", " (map
+						  (pa$ format "'~a'")
+						  args)))))
 
 (define (make-fileline-href srcview package version file line dist)
   (cond
@@ -120,6 +141,23 @@
 	  version
 	  file
 	  line))
+
+(define (fileline->js id fileline)
+  (let1 url (apply format 
+		   ;; TODO
+		   XXX
+		   (substring (kget fileline :package) 0 1)
+		   (kget fileline :package)
+		   (kget fileline :version)
+		   (kget fileline :file)
+		   (let* ((range 3)
+			  (line (kget fileline :line))
+			  (start (- line range))
+			  (start (if (< start 1) 1 start))
+			  (end   (+ line range)))
+		     (list start end)
+		     ))
+    (js 'asyncload id url)))
 
 (define (syslog->html r l dist srcview)
   (let* (
@@ -145,14 +183,23 @@
 		 :style "display: none;"
 		 (map-with-index
 		  (lambda (msg-index msg)
-		    (let ((msg-id (format "msg-~d-~d" l msg-index) )
-			  (filelineblock-id (format "filelineblock-~d-~d" l msg-index)))
+		    (let* ((msg-id (format "msg-~d-~d" l msg-index) )
+			   (filelineblock-id (format "filelineblock-~d-~d" l msg-index))
+			   (source-id$ (pa$ format "#source-~d-~d-~d" l msg-index)))
 		    (html:tr
 		     (html:th :valign "top" :align "left" 
 			      (html:pre
 			       :class "msg"
 			       :id msg-id
-			       :onclick (js 'toggle filelineblock-id)
+			       :onclick (apply string-append
+					       (intersperse ";"
+							    (cons (js 'toggle filelineblock-id)
+								  (map-with-index
+								   (lambda (fileline-index fileline)
+								     (fileline->js (source-id$ fileline-index)
+										   fileline))
+								   (cdr msg)
+								   ))))
 			       :onmouseover (js 'highlight msg-id)
 			       :onmouseout (js 'unhighlight msg-id)
 			       (format "[~,,,,5s/~d] ~s" 
@@ -162,7 +209,8 @@
 			      (html:td :class "filelineblock"
 				       :id filelineblock-id
 				       :style "display: none;"
-				       (html:ul
+				       (html:dl
+
 					(map-with-index
 					 (lambda (fileline-index fileline)
 					   (let1 args (list (kget fileline :package)
@@ -170,11 +218,20 @@
 							    (kget fileline :file)
 							    (kget fileline :line)
 							    dist)
-					     (html:li (html:pre 
-						       (html:a 
-						      :href (apply make-fileline-href srcview args)
-						      (apply make-sources-path args))))))
-					(cdr msg)))
+					     (list 
+					      (html:dt (html:pre 
+							(html:a 
+							 :href (apply make-fileline-href srcview args)
+							 (apply make-sources-path args))))
+					      (html:dd
+					       (html:div :id (source-id$ fileline-index)
+							 (html:img :src "loading.gif")
+						)
+					       )
+					      )))
+					(cdr msg))
+
+					)
 				       )))))
 		  filelines)))))
 

@@ -3,6 +3,7 @@
 :; exec gosh -- $0 "$@"
 (use mperg->html)
 (use gauche.parseopt)
+(use text.tree)
 
 (define (show-help prog n)
   (format #t "~a --help\n" prog)
