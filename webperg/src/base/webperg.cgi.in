@@ -97,7 +97,7 @@
 				      :dist ,dist
 				      :arch ,arch
 				      :debug ,debug
-				      :metavariables ,(cgi-metavariables))
+				      :env ,(sys-environ->alist))
 			      logp) 
 		       (newline logp)))
       (and logp (begin (write `(input ,syslog) logp) (newline logp)))
