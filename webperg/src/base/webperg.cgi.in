@@ -29,6 +29,8 @@
 
 (define srcview "@SRCVIEW@")
 (define preview "@PREVIEW@")
+;; TODO
+(define logdir  "/var/log/webperg/@WWWNAME@")
 
 (define max-groups 5)
 (define max-log-lines 30)
@@ -77,22 +79,43 @@
 	 (take syslog-lines max-log-lines)
 	 syslog-lines))))
 
-(define (result-page dist arch syslog srcview preview debug)
+(define (result-page dist arch syslog srcview preview logdir debug)
   (let1 mperg (run-process `(mperg 
 			     "--dist" ,dist
 			     ,(format "--max-groups=~a" max-groups))
 			   :input :pipe
 			   :output :pipe)
-    (let1 p (process-input mperg)
-      (prepare syslog p)
-      (close-output-port p))
-    (let1 p (process-output mperg)
-      (let1 html (if debug 
-		     (html:pre (html-escape-string (port->string p)))
-		     (mperg->html p dist (delete arch archs) srcview preview))
-	(close-input-port p)
-	(process-wait mperg)
-	html))))
+    (let* ((start (sys-time))
+	   (logp (and logdir 
+		      (open-output-file (build-path 
+					 logdir 
+					 (format "~a-~a" start (sys-getpid)))
+					:if-does-not-exist :create
+					:buffering :none
+					))))
+      (and logp (begin (write `(start ,start 
+				      :dist ,dist
+				      :arch ,arch
+				      :debug ,debug
+				      :metavariables ,(cgi-metavariables))
+			      logp) 
+		       (newline logp)))
+      (and logp (begin (write `(input ,syslog) logp) (newline logp)))
+      (let1 p (process-input mperg)
+	(prepare syslog p)
+	(close-output-port p))
+      (let1 p (process-output mperg)
+	(let1 html (if debug 
+		       (html:pre (html-escape-string (port->string p)))
+		       (mperg->html p dist (delete arch archs) srcview preview))
+	  (close-input-port p)
+	  (process-wait mperg)
+	  (and logp (begin (write `(result ,html) logp) (newline logp)))
+	  (and logp (let1 end (sys-time)
+		      (write `(end ,end) logp) (newline logp)
+		      (write `(delta ,(- end start)) logp) (newline logp)
+		      ))
+	  html)))))
 
 
 
@@ -101,10 +124,11 @@
    (let ((dist (or (cgi-get-parameter "dist" params :convert x->string) "rhel5su4"))
 	 (arch (or (cgi-get-parameter "arch" params :convert x->string) "x86_64"))
 	 (syslog (cgi-get-parameter "syslog" params :convert x->string))
+	 (logdir (if (file-is-directory? logdir) logdir #f))
 	 (debug  (cgi-get-parameter "debug" params)))
      (list
       (cgi-header)
       (if syslog
-	  (result-page dist arch syslog srcview preview debug)
+	  (result-page dist arch syslog srcview preview logdir debug)
 	  (cover-page)
 	 )))))
