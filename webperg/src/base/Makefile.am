@@ -13,6 +13,14 @@ dist_module_DATA =   \
         \
 	$(NULL)
 
+pkgconfdir=$(sysconfdir)/webperg/@WWWNAME@
+dist_pkgconf_DATA = \
+	config.scm \
+	\
+	$(NULL)
+
+
+
 install-exec-hook:
 	cd $(DESTDIR)@WWWDIR@ && for f in $(symlink_srcs); do $(LN_S) $$f ./; done
 

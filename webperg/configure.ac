@@ -37,6 +37,7 @@ AC_ARG_WITH([srcview],
 AC_SUBST([SRCVIEW],[$srcview])
 args_for_configure_in_spec="${args_for_configure_in_spec} --with-srcview='$srcview'"
 
+preview='http://gps-services.nrt.redhat.com/srcsearch/srcview.cgi?src_path=~a/~a/~a/~a&start=~a&end=~a'
 AC_ARG_WITH([preview],
   AS_HELP_STRING([--with-preview=preview],[preview cgi path]),
   preview=$with_preview,

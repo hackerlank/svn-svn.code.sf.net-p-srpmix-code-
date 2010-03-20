@@ -29,13 +29,16 @@
 
 (define srcview "@SRCVIEW@")
 (define preview "@PREVIEW@")
-;; TODO
 (define logdir  "/var/log/webperg/@WWWNAME@")
 
 (define max-groups 5)
 (define max-log-lines 30)
 (define max-log-columns 250)
+
 (define archs (list "x86_64" "i686" "vanilla"))
+
+(load (build-path "/etc/webperg/@WWWNAME@" "config.scm")
+      :error-if-not-found #f)
 
 (define (cover-page)
   (list
@@ -52,7 +55,7 @@
 					   (map (pa$ html:option)
 						archs))
 			      ))
-		(html:p (html:textarea :rows 10 :cols 128 :name "syslog"))
+		(html:p (html:textarea :rows 10 :cols 108 :name "syslog"))
 		(html:p (list (html:input :type "submit" :name "submit" :value "Locate them")))
 		(html:p (list 
 			 (format "max groups: ~a, max log lines: ~a, max log columns: ~a, "
@@ -79,6 +82,10 @@
 	 (take syslog-lines max-log-lines)
 	 syslog-lines))))
 
+(define (writeln data port)
+  (write data port)
+  (newline port))
+
 (define (result-page dist arch syslog srcview preview logdir debug)
   (let1 mperg (run-process `(mperg 
 			     "--dist" ,dist
@@ -87,20 +94,30 @@
 			   :output :pipe)
     (let* ((start (sys-time))
 	   (logp (and logdir 
-		      (open-output-file (build-path 
-					 logdir 
-					 (format "~a-~a" start (sys-getpid)))
-					:if-does-not-exist :create
-					:buffering :none
-					))))
-      (and logp (begin (write `(start ,start 
-				      :dist ,dist
-				      :arch ,arch
-				      :debug ,debug
-				      :env ,(sys-environ->alist))
-			      logp) 
-		       (newline logp)))
-      (and logp (begin (write `(input ,syslog) logp) (newline logp)))
+		      (open-output-file 
+		       (build-path 
+			logdir 
+			(format "~a-~a.es" 
+				(let1 tm0 (sys-localtime start)
+				  (format "~d~2,'0d~2,'0d-~2,'0d:~2,'0d:~2,'0d" 
+					  (+ (ref tm0 'year) 1900)
+					  (+ (ref tm0 'mon) 1)
+					  (ref tm0 'mday)
+					  (ref tm0 'hour)
+					  (ref tm0 'min)
+					  (ref tm0 'sec)))
+				(sys-getpid)))
+		       :if-does-not-exist :create
+		       :buffering :none
+		       ))))
+      (when logp 
+	(writeln `(start ,start 
+			 :dist ,dist
+			 :arch ,arch
+			 :debug ,debug
+			 :env ,(sys-environ->alist))
+		 logp)
+	(writeln `(input ,syslog) logp))
       (let1 p (process-input mperg)
 	(prepare syslog p)
 	(close-output-port p))
@@ -110,11 +127,11 @@
 		       (mperg->html p dist (delete arch archs) srcview preview))
 	  (close-input-port p)
 	  (process-wait mperg)
-	  (and logp (begin (write `(result ,html) logp) (newline logp)))
-	  (and logp (let1 end (sys-time)
-		      (write `(end ,end) logp) (newline logp)
-		      (write `(delta ,(- end start)) logp) (newline logp)
-		      ))
+	  (when logp 
+	    (let1 end (sys-time)
+	      (writeln `(result ,html) logp)
+	      (writeln `(end ,end) logp)
+	      (writeln `(delta ,(- end start)) logp)))
 	  html)))))
 
 
