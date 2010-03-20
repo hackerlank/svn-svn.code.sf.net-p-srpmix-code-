@@ -60,7 +60,7 @@ fi
 
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*
-
+%dir %attr(-, apache, apache) %{_localstatedir}/log/webperg/@WWWNAME@
 
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com>

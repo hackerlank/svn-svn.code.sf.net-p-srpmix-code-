@@ -15,3 +15,11 @@ dist_module_DATA =   \
 
 install-exec-hook:
 	cd $(DESTDIR)@WWWDIR@ && for f in $(symlink_srcs); do $(LN_S) $$f ./; done
+
+install-data-local: 
+	mkdir -p $(DESTDIR)$(localstatedir)/log/webperg/@WWWNAME@
+
+uninstall-local:
+	rmdir $(DESTDIR)$(localstatedir)/log/webperg/@WWWNAME@ || :
+	rm $(DESTDIR)@WWWDIR@/* || :
+	rmdir $(DESTDIR)@WWWDIR@/*

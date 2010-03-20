@@ -26,6 +26,8 @@ AC_ARG_WITH([wwwdir],
 AC_SUBST([WWWDIR],[$wwwdir])
 args_for_configure_in_spec="${args_for_configure_in_spec} --with-wwwdir=$wwwdir"
 
+wwwname=`echo $wwwdir | sed -e 's#/#-#g' | sed -e 's/^-//'`
+AC_SUBST([WWWNAME],[$wwwname])
 
 
 AC_ARG_WITH([srcview],
