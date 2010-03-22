@@ -55,6 +55,7 @@ dist_confd_DATA = \
 	spice,vdi_slirp.lcopy \
 	srpmix,trunk.lcopy \
 	stitch,trunk.lcopy \
+	strace,trunk.lcopy \
 	twig,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
 	wfo,trunk.lcopy \
