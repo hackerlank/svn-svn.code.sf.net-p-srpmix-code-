@@ -39,11 +39,15 @@
 
 (define perg-cmd "perg")
 
-(define (package-version->xgettxt pkg ver)
-  (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
-	      (substring pkg 0 1)
-	      pkg
-	      ver))
+(define (package-version->xgettxt pkg ver dist)
+  (let ((f0 (format "/srv/sources/dists/~a/plugins/cache/~a-xgettext.es" dist pkg))
+	(f1 (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
+		    (substring pkg 0 1) pkg ver)))
+    (if (file-is-readable? f0)
+	f0
+	(if (file-is-readable? f1)
+	    f1
+	    #f))))
 
 (define fat-guys (list
 		  #/^kernel.*/ 
@@ -258,10 +262,11 @@
 
 (define-method boot ((package <package>))
   (let ((xgettext (package-version->xgettxt (ref package 'pkgname)
-					    (ref package 'version)))
+					    (ref package 'version)
+					    (ref package 'dist)))
 	;; FIXME make parametric
 	(limit 20))
-    (when (file-is-readable? xgettext)
+    (when xgettext
       (let ((limit-flag (format "--limit=~d" limit)))
 	(let1 proc (run-process `(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
 				:input :pipe
