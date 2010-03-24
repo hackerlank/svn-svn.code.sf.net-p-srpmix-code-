@@ -666,22 +666,33 @@
        entry))
    (stitch-target-get-files target)))
 
+(defun stitch-count-record ()
+  (let ((i 0))
+    (save-excursion
+      (while (not (bobp))
+	(backward-sexp)
+	(setq i (+ i 1))
+	))
+    i))
 (defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
   (stitch-with-current-file stitch-annotation-file
     (goto-char (point-max))
-    (let ((start (point)))
-      (insert (format "%S\n" (list 'stitch-annotation
-				   :version 0
-				   :target-list target-list
-				   :annotation-list (list (stitch-annotation-save-form annotation))
-				   :date date
-				   :full-name full-name
-				   :mailing-address mailing-address
-				   :keywords keywords)))
-      (save-buffer)
+    (let ((start (point))
+	  (index (progn
+		   (insert (format "%S\n" (list 'stitch-annotation
+						:version 0
+						:target-list target-list
+						:annotation-list (list (stitch-annotation-save-form annotation))
+						:date date
+						:full-name full-name
+						:mailing-address mailing-address
+						:keywords keywords)))
+		   (save-buffer)
+		   (stitch-count-record))))
     (list stitch-annotation-file
 	  start
-	  (point)))))
+	  (point)
+	  index))))
 
 (defface stitch-auto-annotation
   '((((background light)) 
