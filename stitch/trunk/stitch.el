@@ -787,6 +787,7 @@
   (when (with-current-buffer (current-buffer)  
 	  (or buffer-file-read-only
 	      buffer-read-only
+	      (eq major-mode 'dired-mode)
 	      ;; t
 	      ))
     (stitch-insert-annotation0
