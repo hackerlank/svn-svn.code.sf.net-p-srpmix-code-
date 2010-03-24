@@ -1,7 +1,7 @@
 ;;; stitch.el --- your source, my annotation
 
 ;; Copyright (C) 2007, 2008, 2009 Red Hat, Inc.
-;; Copyright (C) 2007, 2008, 2009 Masatake YAMATO
+;; Copyright (C) 2007, 2008, 2009, 2010 Masatake YAMATO
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -175,6 +175,11 @@
 (defface stitch-annotation-body
   '((t (:inherit (font-lock-comment-face stitch-annotation-base))))
   "Face used to highlight anntation body."
+  :group 'stitch)
+
+(defface stitch-annotation-registered-as-line
+  '((t (:inherit (stitch-annotation-body))))
+  "Face used to highlight registered-as line."
   :group 'stitch)
 
 (defface stitch-annotation-email
@@ -645,11 +650,19 @@
        (puthash file 
 		(cons entry (gethash file stitch-annotations ()))
 		stitch-annotations)
-       (when (stitch-klist-value target :surround)
+       (cond
+	;; TODO: This should be method invocation: fuzzy-insertable-p
+	((stitch-klist-value target :surround)
 	 (let ((base-name (file-name-nondirectory file)))
 	   (puthash base-name
 		    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
 		    stitch-annotations-fuzzy)))
+	((eq (stitch-klist-value target :type) 'directory)
+	 (let ((base-name (file-name-nondirectory (directory-file-name file))))
+	   (puthash base-name
+		    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
+		    stitch-annotations-fuzzy)
+	 )))
        entry))
    (stitch-target-get-files target)))
 
@@ -790,40 +803,51 @@
 	      (eq major-mode 'dired-mode)
 	      ;; t
 	      ))
-    (stitch-insert-annotation0
-     ;; (stitch-klist-value e :target)
-     (current-buffer)
-     (stitch-target-get-region (stitch-klist-value entry :target)
-			       file)
-     (stitch-klist-value entry :annotation)
-     (stitch-klist-value entry :date)
-     (stitch-klist-value entry :full-name)
-     (stitch-klist-value entry :mailing-address)
-     (stitch-klist-value entry :keywords)
-     nil)))
+    (let ((region (stitch-target-get-region (stitch-klist-value entry :target)
+					    file)))
+      (when region
+	(stitch-insert-annotation0
+	 ;; (stitch-klist-value e :target)
+	 (current-buffer)
+	 region
+	 (stitch-klist-value entry :annotation)
+	 (stitch-klist-value entry :date)
+	 (stitch-klist-value entry :full-name)
+	 (stitch-klist-value entry :mailing-address)
+	 (stitch-klist-value entry :keywords)
+	 nil)))))
 
 (defun stitch-insert-annotation-fuzzy (file entry)
-  (unless (file-directory-p file)
-    (unless (and (equal (stitch-klist-value entry :registered-as) file)
-		 (with-current-buffer (current-buffer) (or buffer-file-read-only
-							   buffer-read-only
-							   ;; t
-							   ))
-		 )
-      (let ((region (stitch-search-region 
-		     (current-buffer)
-		     (stitch-klist-value entry :target))))
+  (unless (equal (stitch-klist-value entry :registered-as) file)
+    (when
+	(with-current-buffer (current-buffer) 
+	  (or buffer-file-read-only
+	      buffer-read-only
+	      (eq major-mode 'dired-mode)
+	      ))
+      (let ((region 
+	     (cond 
+	      ((not (file-directory-p file))
+	       (stitch-search-region 
+		(current-buffer)
+		(stitch-klist-value entry :target)))
+	      ((eq major-mode 'dired-mode)
+	       (stitch-target-get-region (stitch-klist-value entry :target)
+					    file))
+	      (t 
+	       nil))))
 	(when region
-	  (stitch-insert-annotation0
-	   ;; (stitch-klist-value e :target)
-	   (current-buffer)
-	   region
-	   (stitch-klist-value entry :annotation)
-	   (stitch-klist-value entry :date)
-	   (stitch-klist-value entry :full-name)
-	   (stitch-klist-value entry :mailing-address)
-	   (stitch-klist-value entry :keywords)
-	   t))))))
+	    (stitch-insert-annotation0
+	     ;; (stitch-klist-value e :target)
+	     (current-buffer)
+	     region
+	     (stitch-klist-value entry :annotation)
+	     (stitch-klist-value entry :date)
+	     (stitch-klist-value entry :full-name)
+	     (stitch-klist-value entry :mailing-address)
+	     (stitch-klist-value entry :keywords)
+	     (stitch-klist-value entry :registered-as)
+	     ))))))
 
 (defun stitch-insert-annotation0 (buffer region annotation date full-name mailing-address keywords fuzzy?)
   (if (eq (car region) (cadr region))
@@ -850,7 +874,12 @@
   (with-current-buffer buffer
     (let ((file (stitch-buffer-file-name (current-buffer))))
       (when file
-	(let ((entries (gethash (file-name-nondirectory file) stitch-annotations-fuzzy nil)))
+	(let ((entries (gethash 
+			;; TODO: This depends on major mode.
+			(if (eq major-mode 'dired-mode)
+			    (file-name-nondirectory (directory-file-name file))
+			  (file-name-nondirectory file))
+			stitch-annotations-fuzzy nil)))
 	  (mapc
 	   (lambda (entry) (stitch-insert-annotation-fuzzy file entry))
 	   ;; TODO: This should be done in registration
@@ -957,7 +986,7 @@
 			(reverse (cdr (reverse lcurrent)))
 			(propertize
 			 "\n"
-			 ;; TODO: ??? fazy
+			 ;; TODO: ??? fuzzy
 			 'face 'stitch-annotation-base))))))))
 
 
@@ -976,7 +1005,7 @@
 			 (reverse (nthcdr (- (- llmaster llcurrent) 1) (reverse lmaster)))
 			 (propertize
 			  "\n"
-			  ;; TODO: ??? fazy
+			  ;; TODO: ??? fuzzy
 			  'face 'stitch-annotation-base))))))))
 
 (defun stitch-shrink-annotations (&optional buffer)
@@ -1358,6 +1387,10 @@
 	   (stitch-read-keywords "Commit with" t)
 	   current-prefix-arg))
 
+(defun stitch-make-registered-as-line (fuzzy?)
+  (if fuzzy? 
+      (concat "@" (propertize fuzzy? 'face 'stitch-annotation-registered-as-line) "\n")
+    ""))
 (defun stitch-oneline-annotation-inline-format (annotation
 						overlay
 						date full-name mailing-address
@@ -1370,6 +1403,7 @@
 	      (propertize
 	       (stitch-klist-value annotation :data)
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-body))
+	      (stitch-make-registered-as-line fuzzy?)
 	      (propertize
 	       "\n"
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
@@ -1502,7 +1536,8 @@
 	       (concat
 		(if (eq major-mode 'dired-mode) "" "\n")
 		(if an "" "\n" ))
-	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
+	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))
+	      (stitch-make-registered-as-line fuzzy?)))))
 
 (defun stitch-text-annotation-list-format (annotation)
   (stitch-klist-value annotation :data))
@@ -1538,6 +1573,7 @@
 	      (propertize
 	       (concat
 		"\n"
+		(stitch-make-registered-as-line fuzzy?)
 		(or footer "")
 		(if an "" "\n" ))
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))))))
@@ -1552,7 +1588,6 @@
 	  ))
 
 (defun stitch-graphviz-annotation-inline-format (cmd
-						 footer
 						 annotation
 						 overlay
 						 date full-name mailing-address
