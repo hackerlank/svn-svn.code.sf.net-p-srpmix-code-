@@ -20,6 +20,7 @@
 ;; Author: Masatake YAMATO <yamato@redhat.com>
 ;;
 (use srfi-1)
+(use srfi-11)
 (use srfi-13)
 
 (use gauche.sequence)
@@ -42,11 +43,14 @@
 (define (package-version->xgettxt pkg ver dist)
   (let1 c (substring pkg 0 1)
     (any file-is-readable? 
-	 (format "/srv/sources/dists/~a/plugins/cache/~a-xgettext.es" dist pkg)
-	 (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.es"
-		 c pkg ver)
-	 (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
-		 c pkg ver))))
+	 (values (format "/srv/sources/dists/~a/plugins/cache/~a-xgettext.es" dist pkg)
+		 #t)
+	 (values (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.es"
+			 c pkg ver)
+		 #t)
+	 (values (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
+			 c pkg ver)
+		 #f))))
 	 
 (define fat-guys (list
 		  #/^kernel.*/ 
@@ -260,19 +264,25 @@
    ))
 
 (define-method boot ((package <package>))
-  (let ((xgettext (package-version->xgettxt (ref package 'pkgname)
+  (let-values (((xgettext pre-processed?)  (package-version->xgettxt
+					    (ref package 'pkgname)
 					    (ref package 'version)
-					    (ref package 'dist)))
-	;; FIXME make parametric
-	(limit 20))
-    (when xgettext
-      (let ((limit-flag (format "--limit=~d" limit)))
-	(let1 proc (run-process `(,perg-cmd "--format=es" ,limit-flag = ,xgettext) 
-				:input :pipe
-				:output :pipe)
-	  (push! (ref package 'pergs) proc)
-	  (push! (ref package 'to-pergs-ports) (process-input proc))
-	  (push! (ref package 'from-pergs-ports) (process-output proc)))))))
+					    (ref package 'dist))))
+    ;; FIXME make parametric
+    (let1 limit 20
+      (when xgettext
+	(let ((limit-flag (format "--limit=~d" limit)))
+	  (let1 proc (run-process `(,perg-cmd "--format=es" 
+					      ,limit-flag
+					      ,(format "--pre-processed=~a"
+						       (if pre-processed? "yes" "no"))
+					      =
+					      ,xgettext) 
+				  :input :pipe
+				  :output :pipe)
+	    (push! (ref package 'pergs) proc)
+	    (push! (ref package 'to-pergs-ports) (process-input proc))
+	    (push! (ref package 'from-pergs-ports) (process-output proc))))))))
 		
 
 (define-method make-package ((director <director>) 
