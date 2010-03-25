@@ -40,16 +40,14 @@
 (define perg-cmd "perg")
 
 (define (package-version->xgettxt pkg ver dist)
-  (let* ((c (substring pkg 0 1))
-	 (f0 (format "/srv/sources/dists/~a/plugins/cache/~a-xgettext.es" dist pkg))
-	 (f1 (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.es"
-		     c pkg ver))
-	 (f2 (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
-		     c pkg ver)))
-    (or (file-is-readable? f0)
-	(file-is-readable? f1)
-	(file-is-readable? f2))))
-
+  (let1 c (substring pkg 0 1)
+    (any file-is-readable? 
+	 (format "/srv/sources/dists/~a/plugins/cache/~a-xgettext.es" dist pkg)
+	 (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.es"
+		 c pkg ver)
+	 (format "/srv/sources/sources/~a/~a/~a/plugins/xgettext/xgettext.out"
+		 c pkg ver))))
+	 
 (define fat-guys (list
 		  #/^kernel.*/ 
 		  "glibc"
