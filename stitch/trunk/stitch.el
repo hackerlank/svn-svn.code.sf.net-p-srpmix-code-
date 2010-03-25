@@ -548,12 +548,16 @@
       (let ((target (car target-list)))
 	;; TODO: use all files in the returned list.
 	(stitch-regions-from-target-list (cdr target-list)
-					  (cons
-					   (stitch-target-get-region
-					    target
-					    (car (stitch-target-get-files
-						  target)))
-					   seed)))
+					 (let ((new (stitch-target-get-region
+						     target
+						     (car (stitch-target-get-files
+							   target)))))
+					   (if new
+					       (cons
+						new
+						seed)
+					     seed
+					     ))))
     seed))
 
 
@@ -1343,15 +1347,19 @@
 	(with-current-buffer (car dirbuf)
 	  (condition-case nil
 	      (save-excursion
-		(dired-goto-file absolute-item)
-		(beginning-of-line)
-		(point))
+		(if (dired-goto-file absolute-item)
+		    (progn
+		      (beginning-of-line)
+		      (point))
+		  nil))
 	    (error 0)))
       0)))
 
 (defun stitch-directory-target-get-region (target directory)
   (let ((p (stitch-directory-target-get-point target directory)))
-    (list p p)))
+    (if p
+	(list p p)
+      nil)))
 
 (defun stitch-directory-target-get-label (target directory)
   (format "Item: %s" (stitch-klist-value target :item)))
