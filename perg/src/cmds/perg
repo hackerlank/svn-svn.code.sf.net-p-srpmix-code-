@@ -31,8 +31,8 @@ function print_usage
 {
     echo "Usage: "
     echo "	$0 --help|-h"
-    echo "	$0 [--format=es|grep] [--pre-processed=no] [--limit=N] PATTERN|-|= XGETTEXT.out..."
-    echo "	$0 [--format=es|grep] --pre-processed=yes [--limit=N] PATTERN|-|= XGETTEXT.es..."
+    echo "	$0 [--format=es|grep]  [--limit=N] PATTERN|-|= XGETTEXT.out..."
+    echo "	$0 [--format=es|grep] --pre-processed [--limit=N] PATTERN|-|= XGETTEXT.es..."
 }
 
 function parse_arguments
@@ -55,8 +55,8 @@ function parse_arguments
 	    (--limit=*)
                 LIMIT=${1/--limit=}
 		;;
-	    (--pre-processed=*)
-	        PRE_PROCESSED=${1/--pre-processed=}
+	    (--pre-processed)
+	        PRE_PROCESSED="yes"
 		;;
 	    *)
 		break
@@ -73,11 +73,6 @@ function parse_arguments
     LOG=$1
     shift
     XGETTEXTS=$@
-
-    if [ $PRE_PROCESSED != yes ]  && [ $PRE_PROCESSED != no ]; then
-	print_usage 1>&2
-	exit 1
-    fi
 }
 
 function main
@@ -86,7 +81,7 @@ function main
     
     {
 	{ cat $XGETTEXTS  | { 
-		if [ $PRE_PROCESSED = no ]; then
+		if [ $PRE_PROCESSED = "no" ]; then
 		    es-src-xgettext use-stdin
 		else
 		    cat

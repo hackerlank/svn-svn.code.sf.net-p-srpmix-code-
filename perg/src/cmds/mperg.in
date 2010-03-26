@@ -274,8 +274,7 @@
 	(let ((limit-flag (format "--limit=~d" limit)))
 	  (let1 proc (run-process `(,perg-cmd "--format=es" 
 					      ,limit-flag
-					      ,(format "--pre-processed=~a"
-						       (if pre-processed? "yes" "no"))
+					      ,@(if pre-processed? (list "--pre-processed") ())
 					      =
 					      ,xgettext) 
 				  :input :pipe
