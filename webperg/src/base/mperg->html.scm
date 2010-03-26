@@ -85,6 +85,7 @@
      (html:script :src "jquery.js" :type "text/javascript")
      (html:script :src "jquery.ui.tabs.js" :type "text/javascript")
      (html:link :href  "ui.tabs.css" :media "all" :type "text/css" :rel "stylesheet")
+     (html:link :href  "/srcsearch/srcview.css" :media "all" :type "text/css" :rel "stylesheet")
      (javascript-block))
     (html:body
      (let1 logline-number -1
