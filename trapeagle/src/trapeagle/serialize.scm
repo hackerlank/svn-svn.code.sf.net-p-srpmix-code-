@@ -1,5 +1,7 @@
 (define-module trapeagle.serialize
-  (export <serializer>))
+  (export <serializer>)
+  (use trapeagle.pp-common))
+
 (select-module trapeagle.serialize)
 
 (define-class <serializer> ()

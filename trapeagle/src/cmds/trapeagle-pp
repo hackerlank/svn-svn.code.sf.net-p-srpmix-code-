@@ -1,0 +1,11 @@
+;; -*- scheme -*-
+(use trapeagle.pp-common)
+(use trapeagle.graft)
+(use trapeagle.serialize)
+
+(define read$ (pa$ read (make <grafter> :input-port (make <serializer>))))
+
+(let loop ((r (read$)))
+  (unless (eof-object? r)
+    (write r)
+    (newline)))
