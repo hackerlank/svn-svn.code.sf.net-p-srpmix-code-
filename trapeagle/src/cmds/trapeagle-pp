@@ -8,4 +8,5 @@
 (let loop ((r (read$)))
   (unless (eof-object? r)
     (write r)
-    (newline)))
+    (newline)
+    (loop (read$))))

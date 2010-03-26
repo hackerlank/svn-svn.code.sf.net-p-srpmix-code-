@@ -1,10 +1,12 @@
 (define-module trapeagle.graft
-  (export <grafter>)
+  (export <grafter> 
+	  read)
   (use util.queue)
   (use trapeagle.pp-common)
   (use srfi-1)
   )
 (select-module trapeagle.graft)
+(debug-print-width #f)
 
 (define-class <grafter> ()
   ((input-port :init-keyword :input-port
@@ -30,7 +32,7 @@
 				 old-unfinished))
 		       (let1 r (append! r (list :solved? #f))
 			 (set! (ref proc-table pid) r)
-			 (queue! (ref grafter 'unsolved) r)
+			 (enqueue! (ref grafter 'unsolved) r)
 			 (loop (read (ref grafter 'input-port))))))
 		    ('resumed 
 		     (let* ((pid (cadr (memq :pid r)))
@@ -51,6 +53,12 @@
 			 (read grafter))
 		  )))
 	r)))
+
+(define-method enqueue! ((grafter <grafter>) 
+			 r)
+  (if (queue-empty? (ref grafter 'unsolved))
+      (enqueue! (ref grafter 'solved) r)
+      (enqueue! (ref grafter 'unsolved) r)))
 
 (define (strace? call)
   (eq? (car call) 'strace))
