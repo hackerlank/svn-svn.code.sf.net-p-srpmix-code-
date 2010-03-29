@@ -13,8 +13,8 @@
 	  (lambda (o v) (slot-set! o symbol ((car proc) v))))))
 
 
-;; TODO (* read :xargs 1)
-;; (type syscall kwd)
+;; TODO (* read :xargs 1) 
+;; (type syscall kwd N)
 (define (compile-rules rules)
   (let1 type-table (make-hash-table 'eq?)
 	(let loop ((rules rules))
@@ -24,19 +24,25 @@
 		     (type (ref rule 0))
 		     (syscall (ref rule 1))
 		     (kwd   (ref rule 2)))
-		(hash-table-update! type-table
-				    type
-				    (lambda (syscall-table)
-				      (hash-table-update! syscall-table
-							  syscall
-							  (lambda (kwd-list)
-							    kwd-list
-							    (cons  kwd kwd-list)
-							    )
-							  (list))
-				      syscall-table)
-				    (make-hash-table 'eq?))
-		(loop (cdr rules)))))))
+		(if (eq? type '*)
+		    (loop (append 
+			   (map
+			    (cute list <> syscall kwd)
+			    '(trace signaled killed unfinished resumed))
+			   (cdr rules)))
+		    (begin (hash-table-update! type-table
+					       type
+					       (lambda (syscall-table)
+						 (hash-table-update! syscall-table
+								     syscall
+								     (lambda (kwd-list)
+								       kwd-list
+								       (cons  kwd kwd-list)
+								       )
+								     (list))
+						 syscall-table)
+					       (make-hash-table 'eq?))
+			   (loop (cdr rules)))))))))
 
 (define (kdrop klist key)
   (reverse (let loop ((input klist)
@@ -76,7 +82,7 @@
 			     (kwd-list kwd-list))
 		    (if (null? kwd-list)
 			strace
-			(loop (kreplace strace (car kwd-list) `filtered)
+			(loop (kreplace strace (car kwd-list) '|/* <filter> */|)
 			      (cdr kwd-list)))))
 	strace)))
 
