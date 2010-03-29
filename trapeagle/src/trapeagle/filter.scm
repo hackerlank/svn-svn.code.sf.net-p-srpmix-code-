@@ -15,47 +15,47 @@
 
 ;; TODO (* read :xargs 1) 
 ;; (type syscall kwd N)
+(define-method ref ((list <null>)
+		    (index <integer>)
+		    default)
+  default)
+
+(define-method ref ((list <pair>)
+		    (index <integer>)
+		    default)
+  (if (< index (length list))
+      (ref list index)
+      default))
+
 (define (compile-rules rules)
   (let1 type-table (make-hash-table 'eq?)
-	(let loop ((rules rules))
-	  (if (null? rules)
-	      type-table
-	      (let* ((rule (car rules))
-		     (type (ref rule 0))
-		     (syscall (ref rule 1))
-		     (kwd   (ref rule 2)))
-		(if (eq? type '*)
-		    (loop (append 
-			   (map
-			    (cute list <> syscall kwd)
-			    '(trace signaled killed unfinished resumed))
-			   (cdr rules)))
-		    (begin (hash-table-update! type-table
-					       type
-					       (lambda (syscall-table)
-						 (hash-table-update! syscall-table
-								     syscall
-								     (lambda (kwd-list)
-								       kwd-list
-								       (cons  kwd kwd-list)
-								       )
-								     (list))
-						 syscall-table)
-					       (make-hash-table 'eq?))
-			   (loop (cdr rules)))))))))
-
-(define (kdrop klist key)
-  (reverse (let loop ((input klist)
-		      (result (list)))
-	     (cond
-	      ((null? input) result)
-	      ((eq? (car input) key)
-	       (if (null? (cdr input))
-		   ;; broken klist
-		   result
-		   (loop (cddr input) result)))
-	      (else
-	       (loop (cdr input) (cons (car input) result)))))))
+    (let loop ((rules rules))
+      (if (null? rules)
+	  type-table
+	  (let* ((rule (car rules))
+		 (type (ref rule 0))
+		 (syscall (ref rule 1))
+		 (kwd   (ref rule 2))
+		 (index (ref rule 3 #f)))
+	    (if (eq? type '*)
+		(loop (append 
+		       (map
+			(cute list <> syscall kwd)
+			'(trace signaled killed unfinished resumed))
+		       (cdr rules)))
+		(begin (hash-table-update! type-table
+					   type
+					   (lambda (syscall-table)
+					     (hash-table-update! syscall-table
+								 syscall
+								 (lambda (kwd-list)
+								   kwd-list
+								   (cons  (list kwd index) kwd-list)
+								   )
+								 (list))
+					     syscall-table)
+					   (make-hash-table 'eq?))
+		       (loop (cdr rules)))))))))
 
 (define (kreplace klist key value)
   (reverse (let loop ((input klist)
@@ -71,6 +71,16 @@
 	      (else
 	       (loop (cdr input) (cons (car input) result)))))))
 
+(define kget
+  (case-lambda
+   ((klist key default)
+    (cond
+     ((null? klist) default)
+     ((eq? (car klist) key) (cadr klist))
+     (else (kget (cdr klist) key default))))
+   ((klist key)
+    (kget klist key #f))))
+
 (define (apply-rules rules strace)
   (let* ((type (ref strace 1))
 	 (syscall (cadr (or (memq :call strace)
@@ -78,26 +88,36 @@
 			    ))))
     (or (and-let* ((syscall-table (ref rules type #f))
 		   (kwd-list      (ref syscall-table syscall #f)))
-		  (let loop ((strace strace)
-			     (kwd-list kwd-list))
-		    (if (null? kwd-list)
-			strace
-			(loop (kreplace strace (car kwd-list) '|/* <filter> */|)
-			      (cdr kwd-list)))))
+	  (let loop ((strace strace)
+		     (kwd-list kwd-list))
+	    (if (null? kwd-list)
+		strace
+		(let ((kwd (car (car kwd-list)))
+		      (index (cadr (car kwd-list))))
+		    (loop (replace! strace kwd index '|/* <filter> */|)
+			  (cdr kwd-list))))))
 	strace)))
+
+(define (replace! strace kwd index value)
+  (if index
+      (let1 old (kget strace kwd)
+	(begin (set-car! (list-tail old index) value)
+	       strace))
+      (kreplace strace kwd value)
+      ))
 
 (define-class <filter> ()
   ((input-port :init-keyword :input-port
 	       :init-form (current-input-port))
    (rules     :init-keyword :rules
-	       :allocation :virtual
-	       :slot-set! (redirect 'rules0 compile-rules)
-	       :slot-ref  (redirect 'rules0))
+	      :allocation :virtual
+	      :slot-set! (redirect 'rules0 compile-rules)
+	      :slot-ref  (redirect 'rules0))
    (rules0)))
 
 (define-method read ((filter <filter>))
   (let1 r (read (ref filter 'input-port))
-	(if (eof-object? r)
-	    r
-	    (apply-rules (ref filter 'rules) r))))
+    (if (eof-object? r)
+	r
+	(apply-rules (ref filter 'rules) r))))
 (provide "trapeagle/filter")
