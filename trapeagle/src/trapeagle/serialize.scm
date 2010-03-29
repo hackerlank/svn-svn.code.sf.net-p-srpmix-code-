@@ -15,6 +15,7 @@
 
 (define-method read ((serializer <serializer>))
   (let1 r (read (ref serializer 'input-port))
+    (format (current-error-port) "~d\n" (ref serializer 'index))
     (if (eof-object? r)
 	r
 	(let1 r (append! r 
