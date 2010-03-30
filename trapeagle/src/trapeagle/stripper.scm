@@ -27,6 +27,15 @@
       (ref list index)
       default))
 
+(define-method ref ((list <pair>)
+		    (kwd  <keyword>))
+  (kget kwd list))
+
+(define-method ref ((list <pair>)
+		    (kwd  <keyword>)
+		    default)
+  (kget kwd list default))
+		    
 (define (compile-rules rules)
   (let1 type-table (make-hash-table 'eq?)
     (let loop ((rules rules))
