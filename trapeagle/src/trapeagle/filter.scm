@@ -1,9 +1,9 @@
-(define-module trapeagle.filter
-  (export <filter>
+(define-module trapeagle.stripper
+  (export <stripper>
 	  read)
   (use trapeagle.pp-common))
 
-(select-module trapeagle.filter)
+(select-module trapeagle.stripper)
 
 (define (redirect symbol . proc)
   (if (null? proc)
@@ -40,7 +40,7 @@
 	    (if (eq? type '*)
 		(loop (append 
 		       (map
-			(cute list <> syscall kwd)
+			(cute list <> syscall kwd index)
 			'(trace signaled killed unfinished resumed))
 		       (cdr rules)))
 		(begin (hash-table-update! type-table
@@ -94,19 +94,20 @@
 		strace
 		(let ((kwd (car (car kwd-list)))
 		      (index (cadr (car kwd-list))))
-		    (loop (replace! strace kwd index '|/* <filter> */|)
+		    (loop (replace! strace kwd index '|/* <stripper> */|)
 			  (cdr kwd-list))))))
 	strace)))
 
 (define (replace! strace kwd index value)
   (if index
       (let1 old (kget strace kwd)
-	(begin (set-car! (list-tail old index) value)
-	       strace))
+	    (when old
+		  (set-car! (list-tail old index) value))
+	    strace)
       (kreplace strace kwd value)
       ))
 
-(define-class <filter> ()
+(define-class <stripper> ()
   ((input-port :init-keyword :input-port
 	       :init-form (current-input-port))
    (rules     :init-keyword :rules
@@ -115,9 +116,9 @@
 	      :slot-ref  (redirect 'rules0))
    (rules0)))
 
-(define-method read ((filter <filter>))
-  (let1 r (read (ref filter 'input-port))
+(define-method read ((stripper <stripper>))
+  (let1 r (read (ref stripper 'input-port))
     (if (eof-object? r)
 	r
-	(apply-rules (ref filter 'rules) r))))
-(provide "trapeagle/filter")
+	(apply-rules (ref stripper 'rules) r))))
+(provide "trapeagle/stripper")

@@ -5,18 +5,21 @@
 (use trapeagle.serialize)
 
 ;(define read$ (pa$ read (make <grafter> :input-port (make <serializer>))))
-(define read$ (pa$ read (make <filter> 
-			  :rules '(
-				   (* read :args)
-				   ;(resumed read :args)
-				   (* futex :args)
-				   ;(resumed futex :args)
-				   (* clock_gettime :args)
-				   ;(resumed clock_gettime :args)
-				   (* write :args)
-				   ;(resumed write :args)
-				  )
-			  :input-port (make <serializer>))))
+(define read$ (pa$ read (make <grafter>
+			  :input-port (make <stripper> 
+					:rules '(
+						 (* read :args)
+						 (* read :xargs 1)
+					;(resumed read :args)
+						 (* futex :args)
+					;(resumed futex :args)
+						 (* clock_gettime :args)
+					;(resumed clock_gettime :args)
+						 (* write :args)
+						 (* write :xargs 1)
+					;(resumed write :args)
+						 )
+					:input-port (make <serializer>)))))
 
 (let loop ((r (read$)))
   (unless (eof-object? r)
