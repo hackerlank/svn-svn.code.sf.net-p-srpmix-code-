@@ -1,7 +1,7 @@
 ;; -*- scheme -*-
 (use trapeagle.pp-common)
 (use trapeagle.graft)
-(use trapeagle.filter)
+(use trapeagle.stripper)
 (use trapeagle.serialize)
 
 ;(define read$ (pa$ read (make <grafter> :input-port (make <serializer>))))
