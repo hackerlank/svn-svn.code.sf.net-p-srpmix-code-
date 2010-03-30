@@ -11,11 +11,14 @@
    (tag   :init-keyword :tag
 	  :init-value :index)
    (index :init-keyword :start-index
-	  :init-value 0)))
+	  :init-value 0)
+   (debug :init-keyword :debug
+	  :init-value #f)))
 
 (define-method read ((serializer <serializer>))
   (let1 r (read (ref serializer 'input-port))
-    (format (current-error-port) "~d\n" (ref serializer 'index))
+    (when (ref serializer 'debug)
+       (format (current-error-port) "~d\n" (ref serializer 'index)))
     (if (eof-object? r)
 	r
 	(let1 r (append! r 
