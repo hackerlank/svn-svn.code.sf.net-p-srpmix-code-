@@ -21,10 +21,13 @@
        (format (current-error-port) "~d\n" (ref serializer 'index)))
     (if (eof-object? r)
 	r
-	(let1 r (append! r 
-			 (list (ref serializer 'tag) 
-			       (ref serializer 'index)))
-	  (inc! (ref serializer 'index))
-	  r))))
+	(let1 r (if (memq (ref serializer 'tag) r)
+		    r
+		    (let1 r (append! r 
+				     (list (ref serializer 'tag) 
+					   (ref serializer 'index)))
+			  r))
+	      (inc! (ref serializer 'index))
+	      r))))
 
 (provide "trapeagle/serialize")
