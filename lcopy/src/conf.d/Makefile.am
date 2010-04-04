@@ -62,5 +62,6 @@ dist_confd_DATA = \
 	wireshark,trunk.lcopy \
 	with-log,trunk.lcopy \
 	xtrace,trunk.lcopy \
+	zsh,trunk.lcopy \
 	\
 	$(NULL)
