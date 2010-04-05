@@ -105,7 +105,7 @@
 		strace
 		(let ((kwd (car (car kwd-list)))
 		      (index (cadr (car kwd-list))))
-		    (loop (replace! strace kwd index '|/* <stripper> */|)
+		    (loop (replace! strace kwd index '|;|)
 			  (cdr kwd-list))))))
 	strace)))
 

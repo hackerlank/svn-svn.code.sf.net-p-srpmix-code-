@@ -100,14 +100,14 @@
 	  (case (cadr r)
 	    ('unfinished
 	     (let ((pid (cadr (memq :pid r))))
-	       (push! (ref proc-table pid) (list r #f))))
+	       (hash-table-push! proc-table pid (list r #f))))
 	    ('resumed
 	     (let* ((pid (cadr (memq :pid r)))
-		    (pair  (pop! (ref proc-table pid))))
+		    (pair  (hash-table-pop! proc-table pid)))
 	       (if (cadr pair)
 		   (errorf "Unblanced unfinished/resumed pair for ~d\npair stored: ~s\nnew resumed: ~s\n"
 			   pid pair r)
-		   (push! (ref proc-table pid) (list (car pair) r)))))))
+		   (hash-table-push! proc-table pid (list (car pair) r)))))))
 	(loop (read iport))))
     (for-each (lambda (elt)
 		(write (cons 'trapeagle-pp (cons 'graft-map elt)) oport)
@@ -139,7 +139,7 @@
 		(newline oport)))
 	     ('resumed
 	      (let1 index (cadr (memq :index r))
-		(write (apppend r (list :unfinished? (ref unfinished/resumed index))) oport)
+		(write (append r (list :unfinished? (ref unfinished/resumed index))) oport)
 		(newline oport)))
 	     (else
 	      (write r oport)
