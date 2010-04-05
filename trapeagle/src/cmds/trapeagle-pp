@@ -5,9 +5,53 @@
 (use trapeagle.serialize)
 
 (use gauche.parseopt)
+(use gauche.vport)
 (use file.util)
 (use file.filter)
 
+
+(define-class <graft-input-port> (<virtual-input-port>)
+  ((ports :init-keyword :ports :init-form (list))
+   (current-input-port :allocation :virtual
+		       :slot-ref (lambda (self)
+				   (let1 head (ref self 'ports)
+				     (if (null? head)
+					 #f
+					 (car head)))))))
+
+(define (shift-iports! self)
+  (if (null? (ref self 'ports))
+      #f
+      (update! (ref self 'ports) 
+	       (lambda (ports) (cdr ports)))))
+
+(define (getb self)
+  (let1 iport (ref self 'current-input-port)
+    (if iport 
+	(let1 b (read-byte iport)
+	  (if (eof-object? b)
+	      (begin (shift-iports! self)
+		     (getb self))
+	      b))
+	(eof-object))))
+
+(define (ready self char-ready??)
+  (let1 checker (if char-ready?? char-ready? byte-ready?)
+    (let1 iport (ref self 'current-input-port)
+      (if iport 
+	  (let1 b (checker iport)
+	    (if b
+		b
+		(begin (shift-iports! self)
+		       (ready self char-ready??))))
+	  #f))))
+
+(define-method initialize ((self <graft-input-port>) initargs)
+  (next-method)
+  (set! (ref self 'getb) 
+	(pa$ getb self))
+  (set! (ref self 'ready) 
+	(pa$ ready self)))
 
 ;(define read$ (pa$ read (make <grafter> :input-port (make <serializer>))))
 (define read$ 
@@ -19,38 +63,108 @@
 			    (* * :args)
 			    (* read :xargs 1)
 			    (* read :args)
-			    ;;(resumed read :args)
-			    ;;(* futex :args)
-			    ;;(resumed futex :args)
-			    ;;(* clock_gettime :args)
-			    ;;(resumed clock_gettime :args)
-			    ;;(* write :args)
 			    (* write :xargs 1)
 			    (* write :args)
-			    ;;(resumed write :args)
 			    )
 		   :input-port (make <serializer> :debug #t)))))
-
-(let loop ((r (read$)))
-  (unless (eof-object? r)
-    (write r)
-    (newline)
-    (loop (read$))))
 
 (define (show-help prog n)
   (format #t "~a --help\n" prog)
   (format #t "~a [--debug]\n" prog)
   (exit n))
 
+(define (serialize+stripe iport oport)
+  (let1 iport (make <stripper> 
+		:rules '(
+			 (* * :args)
+			 (* read :xargs 1)
+			 (* read :args)
+			 (* write :xargs 1)
+			 (* write :args)
+			 )
+		:input-port (make <serializer> 
+			      :input-port iport
+			      :debug #t))
+    (let loop ((r (read iport)))
+      (unless (eof-object? r)
+	(write r oport)
+	(newline oport)
+	(loop (read iport))))))
+
+;; (trapeagle-pp graft-map n0 n1)
+(define (make-graft-map iport oport)
+  (let1 proc-table (make-hash-table 'eq?)
+    (let loop ((r (read iport)))
+      (unless (eof-object? r)
+	(when (eq? (car r) 'strace)
+	  (case (cadr r)
+	    ('unfinished
+	     (let ((pid (cadr (memq :pid r))))
+	       (push! (ref proc-table pid) (list r #f))))
+	    ('resumed
+	     (let* ((pid (cadr (memq :pid r)))
+		    (pair  (pop! (ref proc-table pid))))
+	       (if (cadr pair)
+		   (errorf "Unblanced unfinished/resumed pair for ~d\npair stored: ~s\nnew resumed: ~s\n"
+			   pid pair r)
+		   (push! (ref proc-table pid) (list (car pair) r)))))))
+	(loop (read iport))))
+    (for-each (lambda (elt)
+		(write (cons 'trapeagle-pp (cons 'graft-map elt)) oport)
+		(newline oport))
+	      (sort (apply append (hash-table-map proc-table (lambda (key value)
+							       (map (lambda (elt)
+								      (list (cadr (memq :index (car elt)))
+									    (if (cadr elt)
+										(cadr (memq :index (cadr elt)))
+										#f)))
+								    value))))
+		    (lambda (a b) (< (car a) (car b)))))))
+
+(define (apply-map iport oport)
+  (let1 unfinished/resumed (make-hash-table 'eq?)
+    (let loop ((r (read iport)))
+      (unless (eof-object? r)
+	(case (car r)
+	  ('trapeagle-pp
+	   (when (eq? (cadr r) 'graft-map)
+	     (set! (ref unfinished/resumed (caddr r)) (cadddr r))
+	     (when (cadddr r)
+	       (set! (ref unfinished/resumed (cadddr r)) (caddr r)))))
+	  ('strace
+	   (case (cadr r)
+	     ('unfinished
+	      (let1 index (cadr (memq :index r))
+		(write (append r (list :resumed? (ref unfinished/resumed index))) oport)
+		(newline oport)))
+	     ('resumed
+	      (let1 index (cadr (memq :index r))
+		(write (apppend r (list :unfinished? (ref unfinished/resumed index))) oport)
+		(newline oport)))
+	     (else
+	      (write r oport)
+	      (newline oport)))))
+	(loop (read iport))))))
+
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help (car args) 0))
        (debug "debug")
        )
-    (file-filter serialize+strip :output "serialize+strip.es" 
-		 :temporary-file "tmp-serialize+strip.es")
-    (file-filter :input "serialize+strip.es"
-		 :output "graft-map.es")
-    (let1 grafted-port (graft-port (open-input-file "graft-map.es")
 
-      ))
+    (let* ((i (current-input-port))
+	   (o (open-output-file "/tmp/serialize+strip.es")))
+      (serialize+stripe i o)
+      (close-output-port o))
+    (let* ((i (open-input-file "/tmp/serialize+strip.es"))
+	   (o (open-output-file "/tmp/graft-map.es")))
+      (make-graft-map i o)
+      (close-output-port o)
+      (close-input-port i))
+    (let* ((i (make <graft-input-port>
+		:ports (list
+			(open-input-file "/tmp/graft-map.es")
+			(open-input-file "/tmp/serialize+strip.es"))))
+	   (o (current-output-port)))
+      (apply-map i o)))
+  0)
