@@ -18,7 +18,7 @@
 (define-method read ((serializer <serializer>))
   (let1 r (read (ref serializer 'input-port))
     (when (ref serializer 'debug)
-       (format (current-error-port) "~d\n" (ref serializer 'index)))
+       (format (current-error-port) ";; <serializer> ~d\n" (ref serializer 'index)))
     (if (eof-object? r)
 	r
 	(if (eq? (car r) 'strace)

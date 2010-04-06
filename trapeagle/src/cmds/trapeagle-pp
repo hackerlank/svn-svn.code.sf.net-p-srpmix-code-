@@ -73,7 +73,7 @@
   (format #t "~a [--debug]\n" prog)
   (exit n))
 
-(define (serialize+stripe iport oport)
+(define (serialize+stripe iport oport debug)
   (let1 iport (make <stripper> 
 		:rules '(
 			 (* * :args)
@@ -84,7 +84,7 @@
 			 )
 		:input-port (make <serializer> 
 			      :input-port iport
-			      :debug #t))
+			      :debug debug))
     (let loop ((r (read iport)))
       (unless (eof-object? r)
 	(write r oport)
@@ -96,11 +96,13 @@
   (newline oport))
  
 ;; (trapeagle-pp graft-map n0 n1)
-(define (make-graft-map iport oport)
+(define (make-graft-map iport oport debug)
   (let1 proc-table (make-hash-table 'eq?)
     (let loop ((r (read iport)))
       (unless (eof-object? r)
 	(when (eq? (car r) 'strace)
+	  (when debug
+	    (format (current-error-port) ";; <graft-map> ~d\n" (cadr (memq :index r))))
 	  (case (cadr r)
 	    ('unfinished
 	     (let ((pid (cadr (memq :pid r))))
@@ -159,14 +161,14 @@
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help (car args) 0))
-       (debug "debug"))
+       (debug "debug" #t))
     (let* ((i (current-input-port))
 	   (o (open-output-file "/tmp/serialize+strip.es")))
-      (serialize+stripe i o)
+      (serialize+stripe i o debug)
       (close-output-port o))
     (let* ((i (open-input-file "/tmp/serialize+strip.es"))
 	   (o (open-output-file "/tmp/graft-map.es")))
-      (make-graft-map i o)
+      (make-graft-map i o debug)
       (close-output-port o)
       (close-input-port i))
     (let* ((i (make <graft-input-port>
