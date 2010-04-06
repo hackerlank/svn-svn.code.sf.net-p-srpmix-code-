@@ -105,9 +105,9 @@
 	    ('unfinished
 	     (let ((pid (cadr (memq :pid r))))
 	       (if (ref proc-table pid #f)
-		   (hash-table-put! proc-table pid r)
 		   (errorf "duplicated unsolved unfinished pair for ~d\nold: ~s\nnew: ~s\n"
-			   pid (ref proc-table pid) r))))
+			   pid (ref proc-table pid) r)
+		   (hash-table-put! proc-table pid r))))
 	    ('resumed
 	     (let* ((pid (cadr (memq :pid r)))
 		    (unfinished  (ref proc-table pid #f)))
