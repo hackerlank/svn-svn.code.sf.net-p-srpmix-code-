@@ -91,6 +91,10 @@
 	(newline oport)
 	(loop (read iport))))))
 
+(define (writeln o oport)
+  (write o oport)
+  (newline oport))
+ 
 ;; (trapeagle-pp graft-map n0 n1)
 (define (make-graft-map iport oport)
   (let1 proc-table (make-hash-table 'eq?)
@@ -100,26 +104,28 @@
 	  (case (cadr r)
 	    ('unfinished
 	     (let ((pid (cadr (memq :pid r))))
-	       (hash-table-push! proc-table pid (list r #f))))
+	       (if (ref proc-table pid #f)
+		   (hash-table-put! proc-table pid r)
+		   (errorf "duplicated unsolved unfinished pair for ~d\nold: ~s\nnew: ~s\n"
+			   pid (ref proc-table pid) r))))
 	    ('resumed
 	     (let* ((pid (cadr (memq :pid r)))
-		    (pair  (hash-table-pop! proc-table pid)))
-	       (if (cadr pair)
-		   (errorf "Unblanced unfinished/resumed pair for ~d\npair stored: ~s\nnew resumed: ~s\n"
-			   pid pair r)
-		   (hash-table-push! proc-table pid (list (car pair) r)))))))
+		    (unfinished  (ref proc-table pid #f)))
+	       (if unfinished
+		   (writeln `(trapeagle-pp graft-map
+					   ,(cadr (memq :index unfinished))
+					   ,(cadr (memq :index r))
+					   :pid ,pid)
+			    oport)
+		   (errorf "Unblanced unfinished/resumed pair for ~d\nresumed: ~s\n" pid r)
+		   )))))
 	(loop (read iport))))
-    (for-each (lambda (elt)
-		(write (cons 'trapeagle-pp (cons 'graft-map elt)) oport)
-		(newline oport))
-	      (sort (apply append (hash-table-map proc-table (lambda (key value)
-							       (map (lambda (elt)
-								      (list (cadr (memq :index (car elt)))
-									    (if (cadr elt)
-										(cadr (memq :index (cadr elt)))
-										#f)))
-								    value))))
-		    (lambda (a b) (< (car a) (car b)))))))
+    (hash-table-map proc-table (lambda (pid unfinished)
+				 (writeln `(trapeagle-pp graft-map
+							 ,(cadr (memq :index unfinished))
+							 #f
+							 :pid ,pid)
+					  oport)))))
 
 (define (apply-map iport oport)
   (let1 unfinished/resumed (make-hash-table 'eq?)
@@ -149,9 +155,7 @@
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help (car args) 0))
-       (debug "debug")
-       )
-
+       (debug "debug"))
     (let* ((i (current-input-port))
 	   (o (open-output-file "/tmp/serialize+strip.es")))
       (serialize+stripe i o)
