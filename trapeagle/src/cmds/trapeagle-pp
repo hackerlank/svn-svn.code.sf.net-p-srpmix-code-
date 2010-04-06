@@ -110,22 +110,26 @@
 		   (hash-table-put! proc-table pid r))))
 	    ('resumed
 	     (let* ((pid (cadr (memq :pid r)))
-		    (unfinished  (ref proc-table pid #f)))
+		    (unfinished (ref proc-table pid #f)))
 	       (if unfinished
-		   (writeln `(trapeagle-pp graft-map
-					   ,(cadr (memq :index unfinished))
-					   ,(cadr (memq :index r))
-					   :pid ,pid)
-			    oport)
+		   (begin 
+		     (set! (ref proc-table pid) #f)
+		     (writeln `(trapeagle-pp graft-map
+					     ,(cadr (memq :index unfinished))
+					     ,(cadr (memq :index r))
+					     :pid ,pid)
+			      oport)
+		     )
 		   (errorf "Unblanced unfinished/resumed pair for ~d\nresumed: ~s\n" pid r)
 		   )))))
 	(loop (read iport))))
     (hash-table-map proc-table (lambda (pid unfinished)
-				 (writeln `(trapeagle-pp graft-map
-							 ,(cadr (memq :index unfinished))
-							 #f
-							 :pid ,pid)
-					  oport)))))
+				 (when unfinished
+				   (writeln `(trapeagle-pp graft-map
+							   ,(cadr (memq :index unfinished))
+							   #f
+							   :pid ,pid)
+					    oport))))))
 
 (define (apply-map iport oport)
   (let1 unfinished/resumed (make-hash-table 'eq?)
