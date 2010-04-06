@@ -1,9 +1,9 @@
-(define-module trapeagle.stripper
+(define-module trapeagle.pp.stripper
   (export <stripper>
 	  read)
   (use trapeagle.pp-common))
 
-(select-module trapeagle.stripper)
+(select-module trapeagle.pp.stripper)
 
 (define (redirect symbol . proc)
   (if (null? proc)
@@ -132,4 +132,4 @@
     (if (eof-object? r)
 	r
 	(apply-rules (ref stripper 'rules) r))))
-(provide "trapeagle/stripper")
+(provide "trapeagle/pp/stripper")

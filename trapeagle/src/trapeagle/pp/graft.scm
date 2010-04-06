@@ -1,11 +1,11 @@
-(define-module trapeagle.graft
+(define-module trapeagle.pp.graft
   (export <grafter> 
 	  read)
   (use util.queue)
   (use trapeagle.pp-common)
   (use srfi-1)
   )
-(select-module trapeagle.graft)
+(select-module trapeagle.pp.graft)
 (debug-print-width #f)
 
 (define-class <grafter> ()
@@ -117,4 +117,4 @@
 (define-method read  ((queue <pair>))
   (dequeue-safe! queue (eof-object)))
 
-(provide "trapeagle/graft")
+(provide "trapeagle/pp/graft")

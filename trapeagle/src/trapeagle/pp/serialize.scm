@@ -1,9 +1,9 @@
-(define-module trapeagle.serialize
+(define-module trapeagle.pp.serialize
   (export <serializer>
 	  read)
   (use trapeagle.pp-common))
 
-(select-module trapeagle.serialize)
+(select-module trapeagle.pp.serialize)
 
 (define-class <serializer> ()
   ((input-port :init-keyword :input-port
@@ -32,4 +32,4 @@
 	      r)
 	    r))))
 
-(provide "trapeagle/serialize")
+(provide "trapeagle/pp/serialize")
