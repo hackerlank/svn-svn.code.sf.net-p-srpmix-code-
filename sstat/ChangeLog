@@ -1,3 +1,10 @@
+2010-04-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.3.1.
+
+	* src/sstat-pre.scm (read-line-safe): New function.
+	(run): Use `read-line-safe'.
+
 2010-03-16  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.3.0.
