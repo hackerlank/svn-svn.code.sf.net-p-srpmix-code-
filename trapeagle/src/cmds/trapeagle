@@ -1,0 +1,23 @@
+#!/bin/sh
+# -*- scheme -*-
+:; exec gosh -- $0 "$@"
+(use trapeagle.linux)
+(use gauche.parseopt)
+
+(define (show-help prog n)
+  (format #t "~a --help\n" prog)
+  (format #t "~a [--debug]\n" prog)
+  (exit n))
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cute show-help (car args) 0))
+       (debug "debug" #t))
+    (let1 kernel (make <linux>)
+      (let loop ((r (read)))
+	(unless (eof-object? r)
+	  (when (eq? (car r) 'strace)
+	    (syscall <linux> (cdr r)))
+	  (loop (read))))
+      (dump kernel))))
+
