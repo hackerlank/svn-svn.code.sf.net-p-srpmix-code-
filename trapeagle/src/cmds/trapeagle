@@ -2,6 +2,8 @@
 #| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
 (use trapeagle.linux)
+;(use trapeagle.syscalls.fd)
+(use trapeagle.syscalls.task)
 (use gauche.parseopt)
 
 (define (show-help prog n)
