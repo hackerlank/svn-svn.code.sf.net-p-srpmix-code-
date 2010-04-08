@@ -21,8 +21,8 @@
    (execve-index :init-keyword :execve-args :init-value #f)
    (fd-table :init-form (make-hash-table 'eq?))))
 
-(define-class <thread> (<task>)
-  ())
+;(define-class <thread> (<task>)
+;  ())
 
 (define-class <fd> (<resource>)
   ((opened-by  :init-keyword :opened-by )
@@ -32,7 +32,7 @@
    (input-history :init-form (list))
    (output-history :init-form (list))
    (unfinished :init-value #f)
-   (closed? :init-value (#f #f))	; for shutdown
+   (closed? :init-form (#f #f))	; for shutdown
    ))
 
 (define-class <file> (<fd>)

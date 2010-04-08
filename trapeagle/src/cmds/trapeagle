@@ -1,5 +1,5 @@
 #!/bin/sh
-# -*- scheme -*-
+#| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
 (use trapeagle.linux)
 (use gauche.parseopt)
@@ -17,7 +17,7 @@
       (let loop ((r (read)))
 	(unless (eof-object? r)
 	  (when (eq? (car r) 'strace)
-	    (syscall <linux> (cdr r)))
+	    (syscall kernel (cdr r)))
 	  (loop (read))))
       (dump kernel))))
 
