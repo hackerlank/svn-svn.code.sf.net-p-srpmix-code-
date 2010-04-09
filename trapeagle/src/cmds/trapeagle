@@ -2,14 +2,20 @@
 #| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
 (use trapeagle.linux)
-;(use trapeagle.syscalls.fd)
+(use trapeagle.syscalls.fd)
 (use trapeagle.syscalls.task)
 (use gauche.parseopt)
+(use util.match)
 
 (define (show-help prog n)
   (format #t "~a --help\n" prog)
   (format #t "~a [--debug]\n" prog)
   (exit n))
+
+(define control 
+  (match-lambda*
+   ((kernel 'dump ())
+    (dump kernel))))
 
 (define (main args)
   (let-args (cdr args)
@@ -18,8 +24,11 @@
     (let1 kernel (make <linux>)
       (let loop ((r (read)))
 	(unless (eof-object? r)
-	  (when (eq? (car r) 'strace)
+	  (cond 
+	   ((eq? (car r) 'strace)
 	    (syscall kernel (cdr r)))
+	   ((eq? (car r)  'trapeagle)
+	    (control kernel (cadr r) (cddr r))))
 	  (loop (read))))
-      (dump kernel))))
+      )))
 
