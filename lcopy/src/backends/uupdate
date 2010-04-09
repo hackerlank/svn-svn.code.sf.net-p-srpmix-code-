@@ -1,0 +1,3 @@
+http://git.debian.org/?p=devscripts/devscripts.git;a=blob;f=scripts/uupdate.sh;h=ab24d54d0712308c2200e994c064ec5c5732e1f3;hb=HEAD
+http://packages.debian.org/ja/sid/devscripts
+usage: http://www.debian.org/doc/maint-guide/ch-update.en.html
