@@ -2,7 +2,8 @@
   (export <linux>
 	  syscall
 	  dump
-	  get-task)
+	  task-for
+	  fd-for)
   (use trapeagle.type)
   (use trapeagle.syscall)
   (use trapeagle.resource)
@@ -23,12 +24,22 @@
   (set! (ref (ref kernel 'task-table) pid) (ref kernel 'init-task))
   (ref kernel 'init-task))
 
-(define-method get-task ((kernel <linux>) pid)
-  (let1 task (ref (ref kernel 'task-table) pid #f)
+(define-method task-for ((kernel <linux>) tid)
+  (let1 task (ref (ref kernel 'task-table) tid #f)
     (if task
 	task
-	(init-task kernel pid))))
+	(init-task kernel tid))))
 
+(define-method fd-for ((kernel <linux>) tid fd)
+  (and-let* ((task (task-for kernel tid))
+	     (fd-table (ref task 'fd-table))
+	     (fd (ref fd-table fd #f)))
+    fd))
+
+(define-method fd-for ((kernel <linux>) tid fd (fd-obj <fd>))
+  (let* ((task (task-for kernel tid))
+	 (fd-table (ref task 'fd-table)))
+    (hash-table-put! fd-table fd fd-obj)))
 
 (let ((nop-vector (make-vector (type-count) (lambda args #f))))
   (define-method syscall ((kernel <linux>)

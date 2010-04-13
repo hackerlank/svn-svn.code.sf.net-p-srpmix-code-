@@ -1,8 +1,8 @@
 ;; -*- scheme -*-
-(use trapeagle.pp-common)
-(use trapeagle.pp.graft)
-(use trapeagle.pp.stripper)
-(use trapeagle.pp.serialize)
+(use trapeagle.pre-common)
+(use trapeagle.pre.graft)
+(use trapeagle.pre.stripper)
+(use trapeagle.pre.serialize)
 
 (use gauche.parseopt)
 (use gauche.vport)

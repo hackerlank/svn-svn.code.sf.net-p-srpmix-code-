@@ -15,7 +15,7 @@
 	(let1 file (make <file> 
 		     :open-info (vector index index time time xargs xrvalue xerrno)
 		     :unfinished? #f)
-	  (hash-table-put! (ref (get-task kernel pid) 'fd-table) fd file) 
+	  (fd-for kernel pid fd file)
 	  ))))
   :unfinished
   (lambda (kernel pid resumed? time index)
@@ -28,7 +28,7 @@
     (let1 successful? (car xrvalue)
       (when (eq? successful? 0)
 	(let* ((fd (car xargs))
-	       (fd-obj (ref (ref (get-task kernel pid) 'fd-table) fd #f)))
+	       (fd-obj (fd-for kernel pid fd)))
 	  (when fd-obj
 	    (set! (ref fd-obj 'closed?) (list (list index time) (list index time)))))
 	))))

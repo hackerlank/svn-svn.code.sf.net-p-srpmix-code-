@@ -34,6 +34,6 @@
 (deftype trace (pid xargs xrvalue xerrno time index))
 (deftype unfinished (pid resumed? time index))
 (deftype resumed (pid xargs xrvalue xerrno unfinished? time index))
-(deftype unfinished-exit-pos (pid))	; TODO
+(deftype unfinished-exit (pid))	; TODO
 
 (provide "trapeagle/type")

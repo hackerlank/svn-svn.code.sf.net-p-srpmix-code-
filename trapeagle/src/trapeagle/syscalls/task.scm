@@ -15,7 +15,7 @@
     (when born?
       (let ((ppid pid)
 	    (pid (car xrvalue)))
-	(let* ((parent (get-task kernel ppid))
+	(let* ((parent (task-for kernel ppid))
 	       (child (if thread?
 			  (make <task> 
 			    :parent-tid ppid
@@ -40,7 +40,7 @@
   :trace
   (lambda (kernel pid xargs xrvalue xerrno time index)
     (when (eq? xrvalue 0)
-      (let1 task (get-task kernel pid)
+      (let1 task (task-for kernel pid)
 	(set! (ref task 'execve-info) (vector index index time time xargs xrvalue xerrno))))))
 
 (provide "trapeagle/syscalls/task")
