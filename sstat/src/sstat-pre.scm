@@ -75,7 +75,7 @@
 (define (run accept? sstat-dir)
   (let loop ((line (read-line-safe))
 	     (port #f)
-	     (tmf  #f)
+	     (tmp  #f)
 	     (ip    "0.0.0.0")
 	     )
     (cond
