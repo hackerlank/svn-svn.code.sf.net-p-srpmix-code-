@@ -75,11 +75,11 @@
 (define (run accept? sstat-dir)
   (let loop ((line (read-line-safe))
 	     (port #f)
-	     (tmp  #f)
+	     (tmf  #f)
 	     (ip    "0.0.0.0")
 	     )
     (cond
-     ((not line) (loop (read-line-safe) port tmp ip))
+     ((not line) (loop (read-line-safe) port tmf ip))
      ((not (eof-object? line))
       (rxmatch-if (#/^([0-9]+) ([0-9]+) (.*)\/$/ line)
 	  (#f ip time file)
