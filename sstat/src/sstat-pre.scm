@@ -25,9 +25,14 @@
     (lambda (ip file time)
       (if (memq ip unacceptable-ip-list)
 	  #f
-	  (if (let1 last-access-file (hash-table-get multiaccess-table ip #f)
-		(hash-table-put! multiaccess-table ip file)
-		(not (equal? last-access-file file)))
+	  ;; last-access := (file time)
+	  (if (let1 last-access (hash-table-get multiaccess-table ip #f)
+		(hash-table-put! multiaccess-table ip (list file time))
+		(if last-access
+		    (and 
+		     (not (equal? (ref last-access 1) file))
+		     (not (eqv? (ref last-access 2) time)))
+		    #t))
 	      (acceptable-path-regex file)
 	      #f)))))
 
