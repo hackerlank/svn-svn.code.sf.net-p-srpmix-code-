@@ -3,6 +3,7 @@
   (use trapeagle.syscall)
   (use trapeagle.resource)
   (use trapeagle.linux)
+  (use trapeagle.clone)
   )
 
 (select-module trapeagle.syscalls.task)

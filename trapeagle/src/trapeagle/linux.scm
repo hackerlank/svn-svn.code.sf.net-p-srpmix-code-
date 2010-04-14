@@ -1,12 +1,13 @@
 (define-module trapeagle.linux
   (export <linux>
 	  syscall
-	  dump
+	  report
 	  task-for
 	  fd-for)
   (use trapeagle.type)
   (use trapeagle.syscall)
   (use trapeagle.resource)
+  (use trapeagle.report)
   )
 
 (select-module trapeagle.linux)
@@ -61,10 +62,10 @@
 	(else
 	 #f)))))
 
-(define-method dump ((kernel <linux>))
+(define-method report ((kernel <linux>))
   (let1 table (ref kernel 'task-table)
     (for-each
-     (lambda (tid)  (dump (ref table tid)))
+     (lambda (tid)  (report (ref table tid)))
      (sort (hash-table-keys table) <))))
 
 (provide "trapeagle/linux")
