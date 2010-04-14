@@ -26,7 +26,7 @@
 			    :parent-tid ppid
 			    :tid pid
 			    :clone-info (vector index index time time xargs xrvalue xerrno)
-			    ;; TODO COPY
+			    :fd-table (clone (ref parent 'fd-table))
 			    ))))
 	  ;; Check overlaypping
 	    (hash-table-put! (ref kernel 'task-table) pid child)
