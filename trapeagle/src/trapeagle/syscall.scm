@@ -1,7 +1,8 @@
 (define-module trapeagle.syscall
   (export syscalls
 	  syscall-arity-check
-	  defsyscall)
+	  defsyscall
+	  lambda*)
   (use trapeagle.type))
 
 (select-module trapeagle.syscall)
@@ -29,5 +30,10 @@
 	 (vector-set! ,v (type-pos-of 'resumed) ,resumed)
 	 (vector-set! ,v (type-pos-of 'unfinished) ,unfinished-exit)
 	 (set! (ref ,syscalls ',call) ,v)))))
+
+(define-macro (lambda* args . body)
+  `(lambda ,args
+     (let1 $ ,(cons 'list args)
+       ,@body)))
 
 (provide "trapeagle/syscall")

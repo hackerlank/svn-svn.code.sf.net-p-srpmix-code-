@@ -9,12 +9,12 @@
 
 (defsyscall open
   :trace 
-  (lambda (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
     (let1 fd (car xrvalue)
       (when (>= fd 0)
 	(let1 file (make <file> 
 		     :open-info (vector index index time time xargs xrvalue xerrno)
-		     :unfinished? #f)
+		     :unfinished? index)
 	  (fd-for kernel pid fd file)
 	  ))))
   :unfinished
@@ -32,21 +32,21 @@
 
 (defsyscall dup2
   :trace
-  (lambda (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
     (when (>= (car xrvalue) 0)
       (let ((old (ref xargs 0))
 	    (new (ref xargs 1)))
-	(let1 file (or #?=(fd-for kernel pid #?=old) (make <fd>))
+	(let1 file (or (fd-for kernel pid old) (make <fd>))
 	      (fd-for kernel pid new file)))))
   :unfinished
   (lambda (kernel pid resumed? time index)
-    #?=index)
+    index)
   :resumed
-  (lambda (kernel pid xargs xrvalue xerrno unfinished? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
     (when (>= (car xrvalue) 0)
       (let ((old (ref xargs 0))
 	    (new (ref xargs 1)))
-	(let1 file (or #?=(fd-for kernel pid #?=old) (make <fd>))
+	(let1 file (or (fd-for kernel pid old) (make <fd>))
 	  (fd-for kernel pid new file))))
     ))
 
@@ -77,13 +77,13 @@
 
 (defsyscall socket
   :trace
-  (lambda (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
     (let* ((fd (car xrvalue))
 	   (successful? (>= fd 0)))
       (when successful?
 	(let1 socket (make <socket>
 		       :socket-info xargs
-		       :unfinished? #f)
+		       :unfinished? index)
 	  (fd-for kernel pid fd socket)))))
   :resumed
   (lambda (kernel pid xargs xrvalue xerrno unfinished? time index)
@@ -99,10 +99,22 @@
 (defsyscall accept
   :trace
   (lambda (kernel pid xargs xrvalue xerrno time index)
-    
-    )
-  )
-
+    (let* ((fd (car xrvalue))
+	   (successful? (>= fd 0)))
+      (when successful?
+	(let1 socket (make <request-socket>
+		       :accept-info xargs
+		       :unfinished? index)
+	  (fd-for kernel pid fd socket)))))
+  :resumed
+  (lambda (kernel pid xargs xrvalue xerrno unfinished? time index)
+    (let* ((fd (car xrvalue))
+	   (successful? (>= fd 0)))
+      (when successful?
+	(let1 socket (make <request-socket>
+		       :accept-info xargs
+		       :unfinished? unfinished?)
+	  (fd-for kernel pid fd socket))))))
 
 (defsyscall shutdown
   :trace
@@ -152,5 +164,16 @@
 					      (list index time))
 					     (else
 					      #f))))))))))
+
+;; connect, listen, bind
+(defsyscall connect
+  :trace
+  (lambda (kernel pid xargs xrvalue xerrno time index)
+    
+    )
+  :resumed
+  (lambda (kernel pid xargs xrvalue xerrno unfinished? time index)
+    )
+  )
 
 (provide "trapeagle/syscalls/fd")

@@ -65,7 +65,9 @@
 (define-method report ((kernel <linux>))
   (let1 table (ref kernel 'task-table)
     (for-each
-     (lambda (tid)  (report (ref table tid)))
+     (lambda (tid)  (let1 task (ref table tid)
+		      (unless (dead? task)
+			(report task))))
      (sort (hash-table-keys table) <))))
 
 (provide "trapeagle/linux")

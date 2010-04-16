@@ -10,6 +10,8 @@
   (list))
 (define-method clone ((obj <boolean>))
   obj)
+(define-method clone ((obj <integer>))
+  obj)
 (define-method clone ((obj <pair>))
   (list-copy obj))
 (define-method clone ((obj <vector>))
@@ -43,5 +45,8 @@
 
 (define-method clone ((socket0 <socket>))
   (clone-helper socket0 <socket> next-method))
+
+(define-method clone ((socket0 <request-socket>))
+  (clone-helper socket0 <request-socket> next-method))
 
 (provide "trapeagle/clone")

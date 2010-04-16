@@ -11,7 +11,7 @@
 (defsyscall clone
   :trace 
   (lambda (kernel pid xargs xrvalue xerrno time index)
-    (define thread? (memq 'CLONE_VM (cadr xargs)))
+    (define thread? (not (memq 'CLONE_VM (cadr xargs))))
     (define born? (> (car xrvalue) 0))
     (when born?
       (let ((ppid pid)
@@ -43,5 +43,16 @@
     (when (eq? xrvalue 0)
       (let1 task (task-for kernel pid)
 	(set! (ref task 'execve-info) (vector index index time time xargs xrvalue xerrno))))))
+
+(defsyscall exit_group
+  :trace
+  (lambda (kernel pid xargs xrvalue xerrno time index)
+    (let1 task (task-for kernel pid)
+      (set! (ref task 'exit-info) `(exit_group ,pid ,xargs ,index ,time))
+      (for-each
+       (lambda (child)
+	 (unless (eq? (ref task 'fd-table) (ref child 'fd-table))
+	   (set! (ref child 'exit-info) `(exit_group ,pid ,xargs ,index ,time))))
+       (children-of task)))))
 
 (provide "trapeagle/syscalls/task")
