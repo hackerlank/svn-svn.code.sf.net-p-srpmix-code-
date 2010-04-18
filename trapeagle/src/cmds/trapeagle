@@ -14,8 +14,8 @@
 
 (define control 
   (match-lambda*
-   ((kernel 'report ())
-    (report kernel))))
+   ((kernel 'report args)
+    (report kernel args))))
 
 (define (main args)
   (let-args (cdr args)

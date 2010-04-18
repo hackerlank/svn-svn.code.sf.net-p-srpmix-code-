@@ -62,12 +62,15 @@
 	(else
 	 #f)))))
 
-(define-method report ((kernel <linux>))
-  (let1 table (ref kernel 'task-table)
+(define-method report ((kernel <linux>) filter)
+  (let ((table (ref kernel 'task-table))
+	(condition (if (memq 'alive-only filter)
+		       (complement dead?)
+		       boolean)))
     (for-each
      (lambda (tid)  (let1 task (ref table tid)
-		      (unless (dead? task)
-			(report task))))
+		      (when (condition task)
+			(report task filter))))
      (sort (hash-table-keys table) <))))
 
 (provide "trapeagle/linux")

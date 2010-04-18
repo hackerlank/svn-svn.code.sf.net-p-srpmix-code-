@@ -26,47 +26,43 @@
    (tid :init-keyword :tid :init-value #f)
    (clone-info :init-form (vector-copy info-template) :init-keyword :clone-info)
    (children :init-form (list))
+   (execve-info :init-value #f)
    (exit-info :init-value #f)
-   (unfinished? :init-value #f)
+   (unfinished-syscall :init-value #f)
    (fd-table :init-value #f :init-keyword :fd-table)))
 
 (define-method children-of ((task <task>))
   (ref task 'children))
 
 (define-method dead? ((task <task>))
-  (boolean (ref task 'exit-info )))
+  (boolean (ref task 'exit-info)))
 
 (define-class <process> (<task>)
-  ((execve-info  :init-keyword :execve-info :init-value (vector-copy info-template))
+  (
    (fd-table :init-form (make-hash-table 'eq?))))
 
 ;(define-class <thread> (<task>)
 ;  ())
 
 (define-class <fd> (<resource>)
-  (
+  ((open-info)
    (input-history :init-form (list))
    (output-history :init-form (list))
-   (unfinished? :init-value #f :init-keyword :unfinished?)
+   (unfinished-syscall :init-value #f)
    (closed? :init-form (list #f #f))	; for shutdown
    ))
 
 (define-class <file> (<fd>)
-  ((open-info :init-keyword :open-info :init-value (vector-copy info-template))
-   ))
+  ())
 
 (define-class <socket> (<fd>)
-  ((socket-info :init-keyword :socket-info)
-   (bind-index :init-value #f)
-   (bind-args  :init-value #f)
-   (bind-status? :init-value #f)
-   (listen-index :init-value #f)
-   (connect-index :init-value #f)
-   (connect-args :init-value #f)
+  ((bind-info :init-value #f)
+   (listen-info :init-value #f)
+   (connect-info :init-value #f)
    ))
 
 (define-class <request-socket> (<fd>)
-  ((accept-info :init-keyword :accept-info)))
+  ())
   
 (define-class <pipe> (<fd>)
   ())

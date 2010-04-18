@@ -4,6 +4,7 @@
   (use trapeagle.resource)
   (use trapeagle.linux)
   (use trapeagle.clone)
+  (use trapeagle.call-info)
   )
 
 (select-module trapeagle.syscalls.task)
@@ -11,7 +12,7 @@
 (defsyscall clone
   :trace 
   (lambda (kernel pid xargs xrvalue xerrno time index)
-    (define thread? (not (memq 'CLONE_VM (cadr xargs))))
+    (define thread? (memq 'CLONE_VM (cdadr (cadr xargs))))
     (define born? (> (car xrvalue) 0))
     (when born?
       (let ((ppid pid)
@@ -39,10 +40,22 @@
 
 (defsyscall execve
   :trace
-  (lambda (kernel pid xargs xrvalue xerrno time index)
-    (when (eq? xrvalue 0)
-      (let1 task (task-for kernel pid)
-	(set! (ref task 'execve-info) (vector index index time time xargs xrvalue xerrno))))))
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
+	   (when (eq? (car xrvalue) 0)
+	     (update-info! (task-for kernel pid) 'execve-info 'trace 'execve $)
+	     ))
+  :unfinished
+  (lambda* (kernel pid resumed? time index)
+	   (update-info! (task-for kernel pid) 'execve-info 'unfinished 'execve $))
+  :resumed
+  (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
+	   (if (eq? (car xrvalue) 0)
+	       (update-info! (task-for kernel pid) 'execve-info 'resumed 'execve $)
+	       (begin
+		 ;; TODO
+		 (slot-set! (task-for kernel pid) 'execve-info #f)
+		 (clear-unfinished-syscall! kernel pid)))
+	   ))
 
 (defsyscall exit_group
   :trace
