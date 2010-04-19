@@ -72,3 +72,12 @@ rl_forward_word (count, key)") :which-func ("rl_end_of_line"))) :annotation-list
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/o/openssh/4.3p2-36.el5_4.4/pre-build/openssh-4.3p2/auth.c" :point 7400 :coding-system undecided-unix :line 251 :surround ("
 " "" "	authlog(\"%s %s for %s%.100s from %.200s port %d%s\",
 	    authmsg,") :which-func ("auth_log"))) :annotation-list ((annotation :type text :data "%.100sで長すぎる名前の入力を遮断している。")) :date "Tue Mar 16 02:17:03 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (just-reading security))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/j/java-1.6.0-openjdk/1.6.0.0-35.b17.fc13/vanilla/hotspot/src/share/vm/runtime/thread.cpp" :point 135818 :coding-system undecided-unix :line 3734 :surround ("// Threads::print_on() is called at safepoint by VM_PrintThreads operation.
+" "" "void Threads::print_on(outputStream* st, bool print_stacks, bool internal_format, bool print_concurrent_locks) {
+  char buf[32];") :which-func ("Threads::print_on"))) :annotation-list ((annotation :type text :data "javaのスタックトレース")) :date "Wed Apr  7 05:33:50 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (xbacktrace))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/jet/var/emacs/trunk/src/.gdbinit" :point 27159 :coding-system undecided-unix :line 1185 :surround ("
+" "" "define xbacktrace
+  set $bt = backtrace_list") :which-func ("xbacktrace"))) :annotation-list ((annotation :type text :data "emacsのバックトレース")) :date "Wed Apr  7 05:34:10 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (xbacktrace))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/fence/fenced/group.c" :point 3576 :coding-system undecided-unix :line 162 :surround ("
+" "" "	gh = group_init(NULL, \"fence\", 0, &callbacks, GROUPD_TIMEOUT);
+	if (!gh) {") :which-func ("setup_groupd"))) :annotation-list ((annotation :type text :data "group_initの引数のレベル(ここでは0)で通知の優先度が決まるのか？")) :date "Sun Apr 18 22:03:20 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-cluster))

@@ -18,17 +18,21 @@
     (report kernel args))))
 
 (define (main args)
+  (define (consume-one k r)
+    (cond 
+     ((eq? (car r) 'strace)
+      (syscall k (cdr r)))
+     ((eq? (car r)  'trapeagle)
+      (control k (cadr r) (cddr r)))))
   (let-args (cdr args)
       ((help "h|help" => (cute show-help (car args) 0))
        (debug "debug" #t))
-    (let1 kernel (make <linux>)
+    (let ((kernel (make <linux>))
+	  (extra (map read (map open-input-string (cdr args)))))
       (let loop ((r (read)))
 	(unless (eof-object? r)
-	  (cond 
-	   ((eq? (car r) 'strace)
-	    (syscall kernel (cdr r)))
-	   ((eq? (car r)  'trapeagle)
-	    (control kernel (cadr r) (cddr r))))
+	  (consume-one kernel r)
 	  (loop (read))))
+      (for-each (pa$ consume-one kernel) extra)
       )))
 
