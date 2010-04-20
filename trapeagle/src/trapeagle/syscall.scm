@@ -29,7 +29,8 @@
 	 (vector-set! ,v (type-pos-of 'unfinished) ,unfinished)
 	 (vector-set! ,v (type-pos-of 'resumed) ,resumed)
 	 (vector-set! ,v (type-pos-of 'unfinished) ,unfinished-exit)
-	 (set! (ref ,syscalls ',call) ,v)))))
+	 (hash-table-push! ,syscalls ',call ,v)
+	 ))))
 
 (define-macro (lambda* args . body)
   `(lambda ,args

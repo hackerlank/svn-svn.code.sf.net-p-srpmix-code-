@@ -57,12 +57,14 @@
 	  (lambda (i) (+ i 1))
 	  0)
 	 (let-keywords (cdr strace) ((call #f) . rest)
-	   (apply 
-	    (vector-ref (hash-table-get syscalls call nop-vector)
-			(type-pos-of type))
-	    kernel
-	    (type-actual-params-for type (cdr strace)))
-	   ))
+	   (for-each (cute 
+			apply 
+			<>
+			kernel
+			(type-actual-params-for type (cdr strace)))
+		     (map (cute vector-ref <> (type-pos-of type))
+			  (hash-table-get syscalls call (list nop-vector)))
+	   )))
 	('signaled
 	 )
 	('killed
