@@ -24,9 +24,6 @@
     ))
 
 (define-method report ((process <process>) filter)
-  (define (closed? elt)
-    (let1 ? (ref (cdr elt) 'closed?)
-      (or (not (car ?)) (not (cadr ?)))))
   (next-method)
   (let ((condition (if (memq 'alive-only filter)
 		       (complement closed?)
@@ -37,7 +34,7 @@
 		(sort (hash-table-keys table) <)))))
     (format #t "fd-tables: ~s\n" (map car fds))
     (for-each (lambda (elt) 
-		(when (condition elt)
+		(when (condition (cdr elt))
 		  (format #t "fd: ~s\n" (car elt))
 		  (report (cdr elt) filter)))
 	      fds)))
@@ -45,7 +42,7 @@
 (define-method report ((fd <fd>) filter)
   (format #t "open-info: ~s\n" (ref fd 'open-info))
   (format #t "unfinished-syscall: ~s\n" (ref fd 'unfinished-syscall))
-  (format #t "closed?: ~s\n" (ref fd 'closed?)))
+  (format #t "closed?: ~s\n" (closed? fd)))
 
 (define-method report ((file <file>) filter)
   (next-method))

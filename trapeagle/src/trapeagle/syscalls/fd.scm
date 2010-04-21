@@ -1,3 +1,4 @@
+;; (put 'lambda* 'scheme-indent-function 1)
 (define-module trapeagle.syscalls.fd
   (use trapeagle.type)
   (use trapeagle.syscall)
@@ -11,205 +12,199 @@
 (defsyscall open
   :trace 
   (lambda* (kernel pid xargs xrvalue xerrno time index)
-	   (let1 fd (car xrvalue)
-	     (when (>= fd 0)
-	       (let1 file (make <file>)
-		 (fd-for kernel pid fd file)
-		 (update-info! file 'open-info 'trace 'open $)
-		 ))))
+    (let1 fd (car xrvalue)
+      (when (>= fd 0)
+	(let1 file (make <file>)
+	  (fd-for kernel pid fd file)
+	  (update-info! file 'open-info 'trace 'open $)
+	  ))))
   :unfinished
   (lambda* (kernel pid resumed? time index)
-	   (update-info! #f 'open-info 'unfinished 'open $))
+    (update-info! #f 'open-info 'unfinished 'open $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
-	   (let1 fd (car xrvalue)
-	     (if (>= fd 0)
-		 (let1 file (make <file>)
-		   (fd-for kernel pid fd file)
-		   (update-info! file 'open-info 'resumed 'open $))
-		 (clear-unfinished-syscall! kernel pid)))))
+    (let1 fd (car xrvalue)
+      (if (>= fd 0)
+	  (let1 file (make <file>)
+	    (fd-for kernel pid fd file)
+	    (update-info! file 'open-info 'resumed 'open $))
+	  (clear-unfinished-syscall! kernel pid)))))
 
+;; close
 (defsyscall dup2
   :trace
   (lambda* (kernel pid xargs xrvalue xerrno time index)
     (when (>= (car xrvalue) 0)
       (let ((old (ref xargs 0))
 	    (new (ref xargs 1)))
-	(let1 file (or (fd-for kernel pid old) (make <fd>))
-	  (fd-for kernel pid new file)
-	  (update-info! file 'open-info 'trace 'dup2 $)
+	(let* ((new-file (or (clone (fd-for kernel pid old)) (make <fd>)))
+	       (old-file (or (fd-for kernel pid old) (make <fd>))))
+	  (fd-for kernel pid new new-file)
+	  (update-info! new-file 'open-info 'trace 'dup2 $)
+	  ;; TODO: track the original
+	  (update-info! old-file 'input-close-info 'trace 'dup2 $)
+	  (update-info! old-file 'output-close-info 'trace 'dup2 $)
 	  ))))
   :unfinished
   (lambda* (kernel pid resumed? time index)
-	   (update-info! file 'open-info 'unfinished 'dup2 $))
+    (update-info! #f 'open-info 'unfinished 'dup2 $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
     (when (>= (car xrvalue) 0)
       (let ((old (ref xargs 0))
 	    (new (ref xargs 1)))
-	(let1 file (or (fd-for kernel pid old) (make <fd>))
-	  (fd-for kernel pid new file)
-	  (update-info! file 'open-info 'resumed 'dup2 $)
-	  )))
-    ))
+	(let* ((new-file (or (clone (fd-for kernel pid old)) (make <fd>)))
+	       (old-file (or (fd-for kernel pid old) (make <fd>))))
+	  (fd-for kernel pid new new-file)
+	  (update-info! new-file 'open-info 'resumed 'dup2 $)
+	  ;; TODO: track the original
+	  (update-info! old-file 'input-close-info 'resumed 'dup2 $)
+	  (update-info! old-file 'output-close-info 'resumed 'dup2 $)
+	  ))
+      (clear-unfinished-syscall! kernel pid))))
 
 (defsyscall close
   :trace
-  (lambda (kernel pid xargs xrvalue xerrno time index)
-    (let1 successful? (car xrvalue)
-      (when (eq? successful? 0)
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
+    (let1 successful? (eq? (car xrvalue) 0)
+      (when successful?
 	(let* ((fd (car xargs))
-	       (fd-obj (fd-for kernel pid fd)))
-	  (when fd-obj
-	    (set! (ref fd-obj 'closed?) (list (list index time) (list index time)))))
-	)))
+	       (file (or (fd-for kernel pid fd) (make <fd>))))
+	  (update-info! file 'input-close-info 'trace 'close $)
+	  (update-info! file 'output-close-info 'trace 'close $)
+	  ))))
   :unfinished
-  (lambda (kernel pid resumed? time index)
-    )
+  (lambda* (kernel pid resumed? time index)
+    (update-info! #f 'input-close-info 'unfinished 'close $)
+    (update-info! #f 'output-close-info 'unfinished 'close $))
   :resumed
-  (lambda (kernel pid xargs xrvalue xerrno unfinished? time index)
-    (let1 successful? (car xrvalue)
-      (when (eq? successful? 0)
+  (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
+    (let1 successful? (eq? (car xrvalue) 0)
+      (when successful?
 	(let* ((fd (car xargs))
-	       (fd-obj (fd-for kernel pid fd)))
-	  (when fd-obj
-	    ;; --------------------------------------------VTODO
-	    (set! (ref fd-obj 'closed?) (list (list unfinished? #f) (list index time))))))
-	)))
+	       (file (or (fd-for kernel pid fd) (make <fd>))))
+	  (update-info! file 'input-close-info 'resumed 'close $)
+	  (update-info! file 'output-close-info 'resumed 'close $)
+	  )
+	(clear-unfinished-syscall! kernel pid)))))
+
 
 
 (defsyscall socket
   :trace
   (lambda* (kernel pid xargs xrvalue xerrno time index)
-	   (let1 fd (car xrvalue)
-	     (when (>= fd 0)
-	       (let1 file (make <socket>)
-		 (fd-for kernel pid fd file)
-		 (update-info! file 'open-info 'trace 'socket $)
-		 ))))
+    (let* ((fd (car xrvalue))
+	   (successful? (>= fd 0)))
+      (when successful?
+	(let1 socket (make <socket>)
+	  (fd-for kernel pid fd socket)
+	  (update-info! socket 'open-info 'trace 'socket $)))))
   :unfinished
   (lambda* (kernel pid resumed? time index)
-	   (update-info! #f 'open-info 'unfinished 'socket $))
+    (update-info! #f 'open-info 'unfinished 'socket $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
-	   (let1 fd (car xrvalue)
-	     (if (>= fd 0)
-		 (let1 file (make <socket>)
-		   (fd-for kernel pid fd file)
-		   (update-info! file 'open-info 'resumed 'socket $))
-		 (clear-unfinished-syscall! kernel pid)))))
+    (let* ((fd (car xrvalue))
+	   (successful? (>= fd 0)))
+      (when successful?
+	(let1 file (make <socket>)
+	  (fd-for kernel pid fd file)
+	  (update-info! file 'open-info 'resumed 'socket $)))
+      (clear-unfinished-syscall! kernel pid))))
 
 (defsyscall accept
   :trace
   (lambda* (kernel pid xargs xrvalue xerrno time index)
-	   (let* ((fd (car xrvalue))
-		  (successful? (>= fd 0)))
-	     (when successful?
-	       (let1 file (make <request-socket>)
-		 (fd-for kernel pid fd file)
-		 (update-info! file 'open-info 'trace 'accept $)
-		 ))))
+    (let* ((fd (car xrvalue))
+	   (successful? (>= fd 0)))
+      (when successful?
+	(let1 socket (make <request-socket>)
+	  (fd-for kernel pid fd socket)
+	  (update-info! socket 'open-info 'trace 'accept $)
+	  ))))
   :unfinished
   (lambda* (kernel pid resumed? time index)
-	   (update-info! #f 'open-info 'unfinished 'accept $))
+    (update-info! #f 'open-info 'unfinished 'accept $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
-	   (let1 fd (car xrvalue)
-	     (if (>= fd 0)
-		 (let1 file (make <request-socket>)
-		   (fd-for kernel pid fd file)
-		   (update-info! file 'open-info 'resumed 'accept $))
-		 (clear-unfinished-syscall! kernel pid)))))
+    (let1 fd (car xrvalue)
+      (when (>= fd 0)
+	(let1 socket (make <request-socket>)
+	  (fd-for kernel pid fd socket)
+	  (update-info! socket 'open-info 'resumed 'accept $))))
+    (clear-unfinished-syscall! kernel pid)))
+
 
 (defsyscall shutdown
   :trace
-  (lambda (kernel pid xargs xrvalue xerrno time index)
-    (let1 successful? (car xrvalue)
-      (when (eq? successful? 0)
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
+    (let1 successful? (eq? (car xrvalue) 0)
+      (when successful?
 	(let* ((fd (car xargs))
-	       (fd-obj (fd-for kernel pid fd))
-	       (how (ref xargs 1))
-	       (current (ref fd-obj 'closed?)))
-	  (when fd-obj
-	    (set! (ref fd-obj 'closed?) (list 
-					 (or (ref current 0)
-					     (cond
-					      ((or (eq? how 'SHUT_RD)
-						   (eq? how 'SHUT_RDWR))
-					       (list index time))
-					      (else
-					       #f)))
-					 (or (ref current 1)
-					    (cond
-					     ((or (eq? how 'SHUT_WR)
-						  (eq? how 'SHUT_RDWR))
-					      (list index time))
-					     (else
-					      #f))))))))))
+	       (socket (or (fd-for kernel pid fd) (make <fd>)))
+	       (how (ref xargs 1)))
+	  (when (or (eq? how 'SHUT_RD) (eq? how 'SHUT_RDWR))
+	    (update-info! socket 'input-close-info 'trace 'shutdown $))
+	  (when (or (eq? how 'SHUT_WR) (eq? how 'SHUT_RDWR))
+	    (update-info! socket 'output-close-info 'trace 'shutdown $))))))
+  :unfinished
+  (lambda* (kernel pid resumed? time index)
+    (update-info #f 'input-close-info 'unfinished 'shutdown $)
+    (update-info #f 'output-close-info 'unfinished 'shutdown $))
   :resumed
-  (lambda (kernel pid xargs xrvalue xerrno unfinished? time index)
-    (when (eq? successful? 0)
+  (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
+    (let1 successful? (eq? (car xrvalue) 0)
+      (when successful?
 	(let* ((fd (car xargs))
-	       (fd-obj (fd-for kernel pid fd))
-	       (how (ref xargs 1))
-	       (current (ref fd-obj 'closed?)))
-	  (when fd-obj
-	    (set! (ref fd-obj 'closed?) (list 
-					 (or (ref current 0)
-					     (cond
-					      ((or (eq? how 'SHUT_RD)
-						   (eq? how 'SHUT_RDWR))
-					       (list unfinished? #f))
-					      (else
-					       #f)))
-					 (or (ref current 1)
-					    (cond
-					     ((or (eq? how 'SHUT_WR)
-						  (eq? how 'SHUT_RDWR))
-					      (list index time))
-					     (else
-					      #f))))))))))
+	       (socket (or (fd-for kernel pid fd) (make <fd>)))
+	       (how (ref xargs 1)))
+	  (when (or (eq? how 'SHUT_RD) (eq? how 'SHUT_RDWR))
+	    (update-info! socket 'input-close-info 'resumed 'shutodnw $))
+	  (when (or (eq? how 'SHUT_WR) (eq? how 'SHUT_RDWR))
+	    (update-info! socket 'output-close-info 'resumed 'shutdown $))))
+      (clear-unfinished-syscall! kernel pid))))
+
 
 (defsyscall bind
   :trace
   (lambda* (kernel pid xargs xrvalue xerrno time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'bind-info 'trace 'bind $)))
+    (let1 socket (fd-for kernel pid (car xargs))
+      (update-info! socket 'bind-info 'trace 'bind $)))
   :unfinished
   (lambda* (kernel pid resumed? time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'bind-info 'unfinished 'bind $)))
+    (update-info! #f 'bind-info 'unfinished 'bind $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'bind-info 'resumed 'bind $))))
+    (let1 socket (fd-for kernel pid (car xargs))
+      (update-info! socket 'bind-info 'resumed 'bind $))
+    (clear-unfinished-syscall! kernel pid)))
 
 (defsyscall listen
   :trace
   (lambda* (kernel pid xargs xrvalue xerrno time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'listen-info 'trace 'listen $)))
+    (let1 socket (fd-for kernel pid (car xargs))
+      (update-info! socket 'listen-info 'trace 'listen $)))
   :unfinished
   (lambda* (kernel pid resumed? time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'listen-info 'unfinished 'listen $)))
+    (update-info! #f 'listen-info 'unfinished 'listen $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'listen-info 'resumed 'listen $))))
+    (let1 socket (fd-for kernel pid (car xargs))
+      (update-info! socket 'listen-info 'resumed 'listen $))
+    (clear-unfinished-syscall! kernel pid)))
 
 (defsyscall connect
   :trace
   (lambda* (kernel pid xargs xrvalue xerrno time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'connect-info 'trace 'connect $)))
+    (let1 socket (fd-for kernel pid (car xargs))
+      (update-info! socket 'connect-info 'trace 'connect $)))
   :unfinished
   (lambda* (kernel pid resumed? time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'connect-info 'unfinished 'connect $)))
+    (update-info! #f 'connect-info 'unfinished 'connect $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
-	   (let1 socket (fd-for kernel pid (car xargs))
-	     (update-info! socket 'connect-info 'resumed 'connect $))))
+    (let1 socket (fd-for kernel pid (car xargs))
+      (update-info! socket 'connect-info 'resumed 'connect $))
+    (clear-unfinished-syscall! kernel pid)))
 
 (provide "trapeagle/syscalls/fd")

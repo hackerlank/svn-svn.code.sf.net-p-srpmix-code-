@@ -9,6 +9,7 @@
    <request-socket>
    children-of
    dead?
+   closed?
    )
   )
 (select-module trapeagle.resource)
@@ -49,8 +50,14 @@
    (input-history :init-form (list))
    (output-history :init-form (list))
    (unfinished-syscall :init-value #f)
-   (closed? :init-form (list #f #f))	; for shutdown
+   (input-close-info :init-form #f)
+   (output-close-info :init-form #f)
+   (io :init-form (list))
    ))
+
+(define-method closed? ((fd <fd>))
+  (not (or (ref fd 'input-close-info)
+	   (ref fd 'output-close-info))))
 
 (define-class <file> (<fd>)
   ())
