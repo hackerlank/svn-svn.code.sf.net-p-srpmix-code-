@@ -4,6 +4,7 @@
 (use trapeagle.linux)
 (use trapeagle.syscalls.fd)
 (use trapeagle.syscalls.task)
+(use trapeagle.control)
 (use gauche.parseopt)
 (use util.match)
 
@@ -16,6 +17,8 @@
   (match-lambda*
    ((kernel 'report args)
     (report kernel args))))
+
+(defcontrol report (kernel . args) (report kernel args))
 
 (define (split-by pred lst)
   (let loop ((input   lst)
@@ -42,8 +45,9 @@
       (control k (cadr r) (cddr r)))))
   (let-args (cdr args)
       ((help "h|help" => (cute show-help (car args) 0))
-       (debug "debug" #t))
-    (receive (pre post) (split-by (pa$ equal? "-") (cdr args))
+       (debug "debug" #t)
+       . rest)
+    (receive (pre post) (split-by (pa$ equal? "-") rest)
       (let ((kernel (make <linux>))
 	    (pre-list (read-list pre))
 	    (post-list (read-list post)))
