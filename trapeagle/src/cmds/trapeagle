@@ -13,11 +13,6 @@
   (format #t "~a [--debug]\n" prog)
   (exit n))
 
-(define control 
-  (match-lambda*
-   ((kernel 'report args)
-    (report kernel args))))
-
 (defcontrol report (kernel . args) (report kernel args))
 
 (define (split-by pred lst)

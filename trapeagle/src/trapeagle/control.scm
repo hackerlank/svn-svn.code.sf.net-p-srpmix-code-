@@ -8,7 +8,7 @@
 (define controls (make-hash-table 'eq?))
 (define-macro (defcontrol call args . body)
   `(set! (ref controls ',call) (lambda ,args ,@body)))
-(define (control c kernel args)
+(define (control kernel c args)
   (apply (ref controls c) kernel args))
 
 ;(defcontrol help ...
