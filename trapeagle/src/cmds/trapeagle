@@ -4,7 +4,11 @@
 (use trapeagle.linux)
 (use trapeagle.syscalls.fd)
 (use trapeagle.syscalls.task)
+
 (use trapeagle.control)
+(use trapeagle.controls.repl)
+
+
 (use gauche.parseopt)
 (use util.match)
 

@@ -11,6 +11,4 @@
 (define (control kernel c args)
   (apply (ref controls c) kernel args))
 
-;(defcontrol help ...
-
 (provide "trapeagle/control")
