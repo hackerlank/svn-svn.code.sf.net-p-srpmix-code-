@@ -2,7 +2,8 @@
   (use trapeagle.control))
 
 (define (prompt)
-    (display ";trapeagle> " (current-error-port)))
+    (display ";trapeagle>" (current-error-port)))
+
 (define (repl kernel)
   (prompt)
   (let1 r0 (read)
