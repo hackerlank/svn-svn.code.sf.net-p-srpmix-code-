@@ -16,18 +16,24 @@
 			     (slot      <symbol>)
 			     (call-type <symbol>)
 			     (syscall   <symbol>)
-			     (all-args  <list>))
-  ;; #(syscall xargs xrvalue xerrno #(start-index start-time) #(end-index end-time))
+			     (all-args  <list>)
+			     . options)
+  ;; #(syscall xargs xrvalue xerrno #(start-index start-time) #(end-index end-time) option...)
   (case call-type
     ('trace
-     ;; (kernel pid xargs xrvalue xerrno time index) =>
-     (set! (ref resource slot)
-	   (vector syscall
-		   (ref all-args 2) 
-		   (ref all-args 3)
-		   (ref all-args 4)
-		   (vector (ref all-args 6) (ref all-args 5))
-		   (vector (ref all-args 6) (ref all-args 5)))))
+     ;; (kernel pid xargs xrvalue xerrno time index original) =>
+     (let* ((new (vector syscall
+			 (ref all-args 2) 
+			 (ref all-args 3)
+			 (ref all-args 4)
+			 (vector (ref all-args 6) (ref all-args 5))
+			 (vector (ref all-args 6) (ref all-args 5))
+			 #f))
+	    (original (ref resource slot)))
+       (set! (ref resource slot) new)
+       (when (get-keyword :record-history options #f)
+	 (set! (ref new 6) original)
+	 )))
     ('unfinished
      ;; (kernel pid resumed? time index) =>
      (let1 call-info (vector syscall
@@ -35,34 +41,39 @@
 			     #f
 			     #f
 			     (vector index time)
-			     (vector resumed? #f))
+			     (vector resumed? #f)
+			     #f)
        (when resource
-	 (set! (ref resource 'unfinished-syscall) call-info)
-	 (set! (ref resource slot) call-info))
+	 (set! (ref resource 'unfinished-syscall) call-info))
        (set! (ref (task-for (ref all-args 0) (ref all-args 1)) 
 		  'unfinished-syscall) call-info)))
     ('resumed
-     ;; (kernel pid xargs xrvalue xerrno unfinished? time index)
-     (let1 old-value (ref (task-for (ref all-args 0) (ref all-args 1)) 
-			  'unfinished-syscall)
+     ;; (kernel pid xargs xrvalue xerrno unfinished? time index history)
+     (let* ((kernel (ref all-args 0))
+	    (pid (ref all-args 1))
+	    (unfinished (ref (task-for kernel pid) 'unfinished-syscall))
+	    (original (ref resource slot)))
        (set! (ref resource 'unfinished-syscall) #f)
-       (if old-value
-	   (let1 old-value (ref resource slot)
-	     (set! (ref old-value 1) (ref all-args 2))
-	     (set! (ref old-value 2) (ref all-args 3))
-	     (set! (ref old-value 3) (ref all-args 4))
-	     (set! (ref (ref old-value 4) 0) (ref all-args 5))
-	     (set! (ref (ref old-value 5) 1) (ref all-args 6))
-	     (set! (ref (ref old-value 5) 0) (ref all-args 7))
-	     (set! (ref resource slot) old-value)
-	     (clear-unfinished-syscall! (ref all-args 0) (ref all-args 1))
-	     )
-	   (set! (ref resource slot)
-		 (vector syscall
-			 (ref all-args 2) 
-			 (ref all-args 3)
-			 (ref all-args 4)
-			 (vector (ref all-args 5) #f)
-			 (vector (ref all-args 7) (ref all-args 6)))))))))
+       (let1 resumed (if unfinished
+			 (begin
+			   (set! (ref unfinished 1) (ref all-args 2))
+			   (set! (ref unfinished 2) (ref all-args 3))
+			   (set! (ref unfinished 3) (ref all-args 4))
+			   (set! (ref (ref unfinished 4) 0) (ref all-args 5))
+			   (set! (ref (ref unfinished 5) 1) (ref all-args 6))
+			   (set! (ref (ref unfinished 5) 0) (ref all-args 7))
+			   (clear-unfinished-syscall! kernel pid)
+			   unfinished)
+			 (vector syscall
+				 (ref all-args 2) 
+				 (ref all-args 3)
+				 (ref all-args 4)
+				 (vector (ref all-args 5) #f)
+				 (vector (ref all-args 7) (ref all-args 6))
+				 #f))
+	 (set! (ref resource slot) resumed)
+	 (when (get-keyword :record-history options #f)
+	   (set! (ref resumed 6) original)))))
+    ))
 
 (provide "trapeagle/call-info")

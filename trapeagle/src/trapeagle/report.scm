@@ -12,7 +12,7 @@
 		      boolean)
     (format #t "parent-tid: ~s\n" (ref task 'parent-tid))
     (format #t "tid: ~s\n" (ref task 'tid))
-    (format #t "clone-info ~s\n" (ref task 'clone-info))
+    (format #t "clone-info: ~s\n" (ref task 'clone-info))
     (format #t "execve-info: ~s\n" (ref task 'execve-info))
     (format #t "exit-info: ~s\n" (ref task 'exit-info))
     (format #t "unfinished-syscall: ~s\n" (ref task 'unfinished-syscall))

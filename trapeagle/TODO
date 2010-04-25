@@ -1,0 +1,2 @@
+* straceがunfinishedに渡している引数情報を、es-src-straceが resumedに移動している。
+  これは良くない。

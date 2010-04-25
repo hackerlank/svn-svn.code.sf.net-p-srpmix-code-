@@ -46,12 +46,13 @@
 ;  ())
 
 (define-class <fd> (<resource>)
-  ((open-info)
+  ((open-info :init-value #f)
    (input-history :init-form (list))
    (output-history :init-form (list))
    (unfinished-syscall :init-value #f)
    (input-close-info :init-form #f)
    (output-close-info :init-form #f)
+   (close-on-exec? :init-value #f)
    (io :init-form (list))
    ))
 

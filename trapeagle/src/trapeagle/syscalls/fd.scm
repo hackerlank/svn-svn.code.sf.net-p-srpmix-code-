@@ -5,6 +5,7 @@
   (use trapeagle.resource)
   (use trapeagle.linux)
   (use trapeagle.call-info)
+  (use trapeagle.clone)
   )
 
 (select-module trapeagle.syscalls.fd)
@@ -40,8 +41,8 @@
 	(let* ((new-file (or (clone (fd-for kernel pid old)) (make <fd>)))
 	       (old-file (or (fd-for kernel pid old) (make <fd>))))
 	  (fd-for kernel pid new new-file)
-	  (update-info! new-file 'open-info 'trace 'dup2 $)
-	  ;; TODO: track the original
+	  (update-info! new-file 'open-info 'trace 'dup2 $ 
+			:record-history #t)
 	  (update-info! old-file 'input-close-info 'trace 'dup2 $)
 	  (update-info! old-file 'output-close-info 'trace 'dup2 $)
 	  ))))
@@ -56,8 +57,8 @@
 	(let* ((new-file (or (clone (fd-for kernel pid old)) (make <fd>)))
 	       (old-file (or (fd-for kernel pid old) (make <fd>))))
 	  (fd-for kernel pid new new-file)
-	  (update-info! new-file 'open-info 'resumed 'dup2 $)
-	  ;; TODO: track the original
+	  (update-info! new-file 'open-info 'resumed 'dup2 $
+			:record-history #t)
 	  (update-info! old-file 'input-close-info 'resumed 'dup2 $)
 	  (update-info! old-file 'output-close-info 'resumed 'dup2 $)
 	  ))
@@ -87,8 +88,6 @@
 	  (update-info! file 'output-close-info 'resumed 'close $)
 	  )
 	(clear-unfinished-syscall! kernel pid)))))
-
-
 
 (defsyscall socket
   :trace
@@ -164,6 +163,42 @@
 	    (update-info! socket 'output-close-info 'resumed 'shutdown $))))
       (clear-unfinished-syscall! kernel pid))))
 
+;; TODO: F_DUPFD, F_DUPFD_CLOEXEC
+(defsyscall fcntl
+  :trace
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
+    (let1 successful? (or (symbol? (car xrvalue))
+			  (>= (car xrvalue) 0))
+      (when successful?
+	(let* ((fd (car xargs))
+	       (cmd (cadr xargs))
+	       (file (or (fd-for kernel pid fd) (make <fd>))))
+	  (case cmd
+	    ('F_GETFD
+	     (when (and-let* ((flags (cdr xrvalue))
+			      ((not (null? flags))))
+		     (memq 'FD_CLOEXEC (cdar flags)))
+	       (set! (ref file 'close-on-exec?) #t)))
+	    ('F_SETFD
+	     (when (eq? 'FD_CLOEXEC (caddr xargs))
+	       (set! (ref file 'close-on-exec?) #t))))))))
+  :resumed
+  (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
+    (let1 successful? (or (symbol? (car xrvalue))
+			  (>= (car xrvalue) 0))
+      (when successful?
+	(let* ((fd (car xargs))
+	       (cmd (cadr xargs))
+	       (file (or (fd-for kernel pid fd) (make <fd>))))
+	  (case cmd
+	    ('F_GETFD
+	     (when (and-let* ((flags (cdr xrvalue))
+			      ((not (null? flags))))
+		     (memq 'FD_CLOEXEC (cdar flags)))
+	       (set! (ref file 'close-on-exec?) #t)))
+	    ('F_SETFD
+	     (when (eq? 'FD_CLOEXEC (caddr xargs))
+	       (set! (ref file 'close-on-exec?) #t)))))))))
 
 (defsyscall bind
   :trace
@@ -206,5 +241,7 @@
     (let1 socket (fd-for kernel pid (car xargs))
       (update-info! socket 'connect-info 'resumed 'connect $))
     (clear-unfinished-syscall! kernel pid)))
+
+;; socket(SCM_RIGHTS)
 
 (provide "trapeagle/syscalls/fd")
