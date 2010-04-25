@@ -57,8 +57,8 @@
    ))
 
 (define-method closed? ((fd <fd>))
-  (not (or (ref fd 'input-close-info)
-	   (ref fd 'output-close-info))))
+  (and (ref fd 'input-close-info)
+       (ref fd 'output-close-info)))
 
 (define-class <file> (<fd>)
   ())
