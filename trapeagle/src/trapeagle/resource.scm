@@ -20,12 +20,11 @@
   ())
 
 
-(define info-template #(:start-index :end-index :start-time :end-time :xargs :xrvalue :xerrno))
 
 (define-class <task> (<resource>)
   ((parent-tid :init-keyword :parent-tid :init-value #t)
    (tid :init-keyword :tid :init-value #f)
-   (clone-info :init-form (vector-copy info-template) :init-keyword :clone-info)
+   (clone-info :init-value #f)
    (children :init-form (list))
    (execve-info :init-value #f)
    (exit-info :init-value #f)
@@ -47,8 +46,6 @@
 
 (define-class <fd> (<resource>)
   ((open-info :init-value #f)
-   (input-history :init-form (list))
-   (output-history :init-form (list))
    (unfinished-syscall :init-value #f)
    (input-close-info :init-form #f)
    (output-close-info :init-form #f)

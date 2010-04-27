@@ -8,7 +8,7 @@
 (use gauche.vport)
 (use file.util)
 (use file.filter)
-
+(use srfi-11)
 
 (define-class <graft-input-port> (<virtual-input-port>)
   ((ports :init-keyword :ports :init-form (list))
@@ -73,7 +73,7 @@
   (format #t "~a [--debug]\n" prog)
   (exit n))
 
-(define (serialize+stripe iport oport debug)
+(define (serialize+strip iport oport debug)
   (let1 iport (make <stripper> 
 		:rules '(
 			 (* * :args)
@@ -95,7 +95,7 @@
   (write o oport)
   (newline oport))
  
-;; (trapeagle-pp graft-map n0 n1)
+;; (trapeagle-pre graft-map n0 n1)
 (define (make-graft-map iport oport debug)
   (let1 proc-table (make-hash-table 'eq?)
     (let loop ((r (read iport)))
@@ -112,14 +112,20 @@
 		   (hash-table-put! proc-table pid r))))
 	    ('resumed
 	     (let* ((pid (cadr (memq :pid r)))
-		    (unfinished (ref proc-table pid #f)))
+		    (unfinished (ref proc-table pid #f))
+		    (xargs (cadr (memq :xargs r)))
+		    (xrvalue (cadr (memq :xrvalue r)))
+		    (xerrno (cadr (memq :xerrno r))))
 	       (if unfinished
 		   (begin 
 		     (set! (ref proc-table pid) #f)
-		     (writeln `(trapeagle-pp graft-map
+		     (writeln `(trapeagle-pre graft-map
 					     ,(cadr (memq :index unfinished))
 					     ,(cadr (memq :index r))
-					     :pid ,pid)
+					     :xargs ,xargs
+					     :xrvalue ,xrvalue
+					     :xerrno ,xerrno
+					     )
 			      oport)
 		     )
 		   (errorf "Unblanced unfinished/resumed pair for ~d\nresumed: ~s\n" pid r)
@@ -127,10 +133,13 @@
 	(loop (read iport))))
     (hash-table-map proc-table (lambda (pid unfinished)
 				 (when unfinished
-				   (writeln `(trapeagle-pp graft-map
+				   (writeln `(trapeagle-pre graft-map
 							   ,(cadr (memq :index unfinished))
 							   #f
-							   :pid ,pid)
+							   :xargs #f
+							   :xrvalue #f
+							   :xerrno #f
+							   )
 					    oport))))))
 
 (define (apply-map iport oport)
@@ -138,16 +147,17 @@
     (let loop ((r (read iport)))
       (unless (eof-object? r)
 	(case (car r)
-	  ('trapeagle-pp
+	  ('trapeagle-pre
 	   (when (eq? (cadr r) 'graft-map)
-	     (set! (ref unfinished/resumed (caddr r)) (cadddr r))
+	     (set! (ref unfinished/resumed (caddr r)) 
+		   (cdddr r))
 	     (when (cadddr r)
 	       (set! (ref unfinished/resumed (cadddr r)) (caddr r)))))
 	  ('strace
 	   (case (cadr r)
 	     ('unfinished
 	      (let1 index (cadr (memq :index r))
-		(write (append r (list :resumed? (ref unfinished/resumed index))) oport)
+		(write (append r (cons :resumed? (ref unfinished/resumed index))) oport)
 		(newline oport)))
 	     ('resumed
 	      (let1 index (cadr (memq :index r))
@@ -158,23 +168,36 @@
 	      (newline oport)))))
 	(loop (read iport))))))
 
+;; output input name
+(define (make-temporary-io template debug)
+  (if debug
+      (let1 name (format "/tmp/~s" template)
+	(let1 o (open-output-file name)
+	  (let1 i (open-input-file name)
+	    (values o i name))))
+      (receive (o name) (sys-mkstemp (build-path (temporary-directory) template))
+	(let1 i (open-input-file name)
+	  (values o i name)))))
+
+
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help (car args) 0))
-       (debug "debug" #t))
-    (let* ((i (current-input-port))
-	   (o (open-output-file "/tmp/serialize+strip.es")))
-      (serialize+stripe i o debug)
-      (close-output-port o))
-    (let* ((i (open-input-file "/tmp/serialize+strip.es"))
-	   (o (open-output-file "/tmp/graft-map.es")))
-      (make-graft-map i o debug)
-      (close-output-port o)
-      (close-input-port i))
-    (let* ((i (make <graft-input-port>
-		:ports (list
-			(open-input-file "/tmp/graft-map.es")
-			(open-input-file "/tmp/serialize+strip.es"))))
-	   (o (current-output-port)))
-      (apply-map i o)))
-  0)
+       (debug "debug" #f))
+    (let-values (((>strip <strip strip-name) (make-temporary-io 
+					      "serialize+strip.es"
+					      debug)))
+      (serialize+strip (current-input-port) >strip debug)
+      (close-output-port >strip)
+      (let-values (((>graft-map <graft-map graft-map-name) (make-temporary-io 
+							    "graft-map.es"
+							    debug)))
+	(make-graft-map <strip >graft-map debug)
+	(port-seek <strip 0 SEEK_SET)
+	(close-output-port >graft-map)
+	(let1 i (make <graft-input-port>
+		  :ports (list
+			  <graft-map
+			  <strip))
+	  (apply-map i (current-output-port))
+	  0)))))

@@ -11,7 +11,7 @@
 
 (defsyscall clone
   :trace 
-  (lambda (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
     (define thread? (memq 'CLONE_VM (cdadr (cadr xargs))))
     (define born? (> (car xrvalue) 0))
     (when born?
@@ -22,14 +22,13 @@
 			  (make <task> 
 			    :parent-tid ppid
 			    :tid pid
-			    :clone-info (vector index index time time xargs xrvalue xerrno)
 			    :fd-table (ref parent 'fd-table))
 			  (make <process>
 			    :parent-tid ppid
 			    :tid pid
-			    :clone-info (vector index index time time xargs xrvalue xerrno)
 			    :fd-table (clone (ref parent 'fd-table))
 			    ))))
+	  (update-info! child 'clone-info 'trace 'clone $)
 	  ;; Check overlaypping
 	    (hash-table-put! (ref kernel 'task-table) pid child)
 	    (push! (ref parent 'children) child)
@@ -78,13 +77,23 @@
 
 (defsyscall exit_group
   :trace
-  (lambda (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
     (let1 task (task-for kernel pid)
-      (set! (ref task 'exit-info) `(exit_group ,pid ,xargs ,index ,time))
+      (update-info! task 'exit-info 'trace 'exit_group $)
       (for-each
        (lambda (child)
+	 ;; TODO: Check this condition
 	 (unless (eq? (ref task 'fd-table) (ref child 'fd-table))
-	   (set! (ref child 'exit-info) `(exit_group ,pid ,xargs ,index ,time))))
-       (children-of task)))))
+	   (update-info! child 'exit-info 'trace 'exit_group $)))
+       (children-of task))))
+  ;; TODO unfinished, resumed
+  )
+
+(defsyscall _exit
+  :trace
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
+    (let1 task (task-for kernel pid)
+      (update-info! task 'exit-info 'trace '_exit $)
+      )))
 
 (provide "trapeagle/syscalls/task")
