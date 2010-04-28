@@ -4,6 +4,7 @@
 (use trapeagle.linux)
 (use trapeagle.syscalls.fd)
 (use trapeagle.syscalls.task)
+(use trapeagle.syscalls.io)
 
 (use trapeagle.control)
 (use trapeagle.controls.repl)

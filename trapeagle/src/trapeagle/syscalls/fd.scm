@@ -243,5 +243,31 @@
     (clear-unfinished-syscall! kernel pid)))
 
 ;; socket(SCM_RIGHTS)
+(define (set-non-block! kernel pid xargs xrvalue xerrno index)
+  (cond
+   ((and (eq? (cadr xargs) 'F_SETFL)
+	 (eq? (car xrvalue) 0))
+    (when (memq 'O_NONBLOCK (caddr xargs))
+      (let1 fd (fd-for kernel pid (car xargs))
+	(set! (ref fd 'async?) index))))
+   ((and (eq? (cadr xargs) 'F_GETFL)
+	 (not xerrno))
+    (when (memq 'O_NONBLOCK (cadr xrvalue))
+      (let1 fd (fd-for kernel pid (car xargs))
+	(unless (ref fd 'async?)
+	  (set! (ref fd 'async?) index)))))))
+
+(defsyscall fcntl64
+  :trace
+  (lambda (kernel pid xargs xrvalue xerrno time index)
+    (set-non-block! kernel pid xargs xrvalue xerrno index))
+  :unfinished
+  (lambda (kernel pid resumed? time index)
+    (set-unfinished-syscall! kernel pid resumed? time index)
+    )
+  :resumed
+  (lambda (kernel pid xargs xrvalue xerrno unfinished? time index)
+    (clear-unfinished-syscall! kernel pid)
+    (set-non-block! kernel pid xargs xrvalue xerrno index)))
 
 (provide "trapeagle/syscalls/fd")

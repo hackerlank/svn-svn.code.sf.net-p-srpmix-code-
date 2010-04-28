@@ -11,7 +11,21 @@
 (define (clear-unfinished-syscall! kernel pid)
   (set! (ref (task-for kernel pid) 
 	     'unfinished-syscall) #f))
-  
+
+(define-method set-unfinished-syscall! (kernel pid call-info)
+  (set! (ref (task-for kernel pid) 
+	     'unfinished-syscall) call-info))
+
+(define-method set-unfinished-syscall! (kernel pid resumed? time index)
+  (let1 call-info (vector syscall
+			  #f
+			  #f
+			  #f
+			  (vector index time)
+			  (vector resumed? #f)
+			  #f)
+    (set-unfinished-syscall! kernel pid call-info)))
+
 (define-method update-info! ((resource  <resource>)
 			     (slot      <symbol>)
 			     (call-type <symbol>)
@@ -40,13 +54,13 @@
 			     #f
 			     #f
 			     #f
-			     (vector index time)
-			     (vector resumed? #f)
+			     (vector (ref all-args 4) (ref all-args 3))
+			     (vector (ref all-args 2) #f)
 			     #f)
        (when resource
 	 (set! (ref resource 'unfinished-syscall) call-info))
-       (set! (ref (task-for (ref all-args 0) (ref all-args 1)) 
-		  'unfinished-syscall) call-info)))
+       (set-unfinished-syscall! (ref all-args 0) (ref all-args 1) call-info)
+       ))
     ('resumed
      ;; (kernel pid xargs xrvalue xerrno unfinished? time index history)
      (let* ((kernel (ref all-args 0))

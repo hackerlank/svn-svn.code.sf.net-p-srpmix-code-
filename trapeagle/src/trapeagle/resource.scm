@@ -10,6 +10,7 @@
    children-of
    dead?
    closed?
+   async?
    )
   )
 (select-module trapeagle.resource)
@@ -50,12 +51,20 @@
    (input-close-info :init-form #f)
    (output-close-info :init-form #f)
    (close-on-exec? :init-value #f)
+   (async? :init-value #f)
    (io :init-form (list))
    ))
 
 (define-method closed? ((fd <fd>))
   (and (ref fd 'input-close-info)
        (ref fd 'output-close-info)))
+
+(define-method async? ((fd <fd>))
+  (ref fd 'async?))
+
+(define-method io-event ((fd <fd>)
+			 e)
+  (push! fd 'io e))
 
 (define-class <file> (<fd>)
   ())

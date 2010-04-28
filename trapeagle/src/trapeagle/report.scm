@@ -44,7 +44,8 @@
 (define-method report ((fd <fd>) prefix filter)
   (format #t "~aopen-info: ~s\n" prefix (ref fd 'open-info))
   (format #t "~aunfinished-syscall: ~s\n" prefix (ref fd 'unfinished-syscall))
-  (format #t "~aclosed?: ~s\n" prefix (closed? fd)))
+  (format #t "~aclosed?: ~s\n" prefix (closed? fd))
+  (format #t "~aasync?: ~s\n" prefix (async? fd)))
 
 (define-method report ((file <file>) prefix filter)
   (next-method))
