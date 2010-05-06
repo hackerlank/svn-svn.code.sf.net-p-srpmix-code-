@@ -64,7 +64,7 @@
 
 (define-method io-event ((fd <fd>)
 			 e)
-  (push! fd 'io e))
+  (slot-push! fd 'io e))
 
 (define-class <file> (<fd>)
   ())

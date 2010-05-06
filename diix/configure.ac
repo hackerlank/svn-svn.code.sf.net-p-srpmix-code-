@@ -19,5 +19,6 @@ AC_OUTPUT([
            misc/specs/Makefile
            misc/specs/diix.spec
            src/Makefile
+           src/cmds/Makefile
           ])
 

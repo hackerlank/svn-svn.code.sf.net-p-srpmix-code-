@@ -1,5 +1,2 @@
-dist_bin_SCRIPTS= \
-	\
-	diix \
-	\
-	$(NULL)
+SUBDIRS  = .
+SUBDIRS  += cmds
