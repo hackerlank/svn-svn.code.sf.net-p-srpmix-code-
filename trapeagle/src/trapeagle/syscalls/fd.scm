@@ -20,7 +20,7 @@
 	  (update-info! file 'open-info 'trace 'open $)
 	  ))))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! #f 'open-info 'unfinished 'open $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
@@ -47,7 +47,7 @@
 	  (update-info! old-file 'output-close-info 'trace 'dup2 $)
 	  ))))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! #f 'open-info 'unfinished 'dup2 $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
@@ -75,7 +75,7 @@
 	  (update-info! file 'output-close-info 'trace 'close $)
 	  ))))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! #f 'input-close-info 'unfinished 'close $)
     (update-info! #f 'output-close-info 'unfinished 'close $))
   :resumed
@@ -99,7 +99,7 @@
 	  (fd-for kernel pid fd socket)
 	  (update-info! socket 'open-info 'trace 'socket $)))))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! #f 'open-info 'unfinished 'socket $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
@@ -122,7 +122,7 @@
 	  (update-info! socket 'open-info 'trace 'accept $)
 	  ))))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! #f 'open-info 'unfinished 'accept $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
@@ -147,7 +147,7 @@
 	  (when (or (eq? how 'SHUT_WR) (eq? how 'SHUT_RDWR))
 	    (update-info! socket 'output-close-info 'trace 'shutdown $))))))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno  resumed? time index)
     (update-info #f 'input-close-info 'unfinished 'shutdown $)
     (update-info #f 'output-close-info 'unfinished 'shutdown $))
   :resumed
@@ -206,7 +206,7 @@
     (let1 socket (fd-for kernel pid (car xargs))
       (update-info! socket 'bind-info 'trace 'bind $)))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! #f 'bind-info 'unfinished 'bind $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
@@ -220,7 +220,7 @@
     (let1 socket (fd-for kernel pid (car xargs))
       (update-info! socket 'listen-info 'trace 'listen $)))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! #f 'listen-info 'unfinished 'listen $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
@@ -234,7 +234,7 @@
     (let1 socket (fd-for kernel pid (car xargs))
       (update-info! socket 'connect-info 'trace 'connect $)))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! #f 'connect-info 'unfinished 'connect $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
@@ -262,7 +262,7 @@
   (lambda (kernel pid xargs xrvalue xerrno time index)
     (set-non-block! kernel pid xargs xrvalue xerrno index))
   :unfinished
-  (lambda (kernel pid resumed? time index)
+  (lambda (kernel pid xargs xrvalue xerrno resumed? time index)
     (set-unfinished-syscall! kernel pid resumed? time index)
     )
   :resumed

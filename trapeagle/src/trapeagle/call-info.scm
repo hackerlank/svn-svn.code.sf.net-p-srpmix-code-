@@ -49,20 +49,20 @@
 	 (set! (ref new 6) original)
 	 )))
     ('unfinished
-     ;; (kernel pid resumed? time index) =>
+     ;; (kernel pid xargs xrvalue xerrno resumed? time index) =>
      (let1 call-info (vector syscall
-			     #f
-			     #f
-			     #f
-			     (vector (ref all-args 4) (ref all-args 3))
-			     (vector (ref all-args 2) #f)
+			     (ref all-args 2) 
+			     (ref all-args 3) 
+			     (ref all-args 4) 
+			     (vector (ref all-args 7) (ref all-args 6))
+			     (vector (ref all-args 5) #f)
 			     #f)
        (when resource
 	 (set! (ref resource 'unfinished-syscall) call-info))
        (set-unfinished-syscall! (ref all-args 0) (ref all-args 1) call-info)
        ))
     ('resumed
-     ;; (kernel pid xargs xrvalue xerrno unfinished? time index history)
+     ;; (kernel pid xargs xrvalue xerrno unfinished? time index)
      (let* ((kernel (ref all-args 0))
 	    (pid (ref all-args 1))
 	    (unfinished (ref (task-for kernel pid) 'unfinished-syscall))

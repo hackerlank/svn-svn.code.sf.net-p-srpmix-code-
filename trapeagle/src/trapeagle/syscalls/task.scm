@@ -34,7 +34,7 @@
 	    (push! (ref parent 'children) child)
 	    ))))
   :unfinished
-  (lambda (kernel pid resumed? time index)
+  (lambda (kernel pid xargs xrvalue xerrno resumed? time index)
     #f))
 
 (define-method for-each-close-on-exec-fds ((task <task>)
@@ -61,7 +61,7 @@
 	   (update-info! file 'output-close-info 'trace 'execve $)))
 	)))
   :unfinished
-  (lambda* (kernel pid resumed? time index)
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (update-info! (task-for kernel pid) 'execve-info 'unfinished 'execve $))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)

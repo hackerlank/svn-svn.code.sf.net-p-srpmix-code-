@@ -32,7 +32,7 @@
   ((vector-ref (hash-table-get type-infos type) 3) strace))
 
 (deftype trace (pid xargs xrvalue xerrno time index))
-(deftype unfinished (pid resumed? time index))
+(deftype unfinished (pid xargs xrvalue xerrno resumed? time index))
 (deftype resumed (pid xargs xrvalue xerrno unfinished? time index))
 (deftype unfinished-exit (pid))	; TODO
 
