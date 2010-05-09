@@ -7,6 +7,42 @@
   (use trapeagle.clone)
   )
 (select-module trapeagle.syscalls.io)
+
+;; read, write, readable, writable...
+(defsyscall read
+  :trace
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
+    (io 
+     (fd-for kernel pid (car xrvalue))
+     (list 'read xrvalue xerrno index index)))
+  :unfinished
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
+    (io 
+     (fd-for kernel pid (car xrvalue))
+     (list 'read xrvalue xerrno index #f)))
+  :resumed
+  (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
+    (io 
+     (fd-for kernel pid (car xrvalue))
+     (list 'read xrvalue xerrno #f index))))
+
+(defsyscall write
+  :trace
+  (lambda* (kernel pid xargs xrvalue xerrno time index)
+    (io 
+     (fd-for kernel pid (car xrvalue))
+     (list 'write xrvalue xerrno index index)))
+  :unfinished
+  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
+    (io 
+     (fd-for kernel pid (car xrvalue))
+     (list 'write xrvalue xerrno index #f)))
+  :resumed
+  (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
+    (io 
+     (fd-for kernel pid (car xrvalue))
+     (list 'write xrvalue xerrno #f index))))
+
 #; ( 
 (accept . 7666)
  (bind . 6410)

@@ -11,6 +11,7 @@
    dead?
    closed?
    async?
+   io
    )
   )
 (select-module trapeagle.resource)
@@ -62,9 +63,17 @@
 (define-method async? ((fd <fd>))
   (ref fd 'async?))
 
-(define-method io-event ((fd <fd>)
-			 e)
+(define-method io ((fd <fd>) e)
   (slot-push! fd 'io e))
+
+(define-method io ((fd <boolean>)
+		    e)
+  ;; TODO: io on fd which cannot be found on fd table.
+  )
+
+(define-method io ((fd <fd>))
+  (ref fd 'io)
+  )
 
 (define-class <file> (<fd>)
   ())
