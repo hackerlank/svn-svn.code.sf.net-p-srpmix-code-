@@ -13,34 +13,34 @@
   :trace
   (lambda* (kernel pid xargs xrvalue xerrno time index)
     (io 
-     (fd-for kernel pid (car xrvalue))
+     (fd-for kernel pid (car xrvalue) #t) 
      (list 'read xrvalue xerrno index index)))
   :unfinished
   (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (io 
-     (fd-for kernel pid (car xrvalue))
+     (fd-for kernel pid (car xrvalue) #t)
      (list 'read xrvalue xerrno index #f)))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
     (io 
-     (fd-for kernel pid (car xrvalue))
+     (fd-for kernel pid (car xrvalue) #t)
      (list 'read xrvalue xerrno #f index))))
 
 (defsyscall write
   :trace
   (lambda* (kernel pid xargs xrvalue xerrno time index)
     (io 
-     (fd-for kernel pid (car xrvalue))
+     (fd-for kernel pid (car xrvalue) #t)
      (list 'write xrvalue xerrno index index)))
   :unfinished
   (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
     (io 
-     (fd-for kernel pid (car xrvalue))
+     (fd-for kernel pid (car xrvalue) #t)
      (list 'write xrvalue xerrno index #f)))
   :resumed
   (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
     (io 
-     (fd-for kernel pid (car xrvalue))
+     (fd-for kernel pid (car xrvalue) #t)
      (list 'write xrvalue xerrno #f index))))
 
 #; ( 

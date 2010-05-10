@@ -40,10 +40,21 @@
 	     (fd (ref fd-table fd #f)))
     fd))
 
+(define-method fd-for ((kernel <linux>) 
+		       tid 
+		       fd
+		       create-if-not-found)
+  (let1 fd-obj (fd-for kernel tid fd)
+    (if (and (not fd-obj) create-if-not-found)
+	(let1 fd-obj (make <fd>)
+	  (fd-for kernel tid fd fd-obj))
+	fd-obj)))
+
 (define-method fd-for ((kernel <linux>) tid fd (fd-obj <fd>))
   (let* ((task (task-for kernel tid))
 	 (fd-table (ref task 'fd-table)))
-    (hash-table-put! fd-table fd fd-obj)))
+    (hash-table-put! fd-table fd fd-obj)
+    fd-obj))
 
 (let ((nop-vector (make-vector (type-count) (lambda args #f))))
   (define-method syscall ((kernel <linux>)

@@ -46,10 +46,13 @@
 ;(define-class <thread> (<task>)
 ;  ())
 
+
+
 (define-class <fd> (<resource>)
-  ((open-info :init-value #f)
-   (unfinished-syscall :init-value #f)
+  (
+   (open-info :init-value #f)
    (input-close-info :init-form #f)
+   (unfinished-syscall :init-value #f)
    (output-close-info :init-form #f)
    (close-on-exec? :init-value #f)
    (async? :init-value #f)
@@ -65,11 +68,6 @@
 
 (define-method io ((fd <fd>) e)
   (slot-push! fd 'io e))
-
-(define-method io ((fd <boolean>)
-		    e)
-  ;; TODO: io on fd which cannot be found on fd table.
-  )
 
 (define-method io ((fd <fd>))
   (ref fd 'io)
