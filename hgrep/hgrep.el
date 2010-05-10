@@ -17,7 +17,7 @@
 (defun dist-hgrep (dist/update phase)
   (interactive (list
 		(let ((dists/updates (dist-hgrep-all-dists/updates)))
-		  (completing-read (format "Distribution/update (default: %s): " hgrep-default-dist) 
+		  (completing-read (format "Distribution/update (default: %s): " hgrep-dist-default) 
 				   dists/updates
 				   nil
 				   t
@@ -62,7 +62,7 @@
 
 (defun pkg-hgrep (dist/update phase &rest pkgs)
   (interactive (let* ((dists/updates (dist-hgrep-all-dists/updates))
-		      (dist/update (completing-read (format "Distribution/update (default: %s): " hgrep-default-dist) 
+		      (dist/update (completing-read (format "Distribution/update (default: %s): " hgrep-dist-default) 
 						    dists/updates
 						    nil
 						    t
