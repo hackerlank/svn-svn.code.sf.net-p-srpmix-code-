@@ -15,9 +15,6 @@
 (define-class <linux> ()
   ((init-task)
    (task-table :init-value (make-hash-table 'eq?))
-   (syscalls   :init-form  (make-tree-map 
-			    eq?
-			    (lambda (a b) (string<? (symbol->string a) (symbol->string b)))))
    ))
 
 (define-method init-task ((kernel <linux>) pid)
@@ -62,11 +59,7 @@
     (let1 type (car strace)
       (case type
 	((trace unfinished resumed unfinished-exit)
-	 (tree-map-update!
-	  (ref kernel 'syscalls) 
-	  (cadr (memq :call strace))
-	  (lambda (i) (+ i 1))
-	  0)
+	 
 	 (let-keywords (cdr strace) ((call #f) . rest)
 	   (for-each (cute 
 			apply 
@@ -74,7 +67,9 @@
 			kernel
 			(type-actual-params-for type (cdr strace)))
 		     (map (cute vector-ref <> (type-pos-of type))
-			  (hash-table-get syscalls call (list nop-vector)))
+			  (append 
+			   (hash-table-get syscalls #t (list nop-vector))
+			   (hash-table-get syscalls call (list nop-vector))))
 	   )))
 	('signaled
 	 )
@@ -84,7 +79,6 @@
 	 #f)))))
 
 (define-method report ((kernel <linux>) filter)
-  (format #t "syscalls: ~s\n" (tree-map->alist (ref kernel 'syscalls)))
   (let ((table (ref kernel 'task-table))
 	(condition (if (memq 'alive-only filter)
 		       (complement dead?)

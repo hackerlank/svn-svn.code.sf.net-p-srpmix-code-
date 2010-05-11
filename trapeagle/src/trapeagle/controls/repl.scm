@@ -1,5 +1,8 @@
 (define-module trapeagle.controls.repl
-  (use trapeagle.control))
+  (use trapeagle.control)
+  (use trapeagle.hook))
+
+(select-module trapeagle.controls.repl)
 
 (define (prompt)
     (display ";trapeagle> " (current-error-port)))
@@ -28,6 +31,6 @@
   (repl kernel))
 
 (defcontrol quit (kernel . args)
-  (exit 0))
+  (quit 0))
 
 (provide "trapeagle/controls/repl")

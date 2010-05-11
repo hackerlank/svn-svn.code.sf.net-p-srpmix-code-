@@ -25,6 +25,7 @@
 	 ;; TODO
 	 (syscall-arity-check ,trace trace ,call)
 	 (syscall-arity-check ,unfinished unfinished ,call)
+	 (syscall-arity-check ,resumed resumed ,call)
 	 (vector-set! ,v (type-pos-of 'trace) ,trace)
 	 (vector-set! ,v (type-pos-of 'unfinished) ,unfinished)
 	 (vector-set! ,v (type-pos-of 'resumed) ,resumed)

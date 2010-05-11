@@ -11,7 +11,7 @@
 
 (defsyscall clone
   :trace 
-  (lambda* (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid call xargs xrvalue xerrno time index)
     (define thread? (memq 'CLONE_VM (cdadr (cadr xargs))))
     (define born? (> (car xrvalue) 0))
     (when born?
@@ -28,13 +28,13 @@
 			    :tid pid
 			    :fd-table (clone (ref parent 'fd-table))
 			    ))))
-	  (update-info! child 'clone-info 'trace 'clone $)
+	  (update-info! child 'clone-info 'trace $)
 	  ;; Check overlaypping
 	    (hash-table-put! (ref kernel 'task-table) pid child)
 	    (push! (ref parent 'children) child)
 	    ))))
   :unfinished
-  (lambda (kernel pid xargs xrvalue xerrno resumed? time index)
+  (lambda (kernel pid call xargs xrvalue xerrno resumed? time index)
     #f))
 
 (define-method for-each-close-on-exec-fds ((task <task>)
@@ -50,50 +50,50 @@
 
 (defsyscall execve
   :trace
-  (lambda* (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid call xargs xrvalue xerrno time index)
     (when (eq? (car xrvalue) 0)
       (let1 task (task-for kernel pid)
-	(update-info! task 'execve-info 'trace 'execve $)
+	(update-info! task 'execve-info 'trace $)
 	(for-each-close-on-exec-fds 
 	 task
 	 (lambda (file)
-	   (update-info! file 'input-close-info 'trace 'execve $)
-	   (update-info! file 'output-close-info 'trace 'execve $)))
+	   (update-info! file 'input-close-info 'trace $)
+	   (update-info! file 'output-close-info 'trace $)))
 	)))
   :unfinished
-  (lambda* (kernel pid xargs xrvalue xerrno resumed? time index)
-    (update-info! (task-for kernel pid) 'execve-info 'unfinished 'execve $))
+  (lambda* (kernel pid call xargs xrvalue xerrno resumed? time index)
+    (update-info! (task-for kernel pid) 'execve-info 'unfinished $))
   :resumed
-  (lambda* (kernel pid xargs xrvalue xerrno unfinished? time index)
+  (lambda* (kernel pid call xargs xrvalue xerrno unfinished? time index)
     (if (eq? (car xrvalue) 0)
 	(let1 task (task-for kernel pid)
-	  (update-info! task 'execve-info 'resumed 'execve $)
+	  (update-info! task 'execve-info 'resumed $)
 	  (for-each-close-on-exec-fds 
 	   task
 	   (lambda (file)
-	     (update-info! file 'input-close-info 'trace 'execve $)
-	     (update-info! file 'output-close-info 'trace 'execve $))))
+	     (update-info! file 'input-close-info 'trace $)
+	     (update-info! file 'output-close-info 'trace $))))
 	(clear-unfinished-syscall! kernel pid))))
 
 (defsyscall exit_group
   :trace
-  (lambda* (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid call xargs xrvalue xerrno time index)
     (let1 task (task-for kernel pid)
-      (update-info! task 'exit-info 'trace 'exit_group $)
+      (update-info! task 'exit-info 'trace $)
       (for-each
        (lambda (child)
 	 ;; TODO: Check this condition
 	 (unless (eq? (ref task 'fd-table) (ref child 'fd-table))
-	   (update-info! child 'exit-info 'trace 'exit_group $)))
+	   (update-info! child 'exit-info 'trace $)))
        (children-of task))))
   ;; TODO unfinished, resumed
   )
 
 (defsyscall _exit
   :trace
-  (lambda* (kernel pid xargs xrvalue xerrno time index)
+  (lambda* (kernel pid call xargs xrvalue xerrno time index)
     (let1 task (task-for kernel pid)
-      (update-info! task 'exit-info 'trace '_exit $)
+      (update-info! task 'exit-info 'trace $)
       )))
 
 (provide "trapeagle/syscalls/task")

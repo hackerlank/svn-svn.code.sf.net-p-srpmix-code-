@@ -5,10 +5,13 @@
 (use trapeagle.syscalls.fd)
 (use trapeagle.syscalls.task)
 (use trapeagle.syscalls.io)
-(use trapeagle.backing-store)
+(use trapeagle.syscalls.trend)
 
 (use trapeagle.control)
 (use trapeagle.controls.repl)
+(use trapeagle.controls.trend)
+
+(use trapeagle.hook)
 
 (use gauche.parseopt)
 (use util.match)
@@ -35,21 +38,24 @@
 
 (define (read-list lst)
   (map read (map open-input-string lst)))
-
-(define (main args)
+#|
+  (use trapeagle.backing-store)
   (define backing-store (make <backing-store>
 			  :template "trapeagle"
 			  (lambda (obj) (cadr (memq :index obj)))))
+      (write r backing-store)
+   (close backing-store)
+|#
+
+(define (main args)
   (define (consume-one k r)
     (cond 
      ((eq? (car r) 'strace)
-      (write r backing-store)
       (syscall k (cdr r))
       )
      ((eq? (car r)  'trapeagle)
       (control k (cadr r) (cddr r)))))
-  (unwind-protect
-   (let-args (cdr args)
+  (let-args (cdr args)
        ((help "h|help" => (cute show-help (car args) 0))
 	(debug "debug" #t)
 	. rest)
@@ -64,6 +70,5 @@
 	     (loop (read))))
 	 (for-each (pa$ consume-one kernel) post-list)
 	 )))
-   (close backing-store)
-   ))
+  (quit 0))
 

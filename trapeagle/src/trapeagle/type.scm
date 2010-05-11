@@ -31,9 +31,9 @@
 (define (type-actual-params-for type strace)
   ((vector-ref (hash-table-get type-infos type) 3) strace))
 
-(deftype trace (pid xargs xrvalue xerrno time index))
-(deftype unfinished (pid xargs xrvalue xerrno resumed? time index))
-(deftype resumed (pid xargs xrvalue xerrno unfinished? time index))
+(deftype trace      (pid call xargs xrvalue xerrno time index))
+(deftype unfinished (pid call xargs xrvalue xerrno resumed? time index))
+(deftype resumed    (pid call xargs xrvalue xerrno unfinished? time index))
 (deftype unfinished-exit (pid))	; TODO
 
 (provide "trapeagle/type")
