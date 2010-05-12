@@ -6,7 +6,7 @@
 
 (define (prompt)
   (display ";trapeagle> " (current-error-port))
-  (flush (current-error-port)))
+  )
 
 (define (repl kernel)
   (prompt)

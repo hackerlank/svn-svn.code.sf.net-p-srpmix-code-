@@ -10,9 +10,9 @@
 		      :template "trapeagle"
 		      :get-key (lambda (obj) (cadr (memq :index obj))))
   (define (writeln r)
-    (write r (current-output-port))
-    (newline (current-output-port))
-    (flush (current-output-port))
+    (write r)
+    (newline)
+    (flush)
     )
   (define (show n)
     (let1 r (read-for backing-store n)
