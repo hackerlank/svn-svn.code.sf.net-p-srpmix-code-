@@ -1,4 +1,4 @@
-(define-module trapeagle.report
+(define-module trapeagle.controls.report
   (export report)
   (use trapeagle.control)
   (use trapeagle.linux)
@@ -6,7 +6,7 @@
   (use srfi-1)
   )
 
-(select-module trapeagle.report)
+(select-module trapeagle.controls.report)
 
 (define-method report ((kernel <linux>) filter)
   (let ((table (ref kernel 'task-table))
@@ -77,4 +77,4 @@
 
 (defcontrol report (kernel . args) (report kernel args))
 
-(provide "trapeagle/report")
+(provide "trapeagle/controls/report")

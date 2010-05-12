@@ -5,8 +5,9 @@
 	  write
 	  read
 	  read-for
-	  close
-	  ))
+	  close-port
+	  )
+  (use file.util))
 
 (select-module trapeagle.backing-store)
 (define-class <backing-store> ()
@@ -24,7 +25,10 @@
   (next-method)
   (receive (op on) (sys-mkstemp (build-path (temporary-directory) 
 					    (ref bs 'template)))
-    (set! (ref bs 'output-port) op) 
+    ;; Scm_MakePortWithFd of /net/sop/srv/sources/attic/cradles/lcopy.sys/mirror/g/gauche/trunk/pre-build/trunk/src/port.c 
+    ;; sets seeker NULL.
+    (set! (ref bs 'output-port) (open-output-file on))
+    (close-output-port op)
     (set! (ref bs 'file-name) on)
     (set! (ref bs 'input-port) (open-input-file on))))
 
@@ -32,7 +36,9 @@
 (define-method port-tell ((port <port>))
   (original-port-tell port))
 (define-method port-tell ((bs <backing-store>))
-  (port-tell (ref bs 'output-port)))
+  ;(port-tell (ref bs 'output-port))
+  (port-seek (ref bs 'output-port) 0 SEEK_CUR)
+  )
 
 (define original-write write)
 (define-method write (obj)
@@ -40,7 +46,7 @@
 (define-method write (obj (port <port>))
   (original-write obj port))
 (define-method write (obj (bs <backing-store>))
-  (let ((key (get-key obj))
+  (let ((key ((ref bs 'get-key) obj))
 	(pos (port-tell bs)))
     (tree-map-put! (ref bs 'pos-table) key pos)
     (write obj (ref bs 'output-port))
@@ -61,7 +67,7 @@
 (define original-port-seek port-seek)
 (define-method port-seek ((port <port>) offset)
   (original-port-seek port offset))
-(define-method port-seek ((port <port>) whence)
+(define-method port-seek ((port <port>) offset whence)
   (original-port-seek port offset whence))
 (define-method port-seek ((bs <backing-store>) offset)
   (port-seek (ref bs 'input-port) offset))
@@ -75,7 +81,7 @@
 (define-method read-for ((bs <backing-store>) key)
   (pread bs (ref (ref bs 'pos-table) key)))
 
-(define-method close ((bs <backing-store>))
+(define-method close-port ((bs <backing-store>))
   (close-input-port (ref bs 'input-port))
   (close-output-port (ref bs 'output-port))
   (sys-unlink (ref bs 'file-name)))

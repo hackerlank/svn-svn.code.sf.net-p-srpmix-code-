@@ -1,11 +1,9 @@
 (define-module trapeagle.linux
   (export <linux>
-	  syscall
 	  report
 	  task-for
 	  fd-for)
   (use trapeagle.type)
-  (use trapeagle.syscall)
   (use trapeagle.resource)
   )
 
@@ -51,30 +49,5 @@
 	 (fd-table (ref task 'fd-table)))
     (hash-table-put! fd-table fd fd-obj)
     fd-obj))
-
-(let ((nop-vector (make-vector (type-count) (lambda args #f))))
-  (define-method syscall ((kernel <linux>)
-			  strace)
-    (let1 type (car strace)
-      (case type
-	((trace unfinished resumed unfinished-exit)
-	 
-	 (let-keywords (cdr strace) ((call #f) . rest)
-	   (for-each (cute 
-			apply 
-			<>
-			kernel
-			(type-actual-params-for type (cdr strace)))
-		     (map (cute vector-ref <> (type-pos-of type))
-			  (append 
-			   (hash-table-get syscalls #t (list nop-vector))
-			   (hash-table-get syscalls call (list nop-vector))))
-	   )))
-	('signaled
-	 )
-	('killed
-	 )
-	(else
-	 #f)))))
 
 (provide "trapeagle/linux")
