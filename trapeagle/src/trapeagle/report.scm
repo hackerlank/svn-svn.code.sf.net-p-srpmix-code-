@@ -1,10 +1,23 @@
 (define-module trapeagle.report
   (export report)
+  (use trapeagle.control)
+  (use trapeagle.linux)
   (use trapeagle.resource)
   (use srfi-1)
   )
 
 (select-module trapeagle.report)
+
+(define-method report ((kernel <linux>) filter)
+  (let ((table (ref kernel 'task-table))
+	(condition (if (memq 'alive-only filter)
+		       (complement dead?)
+		       boolean)))
+    (for-each
+     (lambda (tid)  (let1 task (ref table tid)
+		      (when (condition task)
+			(report task filter))))
+     (sort (hash-table-keys table) <))))
 
 (define-method report ((task <task>) filter-args)
   (let1 condition (if (memq 'alive-only filter-args)
@@ -61,5 +74,7 @@
 
 (define-method report ((file <request-socket>) prefix filter)
   (next-method))
+
+(defcontrol report (kernel . args) (report kernel args))
 
 (provide "trapeagle/report")

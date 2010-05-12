@@ -8,6 +8,7 @@
 (use trapeagle.syscalls.trend)
 
 (use trapeagle.control)
+(use trapeagle.report)
 (use trapeagle.controls.repl)
 (use trapeagle.controls.trend)
 
@@ -20,8 +21,6 @@
   (format #t "~a --help\n" prog)
   (format #t "~a [--debug]\n" prog)
   (exit n))
-
-(defcontrol report (kernel . args) (report kernel args))
 
 (define (split-by pred lst)
   (let loop ((input   lst)
