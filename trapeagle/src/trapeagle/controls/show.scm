@@ -25,6 +25,9 @@
   (add-hook! quit-hook (lambda (n)
 			 (close-port backing-store)))
   (defcontrol show (kernel . args)
+    "Show strace data:
+ (show N...)
+ (show (B E)...)"
     (for-each 
      (lambda (spec)
        (cond

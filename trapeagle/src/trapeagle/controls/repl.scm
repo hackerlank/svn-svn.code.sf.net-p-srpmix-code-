@@ -29,9 +29,13 @@
 		 (loop #t))))))
 
 (defcontrol repl (kernel . args)
+  "Start repl:
+ (repl)"
   (repl kernel))
 
 (defcontrol quit (kernel . args)
+  "Quit trapeagle:
+ (quit)"
   (quit 0))
 
 (provide "trapeagle/controls/repl")

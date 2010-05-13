@@ -16,6 +16,7 @@
 (use trapeagle.controls.trend)
 (use trapeagle.controls.report)
 (use trapeagle.controls.show)
+(use trapeagle.controls.help)
 
 (use gauche.parseopt)
 

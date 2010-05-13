@@ -76,6 +76,9 @@
 (define-method report ((file <request-socket>) prefix filter)
   (next-method))
 
-(defcontrol report (kernel . args) (report kernel args))
+(defcontrol report (kernel . args) 
+  "Report kernel status:
+ (report [:alive-only BOOLEAN] [:io BOOLEAN])"
+  (report kernel args))
 
 (provide "trapeagle/controls/report")

@@ -6,6 +6,8 @@
 (select-module trapeagle.controls.trend)
 
 (defcontrol trend (kernel) 
+  "Show system call trends:
+ (trend)"
   (format #t "syscalls: ~s\n" 
 	  (trend)))
 
