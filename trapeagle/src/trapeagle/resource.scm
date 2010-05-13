@@ -7,6 +7,7 @@
    <file>
    <socket>
    <request-socket>
+   <pipe>
    children-of
    dead?
    closed?
@@ -86,6 +87,6 @@
   ())
   
 (define-class <pipe> (<fd>)
-  ())
+  (peer))
 
 (provide "trapeagle/resource")

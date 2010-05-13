@@ -270,4 +270,43 @@
     (clear-unfinished-syscall! kernel pid)
     (set-non-block! kernel pid xargs xrvalue xerrno index)))
 
+(defsyscall pipe
+  :trace
+  (lambda* (kernel pid call xargs xrvalue xerrno time index)
+    (let* ((r (car xrvalue))
+	   (successful? (eq? r 0)))
+      (when successful?
+	(let ((pipe0 (make <pipe>))
+	      (pipe1 (make <pipe>))
+	      (pfd0 (ref (car xargs) 1))
+	      (pfd1 (ref (car xargs) 2)))
+	  (fd-for kernel pid pfd0 pipe0)
+	  (fd-for kernel pid pfd1 pipe1)
+	  (update-info! pipe0 'open-info 'trace $)
+	  (update-info! pipe1 'open-info 'trace $)
+	  (set! (ref pipe0 'peer) pipe1)
+	  (set! (ref pipe1 'peer) pipe0)
+	  ))))
+  :unfinished
+  (lambda* (kernel pid call xargs xrvalue xerrno resumed? time index)
+    (update-info! #f 'open-info 'unfinished $))
+  :resumed
+  (lambda* (kernel pid call xargs xrvalue xerrno unfinished? time index)
+    (let* ((r (car xrvalue))
+	   (successful? (eq? r 0)))
+      (when successful?
+	(let ((pipe0 (make <pipe>))
+	      (pipe1 (make <pipe>))
+	      (pfd0 (ref (car xargs) 1))
+	      (pfd1 (ref (car xargs) 2)))
+	  (fd-for kernel pid pfd0 pipe0)
+	  (fd-for kernel pid pfd1 pipe1)
+	  (update-info! pipe0 'open-info 'resumed $)
+	  (update-info! pipe1 'open-info 'resumed $)
+	  (set! (ref pipe0 'peer) pipe1)
+	  (set! (ref pipe1 'peer) pipe0)
+	  ))
+      (clear-unfinished-syscall! kernel pid)))
+  )
+  
 (provide "trapeagle/syscalls/fd")
