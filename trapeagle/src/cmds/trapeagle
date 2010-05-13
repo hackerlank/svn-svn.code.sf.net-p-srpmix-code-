@@ -2,20 +2,22 @@
 #| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
 (use trapeagle.linux)
+
+(use trapeagle.hook)
+
+(use trapeagle.syscall)
 (use trapeagle.syscalls.fd)
 (use trapeagle.syscalls.task)
 (use trapeagle.syscalls.io)
 (use trapeagle.syscalls.trend)
 
 (use trapeagle.control)
-(use trapeagle.report)
 (use trapeagle.controls.repl)
 (use trapeagle.controls.trend)
-
-(use trapeagle.hook)
+(use trapeagle.controls.report)
+(use trapeagle.controls.show)
 
 (use gauche.parseopt)
-(use util.match)
 
 (define (show-help prog n)
   (format #t "~a --help\n" prog)
@@ -37,37 +39,33 @@
 
 (define (read-list lst)
   (map read (map open-input-string lst)))
-#|
-  (use trapeagle.backing-store)
-  (define backing-store (make <backing-store>
-			  :template "trapeagle"
-			  (lambda (obj) (cadr (memq :index obj)))))
-      (write r backing-store)
-   (close backing-store)
-|#
 
 (define (main args)
   (define (consume-one k r)
     (cond 
      ((eq? (car r) 'strace)
-      (syscall k (cdr r))
-      )
+      (syscall k (cdr r)))
      ((eq? (car r)  'trapeagle)
       (control k (cadr r) (cddr r)))))
   (let-args (cdr args)
-       ((help "h|help" => (cute show-help (car args) 0))
-	(debug "debug" #t)
-	. rest)
-     (receive (pre post) (split-by (pa$ equal? "-") rest)
-       (let ((kernel (make <linux>))
+      ((help "h|help" => (cute show-help (car args) 0))
+       (debug "debug" #t)
+       . rest)
+    (receive (pre post) (split-by (pa$ equal? "-") rest)
+      (let* ((kernel (make <linux>))
 	     (pre-list (map (pa$ cons 'trapeagle) (read-list pre)))
-	     (post-list (map (pa$ cons 'trapeagle) (read-list post))))
-	 (for-each (pa$ consume-one kernel) pre-list)
-	 (let loop ((r (read)))
-	   (unless (eof-object? r)
-	     (consume-one kernel r)
-	     (loop (read))))
-	 (for-each (pa$ consume-one kernel) post-list)
-	 )))
-  (quit 0))
+	     (post-list (map (pa$ cons 'trapeagle) (read-list post)))
+	     (input$ (cute input <> (pa$ consume-one kernel))))
+	(unwind-protect
+	 (begin
+	   (for-each input$ pre-list)
+	   (let loop ((r (read)))
+	     (unless (eof-object? r)
+	       (input$ r)
+	       (loop (read))))
+	   (for-each input$ post-list)
+	   )
+	 (quit 0))
+	))))
+
 
