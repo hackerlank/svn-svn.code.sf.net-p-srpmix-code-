@@ -10,7 +10,7 @@
 
 (define-method report ((kernel <linux>) filter)
   (let ((table (ref kernel 'task-table))
-	(condition (if (memq 'alive-only filter)
+	(condition (if (get-keyword :alive-only filter #f)
 		       (complement dead?)
 		       boolean)))
     (for-each
@@ -59,7 +59,8 @@
   (format #t "~aunfinished-syscall: ~s\n" prefix (ref fd 'unfinished-syscall))
   (format #t "~aclosed?: ~s\n" prefix (closed? fd))
   (format #t "~aasync?: ~s\n" prefix (async? fd))
-  (format #t "~aio: ~s\n" prefix (io fd))
+  (when (get-keyword :io filter #f)
+    (format #t "~aio: ~s\n" prefix (io fd)))
   )
 
 (define-method report ((file <file>) prefix filter)

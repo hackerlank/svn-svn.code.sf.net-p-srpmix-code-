@@ -43,7 +43,11 @@
 (defio sendto 'w)
 
 (defio close 'close)
+(defio close 'shutdown)
 (defio connect 'connect)
+(defio bind 'bind)
+(defio accept 'accept)
+(defio listen 'listen)
 
 #; ( 
 (accept . 7666)
