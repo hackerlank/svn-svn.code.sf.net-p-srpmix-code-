@@ -9,39 +9,41 @@
 (select-module trapeagle.syscalls.io)
 
 ;; read, write, readable, writable...
-(defsyscall read
-  :trace
-  (lambda* (kernel pid call xargs xrvalue xerrno time index)
-    (io 
-     (fd-for kernel pid (car xrvalue) #t) 
-     (list 'read xrvalue xerrno index index)))
-  :unfinished
-  (lambda* (kernel pid call xargs xrvalue xerrno resumed? time index)
-    (io 
-     (fd-for kernel pid (car xrvalue) #t)
-     (list 'read xrvalue xerrno index #f)))
-  :resumed
-  (lambda* (kernel pid call xargs xrvalue xerrno unfinished? time index)
-    (io 
-     (fd-for kernel pid (car xrvalue) #t)
-     (list 'read xrvalue xerrno #f index))))
 
-(defsyscall write
-  :trace
-  (lambda* (kernel pid call xargs xrvalue xerrno time index)
-    (io 
-     (fd-for kernel pid (car xrvalue) #t)
-     (list 'write xrvalue xerrno index index)))
-  :unfinished
-  (lambda* (kernel pid call xargs xrvalue xerrno resumed? time index)
-    (io 
-     (fd-for kernel pid (car xrvalue) #t)
-     (list 'write xrvalue xerrno index #f)))
-  :resumed
-  (lambda* (kernel pid call xargs xrvalue xerrno unfinished? time index)
-    (io 
-     (fd-for kernel pid (car xrvalue) #t)
-     (list 'write xrvalue xerrno #f index))))
+(define-macro (defio target key)
+  `(defsyscall ,target
+     :trace
+     (lambda* (kernel pid call xargs xrvalue xerrno time index)
+       (io 
+	(fd-for kernel pid (car xargs) #t) 
+	(list ,key 
+	      ;call
+	      xrvalue xerrno index index)))
+       :unfinished
+       (lambda* (kernel pid call xargs xrvalue xerrno resumed? time index)
+	 (io 
+	  (fd-for kernel pid (car xargs) #t)
+	  (list ,key
+		;call
+		xrvalue xerrno index #f)))
+         :resumed
+	 (lambda* (kernel pid call xargs xrvalue xerrno unfinished? time index)
+	   (io 
+	    (fd-for kernel pid (car xargs) #t)
+	    (list ,key 
+		  ;call
+		  xrvalue xerrno #f index)))))
+
+(defio read     'r)
+(defio recv     'r)
+(defio recvfrom 'r)
+
+(defio write  'w)
+(defio send   'w)
+(defio sendto 'w)
+
+(defio close 'close)
+(defio connect 'connect)
 
 #; ( 
 (accept . 7666)
@@ -55,12 +57,7 @@
  (ioctl . 550)
  (listen . 3)
  (poll . 115774)
- (read . 30926)
- (recv . 604243) 
-(recvfrom . 538)
- (send . 331183)
  (setsockopt . 22352)
- (shutdown . 1)
- (write . 3899520))
+ (shutdown . 1))
   
 (provide "trapeagle/syscalls/io")
