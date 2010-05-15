@@ -84,7 +84,3 @@ rl_forward_word (count, key)") :which-func ("rl_end_of_line"))) :annotation-list
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^lcopy-trunk/pre-build/linux-2.6/net/unix/af_unix.c" :point 26510 :coding-system undecided-unix :line 1036 :surround ("
 " "" "	if (test_bit(SOCK_PASSCRED, &sock->flags) && !u->addr &&
 	    (err = unix_autobind(sock)) != 0)") :which-func ("unix_stream_connect"))) :annotation-list ((annotation :type text :data "!u->addr: バインドされていなかったら。")) :date "Sun May 16 04:03:12 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lsof-cant-identify-protocol))
-
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^lcopy-trunk/pre-build/linux-2.6/net/unix/af_unix.c" :point 26511 :coding-system undecided-unix :line 1036 :surround ("
-	" "" "if (test_bit(SOCK_PASSCRED, &sock->flags) && !u->addr &&
-	    (err = unix_autobind(sock)) != 0)") :which-func ("unix_stream_connect"))) :annotation-list ((annotation :type text :data "FFFR")) :date "Sun May 16 04:23:03 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (TEST))
