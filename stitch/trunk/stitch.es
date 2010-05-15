@@ -81,3 +81,10 @@ rl_forward_word (count, key)") :which-func ("rl_end_of_line"))) :annotation-list
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/fence/fenced/group.c" :point 3576 :coding-system undecided-unix :line 162 :surround ("
 " "" "	gh = group_init(NULL, \"fence\", 0, &callbacks, GROUPD_TIMEOUT);
 	if (!gh) {") :which-func ("setup_groupd"))) :annotation-list ((annotation :type text :data "group_initの引数のレベル(ここでは0)で通知の優先度が決まるのか？")) :date "Sun Apr 18 22:03:20 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-cluster))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^lcopy-trunk/pre-build/linux-2.6/net/unix/af_unix.c" :point 26510 :coding-system undecided-unix :line 1036 :surround ("
+" "" "	if (test_bit(SOCK_PASSCRED, &sock->flags) && !u->addr &&
+	    (err = unix_autobind(sock)) != 0)") :which-func ("unix_stream_connect"))) :annotation-list ((annotation :type text :data "!u->addr: バインドされていなかったら。")) :date "Sun May 16 04:03:12 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lsof-cant-identify-protocol))
+
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^lcopy-trunk/pre-build/linux-2.6/net/unix/af_unix.c" :point 26511 :coding-system undecided-unix :line 1036 :surround ("
+	" "" "if (test_bit(SOCK_PASSCRED, &sock->flags) && !u->addr &&
+	    (err = unix_autobind(sock)) != 0)") :which-func ("unix_stream_connect"))) :annotation-list ((annotation :type text :data "FFFR")) :date "Sun May 16 04:23:03 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (TEST))

@@ -678,11 +678,13 @@
 	(setq i (+ i 1))
 	))
     i))
+  
 (defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
   (stitch-with-current-file stitch-annotation-file
     (goto-char (point-max))
     (let ((start (point))
 	  (index (progn
+		   ;; TODO: print
 		   (insert (format "%S\n" (list 'stitch-annotation
 						:version 0
 						:target-list target-list
