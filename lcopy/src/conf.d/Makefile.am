@@ -18,6 +18,8 @@ dist_confd_DATA = \
 	fence-agents,trunk.lcopy \
 	gauche,trunk.lcopy \
 	gauche-mode,trunk.lcopy \
+	gcc,trunk.lcopy \
+	gdb,turnk.lcopy \
 	gfs2-utils,trunk.lcopy \
 	glib2,trunk.lcopy \
 	glibc,trunk.lcopy \
@@ -32,10 +34,12 @@ dist_confd_DATA = \
 	kernel,trunk.lcopy \
 	kernel,xen-3_2.lcopy \
 	lcopy,trunk.lcopy \
+	libbonobo,trunk.lcopy \
 	libvirt,trunk.lcopy \
 	lm-sensors,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
+	netbsd-kernel,trunk.lcopy \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
 	perg,trunk.lcopy \
