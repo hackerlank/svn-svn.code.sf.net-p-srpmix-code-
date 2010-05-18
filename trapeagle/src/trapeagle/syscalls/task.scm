@@ -57,8 +57,7 @@
 	(for-each-close-on-exec-fds 
 	 task
 	 (lambda (file)
-	   (update-info! file 'input-close-info 'trace $)
-	   (update-info! file 'output-close-info 'trace $)))
+	   (update-info! file 'close-info 'trace $)))
 	)))
   :unfinished
   (lambda* (kernel pid call xargs xrvalue xerrno resumed? time index)
@@ -71,8 +70,7 @@
 	  (for-each-close-on-exec-fds 
 	   task
 	   (lambda (file)
-	     (update-info! file 'input-close-info 'trace $)
-	     (update-info! file 'output-close-info 'trace $))))
+	     (update-info! file 'close-info 'trace $))))
 	(clear-unfinished-syscall! kernel pid))))
 
 (defsyscall exit_group

@@ -43,8 +43,7 @@
 	  (fd-for kernel pid new new-file)
 	  (update-info! new-file 'open-info 'trace $ 
 			:record-history #t)
-	  (update-info! old-file 'input-close-info 'trace $)
-	  (update-info! old-file 'output-close-info 'trace $)
+	  (update-info! old-file 'close-info 'trace $)
 	  ))))
   :unfinished
   (lambda* (kernel pid call xargs xrvalue xerrno resumed? time index)
@@ -59,8 +58,7 @@
 	  (fd-for kernel pid new new-file)
 	  (update-info! new-file 'open-info 'resumed $
 			:record-history #t)
-	  (update-info! old-file 'input-close-info 'resumed $)
-	  (update-info! old-file 'output-close-info 'resumed $)
+	  (update-info! old-file 'close-info 'resumed $)
 	  ))
       (clear-unfinished-syscall! kernel pid))))
 
@@ -71,21 +69,18 @@
       (when successful?
 	(let* ((fd (car xargs))
 	       (file (or (fd-for kernel pid fd) (make <fd>))))
-	  (update-info! file 'input-close-info 'trace $)
-	  (update-info! file 'output-close-info 'trace $)
+	  (update-info! file 'close-info 'trace $)
 	  ))))
   :unfinished
   (lambda* (kernel pid call xargs xrvalue xerrno resumed? time index)
-    (update-info! #f 'input-close-info 'unfinished $)
-    (update-info! #f 'output-close-info 'unfinished $))
+    (update-info! #f 'close-info 'unfinished $))
   :resumed
   (lambda* (kernel pid call xargs xrvalue xerrno unfinished? time index)
     (let1 successful? (eq? (car xrvalue) 0)
       (when successful?
 	(let* ((fd (car xargs))
 	       (file (or (fd-for kernel pid fd) (make <fd>))))
-	  (update-info! file 'input-close-info 'resumed $)
-	  (update-info! file 'output-close-info 'resumed $)
+	  (update-info! file 'close-info 'resumed $)
 	  )
 	(clear-unfinished-syscall! kernel pid)))))
 
@@ -143,13 +138,13 @@
 	       (socket (or (fd-for kernel pid fd) (make <fd>)))
 	       (how (ref xargs 1)))
 	  (when (or (eq? how 'SHUT_RD) (eq? how 'SHUT_RDWR))
-	    (update-info! socket 'input-close-info 'trace $))
+	    (update-info! socket 'input-shutdown-info 'trace $))
 	  (when (or (eq? how 'SHUT_WR) (eq? how 'SHUT_RDWR))
-	    (update-info! socket 'output-close-info 'trace $))))))
+	    (update-info! socket 'output-shutdown-info 'trace $))))))
   :unfinished
   (lambda* (kernel pid call xargs xrvalue xerrno  resumed? time index)
-    (update-info #f 'input-close-info 'unfinished $)
-    (update-info #f 'output-close-info 'unfinished $))
+    (update-info #f 'input-shutdown-info 'unfinished $)
+    (update-info #f 'output-shutdown-info 'unfinished $))
   :resumed
   (lambda* (kernel pid call xargs xrvalue xerrno unfinished? time index)
     (let1 successful? (eq? (car xrvalue) 0)
@@ -158,9 +153,9 @@
 	       (socket (or (fd-for kernel pid fd) (make <fd>)))
 	       (how (ref xargs 1)))
 	  (when (or (eq? how 'SHUT_RD) (eq? how 'SHUT_RDWR))
-	    (update-info! socket 'input-close-info 'resumed $))
+	    (update-info! socket 'input-shutdown-info 'resumed $))
 	  (when (or (eq? how 'SHUT_WR) (eq? how 'SHUT_RDWR))
-	    (update-info! socket 'output-close-info 'resumed $))))
+	    (update-info! socket 'output-shutdown-info 'resumed $))))
       (clear-unfinished-syscall! kernel pid))))
 
 ;; TODO: F_DUPFD, F_DUPFD_CLOEXEC

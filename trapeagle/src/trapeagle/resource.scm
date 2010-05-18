@@ -52,17 +52,15 @@
 (define-class <fd> (<resource>)
   (
    (open-info :init-value #f)
-   (input-close-info :init-form #f)
+   (close-info :init-form #f)
    (unfinished-syscall :init-value #f)
-   (output-close-info :init-form #f)
    (close-on-exec? :init-value #f)
    (async? :init-value #f)
    (io :init-form (list))
    ))
 
 (define-method closed? ((fd <fd>))
-  (and (ref fd 'input-close-info)
-       (ref fd 'output-close-info)))
+  (ref fd 'close-info))
 
 (define-method async? ((fd <fd>))
   (ref fd 'async?))
@@ -81,6 +79,8 @@
   ((bind-info :init-value #f)
    (listen-info :init-value #f)
    (connect-info :init-value #f)
+   (input-shutdown-info :init-value #f)
+   (close-shutdown-info :init-value #f)
    ))
 
 (define-class <request-socket> (<fd>)

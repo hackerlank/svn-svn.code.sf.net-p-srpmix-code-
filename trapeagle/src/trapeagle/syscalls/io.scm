@@ -46,7 +46,7 @@
 (defio sendto 'w)
 
 (defio close 'close)
-(defio shutdown 'close)			;? TODO
+(defio shutdown 'shutdown)			;? TODO
 (defio connect 'connect)
 (defio bind 'bind)
 (defio accept 'accept)
