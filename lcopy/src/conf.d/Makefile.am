@@ -30,6 +30,7 @@ dist_confd_DATA = \
 	hachoir,trunk.lcopy \
 	hal,trunk.lcopy \
 	httpclient,trunk.lcopy \
+	kernel,kvm.lcopy \
 	kernel,rt.lcopy \
 	kernel,trunk.lcopy \
 	kernel,xen-3_2.lcopy \
@@ -43,6 +44,8 @@ dist_confd_DATA = \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
 	perg,trunk.lcopy \
+	python-virtinst,trunk.lcopy \
+	qemu,kvm.lcopy \
 	qt-jambi,trunk.lcopy \
 	resource-agents,trunk.lcopy \
 	rgmanager,trunk.lcopy \
@@ -62,10 +65,12 @@ dist_confd_DATA = \
 	strace,trunk.lcopy \
 	twig,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
+	virt-manager,trunk.lcopy \
 	wfo,trunk.lcopy \
 	wireshark,trunk.lcopy \
 	with-log,trunk.lcopy \
 	xtrace,trunk.lcopy \
+	ymacs,trunk.lcopy \
 	zsh,trunk.lcopy \
 	\
 	$(NULL)
