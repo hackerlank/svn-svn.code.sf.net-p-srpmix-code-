@@ -84,3 +84,9 @@ rl_forward_word (count, key)") :which-func ("rl_end_of_line"))) :annotation-list
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^lcopy-trunk/pre-build/linux-2.6/net/unix/af_unix.c" :point 26510 :coding-system undecided-unix :line 1036 :surround ("
 " "" "	if (test_bit(SOCK_PASSCRED, &sock->flags) && !u->addr &&
 	    (err = unix_autobind(sock)) != 0)") :which-func ("unix_stream_connect"))) :annotation-list ((annotation :type text :data "!u->addr: バインドされていなかったら。")) :date "Sun May 16 04:03:12 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lsof-cant-identify-protocol))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/net/sop/srv/sources/attic/cradles/lcopy.sys/mirror/k/kernel/trunk/pre-build/linux-2.6/net/ipv4/af_inet.c" :point 19440 :coding-system undecided-unix :line 778 :surround ("		if (sk->sk_prot->shutdown)
+" "" "			sk->sk_prot->shutdown(sk, how);
+		break;") :which-func ("inet_shutdown"))) :annotation-list ((annotation :type text :data "ここで tcp_shutdown を呼ぶ。")) :date "Tue May 18 01:14:13 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lsof-cant-identify-protocol))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/net/sop/srv/sources/attic/cradles/lcopy.sys/mirror/k/kernel/trunk/pre-build/linux-2.6/net/ipv4/tcp.c" :point 49642 :coding-system undecided-unix :line 1865 :surround ("		/* Clear out any half completed packets.  FIN if needed. */
+" "" "		if (tcp_close_state(sk))
+			tcp_send_fin(sk);") :which-func ("tcp_shutdown"))) :annotation-list ((annotation :type text :data "sk->sk_shutdownにhowが設定されている。")) :date "Tue May 18 01:18:43 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lsof-cant-identify-protocol))
