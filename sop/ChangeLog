@@ -1,3 +1,14 @@
+2010-05-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cradle-confs/lcopy.sys: Set HLINK_MIRROR no.
+
+	* src/cradle-confs/lcopy.user: Ditto.
+
+	* src/cradle-confs/prelcopy.sys: Ditto.
+
+	* src/cron/sop-020-hardlink-mirror (hlink): Don't run hardlink
+	if HLINK_MIRROR is not in cf.
+
 2010-03-19  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-garbages (parse_arguments): Fix a typo.

@@ -8,6 +8,8 @@ BUILDERS=lcopy
 DIST_MAPPING=no
 INSTALL=yes
 
+HLINK_MIRROR=no
+
 CREATEREPO_OPTS=
 
 LCOPY_SYS_CONF_DIR=/etc/lcopy/conf.d

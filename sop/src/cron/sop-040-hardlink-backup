@@ -30,7 +30,7 @@ function hlink
     if test "$BACKUP" != yes; then
 	return 0
     fi
-    
+
     hardlink ${SOP_BACKUP_DIR}/${name}/mirror
 }
 

@@ -9,6 +9,8 @@ BUILDERS=lcopy
 DIST_MAPPING=no
 INSTALL=yes
 
+HLINK_MIRROR=no
+
 CREATEREPO_OPTS=
 
 PRELCOPY_SYS_CONF_DIR=/etc/prelcopy/conf.d

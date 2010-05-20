@@ -30,6 +30,10 @@ function hlink
     if test "$ENABLE" != yes; then
 	return 0
     fi
+
+    if test "$HLINK_MIRROR" = no; then
+	return 0
+    fi
     
     hardlink ${SOP_CRADLES_DIR}/${name}/mirror
 }
