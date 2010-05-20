@@ -11,7 +11,7 @@ Group: Development/System
 Requires(post): /sbin/service
 Requires: httpd gauche
 
-BuildRequire: gauche-devel
+BuildRequires: gauche-devel
 
 %description
 sources frontend inspired by GNU emacs

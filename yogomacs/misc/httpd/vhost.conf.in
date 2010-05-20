@@ -1,4 +1,5 @@
 NameVirtualHost *:@VHOST_PORT@
+Listen @VHOST_PORT@
 
 <VirtualHost *:@VHOST_PORT@>
     DocumentRoot /srv/sources

@@ -6,6 +6,7 @@
 (select-module yogomacs.main)
 
 (define (yogomacs-main params)
+  
   (list
    (cgi-header)
    (html-doctype)
