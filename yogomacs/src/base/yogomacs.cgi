@@ -1,5 +1,7 @@
 #!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+(use www.cgi)
+(use yogomacs.main)
 
-echo Content-Type: text/plain
-echo
-echo hello, yogomacs
+(cgi-main yogomacs-main)

@@ -1,6 +1,9 @@
 NameVirtualHost *:@VHOST_PORT@
 
 <VirtualHost *:@VHOST_PORT@>
-    DocumentRoot @VHOST_DOCROOT@
+    DocumentRoot /srv/sources
     ServerName @VHOST_SERVERNAME@
+    RewriteEngine on
+    RewriteRule .* /cgi-bin/@PACKAGE@.cgi?A=$0 [PT]
+    ScriptAlias /cgi-bin @VHOST_DOCROOT@/@PACKAGE@/cgi-bin
 </VirtualHost>

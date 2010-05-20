@@ -94,12 +94,16 @@ AC_ARG_WITH([config_name],
 AC_SUBST([ARGS_FOR_CONFIGURE_IN_SPEC], [$args_for_configure_in_spec])
 AC_SUBST([SPEC_CONFIG], [$config_name])
 
+AC_GAUCHE_INIT_EXT
+MODULEDIR=`$GAUCHE_CONFIG --sitelibdir`
+AC_SUBST(MODULEDIR)
 
 AC_OUTPUT([
 	   Makefile
 	   src/Makefile
 	   src/base/Makefile
 	   src/data/Makefile
+           src/yogomacs/Makefile
 	   misc/Makefile
 	   misc/ac-aux/Makefile
 	   misc/m4/Makefile
