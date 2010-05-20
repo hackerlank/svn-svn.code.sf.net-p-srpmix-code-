@@ -30,8 +30,8 @@
 		(hash-table-put! multiaccess-table ip (list file time))
 		(if last-access
 		    (and 
-		     (not (equal? (ref last-access 1) file))
-		     (not (eqv? (ref last-access 2) time)))
+		     (not (equal? (ref last-access 0) file))
+		     (not (eqv? (ref last-access 1) time)))
 		    #t))
 	      (acceptable-path-regex file)
 	      #f)))))
