@@ -98,12 +98,23 @@ AC_GAUCHE_INIT_EXT
 MODULEDIR=`$GAUCHE_CONFIG --sitelibdir`
 AC_SUBST(MODULEDIR)
 
+AC_CONFIG_COMMANDS([chmod-tests],[
+chmod 0755 tests/test.scm
+])
+
+AC_ARG_WITH([emacs],
+             AC_HELP_STRING([--with-emacs=PROG],
+                            [specify the executable file name of emacs]),
+             [ EMACS="${withval}" ])
+AM_PATH_LISPDIR
+
 AC_OUTPUT([
 	   Makefile
 	   src/Makefile
 	   src/base/Makefile
 	   src/data/Makefile
            src/yogomacs/Makefile
+           src/flserver/Makefile
 	   misc/Makefile
 	   misc/ac-aux/Makefile
 	   misc/m4/Makefile

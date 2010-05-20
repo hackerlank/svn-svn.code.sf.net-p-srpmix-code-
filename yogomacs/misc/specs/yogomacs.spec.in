@@ -58,6 +58,8 @@ fi
 %dir %{_datadir}/gauche/site/lib/yogomacs
 %{_datadir}/gauche/site/lib/yogomacs/*
 
+%dir %{_localstatedir}/run/yogomacs
+
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*
 

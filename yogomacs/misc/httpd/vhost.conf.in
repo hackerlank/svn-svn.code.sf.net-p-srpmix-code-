@@ -5,6 +5,6 @@ Listen @VHOST_PORT@
     DocumentRoot /srv/sources
     ServerName @VHOST_SERVERNAME@
     RewriteEngine on
-    RewriteRule .* /cgi-bin/@PACKAGE@.cgi?A=$0 [PT]
+    RewriteRule .* /cgi-bin/@PACKAGE@.cgi?path=$0&display=font-lock [PT]
     ScriptAlias /cgi-bin @VHOST_DOCROOT@/@PACKAGE@/cgi-bin
 </VirtualHost>
