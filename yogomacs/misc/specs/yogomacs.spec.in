@@ -1,0 +1,63 @@
+Summary: sources frontend inspired by GNU emacs
+Name: @PACKAGE@
+Version: @VERSION@
+Release: @RPM_RELEASE@
+Source: @PACKAGE@-@VERSION@.tar.bz2
+
+Buildroot: %{_tmppath}/%{name}-root
+License: GPLv3
+
+Group: Development/System
+Requires(post): /sbin/service
+Requires: httpd
+
+%description
+sources frontend inspired by GNU emacs
+
+%package @SPEC_CONFIG@
+Summary: httpd configuration for @PACKAGE@(@CONFIG configuration)
+Group: Development/System
+Requires: @PACKAGE@
+
+%description @SPEC_CONFIG@
+httpd configuration for @PACKAGE@(@CONFIG configuration)
+
+
+%prep
+%setup -q
+
+%build
+%configure @ARGS_FOR_CONFIGURE_IN_SPEC@
+make %{?_smp_mflags}
+
+%install
+%{__rm} -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+%clean
+%{__rm} -rf $RPM_BUILD_ROOT
+
+%post
+if test $1 = 1; then    # install
+    /sbin/service httpd status > /dev/null 2>&1 && /sbin/service httpd reload > /dev/null 2>&1 || :
+fi
+
+
+%files
+%defattr(-,root,root,-)
+%doc COPYING README
+%dir @WWWDIR@
+@WWWDIR@/*
+%dir %{_libexecdir}/@PACKAGE@/
+%{_libexecdir}/@PACKAGE@/*
+%{_libdir}/pkgconfig/@PACKAGE@.pc
+
+
+%files @SPEC_CONFIG@
+%config %{_sysconfdir}/httpd/conf.d/*
+
+
+%changelog
+* Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com>
+- First RPM build.
+
