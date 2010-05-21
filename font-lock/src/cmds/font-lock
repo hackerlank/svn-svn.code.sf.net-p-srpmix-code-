@@ -1,0 +1,37 @@
+#!/home/yamato/var/emacs/src/emacs --script
+(defun print-to-stderr (str)
+  (mapcar 'external-debugging-output str))
+
+(let ((input (car argv))
+      (output (cadr argv)))
+  (unless input
+    (print-to-stderr "*** No INPUT is given\n")
+    (kill-emacs 1)
+    )
+  (unless output
+    (print-to-stderr "*** No OUTPUT is given\n")
+    (kill-emacs 1)
+    )
+  (unless (file-readable-p input)
+    (print-to-stderr (format "*** Cannot read %s\n" 
+			     input))
+    (kill-exit 1)
+    )
+  (unless (file-writable-p output)
+    (print-to-stderr (format "*** Cannot write %s\n" 
+			     output))
+    (kill-emacs 1)
+    )
+  (let ((srcdir (or (file-name-directory input) "./"))
+	(dstdir output)
+	(file (file-name-nondirectory input)))
+					;    (require 'htmlfontify)
+    (load (expand-file-name "~/var/emacs/lisp/htmlfontify.el"))
+
+    (htmlfontify-load-rgb-file)
+    (let ((hfy-display-class '((type . x-toolkit)
+			       (class . color)
+			       (background . light))))
+      (hfy-copy-and-fontify-file srcdir dstdir file))))
+
+
