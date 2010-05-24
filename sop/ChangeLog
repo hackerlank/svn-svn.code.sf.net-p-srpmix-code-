@@ -1,3 +1,8 @@
+2010-05-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cradle-confs/jpackage-generic (mirrorlist): Use jpackage-6.0.
+	Use roundrobin failovermethod.
+
 2010-05-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cradle-confs/lcopy.sys: Set HLINK_MIRROR no.
