@@ -46,6 +46,7 @@ dist_confd_DATA = \
 	perg,trunk.lcopy \
 	python-virtinst,trunk.lcopy \
 	qemu,kvm.lcopy \
+	qemu,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
 	resource-agents,trunk.lcopy \
 	rgmanager,trunk.lcopy \
