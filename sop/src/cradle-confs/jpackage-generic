@@ -28,6 +28,7 @@ failovermethod=roundrobin
 gpgcheck=1
 gpgkey=http://www.jpackage.org/jpackage.asc
 enabled=1
+timeout=1800
 
 [jpackage-generic-updates]
 name=JPackage (free), generic
@@ -36,6 +37,7 @@ failovermethod=roundrobin
 gpgcheck=1
 gpgkey=http://www.jpackage.org/jpackage.asc
 enabled=1
+timeout=1800
 
 EOF
 )
