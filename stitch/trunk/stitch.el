@@ -1605,7 +1605,8 @@
 	   " "
 	   'display image)
 	  "\n"
-	  (or (concat footer "\n") "")
+	  (if footer
+	      (concat footer "\n") "")
 	  ))
 
 (defun stitch-graphviz-annotation-inline-format (cmd
@@ -1626,7 +1627,8 @@
 (defun stitch-graphviz-annotation-list-format (annotation cmd)
   (stitch-generic-image-annotation-list-format 
    (stitch-graphviz-create-image (stitch-klist-value annotation :data)
-				 cmd)))
+				 cmd)
+   nil))
 
 (defun stitch-graphviz-make-command-line (cmd dotfile pngfile)
   (if (stringp cmd)
