@@ -1,0 +1,5 @@
+#!/bin/sh
+
+emacs=${FL_EMACS:=emacs}
+
+$emacs -Q -l flserver.el

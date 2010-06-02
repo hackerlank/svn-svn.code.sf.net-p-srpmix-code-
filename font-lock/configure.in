@@ -1,0 +1,27 @@
+m4_define([pkg_name], [font-lock])
+m4_define([pkg_version], [0.0.0])
+
+AC_INIT(pkg_name, pkg_version)
+AC_CONFIG_AUX_DIR(misc/ac-aux)
+AM_INIT_AUTOMAKE([no-dist-gzip dist-bzip2])
+AC_CONFIG_MACRO_DIR([misc/m4])
+
+AC_CONFIG_MACRO_DIR([misc/m4])
+
+AC_ARG_WITH([emacs],
+             AC_HELP_STRING([--with-emacs=PROG],
+                            [specify the executable file name of emacs]),
+             [ EMACS="${withval}" ])
+AM_PATH_LISPDIR
+
+
+AC_OUTPUT([
+           Makefile
+	   misc/Makefile
+	   misc/ac-aux/Makefile
+	   misc/m4/Makefile
+	   src/Makefile
+	   src/cmds/Makefile
+	   src/elisp/Makefile
+	   src/elisp/flserver/Makefile
+	   ])

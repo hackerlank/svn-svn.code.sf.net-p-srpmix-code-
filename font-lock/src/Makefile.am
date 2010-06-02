@@ -1,0 +1,5 @@
+SUBDIRS= \
+	cmds  \
+	elisp \
+	\
+	$(NULL)
