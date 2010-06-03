@@ -2,4 +2,14 @@
 
 emacs=${FL_EMACS:=emacs}
 
-$emacs -Q -l flserver.el
+load_path=${FL_LOAD_PATH}
+if [ -n "$load_path" ]; then
+   load_path="-L load_path"
+fi
+
+config_el="${FL_CONFIG_EL}"
+if [ -n "$config_el" ]; then
+   config_el="-l $config_el"
+fi
+
+$emacs -Q $load_path -l flserver-decl.el $config_el -l flserver-main.el

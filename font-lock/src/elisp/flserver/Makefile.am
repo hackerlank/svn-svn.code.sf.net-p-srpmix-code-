@@ -6,5 +6,6 @@ dist_flserver_LISP = \
 	\
 	cssize.el   \
 	xhtmlize.el \
+	logging.el  \
 	\
 	$(NULL)

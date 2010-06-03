@@ -1,7 +1,8 @@
 SUBDIRS = flserver
 dist_lisp_LISP = \
 	\
-	flserver.el \
+	flserver-decl.el \
+	flserver-main.el \
 	\
 	$(NULL)
 
