@@ -1,0 +1,2 @@
+Hey, emacs don't add this directory to the load-path.
+Flserver will do it by itself after the initialization is done.
