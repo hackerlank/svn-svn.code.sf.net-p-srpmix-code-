@@ -3,6 +3,8 @@
 ;;
 ;; Extend load path
 ;;
+(eval-when-compile
+  (message "%s" process-environment))
 (let* ((file (symbol-file 'flserver))
        (flserver-dir (concat 
 		      (file-name-as-directory (file-name-directory file))
@@ -57,14 +59,43 @@
 
 
 ;;
+;; Load libraries
+;;
+(require 'xhtmlize)
+(require 'cssize)
+
+;;
 ;; Entry point for client
 ;;
-(defun flserver-entry (str)
+(defun flserver-entry (action &rest args)
   (flserver-touch)
-  (log-string "accept request")
-  (message "%s" str)
-  )
+  (cond 
+   ((eq action 'xhtmlize)
+    (apply #'flserver-xhtmlize args))
+   ((eq action 'cssize)
+    (apply #'flserver-cssize args))
+   ))
 
+(defun flserver-xhtmlize (src-file html-file css-dir)
+  (with-log-string
+   "xhtmlize" (format "src-file: %s, html-file: %s, css-dir: %s"
+		      src-file html-file css-dir)
+   (let ((xhtmlize-external-css-base-dir css-dir)
+	 (xhtmlize-external-css-base-url (or flserver-xhtmlize-external-css-base-url
+					     (concat "file://" css-dir))))
+     (xhtmlize-file src-file html-file))))
+
+(defun flserver-cssize (face css-dir requires)
+  (with-log-string
+   "cssize" (format "face: %s, css-dir: %s, requires %s"
+		    face css-dir requires)
+   (mapc #'require requires)
+   (set-foreground-color "black")
+   (set-background-color "white")
+   (xhtmlize-cssize face css-dir "Default")
+   (set-foreground-color "white")
+   (set-background-color "black")
+   (xhtmlize-cssize face css-dir "Invert")))
 
 ;;
 ;; Main

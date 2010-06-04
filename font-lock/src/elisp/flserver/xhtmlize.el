@@ -37,9 +37,6 @@
 (require 'assoc)
 
 (eval-when-compile
-  (if (string-match "XEmacs" emacs-version)
-      (byte-compiler-options
-	(warnings (- unresolved))))
   (defvar font-lock-auto-fontify)
   (defvar font-lock-support-mode)
   (defvar global-font-lock-mode)
@@ -255,7 +252,7 @@ Set this to nil if you prefer the default (fundamental) mode."
 		 (function :tag "User-defined major mode"))
   :group 'xhtmlize)
 
-(defcustom xhtmlize-external-css-base-url "http://srpmix.org/api/css"
+(defcustom xhtmlize-external-css-base-url nil
   "*URL where css files are expected to be stored to."
   :type 'string
   :group 'xhtmlize)
@@ -984,33 +981,54 @@ it's called with the same value of KEY.  All other times, the cached
   "<body>")
 
 ;;; External CSS based output support.
-(defun xhtmlize-css-link (face css-dir face-map)
-  (unless (xhtmlize-css-cached-on-disk-p face css-dir)
-    (xhtmlize-css-make-cache-on-disk face css-dir))
+(defun xhtmlize-css-link (face css-dir)
+  (set-foreground-color "black")
+  (set-background-color "white")
+  (xhtmlize-css-link0 face css-dir "Default")
+  (set-foreground-color "white")
+  (set-background-color "black")
+  (xhtmlize-css-link0 face css-dir "Invert")) 
+
+(defun xhtmlize-css-link0 (face css-dir title)
+  (unless (xhtmlize-css-cached-on-disk-p face css-dir title)
+    (xhtmlize-css-make-cache-on-disk face css-dir title))
   (insert "    <link rel=\"stylesheet\" type=\"text/css\""
-	  (format " href=\"%s/%s.css\""
+	  (format " href=\"%s/%s\""
 		  xhtmlize-external-css-base-url
-		  (cssize-clean-up-face-name face))
+		  (xhtmlize-css-make-file-name face title)
+		  )
+	  (format " title=\"%s\"" title)
 	  "/>"
 	  ?\n))
 
 (defun xhtmlize-external-css-insert-head (buffer-faces face-map)
   (let ((css-dir xhtmlize-external-css-base-dir))
-    (xhtmlize-css-link 'default css-dir face-map)
-    (xhtmlize-css-link 'fringe css-dir face-map)
-    (xhtmlize-css-link 'highlight css-dir face-map)
+    (mapc
+     (lambda (face)
+       (xhtmlize-css-link face css-dir))
+     '(default fringe highlight))
     (dolist (face (sort* (copy-list buffer-faces) #'string-lessp
 			 :key (lambda (f)
 				(cssize-fstruct-css-name (gethash f face-map)))))
-      (xhtmlize-css-link face css-dir face-map))))
+      (xhtmlize-css-link face css-dir))))
 
-(defun xhtmlize-css-cached-on-disk-p (face dir)
-  (let ((file (concat (cssize-clean-up-face-name face) ".css")))
+(defun xhtmlize-css-make-file-name (face title)
+  (concat (cssize-clean-up-face-name face) "--" title "." "css"))
+
+(defun xhtmlize-css-cached-on-disk-p (face dir title)
+  (let ((file (xhtmlize-css-make-file-name face title)))
     (let ((path (concat (file-name-as-directory dir) file)))
       (file-readable-p path))))
 
-(defun xhtmlize-css-make-cache-on-disk (face dir)
-  (let ((file (concat (cssize-clean-up-face-name face) ".css")))
+(defun xhtmlize-css-make-cache-on-disk (face dir title)
+  (unless (xhtmlize-css-cached-on-disk-p face dir title)
+    (xhtmlize-css-make-cache-on-disk0 face dir title)))
+
+(defun xhtmlize-cssize (face dir title)
+  (xhtmlize-css-make-cache-on-disk0 face dir title))
+
+(defun xhtmlize-css-make-cache-on-disk0 (face dir title)
+  (let ((file (xhtmlize-css-make-file-name face title)))
     (let ((path (concat (file-name-as-directory dir) file)))
       (cssize-file face path))))
 
@@ -1294,7 +1312,7 @@ it's called with the same value of KEY.  All other times, the cached
 	  ;; NEW CODE
 	  ;; SRPMIX own LINUME hacking
 	  (mapc (lambda (o)
-		  (xhtmlize-zero-width-overlay o)
+		  (xhtmlize-zero-width-overlay o htmlbuf insert-text-with-id-method face-map)
 		  )
 		(xhtmlize-overlays-at (point)))
 
@@ -1379,16 +1397,16 @@ it's called with the same value of KEY.  All other times, the cached
 						    (buffer-disable-undo))
 						  b))
 
-(defun xhtmlize-zero-width-overlay (o)
+(defun xhtmlize-zero-width-overlay (o htmlbuf insert-method face-map)
   (let ((handler (xhtmlize-zero-width-overlay-acceptable-p o)))
     (when handler
       (let ((s (xhtmlize-zero-width-overlay-prepare o handler)))
 	(with-current-buffer xhtmlize-zero-width-overlay-temp-buffer
 	  (erase-buffer) 
 	  (when s (insert s))
-	  (xhtmlize-buffer-0 o handler))))))
+	  (xhtmlize-buffer-0 o handler htmlbuf insert-method face-map))))))
 
-(defun xhtmlize-buffer-0 (o handler)
+(defun xhtmlize-buffer-0 (o handler htmlbuf insert-method face-map)
   (let (next-change face-list fstruct-list text trailing-ellipsis)
     (goto-char (point-min))
     (while (not (eobp))
@@ -1411,7 +1429,7 @@ it's called with the same value of KEY.  All other times, the cached
       (when (> (length text) 0)
 	;; Insert the text, along with the necessary markup to
 	;; represent faces in FSTRUCT-LIST.
-	(funcall insert-text-with-id-method
+	(funcall insert-method
 		 text
 		 (xhtmlize-zero-width-overlay-make-id o handler)
 		 (xhtmlize-zero-width-overlay-make-href o handler)

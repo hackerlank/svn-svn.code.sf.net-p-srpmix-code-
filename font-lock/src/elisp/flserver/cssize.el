@@ -21,7 +21,8 @@
 ;; This program is derived from htmlize.el written by 
 ;; Hrvoje Niksic <hniksic@xemacs.org>.
 
-(require 'cl)
+(eval-and-compile 
+  (require 'cl))
 
 
 (defgroup cssize nil
@@ -165,7 +166,7 @@ Please note that font sizes only work with CSS-based output types."
 
 ;; Convert COLOR to the #RRGGBB string.  If COLOR is already in that
 ;; format, it's left unchanged.
-
+(defvar cssize-color-rgb-hash nil)
 (defun cssize-color-to-rgb (color)
   (let ((rgb-string nil))
     (cond ((null color)
@@ -184,18 +185,9 @@ Please note that font sizes only work with CSS-based output types."
 	  (t
 	   ;; We're getting the RGB components from Emacs.
 	   (let ((rgb
-		  ;; Here I cannot conditionalize on (fboundp ...) 
-		  ;; because ps-print under some versions of GNU Emacs
-		  ;; defines its own dummy version of
-		  ;; `color-instance-rgb-components'.
-		  (if cssize-running-xemacs
-		      (mapcar (lambda (arg)
-				(/ arg 256))
-			      (color-instance-rgb-components
-			       (make-color-instance color)))
-		    (mapcar (lambda (arg)
+		  (mapcar (lambda (arg)
 			      (/ arg 256))
-			    (x-color-values color)))))
+			    (x-color-values color))))
 	     (when rgb
 	       (setq rgb-string (apply #'format "#%02x%02x%02x" rgb))))))
     ;; If RGB-STRING is still nil, it means the color cannot be found,
@@ -364,7 +356,8 @@ If no rgb.txt file is found, return nil."
 ;; Compile the RGB map when loaded.  On systems where rgb.txt is
 ;; missing, the value of the variable will be nil, and rgb.txt will
 ;; not be used.
-(defvar cssize-color-rgb-hash (cssize-get-color-rgb-hash))
+(setq cssize-color-rgb-hash (cssize-get-color-rgb-hash))
+
 
 ;; Internal function; not a method.
 (defun cssize-css-specs (fstruct)
@@ -427,9 +420,15 @@ If no rgb.txt file is found, return nil."
       (t
 	 ""))
      (format "/* About copyright see %s */\n"
-	     (describe-simplify-lib-file-name (symbol-file face 'defface))
-	     ;(symbol-file face 'defface)
-	     )
+	     (cond
+	      ((fboundp 'describe-simplify-lib-file-name)
+	       (describe-simplify-lib-file-name (symbol-file face 'defface)))
+	      (t
+	       (let ((file (find-lisp-object-file-name face 'face)))
+		 (if (eq file 'C-source)
+		     "c source code of GNU Emacs"
+		   file)))
+	     ))
      ;; 
      (if name name (concat "." (cssize-fstruct-css-name fstruct)))
      (if (null specs)

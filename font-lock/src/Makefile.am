@@ -1,5 +1,6 @@
 SUBDIRS= \
-	cmds  \
-	elisp \
+	cmds   \
+	elisp  \
+	gauche \
 	\
 	$(NULL)

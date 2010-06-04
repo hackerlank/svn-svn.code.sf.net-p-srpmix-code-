@@ -1,0 +1,104 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
+(use flclient)
+(use gauche.parseopt)
+(use file.util)
+
+
+(define commands (make-hash-table 'eq?))
+(define-class <command> ()
+  ((proc :init-keyword :proc)
+   (doc  :init-keyword :doc)))
+
+
+(define (show-help prog n)
+  (format #t "Usage: \n")
+  (format #t "	~a --help|-h\n" prog)
+  (for-each
+   (lambda (key)
+     (format #t "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] ~a ~a\n" prog
+	     key
+	     (ref (ref commands key) 'doc)))
+   (sort (hash-table-keys commands)
+	 (lambda (a b)
+	   (string<? (x->string a)
+		     (x->string b)))))
+  (exit n))
+
+
+(define-macro (define-command cmd params-spec doc . body)
+  (let1 sym (gensym)
+    `(let ((,sym (lambda ,params-spec . ,body)))
+       (set! (ref commands ',cmd)
+	     (make <command> 
+	       :proc ,sym
+	       :doc ,doc)))))
+
+(define-command help (prog emacsclient socket-name)
+  ""
+  (show-help prog 0))
+
+(define-command cssize (prog emacsclient socket-name args)
+  "FACE CSS-DIR [REQUIRES...]"
+  (let ((face (string->symbol (ref args 0)))
+	(css-dir (ref args 1))
+	(requires (map string->symbol (list-tail args 2))))
+  (let1 status (flclient-cssize face css-dir requires 
+				:emacsclient emacsclient
+				:socket-name socket-name)
+    (exit status))))
+
+(define-command xhtmlize (prog emacsclient socket-name args)
+  "SRC_FILE HTML_FILE CSS_DIR"
+  (unless (eq? (length args) 3)
+    (with-output-to-port (current-error-port)
+      (lambda () 
+	(print "Wrong number of arguments")
+	(show-help prog 1))))
+  
+  (let ((src-file (ref args 0))
+	(html-file (ref args 1))
+	(css-dir (ref args 2)))
+    (unless (file-is-readable? src-file)
+      (format (current-error-port) "Cannot read: ~a\n" src-file)
+      (exit 1))
+    (guard (e
+	    ((else 
+	      (format (current-error-port) "Cannnot create html file: ~a\n" html-file)
+	      (exit 1))))
+	   (touch-file html-file))
+    (guard (e
+	    ((else
+	      (format (current-error-port) "Cannnot create directory: ~a\n" css-dir)
+	      (exit 1))))
+	   (make-directory* css-dir))
+    (let1 status (flclient-xhtmlize src-file html-file css-dir
+				    :emacsclient emacsclient
+				    :socket-name socket-name)
+      
+      (exit status))))
+
+(define (main args)
+  (let ((prog (car args))
+	(args (cdr args)))
+    (let-args args
+	((help "h|help" => (cute show-help prog 0))
+	 (emacsclient "emacsclient=s"  "emacsclient")
+	 (socket-name "socket-name=s"  "flserver")
+	 . rest)
+      (when (eq? (length rest) 0)
+	(with-output-to-port (current-error-port)
+	  (lambda () 
+	    (print "Wrong number of arguments")
+	    (show-help prog 1))))
+      (let ((cmd (string->symbol (car rest)))
+	    (rest (cdr rest)))
+	(let1 command (ref commands cmd #f)
+	  (if command
+	      ((ref command 'proc) prog emacsclient socket-name rest)
+	      (with-output-to-port (current-error-port)
+		(lambda ()
+		  (format #t "No such command: ~s\n" cmd) 
+		  (show-help prog 1)))))))))

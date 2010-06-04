@@ -15,6 +15,15 @@ AC_ARG_WITH([emacs],
 AM_PATH_LISPDIR
 
 
+AC_GAUCHE_INIT_EXT
+GAUCHE_MODULEDIR=`$GAUCHE_CONFIG --sitelibdir`
+AC_SUBST(GAUCHE_MODULEDIR)
+
+
+AC_CONFIG_COMMANDS([chmod],[
+chmod 0755 src/cmds/*
+])
+
 AC_OUTPUT([
            Makefile
 	   misc/Makefile
@@ -24,4 +33,5 @@ AC_OUTPUT([
 	   src/cmds/Makefile
 	   src/elisp/Makefile
 	   src/elisp/flserver/Makefile
+	   src/gauche/Makefile
 	   ])

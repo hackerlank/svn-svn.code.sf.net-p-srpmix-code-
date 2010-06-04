@@ -27,4 +27,10 @@
   (let ((str (apply #'format fmt args)))
     (log-string str)))
 
+(defmacro with-log-string (key str &rest body)
+  `(progn
+     (log-format "%s-start %s" ,key ,str)
+     ,@body
+     (log-format "%s-end %s" ,key ,str)))
+
 (provide 'log)
