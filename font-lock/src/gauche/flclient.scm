@@ -1,6 +1,7 @@
 (define-module flclient
   (export flclient-xhtmlize
-	  flclient-cssize)
+	  flclient-cssize
+	  flclient-shutdown)
   (use gauche.process)
   )
 (select-module flclient)
@@ -10,14 +11,23 @@
 		      (socket-name :socket-name "flserver"))
 		(invoke-emacsclient emacsclient
 				    socket-name
-				    `(flserver-entry 'xhtmlize ,src-file ,html-file ,css-dir))))
+				    `(flserver 'xhtmlize ,src-file ,html-file ,css-dir))))
 
 (define (flclient-cssize face css-dir requires . rest)
   (let-keywords rest ((emacsclient :emacsclient "emacsclient")
 		      (socket-name :socket-name "flserver"))
 		(invoke-emacsclient emacsclient
 				    socket-name
-				    `(flserver-entry 'cssize ',face ,css-dir ',requires))))
+				    `(flserver 'cssize ',face ,css-dir ',requires))))
+(define (flclient-shutdown . rest)
+  (let-keywords rest ((emacsclient :emacsclient "emacsclient")
+		      (socket-name :socket-name "flserver"))
+		(invoke-emacsclient emacsclient
+				    socket-name
+				    `(flserver 'shutdown))))
+
+
+
 
 ;; TODO: Timeout
 (define (invoke-emacsclient emacsclient socket-name expression)

@@ -67,13 +67,15 @@
 ;;
 ;; Entry point for client
 ;;
-(defun flserver-entry (action &rest args)
+(defun flserver (action &rest args)
   (flserver-touch)
   (cond 
    ((eq action 'xhtmlize)
     (apply #'flserver-xhtmlize args))
    ((eq action 'cssize)
     (apply #'flserver-cssize args))
+   ((eq action 'shutdown)
+    (apply #'flserver-shutdown args))
    ))
 
 (defun flserver-xhtmlize (src-file html-file css-dir)
@@ -96,6 +98,10 @@
    (set-foreground-color "white")
    (set-background-color "black")
    (xhtmlize-cssize face css-dir "Invert")))
+
+(defun flserver-shutdown ()
+  (log-string "lazy shutdown")
+  (setq flserver-idle-timeout 0))
 
 ;;
 ;; Main

@@ -10,17 +10,24 @@
 (define commands (make-hash-table 'eq?))
 (define-class <command> ()
   ((proc :init-keyword :proc)
-   (doc  :init-keyword :doc)))
+   (doc  :init-keyword :doc)
+   (connect? :init-keyword :connect?)))
 
-
+(define (show-help-1 prog key)
+  (lambda (key)
+    (let1 cmd (ref commands key)
+      (format #t 
+	      (if (ref cmd 'connect?) 
+		  "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] ~a ~a\n"
+		  "	~a ~a ~a\n")
+	      prog
+	      key
+	      (ref cmd 'doc)))))
 (define (show-help prog n)
   (format #t "Usage: \n")
   (format #t "	~a --help|-h\n" prog)
   (for-each
-   (lambda (key)
-     (format #t "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] ~a ~a\n" prog
-	     key
-	     (ref (ref commands key) 'doc)))
+   (pa$ show-help-1 prog)
    (sort (hash-table-keys commands)
 	 (lambda (a b)
 	   (string<? (x->string a)
@@ -28,30 +35,42 @@
   (exit n))
 
 
-(define-macro (define-command cmd params-spec doc . body)
+(define-macro (define-command cmd params-spec doc connect? . body)
   (let1 sym (gensym)
     `(let ((,sym (lambda ,params-spec . ,body)))
        (set! (ref commands ',cmd)
 	     (make <command> 
 	       :proc ,sym
-	       :doc ,doc)))))
+	       :doc ,doc
+	       :connect? ,connect?)))))
 
-(define-command help (prog emacsclient socket-name)
-  ""
+(define-command help (prog emacsclient socket-name args)
+  "" #f
+  
   (show-help prog 0))
 
+(define-command shutdown (prog emacsclient socket-name args)
+  "" #t
+  (flclient-shutdown :emacsclient emacsclient
+		     :socket-name socket-name))
+
 (define-command cssize (prog emacsclient socket-name args)
-  "FACE CSS-DIR [REQUIRES...]"
+  "FACE CSS-DIR [REQUIRES...]" #t
+  (unless (eq? (length args) 3)
+    (with-output-to-port (current-error-port)
+      (lambda () 
+	(print "Wrong number of arguments")
+	(show-help prog 1))))
   (let ((face (string->symbol (ref args 0)))
 	(css-dir (ref args 1))
 	(requires (map string->symbol (list-tail args 2))))
-  (let1 status (flclient-cssize face css-dir requires 
-				:emacsclient emacsclient
-				:socket-name socket-name)
-    (exit status))))
+    (let1 status (flclient-cssize face css-dir requires 
+				  :emacsclient emacsclient
+				  :socket-name socket-name)
+      (exit status))))
 
 (define-command xhtmlize (prog emacsclient socket-name args)
-  "SRC_FILE HTML_FILE CSS_DIR"
+  "SRC_FILE HTML_FILE CSS_DIR" #t
   (unless (eq? (length args) 3)
     (with-output-to-port (current-error-port)
       (lambda () 

@@ -1318,7 +1318,7 @@ it's called with the same value of KEY.  All other times, the cached
 
 	  (when (bolp)
 	    (funcall insert-text-with-id-method " "
-		     (format "point:%d" (point))
+		     (format "P:%d" (point))
 		     nil
 		     (mapcar (lambda (f)
 			       (gethash f face-map))
@@ -1351,7 +1351,8 @@ it's called with the same value of KEY.  All other times, the cached
 	    ;; Insert the text, along with the necessary markup to
 	    ;; represent faces in FSTRUCT-LIST.
 	    (funcall insert-text-with-id-method text 
-		     (format "font-lock:%s" (point))
+		     ;(format "font-lock:%s" (point))
+		     (format "F:%s" (point))
 		     nil
 		     fstruct-list
 		     htmlbuf))
