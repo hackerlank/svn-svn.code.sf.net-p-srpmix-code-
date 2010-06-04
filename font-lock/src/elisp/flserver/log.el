@@ -2,4 +2,5 @@
 
 
 (defun log (str)
+  )
 (provide 'logging)
