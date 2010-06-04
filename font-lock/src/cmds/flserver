@@ -1,15 +1,57 @@
-#!/bin/sh
+#!/bin/bash
 
-emacs=${FL_EMACS:=emacs}
+emacs=emacs
+load_path=
+config_el=
 
-load_path=${FL_LOAD_PATH}
-if [ -n "$load_path" ]; then
-   load_path="-L load_path"
-fi
+function print_usage
+{
+    echo "Usage: "
+    echo "  flserver --help|-h"
+    echo "  flserver [--load-path=PATH] [--emacs=EMACS] [config_el]"
+    echo
+}
+function parse_arugments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    (--load-path=*)
+		load_path="-L ${1/--load-path=}"
+		;;
+	    (--emacs=*)
+		emacs="${1/--emacs=}"
+		;;
+	    (--*)
+		echo "No such option: $1" 1>&2
+		print_usage 1>&2
+		exit 1
+		;;
+	    (*)
+		break;
+		;;
+	esac
+	shift
+    done
+    
+    if [ $# = 0 ]; then
+	:			# do nothing
+    elif [ $# = 1 ]; then
+	config_el=$1
+	shift
+    else
+	print_usage 1>&2
+	exit 1
+    fi
+}
 
-config_el="${FL_CONFIG_EL}"
-if [ -n "$config_el" ]; then
-   config_el="-l $config_el"
-fi
+function main
+{
+    parse_arugments "$@"
+    $emacs -Q $load_path -l flserver-decl.el $config_el -l flserver-main.el
+}
 
-$emacs -Q $load_path -l flserver-decl.el $config_el -l flserver-main.el
+main "$@"
