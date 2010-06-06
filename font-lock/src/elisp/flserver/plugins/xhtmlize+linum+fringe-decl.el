@@ -1,0 +1,1 @@
+(provide 'xhtml-linum-fringe-decl)

@@ -19,4 +19,14 @@ dist_flserver_LISP = \
 	$(NULL)
 
 pluginsdir = $(lispdir)/flserver/plugins
+dist_plugins_LISP = \
+	\
+	flserver/plugins/xhtmlize+linum-decl.el \
+	flserver/plugins/xhtmlize+linum-main.el \
+	\
+	flserver/plugins/xhtmlize+linum+fringe-decl.el
+	flserver/plugins/xhtmlize+linum+fringe-main.el
+	\
+	$(NULL)
+
 modesdir = $(lispdir)/flserver/modes

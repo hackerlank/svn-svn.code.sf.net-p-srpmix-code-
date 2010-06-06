@@ -1,3 +1,4 @@
+(require 'xhtml-linum-fringe-decl)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 
 ;; Handle zero with overlays like linum
@@ -19,3 +20,4 @@
 ;; 	     htmlbuf))
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(provide 'xhtml-linum-fringe-main)

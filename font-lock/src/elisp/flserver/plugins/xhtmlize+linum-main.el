@@ -1,5 +1,6 @@
 (require 'linum)
 (require 'xhtmlize)
+(require 'xhtmlize-linum-decl)
 
 (defun xhtmlize-linum-acceptable-p (o)
   (if (overlay-get o 'linum-str) t nil))
@@ -33,4 +34,4 @@
 (xhtmlize-add-builtin-faces 'linum)
 
 
-(provide 'xhtmlize+linum)
+(provide 'xhtmlize+linum-main)
