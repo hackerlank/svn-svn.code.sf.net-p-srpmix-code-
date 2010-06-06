@@ -1,8 +1,8 @@
 - Cleanup xhtmlize.el and cssize.el.
 -- Build rgb map
--- Remove XEmacs related code
+-- Remove XEmacs related code <done>
 -- optiomize
--- plugins
---- linum
+-- plugins <working>
+--- linum  <working>
 - XSLT for range extraction
 - Xvnc and Screen wrapper

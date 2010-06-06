@@ -24,7 +24,7 @@
 ;;
 ;;        <http://fly.srk.fer.hr/~hniksic/emacs/xhtmlize.el>
 ;;
-;; You can find a sample of xhtmlize's output (possibly generated with
+;; You can find a sample of htmlize's output (possibly generated with
 ;; an older version) at:
 ;;
 ;;        <http://fly.srk.fer.hr/~hniksic/emacs/xhtmlize.el.html>
@@ -39,31 +39,9 @@
 (eval-when-compile
   (defvar font-lock-auto-fontify)
   (defvar font-lock-support-mode)
-  (defvar global-font-lock-mode)
-  (when (and (eq emacs-major-version 19)
-	     (not (string-match "XEmacs" emacs-version)))
-    ;; Older versions of GNU Emacs fail to autoload cl-extra even when
-    ;; `cl' is loaded.
-    (load "cl-extra")))
+  (defvar global-font-lock-mode))
 
-(defconst xhtmlize-version "1.34")
-
-;; Incantations to make custom stuff work without customize, e.g. on
-;; XEmacs 19.14 or GNU Emacs 19.34.
-(eval-and-compile
-  (condition-case ()
-      (require 'custom)
-    (error nil))
-  (if (and (featurep 'custom) (fboundp 'custom-declare-variable))
-      nil				; we've got what we needed
-    ;; No custom or obsolete custom, define surrogates.  Define all
-    ;; three macros, so we don't hose another library that expects
-    ;; e.g. `defface' to work after (fboundp 'defcustom) succeeds.
-    (defmacro defgroup (&rest ignored) nil)
-    (defmacro defcustom (var value doc &rest ignored)
-      `(defvar ,var ,value ,doc))
-    (defmacro defface (face value doc &rest stuff)
-      `(make-face ,face))))
+(defconst xhtmlize-version "1.34.1")
 
 (defgroup xhtmlize nil
   "Convert buffer text and faces to HTML."
@@ -252,7 +230,7 @@ Set this to nil if you prefer the default (fundamental) mode."
 		 (function :tag "User-defined major mode"))
   :group 'xhtmlize)
 
-(defcustom xhtmlize-external-css-base-url nil
+(defcustom xhtmlize-external-css-base-url "file:///tmp"
   "*URL where css files are expected to be stored to."
   :type 'string
   :group 'xhtmlize)
@@ -261,6 +239,10 @@ Set this to nil if you prefer the default (fundamental) mode."
   "*Directory where css files are stored to."
   :type 'directory
   :group 'xhtmlize)
+
+(defvar xhtmlize-builtin-faces nil)
+(defun  xhtmlize-add-builtin-faces (face)
+  (adjoin face xhtmlize-builtin-faces :test 'equal))
 
 (defvar xhtmlize-before-hook nil
   "Hook run before htmlizing a buffer.
@@ -280,95 +262,6 @@ output.")
 
 ;;; Some cross-Emacs compatibility.
 
-;; I try to conditionalize on features rather than Emacs version, but
-;; in some cases checking against the version *is* necessary.
-(defconst xhtmlize-running-xemacs (string-match "XEmacs" emacs-version))
-
-(eval-and-compile
-  ;; save-current-buffer, with-current-buffer, and with-temp-buffer
-  ;; are not available in 19.34 and in older XEmacsen.  Strictly
-  ;; speaking, we should stick to our own namespace and define and use
-  ;; xhtmlize-save-current-buffer, etc.  But non-standard special forms
-  ;; are a pain because they're not properly fontified or indented and
-  ;; because they look weird and ugly.  So I'll just go ahead and
-  ;; define the real ones if they're not available.  If someone
-  ;; convinces me that this breaks something, I'll switch to the
-  ;; "xhtmlize-" namespace.
-  (unless (fboundp 'save-current-buffer)
-    (defmacro save-current-buffer (&rest forms)
-      `(let ((__scb_current (current-buffer)))
-	 (unwind-protect
-	     (progn ,@forms)
-	   (set-buffer __scb_current)))))
-  (unless (fboundp 'with-current-buffer)
-    (defmacro with-current-buffer (buffer &rest forms)
-      `(save-current-buffer (set-buffer ,buffer) ,@forms)))
-  (unless (fboundp 'with-temp-buffer)
-    (defmacro with-temp-buffer (&rest forms)
-      (let ((temp-buffer (gensym "tb-")))
-	`(let ((,temp-buffer
-		(get-buffer-create (generate-new-buffer-name " *temp*"))))
-	   (unwind-protect
-	       (with-current-buffer ,temp-buffer
-		 ,@forms)
-	     (and (buffer-live-p ,temp-buffer)
-		  (kill-buffer ,temp-buffer))))))))
-
-;; We need a function that efficiently finds the next change of a
-;; property (usually `face'), preferably regardless of whether the
-;; change occurred because of a text property or an extent/overlay.
-;; As it turns out, it is not easy to do that compatibly.
-;;
-;; Under XEmacs, `next-single-property-change' does that.  Under GNU
-;; Emacs beginning with version 21, `next-single-char-property-change'
-;; is available and does the same.  GNU Emacs 20 had
-;; `next-char-property-change', which we can use.  GNU Emacs 19 didn't
-;; provide any means for simultaneously examining overlays and text
-;; properties, so when using Emacs 19.34, we punt and fall back to
-;; `next-single-property-change', thus ignoring overlays altogether.
-
-(cond
- (xhtmlize-running-xemacs
-  ;; XEmacs: good.
-  (defun xhtmlize-next-change (pos prop &optional limit)
-    (next-single-property-change pos prop nil (or limit (point-max)))))
- ((fboundp 'next-single-char-property-change)
-  ;; GNU Emacs 21: good.
-  (defun xhtmlize-next-change (pos prop &optional limit)
-    (next-single-char-property-change pos prop nil limit)))
- ((fboundp 'next-char-property-change)
-  ;; GNU Emacs 20: bad, but fixable.
-  (defun xhtmlize-next-change (pos prop &optional limit)
-    (let ((done nil)
-	  (current-value (get-char-property pos prop))
-	  newpos next-value)
-      ;; Loop over positions returned by next-char-property-change
-      ;; until the value of PROP changes or we've hit EOB.
-      (while (not done)
-	(setq newpos (next-char-property-change pos limit)
-	      next-value (get-char-property newpos prop))
-	(cond ((eq newpos pos)
-	       ;; Possibly at EOB?  Whatever, just don't infloop.
-	       (setq done t))
-	      ((eq next-value current-value)
-	       ;; PROP hasn't changed -- keep looping.
-	       )
-	      (t
-	       (setq done t)))
-	(setq pos newpos))
-      pos)))
- (t
-  ;; GNU Emacs 19.34: hopeless, cannot properly support overlays.
-  (defun xhtmlize-next-change (pos prop &optional limit)
-    (unless limit
-      (setq limit (point-max)))
-    (let ((res (next-single-property-change pos prop)))
-      (if (or (null res)
-	      (> res limit))
-	  limit
-	res)))))
-
-;; NEW CODE
 (defun xhtmlize-fold (proc list result)
   (if (null list)
       result
@@ -398,18 +291,15 @@ output.")
   (let ((r0 (next-char-property-change pos limit))
 	(r1 (next-single-char-property-change pos prop nil limit)))
     (if (< r0 r1)
-	(let ((ovs (xhtmlize-overlays-between r0 r1)))
-	  (let ((r00 (some (lambda (o) 
-			     (and (xhtmlize-zero-width-overlay-acceptable-p o)
-				  (overlay-start o))
-			     )
-			   ovs)))
-	    (or r00 r1)))
+	(let* ((ovs (xhtmlize-overlays-between r0 r1))
+	       (r00 (some (lambda (o) 
+			    (and (xhtmlize-zero-width-overlay-acceptable-p o)
+				 (overlay-start o))
+			    )
+			  ovs)))
+	  (or r00 r1))
       r1)))
-	  
       
-    
- 
 ;;; Transformation of buffer text: HTML escapes, untabification, etc.
 
 (defvar xhtmlize-basic-character-table
@@ -773,127 +663,90 @@ without modifying their meaning."
 
 (defun xhtmlize-faces-in-buffer ()
   "Return a list of faces used in the current buffer.
-Under XEmacs, this returns the set of faces specified by the extents
-with the `face' property.  (This covers text properties as well.)  Under
+Under
 GNU Emacs, it returns the set of faces specified by the `face' text
 property and by buffer overlays that specify `face'."
   (let (faces)
-    ;; Testing for (fboundp 'map-extents) doesn't work because W3
-    ;; defines `map-extents' under FSF.
-    (if xhtmlize-running-xemacs
-	(let (face-prop)
-	  (map-extents (lambda (extent ignored)
-			 (setq face-prop (extent-face extent)
-			       ;; FACE-PROP can be a face or a list of
-			       ;; faces.
-			       faces (if (listp face-prop)
-					 (union face-prop faces)
-				       (adjoin face-prop faces)))
-			 nil)
-		       nil
-		       ;; Specify endpoints explicitly to respect
-		       ;; narrowing.
-		       (point-min) (point-max) nil nil 'face))
-      ;; FSF Emacs code.
-      ;; Faces used by text properties.
-      (let ((pos (point-min)) face-prop next)
-	(while (< pos (point-max))
-	  (setq face-prop (get-text-property pos 'face)
-		next (or (next-single-property-change pos 'face) (point-max)))
-	  ;; FACE-PROP can be a face/attrlist or a list thereof.
-	  (setq faces (if (xhtmlize-face-list-p face-prop)
-			  (nunion (mapcar #'xhtmlize-unstringify-face face-prop)
-				  faces :test 'equal)
-			(adjoin (xhtmlize-unstringify-face face-prop)
-				faces :test 'equal)))
-	  (setq pos next)))
-      ;; Faces used by overlays.
-      (dolist (overlay (overlays-in (point-min) (point-max)))
-	(let ((face-prop (overlay-get overlay 'face)))
-	  ;; FACE-PROP can be a face/attrlist or a list thereof.
-	  (setq faces (if (xhtmlize-face-list-p face-prop)
-			  (nunion (mapcar #'xhtmlize-unstringify-face face-prop)
-				  faces :test 'equal)
-			(adjoin (xhtmlize-unstringify-face face-prop)
-				faces :test 'equal))))))
+    ;; FSF Emacs code.
+    ;; Faces used by text properties.
+    (let ((pos (point-min)) face-prop next)
+      (while (< pos (point-max))
+	(setq face-prop (get-text-property pos 'face)
+	      next (or (next-single-property-change pos 'face) (point-max)))
+	;; FACE-PROP can be a face/attrlist or a list thereof.
+	(setq faces (if (xhtmlize-face-list-p face-prop)
+			(nunion (mapcar #'xhtmlize-unstringify-face face-prop)
+				faces :test 'equal)
+		      (adjoin (xhtmlize-unstringify-face face-prop)
+			      faces :test 'equal)))
+	(setq pos next)))
+    ;; Faces used by overlays.
+    (dolist (overlay (overlays-in (point-min) (point-max)))
+      (let ((face-prop (overlay-get overlay 'face)))
+	;; FACE-PROP can be a face/attrlist or a list thereof.
+	(setq faces (if (xhtmlize-face-list-p face-prop)
+			(nunion (mapcar #'xhtmlize-unstringify-face face-prop)
+				faces :test 'equal)
+		      (adjoin (xhtmlize-unstringify-face face-prop)
+			      faces :test 'equal)))))
     faces))
 
 ;; xhtmlize-faces-at-point returns the faces in use at point.  The
 ;; faces are sorted by increasing priority, i.e. the last face takes
 ;; precedence.
 ;;
-;; Under XEmacs, this returns all the faces in all the extents at
-;; point.  Under GNU Emacs, this returns all the faces in the `face'
+;; Under GNU Emacs, this returns all the faces in the `face'
 ;; property and all the faces in the overlays at point.
 
-(cond (xhtmlize-running-xemacs
-       (defun xhtmlize-faces-at-point ()
-	 (let (extent extent-list face-list face-prop)
-	   (while (setq extent (extent-at (point) nil 'face extent))
-	     (push extent extent-list))
-	   ;; extent-list is in reverse display order, meaning that
-	   ;; smallest ones come last.  That is the order we want,
-	   ;; except it can be overridden by the `priority' property.
-	   (setq extent-list (stable-sort extent-list #'<
-					  :key #'extent-priority))
-	   (dolist (extent extent-list)
-	     (setq face-prop (extent-face extent))
-	     ;; extent's face-list is in reverse order from what we
-	     ;; want, but the `nreverse' below will take care of it.
-	     (setq face-list (if (listp face-prop)
-				 (append face-prop face-list)
-			       (cons face-prop face-list))))
-	   (nreverse face-list))))
-      (t
-       (defun xhtmlize-faces-at-point ()
-	 (let (all-faces)
-	   ;; Faces from text properties.
-	   (let ((face-prop (get-text-property (point) 'face)))
-	     (setq all-faces (if (xhtmlize-face-list-p face-prop)
-				 (nreverse (mapcar #'xhtmlize-unstringify-face
-						   face-prop))
-			       (list (xhtmlize-unstringify-face face-prop)))))
-	   ;; Faces from overlays.
-	   (let ((overlays
-		  ;; Collect overlays at point that specify `face'.
-		  (delete-if-not (lambda (o)
-				   (overlay-get o 'face))
-				 (overlays-at (point))))
-		 list face-prop)
-	     ;; Sort the overlays so the smaller (more specific) ones
-	     ;; come later.  The number of overlays at each one
-	     ;; position should be very small, so the sort shouldn't
-	     ;; slow things down.
-	     (setq overlays (sort* overlays
-				   ;; Sort by ascending...
-				   #'<
-				   ;; ...overlay size.
-				   :key (lambda (o)
-					  (- (overlay-end o)
-					     (overlay-start o)))))
-	     ;; Overlay priorities, if present, override the above
-	     ;; established order.  Larger overlay priority takes
-	     ;; precedence and therefore comes later in the list.
-	     (setq overlays (stable-sort
-			     overlays
-			     ;; Reorder (stably) by acending...
-			     #'<
-			     ;; ...overlay priority.
-			     :key (lambda (o)
-				    (or (overlay-get o 'priority) 0))))
-	     (dolist (overlay overlays)
-	       (setq face-prop (overlay-get overlay 'face))
-	       (setq list (if (xhtmlize-face-list-p face-prop)
-			      (nconc (nreverse (mapcar
-						#'xhtmlize-unstringify-face
-						face-prop))
-				     list)
-			    (cons (xhtmlize-unstringify-face face-prop) list))))
-	     ;; Under "Merging Faces" the manual explicitly states
-	     ;; that faces specified by overlays take precedence over
-	     ;; faces specified by text properties.
-	     (setq all-faces (nconc all-faces list)))
-	   all-faces))))
+(defun xhtmlize-faces-at-point ()
+  (let (all-faces)
+    ;; Faces from text properties.
+    (let ((face-prop (get-text-property (point) 'face)))
+      (setq all-faces (if (xhtmlize-face-list-p face-prop)
+			  (nreverse (mapcar #'xhtmlize-unstringify-face
+					    face-prop))
+			(list (xhtmlize-unstringify-face face-prop)))))
+    ;; Faces from overlays.
+    (let ((overlays
+	   ;; Collect overlays at point that specify `face'.
+	   (delete-if-not (lambda (o)
+			    (overlay-get o 'face))
+			  (overlays-at (point))))
+	  list face-prop)
+      ;; Sort the overlays so the smaller (more specific) ones
+      ;; come later.  The number of overlays at each one
+      ;; position should be very small, so the sort shouldn't
+      ;; slow things down.
+      (setq overlays (sort* overlays
+			    ;; Sort by ascending...
+			    #'<
+			    ;; ...overlay size.
+			    :key (lambda (o)
+				   (- (overlay-end o)
+				      (overlay-start o)))))
+      ;; Overlay priorities, if present, override the above
+      ;; established order.  Larger overlay priority takes
+      ;; precedence and therefore comes later in the list.
+      (setq overlays (stable-sort
+		      overlays
+		      ;; Reorder (stably) by acending...
+		      #'<
+		      ;; ...overlay priority.
+		      :key (lambda (o)
+			     (or (overlay-get o 'priority) 0))))
+      (dolist (overlay overlays)
+	(setq face-prop (overlay-get overlay 'face))
+	(setq list (if (xhtmlize-face-list-p face-prop)
+		       (nconc (nreverse (mapcar
+					 #'xhtmlize-unstringify-face
+					 face-prop))
+			      list)
+		     (cons (xhtmlize-unstringify-face face-prop) list))))
+      ;; Under "Merging Faces" the manual explicitly states
+      ;; that faces specified by overlays take precedence over
+      ;; faces specified by text properties.
+      (setq all-faces (nconc all-faces list)))
+    all-faces))
 
 ;; xhtmlize supports generating HTML in two several fundamentally
 ;; different ways, one with the use of CSS and nested <span> tags, and
@@ -982,15 +835,13 @@ it's called with the same value of KEY.  All other times, the cached
 
 ;;; External CSS based output support.
 (defun xhtmlize-css-link (face css-dir)
-  (set-foreground-color "black")
-  (set-background-color "white")
-  (xhtmlize-css-link0 face css-dir "Default")
-  (set-foreground-color "white")
-  (set-background-color "black")
-  (xhtmlize-css-link0 face css-dir "Invert")) 
+  (xhtmlize-css-link0 face css-dir "black" "white" "Default")
+  (xhtmlize-css-link0 face css-dir "white" "black" "Invert")) 
 
-(defun xhtmlize-css-link0 (face css-dir title)
+(defun xhtmlize-css-link0 (face css-dir fg bg title)
   (unless (xhtmlize-css-cached-on-disk-p face css-dir title)
+    (set-foreground-color fg)
+    (set-background-color bg)
     (xhtmlize-css-make-cache-on-disk face css-dir title))
   (insert "    <link rel=\"stylesheet\" type=\"text/css\""
 	  (format " href=\"%s/%s\""
@@ -1006,7 +857,8 @@ it's called with the same value of KEY.  All other times, the cached
     (mapc
      (lambda (face)
        (xhtmlize-css-link face css-dir))
-     '(default fringe highlight))
+     (cons 'default xhtmlize-builtin-faces)
+     )
     (dolist (face (sort* (copy-list buffer-faces) #'string-lessp
 			 :key (lambda (f)
 				(cssize-fstruct-css-name (gethash f face-map)))))
@@ -1074,7 +926,10 @@ it's called with the same value of KEY.  All other times, the cached
 		     (xhtmlize-css-specs (gethash 'default face-map))
 		     "\n        ")
 	  "\n      }\n")
-  (dolist (face (sort* (copy-list (cons 'highlight (cons 'fringe buffer-faces))) #'string-lessp
+  (dolist (face (sort* (copy-list buffer-faces
+				  (nunion xhtmlize-builtin-faces 
+					  buffer-faces :test 'equal)
+				  ) #'string-lessp
 		       :key (lambda (f)
 			      (cssize-fstruct-css-name (gethash f face-map)))))
     (let* ((fstruct (gethash face face-map))
@@ -1241,8 +1096,10 @@ it's called with the same value of KEY.  All other times, the cached
     (clrhash xhtmlize-extended-character-cache)
     (clrhash xhtmlize-memoization-table)
     (let* ((buffer-faces (xhtmlize-faces-in-buffer))
-	   (face-map (xhtmlize-make-face-map (adjoin 'fringe
-						     (adjoin 'default buffer-faces))))
+	   (face-map (xhtmlize-make-face-map 
+		      (nunion (cons 'default xhtmlize-builtin-faces)
+			      buffer-faces :test 'equal)
+		      ))
 	   ;; Generate the new buffer.  It's important that it inherits
 	   ;; default-directory from the current buffer.
 	   (htmlbuf (generate-new-buffer (if (buffer-file-name)
@@ -1309,21 +1166,10 @@ it's called with the same value of KEY.  All other times, the cached
 	;; require buffer switches, which are slow in Emacs.
 	(goto-char (point-min))
 	(while (not (eobp))
-	  ;; NEW CODE
-	  ;; SRPMIX own LINUME hacking
 	  (mapc (lambda (o)
-		  (xhtmlize-zero-width-overlay o htmlbuf insert-text-with-id-method face-map)
+		  (xhtmlize-zero-width-overlay o insert-text-with-id-method face-map htmlbuf)
 		  )
 		(xhtmlize-overlays-at (point)))
-
-	  (when (bolp)
-	    (funcall insert-text-with-id-method " "
-		     (format "P:%d" (point))
-		     nil
-		     (mapcar (lambda (f)
-			       (gethash f face-map))
-			     (list 'fringe))
-		     htmlbuf))
 
 	  (setq next-change (xhtmlize-next-change (point) 'face))
 	  ;; Get faces in use between (point) and NEXT-CHANGE, and
@@ -1352,7 +1198,7 @@ it's called with the same value of KEY.  All other times, the cached
 	    ;; represent faces in FSTRUCT-LIST.
 	    (funcall insert-text-with-id-method text 
 		     ;(format "font-lock:%s" (point))
-		     (format "F:%s" (point))
+		     (concat "F:" (number-to-string (point)))
 		     nil
 		     fstruct-list
 		     htmlbuf))
@@ -1398,16 +1244,17 @@ it's called with the same value of KEY.  All other times, the cached
 						    (buffer-disable-undo))
 						  b))
 
-(defun xhtmlize-zero-width-overlay (o htmlbuf insert-method face-map)
+(defun xhtmlize-zero-width-overlay (o insert-method face-map htmlbuf)
   (let ((handler (xhtmlize-zero-width-overlay-acceptable-p o)))
     (when handler
       (let ((s (xhtmlize-zero-width-overlay-prepare o handler)))
+	;; TODO: Don't use `with-current-buffer'.
 	(with-current-buffer xhtmlize-zero-width-overlay-temp-buffer
 	  (erase-buffer) 
 	  (when s (insert s))
-	  (xhtmlize-buffer-0 o handler htmlbuf insert-method face-map))))))
+	  (xhtmlize-buffer-0 o handler insert-method face-map htmlbuf))))))
 
-(defun xhtmlize-buffer-0 (o handler htmlbuf insert-method face-map)
+(defun xhtmlize-buffer-0 (o handler insert-method face-map htmlbuf)
   (let (next-change face-list fstruct-list text trailing-ellipsis)
     (goto-char (point-min))
     (while (not (eobp))

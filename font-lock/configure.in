@@ -33,5 +33,7 @@ AC_OUTPUT([
 	   src/cmds/Makefile
 	   src/elisp/Makefile
 	   src/elisp/flserver/Makefile
+	   src/elisp/flserver/plugins/Makefile
+	   src/elisp/flserver/modes/Makefile
 	   src/gauche/Makefile
 	   ])

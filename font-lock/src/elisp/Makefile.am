@@ -1,6 +1,7 @@
 SUBDIRS = flserver
 dist_lisp_LISP = \
 	\
+	flserver-boot.el \
 	flserver-decl.el \
 	flserver-main.el \
 	\
@@ -16,3 +17,6 @@ dist_flserver_LISP = \
 	flserver/log.el  \
 	\
 	$(NULL)
+
+pluginsdir = $(lispdir)/flserver/plugins
+modesdir = $(lispdir)/flserver/modes

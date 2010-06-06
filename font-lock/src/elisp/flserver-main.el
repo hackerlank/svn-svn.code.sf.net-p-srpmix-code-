@@ -1,18 +1,6 @@
 (require 'flserver-decl)
 
 ;;
-;; Extend load path
-;;
-(eval-when-compile
-  (message "%s" process-environment))
-(let* ((file (symbol-file 'flserver))
-       (flserver-dir (concat 
-		      (file-name-as-directory (file-name-directory file))
-		      "flserver")))
-  (setq load-path (cons flserver-dir load-path)))
-
-
-;;
 ;; Enable logging
 ;;
 (require 'log)
@@ -42,6 +30,17 @@
   (setq server-name flserver-server-name))
 (setq server-raise-frame nil)
 
+;;
+;; Load libraries
+;;
+(require 'xhtmlize)
+(require 'cssize)
+(flserver-load-plugin-mains)
+
+;;
+;; Extra modes
+;;
+;; ...
 
 ;;
 ;; Idle logout
@@ -56,13 +55,6 @@
 (defun flserver-touch ()
   (setq flserver-timestamp (current-time)))
 (flserver-touch)
-
-
-;;
-;; Load libraries
-;;
-(require 'xhtmlize)
-(require 'cssize)
 
 ;;
 ;; Entry point for client

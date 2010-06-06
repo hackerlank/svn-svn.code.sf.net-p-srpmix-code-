@@ -51,7 +51,7 @@ function parse_arugments
 function main
 {
     parse_arugments "$@"
-    $emacs -Q $load_path -l flserver-decl.el $config_el -l flserver-main.el
+    $emacs -Q $load_path -l flserver-bool.el flserver-decl.el $config_el -l flserver-main.el
 }
 
 main "$@"

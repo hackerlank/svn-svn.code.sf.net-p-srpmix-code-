@@ -1,0 +1,6 @@
+SUBDIRS = \
+	\
+	plugins \
+	modes   \
+	\
+	$(NULL)
