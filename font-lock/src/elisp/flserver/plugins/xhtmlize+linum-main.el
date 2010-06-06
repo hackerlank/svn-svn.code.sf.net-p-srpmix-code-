@@ -1,6 +1,6 @@
 (require 'linum)
 (require 'xhtmlize)
-(require 'xhtmlize-linum-decl)
+(require 'xhtmlize+linum-decl)
 
 (defun xhtmlize-linum-acceptable-p (o)
   (if (overlay-get o 'linum-str) t nil))
@@ -28,10 +28,9 @@
 (defun xhtmlize-linum-update-buffer ()
   (flet ((window-start (win) (point-min))
          (window-end (win &optional update) (point-max))
-         (set-window-margins (win width)))
+         (set-window-margins (win width &rest ignore)))
     (linum-update-window nil)))
 
 (xhtmlize-add-builtin-faces 'linum)
-
 
 (provide 'xhtmlize+linum-main)

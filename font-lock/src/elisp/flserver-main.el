@@ -99,7 +99,6 @@
 ;; Main
 ;;
 (defun flserver-main ()
-  (message "Hello world")
   (server-start)
   (while t
     (when (flserver-timtout-p)

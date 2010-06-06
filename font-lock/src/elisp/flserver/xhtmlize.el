@@ -926,10 +926,9 @@ it's called with the same value of KEY.  All other times, the cached
 		     (xhtmlize-css-specs (gethash 'default face-map))
 		     "\n        ")
 	  "\n      }\n")
-  (dolist (face (sort* (copy-list buffer-faces
-				  (nunion xhtmlize-builtin-faces 
-					  buffer-faces :test 'equal)
-				  ) #'string-lessp
+  (dolist (face (sort* (copy-list (nunion xhtmlize-builtin-faces 
+					  buffer-faces :test 'equal))
+		       #'string-lessp
 		       :key (lambda (f)
 			      (cssize-fstruct-css-name (gethash f face-map)))))
     (let* ((fstruct (gethash face face-map))

@@ -40,7 +40,7 @@ function parse_arugments
     if [ $# = 0 ]; then
 	:			# do nothing
     elif [ $# = 1 ]; then
-	config_el=$1
+	config_el="-l $1"
 	shift
     else
 	print_usage 1>&2
@@ -51,7 +51,7 @@ function parse_arugments
 function main
 {
     parse_arugments "$@"
-    $emacs -Q $load_path -l flserver-bool.el flserver-decl.el $config_el -l flserver-main.el
+    $emacs -Q $load_path -l flserver-boot -l flserver-decl $config_el -l flserver-main
 }
 
 main "$@"

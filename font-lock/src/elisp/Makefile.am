@@ -24,8 +24,8 @@ dist_plugins_LISP = \
 	flserver/plugins/xhtmlize+linum-decl.el \
 	flserver/plugins/xhtmlize+linum-main.el \
 	\
-	flserver/plugins/xhtmlize+linum+fringe-decl.el
-	flserver/plugins/xhtmlize+linum+fringe-main.el
+	flserver/plugins/xhtmlize+linum+fringe-decl.el \
+	flserver/plugins/xhtmlize+linum+fringe-main.el \
 	\
 	$(NULL)
 

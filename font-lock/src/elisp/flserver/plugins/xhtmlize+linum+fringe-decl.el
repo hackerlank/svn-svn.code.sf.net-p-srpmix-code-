@@ -1,1 +1,1 @@
-(provide 'xhtml-linum-fringe-decl)
+(provide 'xhtmlize+linum+fringe-decl)
