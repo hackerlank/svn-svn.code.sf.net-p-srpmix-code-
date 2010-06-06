@@ -242,7 +242,8 @@ Set this to nil if you prefer the default (fundamental) mode."
 
 (defvar xhtmlize-builtin-faces nil)
 (defun  xhtmlize-add-builtin-faces (face)
-  (adjoin face xhtmlize-builtin-faces :test 'equal))
+  (setq xhtmlize-builtin-faces 
+	(adjoin face xhtmlize-builtin-faces :test 'equal)))
 
 (defvar xhtmlize-before-hook nil
   "Hook run before htmlizing a buffer.
@@ -1166,10 +1167,13 @@ it's called with the same value of KEY.  All other times, the cached
 	(goto-char (point-min))
 	(while (not (eobp))
 	  (mapc (lambda (o)
-		  (xhtmlize-zero-width-overlay o insert-text-with-id-method face-map htmlbuf)
+		  (xhtmlize-zero-width-overlay o 
+					       insert-text-with-id-method
+					       face-map
+					       htmlbuf)
 		  )
 		(xhtmlize-overlays-at (point)))
-
+	    
 	  (setq next-change (xhtmlize-next-change (point) 'face))
 	  ;; Get faces in use between (point) and NEXT-CHANGE, and
 	  ;; convert them to fstructs.
