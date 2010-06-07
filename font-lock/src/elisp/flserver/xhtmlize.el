@@ -280,7 +280,7 @@ output.")
 
 (defun xhtmlize-overlays-between (p q)
   (sort (xhtmlize-fold (lambda (kar kdr)
-			(if (xhtmlize-zero-width-overlay-acceptable-p kar)
+			(if (xhtmlize-width0-overlay-acceptable-p kar)
 			    (cons kar kdr)
 			  kdr))
 		(overlays-in p q)
@@ -294,7 +294,7 @@ output.")
     (if (< r0 r1)
 	(let* ((ovs (xhtmlize-overlays-between r0 r1))
 	       (r00 (some (lambda (o) 
-			    (and (xhtmlize-zero-width-overlay-acceptable-p o)
+			    (and (xhtmlize-width0-overlay-acceptable-p o)
 				 (overlay-start o))
 			    )
 			  ovs)))
@@ -1043,23 +1043,25 @@ it's called with the same value of KEY.  All other times, the cached
     (princ (cdr markup) buffer)))
 
 
-(defvar xhtmlize-zero-overlay-handlers (list))
+(defvar xhtmlize-width0-overlay-handlers (list))
 
-(defun xhtmlize-register-zero-overlay-handler (acceptable-p
-					       prepare
-					       make-id
-					       make-href)
-  (setq xhtmlize-zero-overlay-handlers
-	(cons `((acceptable-p . ,acceptable-p)
-		(prepare  . ,prepare )
-		(make-id  . ,make-id )
-		(make-href . ,make-href))
-	      xhtmlize-zero-overlay-handlers)))
+(defun define-xhtmlize-width0-overlay-handler (acceptable-p
+					     render-direct
+					     prepare
+					     make-id
+					     make-href)
+  (setq xhtmlize-width0-overlay-handlers
+	(cons `((acceptable-p  . ,acceptable-p  )
+		(render-direct . ,render-direct )
+		(prepare       . ,prepare       )
+		(make-id       . ,make-id       )
+		(make-href     . ,make-href     ))
+	      xhtmlize-width0-overlay-handlers)))
 
-(defun xhtmlize-zero-width-overlay-acceptable-p (o)
-  (let ((handlers xhtmlize-zero-overlay-handlers ))
-    (xhtmlize-zero-width-overlay-acceptable-p0 o handlers)))
-(defun xhtmlize-zero-width-overlay-acceptable-p0 (o handlers)
+(defun xhtmlize-width0-overlay-acceptable-p (o)
+  (let ((handlers xhtmlize-width0-overlay-handlers ))
+    (xhtmlize-width0-overlay-acceptable-p0 o handlers)))
+(defun xhtmlize-width0-overlay-acceptable-p0 (o handlers)
   (if (null handlers)
       nil
     (let ((handler (assq 'acceptable-p (car handlers))))
@@ -1067,19 +1069,30 @@ it's called with the same value of KEY.  All other times, the cached
 	  (let ((r (funcall (cdr handler) o)))
 	    (if r
 		(car handlers)
-	      (xhtmlize-zero-width-overlay-acceptable-p0 o (cdr handlers))))
+	      (xhtmlize-width0-overlay-acceptable-p0 o (cdr handlers))))
 	;; ???
-	(xhtmlize-zero-width-overlay-acceptable-p0 o (cdr handlers))
+	(xhtmlize-width0-overlay-acceptable-p0 o (cdr handlers))
 	))))
-(defun xhtmlize-zero-width-overlay-prepare (o handler)
+
+(defun xhtmlize-width0-overlay-render-direct (o handler insert-method face-map htmlbuf)
+  (let ((func (cdr (assq 'render-direct handler))))
+    (if func
+	(prog1 t
+	  (funcall func o insert-method face-map htmlbuf)
+	  )
+      nil)))
+
+(defun xhtmlize-width0-overlay-prepare (o handler)
   (funcall (cdr (assq 'prepare handler)) o))
-(defun xhtmlize-zero-width-overlay-make-id (o handler)
+(defun xhtmlize-width0-overlay-make-id (o handler)
   (funcall (cdr (assq 'make-id handler)) o))
-(defun xhtmlize-zero-width-overlay-make-href (o handler)
+(defun xhtmlize-width0-overlay-make-href (o handler)
   (let ((f (cdr (assq 'make-href handler))))
     (if f
 	(funcall f o)
       nil)))
+
+
        
 (defun xhtmlize-buffer-1 ()
   ;; Internal function; don't call it from outside this file.  Xhtmlize
@@ -1167,10 +1180,10 @@ it's called with the same value of KEY.  All other times, the cached
 	(goto-char (point-min))
 	(while (not (eobp))
 	  (mapc (lambda (o)
-		  (xhtmlize-zero-width-overlay o 
-					       insert-text-with-id-method
-					       face-map
-					       htmlbuf)
+		  (xhtmlize-width0-overlay o 
+					   insert-text-with-id-method
+					   face-map
+					   htmlbuf)
 		  )
 		(xhtmlize-overlays-at (point)))
 	    
@@ -1241,21 +1254,29 @@ it's called with the same value of KEY.  All other times, the cached
       htmlbuf)))
 
 
-(defvar xhtmlize-zero-width-overlay-temp-buffer (let ((b (get-buffer-create
-							  " *zero-width-overlay-xhtmlize*")))
+(defvar xhtmlize-width0-overlay-temp-buffer (let ((b (get-buffer-create
+							  " *width0-overlay-xhtmlize*")))
 						  (with-current-buffer b
 						    (buffer-disable-undo))
 						  b))
 
-(defun xhtmlize-zero-width-overlay (o insert-method face-map htmlbuf)
-  (let ((handler (xhtmlize-zero-width-overlay-acceptable-p o)))
+(defun xhtmlize-width0-overlay (o insert-method face-map htmlbuf)
+  (let ((handler (xhtmlize-width0-overlay-acceptable-p o)))
     (when handler
-      (let ((s (xhtmlize-zero-width-overlay-prepare o handler)))
-	;; TODO: Don't use `with-current-buffer'.
-	(with-current-buffer xhtmlize-zero-width-overlay-temp-buffer
-	  (erase-buffer) 
-	  (when s (insert s))
-	  (xhtmlize-buffer-0 o handler insert-method face-map htmlbuf))))))
+      ;;
+      (unless (xhtmlize-width0-overlay-render-direct o
+						     handler
+						     insert-method
+						     face-map
+						     htmlbuf)
+	(let ((s (xhtmlize-width0-overlay-prepare o handler)))
+	  ;; TODO: Don't use `with-current-buffer'.
+	  (with-current-buffer xhtmlize-width0-overlay-temp-buffer
+	    (erase-buffer) 
+	    (when s (insert s))
+	    (xhtmlize-buffer-0 o handler insert-method face-map htmlbuf))))
+      ;;
+      )))
 
 (defun xhtmlize-buffer-0 (o handler insert-method face-map htmlbuf)
   (let (next-change face-list fstruct-list text trailing-ellipsis)
@@ -1282,8 +1303,8 @@ it's called with the same value of KEY.  All other times, the cached
 	;; represent faces in FSTRUCT-LIST.
 	(funcall insert-method
 		 text
-		 (xhtmlize-zero-width-overlay-make-id o handler)
-		 (xhtmlize-zero-width-overlay-make-href o handler)
+		 (xhtmlize-width0-overlay-make-id o handler)
+		 (xhtmlize-width0-overlay-make-href o handler)
 		 fstruct-list htmlbuf))
       (goto-char next-change))
     ))
