@@ -1,4 +1,6 @@
+- broken hover
 - Cleanup xhtmlize.el and cssize.el.
+-- Copyright notnice
 -- Build rgb map
 -- Remove XEmacs related code <done>
 -- optiomize

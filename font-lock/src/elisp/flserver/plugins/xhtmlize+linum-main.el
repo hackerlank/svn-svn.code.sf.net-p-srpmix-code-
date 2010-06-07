@@ -74,6 +74,7 @@
     (linum-update-window nil)))
 
 (xhtmlize-add-builtin-faces 'linum)
+(xhtmlize-add-builtin-faces 'highlight)
 
 
 (provide 'xhtmlize+linum-main)
