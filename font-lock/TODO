@@ -1,5 +1,5 @@
 - batch mode, replace the main function
-- logging
+- logging, rotation
 - debug facility
 - broken hover, background-color of linum interfere with hover rendering <done>
 - Cleanup xhtmlize.el and cssize.el.
@@ -10,5 +10,7 @@
 -- plugins <working>
 --- font-lock face own handler
 --- linum  <working>
+--- spec
+- Es Expression stream
 - XSLT for range extraction
 - Xvnc and Screen wrapper

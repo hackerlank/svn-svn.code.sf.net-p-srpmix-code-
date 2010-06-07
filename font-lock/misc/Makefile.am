@@ -1,6 +1,7 @@
-SUBDIRS  =					\
-        ac-aux                                  \
-        m4                                      \
+SUBDIRS  =	\
+        ac-aux  \
+        m4      \
+	specs	\
         \
 	$(NULL)
 
