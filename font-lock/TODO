@@ -1,11 +1,14 @@
-- broken hover
--- background-color of linum interfere with hover rendering
+- batch mode, replace the main function
+- logging
+- debug facility
+- broken hover, background-color of linum interfere with hover rendering <done>
 - Cleanup xhtmlize.el and cssize.el.
 -- Copyright notnice
 -- Build rgb map
 -- Remove XEmacs related code <done>
 -- optiomize
 -- plugins <working>
+--- font-lock face own handler
 --- linum  <working>
 - XSLT for range extraction
 - Xvnc and Screen wrapper
