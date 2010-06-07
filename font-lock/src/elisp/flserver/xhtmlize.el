@@ -961,11 +961,6 @@ it's called with the same value of KEY.  All other times, the cached
   ;; face in FSTRUCT-LIST.
   ;;
   (dolist (fstruct fstruct-list)
-    (when href
-      (princ "<a href=\"" buffer)
-      (princ (xhtmlize-protect-string href) buffer)
-      (princ "\">" buffer))
-
     (princ "<span class=\"" buffer)
     (princ (cssize-fstruct-css-name fstruct) buffer)
     (when id
@@ -974,16 +969,22 @@ it's called with the same value of KEY.  All other times, the cached
       (princ id buffer)
       )
     (princ "\">" buffer))
-  
-  (princ text buffer)
 
-  (dolist (fstruct fstruct-list)
-    (ignore fstruct)			; shut up the byte-compiler
-    (princ "</span>" buffer))
+  (when href
+    (princ "<a href=\"" buffer)
+    (princ (xhtmlize-protect-string href) buffer)
+    (princ "\">" buffer))
+
+  (princ text buffer)
 
   (when href
     (princ "</a>" buffer)
-    ))
+    )
+  
+  (dolist (fstruct fstruct-list)
+    (ignore fstruct)			; shut up the byte-compiler
+    (princ "</span>" buffer))
+  )
 
 
 
