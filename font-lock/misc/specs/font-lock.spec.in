@@ -1,0 +1,79 @@
+%define emacs_lispdir %(pkg-config emacs --variable sitepkglispdir)
+%define emacs_startdir %(pkg-config emacs --variable sitestartdir)
+%define emacs_version %(pkg-config emacs --modversion)
+
+
+Summary: A tool converting a file to html format with GNU Emacs
+Name: font-lock
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPLv2+
+Group: Development/Tools
+URL: http://srpmix.org
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+BuildRequires: emacs gauche-devel
+Requires: emacs gauche 
+
+%description
+A tool converting a file to html format with GNU Emacs.
+Syntax highlighting is done with font-lock mode of GNU Emacs.
+So the look and feel of output html is very simpler to what
+you can see on GNU Emacs window.
+
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/%{emacs_lispdir}/flserver/modes
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/flclient
+%{_bindir}/flserver
+
+%{emacs_lispdir}/flserver-boot.el
+%{emacs_lispdir}/flserver-boot.elc
+%{emacs_lispdir}/flserver-decl.el
+%{emacs_lispdir}/flserver-decl.elc
+%{emacs_lispdir}/flserver-main.el
+%{emacs_lispdir}/flserver-main.elc
+
+%dir %{emacs_lispdir}/flserver
+%{emacs_lispdir}/flserver/.nosearch
+%{emacs_lispdir}/flserver/cssize.el
+%{emacs_lispdir}/flserver/cssize.elc
+%{emacs_lispdir}/flserver/log.el
+%{emacs_lispdir}/flserver/log.elc
+%{emacs_lispdir}/flserver/xhtmlize.el
+%{emacs_lispdir}/flserver/xhtmlize.elc
+
+%dir %{emacs_lispdir}/flserver/plugins
+%{emacs_lispdir}/flserver/plugins/xhtmlize+linum+fringe-decl.el
+%{emacs_lispdir}/flserver/plugins/xhtmlize+linum+fringe-main.el
+%{emacs_lispdir}/flserver/plugins/xhtmlize+linum-decl.el
+%{emacs_lispdir}/flserver/plugins/xhtmlize+linum-main.el
+
+%dir %{emacs_lispdir}/flserver/modes
+
+%{_datadir}/gauche/site/lib/flclient.scm
+%doc
+
+
+%changelog
+* Tue Jun  8 2010 Masatake YAMATO <yamato@redhat.com> - 0.0.0-0
+- Initial build.
+

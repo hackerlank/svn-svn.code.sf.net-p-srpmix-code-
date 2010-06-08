@@ -54,21 +54,22 @@
        flserver-idle-timeout)))
 (defun flserver-touch ()
   (setq flserver-timestamp (current-time)))
-(flserver-touch)
 
 ;;
 ;; Entry point for client
 ;;
 (defun flserver (action &rest args)
   (flserver-touch)
-  (cond 
-   ((eq action 'xhtmlize)
-    (apply #'flserver-xhtmlize args))
-   ((eq action 'cssize)
-    (apply #'flserver-cssize args))
-   ((eq action 'shutdown)
-    (apply #'flserver-shutdown args))
-   ))
+  (prog1 
+      (cond 
+       ((eq action 'xhtmlize)
+	(apply #'flserver-xhtmlize args))
+       ((eq action 'cssize)
+	(apply #'flserver-cssize args))
+       ((eq action 'shutdown)
+	(apply #'flserver-shutdown args))
+       )
+    (flserver-touch)))
 
 (defun flserver-xhtmlize (src-file html-file css-dir)
   (with-log-string
@@ -100,6 +101,7 @@
 ;;
 (defun flserver-main ()
   (server-start)
+  (flserver-touch)
   (while t
     (when (flserver-timtout-p)
 	(log-string "idle shutdown")

@@ -1,6 +1,5 @@
 EXTRA_DIST = \
 	\
-	rpm.m4 \
+	rpm.mk \
 	\
 	$(NULL)
-

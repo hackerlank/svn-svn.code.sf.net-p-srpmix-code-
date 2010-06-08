@@ -19,6 +19,7 @@ AC_GAUCHE_INIT_EXT
 GAUCHE_MODULEDIR=`$GAUCHE_CONFIG --sitelibdir`
 AC_SUBST(GAUCHE_MODULEDIR)
 
+AC_RPM_RELEASE
 
 AC_CONFIG_COMMANDS([chmod],[
 chmod 0755 src/cmds/*
@@ -30,6 +31,8 @@ AC_OUTPUT([
 	   misc/ac-aux/Makefile
 	   misc/m4/Makefile
 	   misc/specs/Makefile
+	   misc/specs/font-lock.spec
+	   misc/makefiles/Makefile
 	   src/Makefile
 	   src/cmds/Makefile
 	   src/elisp/Makefile

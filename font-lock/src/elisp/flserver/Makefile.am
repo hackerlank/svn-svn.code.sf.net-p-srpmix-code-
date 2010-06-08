@@ -4,3 +4,16 @@ SUBDIRS = \
 	modes   \
 	\
 	$(NULL)
+
+
+
+## Remove duplication (see font-lock/src/elisp/Makefile.am)
+flserverdir = $(lispdir)/flserver
+dist_flserver_DATA = .nosearch
+dist_flserver_LISP = \
+	\
+	cssize.el   \
+	xhtmlize.el \
+	log.el      \
+	\
+	$(NULL)

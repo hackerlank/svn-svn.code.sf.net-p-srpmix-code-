@@ -263,13 +263,18 @@ output.")
 
 ;;; Some cross-Emacs compatibility.
 
+;(defun xhtmlize-fold (proc list result)
+;  (if (null list)
+;      result
+;    (xhtmlize-fold proc (cdr list) 
+;		  (funcall proc (car list) result))))
+
 (defun xhtmlize-fold (proc list result)
-  (if (null list)
-      result
-    (xhtmlize-fold proc (cdr list) 
-		  (funcall proc (car list) result))))
-
-
+  (while list
+    (setq result (funcall proc (car list) result))
+    (setq list (cdr list))
+    )
+  result)
 
 (defun xhtmlize-overlays-at (p)
   (xhtmlize-overlays-between p
@@ -278,6 +283,8 @@ output.")
 				  p
 				e0))))
 
+;; TODO: Merge following two functions.
+;; xhtmlize-overlays-between and xhtmlize-next-change
 (defun xhtmlize-overlays-between (p q)
   (sort (xhtmlize-fold (lambda (kar kdr)
 			(if (xhtmlize-width0-overlay-acceptable-p kar)
