@@ -1101,8 +1101,162 @@ it's called with the same value of KEY.  All other times, the cached
       nil)))
 
 
-       
-(defun xhtmlize-buffer-1 ()
+(defun xhtmlize-buffer-1-prepare ()
+  (generate-new-buffer (if (buffer-file-name)
+			   (xhtmlize-make-file-name
+			    (file-name-nondirectory
+			     (buffer-file-name)))
+			 "*html*")))
+
+(defun xhtmlize-buffer-1-prologue (htmlbuf places buffer-faces face-map title)
+  ;; Generate the new buffer.  It's important that it inherits
+  ;; default-directory from the current buffer.
+  (with-current-buffer htmlbuf
+      (buffer-disable-undo)
+      ;; NEW CODE
+      (insert "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" ?\n)
+      ;;
+      (insert (xhtmlize-method doctype) ?\n
+	      (format "<!-- Created by xhtmlize-%s in %s mode. -->\n"
+		      xhtmlize-version xhtmlize-output-type)
+	      ;; HTMLIZE.EL
+	      ;; "<html>\n  "
+	      ;; XHTMLIZE.EL
+	      "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">"
+	      
+	      ?\n)
+      (plist-put places 'head-start (point-marker))
+      ;;
+      (insert "<head>" ?\n)
+      ;;
+      (insert "    <title>" (xhtmlize-protect-string title) "</title>\n"
+	      (if xhtmlize-html-charset
+		  (format (concat "    <meta http-equiv=\"Content-Type\" "
+				  "content=\"text/html; charset=%s\">\n")
+			  xhtmlize-html-charset)
+		"")
+	      xhtmlize-head-tags)
+      (xhtmlize-method insert-head buffer-faces face-map)
+      (insert "  </head>")
+      (plist-put places 'head-end (point-marker))
+      (insert "\n  ")
+      (plist-put places 'body-start (point-marker))
+      (insert (xhtmlize-method body-tag face-map)
+	      "\n    ")
+      (plist-put places 'content-start (point-marker))
+      (insert xhtmlize-body-pre-tags)
+      (insert "<pre>\n")))
+
+
+(defun xhtmlize-buffer-1-body (htmlbuf face-map)
+  (let (;; Get the inserter method, so we can funcall it inside
+	;; the loop.  Not calling `xhtmlize-method' in the loop
+	;; body yields a measurable speed increase.
+	(insert-text-with-id-method
+	 (xhtmlize-method-function 'insert-text-with-id))
+	;; Declare variables used in loop body outside the loop
+	;; because it's faster to establish `let' bindings only
+	;; once.
+	next-change text face-list fstruct-list trailing-ellipsis)
+    ;; This loop traverses and reads the source buffer, appending
+    ;; the resulting HTML to HTMLBUF with `princ'.  This method is
+    ;; fast because: 1) it doesn't require examining the text
+    ;; properties char by char (xhtmlize-next-change is used to
+    ;; move between runs with the same face), and 2) it doesn't
+    ;; require buffer switches, which are slow in Emacs.
+    (goto-char (point-min))
+    (while (not (eobp))
+      (mapc (lambda (o)
+	      (xhtmlize-width0-overlay o 
+				       insert-text-with-id-method
+				       face-map
+				       htmlbuf)
+	      )
+	    (xhtmlize-overlays-at (point)))
+      
+      (setq next-change (xhtmlize-next-change (point) 'face))
+      ;; Get faces in use between (point) and NEXT-CHANGE, and
+      ;; convert them to fstructs.
+      (setq face-list (xhtmlize-faces-at-point)
+	    fstruct-list (delq nil (mapcar (lambda (f)
+					     (gethash f face-map))
+					   face-list)))
+      ;; Extract buffer text, sans the invisible parts.  Then
+      ;; untabify it and escape the HTML metacharacters.
+      (setq text (xhtmlize-buffer-substring-no-invisible
+		  (point) next-change))
+      (when trailing-ellipsis
+	(setq text (xhtmlize-trim-ellipsis text)))
+      ;; If TEXT ends up empty, don't change trailing-ellipsis.
+      (when (> (length text) 0)
+	(setq trailing-ellipsis
+	      (get-text-property (1- (length text))
+				 'xhtmlize-ellipsis text)))
+      (setq text (xhtmlize-untabify text (current-column)))
+      (setq text (xhtmlize-protect-string text))
+      ;; Don't bother writing anything if there's no text (this
+      ;; happens in invisible regions).
+      (when (> (length text) 0)
+	;; Insert the text, along with the necessary markup to
+	;; represent faces in FSTRUCT-LIST.
+	(funcall insert-text-with-id-method text 
+					;(format "font-lock:%s" (point))
+		 (concat "F:" (number-to-string (point)))
+		 nil
+		 fstruct-list
+		 htmlbuf))
+      (goto-char next-change))))
+
+(defun xhtmlize-buffer-1-epilogue (htmlbuf places)
+  (with-current-buffer htmlbuf
+    (insert "</pre>")
+    (insert xhtmlize-body-post-tags)
+    (plist-put places 'content-end (point-marker))
+    (insert "\n  </body>")
+    (plist-put places 'body-end (point-marker))
+    (insert "\n</html>\n")
+    (when xhtmlize-generate-hyperlinks
+      (xhtmlize-make-hyperlinks))
+    (xhtmlize-defang-local-variables)
+    (when xhtmlize-replace-form-feeds
+      ;; Change each "\n^L" to "<hr />".
+      (goto-char (point-min))
+      (let ((source
+	     ;; ^L has already been escaped, so search for that.
+	     (xhtmlize-protect-string "\n\^L"))
+	    (replacement
+	     (if (stringp xhtmlize-replace-form-feeds)
+		 xhtmlize-replace-form-feeds
+	       "</pre><hr /><pre>")))
+	(while (search-forward source nil t)
+	  (replace-match replacement t t))))
+    (goto-char (point-min))
+    (when xhtmlize-html-major-mode
+      ;; What sucks about this is that the minor modes, most notably
+      ;; font-lock-mode, won't be initialized.  Oh well.
+      (funcall xhtmlize-html-major-mode))
+    (set (make-local-variable 'xhtmlize-buffer-places) places)
+    (run-hooks 'xhtmlize-after-hook)
+    (buffer-enable-undo)))
+
+(defun xhtmlize-buffer-1-process (htmlbuf)
+  htmlbuf)
+
+(require 'eieio)
+(defclass <xhtmlize-common-engine> ()
+  ((canvas :initform nil)
+   (places :initarg :places
+	   :initform nil)
+   (face-map :initarg :face-map
+	     :initform nil)))
+(defclass <xhtmlize-engine> (<xhtmlize-common-engine>)
+  ()
+  )
+
+(defmethod prepare ((engine <xhtmlize-engine>))
+  )
+   
+(defun xhtmlize-buffer-1 (&optional engines)
   ;; Internal function; don't call it from outside this file.  Xhtmlize
   ;; current buffer, writing the resulting HTML to a new buffer, and
   ;; return it.  Unlike xhtmlize-buffer, this doesn't change current
@@ -1116,150 +1270,24 @@ it's called with the same value of KEY.  All other times, the cached
     (xhtmlize-ensure-fontified)
     (clrhash xhtmlize-extended-character-cache)
     (clrhash xhtmlize-memoization-table)
-    (let* ((buffer-faces (xhtmlize-faces-in-buffer))
+    (let* ((canvas (xhtmlize-buffer-1-prepare))
+	   (buffer-faces (xhtmlize-faces-in-buffer))
 	   (face-map (xhtmlize-make-face-map 
 		      (nunion (cons 'default xhtmlize-builtin-faces)
-			      buffer-faces :test 'equal)
-		      ))
-	   ;; Generate the new buffer.  It's important that it inherits
-	   ;; default-directory from the current buffer.
-	   (htmlbuf (generate-new-buffer (if (buffer-file-name)
-					     (xhtmlize-make-file-name
-					      (file-name-nondirectory
-					       (buffer-file-name)))
-					   "*html*")))
+			      buffer-faces :test 'equal)))
 	   ;; Having a dummy value in the plist allows writing simply
 	   ;; (plist-put places foo bar).
 	   (places '(nil nil))
 	   (title (if (buffer-file-name)
 		      (file-name-nondirectory (buffer-file-name))
 		    (buffer-name))))
-      ;; Initialize HTMLBUF and insert the HTML prolog.
-      (with-current-buffer htmlbuf
-	(buffer-disable-undo)
-	;; NEW CODE
-	(insert "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" ?\n)
-	;;
-	(insert (xhtmlize-method doctype) ?\n
-		(format "<!-- Created by xhtmlize-%s in %s mode. -->\n"
-			xhtmlize-version xhtmlize-output-type)
-		;; HTMLIZE.EL
-		;; "<html>\n  "
-		;; XHTMLIZE.EL
-		"<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"en\" lang=\"en\">"
-		
-		?\n)
-	(plist-put places 'head-start (point-marker))
-	;;
-	(insert "<head>" ?\n)
-	;;
-	(insert "    <title>" (xhtmlize-protect-string title) "</title>\n"
-		(if xhtmlize-html-charset
-		    (format (concat "    <meta http-equiv=\"Content-Type\" "
-				    "content=\"text/html; charset=%s\">\n")
-			    xhtmlize-html-charset)
-		  "")
-		xhtmlize-head-tags)
-	(xhtmlize-method insert-head buffer-faces face-map)
-	(insert "  </head>")
-	(plist-put places 'head-end (point-marker))
-	(insert "\n  ")
-	(plist-put places 'body-start (point-marker))
-	(insert (xhtmlize-method body-tag face-map)
-		"\n    ")
-	(plist-put places 'content-start (point-marker))
-	(insert xhtmlize-body-pre-tags)
-	(insert "<pre>\n"))
-      (let (;; Get the inserter method, so we can funcall it inside
-	    ;; the loop.  Not calling `xhtmlize-method' in the loop
-	    ;; body yields a measurable speed increase.
-	    (insert-text-with-id-method
-	     (xhtmlize-method-function 'insert-text-with-id))
-	    ;; Declare variables used in loop body outside the loop
-	    ;; because it's faster to establish `let' bindings only
-	    ;; once.
-	    next-change text face-list fstruct-list trailing-ellipsis)
-	;; This loop traverses and reads the source buffer, appending
-	;; the resulting HTML to HTMLBUF with `princ'.  This method is
-	;; fast because: 1) it doesn't require examining the text
-	;; properties char by char (xhtmlize-next-change is used to
-	;; move between runs with the same face), and 2) it doesn't
-	;; require buffer switches, which are slow in Emacs.
-	(goto-char (point-min))
-	(while (not (eobp))
-	  (mapc (lambda (o)
-		  (xhtmlize-width0-overlay o 
-					   insert-text-with-id-method
-					   face-map
-					   htmlbuf)
-		  )
-		(xhtmlize-overlays-at (point)))
-	    
-	  (setq next-change (xhtmlize-next-change (point) 'face))
-	  ;; Get faces in use between (point) and NEXT-CHANGE, and
-	  ;; convert them to fstructs.
-	  (setq face-list (xhtmlize-faces-at-point)
-		fstruct-list (delq nil (mapcar (lambda (f)
-						 (gethash f face-map))
-					       face-list)))
-	  ;; Extract buffer text, sans the invisible parts.  Then
-	  ;; untabify it and escape the HTML metacharacters.
-	  (setq text (xhtmlize-buffer-substring-no-invisible
-		      (point) next-change))
-	  (when trailing-ellipsis
-	    (setq text (xhtmlize-trim-ellipsis text)))
-	  ;; If TEXT ends up empty, don't change trailing-ellipsis.
-	  (when (> (length text) 0)
-	    (setq trailing-ellipsis
-		  (get-text-property (1- (length text))
-				     'xhtmlize-ellipsis text)))
-	  (setq text (xhtmlize-untabify text (current-column)))
-	  (setq text (xhtmlize-protect-string text))
-	  ;; Don't bother writing anything if there's no text (this
-	  ;; happens in invisible regions).
-	  (when (> (length text) 0)
-	    ;; Insert the text, along with the necessary markup to
-	    ;; represent faces in FSTRUCT-LIST.
-	    (funcall insert-text-with-id-method text 
-		     ;(format "font-lock:%s" (point))
-		     (concat "F:" (number-to-string (point)))
-		     nil
-		     fstruct-list
-		     htmlbuf))
-	  (goto-char next-change)))
 
-      ;; Insert the epilog and post-process the buffer.
-      (with-current-buffer htmlbuf
-	(insert "</pre>")
-	(insert xhtmlize-body-post-tags)
-	(plist-put places 'content-end (point-marker))
-	(insert "\n  </body>")
-	(plist-put places 'body-end (point-marker))
-	(insert "\n</html>\n")
-	(when xhtmlize-generate-hyperlinks
-	  (xhtmlize-make-hyperlinks))
-	(xhtmlize-defang-local-variables)
-	(when xhtmlize-replace-form-feeds
-	  ;; Change each "\n^L" to "<hr />".
-	  (goto-char (point-min))
-	  (let ((source
-		 ;; ^L has already been escaped, so search for that.
-		 (xhtmlize-protect-string "\n\^L"))
-		(replacement
-		 (if (stringp xhtmlize-replace-form-feeds)
-		     xhtmlize-replace-form-feeds
-		   "</pre><hr /><pre>")))
-	    (while (search-forward source nil t)
-	      (replace-match replacement t t))))
-	(goto-char (point-min))
-	(when xhtmlize-html-major-mode
-	  ;; What sucks about this is that the minor modes, most notably
-	  ;; font-lock-mode, won't be initialized.  Oh well.
-	  (funcall xhtmlize-html-major-mode))
-	(set (make-local-variable 'xhtmlize-buffer-places) places)
-	(run-hooks 'xhtmlize-after-hook)
-	(buffer-enable-undo))
-      htmlbuf)))
+      (xhtmlize-buffer-1-prologue canvas places buffer-faces face-map title)
+      (xhtmlize-buffer-1-body canvas face-map)
+      (xhtmlize-buffer-1-epilogue canvas places)
+      (xhtmlize-buffer-1-process canvas)
+
+      )))
 
 
 (defvar xhtmlize-width0-overlay-temp-buffer (let ((b (get-buffer-create
@@ -1434,7 +1462,7 @@ overload this function to do it and xhtmlize will comply."
 ;      (concat sans-extension ".html"))))
 
 ;;;###autoload
-(defun xhtmlize-file (file &optional target)
+(defun xhtmlize-file (file &optional target engine)
   "Load FILE, fontify it, convert it to HTML, and save the result.
 
 Contents of FILE are inserted into a temporary buffer, whose major mode
@@ -1494,7 +1522,7 @@ does not name a directory, it will be used as output file name."
 	  ;; contrary to the documentation.  This seems to work.
 	  (font-lock-fontify-buffer))
 	;; xhtmlize the buffer and save the HTML.
-	(with-current-buffer (xhtmlize-buffer-1)
+	(with-current-buffer (xhtmlize-buffer-1 engine)
 	  (unwind-protect
 	      (progn
 		(run-hooks 'xhtmlize-file-hook)
