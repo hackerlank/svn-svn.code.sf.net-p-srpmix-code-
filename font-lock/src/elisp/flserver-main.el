@@ -34,6 +34,7 @@
 ;; Load libraries
 ;;
 (require 'xhtmlize)
+(require 'xhtmlize-engine)
 (require 'cssize)
 (flserver-load-plugin-mains)
 

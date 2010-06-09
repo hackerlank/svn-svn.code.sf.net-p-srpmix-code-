@@ -14,6 +14,7 @@ dist_flserver_LISP = \
 	\
 	cssize.el   \
 	xhtmlize.el \
+	xhtmlize-engine.el \
 	log.el      \
 	\
 	$(NULL)

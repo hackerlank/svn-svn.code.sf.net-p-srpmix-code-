@@ -60,6 +60,8 @@ rm -rf $RPM_BUILD_ROOT
 %{emacs_lispdir}/flserver/log.elc
 %{emacs_lispdir}/flserver/xhtmlize.el
 %{emacs_lispdir}/flserver/xhtmlize.elc
+%{emacs_lispdir}/flserver/xhtmlize-engine.el
+%{emacs_lispdir}/flserver/xhtmlize-engine.elc
 
 %dir %{emacs_lispdir}/flserver/plugins
 %{emacs_lispdir}/flserver/plugins/xhtmlize+linum+fringe-decl.el
