@@ -81,79 +81,24 @@
     ))
 
 (defmethod xhtmlize-engine-body ((engine <xhtmlize-engine>))
-  (with-slots (canvas face-map) engine
-    (with-current-buffer canvas
-      (plist-put (oref engine places) 'body-start (point-marker))
-      (insert (xhtmlize-method body-tag (oref engine face-map))
-	      "\n    ")
-      (plist-put (oref engine places) 'content-start (point-marker))
-      (insert xhtmlize-body-pre-tags)
-      (insert "<pre>\n"))
-    ;;
-    (let (;; Get the inserter method, so we can funcall it inside
-	  ;; the loop.  Not calling `xhtmlize-method' in the loop
-	  ;; body yields a measurable speed increase.
-	  (insert-text-with-id-method
-	   (xhtmlize-method-function 'insert-text-with-id))
-	  ;; Declare variables used in loop body outside the loop
-	  ;; because it's faster to establish `let' bindings only
-	  ;; once.
-	  next-change text face-list fstruct-list trailing-ellipsis)
-      ;; This loop traverses and reads the source buffer, appending
-      ;; the resulting HTML to HTMLBUF with `princ'.  This method is
-      ;; fast because: 1) it doesn't require examining the text
-      ;; properties char by char (xhtmlize-next-change is used to
-      ;; move between runs with the same face), and 2) it doesn't
-      ;; require buffer switches, which are slow in Emacs.
-      (goto-char (point-min))
-      (while (not (eobp))
-	(mapc (lambda (o)
-		(xhtmlize-width0-overlay o 
-					 insert-text-with-id-method
-					 face-map
-					 canvas)
-		)
-	      (xhtmlize-overlays-at (point)))
-	
-	(setq next-change (xhtmlize-next-change (point) 'face))
-	;; Get faces in use between (point) and NEXT-CHANGE, and
-	;; convert them to fstructs.
-	(setq face-list (xhtmlize-faces-at-point)
-	      fstruct-list (delq nil (mapcar (lambda (f)
-					       (gethash f face-map))
-					     face-list)))
-	;; Extract buffer text, sans the invisible parts.  Then
-	;; untabify it and escape the HTML metacharacters.
-	(setq text (xhtmlize-buffer-substring-no-invisible
-		    (point) next-change))
-	(when trailing-ellipsis
-	  (setq text (xhtmlize-trim-ellipsis text)))
-	;; If TEXT ends up empty, don't change trailing-ellipsis.
-	(when (> (length text) 0)
-	  (setq trailing-ellipsis
-		(get-text-property (1- (length text))
-				   'xhtmlize-ellipsis text)))
-	(setq text (xhtmlize-untabify text (current-column)))
-	(setq text (xhtmlize-protect-string text))
-	;; Don't bother writing anything if there's no text (this
-	;; happens in invisible regions).
-	(when (> (length text) 0)
-	  ;; Insert the text, along with the necessary markup to
-	  ;; represent faces in FSTRUCT-LIST.
-	  (funcall insert-text-with-id-method text 
-					;(format "font-lock:%s" (point))
-		   (concat "F:" (number-to-string (point)))
-		   nil
-		   fstruct-list
-		   canvas))
-	(goto-char next-change)))
-    (with-current-buffer canvas
-      (insert "</pre>")
-      (insert xhtmlize-body-post-tags)
-      (plist-put (oref engine places) 'content-end (point-marker))
-      (insert "\n  </body>")
-      (plist-put (oref engine places) 'body-end (point-marker)))
-    ))
+  (with-current-buffer (oref engine canvas)
+    (plist-put (oref engine places) 'body-start (point-marker))
+    (insert (xhtmlize-method body-tag (oref engine face-map))
+	    "\n    ")
+    (plist-put (oref engine places) 'content-start (point-marker))
+    (insert xhtmlize-body-pre-tags)
+    (insert "<pre>\n"))
+  (xhtmlize-engine-body-common engine
+			       ;; Get the inserter method, so we can funcall it inside
+			       ;; the loop.  Not calling `xhtmlize-method' in the loop
+			       ;; body yields a measurable speed increase.
+			       (xhtmlize-method-function 'insert-text-with-id))
+  (with-current-buffer (oref engine canvas)
+    (insert "</pre>")
+    (insert xhtmlize-body-post-tags)
+    (plist-put (oref engine places) 'content-end (point-marker))
+    (insert "\n  </body>")
+    (plist-put (oref engine places) 'body-end (point-marker))))
 
 (defmethod xhtmlize-engine-epilogue ((engine <xhtmlize-engine>))
   (with-current-buffer (oref engine canvas)
@@ -185,59 +130,5 @@
 (defmethod xhtmlize-engine-process ((engine <xhtmlize-engine>))
   (oref engine canvas))
 
-(defvar xhtmlize-width0-overlay-temp-buffer (let ((b (get-buffer-create
-							  " *width0-overlay-xhtmlize*")))
-						  (with-current-buffer b
-						    (buffer-disable-undo))
-						  b))
-
-(defun xhtmlize-width0-overlay (o insert-method face-map htmlbuf)
-  (let ((handler (xhtmlize-width0-overlay-acceptable-p o)))
-    (when handler
-      ;;
-      (unless (xhtmlize-width0-overlay-render-direct o
-						     handler
-						     insert-method
-						     face-map
-						     htmlbuf)
-	(let ((s (xhtmlize-width0-overlay-prepare o handler)))
-	  ;; TODO: Don't use `with-current-buffer'.
-	  (with-current-buffer xhtmlize-width0-overlay-temp-buffer
-	    (erase-buffer) 
-	    (when s (insert s))
-	    (xhtmlize-buffer-0 o handler insert-method face-map htmlbuf))))
-      ;;
-      )))
-
-(defun xhtmlize-buffer-0 (o handler insert-method face-map htmlbuf)
-  (let (next-change face-list fstruct-list text trailing-ellipsis)
-    (goto-char (point-min))
-    (while (not (eobp))
-      (setq next-change (xhtmlize-next-change (point) 'face))
-      (setq face-list (xhtmlize-faces-at-point)
-	    fstruct-list (delq nil (mapcar (lambda (f)
-					     (gethash f face-map))
-					   face-list)))
-      (setq text (xhtmlize-buffer-substring-no-invisible
-		  (point) next-change))
-      
-;;      (when trailing-ellipsis
-;;	(setq text (xhtmlize-trim-ellipsis text)))
-;;      (when (> (length text) 0)
-;;	(setq trailing-ellipsis
-;;	      (get-text-property (1- (length text))
-;;				 'xhtmlize-ellipsis text)))
-      (setq text (xhtmlize-untabify text (current-column)))
-      (setq text (xhtmlize-protect-string text))
-      (when (> (length text) 0)
-	;; Insert the text, along with the necessary markup to
-	;; represent faces in FSTRUCT-LIST.
-	(funcall insert-method
-		 text
-		 (xhtmlize-width0-overlay-make-id o handler)
-		 (xhtmlize-width0-overlay-make-href o handler)
-		 fstruct-list htmlbuf))
-      (goto-char next-change))
-    ))
 
 (provide 'xhtmlize-engine)

@@ -42,6 +42,33 @@
 (defun shtmlize-expand (engine)
   (shtmlize-expand-0 (shtmlize-top engine)))
 
+(defun shtmlize-enqueue-text-with-id (text id href fstruct-list engine)
+  (let ((queue (shtmlize-top engine)))
+    (dolist (fstruct fstruct-list)
+      (setq queue (shtmlize-push engine))
+      (shtmlize-enqueue queue '(span))
+      (setq queue (shtmlize-push engine))
+      (shtmlize-enqueue queue `(|@|
+				(class ,(cssize-fstruct-css-name (car fstruct-list)))
+				,@(if id
+				      `((id ,id))
+				    ())
+				))
+      (setq queue (shtmlize-pop engine))
+      )
+    (when href
+      (setq queue (shtmlize-push engine))
+      (shtmlize-enqueue queue
+			`(a (|@| (href ,href)))))
+
+    (shtmlize-enqueue queue (list text))
+
+    (when href
+      (setq queue (shtmlize-pop engine)))
+    
+    (dolist (fstruct fstruct-list)
+      (setq queue (shtmlize-pop engine))))
+  )
 
 (defmethod xhtmlize-engine-prepare ((engine <shtmlize-engine>))
   (call-next-method)
@@ -97,8 +124,16 @@
 (defmethod xhtmlize-engine-body ((engine <shtmlize-engine>))
   (let ((queue (shtmlize-top engine)))
     (setq queue (shtmlize-push engine))
-    (shtmlize-enqueue queue '(body))
-    ;; ...
+    (shtmlize-enqueue queue '(body "\n"))
+    (setq queue (shtmlize-push engine))
+    (shtmlize-enqueue queue '("    " pre "\n"))
+    
+    (xhtmlize-engine-body-common engine
+				 #'shtmlize-enqueue-text-with-id
+				 )
+    
+    (setq queue (shtmlize-pop engine))
+    (shtmlize-enqueue queue '("    " "\n"))
     (setq queue (shtmlize-pop engine))
     (shtmlize-enqueue queue '("    " "\n"))))
 

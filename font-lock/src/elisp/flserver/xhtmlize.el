@@ -900,8 +900,8 @@ it's called with the same value of KEY.  All other times, the cached
     (let ((path (concat (file-name-as-directory dir) file)))
       (cssize-file face path))))
 
-(defun xhtmlize-external-css-insert-text-with-id (text id href fstruct-list buffer)
-  (xhtmlize-css-insert-text-with-id text id href fstruct-list buffer)
+(defun xhtmlize-external-css-insert-text-with-id (text id href fstruct-list engine)
+  (xhtmlize-css-insert-text-with-id text id href fstruct-list engine)
   )
 
 
@@ -970,36 +970,37 @@ it's called with the same value of KEY.  All other times, the cached
   (insert xhtmlize-hyperlink-style
 	  "    -->\n    </style>\n"))
 
-(defun xhtmlize-css-insert-text-with-id (text id href fstruct-list buffer)
+(defun xhtmlize-css-insert-text-with-id (text id href fstruct-list engine)
   ;; Insert TEXT colored with FACES into BUFFER.  In CSS mode, this is
   ;; easy: just nest the text in one <span class=...> tag for each
   ;; face in FSTRUCT-LIST.
   ;;
-  (dolist (fstruct fstruct-list)
-    (princ "<span class=\"" buffer)
-    (princ (cssize-fstruct-css-name fstruct) buffer)
-    (when id
-      (princ "\" id=\"" buffer)
-      ;; TODO HTML ESCAPING
-      (princ id buffer)
+  (with-xhtmlize-engine-canvas buffer engine
+    (dolist (fstruct fstruct-list)
+      (princ "<span class=\"" buffer)
+      (princ (cssize-fstruct-css-name fstruct) buffer)
+      (when id
+	(princ "\" id=\"" buffer)
+	;; TODO HTML ESCAPING
+	(princ id buffer)
+	)
+      (princ "\">" buffer))
+
+    (when href
+      (princ "<a href=\"" buffer)
+      (princ (xhtmlize-protect-string href) buffer)
+      (princ "\">" buffer))
+
+    (princ text buffer)
+
+    (when href
+      (princ "</a>" buffer)
       )
-    (princ "\">" buffer))
-
-  (when href
-    (princ "<a href=\"" buffer)
-    (princ (xhtmlize-protect-string href) buffer)
-    (princ "\">" buffer))
-
-  (princ text buffer)
-
-  (when href
-    (princ "</a>" buffer)
-    )
-  
-  (dolist (fstruct fstruct-list)
-    (ignore fstruct)			; shut up the byte-compiler
-    (princ "</span>" buffer))
-  )
+    
+    (dolist (fstruct fstruct-list)
+      (ignore fstruct)			; shut up the byte-compiler
+      (princ "</span>" buffer))
+    ))
 
 
 
@@ -1010,20 +1011,21 @@ it's called with the same value of KEY.  All other times, the cached
 	  (mapconcat #'identity (xhtmlize-css-specs (gethash 'default face-map))
 		     " ")))
 
-(defun xhtmlize-inline-css-insert-text-with-id (text id href fstruct-list buffer)
-  (let* ((merged (xhtmlize-merge-faces fstruct-list))
-	 (style (xhtmlize-memoize
-		 merged
-		 (let ((specs (xhtmlize-css-specs merged)))
-		   (and specs
-			(mapconcat #'identity (xhtmlize-css-specs merged) " "))))))
-    (when style
-      (princ "<span style=\"" buffer)
-      (princ style buffer)
-      (princ "\">" buffer))
-    (princ text buffer)
-    (when style
-      (princ "</span>" buffer))))
+(defun xhtmlize-inline-css-insert-text-with-id (text id href fstruct-list engine)
+  (with-xhtmlize-engine-canvas buffer engine
+    (let* ((merged (xhtmlize-merge-faces fstruct-list))
+	   (style (xhtmlize-memoize
+		   merged
+		   (let ((specs (xhtmlize-css-specs merged)))
+		     (and specs
+			  (mapconcat #'identity (xhtmlize-css-specs merged) " "))))))
+      (when style
+	(princ "<span style=\"" buffer)
+	(princ style buffer)
+	(princ "\">" buffer))
+      (princ text buffer)
+      (when style
+	(princ "</span>" buffer)))))
 
 
 ;;; `font' tag based output support.
@@ -1034,29 +1036,30 @@ it's called with the same value of KEY.  All other times, the cached
 	    (cssize-fstruct-foreground fstruct)
 	    (cssize-fstruct-background fstruct))))
        
-(defun xhtmlize-font-insert-text-with-id (text id href fstruct-list buffer)
-  ;; In `font' mode, we use the traditional HTML means of altering
-  ;; presentation: <font> tag for colors, <b> for bold, <u> for
-  ;; underline, and <strike> for strike-through.
-  (let* ((merged (xhtmlize-merge-faces fstruct-list))
-	 (markup (xhtmlize-memoize
-		  merged
-		  (cons (concat
-			 (and (cssize-fstruct-foreground merged)
-			      (format "<font color=\"%s\">" (cssize-fstruct-foreground merged)))
-			 (and (cssize-fstruct-boldp merged)      "<b>")
-			 (and (cssize-fstruct-italicp merged)    "<i>")
-			 (and (cssize-fstruct-underlinep merged) "<u>")
-			 (and (cssize-fstruct-strikep merged)    "<strike>"))
-			(concat
-			 (and (cssize-fstruct-strikep merged)    "</strike>")
-			 (and (cssize-fstruct-underlinep merged) "</u>")
-			 (and (cssize-fstruct-italicp merged)    "</i>")
-			 (and (cssize-fstruct-boldp merged)      "</b>")
-			 (and (cssize-fstruct-foreground merged) "</font>"))))))
-    (princ (car markup) buffer)
-    (princ text buffer)
-    (princ (cdr markup) buffer)))
+(defun xhtmlize-font-insert-text-with-id (text id href fstruct-list engine)
+  (with-xhtmlize-engine-canvas buffer engine
+    ;; In `font' mode, we use the traditional HTML means of altering
+    ;; presentation: <font> tag for colors, <b> for bold, <u> for
+    ;; underline, and <strike> for strike-through.
+    (let* ((merged (xhtmlize-merge-faces fstruct-list))
+	   (markup (xhtmlize-memoize
+		    merged
+		    (cons (concat
+			   (and (cssize-fstruct-foreground merged)
+				(format "<font color=\"%s\">" (cssize-fstruct-foreground merged)))
+			   (and (cssize-fstruct-boldp merged)      "<b>")
+			   (and (cssize-fstruct-italicp merged)    "<i>")
+			   (and (cssize-fstruct-underlinep merged) "<u>")
+			   (and (cssize-fstruct-strikep merged)    "<strike>"))
+			  (concat
+			   (and (cssize-fstruct-strikep merged)    "</strike>")
+			   (and (cssize-fstruct-underlinep merged) "</u>")
+			   (and (cssize-fstruct-italicp merged)    "</i>")
+			   (and (cssize-fstruct-boldp merged)      "</b>")
+			   (and (cssize-fstruct-foreground merged) "</font>"))))))
+      (princ (car markup) buffer)
+      (princ text buffer)
+      (princ (cdr markup) buffer))))
 
 
 (defvar xhtmlize-width0-overlay-handlers (list))
@@ -1108,6 +1111,61 @@ it's called with the same value of KEY.  All other times, the cached
 	(funcall f o)
       nil)))
 
+(defvar xhtmlize-width0-overlay-temp-buffer (let ((b (get-buffer-create
+							  " *width0-overlay-xhtmlize*")))
+						  (with-current-buffer b
+						    (buffer-disable-undo))
+						  b))
+
+(defun xhtmlize-width0-overlay (o insert-method face-map engine)
+  (let ((handler (xhtmlize-width0-overlay-acceptable-p o)))
+    (when handler
+      ;;
+      (unless (xhtmlize-width0-overlay-render-direct o
+						     handler
+						     insert-method
+						     face-map
+						     engine)
+	(let ((s (xhtmlize-width0-overlay-prepare o handler)))
+	  ;; TODO: Don't use `with-current-buffer'.
+	  (with-current-buffer xhtmlize-width0-overlay-temp-buffer
+	    (erase-buffer) 
+	    (when s (insert s))
+	    (xhtmlize-buffer-0 o handler insert-method face-map engine))))
+      ;;
+      )))
+
+(defun xhtmlize-buffer-0 (o handler insert-method face-map engine)
+  (with-xhtmlize-engine-canvas htmlbuf engine
+    (let (next-change face-list fstruct-list text trailing-ellipsis)
+      (goto-char (point-min))
+      (while (not (eobp))
+	(setq next-change (xhtmlize-next-change (point) 'face))
+	(setq face-list (xhtmlize-faces-at-point)
+	      fstruct-list (delq nil (mapcar (lambda (f)
+					       (gethash f face-map))
+					     face-list)))
+	(setq text (xhtmlize-buffer-substring-no-invisible
+		    (point) next-change))
+	
+	;;      (when trailing-ellipsis
+	;;	(setq text (xhtmlize-trim-ellipsis text)))
+	;;      (when (> (length text) 0)
+	;;	(setq trailing-ellipsis
+	;;	      (get-text-property (1- (length text))
+	;;				 'xhtmlize-ellipsis text)))
+	(setq text (xhtmlize-untabify text (current-column)))
+	(setq text (xhtmlize-protect-string text))
+	(when (> (length text) 0)
+	  ;; Insert the text, along with the necessary markup to
+	  ;; represent faces in FSTRUCT-LIST.
+	  (funcall insert-method
+		   text
+		   (xhtmlize-width0-overlay-make-id o handler)
+		   (xhtmlize-width0-overlay-make-href o handler)
+		   fstruct-list htmlbuf))
+	(goto-char next-change))
+      )))
 
 ;;
 ;; Engine stub
@@ -1141,10 +1199,72 @@ it's called with the same value of KEY.  All other times, the cached
   )
 (defmethod xhtmlize-engine-body ((engine <xhtmlize-common-engine>))
   )
+
+(defmethod xhtmlize-engine-body-common ((engine <xhtmlize-common-engine>)
+					insert-text-with-id-method)
+  (with-slots (face-map) engine
+    (let (;; Declare variables used in loop body outside the loop
+	  ;; because it's faster to establish `let' bindings only
+	  ;; once.
+	  next-change text face-list fstruct-list trailing-ellipsis)
+      ;; This loop traverses and reads the source buffer, appending
+      ;; the resulting HTML to HTMLBUF with `princ'.  This method is
+      ;; fast because: 1) it doesn't require examining the text
+      ;; properties char by char (xhtmlize-next-change is used to
+      ;; move between runs with the same face), and 2) it doesn't
+      ;; require buffer switches, which are slow in Emacs.
+      (goto-char (point-min))
+      (while (not (eobp))
+	(mapc (lambda (o)
+		(xhtmlize-width0-overlay o 
+					 insert-text-with-id-method
+					 face-map
+					 engine)
+		)
+	      (xhtmlize-overlays-at (point)))
+	
+	(setq next-change (xhtmlize-next-change (point) 'face))
+	;; Get faces in use between (point) and NEXT-CHANGE, and
+	;; convert them to fstructs.
+	(setq face-list (xhtmlize-faces-at-point)
+	      fstruct-list (delq nil (mapcar (lambda (f)
+					       (gethash f face-map))
+					     face-list)))
+	;; Extract buffer text, sans the invisible parts.  Then
+	;; untabify it and escape the HTML metacharacters.
+	(setq text (xhtmlize-buffer-substring-no-invisible
+		    (point) next-change))
+	(when trailing-ellipsis
+	  (setq text (xhtmlize-trim-ellipsis text)))
+	;; If TEXT ends up empty, don't change trailing-ellipsis.
+	(when (> (length text) 0)
+	  (setq trailing-ellipsis
+		(get-text-property (1- (length text))
+				   'xhtmlize-ellipsis text)))
+	(setq text (xhtmlize-untabify text (current-column)))
+	(setq text (xhtmlize-protect-string text))
+	;; Don't bother writing anything if there's no text (this
+	;; happens in invisible regions).
+	(when (> (length text) 0)
+	  ;; Insert the text, along with the necessary markup to
+	  ;; represent faces in FSTRUCT-LIST.
+	  (funcall insert-text-with-id-method text 
+					;(format "font-lock:%s" (point))
+		   (concat "F:" (number-to-string (point)))
+		   nil
+		   fstruct-list
+		   engine))
+	(goto-char next-change)))))
+
 (defmethod xhtmlize-engine-epilogue ((engine <xhtmlize-common-engine>))
   )
 (defmethod xhtmlize-engine-process ((engine <xhtmlize-common-engine>))
   )
+
+(defmacro with-xhtmlize-engine-canvas (name engine &rest body)
+  `(with-slot ((,name (oref ,engine canvas)))
+	      ,@body))
+(put 'with-xhtmlize-engine-canvas 'lisp-indent-function 2)
 
 (defun xhtmlize-buffer-1 (&optional engine-name)
   ;; Internal function; don't call it from outside this file.  Xhtmlize

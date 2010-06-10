@@ -12,7 +12,7 @@
 
 
 (define-xhtmlize-linum-bol-handler 'xhtmlize-linum-fringe-redner-direct)
-(defun xhtmlize-linum-fringe-redner-direct (line point insert-method face-map htmlbuf)
+(defun xhtmlize-linum-fringe-redner-direct (line point insert-method face-map engine)
   (let ((text  " ")
 	(id (concat "P:" (number-to-string point)
 		    ";"
@@ -26,7 +26,7 @@
 	     id
 	     href
 	     fstruct-list
-	     htmlbuf)))
+	     engine)))
 
 (xhtmlize-add-builtin-faces 'fringe)
 

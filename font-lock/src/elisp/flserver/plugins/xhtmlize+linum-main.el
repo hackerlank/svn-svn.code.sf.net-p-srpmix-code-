@@ -22,8 +22,9 @@
 	  (mapcar (lambda (f) (gethash f face-map)) '(linum)))
     xhtmlize-linum-fstruct-list-cache))
 
-(defun xhtmlize-linum-render-direct (o insert-method face-map htmlbuf)
-  (let* ((str (overlay-get o 'linum-str))
+(defun xhtmlize-linum-render-direct (o insert-method face-map engine)
+  (let* ((str0 (overlay-get o 'linum-str))
+	 (str (substring-no-properties str0))
 	 (line-str (car (split-string str)))
 	 (point (point))
 	 (id (concat "L:" line-str))
@@ -34,14 +35,14 @@
 	     id
 	     href
 	     fstruct-list
-	     htmlbuf)
+	     engine)
     (when xhtmlize-linum-bol-handler
       (let ((line (string-to-number line-str)))
 	(mapc
 	 (lambda (handler)
 	   (let ((render-direct (cdr (assq 'render-direct xhtmlize-linum-bol-handler))))
 	     (when render-direct
-	       (funcall render-direct line point insert-method face-map htmlbuf)
+	       (funcall render-direct line point insert-method face-map engine)
 	       )
 	     ))
 	 xhtmlize-linum-bol-handler)))))
