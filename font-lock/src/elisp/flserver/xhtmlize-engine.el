@@ -43,7 +43,7 @@
 					(xhtmlize-make-file-name
 					 (file-name-nondirectory
 					  (buffer-file-name)))
-				      "*html*"))))
+				      "*xhtml*"))))
 
 (defmethod xhtmlize-engine-prologue ((engine <xhtmlize-engine>) title)
   (with-current-buffer (oref engine canvas)
@@ -71,19 +71,25 @@
 			xhtmlize-html-charset)
 	      "")
 	    xhtmlize-head-tags)
-    (xhtmlize-method insert-head (oref engine buffer-faces) (oref engine face-map))
+    (xhtmlize-method insert-head
+		     (oref engine buffer-faces)
+		     (oref engine face-map)
+		     )
     (insert "  </head>")
     (plist-put (oref engine places) 'head-end (point-marker))
     (insert "\n  ")
-    (plist-put (oref engine places) 'body-start (point-marker))
-    (insert (xhtmlize-method body-tag (oref engine face-map))
-	    "\n    ")
-    (plist-put (oref engine places) 'content-start (point-marker))
-    (insert xhtmlize-body-pre-tags)
-    (insert "<pre>\n")))
+    ))
 
 (defmethod xhtmlize-engine-body ((engine <xhtmlize-engine>))
   (with-slots (canvas face-map) engine
+    (with-current-buffer canvas
+      (plist-put (oref engine places) 'body-start (point-marker))
+      (insert (xhtmlize-method body-tag (oref engine face-map))
+	      "\n    ")
+      (plist-put (oref engine places) 'content-start (point-marker))
+      (insert xhtmlize-body-pre-tags)
+      (insert "<pre>\n"))
+    ;;
     (let (;; Get the inserter method, so we can funcall it inside
 	  ;; the loop.  Not calling `xhtmlize-method' in the loop
 	  ;; body yields a measurable speed increase.
@@ -140,15 +146,17 @@
 		   nil
 		   fstruct-list
 		   canvas))
-	(goto-char next-change)))))
+	(goto-char next-change)))
+    (with-current-buffer canvas
+      (insert "</pre>")
+      (insert xhtmlize-body-post-tags)
+      (plist-put (oref engine places) 'content-end (point-marker))
+      (insert "\n  </body>")
+      (plist-put (oref engine places) 'body-end (point-marker)))
+    ))
 
 (defmethod xhtmlize-engine-epilogue ((engine <xhtmlize-engine>))
   (with-current-buffer (oref engine canvas)
-    (insert "</pre>")
-    (insert xhtmlize-body-post-tags)
-    (plist-put (oref engine places) 'content-end (point-marker))
-    (insert "\n  </body>")
-    (plist-put (oref engine places) 'body-end (point-marker))
     (insert "\n</html>\n")
     (when xhtmlize-generate-hyperlinks
       (xhtmlize-make-hyperlinks))

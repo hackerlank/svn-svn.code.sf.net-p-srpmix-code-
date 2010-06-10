@@ -15,6 +15,12 @@ dist_flserver_LISP = \
 	cssize.el   \
 	xhtmlize.el \
 	xhtmlize-engine.el \
-	log.el      \
+	\
+	queue-m.el \
+	shtmlize.el \
+	shtmlize-engine.el \
+	\
+	log.el       \
+	text-tree.el \
 	\
 	$(NULL)

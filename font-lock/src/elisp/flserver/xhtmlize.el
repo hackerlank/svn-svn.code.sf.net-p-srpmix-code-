@@ -844,15 +844,18 @@ it's called with the same value of KEY.  All other times, the cached
   "<body>")
 
 ;;; External CSS based output support.
-(defun xhtmlize-css-link (face css-dir)
-  (xhtmlize-css-link0 face css-dir "black" "white" "Default")
-  (xhtmlize-css-link0 face css-dir "white" "black" "Invert")) 
+(defun xhtmlize-css-link (face css-dir insert-func)
+  (xhtmlize-css-link0 face css-dir "black" "white" "Default" insert-func)
+  (xhtmlize-css-link0 face css-dir "white" "black" "Invert" insert-func)) 
 
-(defun xhtmlize-css-link0 (face css-dir fg bg title)
+(defun xhtmlize-css-link0 (face css-dir fg bg title insert-func)
   (unless (xhtmlize-css-cached-on-disk-p face css-dir title)
     (set-foreground-color fg)
     (set-background-color bg)
     (xhtmlize-css-make-cache-on-disk face css-dir title))
+  (funcall insert-func face title))
+
+(defun xhtmlize-css-link-insert (face title)
   (insert "    <link rel=\"stylesheet\" type=\"text/css\""
 	  (format " href=\"%s/%s\""
 		  xhtmlize-external-css-base-url
@@ -862,17 +865,20 @@ it's called with the same value of KEY.  All other times, the cached
 	  "/>"
 	  ?\n))
 
+(defun xhtmlize-external-css-enumerate-faces (buffer-faces face-map)
+  (cons
+   'default
+   (append
+    xhtmlize-builtin-faces
+    (sort* (copy-list buffer-faces) #'string-lessp
+	   :key (lambda (f)
+		  (cssize-fstruct-css-name (gethash f face-map)))))))
+
 (defun xhtmlize-external-css-insert-head (buffer-faces face-map)
-  (let ((css-dir xhtmlize-external-css-base-dir))
-    (mapc
-     (lambda (face)
-       (xhtmlize-css-link face css-dir))
-     (cons 'default xhtmlize-builtin-faces)
-     )
-    (dolist (face (sort* (copy-list buffer-faces) #'string-lessp
-			 :key (lambda (f)
-				(cssize-fstruct-css-name (gethash f face-map)))))
-      (xhtmlize-css-link face css-dir))))
+  (dolist (face (xhtmlize-external-css-enumerate-faces buffer-faces face-map))
+      (xhtmlize-css-link face 
+			 xhtmlize-external-css-base-dir
+			 #'xhtmlize-css-link-insert)))
 
 (defun xhtmlize-css-make-file-name (face title)
   (concat (cssize-clean-up-face-name face) "--" title "." "css"))
@@ -1209,7 +1215,7 @@ it's called with the same value of KEY.  All other times, the cached
 
 
 ;;;###autoload
-(defun xhtmlize-buffer (&optional buffer)
+(defun xhtmlize-buffer (&optional buffer engine-name)
   "Convert BUFFER to HTML, preserving colors and decorations.
 
 The generated HTML is available in a new buffer, which is returned.
@@ -1224,7 +1230,7 @@ plain.  Likewise, if you don't like the choice of colors, fix the mode
 that created them, or simply alter the faces it uses."
   (interactive)
   (let ((htmlbuf (with-current-buffer (or buffer (current-buffer))
-		   (xhtmlize-buffer-1))))
+		   (xhtmlize-buffer-1 engine-name))))
     (when (interactive-p)
       (switch-to-buffer htmlbuf))
     htmlbuf))

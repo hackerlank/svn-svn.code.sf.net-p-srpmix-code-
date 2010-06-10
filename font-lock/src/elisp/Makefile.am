@@ -15,7 +15,11 @@ dist_flserver_LISP = \
 	flserver/cssize.el   \
 	flserver/xhtmlize.el \
 	flserver/xhtmlize-engine.el \
+	flserver/queue-m.el \
+	flserver/shtmlize.el \
+	flserver/shtmlize-engine.el \
 	flserver/log.el  \
+	flserver/text-tree.el \
 	\
 	$(NULL)
 
