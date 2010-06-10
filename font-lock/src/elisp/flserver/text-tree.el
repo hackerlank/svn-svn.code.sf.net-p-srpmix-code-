@@ -12,3 +12,5 @@
       (setq tree (cdr tree)))
      (t
       (error "Cannot handle: %s" (car tree))))))
+(provide 'text-tree)
+
