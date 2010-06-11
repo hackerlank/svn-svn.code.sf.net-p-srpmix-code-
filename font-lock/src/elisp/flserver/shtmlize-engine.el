@@ -79,13 +79,13 @@
   (let ((queue (shtmlize-top engine)))
     (shtmlize-enqueue 
      queue
-     '(*TOP* 
+     `(*TOP* 
        (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n"
        (*DECL* DOCTYPE html PUBLIC 
 	       "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd")
        "\n"
-					;'(*COMMENT* " Created by xhtmlize-1.34.1 in external-css mode. ")
+       (*COMMENT* ,(format " Created by xhtmlize-%s in external-css mode. " xhtmlize-version))
        "\n"))
 
     (setq queue (shtmlize-push engine))
@@ -118,24 +118,24 @@
 				"\n"))))))
     
     (setq queue (shtmlize-pop engine))
-    (shtmlize-enqueue queue '("    " "\n"))
+    (shtmlize-enqueue queue '("\n" "    "))
     ))
 
 (defmethod xhtmlize-engine-body ((engine <shtmlize-engine>))
   (let ((queue (shtmlize-top engine)))
     (setq queue (shtmlize-push engine))
-    (shtmlize-enqueue queue '(body "\n"))
+    (shtmlize-enqueue queue '(body "\n" "    "))
     (setq queue (shtmlize-push engine))
-    (shtmlize-enqueue queue '("    " pre "\n"))
+    (shtmlize-enqueue queue '(pre "\n"))
     
     (xhtmlize-engine-body-common engine
 				 #'shtmlize-enqueue-text-with-id
 				 )
     
     (setq queue (shtmlize-pop engine))
-    (shtmlize-enqueue queue '("    " "\n"))
+    (shtmlize-enqueue queue '("\n" "    "))
     (setq queue (shtmlize-pop engine))
-    (shtmlize-enqueue queue '("    " "\n"))))
+    (shtmlize-enqueue queue '("\n"))))
 
 (defmethod xhtmlize-engine-epilogue ((engine <shtmlize-engine>))
   (setq queue (shtmlize-pop engine))
