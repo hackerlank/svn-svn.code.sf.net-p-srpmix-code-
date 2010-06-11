@@ -67,8 +67,7 @@
       (setq queue (shtmlize-pop engine)))
     
     (dolist (fstruct fstruct-list)
-      (setq queue (shtmlize-pop engine))))
-  )
+      (setq queue (shtmlize-pop engine)))))
 
 (defmethod xhtmlize-engine-prepare ((engine <shtmlize-engine>))
   (call-next-method)
@@ -131,7 +130,6 @@
     (xhtmlize-engine-body-common engine
 				 #'shtmlize-enqueue-text-with-id
 				 )
-    
     (setq queue (shtmlize-pop engine))
     (shtmlize-enqueue queue '("\n" "    "))
     (setq queue (shtmlize-pop engine))
@@ -148,7 +146,7 @@
 					(buffer-file-name)))
 				    "*shtml*")))
 	(print-escape-newlines t))
-    (print (shtmlize-expand engine) buf)
+    (prin1 (shtmlize-expand engine) buf)
     buf))
 (provide 'shtmlize-engine)
 
