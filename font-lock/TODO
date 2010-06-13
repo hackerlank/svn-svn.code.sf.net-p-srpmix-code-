@@ -9,16 +9,16 @@
 -- optiomize
 -- plugins <working>
 --- font-lock face own handler
---- linum  <working>
+--- linum  <done>
 --- spec
 - Es Expression stream
-- XSLT for range extraction
+- XSLT for range extraction <done>
 - Xvnc and Screen wrapper
 -- if ! -f $ENV{HOME}/.vnc/passwd; then vncpasswd -q $vncUserDir/passwd; fi
 -- if ! -f $ENV{HOME}/.vnc/startup; then echo 'twm' > $vncUserDir/xstartup; fi
 -- vncserver :N
 -- DISPLAY=:N flserver
--- sxml-engine
+-- sxml-engine <done>
 
 
 http://www.neilvandyke.org/htmlprag/htmlprag-0-16.scm

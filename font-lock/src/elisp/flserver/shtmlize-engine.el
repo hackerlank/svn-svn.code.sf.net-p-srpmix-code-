@@ -136,8 +136,8 @@
     (shtmlize-enqueue queue '("\n"))))
 
 (defmethod xhtmlize-engine-epilogue ((engine <shtmlize-engine>))
-  (setq queue (shtmlize-pop engine))
-  (shtmlize-enqueue queue '("\n")))
+  (let ((queue (shtmlize-pop engine))) 
+    (shtmlize-enqueue queue '("\n"))))
 
 (defmethod xhtmlize-engine-process ((engine <shtmlize-engine>))
   (let ((buf (generate-new-buffer (if (buffer-file-name)

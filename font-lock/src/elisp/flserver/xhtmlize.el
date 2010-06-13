@@ -1262,7 +1262,7 @@ it's called with the same value of KEY.  All other times, the cached
   )
 
 (defmacro with-xhtmlize-engine-canvas (name engine &rest body)
-  `(with-slot ((,name (oref ,engine canvas)))
+  `(let ((,name (oref ,engine canvas)))
 	      ,@body))
 (put 'with-xhtmlize-engine-canvas 'lisp-indent-function 2)
 
