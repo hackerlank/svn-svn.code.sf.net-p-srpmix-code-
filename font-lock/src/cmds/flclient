@@ -69,8 +69,7 @@
 				  :socket-name socket-name)
       (exit status))))
 
-(define-command xhtmlize (prog emacsclient socket-name args)
-  "SRC_FILE HTML_FILE CSS_DIR" #t
+(define (convert-common proc prog emacsclient socket-name args)
   (unless (eq? (length args) 3)
     (with-output-to-port (current-error-port)
       (lambda () 
@@ -87,17 +86,25 @@
 	    ((else 
 	      (format (current-error-port) "Cannnot create html file: ~a\n" html-file)
 	      (exit 1))))
-	   (touch-file html-file))
+      (touch-file html-file))
     (guard (e
 	    ((else
 	      (format (current-error-port) "Cannnot create directory: ~a\n" css-dir)
 	      (exit 1))))
-	   (make-directory* css-dir))
-    (let1 status (flclient-xhtmlize src-file html-file css-dir
+      (make-directory* css-dir))
+    (let1 status (proc src-file html-file css-dir
 				    :emacsclient emacsclient
 				    :socket-name socket-name)
       
       (exit status))))
+
+(define-command xhtmlize (prog emacsclient socket-name args)
+  "SRC_FILE HTML_FILE CSS_DIR" #t
+  (convert-common flclient-xhtmlize prog emacsclient socket-name args))
+
+(define-command shtmlize (prog emacsclient socket-name args)
+  "SRC_FILE HTML_FILE CSS_DIR" #t
+  (convert-common flclient-shtmlize prog emacsclient socket-name args))
 
 (define (main args)
   (let ((prog (car args))

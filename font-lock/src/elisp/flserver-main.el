@@ -36,6 +36,9 @@
 (require 'xhtmlize)
 (require 'xhtmlize-engine)
 (require 'cssize)
+
+(require 'shtmlize)
+
 (flserver-load-plugin-mains)
 
 ;;
@@ -65,6 +68,8 @@
       (cond 
        ((eq action 'xhtmlize)
 	(apply #'flserver-xhtmlize args))
+       ((eq action 'shtmlize)
+	(apply #'flserver-shtmlize args))
        ((eq action 'cssize)
 	(apply #'flserver-cssize args))
        ((eq action 'shutdown)
@@ -80,6 +85,15 @@
 	 (xhtmlize-external-css-base-url (or flserver-xhtmlize-external-css-base-url
 					     (concat "file://" css-dir))))
      (xhtmlize-file src-file html-file))))
+
+(defun flserver-shtmlize (src-file shtml-file css-dir)
+  (with-log-string
+   "shtmlize" (format "src-file: %s, shtml-file: %s, css-dir: %s"
+		      src-file shtml-file css-dir)
+   (let ((xhtmlize-external-css-base-dir css-dir)
+	 (xhtmlize-external-css-base-url (or flserver-xhtmlize-external-css-base-url
+					     (concat "file://" css-dir))))
+     (shtmlize-file src-file shtml-file))))
 
 (defun flserver-cssize (face css-dir requires)
   (with-log-string
@@ -101,6 +115,7 @@
 ;; Main
 ;;
 (defun flserver-main ()
+  (cd "/")
   (server-start)
   (flserver-touch)
   (while t
