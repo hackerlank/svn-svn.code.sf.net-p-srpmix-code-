@@ -20,5 +20,9 @@
 -- DISPLAY=:N flserver
 -- sxml-engine <done>
 - Make TITLE parametarize
-
+- td/td
+-- highlighting line
+-- line trimming
+-- stitching...
+-- cut&paste friendly
 http://www.neilvandyke.org/htmlprag/htmlprag-0-16.scm
