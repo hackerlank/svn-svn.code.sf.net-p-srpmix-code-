@@ -3,11 +3,18 @@
 (require 'xhtmlize+linum-decl)
 
 
-(defvar xhtmlize-linum-bol-handler (list))
-(defun define-xhtmlize-linum-bol-handler (render-direct)
-  (setq xhtmlize-linum-bol-handler
-	(cons `(render-direct . ,render-direct)
-	      xhtmlize-linum-bol-handler)))
+(defvar xhtmlize-pre-linum-handlers (list))
+(defun define-xhtmlize-pre-linum-handler (render-direct)
+  (setq xhtmlize-pre-linum-handlers
+	(cons `((render-direct . ,render-direct))
+	      xhtmlize-pre-linum-handlers)))
+
+(defvar xhtmlize-post-linum-handlers (list))
+(defun define-xhtmlize-post-linum-handler (render-direct)
+  (setq xhtmlize-post-linum-handlers
+	(cons `((render-direct . ,render-direct))
+	      xhtmlize-post-linum-handlers)))
+
 
 
 
@@ -29,30 +36,32 @@
 	 (point (point))
 	 (id (concat "L:" line-str))
 	 (href (concat "#" id)) ; TODO: "L:" is needed?
-	 (fstruct-list (xhtmlize-linum-fstruct-list-cache face-map)))
-    ;;
-    ;; TODO: before
-    ;; <span style="color: red;float: right;">****************</span>
-    ;;
+	 (fstruct-list (xhtmlize-linum-fstruct-list-cache face-map))
+	 (line (string-to-number line-str)))
+    (when xhtmlize-pre-linum-handlers
+      (mapc
+       (lambda (handler)
+	 (let ((render-direct (cdr (assq 'render-direct handler))))
+	   (when render-direct
+	     (funcall render-direct line point insert-method face-map engine)
+	     )
+	   ))
+       xhtmlize-pre-linum-handlers))
     (funcall insert-method 
 	     str
 	     id
 	     href
 	     fstruct-list
 	     engine)
-    ;;
-    ;; TODO: after
-    ;; 
-    (when xhtmlize-linum-bol-handler
-      (let ((line (string-to-number line-str)))
-	(mapc
-	 (lambda (handler)
-	   (let ((render-direct (cdr (assq 'render-direct xhtmlize-linum-bol-handler))))
-	     (when render-direct
-	       (funcall render-direct line point insert-method face-map engine)
-	       )
-	     ))
-	 xhtmlize-linum-bol-handler)))))
+    (when xhtmlize-post-linum-handlers
+      (mapc
+       (lambda (handler)
+	 (let ((render-direct (cdr (assq 'render-direct handler))))
+	   (when render-direct
+	     (funcall render-direct line point insert-method face-map engine)
+	     )
+	   ))
+       xhtmlize-post-linum-handlers))))
 
 (defun xhtmlize-linum-prepare  (o)
   (let ((str (overlay-get o 'linum-str)))

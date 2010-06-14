@@ -11,10 +11,29 @@
     xhtmlize-linum-fringe-fstruct-list-cache))
 
 
-(define-xhtmlize-linum-bol-handler 'xhtmlize-linum-fringe-redner-direct)
-(defun xhtmlize-linum-fringe-redner-direct (line point insert-method face-map engine)
+;;
+;; TODO: before
+;; <span style="color: red;float: right;">****************</span>
+;;
+;; (define-xhtmlize-pre-linum-handler 'xhtmlize-linum-lfringe-render-direct)
+;; (defun xhtmlize-linum-lfringe-render-direct (line point insert-method face-map engine)
+;;   (let ((text  " ")
+;; 	(id (concat "f:L"))
+;; 	(href nil)
+;; 	(fstruct-list (xhtmlize-linum-fringe-fstruct-list-cache face-map))
+;; 	)
+;;     (funcall insert-method
+;; 	     text
+;; 	     id
+;; 	     href
+;; 	     fstruct-list
+;; 	     engine)))
+
+(define-xhtmlize-post-linum-handler 'xhtmlize-linum-rfringe-render-direct)
+(defun xhtmlize-linum-rfringe-render-direct (line point insert-method face-map engine)
   (let ((text  " ")
-	(id (concat "P:" (number-to-string point)
+	(id (concat "f:R;"
+		    "P:" (number-to-string point)
 		    ";"
 		    "L:" (number-to-string line)
 		    ))
@@ -27,6 +46,8 @@
 	     href
 	     fstruct-list
 	     engine)))
+
+
 
 (xhtmlize-add-builtin-faces 'fringe)
 

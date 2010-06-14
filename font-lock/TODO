@@ -25,4 +25,6 @@
 -- line trimming
 -- stitching...
 -- cut&paste friendly
+- before/after hook
+--- define-cssize-fstruct
 http://www.neilvandyke.org/htmlprag/htmlprag-0-16.scm
