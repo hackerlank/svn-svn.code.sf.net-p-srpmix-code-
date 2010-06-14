@@ -19,6 +19,6 @@
 -- vncserver :N
 -- DISPLAY=:N flserver
 -- sxml-engine <done>
-
+- Make TITLE parametarize
 
 http://www.neilvandyke.org/htmlprag/htmlprag-0-16.scm
