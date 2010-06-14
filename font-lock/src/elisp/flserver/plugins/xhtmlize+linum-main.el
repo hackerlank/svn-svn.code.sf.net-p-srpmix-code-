@@ -30,12 +30,19 @@
 	 (id (concat "L:" line-str))
 	 (href (concat "#" id)) ; TODO: "L:" is needed?
 	 (fstruct-list (xhtmlize-linum-fstruct-list-cache face-map)))
+    ;;
+    ;; TODO: before
+    ;; <span style="color: red;float: right;">****************</span>
+    ;;
     (funcall insert-method 
 	     str
 	     id
 	     href
 	     fstruct-list
 	     engine)
+    ;;
+    ;; TODO: after
+    ;; 
     (when xhtmlize-linum-bol-handler
       (let ((line (string-to-number line-str)))
 	(mapc
