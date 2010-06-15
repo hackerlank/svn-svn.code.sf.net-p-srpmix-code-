@@ -28,4 +28,5 @@
 - before/after hook<done>
 --- define-cssize-fstruct<done>
 --- lfringe of the last line without newline is broken.
+--- remove ad-hoc code from cssize.el
 http://www.neilvandyke.org/htmlprag/htmlprag-0-16.scm
