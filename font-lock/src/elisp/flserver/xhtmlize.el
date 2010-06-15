@@ -991,7 +991,7 @@ it's called with the same value of KEY.  All other times, the cached
       (princ (xhtmlize-protect-string href) buffer)
       (princ "\">" buffer))
 
-    (princ text buffer)
+    (princ (xhtmlize-protect-string text) buffer)
 
     (when href
       (princ "</a>" buffer)
@@ -1023,7 +1023,7 @@ it's called with the same value of KEY.  All other times, the cached
 	(princ "<span style=\"" buffer)
 	(princ style buffer)
 	(princ "\">" buffer))
-      (princ text buffer)
+      (princ (xhtmlize-protect-string text) buffer)
       (when style
 	(princ "</span>" buffer)))))
 
@@ -1058,7 +1058,7 @@ it's called with the same value of KEY.  All other times, the cached
 			   (and (cssize-fstruct-boldp merged)      "</b>")
 			   (and (cssize-fstruct-foreground merged) "</font>"))))))
       (princ (car markup) buffer)
-      (princ text buffer)
+      (princ (xhtmlize-protect-string text) buffer)
       (princ (cdr markup) buffer))))
 
 
@@ -1155,7 +1155,6 @@ it's called with the same value of KEY.  All other times, the cached
 	;;	      (get-text-property (1- (length text))
 	;;				 'xhtmlize-ellipsis text)))
 	(setq text (xhtmlize-untabify text (current-column)))
-	(setq text (xhtmlize-protect-string text))
 	(when (> (length text) 0)
 	  ;; Insert the text, along with the necessary markup to
 	  ;; represent faces in FSTRUCT-LIST.
@@ -1242,7 +1241,6 @@ it's called with the same value of KEY.  All other times, the cached
 		(get-text-property (1- (length text))
 				   'xhtmlize-ellipsis text)))
 	(setq text (xhtmlize-untabify text (current-column)))
-	(setq text (xhtmlize-protect-string text))
 	;; Don't bother writing anything if there's no text (this
 	;; happens in invisible regions).
 	(when (> (length text) 0)

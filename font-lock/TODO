@@ -25,6 +25,7 @@
 -- line trimming
 -- stitching...
 -- cut&paste friendly
-- before/after hook
---- define-cssize-fstruct
+- before/after hook<done>
+--- define-cssize-fstruct<done>
+--- lfringe of the last line without newline is broken.
 http://www.neilvandyke.org/htmlprag/htmlprag-0-16.scm

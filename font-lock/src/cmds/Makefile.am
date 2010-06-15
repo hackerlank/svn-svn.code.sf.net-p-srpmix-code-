@@ -1,6 +1,7 @@
 dist_bin_SCRIPTS = \
 	\
-	flserver   \
-	flclient   \
+	flserver     \
+	flclient     \
+	shtml->xhtml \
 	\
 	$(NULL)

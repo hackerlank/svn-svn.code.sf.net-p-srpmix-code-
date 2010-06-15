@@ -77,6 +77,9 @@ Please note that font sizes only work with CSS-based output types."
 ;; type `cssize-fstruct', while the term "face" is reserved for Emacs
 ;; faces.
 
+(defvar cssize-pseudo-face-attr-table (make-hash-table :test 'eq))
+(defmacro define-cssize-pseudo-face-attr-table (face attrs)
+  `(setf (gethash (quote ,face) cssize-pseudo-face-attr-table) (quote ,attrs)))
 
 (defstruct cssize-fstruct
   foreground				; foreground color, #rrggbb
@@ -88,15 +91,18 @@ Please note that font sizes only work with CSS-based output types."
   overlinep				; whether face is overlined
   strikep				; whether face is struck through
   css-name				; CSS name of face
+  float					; float, extra slot
   )
 
 (defun cssize-face-to-fstruct (face)
   "Convert Emacs face FACE to fstruct."
-  (let ((fstruct (make-cssize-fstruct
-		  :foreground (cssize-color-to-rgb
-			       (cssize-face-foreground face))
-		  :background (cssize-color-to-rgb
-			       (cssize-face-background face)))))
+  (let* ((fstruct (make-cssize-fstruct
+		   :foreground (cssize-color-to-rgb
+				(cssize-face-foreground face))
+		   :background (cssize-color-to-rgb
+				(cssize-face-background face))
+		   :float (cdr (assq 'float 
+				     (gethash face cssize-pseudo-face-attr-table nil))))))
     (dolist (attr '(:weight :slant :underline :overline :strike-through))
       (let ((value (face-attribute face attr nil t)))
 	(when (and value (not (eq value 'unspecified)))
@@ -385,6 +391,9 @@ If no rgb.txt file is found, return nil."
       (push "text-decoration: overline;" result))
     (when (cssize-fstruct-strikep fstruct)
       (push "text-decoration: line-through;" result))
+    (let ((float (cssize-fstruct-float fstruct)))
+      (when float
+	(push (format "float: %s;" float) result)))
     (nreverse result)))
 
 (defun cssize-clean-up-face-name (face)

@@ -1,0 +1,13 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+(use sxml.serializer)
+(use gauche.parseopt)
+
+;; TODO:
+;; * range extracint
+;; * title replcement
+(define (main args)
+  (define x (read))
+  (srl:sxml->html-noindent x 
+		  (current-output-port)))

@@ -1,54 +1,62 @@
+(eval-when-compile 
+  (require 'cssize))
 (require 'xhtmlize+linum-main)
 (require 'xhtmlize+linum+fringe-decl)
 
 ;; TODO: define macro.
-(defvar xhtmlize-linum-fringe-fstruct-list-cache nil)
-(defun xhtmlize-linum-fringe-fstruct-list-cache (face-map)
-  (if xhtmlize-linum-fringe-fstruct-list-cache
-      xhtmlize-linum-fringe-fstruct-list-cache
-    (setq xhtmlize-linum-fringe-fstruct-list-cache 
-	  (mapcar (lambda (f) (gethash f face-map)) '(fringe)))
-    xhtmlize-linum-fringe-fstruct-list-cache))
-
-
-;;
-;; TODO: before
-;; <span style="color: red;float: right;">****************</span>
-;;
-;; (define-xhtmlize-pre-linum-handler 'xhtmlize-linum-lfringe-render-direct)
-;; (defun xhtmlize-linum-lfringe-render-direct (line point insert-method face-map engine)
-;;   (let ((text  " ")
-;; 	(id (concat "f:L"))
-;; 	(href nil)
-;; 	(fstruct-list (xhtmlize-linum-fringe-fstruct-list-cache face-map))
-;; 	)
-;;     (funcall insert-method
-;; 	     text
-;; 	     id
-;; 	     href
-;; 	     fstruct-list
-;; 	     engine)))
+(defvar xhtmlize-linum-lfringe-fstruct-list-cache nil)
+(defun xhtmlize-linum-lfringe-fstruct-list-cache (face-map)
+  (if xhtmlize-linum-lfringe-fstruct-list-cache
+      xhtmlize-linum-lfringe-fstruct-list-cache
+    (setq xhtmlize-linum-lfringe-fstruct-list-cache 
+	  (mapcar (lambda (f) (gethash f face-map)) '(lfringe)))
+    xhtmlize-linum-lfringe-fstruct-list-cache))
+(defvar xhtmlize-linum-rfringe-fstruct-list-cache nil)
+(defun xhtmlize-linum-rfringe-fstruct-list-cache (face-map)
+  (if xhtmlize-linum-rfringe-fstruct-list-cache
+      xhtmlize-linum-rfringe-fstruct-list-cache
+    (setq xhtmlize-linum-rfringe-fstruct-list-cache 
+	  (mapcar (lambda (f) (gethash f face-map)) '(rfringe)))
+    xhtmlize-linum-rfringe-fstruct-list-cache))
 
 (define-xhtmlize-post-linum-handler 'xhtmlize-linum-rfringe-render-direct)
 (defun xhtmlize-linum-rfringe-render-direct (line point insert-method face-map engine)
-  (let ((text  " ")
-	(id (concat "f:R;"
-		    "P:" (number-to-string point)
-		    ";"
-		    "L:" (number-to-string line)
-		    ))
-	(href nil)
-	(fstruct-list (xhtmlize-linum-fringe-fstruct-list-cache face-map))
-	)
+  (let* ((text  " ")
+	 (line-str (number-to-string line))
+	 (lid (concat "f:L"
+		      ";"
+		      "P:" (number-to-string point)
+		      ";"
+		      "L:" line-str
+		      ))
+	 (rid (concat "f:R;"
+		      "L:" line-str
+		      ))
+	 (lfstruct-list (xhtmlize-linum-lfringe-fstruct-list-cache face-map))
+	 (rfstruct-list (xhtmlize-linum-rfringe-fstruct-list-cache face-map))
+	 )
     (funcall insert-method
 	     text
-	     id
-	     href
-	     fstruct-list
-	     engine)))
+	     lid
+	     nil
+	     lfstruct-list
+	     engine)
+    (funcall insert-method
+	     text
+	     rid
+	     nil
+	     rfstruct-list
+	     engine)
+    ))
 
+(defface lfringe '((t :inherit fringe))
+  "Dummy face for left fringe in html")
+(define-cssize-pseudo-face-attr-table rfringe ((float . right)))
+(xhtmlize-add-builtin-faces 'lfringe)
 
-
-(xhtmlize-add-builtin-faces 'fringe)
-
+(defface rfringe '((t :inherit fringe))
+  "Dummy face for right fringe in html")
+(define-cssize-pseudo-face-attr-table lfringe ((float . left)))
+(xhtmlize-add-builtin-faces 'rfringe)
+  
 (provide 'xhtmlize+linum+fringe-main)

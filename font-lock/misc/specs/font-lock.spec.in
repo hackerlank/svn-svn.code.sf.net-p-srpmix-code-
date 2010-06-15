@@ -45,6 +45,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_bindir}/flclient
 %{_bindir}/flserver
+%{_bindir}/shtml->xhtml
 
 %{emacs_lispdir}/flserver-boot.el
 %{emacs_lispdir}/flserver-boot.elc

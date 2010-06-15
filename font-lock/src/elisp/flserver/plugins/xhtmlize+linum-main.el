@@ -91,6 +91,8 @@
     (linum-update-window nil)))
 
 (xhtmlize-add-builtin-faces 'linum)
+(define-cssize-pseudo-face-attr-table linum ((float . left)))
+
 (xhtmlize-add-builtin-faces 'highlight)
 
 
