@@ -82,7 +82,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %dir %{emacs_lispdir}/flserver/modes
 
-%{_datadir}/gauche/site/lib/flclient.scm
+%dir %{_datadir}/gauche/site/lib/font-lock
+%{_datadir}/gauche/site/lib/font-lock/flclient.scm
 %doc
 
 

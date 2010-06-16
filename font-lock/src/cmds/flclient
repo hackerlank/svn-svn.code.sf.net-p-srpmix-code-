@@ -2,7 +2,7 @@
 #| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
 
-(use flclient)
+(use font-lock.flclient)
 (use gauche.parseopt)
 (use file.util)
 

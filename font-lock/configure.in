@@ -40,4 +40,5 @@ AC_OUTPUT([
 	   src/elisp/flserver/plugins/Makefile
 	   src/elisp/flserver/modes/Makefile
 	   src/gauche/Makefile
+	   src/gauche/font-lock/Makefile
 	   ])
