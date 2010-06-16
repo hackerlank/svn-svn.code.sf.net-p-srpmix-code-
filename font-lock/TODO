@@ -10,7 +10,7 @@
 -- plugins <working>
 --- font-lock face own handler
 --- linum  <done>
---- spec
+--- spec <done>
 - Es Expression stream
 - XSLT for range extraction <done>
 - Xvnc and Screen wrapper
@@ -19,14 +19,15 @@
 -- vncserver :N
 -- DISPLAY=:N flserver
 -- sxml-engine <done>
-- Make TITLE parametarize
+- Make TITLE parametarize <done>
 - td/td
 -- highlighting line
--- line trimming
+-- line trimming <done>
 -- stitching...
 -- cut&paste friendly
 - before/after hook<done>
 --- define-cssize-fstruct<done>
 --- lfringe of the last line without newline is broken.
 --- remove ad-hoc code from cssize.el
+-- verifying font-locking status
 http://www.neilvandyke.org/htmlprag/htmlprag-0-16.scm
