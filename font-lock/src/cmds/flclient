@@ -14,15 +14,15 @@
    (connect? :init-keyword :connect?)))
 
 (define (show-help-1 prog key)
-  (lambda (key)
-    (let1 cmd (ref commands key)
+  (let1 cmd (ref commands key)
       (format #t 
 	      (if (ref cmd 'connect?) 
 		  "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] ~a ~a\n"
 		  "	~a ~a ~a\n")
 	      prog
 	      key
-	      (ref cmd 'doc)))))
+	      (ref cmd 'doc))))
+
 (define (show-help prog n)
   (format #t "Usage: \n")
   (format #t "	~a --help|-h\n" prog)
@@ -99,11 +99,11 @@
       (exit status))))
 
 (define-command xhtmlize (prog emacsclient socket-name args)
-  "SRC_FILE HTML_FILE CSS_DIR" #t
+  "SRC_FILE XHTML_FILE CSS_DIR" #t
   (convert-common flclient-xhtmlize prog emacsclient socket-name args))
 
 (define-command shtmlize (prog emacsclient socket-name args)
-  "SRC_FILE HTML_FILE CSS_DIR" #t
+  "SRC_FILE SHTML_FILE CSS_DIR" #t
   (convert-common flclient-shtmlize prog emacsclient socket-name args))
 
 (define (main args)

@@ -1,11 +1,11 @@
-(define-module flclient
+(define-module font-lock.flclient
   (export flclient-xhtmlize
 	  flclient-shtmlize
 	  flclient-cssize
 	  flclient-shutdown)
   (use gauche.process)
   )
-(select-module flclient)
+(select-module font-lock.flclient)
 
 (define (flclient-xhtmlize src-file html-file css-dir . rest)
   (let-keywords rest ((emacsclient :emacsclient "emacsclient")
@@ -46,4 +46,4 @@
     (let1 status (process-exit-status proc)
       (if (eq? status 0) 0 1))))
 
-(provide "flclient")
+(provide "font-lock/flclient")

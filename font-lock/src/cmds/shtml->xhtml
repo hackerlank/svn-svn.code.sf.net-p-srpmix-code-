@@ -3,11 +3,34 @@
 :; exec gosh -- $0 "$@"
 (use sxml.serializer)
 (use gauche.parseopt)
+(use font-lock.rearrange.range)
+(use font-lock.rearrange.title)
 
-;; TODO:
-;; * range extracint
-;; * title replcement
+
+(define (show-help n)
+  (format #t "Usage:\n")
+  (format #t "	~a --help\n" *program-name*)
+  (format #t "	~a [--range=N-M|--range=-M|--range=N-] [--title=TITLE] < INPUT.SHTML > OUTPUT.HTML\n" 
+	   *program-name*)
+  (exit n))
+
+(define (identity x) x)
+
 (define (main args)
-  (define x (read))
-  (srl:sxml->html-noindent x 
-		  (current-output-port)))
+  (let-args (cdr args)
+      ((help "h|help" => (pa$ show-help 0))
+       (range "range=s" #f => parse-range)
+       (title "title=s" #f)
+       . rest)
+    (unless (null? rest)
+      (with-output-to-port (current-error-port)
+	(pa$ show-help 1)))
+    (let* ((shtml0 (read))
+	   (shtml1 ((if title
+			(cute rearrange-title <> title)
+			identity)
+		    ((if range
+			 (cute rearrange-range <> (car range) (cdr range))
+			 identity) shtml0))))
+      (srl:sxml->xml-noindent shtml1 
+			       (current-output-port)))))

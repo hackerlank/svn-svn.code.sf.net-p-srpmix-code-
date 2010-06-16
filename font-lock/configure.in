@@ -41,4 +41,5 @@ AC_OUTPUT([
 	   src/elisp/flserver/modes/Makefile
 	   src/gauche/Makefile
 	   src/gauche/font-lock/Makefile
+	   src/gauche/font-lock/rearrange/Makefile
 	   ])
