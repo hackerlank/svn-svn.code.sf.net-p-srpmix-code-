@@ -24,12 +24,13 @@
   (let* ((text  " ")
 	 (line-str (number-to-string line))
 	 (lid (concat "f:L"
-		      ";"
+		      "/"
 		      "P:" (number-to-string point)
-		      ";"
+		      "/"
 		      "L:" line-str
 		      ))
-	 (rid (concat "f:R;"
+	 (rid (concat "f:R"
+		      "/"
 		      "L:" line-str
 		      ))
 	 (lfstruct-list (xhtmlize-linum-lfringe-fstruct-list-cache face-map))
