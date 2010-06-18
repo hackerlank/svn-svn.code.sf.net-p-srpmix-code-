@@ -1,18 +1,18 @@
 ;; * Directory
 ;;
-;;   directoy -> sxml -> html
-;;      <=========>
-;;                 <======> htmlprag
+;;   directory -> sxml -> html
+;;      <=========> yogomacs.dired
+;;                 <======> shtml->html (font-lock)
 ;;
 ;;
 ;; * File
 ;;
 ;;   file -> sxml -> gzip -> sxml [-> narrowed sxml] -> html
-;;     <=======> font-lock
-;;             <======>
-;;                    <========>
-;;                             <============>
-;;                             <=========================> htmlprag
+;;     <=======> xhtmlize (font-lock)
+;;             <======> rfc.zlib
+;;                    <========> rfc.zlib
+;;                             <============> shtml->html (font-lock)
+;;                             <=========================> shtml->html (font-lock)
 
 ;; . -> /srv/sources...
 ;; .. -> /srv/sources...
@@ -23,6 +23,7 @@
   (use file.util)
   (use util.combinations)
   (use gauche.sequence)
+  (use srfi-19)
   )
 (select-module yogomacs.dired)
 
@@ -38,6 +39,9 @@
 		      dired-symlink
 		      dired-symlink-arrow ;TODO
 		      dired-symlink-to	  ;TODO
+		      dired-entry-type	  ;TODO
+		      dired-size	  ;TODO
+		      dired-date	  ;TODO
 		      ))
 (define dired-styles '(Default Invert))
 
@@ -45,115 +49,175 @@
   (format "~a/~a--~a.css" css-prefix face style))
 
 (define (stylesheets css-prefix)
-  (map
-   (lambda (face-style)
-     `(link (|@| 
-	     (rel "stylesheet")
-	     (type "text/css")
-	     (href ,(face->css-url (car face-style) (cadr face-style) css-prefix))))
-     )
-   (cartesian-product `(,dired-faces
-		       ,dired-styles ))))
+  (reverse
+   (fold
+    (lambda (face-style result)
+      (cons "\n" (cons `(link (|@| 
+			       (rel "stylesheet")
+			       (type "text/css")
+			       (href ,(face->css-url (car face-style) (cadr face-style) css-prefix))
+			       (title ,(x->string (cadr face-style)))
+			       )) (cons "	" result)))
+      )
+    (list)
+    (cartesian-product `(,dired-faces
+			 ,dired-styles )))))
 
-(define (line dir linum entry linum-column make-url result)
-  (append (reverse (line0 dir linum entry linum-column make-url)) result))
+(define (entry-directory path dir entry make-url)
+  `(
+    (span (|@| (class "dired-directory")) 
+	  (a (|@| (href ,(make-url path dir entry 'current-directory)))
+	     ,entry))
+    "\n"
+    ))
 
-(define (line0 dir linum entry linum-column make-url)
-  (let1 path (build-path dir entry)
-    `(
-      (span (|@| (class "linum") (id ,(format "N:~a/L:~a" entry linum))) 
-	    ,(format (string-append "~" (number->string linum-column) ",d")
-		     linum))
+(define (entry-symlink path dir entry make-url make-symlink-to)
+  `(
+    (span (|@| (class "dired-symlink"))
+	  (a (|@| (href ,(make-url path dir entry 'symlink)))
+	     ,entry))
+    (span (|@| (class "dired-symlink-arrow"))
+	  " -> ")
+    (span (|@| (class "dired-symlink-to"))
+	  ;; TODO
+	  ,(make-symlink-to path))
+    "\n"
+    ))
+
+(define (entry-regular path dir entry make-url)
+  `(
+    (span (|@| (class "dired-regular")) 
+	  (a (|@| (href ,(make-url path dir entry 'regular)))
+	     ,entry))
+    "\n"
+    ))
+
+(define (linum&fringe entry linum linum-column)
+  (let1 id (format "N:~a/L:~a" entry linum)
+    `((span (|@| (class "linum") (id ,id))
+	    (a (|@| (href ,(format "#~a" id)))
+	       ,(format (string-append "~" (number->string linum-column) ",d")
+			linum)))
       (span (|@| (class "lfringe") (id ,(format "f:L/N:~a/L:~d" entry linum))) " ")
-      (span (|@| (class "rfringe") (id "f:R/L:~d") linum) " ")
-      ,@(append
-	 (cond
-	  ((equal? entry ".")
-	   `(
-	     ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03 ")
-	     (span (|@| (class "dired-directory")) 
-		   (a (|@| (href ,(make-url path dir entry 'current-directory)))
-		      ,entry))
-	     ))
-	  ((equal? entry "..")
-	   `(
-	     ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03")
-	     (span (|@| (class "dired-directory")) 
-		   (a (|@| (href ,(make-url path dir entry 'parent-directory)))
-		      ,entry))
-	     ))
-	  ((file-is-symlink? path)
-	   (let1 to "/dev/null"		;TODO
-	     `(
-	       ,(format "  ~a ~d ~a " #\l 4096 "Apr 27 00:03")
-	       (span (|@| (class "dired-symlink"))
-		     (a (|@| (href ,(make-url path dir entry 'symlink to)))
-			,entry))
-	       (span (|@| (class "dired-symlink-arrow"))
-		     " -> ")
-	       (span (|@| (class "dired-symlink-to"))
-		     ;; TODO
-		     "/dev/null")
-	       )))
-	  ((file-is-directory? path)
-	   `(
-	     ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03")
-	     (span (|@| (class "dired-directory")) 
-		   (a (|@| (href ,(make-url path dir entry 'directory)))
-		      ,entry))))
-	  ((file-is-regular? path)
-	   `(
-	     ,(format "  ~a ~d ~a " #\- 4096 "Apr 27 00:03")
-	     (span (|@| (class "dired-regular")) 
-		   (a (|@| (href ,(make-url path dir entry 'regular)))
-		      ,entry))))
-	  (else
-	   (list)))
-	 ("\n")))))
+      (span (|@| (class "rfringe") (id "f:R/L:~d") linum) " "))))
 
-(define (dired path filter make-url css-prefix)
+(define (type&size&date stat size-column)
+  `(
+    " "
+    (span (|@| (class "dired-entry-type"))
+	   ,(case (ref stat 'type)
+	      ('regular  "-")
+	      ('directory "d")
+	      ('symlink  "l")
+	      (else "?")))
+    " "
+    (span (|@| (class "dired-size"))
+	  ,(format (string-append "~" (number->string size-column) ",d")
+		   (ref stat 'size)))
+    "  "
+    (span (|@| (class "dired-date"))
+	  ,(date->string (time-utc->date (make-time time-utc 0 (ref stat 'mtime)))
+			 "~b ~e ~H:~M ~Y"
+			 )
+	  )
+    "  "
+    ))
+
+(define (line dir linum entry linum-column size-column make-url make-symlink-to result)
+  (let ((entry (car entry))
+	(path (cadr entry))
+	(stat (caddr entry)))
+    (append (reverse 
+	     (append
+	      (linum&fringe entry (+ 1 linum) linum-column)
+	      (type&size&date stat size-column)
+	      ;; TODO: readdable?
+	      (case (ref stat 'type)
+		('regular
+		 (entry-regular path dir entry make-url))
+		('directory
+		 #?=(entry-directory path dir entry make-url))
+		('symlink
+		 (entry-symlink path dir entry make-url make-symlink-to))
+		(else
+		 (list "\n"))))
+	     )
+	    result)))
+
+(define (make-url-default path dir entry type)
+  (format "file://~a" (if (eq? type 'symlink)
+			  (sys-readlink path)
+			  path)))
+
+(define (make-symlink-to-default path)
+  (sys-readlink path))
+
+(define css-prefix-default "file:///tmp")
+
+(define (dired path filter make-url make-symlink-to css-prefix)
   (receive (dir entries)
       (if (file-is-directory? path)
 	    (values path (directory-list path
 					 :add-path? #f 
-					 :children? #t
+					 :children? #f
 					 :filter (if filter
 						     filter
 						     (lambda (e) #t))))
+	    ;; ???
 	    (values (sys-dirname path) (let1 basename (sys-basename path)
 					 (if filter
 					     (if (filter basename)
 						 (list basename)
 						 (list))
 					     (list basename)))))
-    (dired0 dir entries
-	    (or make-url make-url-default)
-	    (or css-prefix css-prefix-default
-	      ))))
-
-(define (make-url-default path dir entry type . rest)
-  (format "file://~a" path))
-
-(define css-prefix-default "file:///tmp")
+    (let* ((stats (map (lambda (entry)
+			 (let1 path (build-path dir entry)
+			   (list entry path (sys-stat path))))
+		       entries))
+	   (max-size (fold (lambda (stat current-max)
+			     (let1 size (sys-stat->size (caddr stat))
+			     (if (< current-max size)
+				 size
+				 current-max)))
+			   0 stats))
+	   (max-column (+ (floor->exact (log max-size 10))
+			  1)))
+      (dired0 dir stats max-column
+	      (or make-url make-url-default)
+	      (or make-symlink-to make-symlink-to-default)
+	      (or css-prefix css-prefix-default)))))
   
-(define (dired0 dir entries make-url css-prefix)
+(define (dired0 dir entries size-column make-url make-symlink-to css-prefix)
   `(*TOP* 
     (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n"
     (*DECL* DOCTYPE html PUBLIC 
 	    "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd") "\n"
 	    (html (|@| (xmlns "http://www.w3.org/1999/xhtml") (xml:lang "en") (lang "en"))
+		  "\n"
 		  (head 
-		   (title ,dir)
+		   "\n"
+		   "	" (title ,dir) "\n"
 		   ,@(stylesheets css-prefix))
+		  "\n"
 		  (body
-		   ,@(reverse (fold-with-index (cute line 
-						     dir
-						     <>
-						     <>
-						     (+ (floor->exact (log (length entries) 10)) 1)
-						     make-url
-						     <>)
-					       (list) entries))
+		   "\n"
+		   (pre
+		    ,@(reverse (fold-with-index (cute line 
+						      dir
+						      <>
+						      <>
+						      (+ (floor->exact (log (length entries) 10)) 1)
+						      size-column
+						      make-url
+						      make-symlink-to
+						      <>)
+						(list) entries)))
+		   "\n"
 		   ))))
 
 (provide "yogomacs/dired")
+
+(use yogomacs.dired)
+(define (main args)
+  (write (dired (cadr args) #f #f #f #f)))
+(main '(x "/tmp"))
