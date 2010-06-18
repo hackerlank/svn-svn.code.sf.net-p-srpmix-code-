@@ -1,4 +1,4 @@
-- batch mode, replace the main function
+- batch mode, replace the main function, or one shot
 - logging, rotation
 - debug facility
 - broken hover, background-color of linum interfere with hover rendering <done>
