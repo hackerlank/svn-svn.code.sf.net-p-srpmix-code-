@@ -41,29 +41,29 @@
 		      ))
 (define dired-styles '(Default Invert))
 
-(define (face->ccs-url face style ccs-prefix)
-  (format "~a/~a--~a.css" ccs-prefix face style))
+(define (face->css-url face style css-prefix)
+  (format "~a/~a--~a.css" css-prefix face style))
 
-(define (stylesheets ccs-prefix)
+(define (stylesheets css-prefix)
   (map
    (lambda (face-style)
      `(link (|@| 
 	     (rel "stylesheet")
 	     (type "text/css")
-	     (href ,(face-ccs-url (car face-style) (cadr face-style) ccs-prefix))))
+	     (href ,(face->css-url (car face-style) (cadr face-style) css-prefix))))
      )
    (cartesian-product `(,dired-faces
 		       ,dired-styles ))))
 
-(define (line dir entry linum linum-column make-url result)
-  (append (revese (line0 dir entry linum linum-column make-url)) result))
+(define (line dir linum entry linum-column make-url result)
+  (append (reverse (line0 dir linum entry linum-column make-url)) result))
 
-(define (line0 dir entry linum linum-column make-url)
+(define (line0 dir linum entry linum-column make-url)
   (let1 path (build-path dir entry)
     `(
       (span (|@| (class "linum") (id ,(format "N:~a/L:~a" entry linum))) 
-	    ,(format (string-append "~" (nubmer->string linum-column) ",d")
-		     (nubmer->string linum)))
+	    ,(format (string-append "~" (number->string linum-column) ",d")
+		     linum))
       (span (|@| (class "lfringe") (id ,(format "f:L/N:~a/L:~d" entry linum))) " ")
       (span (|@| (class "rfringe") (id "f:R/L:~d") linum) " ")
       ,@(cond
@@ -71,7 +71,7 @@
 	  `(
 	    ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03 ")
 	    (span (|@| (class "dired-directory")) 
-		  (a (|@| (href ,(make-url dir entry 'current-directory)))
+		  (a (|@| (href ,(make-url path dir entry 'current-directory)))
 		     ,entry))
 	    ))
 	 ((equal? entry "..")
@@ -102,30 +102,38 @@
 		     ,entry))))
 	 ((file-is-regular? path)
 	  `(
-	    ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03")
+	    ,(format "  ~a ~d ~a " #\- 4096 "Apr 27 00:03")
 	    (span (|@| (class "dired-regular")) 
 		  (a (|@| (href ,(make-url path dir entry 'regular)))
 		     ,entry))))
 	 (else
 	  (list))))))
 
-(define (dired path filter ccs-prefix)
+(define (dired path filter make-url css-prefix)
   (receive (dir entries)
-      (if file-is-directory? path
-	  (values path (directory-list path
-				       :add-path? #f 
-				       :children? #t
-				       :filter (if filter
-						   filter
-						   (lambda (e) #t))))
-	  (values (sys-dirname path) (let1 basename (sys-basename path)
-				       (if filter
-					   (if (filter basename)
-					       (list basename)
-					       (list))
-					   (list basename)))))
-    (cute dired0 <> <> css-prefix)))
+      (if (file-is-directory? path)
+	    (values path (directory-list path
+					 :add-path? #f 
+					 :children? #t
+					 :filter (if filter
+						     filter
+						     (lambda (e) #t))))
+	    (values (sys-dirname path) (let1 basename (sys-basename path)
+					 (if filter
+					     (if (filter basename)
+						 (list basename)
+						 (list))
+					     (list basename)))))
+    (dired0 dir entries
+	    (or make-url make-url-default)
+	    (or css-prefix css-prefix-default
+	      ))))
 
+(define (make-url-default path dir entry type . rest)
+  (format "file://~a" path))
+
+(define css-prefix-default "file:///tmp")
+  
 (define (dired0 dir entries make-url css-prefix)
   `(*TOP* 
     (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n"
