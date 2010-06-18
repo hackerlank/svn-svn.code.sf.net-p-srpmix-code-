@@ -26,3 +26,5 @@
 --- remove ad-hoc code from cssize.el
 -- verifying font-locking status
 - http://www.neilvandyke.org/htmlprag/htmlprag-0-16.scm
+
+-- connectivity, connectability
