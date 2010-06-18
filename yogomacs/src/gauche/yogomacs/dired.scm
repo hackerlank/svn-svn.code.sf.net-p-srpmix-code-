@@ -66,48 +66,50 @@
 		     linum))
       (span (|@| (class "lfringe") (id ,(format "f:L/N:~a/L:~d" entry linum))) " ")
       (span (|@| (class "rfringe") (id "f:R/L:~d") linum) " ")
-      ,@(cond
-	 ((equal? entry ".")
-	  `(
-	    ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03 ")
-	    (span (|@| (class "dired-directory")) 
-		  (a (|@| (href ,(make-url path dir entry 'current-directory)))
-		     ,entry))
-	    ))
-	 ((equal? entry "..")
-	  `(
-	    ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03")
-	    (span (|@| (class "dired-directory")) 
-		  (a (|@| (href ,(make-url path dir entry 'parent-directory)))
-		     ,entry))
-	   ))
-	 ((file-is-symlink? path)
-	  (let1 to "/dev/null"		;TODO
-	    `(
-	      ,(format "  ~a ~d ~a " #\l 4096 "Apr 27 00:03")
-	      (span (|@| (class "dired-symlink"))
-		    (a (|@| (href ,(make-url path dir entry 'symlink to)))
-		       ,entry))
-	      (span (|@| (class "dired-symlink-arrow"))
-		   " -> ")
-	      (span (|@| (class "dired-symlink-to"))
-		    ;; TODO
-		    "/dev/null")
-	     )))
-	 ((file-is-directory? path)
-	  `(
-	    ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03")
-	    (span (|@| (class "dired-directory")) 
-		  (a (|@| (href ,(make-url path dir entry 'directory)))
-		     ,entry))))
-	 ((file-is-regular? path)
-	  `(
-	    ,(format "  ~a ~d ~a " #\- 4096 "Apr 27 00:03")
-	    (span (|@| (class "dired-regular")) 
-		  (a (|@| (href ,(make-url path dir entry 'regular)))
-		     ,entry))))
-	 (else
-	  (list))))))
+      ,@(append
+	 (cond
+	  ((equal? entry ".")
+	   `(
+	     ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03 ")
+	     (span (|@| (class "dired-directory")) 
+		   (a (|@| (href ,(make-url path dir entry 'current-directory)))
+		      ,entry))
+	     ))
+	  ((equal? entry "..")
+	   `(
+	     ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03")
+	     (span (|@| (class "dired-directory")) 
+		   (a (|@| (href ,(make-url path dir entry 'parent-directory)))
+		      ,entry))
+	     ))
+	  ((file-is-symlink? path)
+	   (let1 to "/dev/null"		;TODO
+	     `(
+	       ,(format "  ~a ~d ~a " #\l 4096 "Apr 27 00:03")
+	       (span (|@| (class "dired-symlink"))
+		     (a (|@| (href ,(make-url path dir entry 'symlink to)))
+			,entry))
+	       (span (|@| (class "dired-symlink-arrow"))
+		     " -> ")
+	       (span (|@| (class "dired-symlink-to"))
+		     ;; TODO
+		     "/dev/null")
+	       )))
+	  ((file-is-directory? path)
+	   `(
+	     ,(format "  ~a ~d ~a " #\d 4096 "Apr 27 00:03")
+	     (span (|@| (class "dired-directory")) 
+		   (a (|@| (href ,(make-url path dir entry 'directory)))
+		      ,entry))))
+	  ((file-is-regular? path)
+	   `(
+	     ,(format "  ~a ~d ~a " #\- 4096 "Apr 27 00:03")
+	     (span (|@| (class "dired-regular")) 
+		   (a (|@| (href ,(make-url path dir entry 'regular)))
+		      ,entry))))
+	  (else
+	   (list)))
+	 ("\n")))))
 
 (define (dired path filter make-url css-prefix)
   (receive (dir entries)
