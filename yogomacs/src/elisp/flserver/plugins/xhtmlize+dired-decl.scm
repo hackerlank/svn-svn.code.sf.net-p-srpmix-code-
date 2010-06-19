@@ -1,0 +1,1 @@
+(provide 'xhtmlize+dired-decl)

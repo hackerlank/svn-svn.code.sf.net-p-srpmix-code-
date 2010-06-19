@@ -49,7 +49,7 @@
 (define-constant dired-foreign-faces
   '(
     dired-regular	  ;TODO
-    dired-unknnative	  ;TODO
+    dired-unknown	  ;TODO
     dired-symlink-arrow ;TODO
     dired-symlink-to	  ;TODO
     dired-executable	  ;TODO
