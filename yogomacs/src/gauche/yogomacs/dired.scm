@@ -19,30 +19,53 @@
 ;; http://planet.plt-scheme.org/package-source/lizorkin/ssax.plt/2/0/SXML-tree-trans.ss
 (define-module yogomacs.dired
   (export dired
+	  dired-native-faces
+	  dired-foreign-faces
 	  dired-faces)
   (use file.util)
   (use util.combinations)
   (use gauche.sequence)
   (use srfi-19)
+  (use yogomacs.dentry)
   )
 (select-module yogomacs.dired)
 
-(define dired-faces '(
-		      default
-		      highlight
-		      linum
-		      lfringe
-		      rfringe
-		      dired-regular	;TODO
-		      dired-header
-		      dired-directory
-		      dired-symlink
-		      dired-symlink-arrow ;TODO
-		      dired-symlink-to	  ;TODO
-		      dired-entry-type	  ;TODO
-		      dired-size	  ;TODO
-		      dired-date	  ;TODO
-		      ))
+(define-constant font-lock-built-in-faces 
+  '(
+    default
+    highlight
+    linum
+    lfringe
+    rfringe
+    ))
+
+(define-constant dired-native-faces
+  '(
+    dired-header
+    dired-directory
+    dired-symlink
+    ))
+
+(define-constant dired-foreign-faces
+  '(
+    dired-regular	  ;TODO
+    dired-unknnative	  ;TODO
+    dired-symlink-arrow ;TODO
+    dired-symlink-to	  ;TODO
+    dired-executable	  ;TODO
+    dired-entry-type	  ;TODO
+    dired-size	  ;TODO
+    dired-date	  ;TODO
+    ))
+  
+(define-constant dired-faces 
+  `(
+    ,@font-lock-built-in-faces
+    ,@dired-native-faces
+    ,@dired-foreign-faces
+    )
+  )
+
 (define dired-styles '(Default Invert))
 
 (define (face->css-url face style css-prefix)
@@ -57,137 +80,103 @@
 			       (type "text/css")
 			       (href ,(face->css-url (car face-style) (cadr face-style) css-prefix))
 			       (title ,(x->string (cadr face-style)))
-			       )) (cons "	" result)))
-      )
+			       )) 
+		       (cons "	" result))))
     (list)
     (cartesian-product `(,dired-faces
 			 ,dired-styles )))))
 
-(define (entry-directory path dir entry make-url)
+(define (generic-entry dentry)
   `(
-    (span (|@| (class "dired-directory")) 
-	  (a (|@| (href ,(make-url path dir entry 'current-directory)))
-	     ,entry))
-    "\n"
-    ))
+    (span (|@| ,(class (case (type-maker-of dentry)
+			 ((#\-)
+			  "dired-regular")
+			 ((#\d)
+			  "dired-directory")
+			 (else
+			  "dired-unknown"))))
+	  (a (|@| (href ,(url-of dentry)))
+	     ,(dname-of dentry)))
+    "\n"))
 
-(define (entry-symlink path dir entry make-url make-symlink-to)
+(define (symlink-entry dentry)
   `(
     (span (|@| (class "dired-symlink"))
-	  (a (|@| (href ,(make-url path dir entry 'symlink)))
-	     ,entry))
+	  (a (|@| (href ,(url-of dentry)))
+	     ,(dname-of dentry)))
     (span (|@| (class "dired-symlink-arrow"))
 	  " -> ")
     (span (|@| (class "dired-symlink-to"))
-	  ;; TODO
-	  ,(make-symlink-to path))
-    "\n"
-    ))
+	  ,(symlink-to-dname-of dentry))
+    "\n"))
 
-(define (entry-regular path dir entry make-url)
+(define (executable-entry dentry)
   `(
-    (span (|@| (class "dired-regular")) 
-	  (a (|@| (href ,(make-url path dir entry 'regular)))
-	     ,entry))
-    "\n"
-    ))
+    (span (|@| ,(class "dired-executable"))
+	  (a (|@| (href ,(url-of dentry)))
+	     ,(dname-of dentry)))
+    "\n"))
 
-(define (linum&fringe entry linum linum-column)
-  (let1 id (format "N:~a/L:~a" entry linum)
+(define (linum&fringe dentry linum linum-column)
+  (let* ((dname (dname-of dentry))
+	 (id (format "N:~a/L:~a" dname linum)))
     `((span (|@| (class "linum") (id ,id))
 	    (a (|@| (href ,(format "#~a" id)))
 	       ,(format (string-append "~" (number->string linum-column) ",d")
 			linum)))
-      (span (|@| (class "lfringe") (id ,(format "f:L/N:~a/L:~d" entry linum))) " ")
+      (span (|@| (class "lfringe") (id ,(format "f:L/N:~a/L:~d" dname linum))) " ")
       (span (|@| (class "rfringe") (id "f:R/L:~d") linum) " "))))
 
-(define (type&size&date stat size-column)
+(define (type&size&date dentry size-column)
   `(
     " "
     (span (|@| (class "dired-entry-type"))
-	   ,(case (ref stat 'type)
-	      ('regular  "-")
-	      ('directory "d")
-	      ('symlink  "l")
-	      (else "?")))
+	  ,(x->string (type-maker-of dentry)))
     " "
     (span (|@| (class "dired-size"))
 	  ,(format (string-append "~" (number->string size-column) ",d")
-		   (ref stat 'size)))
+		   (size-of dentry)))
     "  "
     (span (|@| (class "dired-date"))
-	  ,(date->string (time-utc->date (make-time time-utc 0 (ref stat 'mtime)))
+	  ,(date->string (time-utc->date (mtime-of dentry))
 			 "~b ~e ~H:~M ~Y"
 			 )
 	  )
     "  "
     ))
 
-(define (line dir linum entry linum-column size-column make-url make-symlink-to result)
-  (let ((entry (car entry))
-	(path (cadr entry))
-	(stat (caddr entry)))
-    (append (reverse 
-	     (append
-	      (linum&fringe entry (+ 1 linum) linum-column)
-	      (type&size&date stat size-column)
-	      ;; TODO: readdable?
-	      (case (ref stat 'type)
-		('regular
-		 (entry-regular path dir entry make-url))
-		('directory
-		 #?=(entry-directory path dir entry make-url))
-		('symlink
-		 (entry-symlink path dir entry make-url make-symlink-to))
-		(else
-		 (list "\n"))))
-	     )
-	    result)))
+(define (line0 dir linum dentry linum-column size-column)
+  (list
+   (linum&fringe dentry (+ 1 linum) linum-column)
+   (type&size&date dentry size-column)
+   (cond
+    ((symlink? dentry) (symlink-entry dentry))
+    ((executable? dentry) (executable-entry dentry))
+    (else (generic-entry dentry)))))
 
-(define (make-url-default path dir entry type)
-  (format "file://~a" (if (eq? type 'symlink)
-			  (sys-readlink path)
-			  path)))
-
-(define (make-symlink-to-default path)
-  (sys-readlink path))
+(define (line dir linum dentry linum-column size-column result)
+  (append (reverse 
+	   (line0 dir line0 dentry linum-column size-column))
+	  result))
 
 (define css-prefix-default "file:///tmp")
-
-(define (dired path filter make-url make-symlink-to css-prefix)
-  (receive (dir entries)
-      (if (file-is-directory? path)
-	    (values path (directory-list path
-					 :add-path? #f 
-					 :children? #f
-					 :filter (if filter
-						     filter
-						     (lambda (e) #t))))
-	    ;; ???
-	    (values (sys-dirname path) (let1 basename (sys-basename path)
-					 (if filter
-					     (if (filter basename)
-						 (list basename)
-						 (list))
-					     (list basename)))))
-    (let* ((stats (map (lambda (entry)
-			 (let1 path (build-path dir entry)
-			   (list entry path (sys-stat path))))
-		       entries))
-	   (max-size (fold (lambda (stat current-max)
-			     (let1 size (sys-stat->size (caddr stat))
-			     (if (< current-max size)
+(define (dired dir dentires css-prefix)
+  (let* ((max-size (fold (lambda (dentry current-max-size)
+			   (let1 size (size-of dentry)
+			     (if (< current-max-size size)
 				 size
-				 current-max)))
-			   0 stats))
-	   (max-column (+ (floor->exact (log max-size 10))
-			  1)))
-      (dired0 dir stats max-column
-	      (or make-url make-url-default)
-	      (or make-symlink-to make-symlink-to-default)
-	      (or css-prefix css-prefix-default)))))
-  
-(define (dired0 dir entries size-column make-url make-symlink-to css-prefix)
+				 current-max-size)))
+			 0
+			 dentires))
+	 (max-column (+ (floor->exact (log max-size 10))
+			1)))
+    (dired0 dir dentires 
+	    (+ (floor->exact (log (length dentires) 10)) 1)
+	    max-column
+	    (or css-prefix css-prefix-default))
+    ))
+
+(define (dired0 dir entries linum-column size-column css-prefix)
   `(*TOP* 
     (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n"
     (*DECL* DOCTYPE html PUBLIC 
@@ -206,18 +195,12 @@
 						      dir
 						      <>
 						      <>
-						      (+ (floor->exact (log (length entries) 10)) 1)
+						      linum-column
 						      size-column
-						      make-url
-						      make-symlink-to
 						      <>)
-						(list) entries)))
+						(list)
+						entries)))
 		   "\n"
 		   ))))
 
 (provide "yogomacs/dired")
-
-(use yogomacs.dired)
-(define (main args)
-  (write (dired (cadr args) #f #f #f #f)))
-(main '(x "/tmp"))

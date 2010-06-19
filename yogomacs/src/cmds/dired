@@ -1,0 +1,34 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
+(use yogomacs.dired)
+(use yogomacs.dentries.fs)
+(use gauche.parseopt)
+(use file.util)
+
+(define (show-help n)
+  (format #t "Usage:\n")
+  (format #t "	~a --help\n" *program-name*)
+  (format #t "	~a DIR\n" *program-name*)
+  (format #t "	~a DIR > DIR.shtml\n" *program-name*)
+  (format #t "	~a DIR | shtml->html > DIR.html\n" *program-name*)
+  (exit n))
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (pa$ show-help 0))
+       . rest)
+    (when (or (null? rest)
+	      (< 1 (length rest)))
+      (with-output-to-port (current-error-port)
+	(pa$ show-help 1)))
+    (let1 dir (car rest)
+      (unless (file-is-directory? dir)
+	(format (current-error-port)
+		"No such directory: ~a\n" dir))
+      (unless (file-is-readable? dir)
+	(format (current-error-port)
+		"Cannot read: ~a\n" dir))
+      (let1 dentires (read-dentries dir)
+	(dired dir dentires #f)))))
