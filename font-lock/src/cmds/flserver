@@ -3,19 +3,45 @@
 :; exec gosh -- $0 "$@"
 
 (use gauche.parseopt)
+(use file.util)
+
+
 (define (show-help n)
   (format #t "Usage: \n")
   (format #t "	~a --help|-h\n" *program-name*)
-  (format #t "	~a [--emacs=EMACS] [--load-path=PATH] [CONFIG_EL|@CONFIG_EL]\n")
+  (format #t "	~a [--emacs=EMACS] [--load-path=PATH] [--config-file=CONFIG_EL|--config=CONFIG]\n")
   (exit n)
   )
+
+(define (invoke-emacs emacs load-path config-file)
+  ...)
+
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help 0))
        (load-path "load-path=s" #f)
        (emacs "emacs=s" "emacs")
+       (config-file "config-file=" #f)
+       (config "config=" #f)
        . rest)
-    (invoke-emacs emacs load-path ...)))
+    (unless (null? rest)
+      (display "Too many arguments\n" (current-error-port))
+      (with-output-to-pprt
+       (pa$ show-help 1)))
+    (when (and config-file config)
+      (display "Specify only --config-file or --config\n" 
+	       (current-error-port))
+      (with-output-to-port
+       (pa$ show-help 1)))
+    (let1 config-file (if config-file
+			  config-file
+			  (let1 config-file (build-path "/etc/font-lock/flserver" 
+							(string-append config ".el"))
+			    (unless (file-is-readable? config-file)
+			      (format (current-error-port)
+				      "Cannot read: ~a\n" config-file))
+			    config-file))
+    (invoke-emacs emacs load-path config-file))))
 
 
 emacs=emacs
