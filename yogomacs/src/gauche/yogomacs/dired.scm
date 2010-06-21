@@ -17,6 +17,7 @@
 ;; . -> /srv/sources...
 ;; .. -> /srv/sources...
 ;; http://planet.plt-scheme.org/package-source/lizorkin/ssax.plt/2/0/SXML-tree-trans.ss
+(debug-print-width #f)
 (define-module yogomacs.dired
   (export dired
 	  dired-native-faces
@@ -88,7 +89,7 @@
 
 (define (generic-entry dentry)
   `(
-    (span (|@| ,(class (case (type-maker-of dentry)
+    (span (|@| (class ,(case (type-maker-of dentry)
 			 ((#\-)
 			  "dired-regular")
 			 ((#\d)
@@ -112,7 +113,7 @@
 
 (define (executable-entry dentry)
   `(
-    (span (|@| ,(class "dired-executable"))
+    (span (|@| (class "dired-executable"))
 	  (a (|@| (href ,(url-of dentry)))
 	     ,(dname-of dentry)))
     "\n"))
@@ -125,7 +126,7 @@
 	       ,(format (string-append "~" (number->string linum-column) ",d")
 			linum)))
       (span (|@| (class "lfringe") (id ,(format "f:L/N:~a/L:~d" dname linum))) " ")
-      (span (|@| (class "rfringe") (id "f:R/L:~d") linum) " "))))
+      (span (|@| (class "rfringe") (id ,(format "f:R/L:~d" linum))) " "))))
 
 (define (type&size&date dentry size-column)
   `(
@@ -146,17 +147,17 @@
     ))
 
 (define (line0 dir linum dentry linum-column size-column)
-  (list
-   (linum&fringe dentry (+ 1 linum) linum-column)
-   (type&size&date dentry size-column)
-   (cond
-    ((symlink? dentry) (symlink-entry dentry))
-    ((executable? dentry) (executable-entry dentry))
-    (else (generic-entry dentry)))))
+  `(
+    ,@(linum&fringe dentry (+ 1 linum) linum-column)
+    ,@(type&size&date dentry size-column)
+    ,@(cond
+       ((symlink? dentry) (symlink-entry dentry))
+       ((executable? dentry) (executable-entry dentry))
+       (else (generic-entry dentry)))))
 
 (define (line dir linum dentry linum-column size-column result)
   (append (reverse 
-	   (line0 dir line0 dentry linum-column size-column))
+	   (line0 dir linum dentry linum-column size-column))
 	  result))
 
 (define css-prefix-default "file:///tmp")

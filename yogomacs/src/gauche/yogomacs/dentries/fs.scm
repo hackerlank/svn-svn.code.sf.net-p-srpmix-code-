@@ -28,8 +28,7 @@
    ))
 
 (define-class <fs-symlink-dentry> (<symlink-dentry> <fs-dentry>)
-  (symlink-to-dname
-   ))
+  (symlink-to-dname))
 
 
 (define-method type-maker-of ((fs-dentry <dentry>))
@@ -42,19 +41,19 @@
 (define-method dname-of ((fs-dentry <fs-dentry>))
   (ref fs-dentry 'entry))
 
-(define-method path-of ((fs-entry <fs-dentry>))
+(define-method path-of ((fs-dentry <fs-dentry>))
   (build-path (ref fs-dentry 'parent)
 	      (ref fs-dentry 'entry)))
-(define-method size-of ((fs-entry <fs-dentry>))
-  (ref (ref fs-entry 'stat) 'size))
+(define-method size-of ((fs-dentry <fs-dentry>))
+  (ref (ref fs-dentry 'stat) 'size))
 
-(define-method mtime-of ((fs-entry <fs-dentry>))
+(define-method mtime-of ((fs-dentry <fs-dentry>))
   (make-time time-utc
 	     0 
-	     (ref (ref fs-entry 'stat) 'mtime)))
+	     (ref (ref fs-dentry 'stat) 'mtime)))
 
-(define-method url-of ((fs-entry <fs-dentry>))
-  (ref fs-entry 'url))
+(define-method url-of ((fs-dentry <fs-dentry>))
+  (ref fs-dentry 'url))
 
 (define-method symlink-to-dname-of ((fs-symlink-dentry <fs-symlink-dentry>))
   (ref fs-symlink-dentry 'symlink-to-dname))
@@ -77,9 +76,9 @@
   (if (file-is-directory? path)
       (map (lambda (entry)
 	     (let* ((stat (sys-stat (build-path path entry)))
-		    (dentry (make (if (eq? (ref (ref dentry 'stat) 'type) 'symlink)
-				      <fs-dentry>
-				      <fs-symlink-dentry>)
+		    (dentry (make (if (eq? (ref stat 'type) 'symlink)
+				      <fs-symlink-dentry>
+				      <fs-dentry>)
 			      :parent path
 			      :entry entry
 			      :stat stat)))
@@ -88,7 +87,8 @@
 							   make-symlink-to-dname-default)
 						       dentry)))
 	       (set! (ref dentry 'url) ((or make-url make-url-default)
-					dentry))))
+					dentry))
+	       dentry))
 	   (directory-list path
 			   :add-path? #f 
 			   :children? #f

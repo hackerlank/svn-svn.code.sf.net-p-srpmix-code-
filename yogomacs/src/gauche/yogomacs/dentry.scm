@@ -15,10 +15,10 @@
 (select-module yogomacs.dentry)
 
 (define-class <dentry> ()
-  )
+  ())
 
 (define-class <symlink-dentry> (<dentry>)
-  )
+  ())
 
 
 (define-method symlink? ((d <dentry>)) #f)
