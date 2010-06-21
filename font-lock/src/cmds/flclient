@@ -5,7 +5,7 @@
 (use font-lock.flclient)
 (use gauche.parseopt)
 (use file.util)
-
+(use srfi-1)
 
 (define commands (make-hash-table 'eq?))
 (define-class <command> ()
@@ -17,7 +17,7 @@
   (let1 cmd (ref commands key)
       (format #t 
 	      (if (ref cmd 'connect?) 
-		  "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] ~a ~a\n"
+		  "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] [--verbose] [--timeout=SEC] [--harness=HARNESS] ~a ~a\n"
 		  "	~a ~a ~a\n")
 	      prog
 	      key
@@ -44,17 +44,25 @@
 	       :doc ,doc
 	       :connect? ,connect?)))))
 
-(define-command help (prog emacsclient socket-name args)
+(define-command help (prog emacsclient socket-name verbose timeout args)
   "" #f
-  
   (show-help prog 0))
 
-(define-command shutdown (prog emacsclient socket-name args)
+(define-command shutdown (prog emacsclient socket-name verbose timeout args)
   "" #t
   (flclient-shutdown :emacsclient emacsclient
-		     :socket-name socket-name))
+		     :socket-name socket-name
+		     :verbose verbose
+		     :timeout timeout))
 
-(define-command cssize (prog emacsclient socket-name args)
+(define-command ping (prog emacsclient socket-name verbose timeout args)
+  "" #t
+  (flclient-ping :emacsclient emacsclient
+		 :socket-name socket-name
+		 :verbose verbose
+		 :timeout timeout))
+
+(define-command cssize (prog emacsclient socket-name verbose timeout args)
   "FACE CSS-DIR [REQUIRES...]" #t
   (unless (eq? (length args) 3)
     (with-output-to-port (current-error-port)
@@ -66,10 +74,12 @@
 	(requires (map string->symbol (list-tail args 2))))
     (let1 status (flclient-cssize face css-dir requires 
 				  :emacsclient emacsclient
-				  :socket-name socket-name)
+				  :socket-name socket-name
+				  :verbose verbose
+				  :timeout timeout)
       (exit status))))
 
-(define (convert-common proc prog emacsclient socket-name args)
+(define (convert-common proc prog emacsclient socket-name verbose timeout args)
   (unless (eq? (length args) 3)
     (with-output-to-port (current-error-port)
       (lambda () 
@@ -93,18 +103,20 @@
 	      (exit 1))))
       (make-directory* css-dir))
     (let1 status (proc src-file html-file css-dir
-				    :emacsclient emacsclient
-				    :socket-name socket-name)
+		       :emacsclient emacsclient
+		       :socket-name socket-name
+		       :verbose verbose
+		       :timeout timeout)
       
       (exit status))))
 
-(define-command xhtmlize (prog emacsclient socket-name args)
+(define-command xhtmlize (prog emacsclient socket-name verbose timeout args)
   "SRC_FILE XHTML_FILE CSS_DIR" #t
-  (convert-common flclient-xhtmlize prog emacsclient socket-name args))
+  (convert-common flclient-xhtmlize prog emacsclient socket-name verbose timeout args))
 
-(define-command shtmlize (prog emacsclient socket-name args)
+(define-command shtmlize (prog emacsclient socket-name verbose timeout args)
   "SRC_FILE SHTML_FILE CSS_DIR" #t
-  (convert-common flclient-shtmlize prog emacsclient socket-name args))
+  (convert-common flclient-shtmlize prog emacsclient socket-name verbose timeout args))
 
 (define (main args)
   (let ((prog (car args))
@@ -113,6 +125,8 @@
 	((help "h|help" => (cute show-help prog 0))
 	 (emacsclient "emacsclient=s"  "emacsclient")
 	 (socket-name "socket-name=s"  "flserver")
+	 (verbose "verbose" #f)
+	 (timeout "timeout=i" #f)
 	 . rest)
       (when (eq? (length rest) 0)
 	(with-output-to-port (current-error-port)
@@ -123,7 +137,7 @@
 	    (rest (cdr rest)))
 	(let1 command (ref commands cmd #f)
 	  (if command
-	      ((ref command 'proc) prog emacsclient socket-name rest)
+	      ((ref command 'proc) prog emacsclient socket-name verbose timeout rest)
 	      (with-output-to-port (current-error-port)
 		(lambda ()
 		  (format #t "No such command: ~s\n" cmd) 

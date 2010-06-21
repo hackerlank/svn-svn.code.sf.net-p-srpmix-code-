@@ -66,6 +66,8 @@
   (flserver-touch)
   (prog1 
       (cond 
+       ((eq action 'ping)
+	(apply #'flserver-ping (list)))
        ((eq action 'xhtmlize)
 	(apply #'flserver-xhtmlize args))
        ((eq action 'shtmlize)
@@ -76,6 +78,9 @@
 	(apply #'flserver-shutdown args))
        )
     (flserver-touch)))
+
+(defun flserver-ping ()
+  (with-log-string "ping" "" t))
 
 (defun flserver-xhtmlize (src-file html-file css-dir)
   (with-log-string

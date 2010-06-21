@@ -1,4 +1,4 @@
-moduledir=@GAUCHE_MODULEDIR@/yogomacs/harnesses
+moduledir=@GAUCHE_MODULEDIR@/font-lock/harnesses
 dist_module_DATA =   \
 	\
 	direct.scm \
