@@ -42,4 +42,5 @@ AC_OUTPUT([
 	   src/gauche/Makefile
 	   src/gauche/font-lock/Makefile
 	   src/gauche/font-lock/rearrange/Makefile
+	   src/gauche/font-lock/harnesses/Makefile
 	   ])
