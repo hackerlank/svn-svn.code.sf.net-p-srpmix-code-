@@ -11,12 +11,12 @@
 (define-class <command> ()
   ((proc :init-keyword :proc)
    (doc  :init-keyword :doc)
-   (connect? :init-keyword :connect?)))
+   (require-connection? :init-keyword :require-connection?)))
 
 (define (show-help-1 prog key)
   (let1 cmd (ref commands key)
       (format #t 
-	      (if (ref cmd 'connect?) 
+	      (if (ref cmd 'require-connection?) 
 		  "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] [--verbose] [--timeout=SEC] [--harness=HARNESS] ~a ~a\n"
 		  "	~a ~a ~a\n")
 	      prog
@@ -35,14 +35,14 @@
   (exit n))
 
 
-(define-macro (define-command cmd params-spec doc connect? . body)
+(define-macro (define-command cmd params-spec doc require-connection? . body)
   (let1 sym (gensym)
     `(let ((,sym (lambda ,params-spec . ,body)))
        (set! (ref commands ',cmd)
 	     (make <command> 
 	       :proc ,sym
 	       :doc ,doc
-	       :connect? ,connect?)))))
+	       :require-connection? ,require-connection?)))))
 
 (define-command help (prog emacsclient socket-name verbose timeout args)
   "" #f
@@ -118,6 +118,25 @@
   "SRC_FILE SHTML_FILE CSS_DIR" #t
   (convert-common flclient-shtmlize prog emacsclient socket-name verbose timeout args))
 
+
+
+(define (invoke command client-args server-args)
+  (define (invoke-client cmd)
+    (apply (ref cmd 'proc) client-args))
+  (define (ping)
+    (if (eq? (invoke-client (ref commands "ping" #f)) 0) 
+	#t
+	#f))
+  (when (ref command 'require-connection?)
+    (unless (ping)
+      ;; ;; lauch flserver under harness
+    ))
+  (invoke-client command))
+
+		
+
+
+
 (define (main args)
   (let ((prog (car args))
 	(args (cdr args)))
@@ -137,7 +156,9 @@
 	    (rest (cdr rest)))
 	(let1 command (ref commands cmd #f)
 	  (if command
-	      ((ref command 'proc) prog emacsclient socket-name verbose timeout rest)
+	      (invoke command 
+		      (list prog emacsclient socket-name verbose timeout rest)
+		      (list))
 	      (with-output-to-port (current-error-port)
 		(lambda ()
 		  (format #t "No such command: ~s\n" cmd) 

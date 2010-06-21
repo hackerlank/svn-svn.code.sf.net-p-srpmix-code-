@@ -89,7 +89,6 @@
 	      )))
 	(process-wait proc #f))
     ;;
-    (let1 status (process-exit-status proc)
-      (if (eq? status 0) 0 1))))
+    (process-exit-status proc)))
 
 (provide "font-lock/flclient")
