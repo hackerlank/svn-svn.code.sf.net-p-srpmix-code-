@@ -41,5 +41,4 @@ AC_OUTPUT([
 	   src/gauche/Makefile
 	   src/gauche/yogomacs/Makefile
 	   src/gauche/yogomacs/dentries/Makefile
-	   src/gauche/yogomacs/harnesses/Makefile
 	   ])

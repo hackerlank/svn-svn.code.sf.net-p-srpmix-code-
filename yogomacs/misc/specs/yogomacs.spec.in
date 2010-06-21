@@ -50,15 +50,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/gauche/site/lib/yogomacs
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
 %{_datadir}/gauche/site/lib/yogomacs/dired.scm
-%{_datadir}/gauche/site/lib/yogomacs/harness.scm
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/dentries
 %{_datadir}/gauche/site/lib/yogomacs/dentries/fs.scm
-
-%dir %{_datadir}/gauche/site/lib/yogomacs/harnesses
-%{_datadir}/gauche/site/lib/yogomacs/harnesses/screen.scm
-%{_datadir}/gauche/site/lib/yogomacs/harnesses/xvnc.scm
-%{_datadir}/gauche/site/lib/yogomacs/harnesses/direct.scm
 
 %doc
 
