@@ -61,13 +61,17 @@
 
 (define-method make-url-default ((fs-dentry <fs-dentry>))
   (uri-compose :scheme "file"
-	       :path (path-of fs-dentry)))
+	       :path (sys-normalize-pathname (path-of fs-dentry)
+					     :canonicalize #t
+					     )))
 (define-method make-url-default ((fs-symlink-dentry <fs-symlink-dentry>))
   (uri-compose :scheme "file"
 		 :path (ref fs-dentry 'symlink-to-dname)))
 
 (define (make-symlink-to-dname-default fs-dentry)
-  (sys-readlink (path-of fs-dentry)))
+  (guard (e
+	  (else #f))
+    (sys-readlink (path-of fs-dentry))))
 
 (define (read-dentries path 
 		       make-url 
