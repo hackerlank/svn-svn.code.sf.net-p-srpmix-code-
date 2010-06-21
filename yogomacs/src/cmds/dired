@@ -6,6 +6,8 @@
 (use yogomacs.dentries.fs)
 (use gauche.parseopt)
 (use file.util)
+(use font-lock.flclient)
+
 
 (define (show-help n)
   (format #t "Usage:\n")
@@ -18,6 +20,7 @@
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (pa$ show-help 0))
+       (css-output-dir "css-output-dir=s" "/tmp")
        . rest)
     (when (or (null? rest)
 	      (< 1 (length rest)))
@@ -31,6 +34,12 @@
 	(format (current-error-port)
 		"Cannot read: ~a\n" dir))
       (let1 dentires (read-dentries dir #f #f #f)
-	(write (dired dir dentires #f))
-	(newline)
+	(when dentires
+	  (for-each
+	   (cute flclient-cssize <> css-output-dir (list 'dired))
+	   dired-faces)
+	  (write (dired dir dentires #f)))
+	(exit (if dentires 0 1))
 	))))
+
+

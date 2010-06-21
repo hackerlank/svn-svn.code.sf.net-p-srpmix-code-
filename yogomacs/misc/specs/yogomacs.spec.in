@@ -1,0 +1,69 @@
+%define emacs_lispdir %(pkg-config emacs --variable sitepkglispdir)
+%define emacs_startdir %(pkg-config emacs --variable sitestartdir)
+%define emacs_version %(pkg-config emacs --modversion)
+
+
+Summary: sources web frontend
+Name: yogomacs
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPLv3
+Group: Development/Tools
+Buildarch: noarch
+URL: http://srpmix.org
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+BuildRequires: emacs gauche-devel font-lock
+Requires: emacs gauche font-lock
+
+%description
+sources web frontend
+
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{_bindir}/dired
+
+%{emacs_lispdir}/flserver/plugins/xhtmlize+dired-decl.el
+%{emacs_lispdir}/flserver/plugins/xhtmlize+dired-main.el
+%{emacs_lispdir}/flserver/plugins/xhtmlize+dired-decl.elc
+%{emacs_lispdir}/flserver/plugins/xhtmlize+dired-main.elc
+
+
+%dir %{_datadir}/gauche/site/lib/yogomacs
+%{_datadir}/gauche/site/lib/yogomacs/dentry.scm
+%{_datadir}/gauche/site/lib/yogomacs/dired.scm
+%{_datadir}/gauche/site/lib/yogomacs/harness.scm
+
+%dir %{_datadir}/gauche/site/lib/yogomacs/dentries
+%{_datadir}/gauche/site/lib/yogomacs/dentries/fs.scm
+
+%dir %{_datadir}/gauche/site/lib/yogomacs/harnesses
+%{_datadir}/gauche/site/lib/yogomacs/harnesses/screen.scm
+%{_datadir}/gauche/site/lib/yogomacs/harnesses/xvnc.scm
+%{_datadir}/gauche/site/lib/yogomacs/harnesses/direct.scm
+
+%doc
+
+
+%changelog
+* Tue Jun  8 2010 Masatake YAMATO <yamato@redhat.com> - 0.0.0-0
+- Initial build.
+
