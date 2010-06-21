@@ -49,14 +49,15 @@
 
 (define-constant dired-foreign-faces
   '(
-    dired-regular	  ;TODO
-    dired-unknown	  ;TODO
-    dired-symlink-arrow ;TODO
-    dired-symlink-to	  ;TODO
-    dired-executable	  ;TODO
-    dired-entry-type	  ;TODO
-    dired-size	  ;TODO
-    dired-date	  ;TODO
+    dired-regular	  
+    dired-unknown	  
+    dired-symlink-arrow 
+    dired-broken-symlink		
+    dired-symlink-to	
+    dired-executable	
+    dired-entry-type	
+    dired-size	  
+    dired-date	  
     ))
   
 (define-constant dired-faces 
@@ -101,14 +102,20 @@
     "\n"))
 
 (define (symlink-entry dentry)
-  `(
-    (span (|@| (class "dired-symlink"))
-	  (a (|@| (href ,(url-of dentry)))
-	     ,(dname-of dentry)))
-    (span (|@| (class "dired-symlink-arrow"))
-	  " -> ")
-    (span (|@| (class "dired-symlink-to"))
-	  ,(symlink-to-dname-of dentry))
+  (let1 symlink-to-dname (symlink-to-dname-of dentry)
+    (if symlink-to-dname
+	`(
+	  (span (|@| (class "dired-symlink"))
+		(a (|@| (href ,(url-of dentry)))
+		   ,(dname-of dentry)))
+	  (span (|@| (class "dired-symlink-arrow"))
+		" -> ")
+	  (span (|@| (class "dired-symlink-to"))
+		,symlink-to-dname))
+	`(
+	  (span (|@| (class "dired-broken-symlink"))
+		,(dname-of dentry))
+	  ))
     "\n"))
 
 (define (executable-entry dentry)
