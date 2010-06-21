@@ -1,4 +1,22 @@
-#!/bin/bash
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
+(use gauche.parseopt)
+(define (show-help n)
+  (format #t "Usage: \n")
+  (format #t "	~a --help|-h\n" *program-name*)
+  (format #t "	~a [--emacs=EMACS] [--load-path=PATH] [CONFIG_EL|@CONFIG_EL]\n")
+  (exit n)
+  )
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cute show-help 0))
+       (load-path "load-path=s" #f)
+       (emacs "emacs=s" "emacs")
+       . rest)
+    (invoke-emacs emacs load-path ...)))
+
 
 emacs=emacs
 load_path=
