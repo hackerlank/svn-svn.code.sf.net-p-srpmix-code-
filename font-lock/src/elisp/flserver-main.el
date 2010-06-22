@@ -13,8 +13,9 @@
 ;;
 ;; Disable interactive features
 ;;
-(setq enable-local-variables nil)
-
+(setq enable-local-variables nil
+      enable-local-eval nil
+      local-enable-local-variables nil)
 
 ;;
 ;; Don't create backup file
