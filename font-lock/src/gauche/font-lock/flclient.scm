@@ -5,68 +5,49 @@
 	  flclient-cssize
 	  flclient-shutdown)
   (use gauche.process)
+  (use srfi-1)
+  (use util.match)
   )
 (select-module font-lock.flclient)
 
 
-(define (flclient-ping . rest)
-  (let-keywords rest ((emacsclient :emacsclient "emacsclient")
-		      (socket-name :socket-name "flserver")
-		      (verbose :verbose #f)
-		      (timeout :timeout 1))
+;; (define replace-keyword (match-lambda*
+;; 			 ((args key val replace?)
+;; 			  (guard (e
+;; 				  (else (cons* key val args)))
+;; 				 (let1 oval (get-keyword key args)
+;; 				   (if (replace? oval)
+;; 				       (cons* key val (delete-keyword key args))
+;; 				       args))))
+;; 			 ((args key val)
+;; 			  (replace-keyword args key val not))))
+
+(define (flclient-do common-args default-timeout expression)
+  (let-keywords common-args ((emacsclient :emacsclient "emacsclient")
+			     (socket-name :socket-name "flserver")
+			     (verbose :verbose #f)
+			     (timeout :timeout default-timeout))
 		(invoke-emacsclient emacsclient
 				    socket-name
 				    verbose
 				    timeout
-				    `(flserver 'ping)
+				    expression
 				    )))
+
+(define (flclient-ping . rest)
+  (flclient-do rest 1 `(flserver 'ping)))
 
 (define (flclient-xhtmlize src-file html-file css-dir . rest)
-  (let-keywords rest ((emacsclient :emacsclient "emacsclient")
-		      (socket-name :socket-name "flserver")
-		      (verbose :verbose #f)
-		      (timeout :timeout 60))
-		(invoke-emacsclient emacsclient
-				    socket-name
-				    verbose
-				    timeout
-				    `(flserver 'xhtmlize ,src-file ,html-file ,css-dir)
-				    )))
+  (flclient-do rest 60 `(flserver 'xhtmlize ,src-file ,html-file ,css-dir)))
 
 (define (flclient-shtmlize src-file shtml-file css-dir . rest)
-  (let-keywords rest ((emacsclient :emacsclient "emacsclient")
-		      (socket-name :socket-name "flserver")
-		      (verbose :verbose #f)
-		      (timeout :timeout 60))
-		(invoke-emacsclient emacsclient
-				    socket-name
-				    verbose
-				    timeout
-				    `(flserver 'shtmlize ,src-file ,shtml-file ,css-dir)
-				    )))
+  (flclient-do rest 60 `(flserver 'shtmlize ,src-file ,shtml-file ,css-dir)))
 
 (define (flclient-cssize face css-dir requires . rest)
-  (let-keywords rest ((emacsclient :emacsclient "emacsclient")
-		      (socket-name :socket-name "flserver")
-		      (verbose :verbose #f)
-		      (timeout :timeout 10))
-		(invoke-emacsclient emacsclient
-				    socket-name
-				    verbose
-				    timeout
-				    `(flserver 'cssize ',face ,css-dir ',requires)
-				    )))
+  (flclient-do rest 10 `(flserver 'cssize ',face ,css-dir ',requires)))
+
 (define (flclient-shutdown . rest)
-  (let-keywords rest ((emacsclient :emacsclient "emacsclient")
-		      (socket-name :socket-name "flserver")
-		      (verbose :verbose #f)
-		      (timeout :timeout 60))
-		(invoke-emacsclient emacsclient
-				    socket-name
-				    verbose
-				    timeout
-				    `(flserver 'shutdown)
-				    )))
+  (flclient-do rest 60 `(flserver 'shutdown)))
 
 (define (invoke-emacsclient emacsclient socket-name verbose timeout expression)
   (let1 proc (run-process (list emacsclient

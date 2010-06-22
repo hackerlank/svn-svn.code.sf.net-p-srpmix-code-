@@ -124,7 +124,7 @@
   (define (invoke-client cmd)
     (apply (ref cmd 'proc) client-args))
   (define (ping)
-    (if (eq? (invoke-client (ref commands "ping" #f)) 0) 
+    (if (eq? (invoke-client (ref commands 'ping)) 0) 
 	#t
 	#f))
   (when (ref command 'require-connection?)

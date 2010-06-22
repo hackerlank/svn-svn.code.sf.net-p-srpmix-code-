@@ -3,26 +3,34 @@
 :; exec gosh -- $0 "$@"
 
 (use gauche.parseopt)
+(use gauche.process)
 (use file.util)
 
 
 (define (show-help n)
   (format #t "Usage: \n")
   (format #t "	~a --help|-h\n" *program-name*)
-  (format #t "	~a [--emacs=EMACS] [--load-path=PATH] [--config-file=CONFIG_EL|--config=CONFIG]\n")
+  (format #t "	~a [--verbose] [--emacs=EMACS] [--load-path=PATH] [--config-file=CONFIG_EL|--config=CONFIG]\n")
   (exit n)
   )
 
-(define (invoke-emacs emacs load-path config-file)
-  ...)
+(define (emacs-cmdline emacs load-path config-file)
+  `(,emacs
+    "-Q"
+    ,@(if load-path `("-L" ,load-path) (list))
+    "-l" "flserver-boot"
+    "-l" "flserver-decl"
+    ,@(if config-file `("-l" ,config-file) (list))
+    "-l" "flserver-main"))
 
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help 0))
        (load-path "load-path=s" #f)
        (emacs "emacs=s" "emacs")
-       (config-file "config-file=" #f)
-       (config "config=" #f)
+       (config-file "config-file=s" #f)
+       (config "config=s" #f)
+       (verbose "verbose" #f)
        . rest)
     (unless (null? rest)
       (display "Too many arguments\n" (current-error-port))
@@ -35,67 +43,19 @@
        (pa$ show-help 1)))
     (let1 config-file (if config-file
 			  config-file
-			  (let1 config-file (build-path "/etc/font-lock/flserver" 
-							(string-append config ".el"))
-			    (unless (file-is-readable? config-file)
-			      (format (current-error-port)
-				      "Cannot read: ~a\n" config-file))
-			    config-file))
-    (invoke-emacs emacs load-path config-file))))
+			  ;; TODO: handle in *.in
+			  (if config
+			      (let1 config-file (build-path "/etc/font-lock/flserver" 
+							    (string-append config ".el"))
+				(unless (file-is-readable? config-file)
+				  (format (current-error-port)
+					  "Cannot read: ~a\n" config-file))
+				config-file)
+			      #f))
+      ;; TODO: ping?
+      ;; TODO: harness?
+      (let* ((cmdline (emacs-cmdline emacs load-path config-file))
+	     (proc (run-process cmdline :wait #f :error (if verbose #f "/dev/null"))))
+	(process-wait proc)
+	(exit (process-exit-status proc))))))
 
-
-emacs=emacs
-load_path=
-config_el=
-
-function print_usage
-{
-    echo "Usage: "
-    echo "  flserver --help|-h"
-    echo "  flserver [--load-path=PATH] [--emacs=EMACS] [config_el]"
-    echo
-}
-function parse_arugments
-{
-    while [ $# -gt 0 ]; do
-	case "$1" in
-	    --help|-h)
-		print_usage
-		exit 0
-		;;
-	    (--load-path=*)
-		load_path="-L ${1/--load-path=}"
-		;;
-	    (--emacs=*)
-		emacs="${1/--emacs=}"
-		;;
-	    (--*)
-		echo "No such option: $1" 1>&2
-		print_usage 1>&2
-		exit 1
-		;;
-	    (*)
-		break;
-		;;
-	esac
-	shift
-    done
-    
-    if [ $# = 0 ]; then
-	:			# do nothing
-    elif [ $# = 1 ]; then
-	config_el="-l $1"
-	shift
-    else
-	print_usage 1>&2
-	exit 1
-    fi
-}
-
-function main
-{
-    parse_arugments "$@"
-    $emacs -Q $load_path -l flserver-boot -l flserver-decl $config_el -l flserver-main
-}
-
-main "$@"
