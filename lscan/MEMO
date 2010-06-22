@@ -1,0 +1,36 @@
+http://dehs.alioth.debian.org/
+
+
+
+前に教えてくれこの件ですが、驚くことにfedoraで簡単に動きました。
+lcopyのバックエンドにするのもそれほど難しくなさそうです。
+
+以下はbindの最新版のurlを特定する例です。
+
+# sudo yum -y install dpkg-devel
+# git clone git://git.debian.org/devscripts/devscripts.git
+$ cat bind.watch
+version=3
+http://ftp.yz.yamagata-u.ac.jp/pub/network/isc/bind/(\d.*)/ \
+  bind-(\d.*)\.tar\.gz
+
+$ perl -I devscripts devscripts/scripts/uscan.pl \
+  --watchfile bind.watch \
+ --upstream-version 9.0.0 \
+ --package bind  \
+ --dehs
+<an.pl --watchfile bind.watch --upstream-version 9.0.0 --package bind  --dehs
+<dehs>
+<package>bind</package>
+<debian-uversion>9.0.0</debian-uversion>
+<debian-mangled-uversion>9.0.0</debian-mangled-uversion>
+<upstream-version>9.7.1</upstream-version>
+<upstream-url>http://ftp.yz.yamagata-u.ac.jp/pub/network/isc/bind/9.7.1/bind-9.7.1.tar.gz</upstream-url>
+<status>Newer version available</status>
+<messages>Not downloading as --package was used.  Use --download to force downloading.</messages>
+</dehs>
+
+
+watch file is included in: 
+ftp://ftp.debian.org/debian/pool/main/l/lam/lam_7.1.2-1.3.diff.gz
+
