@@ -84,6 +84,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %dir %{_datadir}/gauche/site/lib/font-lock
 %{_datadir}/gauche/site/lib/font-lock/flclient.scm
+%{_datadir}/gauche/site/lib/font-lock/flserver.scm
 %{_datadir}/gauche/site/lib/font-lock/harness.scm
 
 %dir %{_datadir}/gauche/site/lib/font-lock/rearrange

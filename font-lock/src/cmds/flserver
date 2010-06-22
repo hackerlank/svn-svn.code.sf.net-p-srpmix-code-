@@ -3,25 +3,24 @@
 :; exec gosh -- $0 "$@"
 
 (use gauche.parseopt)
-(use gauche.process)
 (use file.util)
+(use font-lock.flserver)
+(use font-lock.harness)
 
+(use font-lock.harnesses.direct)
+(use font-lock.harnesses.screen)
+(use font-lock.harnesses.xvnc)
 
 (define (show-help n)
   (format #t "Usage: \n")
   (format #t "	~a --help|-h\n" *program-name*)
-  (format #t "	~a [--verbose] [--emacs=EMACS] [--load-path=PATH] [--config-file=CONFIG_EL|--config=CONFIG]\n")
+  (format #t "	~a [--verbose] [--emacs=EMACS] [--load-path=PATH] [--config-file=CONFIG_EL|--config=CONFIG] [--harness=HARNESS]\n" *program-name*)
+  (format #t "HARNESS: \n")
+  (for-each 
+   (lambda (harness) (format #t "	~a\n" (name-of harness)))
+   (all-harnesses))
   (exit n)
   )
-
-(define (emacs-cmdline emacs load-path config-file)
-  `(,emacs
-    "-Q"
-    ,@(if load-path `("-L" ,load-path) (list))
-    "-l" "flserver-boot"
-    "-l" "flserver-decl"
-    ,@(if config-file `("-l" ,config-file) (list))
-    "-l" "flserver-main"))
 
 (define (main args)
   (let-args (cdr args)
@@ -31,31 +30,31 @@
        (config-file "config-file=s" #f)
        (config "config=s" #f)
        (verbose "verbose" #f)
+       (harness "harness=s" "direct")
        . rest)
     (unless (null? rest)
       (display "Too many arguments\n" (current-error-port))
-      (with-output-to-pprt
+      (with-output-to-port (current-error-port)
        (pa$ show-help 1)))
     (when (and config-file config)
       (display "Specify only --config-file or --config\n" 
 	       (current-error-port))
-      (with-output-to-port
+      (with-output-to-port (current-error-port)
        (pa$ show-help 1)))
     (let1 config-file (if config-file
 			  config-file
-			  ;; TODO: handle in *.in
 			  (if config
-			      (let1 config-file (build-path "/etc/font-lock/flserver" 
-							    (string-append config ".el"))
-				(unless (file-is-readable? config-file)
+			      (let1 config-file (config->config-file config)
+				(unless config-file
 				  (format (current-error-port)
 					  "Cannot read: ~a\n" config-file))
 				config-file)
 			      #f))
-      ;; TODO: ping?
-      ;; TODO: harness?
       (let* ((cmdline (emacs-cmdline emacs load-path config-file))
-	     (proc (run-process cmdline :wait #f :error (if verbose #f "/dev/null"))))
-	(process-wait proc)
-	(exit (process-exit-status proc))))))
+	     (harness-object (choose-harness harness)))
+	(unless harness-object
+	  (format (current-error-port)
+		  "No such hanress: ~a" hanress)
+	  (exit 1))
+	(exit (launch harness-object cmdline verbose #f))))))
 

@@ -13,21 +13,21 @@
    (doc  :init-keyword :doc)
    (require-connection? :init-keyword :require-connection?)))
 
-(define (show-help-1 prog key)
+(define (show-help-1 key)
   (let1 cmd (ref commands key)
       (format #t 
 	      (if (ref cmd 'require-connection?) 
 		  "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] [--verbose] [--timeout=SEC] [--harness=HARNESS] ~a ~a\n"
 		  "	~a ~a ~a\n")
-	      prog
+	      *program-name*
 	      key
 	      (ref cmd 'doc))))
 
-(define (show-help prog n)
+(define (show-help n)
   (format #t "Usage: \n")
-  (format #t "	~a --help|-h\n" prog)
+  (format #t "	~a --help|-h\n" *program-name*)
   (for-each
-   (pa$ show-help-1 prog)
+   show-help-1
    (sort (hash-table-keys commands)
 	 (lambda (a b)
 	   (string<? (x->string a)
@@ -44,31 +44,31 @@
 	       :doc ,doc
 	       :require-connection? ,require-connection?)))))
 
-(define-command help (prog emacsclient socket-name verbose timeout args)
+(define-command help (emacsclient socket-name verbose timeout args)
   "" #f
-  (show-help prog 0))
+  (show-help 0))
 
-(define-command shutdown (prog emacsclient socket-name verbose timeout args)
+(define-command shutdown (emacsclient socket-name verbose timeout args)
   "" #t
   (flclient-shutdown :emacsclient emacsclient
 		     :socket-name socket-name
 		     :verbose verbose
 		     :timeout timeout))
 
-(define-command ping (prog emacsclient socket-name verbose timeout args)
+(define-command ping (emacsclient socket-name verbose timeout args)
   "" #t
   (flclient-ping :emacsclient emacsclient
 		 :socket-name socket-name
 		 :verbose verbose
 		 :timeout timeout))
 
-(define-command cssize (prog emacsclient socket-name verbose timeout args)
+(define-command cssize (emacsclient socket-name verbose timeout args)
   "FACE CSS-DIR [REQUIRES...]" #t
   (unless (eq? (length args) 3)
     (with-output-to-port (current-error-port)
       (lambda () 
 	(print "Wrong number of arguments")
-	(show-help prog 1))))
+	(show-help 1))))
   (let ((face (string->symbol (ref args 0)))
 	(css-dir (ref args 1))
 	(requires (map string->symbol (list-tail args 2))))
@@ -79,12 +79,12 @@
 				  :timeout timeout)
       (exit status))))
 
-(define (convert-common proc prog emacsclient socket-name verbose timeout args)
+(define (convert-common proc emacsclient socket-name verbose timeout args)
   (unless (eq? (length args) 3)
     (with-output-to-port (current-error-port)
       (lambda () 
 	(print "Wrong number of arguments")
-	(show-help prog 1))))
+	(show-help 1))))
   
   (let ((src-file (ref args 0))
 	(html-file (ref args 1))
@@ -110,13 +110,13 @@
       
       (exit status))))
 
-(define-command xhtmlize (prog emacsclient socket-name verbose timeout args)
+(define-command xhtmlize (emacsclient socket-name verbose timeout args)
   "SRC_FILE XHTML_FILE CSS_DIR" #t
-  (convert-common flclient-xhtmlize prog emacsclient socket-name verbose timeout args))
+  (convert-common flclient-xhtmlize emacsclient socket-name verbose timeout args))
 
-(define-command shtmlize (prog emacsclient socket-name verbose timeout args)
+(define-command shtmlize (emacsclient socket-name verbose timeout args)
   "SRC_FILE SHTML_FILE CSS_DIR" #t
-  (convert-common flclient-shtmlize prog emacsclient socket-name verbose timeout args))
+  (convert-common flclient-shtmlize emacsclient socket-name verbose timeout args))
 
 
 
@@ -138,28 +138,26 @@
 
 
 (define (main args)
-  (let ((prog (car args))
-	(args (cdr args)))
-    (let-args args
-	((help "h|help" => (cute show-help prog 0))
-	 (emacsclient "emacsclient=s"  "emacsclient")
-	 (socket-name "socket-name=s"  "flserver")
-	 (verbose "verbose" #f)
-	 (timeout "timeout=i" #f)
-	 . rest)
-      (when (eq? (length rest) 0)
-	(with-output-to-port (current-error-port)
-	  (lambda () 
-	    (print "Wrong number of arguments")
-	    (show-help prog 1))))
-      (let ((cmd (string->symbol (car rest)))
-	    (rest (cdr rest)))
-	(let1 command (ref commands cmd #f)
-	  (if command
-	      (invoke command 
-		      (list prog emacsclient socket-name verbose timeout rest)
-		      (list))
-	      (with-output-to-port (current-error-port)
-		(lambda ()
-		  (format #t "No such command: ~s\n" cmd) 
-		  (show-help prog 1)))))))))
+  (let-args (cdr args)
+      ((help "h|help" => (cute show-help 0))
+       (emacsclient "emacsclient=s"  "emacsclient")
+       (socket-name "socket-name=s"  "flserver")
+       (verbose "verbose" #f)
+       (timeout "timeout=i" #f)
+       . rest)
+    (when (eq? (length rest) 0)
+      (with-output-to-port (current-error-port)
+	(lambda () 
+	  (print "Wrong number of arguments")
+	  (show-help 1))))
+    (let ((cmd (string->symbol (car rest)))
+	  (rest (cdr rest)))
+      (let1 command (ref commands cmd #f)
+	(if command
+	    (invoke command 
+		    (list emacsclient socket-name verbose timeout rest)
+		    (list))
+	    (with-output-to-port (current-error-port)
+	      (lambda ()
+		(format #t "No such command: ~s\n" cmd) 
+		(show-help 1))))))))

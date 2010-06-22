@@ -4,6 +4,9 @@
 --- if ! -f $ENV{HOME}/.vnc/startup; then echo 'twm' > $vncUserDir/xstartup; fi
 --- vncserver :N
 --- DISPLAY=:N flserver
+-- Screen
+--- Conflicts
+
 - batch mode, replace the main function, or one shot
 - logging, rotation
 - debug facility
