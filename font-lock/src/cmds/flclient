@@ -3,9 +3,18 @@
 :; exec gosh -- $0 "$@"
 
 (use font-lock.flclient)
+(use font-lock.flserver)
+(use font-lock.harness)
+
+(use font-lock.harnesses.daemonize)
+(use font-lock.harnesses.screen)
+(use font-lock.harnesses.xvnc)
+
+
 (use gauche.parseopt)
 (use file.util)
 (use srfi-1)
+
 
 (define commands (make-hash-table 'eq?))
 (define-class <command> ()
@@ -118,19 +127,24 @@
   "SRC_FILE SHTML_FILE CSS_DIR" #t
   (convert-common flclient-shtmlize emacsclient socket-name verbose timeout args))
 
-
-
 (define (invoke command client-args server-args)
   (define (invoke-client cmd)
     (apply (ref cmd 'proc) client-args))
+  (define (invoke-server)
+    (let ((cmdline (emacs-cmdline #f #f #f))
+	  (harness-object (choose-harness (get-keyword :harness server-args))))
+      (launch harness-object cmdline (list) (get-keyword :verbose server-args))
+      ))
   (define (ping)
     (if (eq? (invoke-client (ref commands 'ping)) 0) 
 	#t
 	#f))
   (when (ref command 'require-connection?)
     (unless (ping)
-      ;; ;; lauch flserver under harness
-    ))
+      (invoke-server)
+    )
+    ;; ping check must be here.
+    )
   (invoke-client command))
 
 		
@@ -144,6 +158,7 @@
        (socket-name "socket-name=s"  "flserver")
        (verbose "verbose" #f)
        (timeout "timeout=i" #f)
+       (harness "harness=s" "xvnc")
        . rest)
     (when (eq? (length rest) 0)
       (with-output-to-port (current-error-port)
@@ -156,7 +171,7 @@
 	(if command
 	    (invoke command 
 		    (list emacsclient socket-name verbose timeout rest)
-		    (list))
+		    `(:harness ,harness :verbose ,verbose))
 	    (with-output-to-port (current-error-port)
 	      (lambda ()
 		(format #t "No such command: ~s\n" cmd) 

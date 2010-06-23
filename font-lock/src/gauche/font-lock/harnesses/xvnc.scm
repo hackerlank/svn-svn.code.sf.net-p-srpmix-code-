@@ -59,7 +59,7 @@
 	  (launch daemonize-harness
 		  (cons* (car cmdline)
 			 "--display"
-			 display
+			 (format ":~d" display)
 			 (cdr cmdline))
 		  (list)
 		  verbose))))))

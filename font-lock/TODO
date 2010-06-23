@@ -4,7 +4,7 @@
 --- if ! -f $ENV{HOME}/.vnc/startup; then echo 'twm' > $vncUserDir/xstartup; fi
 --- vncserver :N
 --- DISPLAY=:N flserver
-
+--- reporting error if the display cannot be opened.
 -- Screen <done?>
 --- Conflicts
 

@@ -8,7 +8,7 @@
 (select-module font-lock.flserver)
 
 (define (emacs-cmdline emacs load-path config-file)
-  `(,emacs
+  `(,(or emacs "emacs")
     "-Q"
     ,@(if load-path `("-L" ,load-path) (list))
     "-l" "flserver-boot"

@@ -7,8 +7,8 @@
 (use font-lock.flserver)
 (use font-lock.harness)
 
-(use font-lock.harnesses.foreground)
 (use font-lock.harnesses.daemonize)
+(use font-lock.harnesses.foreground)
 (use font-lock.harnesses.screen)
 (use font-lock.harnesses.xvnc)
 
