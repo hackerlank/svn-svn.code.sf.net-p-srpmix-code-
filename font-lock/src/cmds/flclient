@@ -127,7 +127,7 @@
   "SRC_FILE SHTML_FILE CSS_DIR" #t
   (convert-common flclient-shtmlize emacsclient socket-name verbose timeout args))
 
-(define (invoke command client-args server-args)
+(define (invoke command timeout client-args server-args)
   (define (invoke-client cmd)
     (apply (ref cmd 'proc) client-args))
   (define (invoke-server)
@@ -139,17 +139,21 @@
     (if (eq? (invoke-client (ref commands 'ping)) 0) 
 	#t
 	#f))
-  (when (ref command 'require-connection?)
-    (unless (ping)
-      (invoke-server)
-    )
-    ;; ping check must be here.
-    )
-  (invoke-client command))
-
-		
-
-
+  (if (ref command 'require-connection?)
+      (let ((pong (ping)))
+	(unless pong
+	  (invoke-server))
+	(let loop ((limit timeout)
+		   (pong (or pong (ping))))
+	  (cond
+	   (pong
+	    (invoke-client command))
+	   ((eq? timeout 0)
+	    (print "Cannot launch flserver\n" (current-error-port))
+	    1)
+	   (else
+	    (loop (- timeout 1) (ping))))))
+      (invoke-client command)))
 
 (define (main args)
   (let-args (cdr args)
@@ -169,7 +173,7 @@
 	  (rest (cdr rest)))
       (let1 command (ref commands cmd #f)
 	(if command
-	    (invoke command 
+	    (invoke command timeout
 		    (list emacsclient socket-name verbose timeout rest)
 		    `(:harness ,harness :verbose ,verbose))
 	    (with-output-to-port (current-error-port)
