@@ -139,21 +139,30 @@
     (if (eq? (invoke-client (ref commands 'ping)) 0) 
 	#t
 	#f))
-  (if (ref command 'require-connection?)
-      (let ((pong (ping)))
-	(unless pong
-	  (invoke-server))
-	(let loop ((limit timeout)
-		   (pong (or pong (ping))))
-	  (cond
-	   (pong
-	    (invoke-client command))
-	   ((eq? timeout 0)
-	    (print "Cannot launch flserver\n" (current-error-port))
-	    1)
-	   (else
-	    (loop (- timeout 1) (ping))))))
-      (invoke-client command)))
+  (cond
+   ((eq? command 'ping)
+    (ping))
+   ((ref command 'require-connection?)
+    (let ((pong (ping)))
+      (unless pong
+	(invoke-server)
+	;; TODO
+	;(sys-sleep 2)
+	)
+      ;; TODO: 20?
+      (let loop ((timeout (or timeout 20))
+		 (pong (or pong (ping))))
+	(cond
+	 (pong
+	  (invoke-client command))
+	 ((eq? timeout 0)
+	  (print "Cannot launch flserver\n" (current-error-port))
+	  1)
+	 (else
+	  (sys-sleep 1)
+	  (loop (- timeout 1) (ping)))))))
+   (else
+    (invoke-client command))))
 
 (define (main args)
   (let-args (cdr args)

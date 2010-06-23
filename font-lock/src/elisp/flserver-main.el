@@ -121,6 +121,10 @@
 
 (defun flserver-server-start ()
   (cd "/")
+  ;;
+  (setq server-log t)
+  (display-buffer (get-buffer-create server-buffer))
+  ;;
   (condition-case e
       (with-log-string "server-start" ""
 		       (server-start))
@@ -150,6 +154,8 @@
     (sit-for flserver-period)))
 
 (log-string "initializing...done")
-(flserver-main)
+
+;;
+(run-with-idle-timer 1 nil 'flserver-main)
 
 (provide 'flserver-main)

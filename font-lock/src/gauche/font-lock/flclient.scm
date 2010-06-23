@@ -30,7 +30,7 @@
 		(invoke-emacsclient emacsclient
 				    socket-name
 				    verbose
-				    timeout
+				    (or timeout default-timeout)
 				    expression
 				    )))
 
