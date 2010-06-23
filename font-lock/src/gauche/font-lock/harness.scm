@@ -6,6 +6,9 @@
 	  define-harness
 	  all-harnesses
 	  choose-harness
+	  ;;
+	  parameters-of
+	  help-string-of
 	  )
   )
 
@@ -13,6 +16,8 @@
 
 (define-class <harness> ()
   ((name :getter name-of)))
+
+(define-method parameters-of ((harness <harness>)) (list))
 
 (define-method launch ((harness <harness>)
 		       cmdline
@@ -27,5 +32,8 @@
      (lambda () (sort harnesses (lambda (a b)
 				  (string< (name-of a) (name-of b)))))
      (lambda (name) (find (lambda (harness) (equal? (name-of harness) name)) harnesses)))))
-  
+
+(define-method help-string-of (parameter) 
+  parameter)
+
 (provide "font-lock/harness")

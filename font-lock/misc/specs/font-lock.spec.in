@@ -15,7 +15,7 @@ Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs gauche-devel
-Requires: emacs gauche screen util-linux-ng
+Requires: emacs gauche screen util-linux-ng tigervnc-server metacity
 
 %description
 A tool converting a file to html format with GNU Emacs.
@@ -94,7 +94,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/gauche/site/lib/font-lock/harnesses
 %{_datadir}/gauche/site/lib/font-lock/harnesses/screen.scm
 %{_datadir}/gauche/site/lib/font-lock/harnesses/xvnc.scm
-%{_datadir}/gauche/site/lib/font-lock/harnesses/direct.scm
+%{_datadir}/gauche/site/lib/font-lock/harnesses/daemonize.scm
 %{_datadir}/gauche/site/lib/font-lock/harnesses/foreground.scm
 
 %doc
