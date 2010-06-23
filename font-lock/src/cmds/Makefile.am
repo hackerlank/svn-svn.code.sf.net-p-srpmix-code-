@@ -1,7 +1,7 @@
 dist_bin_SCRIPTS = \
 	\
 	flserver     \
-	flclient     \
+	font-lock    \
 	shtml->xhtml \
 	\
 	$(NULL)
