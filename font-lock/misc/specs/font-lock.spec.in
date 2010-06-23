@@ -15,7 +15,7 @@ Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs gauche-devel
-Requires: emacs gauche 
+Requires: emacs gauche screen util-linux-ng
 
 %description
 A tool converting a file to html format with GNU Emacs.

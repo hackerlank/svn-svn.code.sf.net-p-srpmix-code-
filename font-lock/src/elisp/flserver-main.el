@@ -4,9 +4,8 @@
 ;; Enable logging
 ;;
 (require 'log)
-(log-set-identity "flserver")
-(when flserver-log-file
-  (log-set-file flserver-log-file))
+(log-set-identity flserver-server-name)
+(setq message-log-max flserver-log-max)
 (log-string "initializing...")
 
 
@@ -40,7 +39,8 @@
 
 (require 'shtmlize)
 
-(flserver-load-plugin-mains)
+(with-log-string "loading plugins" ""
+		 (flserver-load-plugin-mains))
 
 ;;
 ;; Extra modes
@@ -117,20 +117,37 @@
   (log-string "lazy shutdown")
   (setq flserver-idle-timeout 0))
 
+
+
+(defun flserver-server-start ()
+  (cd "/")
+  (condition-case e
+      (with-log-string "server-start" ""
+		       (server-start))
+    (error 
+     (log-string "Error in server-start")
+     (flserver-kill-emacs 1)))
+  (unless server-process
+    (log-string "No server-process")
+    (flserver-kill-emacs 1))
+  )
+
+(defun flserver-kill-emacs (n)
+    (log-format "Kill emacs(%d)" n)
+    (kill-emacs n))
+
 ;;
 ;; Main
 ;;
 (defun flserver-main ()
-  (cd "/")
-  (server-start)
+  (flserver-server-start)
   (flserver-touch)
   (while t
     (when (flserver-timtout-p)
 	(log-string "idle shutdown")
-	(kill-emacs 0)
+	(flserver-kill-emacs 0)
 	)
-    (sit-for flserver-period)
-    ))
+    (sit-for flserver-period)))
 
 (log-string "initializing...done")
 (flserver-main)
