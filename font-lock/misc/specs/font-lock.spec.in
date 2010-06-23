@@ -95,6 +95,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gauche/site/lib/font-lock/harnesses/screen.scm
 %{_datadir}/gauche/site/lib/font-lock/harnesses/xvnc.scm
 %{_datadir}/gauche/site/lib/font-lock/harnesses/direct.scm
+%{_datadir}/gauche/site/lib/font-lock/harnesses/foreground.scm
 
 %doc
 

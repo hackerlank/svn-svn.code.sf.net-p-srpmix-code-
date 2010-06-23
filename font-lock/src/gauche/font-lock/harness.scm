@@ -24,7 +24,8 @@
   (let ((harnesses (list)))
     (values
      (lambda (harness) (set! harnesses (cons harness harnesses)))
-     (lambda () harnesses)
+     (lambda () (sort harnesses (lambda (a b)
+				  (string< (name-of a) (name-of b)))))
      (lambda (name) (find (lambda (harness) (equal? (name-of harness) name)) harnesses)))))
   
 (provide "font-lock/harness")
