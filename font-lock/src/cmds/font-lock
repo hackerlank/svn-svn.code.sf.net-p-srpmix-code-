@@ -26,7 +26,7 @@
   (let1 cmd (ref commands key)
       (format #t 
 	      (if (ref cmd 'require-connection?) 
-		  "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] [--verbose] [--timeout=SEC] [--harness=HARNESS] ~a ~a\n"
+		  "	~a [--socket-name=NAME] [--emacsclient=EMACSCLIENT] [--verbose] [--timeout=SEC] [--harness=HARNESS] [--emacs=EMACS] [--load-path=LOAD-PATH] [--config-file=CONFIG-FILE] ~a ~a\n"
 		  "	~a ~a ~a\n")
 	      *program-name*
 	      key
@@ -131,7 +131,9 @@
   (define (invoke-client cmd)
     (apply (ref cmd 'proc) client-args))
   (define (invoke-server)
-    (let ((cmdline (emacs-cmdline #f #f #f))
+    (let ((cmdline (emacs-cmdline (get-keyword :emacs server-args #f)
+				  (get-keyword :load-path server-args #f)
+				  (get-keyword :config-file server-args #f)))
 	  (harness-object (choose-harness (get-keyword :harness server-args))))
       (launch harness-object cmdline (list) (get-keyword :verbose server-args))
       ))
@@ -170,6 +172,9 @@
        (verbose "verbose" #f)
        (timeout "timeout=i" #f)
        (harness "harness=s" "xvnc")
+       (emacs "emacs=s" "emacs")
+       (load-path "load-path=s" #f)
+       (config-file "config-file=s" #f)
        . rest)
     (when (eq? (length rest) 0)
       (with-output-to-port (current-error-port)
@@ -182,7 +187,7 @@
 	(if command
 	    (invoke command timeout
 		    (list emacsclient socket-name verbose timeout rest)
-		    `(:harness ,harness :verbose ,verbose))
+		    `(:harness ,harness :verbose ,verbose :emacs ,emacs :load-path ,load-path :config-file ,config-file))
 	    (with-output-to-port (current-error-port)
 	      (lambda ()
 		(format #t "No such command: ~s\n" cmd) 
