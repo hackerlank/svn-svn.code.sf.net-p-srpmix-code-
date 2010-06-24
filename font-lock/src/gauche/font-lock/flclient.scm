@@ -59,8 +59,9 @@
     (if (number? timeout)
 	(let1 total-sleep 0
 	  (until (process-wait proc #t)
-	    (sys-sleep 1)
-	    (inc! total-sleep)
+	    ;;wait for 0.1 sec
+	    (sys-nanosleep 100000000)
+	    (set! total-sleep (+ total-sleep 0.1))
 	    (when (< timeout total-sleep)
 	      (when verbose
 		(format (current-error-port) "Timeout: ~d\n" timeout)

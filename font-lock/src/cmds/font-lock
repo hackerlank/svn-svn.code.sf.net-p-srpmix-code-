@@ -146,8 +146,6 @@
     (let ((pong (ping)))
       (unless pong
 	(invoke-server)
-	;; TODO
-	;(sys-sleep 2)
 	)
       ;; TODO: 20?
       (let loop ((timeout (or timeout 20))
