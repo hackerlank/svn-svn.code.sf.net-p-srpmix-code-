@@ -1,0 +1,74 @@
+(use rfc.ftp)
+(use file.util)
+(use srfi-1)
+(use gauche.version)
+(use text.tr)
+
+
+(define debian-host "ftp.debian.org")
+(define pool-main-dir "/debian/pool/main")
+(define prefixes-cache '("2" "3" "4" "6" "9" "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "lib-" "lib3" "liba" "libb" "libc" "libd" "libe" "libf" "libg" "libh" "libi" "libj" "libk" "libl" "libm" "libn" "libo" "libp" "libq" "libr" "libs" "libt" "libu" "libv" "libw" "libx" "liby" "libz" "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"))
+
+(define (get host path)
+  (call-with-ftp-connection host 
+			    (lambda (conn)
+			      (ftp-get conn
+				       path
+				       :sink (current-output-port)
+				       :flusher flush
+				       )
+			      )
+			    :passive #t))
+(define (entries host path)
+  (map 
+   (cute <> 1)
+   (map 
+    #/.* ([^ ]+)$/ 
+    (call-with-ftp-connection host
+			      (cute ftp-list <> path)
+			      :passive #t ))))
+
+(debug-print-width #f)
+(define (prefix-dir-for pkg-name)
+  (let* ((prefixes (or prefixes-cache
+		       #?=(entries debian-host pool-main-dir)
+		       ))
+	 (regexps (map (lambda (p) (cons p (string->regexp (string-append "^" p)))) prefixes)))
+    (fold (lambda (kar kdr)
+	    (let1 m ((cdr kar) pkg-name)
+	      (if m
+		  (if kdr
+		      (if (< (string-length (car kar))
+			     (string-length kdr))
+			  kdr
+			  (car kar))
+		      (car kar))
+		  kdr)))
+	  #f
+	  regexps)))
+
+(define (main args)
+  (let1 pkg-name (cadr args)
+    (let* ((prefix (or (prefix-dir-for pkg-name)
+		       (exit 1)))
+	   (path (build-path pool-main-dir 
+			     prefix
+			     pkg-name))
+	   (all (entries debian-host path))
+	   (diffs (if (null? all)
+		      (exit 1)
+		      (filter #/\.diff\.gz$/ all)))
+	   (head (if (null? diffs)
+		     (exit 1)
+		     (car (sort diffs 
+				(lambda (a b)
+				  (let1 conv (cute string-tr <> "+" "-")
+				    (version>? (conv a)
+					       (conv b)))
+				  )))))
+	   (head-path (build-path pool-main-dir
+				  prefix
+				  pkg-name
+				  head))
+	   )
+      (get debian-host head-path))))

@@ -1,0 +1,42 @@
+;; -*- scheme -*-
+(define (read-line-safe)
+  (guard (e
+	  (else ""))
+	 (read-line)))
+
+(let loop ((line (read-line-safe))
+	   (state 'initial))
+  (when (eof-object? line)
+    (exit 1))
+  (case state
+    ('initial
+     (if (#/^--- .*\/debian\/watch$/ line)
+	 (loop (read-line) '---)
+	 (loop (read-line-safe) state)))
+    ('---
+     (if (#/^\+\+\+ .*\/debian\/watch$/ line)
+	 (loop (read-line) '+++)
+	 (exit 1)))
+    ('+++
+     (rxmatch-cond
+       ((#/^@.*/ line)
+	(#f)
+	(loop (read-line) '+++))
+       ((#/^---.*/ line)
+	(#f)
+	(let loop ((line (read-line-safe)))
+	  (if (eof-object? line)
+	      (exit 0)
+	      (loop (read-line-safe)))))
+       ((#/^\+(.*)/ line)
+	(#f data)
+	(print data)
+	(loop (read-line) '+++))
+       (else
+	(print "BUG!" (current-error-port))
+	(exit 2)
+	)))
+    (else
+     (print "BUG!" (current-error-port))
+     (exit 3)
+     )))
