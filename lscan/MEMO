@@ -34,3 +34,7 @@ $ perl -I devscripts devscripts/scripts/uscan.pl \
 watch file is included in: 
 ftp://ftp.debian.org/debian/pool/main/l/lam/lam_7.1.2-1.3.diff.gz
 
+
+
+
+gosh ~/var/lscan/download-diff  bind | gunzip | gosh ~/var/lscan/extract-watch
