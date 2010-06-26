@@ -20,26 +20,50 @@ Requires: emacs gauche font-lock
 %description
 sources web frontend
 
+%package @SPEC_CONFIG@
+Summary: httpd configuration for @PACKAGE@(@CONFIG configuration)
+Group: Development/System
+Requires: @PACKAGE@
+
+
+%description @SPEC_CONFIG@
+httpd configuration for @PACKAGE@(@CONFIG configuration)
+
 
 %prep
 %setup -q
 
 %build
-%configure
-make
+%configure @ARGS_FOR_CONFIGURE_IN_SPEC@
+make  %{?_smp_mflags}
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
 
+%post
+if test $1 = 1; then    # install
+    /sbin/service httpd status > /dev/null 2>&1 && /sbin/service httpd reload > /dev/null 2>&1 || :
+fi
 
 %files
 %defattr(-,root,root,-)
+
+%doc
+
+
 %{_bindir}/dired
+
+%dir @WWWDIR@
+@WWWDIR@/*
+%dir @WWWDIR@/cgi-bin
+@WWWDIR@/cgi-bin/*
+%dir %{_libexecdir}/@PACKAGE@/
+%{_libexecdir}/@PACKAGE@/*
 
 %{emacs_lispdir}/flserver/plugins/xhtmlize+dired-decl.el
 %{emacs_lispdir}/flserver/plugins/xhtmlize+dired-main.el
@@ -48,13 +72,27 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %dir %{_datadir}/gauche/site/lib/yogomacs
+%{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
 %{_datadir}/gauche/site/lib/yogomacs/dired.scm
+%{_datadir}/gauche/site/lib/yogomacs/route.scm
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/dentries
 %{_datadir}/gauche/site/lib/yogomacs/dentries/fs.scm
 
-%doc
+%dir %{_datadir}/gauche/site/lib/yogomacs/handlers
+%{_datadir}/gauche/site/lib/yogomacs/handlers/deliver-css.scm
+%{_datadir}/gauche/site/lib/yogomacs/handlers/print-path.scm
+%{_datadir}/gauche/site/lib/yogomacs/handlers/root-dir.scm
+
+
+%dir %{_localstatedir}/lib/yogomacs
+# TODO: This should be also done in configure.ac.
+%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/css_cache
+
+
+%files @SPEC_CONFIG@
+%config %{_sysconfdir}/httpd/conf.d/*
 
 
 %changelog

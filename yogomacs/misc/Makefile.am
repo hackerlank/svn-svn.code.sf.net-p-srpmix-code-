@@ -1,10 +1,7 @@
-SUBDIRS  = \
-	\
-        ac-aux    \
-        m4        \
-	specs	  \
-	makefiles \
-        \
-	$(NULL)
-
+SUBDIRS  = .
+SUBDIRS += ac-aux
+SUBDIRS += m4
+SUBDIRS += specs
+SUBDIRS += makefiles
+SUBDIRS += httpd
 

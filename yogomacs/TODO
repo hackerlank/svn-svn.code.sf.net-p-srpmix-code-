@@ -16,3 +16,6 @@
 * chat
 * external data stitching
 * public server
+
+
+make  /srv/www a package
