@@ -1,3 +1,5 @@
+- Invoke flserver
+- Cache facility
 
 - Dired
 -- Virtual entry
@@ -6,6 +8,7 @@
 - FLATE&DEFLATE
 
 - FSTAB
+
 
 - mile stone
 * Just viewable
@@ -17,5 +20,5 @@
 * external data stitching
 * public server
 
-
-make  /srv/www a package
+- other
+* make  /srv/www a package

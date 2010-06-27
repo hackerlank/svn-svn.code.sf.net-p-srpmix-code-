@@ -2,12 +2,12 @@
   (export deliver-css)
   (use www.cgi)  
   (use file.util)
+  (use srfi-1)
   )
 
 (select-module yogomacs.handlers.deliver-css)
 (define (deliver-css path params)
-  ;; TODO: last
-  (let1 last (sys-basename path)
+  (let1 last (last path)
     (let1 real (directory-list "/var/lib/yogomacs/css_cache"
 			       :add-path?
 			       :children?

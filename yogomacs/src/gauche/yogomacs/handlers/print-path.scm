@@ -2,6 +2,7 @@
   (export print-path)
   (use text.html-lite)
   (use www.cgi)  
+  (use yogomacs.path)
   )
 (select-module yogomacs.handlers.print-path)
 
@@ -11,6 +12,6 @@
    (html-doctype)
    (html:html
     (html:head (html:title "print-path"))
-    (html:body path))))
+    (html:body (compose-path path)))))
 
 (provide "yogomacs/handlers/print-path")

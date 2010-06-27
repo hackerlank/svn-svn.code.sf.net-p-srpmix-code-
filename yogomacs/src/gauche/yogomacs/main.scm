@@ -5,7 +5,7 @@
   (use www.cgi)
   ;;
   (use yogomacs.handlers.root-dir)
-;  (use yogomacs.handlers.sources-dir)
+  (use yogomacs.handlers.sources-dir)
 ;  (use yogomacs.handlers.dists-dir)
   ;;
   (use yogomacs.handlers.deliver-css)
@@ -19,7 +19,7 @@
   `(
     ;;
     (#/^\/$/ ,root-dir)
-;    (#/^\/sources[\/]$/ ,soruces-dir)
+    (#/^\/sources$/ ,sources-dir)
 ;    (#/^\/sources\// ,soruces-dir)
 ;    (#/^\/dists[\/]$/ ,dists-dir)
 ;    (#/^\/dists\// ,dists-dir)

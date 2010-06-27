@@ -5,6 +5,7 @@
   ;;
   (use yogomacs.dentries.fs)
   (use yogomacs.dired)
+  (use yogomacs.path)
   ;;
   (use sxml.serializer)
   ;;
@@ -29,7 +30,7 @@
   (list
    (cgi-header)
    (srl:sxml->xml-noindent 
-	(dired "/"
+	(dired (compose-path path)
 	       (read-dentries "/srv/sources"
 			      root-dir-make-url
 			      #f

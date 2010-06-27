@@ -4,5 +4,6 @@ dist_module_DATA =   \
 	deliver-css.scm \
 	print-path.scm  \
 	root-dir.scm    \
+	sources-dir.scm    \
         \
 	$(NULL)

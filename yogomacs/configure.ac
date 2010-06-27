@@ -109,6 +109,7 @@ AC_SUBST([SPEC_CONFIG], [$config_name])
 
 AC_CONFIG_COMMANDS([chmod],[
 chmod 0755 src/cmds/*
+chmod 0755 tests/test.scm
 ])
 
 AC_OUTPUT([
@@ -133,4 +134,5 @@ AC_OUTPUT([
 	   misc/httpd/Makefile
 	   misc/httpd/vhost.conf
 	   misc/httpd/yogomacs.conf
+	   tests/Makefile
 	   ])
