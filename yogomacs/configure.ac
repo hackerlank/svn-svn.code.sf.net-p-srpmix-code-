@@ -118,6 +118,7 @@ AC_OUTPUT([
 	   src/gauche/yogomacs/handlers/Makefile
 	   src/base/Makefile
 	   src/data/Makefile
+	   src/apache-home/Makefile
 	   misc/Makefile
 	   misc/ac-aux/Makefile
 	   misc/m4/Makefile

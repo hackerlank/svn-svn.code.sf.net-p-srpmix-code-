@@ -10,6 +10,7 @@ dist_module_DATA =   \
 	css-cache.scm \
 	dentry.scm   \
 	dired.scm    \
+	flserver.scm \
 	main.scm     \
 	path.scm     \
 	render.scm   \
@@ -28,11 +29,3 @@ install-data-hook:
 
 csscachedir=$(localstatedir)/lib/yogomacs/@SPEC_CONFIG@/css_cache
 csscache_DATA=
-
-emacsdir=$(localstatedir)/www/.emacs.d
-dist_emacs_DATA=init.el
-
-vncdir=$(localstatedir)/www/.vnc
-dist_vnc_DATA=passwd
-
-

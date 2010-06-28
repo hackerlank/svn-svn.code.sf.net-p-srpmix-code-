@@ -75,6 +75,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/css-cache.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
 %{_datadir}/gauche/site/lib/yogomacs/dired.scm
+%{_datadir}/gauche/site/lib/yogomacs/flserer.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/path.scm

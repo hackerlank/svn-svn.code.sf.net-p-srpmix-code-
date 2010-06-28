@@ -6,6 +6,7 @@
   (use yogomacs.dentries.fs)
   (use yogomacs.dired)
   (use yogomacs.path)
+  ;;
   (use yogomacs.render)
   ;;
   )
@@ -18,6 +19,7 @@
    (else (string-append "/sources/" (dname-of fs-dentry)))))
 
 (define (sources-dir path params config)
+  (prepare-dired-faces config)
   (list
    (cgi-header)
    (render
@@ -26,6 +28,7 @@
 			  sources-dir-make-url
 			  #f
 			  #f)
+	   ;; THIS IS CONSTANT
 	   "/web/css")
     )))
 

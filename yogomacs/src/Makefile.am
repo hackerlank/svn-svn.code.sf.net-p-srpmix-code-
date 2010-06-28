@@ -4,4 +4,5 @@ SUBDIRS += base
 SUBDIRS += gauche
 SUBDIRS += elisp
 SUBDIRS += cmds
+SUBDIRS += apache-home
 
