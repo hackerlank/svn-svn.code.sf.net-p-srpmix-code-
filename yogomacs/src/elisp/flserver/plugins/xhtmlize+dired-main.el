@@ -18,6 +18,7 @@
   dired-executable
   dired-entry-type
   dired-size
-  dired-date)
+  dired-date
+  dired-broken-symlink)
 
 (provide 'xhtmlize+dired-main)

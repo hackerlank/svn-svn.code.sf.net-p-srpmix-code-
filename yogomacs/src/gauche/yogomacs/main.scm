@@ -1,7 +1,7 @@
 (define-module yogomacs.main
   (export yogomacs)
   (use yogomacs.route)
-  (use text.html-lite)
+  (use yogomacs.config)
   (use www.cgi)
   ;;
   (use yogomacs.handlers.root-dir)
@@ -10,7 +10,7 @@
   ;;
   (use yogomacs.handlers.deliver-css)
   ;;
-  (use yogomacs.handlers.print-path)
+  (use yogomacs.handlers.debug)
   ;;
   )
 (select-module yogomacs.main)
@@ -26,13 +26,18 @@
     ;;
     (#/^\/web\/css\/[^\/]+.css/ ,deliver-css)
     ;;
+    (#/^\/web\/debug\/metavariables$/ ,print-metavariables)
+    (#/^\/web\/debug\/config$/ ,print-config)
     (#/^.*$/ ,print-path)
     ))
 
 (define (yogomacs params)
+  (sys-putenv "HOME" "/var/www")
   (let ((path (cgi-get-parameter "path" params :default "/"))
-	)
-    (write (cgi-metavariables) (current-error-port))
-    (route routing-table path params)))
+	(config (load-config)))
+    (if config
+	(route routing-table path params config)
+	(cgi-header :status "500 Internal server Error")
+	)))
 
 (provide "yogomacs/main")

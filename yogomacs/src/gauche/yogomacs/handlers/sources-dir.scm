@@ -17,7 +17,7 @@
    ((equal? ".." (dname-of fs-dentry)) "/")
    (else (string-append "/sources/" (dname-of fs-dentry)))))
 
-(define (sources-dir path params)
+(define (sources-dir path params config)
   (list
    (cgi-header)
    (render

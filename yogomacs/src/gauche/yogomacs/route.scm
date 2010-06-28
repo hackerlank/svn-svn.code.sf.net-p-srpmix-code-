@@ -1,23 +1,24 @@
 (define-module yogomacs.route
   (export route)
-  (use yogomacs.handlers.print-path)
+  (use yogomacs.handlers.debug)
   (use yogomacs.sanitize)
   (use yogomacs.path)
   )
 (select-module yogomacs.route)
 
-(define (route rtable path params)
+(define (route rtable path params config)
   (route0 rtable
 	  (sanitize-path path)
-	  params))
+	  params
+	  config))
 
-(define (route0 rtable path params)
+(define (route0 rtable path params config)
   (if (null? rtable)
-      (print-path (decompose-path path) params)		; TODO
+      (print-path (decompose-path path) params config)		; TODO
       (let ((regex (car (car rtable)))
 	    (action (cadr (car rtable))))
 	(if (regex path)
-	    (action (decompose-path path) params)
-	    (route0 (cdr rtable) path params)))))
+	    (action (decompose-path path) params config)
+	    (route0 (cdr rtable) path params config)))))
 
 (provide "yogomacs/route")

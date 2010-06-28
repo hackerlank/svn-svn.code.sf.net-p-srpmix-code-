@@ -91,6 +91,7 @@ AC_ARG_WITH([config_name],
 	AS_HELP_STRING([--with-config-name=CONFIG],
 	               [Configuration name used as part of rpm package named.]),
 	    config_name=$with_config_name)
+args_for_configure_in_spec="${args_for_configure_in_spec} --with-config-name=$config_name"
 
 
 AC_SUBST([ARGS_FOR_CONFIGURE_IN_SPEC], [$args_for_configure_in_spec])
@@ -111,6 +112,8 @@ AC_OUTPUT([
 	   src/elisp/flserver/plugins/Makefile
 	   src/gauche/Makefile
 	   src/gauche/yogomacs/Makefile
+	   src/gauche/yogomacs/config.scm
+	   src/gauche/yogomacs/default.scm
 	   src/gauche/yogomacs/dentries/Makefile
 	   src/gauche/yogomacs/handlers/Makefile
 	   src/base/Makefile

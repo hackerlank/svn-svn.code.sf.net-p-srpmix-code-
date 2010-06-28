@@ -8,7 +8,9 @@
   (use yogomacs.path)
   ;;
   (use yogomacs.render)
+  (use yogomacs.css-cache)
   ;;
+  (use util.combinations)
   )
 (select-module yogomacs.handlers.root-dir)
 
@@ -26,7 +28,15 @@
    ((equal? ".." (dname-of fs-dentry)) "/")
    (else (string-append "/" (dname-of fs-dentry)))))
 
-(define (root-dir path params)
+(define (prepare-dired-faces config)
+  (for-each
+   (lambda (face-style)
+     (prepare-css-cache config (car face-style) (cadr face-style) '(dired)))
+   (cartesian-product `(,dired-faces
+			,dired-styles))))
+
+(define (root-dir path params config)
+  (prepare-dired-faces config)
   (list
    (cgi-header)
    (render

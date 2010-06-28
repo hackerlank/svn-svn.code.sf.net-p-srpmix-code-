@@ -5,4 +5,4 @@ symlink_srcs = $(pkglibexecdir)/yogomacs.cgi
 
 install-exec-hook:
 	cd $(DESTDIR)@WWWDIR@ && mkdir cgi-bin && cd cgi-bin \
-	&& for f in $(symlink_srcs); do $(LN_S) $$f ./; done
+	&& $(LN_S) $(pkglibexecdir)/yogomacs.cgi ./yogomacs-@SPEC_CONFIG@.cgi

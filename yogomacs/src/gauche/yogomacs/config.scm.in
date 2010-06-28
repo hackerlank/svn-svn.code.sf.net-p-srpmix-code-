@@ -1,0 +1,32 @@
+;; -*- scheme -*-
+(define-module yogomacs.config
+  (export load-config)
+  (use www.cgi)
+  (use yogomacs.access)
+  (use file.util)
+  )
+(select-module yogomacs.config)
+
+(define (load-config)
+  (and-let* ((env-val (cgi-get-metavariable "SCRIPT_NAME"))
+	     (m (#/^yogomacs-(.*)\.cgi$/ (sys-basename env-val)))
+	     (conf-name (m 1))
+	     (entry (format "~a.scm" conf-name))
+	     ;; TODO
+	     (dir "/etc/yogomacs")
+	     ( (readable?  dir entry) )
+	     (port (open-input-file 
+		    (build-path dir entry)
+		    :if-does-not-exist #f))
+	     (conf (guard (e
+			   (else #f))
+			  (read port))))
+    (close-input-port port)
+    (cond
+     ((not conf) #f)
+     ((eof-object? (list)))
+     (else 
+      (cons (cons 'spec-conf conf-name)
+	    conf)))))
+
+(provide "yogomacs/config")

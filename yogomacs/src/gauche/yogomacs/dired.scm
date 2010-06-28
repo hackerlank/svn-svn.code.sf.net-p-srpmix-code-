@@ -22,7 +22,8 @@
   (export dired
 	  dired-native-faces
 	  dired-foreign-faces
-	  dired-faces)
+	  dired-faces
+	  dired-styles)
   (use file.util)
   (use util.combinations)
   (use gauche.sequence)

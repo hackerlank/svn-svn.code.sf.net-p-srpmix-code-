@@ -94,10 +94,18 @@
 (use yogomacs.handlers.deliver-css)
 (test-module 'yogomacs.handlers.deliver-css)
 
-(use yogomacs.handlers.print-path)
-(test-module 'yogomacs.handlers.print-path)
+(use yogomacs.handlers.print-alist)
+(test-module 'yogomacs.handlers.print-alist)
 
 (use yogomacs.handlers.root-dir)
 (test-module 'yogomacs.handlers.root-dir)
+
+(use yogomacs.access)
+(test-module 'yogomacs.access)
+
+(test* "/etc/passwd"
+       "/etc/passwd" (readable? "/etc" "passwd"))
+(test* "/etc/passwd-"
+       #f (readable? "/etc" "passwd-"))
 
 (exit (if (zero? (test-end)) 0 1))
