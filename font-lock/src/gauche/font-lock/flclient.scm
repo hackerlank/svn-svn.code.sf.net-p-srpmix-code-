@@ -54,6 +54,7 @@
 				(format "--socket-name=~a" socket-name)
 				"--eval" (format "~s" expression))
 			  :wait #f
+			  :output (if verbose #f "/dev/null")
 			  :error (if verbose #f "/dev/null"))
     ;;
     (if (number? timeout)
