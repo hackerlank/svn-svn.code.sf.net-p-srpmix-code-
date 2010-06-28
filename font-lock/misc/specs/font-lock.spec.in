@@ -36,6 +36,7 @@ make
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/%{emacs_lispdir}/flserver/modes
+mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/font-lock/flserver
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -96,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gauche/site/lib/font-lock/harnesses/xvnc.scm
 %{_datadir}/gauche/site/lib/font-lock/harnesses/daemonize.scm
 %{_datadir}/gauche/site/lib/font-lock/harnesses/foreground.scm
+
+%dir %{_sysconfdir}/font-lock
+%dir %{_sysconfdir}/font-lock/flserver
 
 %doc
 
