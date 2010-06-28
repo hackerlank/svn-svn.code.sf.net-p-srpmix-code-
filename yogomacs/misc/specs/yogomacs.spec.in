@@ -76,6 +76,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
 %{_datadir}/gauche/site/lib/yogomacs/dired.scm
 %{_datadir}/gauche/site/lib/yogomacs/path.scm
+%{_datadir}/gauche/site/lib/yogomacs/render.scm
 %{_datadir}/gauche/site/lib/yogomacs/route.scm
 %{_datadir}/gauche/site/lib/yogomacs/sanitize.scm
 

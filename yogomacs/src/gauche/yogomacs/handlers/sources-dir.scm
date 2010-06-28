@@ -6,8 +6,7 @@
   (use yogomacs.dentries.fs)
   (use yogomacs.dired)
   (use yogomacs.path)
-  ;;
-  (use sxml.serializer)
+  (use yogomacs.render)
   ;;
   )
 (select-module yogomacs.handlers.sources-dir)
@@ -21,13 +20,13 @@
 (define (sources-dir path params)
   (list
    (cgi-header)
-   (srl:sxml->xml-noindent 
-	(dired (compose-path path)
-	       (read-dentries "/srv/sources/sources"
-			      sources-dir-make-url
-			      #f
-			      #f)
-	       "/web/css")
-	)))
+   (render
+    (dired (compose-path path)
+	   (read-dentries "/srv/sources/sources"
+			  sources-dir-make-url
+			  #f
+			  #f)
+	   "/web/css")
+    )))
 
 (provide "yogomacs/handlers/sources-dir")
