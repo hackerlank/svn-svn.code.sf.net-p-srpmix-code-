@@ -45,11 +45,11 @@
 		       verbose
 		       )
   (let/cc return
-  (daemonize
-   (lambda () (return 0))
-   (lambda ()
-     (let1 proc (run-process cmdline :wait #f)
-       (process-wait proc)
-       (process-exit-status proc))))))
+    (daemonize
+     (lambda () (return 0))
+     (lambda ()
+       (let1 proc (run-process cmdline :wait #f)
+	 (process-wait proc)
+	 (process-exit-status proc))))))
 
 (provide "font-lock/harnesses/daemonize")
