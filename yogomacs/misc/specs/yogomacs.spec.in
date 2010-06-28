@@ -92,12 +92,16 @@ fi
 
 
 %dir %{_localstatedir}/lib/yogomacs
-# TODO: This should be also done in configure.ac.
-%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/css_cache
+%dir %{_sysconfdir}/yogomacs
 
 
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*
+
+
+%config %{_sysconfdir}/yogomacs/@SPEC_CONFIG@.scm
+%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@
+%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css_cache
 
 
 %changelog

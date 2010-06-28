@@ -79,16 +79,6 @@ args_for_configure_in_spec="${args_for_configure_in_spec} --with-vhost-docroot=$
 
 
 AC_SUBST_FILE([vhost_conf])
-if test "$enable_vhost" = "no"; then
-   vhost_conf=/dev/null
-else
-   vhost_conf=$srcdir/misc/httpd/vhost.conf
-fi
-
-args_for_configure_in_spec="${args_for_configure_in_spec} --with-vhost-docroot=$vhost_docroot"
-
-
-AC_SUBST_FILE([vhost_conf])
 if test x"$enable_vhost" = x"no"; then
    vhost_conf=/dev/null
 else

@@ -30,7 +30,9 @@
     ))
 
 (define (yogomacs params)
-  (let1 path (cgi-get-parameter "path" params :default "/")
+  (let ((path (cgi-get-parameter "path" params :default "/"))
+	)
+    (write (cgi-metavariables) (current-error-port))
     (route routing-table path params)))
 
 (provide "yogomacs/main")
