@@ -7,7 +7,7 @@
   (use yogomacs.dired)
   (use yogomacs.path)
   ;;
-  (use sxml.serializer)
+  (use yogomacs.render)
   ;;
   )
 (select-module yogomacs.handlers.root-dir)
@@ -29,13 +29,13 @@
 (define (root-dir path params)
   (list
    (cgi-header)
-   (srl:sxml->xml-noindent 
-	(dired (compose-path path)
-	       (read-dentries "/srv/sources"
-			      root-dir-make-url
-			      #f
-			      accept?)
-	       "/web/css")
-	)))
+   (render
+    (dired (compose-path path)
+	   (read-dentries "/srv/sources"
+			  root-dir-make-url
+			  #f
+			  accept?)
+	   "/web/css")
+    )))
 
 (provide "yogomacs/handlers/root-dir")
