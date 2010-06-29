@@ -24,8 +24,8 @@ function repo_check
 
     local http_spec="^http://.*$"
     local https_spec="^https://.*$"
-    if  ! ( [[ "$repo" =~ "$http_spec" ]]  || \
-	    [[ "$repo" =~ "$https_spec" ]]); then
+    if  ! ( [[ "$repo" =~ $http_spec ]]  || \
+	    [[ "$repo" =~ $https_spec ]]); then
 	echo "broken darcs command line: unrecognizable repo specification: $repo" 1>&2
 	echo "expected repo specifications: " 1>&2
 	for s in "$http_spec" "$https_spec"; do
