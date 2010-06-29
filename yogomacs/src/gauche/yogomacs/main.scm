@@ -16,13 +16,11 @@
 (select-module yogomacs.main)
 
 (define routing-table
-  `(
-    ;;
-    (#/^\/$/ ,root-dir)
+  `((#/^\/$/ ,root-dir)
     (#/^\/sources$/ ,sources-dir)
-;    (#/^\/sources\// ,soruces-dir)
-;    (#/^\/dists[\/]$/ ,dists-dir)
-;    (#/^\/dists\// ,dists-dir)
+    (#/^\/sources\// ,sources-dir)
+    ;; (#/^\/dists[\/]$/ ,dists-dir)
+    ;; (#/^\/dists\// ,dists-dir)
     ;;
     (#/^\/web\/css\/[^\/]+.css/ ,deliver-css)
     ;;

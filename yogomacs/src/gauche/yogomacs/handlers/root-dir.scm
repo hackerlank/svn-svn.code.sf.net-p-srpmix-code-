@@ -1,6 +1,7 @@
 (define-module yogomacs.handlers.root-dir
   (export root-dir)
-  (use www.cgi)  
+  (use www.cgi) 
+  (use file.util)
   ;;
   (use yogomacs.dentry)
   (use yogomacs.dentries.fs)
@@ -16,8 +17,8 @@
   `(("." "/")
     (".." "/")
     (#/^(?:package|sources|dists)$/ ,(lambda (fs-dentry) 
-				       (string-append "/"
-						      (dname-of fs-dentry))))))
+				       (build-path "/"
+						   (dname-of fs-dentry))))))
 
 (define (root-dir path params config)
   (prepare-dired-faces config)
@@ -26,7 +27,6 @@
    (render
     (dired (compose-path path)
 	   (read-dentries+ "/srv/sources" root-dir-spec)
-	   "/web/css")
-    )))
+	   "/web/css"))))
 
 (provide "yogomacs/handlers/root-dir")
