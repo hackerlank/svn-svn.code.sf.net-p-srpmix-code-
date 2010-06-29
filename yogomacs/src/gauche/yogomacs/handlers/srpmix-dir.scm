@@ -43,10 +43,7 @@
 		    (rearrange-css-href 
 		     (call-with-input-file real-dest-path read)
 		     (lambda (css-href)
-		       ;; TODO
-		       "")
-		     )
-		    ))
+		       (build-path "/web/css" (sys-basename css-href))))))
 		  (print-echo path path config "FALSE!")
 		  )
 	      ))
