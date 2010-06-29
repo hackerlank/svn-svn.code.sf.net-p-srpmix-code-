@@ -1,11 +1,19 @@
 (define-module yogomacs.handlers.dir
   (export prepare-dired-faces
-	  read-dentries+)
-  (use yogomacs.dired)
-  (use yogomacs.css-cache)
-  (use util.combinations)
+	  read-dentries+
+	  dir-handler)
+  (use srfi-1)
+  (use www.cgi)  
+  (use file.util)
   ;;
-  (use yogomacs.dentries.fs)
+  (use yogomacs.dentry)
+  (use yogomacs.dentries.fs)  
+  (use yogomacs.dired)
+  (use util.combinations)
+  (use yogomacs.path)
+  ;;
+  (use yogomacs.render)
+  (use yogomacs.css-cache)
   )
 (select-module yogomacs.handlers.dir)
 
@@ -72,5 +80,32 @@
 		   make-url
 		   make-symlink-to-dname
 		   filter)))
+
+
+(define (dir-handler path params config)
+  (let ((last (last path))
+	(head (path->head path)))
+    (prepare-dired-faces config)
+    (list
+     (cgi-header)
+     (render
+      (dired (compose-path path)
+	     (read-dentries+ (build-path "/srv/sources" head last)
+			     (dir-spec (build-path "/" head) last))
+	     "/web/css")))))
+
+(define (dir-spec base last)
+  `(("." ,(build-path base last))
+    (".." ,base)
+    (#/.*/ ,(lambda (fs-dentry) 
+	      (build-path base 
+			  last
+			  (dname-of fs-dentry))))))
+
+(define (path->head path)
+  (let1 l (reverse (cdr (reverse path)))
+    (if (null? l)
+	""
+	(apply build-path l))))
 
 (provide "yogomacs/handlers/dir")
