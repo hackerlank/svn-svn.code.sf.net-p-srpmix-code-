@@ -27,55 +27,60 @@
    (cartesian-product `(,dired-faces
 			,dired-styles))))
 
-
-;; ( (#/pattern0/ make-url) (#/pattern1/ #f) )
-
 (define (make-make-make specs dname-of conv)
   (lambda (dentry-or-dname)
     (let1 dname (dname-of dentry-or-dname)
       (let loop ((specs specs))
 	(if (null? specs)
 	    #f
-	    (let1 spec (car specs)
+	    (let* ((spec (car specs))
+		   (pattern (car spec)))
 	      (cond
-	       ((and (string? (car spec))
-		     (equal? (car spec) dname)) 
+	       ((and (string? pattern)
+		     (equal? pattern dname)) 
 		(conv spec dentry-or-dname))
-	       ((and (regexp? (car spec))
-		     (rxmatch (car spec) dname))
+	       ((and (regexp? pattern)
+		     (rxmatch pattern dname))
 		(conv spec dentry-or-dname))
 	       (else
 		(loop (cdr specs))))))))))
 
+(define (make-conv n)
+  (lambda (spec dentry)
+    (let1 maker (list-ref spec n #f)
+      (cond
+       ((string? maker)
+	maker)
+       ((not maker)
+	#f)
+       (else
+	(maker dentry))))))
+
 (define (make-make-url specs)
   (make-make-make specs 
 		  dname-of
-		  (lambda (spec dentry)
-		    (let1 conv (cadr spec)
-		      (cond
-		       ((string? conv) conv)
-		       (else
-			(conv dentry)))))))
+		  (make-conv 2)))
 
 (define (make-make-symlink-to-dname specs)
   (make-make-make specs 
 		  dname-of
-		  (lambda (spec dentry)
-		    (if (null? (list-tail spec 2))
-			#f
-			(let1 conv (caddr spec)
-			  (cond
-			   ((string? conv) conv)
-			   (else 
-			    (conv dentry))))))))
+		  (make-conv 3)))
 
-				   
 (define (make-filter specs)
   (make-make-make specs
-		  (lambda (e) e)
-		  (lambda (spec dentry) 
-		    (cadr spec))))
+		  (lambda (dname) dname)
+		  (lambda (spec dname) 
+		    (let1 filter (cadr spec)
+		      (cond
+		       ((boolean? filter) filter)
+		       (else (filter dname)))))))
 
+;; read-dentries+
+;; ( ( PATTERN FILTER MAKE-URL [MAKE-SYMLINK-TO-DNAME] ) ... )
+;;  PATTERN: regex, string
+;;  FILTER: #t, #f, (lambda (e) ) -> #t|#f
+;;  MAKE-URL: string, #f, (lambda (e) ) -> string|#f
+;;  MAKE-SYMLINK-TO-DNAME: string, #f, (lambda (e) ) -> string|#f
 (define (read-dentries+ path specs)
   (let ((make-url (make-make-url specs))	      
 	(make-symlink-to-dname (make-make-symlink-to-dname specs))
@@ -105,13 +110,13 @@
 (define dir-spec
   (match-lambda*
    ((base last extra)
-    `(("." ,(build-path base last))
-      (".." ,base)
+    `(("."  #t ,(build-path base last))
+      (".." #t ,base)
       ,@extra
-      (#/.*/ ,(lambda (fs-dentry) 
-		(build-path base 
-			    last
-			    (dname-of fs-dentry))))))
+      (#/.*/ #t ,(lambda (fs-dentry) 
+		   (build-path base 
+			       last
+			       (dname-of fs-dentry))) #f)))
    ((base last)
     (dir-spec base last (list)))))
 

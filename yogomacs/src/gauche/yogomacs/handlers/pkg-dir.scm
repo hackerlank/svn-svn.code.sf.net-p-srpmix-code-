@@ -17,6 +17,7 @@
   (let ((last (last path))
 	(head (path->head path)))
     `((,#/\^lcopy-[^\/]+/ 
+		  #t
 		  ,(lambda (fs-dentry)
 		     (build-path "/" 
 				 head
@@ -29,14 +30,14 @@
 
 (define (handler path params config)
   (dir-handler path params config
-	       (lcopy-spec path)))
+	       `(
+		 ,@(lcopy-spec path)
+		 )))
 
 (define routing-table
   `((#/^\/sources\/[a-zA-Z0-9]\/[^\/]+$/ ,handler)
-    ;; (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)$/ ,lcopy-dir-handler)
-    ;; (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)\// ,lcopy-dir-handler) 
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)$/ ,srpmix-dir-handler)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\// ,srpmix-dir-handler)
+    ;; (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)(?:\/.+)?$/ ,lcopy-dir-handler)
+    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)(?:\/.+)?$/ ,srpmix-dir-handler)
     ))
 
 (define (pkg-dir-handler path params config)

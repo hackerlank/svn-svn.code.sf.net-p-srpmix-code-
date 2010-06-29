@@ -2,6 +2,7 @@
   (export print-path
 	  print-metavariables
 	  print-config
+	  print-echo
 	  )
   (use www.cgi)  
   (use text.html-lite)
@@ -10,6 +11,14 @@
   )
 
 (select-module yogomacs.handlers.debug)
+
+(define (print-echo path params config msg)
+  (list
+   (cgi-header)
+   (html-doctype)
+   (html:html
+    (html:head (html:title (compose-path path)))
+    (html:body msg))))
 
 (define (print-path path params config)
   (list

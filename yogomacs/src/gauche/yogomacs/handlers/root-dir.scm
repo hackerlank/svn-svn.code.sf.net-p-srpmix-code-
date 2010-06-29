@@ -14,11 +14,11 @@
 (select-module yogomacs.handlers.root-dir)
 
 (define root-dir-spec
-  `(("." "/")
-    (".." "/")
-    (#/^(?:package|sources|dists)$/ ,(lambda (fs-dentry) 
-				       (build-path "/"
-						   (dname-of fs-dentry))))))
+  `(("."  #t "/")
+    (".." #t "/")
+    (#/^(?:package|sources|dists)$/ #t ,(lambda (fs-dentry) 
+					  (build-path "/"
+						      (dname-of fs-dentry))))))
 
 (define (root-dir-handler path params config)
   (prepare-dired-faces config)

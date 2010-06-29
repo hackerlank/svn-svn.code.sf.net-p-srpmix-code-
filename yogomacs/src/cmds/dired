@@ -33,7 +33,7 @@
       (unless (file-is-readable? dir)
 	(format (current-error-port)
 		"Cannot read: ~a\n" dir))
-      (let1 dentires (read-dentries dir #f #f #f)
+      (let1 dentires (read-dentries dir #t #t #t)
 	(when dentires
 	  (for-each
 	   (cute flclient-cssize <> css-output-dir (list 'dired))

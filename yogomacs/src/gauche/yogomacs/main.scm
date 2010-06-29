@@ -17,8 +17,7 @@
 
 (define routing-table
   `((#/^\/$/ ,root-dir-handler)
-    (#/^\/sources$/ ,sources-dir-handler)
-    (#/^\/sources\// ,sources-dir-handler)
+    (#/^\/sources(?:\/.+)?$/ ,sources-dir-handler)
     ;; (#/^\/dists[\/]$/ ,dists-dir)
     ;; (#/^\/dists\// ,dists-dir)
     ;;

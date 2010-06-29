@@ -77,28 +77,49 @@
 		       make-url 
 		       make-symlink-to-dname
 		       filter)
+  (define (reject . e) #f)
+  (define (accept . e) #t)
   (if (file-is-directory? path)
-      (map (lambda (entry)
-	     (let* ((stat (sys-lstat (build-path path entry)))
-		    (dentry (make (if (eq? (ref stat 'type) 'symlink)
-				      <fs-symlink-dentry>
-				      <fs-dentry>)
-			      :parent path
-			      :entry entry
-			      :stat stat)))
-	       (when (symlink? dentry)
-		 (set! (ref dentry 'symlink-to-dname) ((or make-symlink-to-dname
-							   make-symlink-to-dname-default)
-						       dentry)))
-	       (set! (ref dentry 'url) ((or make-url make-url-default)
-					dentry))
-	       dentry))
-	   (directory-list path
-			   :add-path? #f 
-			   :children? #f
-			   :filter (if filter
-				       filter
-				       (lambda (e) #t))))
+      (fold-right 
+       (lambda (entry kdr)
+	 (let* ((stat (sys-lstat (build-path path entry)))
+		(dentry (make (if (eq? (ref stat 'type) 'symlink)
+				  <fs-symlink-dentry>
+				  <fs-dentry>)
+			  :parent path
+			  :entry entry
+			  :stat stat)))
+	   (when (symlink? dentry)
+	     (set! (ref dentry 'symlink-to-dname) (#?=(cond
+						       ((eq? make-symlink-to-dname #t)
+							make-symlink-to-dname-default)
+						       (make-symlink-to-dname
+							make-symlink-to-dname)
+						       (else
+							reject))
+						      dentry)))
+	   (set! (ref dentry 'url) (#?=(cond
+					((eq? make-url #t)
+					 make-url-default)
+					(make-url
+					 make-url)
+					(else
+					 reject))
+				       dentry))
+	   (if (ref dentry 'url)
+	       (cons dentry kdr)
+	       kdr)))
+       (list)
+       (directory-list path
+		       :add-path? #f 
+		       :children? #f
+		       :filter (cond
+				((eq? filter #t)
+				 accept)
+				(filter filter)
+				(else
+				 reject))
+		       ))
       #f))
 
 (provide "yogomacs/dentries/fs")
