@@ -73,7 +73,8 @@
 (define (make-filter specs)
   (make-make-make specs
 		  (lambda (e) e)
-		  (lambda (spec dentry) #t)))
+		  (lambda (spec dentry) 
+		    (cadr spec))))
 
 (define (read-dentries+ path specs)
   (let ((make-url (make-make-url specs))	      

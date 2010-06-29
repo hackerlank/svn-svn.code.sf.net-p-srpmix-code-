@@ -7,6 +7,7 @@
   (use yogomacs.path)
   (use yogomacs.handlers.dir)
 
+  (use yogomacs.handlers.srpmix-dir)
   (use srfi-1)
   (use file.util)
   )
@@ -27,16 +28,15 @@
 		     )))))
 
 (define (handler path params config)
-  (let ((last (last path))
-	(head (path->head path)))
-    (dir-handler path params config
-		 (lcopy-spec path))))
+  (dir-handler path params config
+	       (lcopy-spec path)))
 
 (define routing-table
-  `(
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+$/ ,handler)
-    ;;    (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)$/ ,lcopy-dir-handler)
-    ;;    (#/^\/sources\/[a-zA-Z0-9]\/([^\/]+)$/ ,pvr-dir-handler)
+  `((#/^\/sources\/[a-zA-Z0-9]\/[^\/]+$/ ,handler)
+    ;; (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)$/ ,lcopy-dir-handler)
+    ;; (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)\// ,lcopy-dir-handler) 
+    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)$/ ,srpmix-dir-handler)
+    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\// ,srpmix-dir-handler)
     ))
 
 (define (pkg-dir-handler path params config)

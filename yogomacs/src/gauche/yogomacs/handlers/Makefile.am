@@ -8,5 +8,6 @@ dist_module_DATA =   \
 	print-alist.scm				\
 	root-dir.scm				\
 	sources-dir.scm                         \
+	srpmix-dir.scm                          \
         \
 	$(NULL)
