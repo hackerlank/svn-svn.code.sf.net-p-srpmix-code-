@@ -6,9 +6,17 @@
 (define (rearrange-css-href sxml-tree converter)
   (pre-post-order sxml-tree
 		  `(
-		    (link *preorder* . ,(lambda x x))
-		    (css-href . ,(lambda x
-			       `(css-href ,css-href)))
+		    (link . ,(lambda x
+			       (pre-post-order x
+					       `(
+						 (href . ,(lambda (tag str)
+							    (if (#/.*\.css/ str)
+								`(href ,(converter str))
+								`(href ,str))
+							    ))
+						 (*text* . ,(lambda (tag str) str))
+						 (*default* . ,(lambda x x))
+						 ))))
 		    (*text* . ,(lambda (tag str) str))
 		    (*default* . ,(lambda x x))
 		    )))
