@@ -3,6 +3,7 @@
 	  prepare-css-cache)
   (use file.util)
   ;;
+  (use yogomacs.flserver)
   (use font-lock.flclient)
   )
 

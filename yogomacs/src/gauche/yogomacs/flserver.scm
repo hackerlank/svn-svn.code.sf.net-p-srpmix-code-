@@ -1,4 +1,5 @@
-(define yogomacs.flserver
+(define-module yogomacs.flserver
+  (export flserver)
   (use font-lock.flclient)
   (use font-lock.harness)
   (use font-lock.flserver)
