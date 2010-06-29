@@ -29,9 +29,9 @@ function repo_check
     fi
     
 
-    if ! ( [[ "${repo}" =~ "$file_spec" ]] || \
-	   [[ "${repo}" =~ "$http_spec" ]] || \
-	   [[ "${repo}" =~ "$ftp_spec" ]]    ); then
+    if ! ( [[ "${repo}" =~ $file_spec ]] || \
+	   [[ "${repo}" =~ $http_spec ]] || \
+	   [[ "${repo}" =~ $ftp_spec ]]    ); then
 	echo "broken wgetx command line: unrecognizable repo specification: $repo" 1>&2
 	echo "expected repo specifications: " 1>&2
 	for s in "$file_spec" "$http_spec" "$ftp_spec"; do
@@ -138,7 +138,7 @@ function wgetx_checkout
     fi
 
     mkdir -p $archives
-    if [[ "$repo" =~ "${file_spec}" ]]; then
+    if [[ "$repo" =~ ${file_spec} ]]; then
 	local file=${repo/file:\/\//}
 	if ! [ -r "$file" ]; then
 	    echo "cannot read $file" 1>&2

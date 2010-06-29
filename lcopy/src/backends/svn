@@ -25,9 +25,9 @@ function repo_check
     local http_spec="^http://.*$"
     local https_spec="^https://.*$"
     local svn_spec="^svn://.*$"
-    if  ! ( [[ "$repo" =~ "$http_spec" ]]  || \
-	    [[ "$repo" =~ "$https_spec" ]] || \
-	    [[ "$repo" =~ "$svn_spec" ]] ); then
+    if  ! ( [[ "$repo" =~ $http_spec ]]  || \
+	    [[ "$repo" =~ $https_spec ]] || \
+	    [[ "$repo" =~ $svn_spec ]] ); then
 	echo "broken svn command line: unrecognizable repo specification: $repo" 1>&2
 	echo "expected repo specifications: " 1>&2
 	for s in "$http_spec" "$https_spec" "$svn_spec"; do

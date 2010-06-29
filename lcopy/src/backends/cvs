@@ -26,7 +26,7 @@ function repo_check
 
     local pserver_spec="^:pserver:[a-zA-Z0-9]+:[a-zA-Z0-9]*@[-a-zA-Z0-9./:]+$"
     local extssh_spec="^:extssh:[a-zA-Z0-9]+@[-a-zA-Z0-9./:]+$"
-    if  ! ( [[ "$repo" =~ "$pserver_spec" ]] || [[ "$repo" =~ "$extssh_spec" ]] ); then
+    if  ! ( [[ "$repo" =~ $pserver_spec ]] || [[ "$repo" =~ $extssh_spec ]] ); then
 	echo "broken cvs command line: unrecognizable repo specification: $repo" 1>&2
 	echo "expected repo specifications: " 1>&2
 	echo "	$pserver_spec" 1>&2
@@ -44,7 +44,7 @@ function module_check
     if [ -z "$module" ]; then
 	echo "NO MODULE given: $original" 1>&2
 	return 1
-    elif ! [[ "${module}" =~ "${module_spec}" ]]; then
+    elif ! [[ "${module}" =~ ${module_spec} ]]; then
 	echo "unacceptable module name: ${module}" 1>&2
 	echo "expected module specification: " 1>&2
 	echo "	$module_spec" 1>&2

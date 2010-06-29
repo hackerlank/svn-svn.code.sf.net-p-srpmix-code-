@@ -1,3 +1,7 @@
+2010-06-29  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/*: Remove double quotes from patterns in [[.
+
 2010-01-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/backends (*): Fix broken log names.
