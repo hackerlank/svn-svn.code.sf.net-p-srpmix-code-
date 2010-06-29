@@ -79,7 +79,7 @@
 		       filter)
   (if (file-is-directory? path)
       (map (lambda (entry)
-	     (let* ((stat (sys-stat (build-path path entry)))
+	     (let* ((stat (sys-lstat (build-path path entry)))
 		    (dentry (make (if (eq? (ref stat 'type) 'symlink)
 				      <fs-symlink-dentry>
 				      <fs-dentry>)

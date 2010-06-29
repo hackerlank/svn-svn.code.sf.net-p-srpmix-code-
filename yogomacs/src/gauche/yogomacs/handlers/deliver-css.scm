@@ -1,5 +1,5 @@
 (define-module yogomacs.handlers.deliver-css
-  (export deliver-css)
+  (export deliver-css-handler)
   (use www.cgi)  
   (use file.util)
   (use yogomacs.access)
@@ -9,7 +9,7 @@
 
 (select-module yogomacs.handlers.deliver-css)
 
-(define (deliver-css path params config)
+(define (deliver-css-handler path params config)
   (let1 last (last path)
     (let1 real (readable? (css-cache-dir config)
 			  last)

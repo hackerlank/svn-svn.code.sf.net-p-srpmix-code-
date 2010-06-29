@@ -105,19 +105,19 @@
 (define (symlink-entry dentry)
   (let1 symlink-to-dname (symlink-to-dname-of dentry)
     (if symlink-to-dname
-	`(
+      	`(
 	  (span (|@| (class "dired-symlink"))
 		(a (|@| (href ,(url-of dentry)))
 		   ,(dname-of dentry)))
 	  (span (|@| (class "dired-symlink-arrow"))
 		" -> ")
 	  (span (|@| (class "dired-symlink-to"))
-		,symlink-to-dname))
+		,symlink-to-dname)
+	  "\n")
 	`(
 	  (span (|@| (class "dired-broken-symlink"))
 		,(dname-of dentry))
-	  ))
-    "\n"))
+	  "\n"))))
 
 (define (executable-entry dentry)
   `(

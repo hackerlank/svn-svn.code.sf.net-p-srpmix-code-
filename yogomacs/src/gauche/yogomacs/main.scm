@@ -16,13 +16,13 @@
 (select-module yogomacs.main)
 
 (define routing-table
-  `((#/^\/$/ ,root-dir)
-    (#/^\/sources$/ ,sources-dir)
-    (#/^\/sources\// ,sources-dir)
+  `((#/^\/$/ ,root-dir-handler)
+    (#/^\/sources$/ ,sources-dir-handler)
+    (#/^\/sources\// ,sources-dir-handler)
     ;; (#/^\/dists[\/]$/ ,dists-dir)
     ;; (#/^\/dists\// ,dists-dir)
     ;;
-    (#/^\/web\/css\/[^\/]+.css/ ,deliver-css)
+    (#/^\/web\/css\/[^\/]+.css/ ,deliver-css-handler)
     ;;
     (#/^\/web\/debug\/metavariables$/ ,print-metavariables)
     (#/^\/web\/debug\/config$/ ,print-config)

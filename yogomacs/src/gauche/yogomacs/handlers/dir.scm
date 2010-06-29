@@ -1,7 +1,8 @@
 (define-module yogomacs.handlers.dir
   (export prepare-dired-faces
 	  read-dentries+
-	  dir-handler)
+	  dir-handler
+	  path->head)
   (use srfi-1)
   (use www.cgi)  
   (use file.util)
@@ -14,6 +15,8 @@
   ;;
   (use yogomacs.render)
   (use yogomacs.css-cache)
+  ;;
+  (use util.match)
   )
 (select-module yogomacs.handlers.dir)
 
@@ -82,25 +85,34 @@
 		   filter)))
 
 
-(define (dir-handler path params config)
-  (let ((last (last path))
-	(head (path->head path)))
-    (prepare-dired-faces config)
-    (list
-     (cgi-header)
-     (render
-      (dired (compose-path path)
-	     (read-dentries+ (build-path "/srv/sources" head last)
-			     (dir-spec (build-path "/" head) last))
-	     "/web/css")))))
+(define dir-handler 
+  (match-lambda*
+   ((path params config extra)
+    (let ((last (last path))
+	  (head (path->head path)))
+      (prepare-dired-faces config)
+      (list
+       (cgi-header)
+       (render
+	(dired (compose-path path)
+	       (read-dentries+ (build-path "/srv/sources" head last)
+			       (dir-spec (build-path "/" head) last extra))
+	       "/web/css")))))
+   ((path params config)
+    (dir-handler path params config (list)))))
 
-(define (dir-spec base last)
-  `(("." ,(build-path base last))
-    (".." ,base)
-    (#/.*/ ,(lambda (fs-dentry) 
-	      (build-path base 
-			  last
-			  (dname-of fs-dentry))))))
+(define dir-spec
+  (match-lambda*
+   ((base last extra)
+    `(("." ,(build-path base last))
+      (".." ,base)
+      ,@extra
+      (#/.*/ ,(lambda (fs-dentry) 
+		(build-path base 
+			    last
+			    (dname-of fs-dentry))))))
+   ((base last)
+    (dir-spec base last (list)))))
 
 (define (path->head path)
   (let1 l (reverse (cdr (reverse path)))

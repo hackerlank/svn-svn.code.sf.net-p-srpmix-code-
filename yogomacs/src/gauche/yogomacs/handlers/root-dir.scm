@@ -1,5 +1,5 @@
 (define-module yogomacs.handlers.root-dir
-  (export root-dir)
+  (export root-dir-handler)
   (use www.cgi) 
   (use file.util)
   ;;
@@ -20,7 +20,7 @@
 				       (build-path "/"
 						   (dname-of fs-dentry))))))
 
-(define (root-dir path params config)
+(define (root-dir-handler path params config)
   (prepare-dired-faces config)
   (list
    (cgi-header)
