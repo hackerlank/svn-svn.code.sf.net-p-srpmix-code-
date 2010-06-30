@@ -13,7 +13,7 @@
   (use util.combinations)
   (use yogomacs.path)
   ;;
-  (use yogomacs.render)
+  (use yogomacs.fix)
   (use yogomacs.caches.css)
   ;;
   (use util.match)
@@ -104,7 +104,7 @@
       (prepare-dired-faces config)
       (list
        (cgi-header)
-       (render
+       (fix
 	(dired (compose-path path)
 	       (read-dentries+ (build-path (config 'real-sources-dir) head last)
 			       (dir-spec (build-path "/" head) last extra))

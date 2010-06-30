@@ -13,7 +13,7 @@ dist_module_DATA =   \
 	flserver.scm \
 	main.scm     \
 	path.scm     \
-	render.scm   \
+	fix.scm      \
 	renderer.scm \
 	route.scm    \
 	sanitize.scm \

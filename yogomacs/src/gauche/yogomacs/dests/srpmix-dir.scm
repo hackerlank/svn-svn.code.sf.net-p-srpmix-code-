@@ -12,7 +12,7 @@
   (use yogomacs.flserver)
   (use font-lock.flclient)
   (use yogomacs.caches.css)
-  (use yogomacs.render)
+  (use yogomacs.fix)
   (use font-lock.rearrange.css-href)
   (use yogomacs.dests.css)
   )
@@ -40,7 +40,7 @@
 	      (if (file-exists? real-dest-path)
 		  (list
 		   (cgi-header)
-		   (render
+		   (fix
 		    (rearrange-css-href 
 		     (call-with-input-file real-dest-path read)
 		     (lambda (css-href)

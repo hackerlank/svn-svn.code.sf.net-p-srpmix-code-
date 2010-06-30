@@ -10,7 +10,7 @@
   (use yogomacs.dests.dir)
   (use yogomacs.dests.css)
   ;;
-  (use yogomacs.render)
+  (use yogomacs.fix)
   )
 (select-module yogomacs.dests.root-dir)
 
@@ -25,7 +25,7 @@
   (prepare-dired-faces config)
   (list
    (cgi-header)
-   (render
+   (fix
     (dired (compose-path path)
 	   (read-dentries+ (config 'real-sources-dir) root-dir-spec)
 	   css-route))))
