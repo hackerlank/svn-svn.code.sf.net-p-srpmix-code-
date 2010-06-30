@@ -6,5 +6,8 @@ dist_module_DATA =   \
 	$(NULL)
 
 
-csscachedir=$(localstatedir)/lib/yogomacs/@SPEC_CONFIG@/css_cache
+csscachedir=$(localstatedir)/lib/yogomacs/@SPEC_CONFIG@/css
 csscache_DATA=
+
+shtmlcachedir=$(localstatedir)/cache/yogomacs/@SPEC_CONFIG@/shtml
+shtmlcache_DATA=

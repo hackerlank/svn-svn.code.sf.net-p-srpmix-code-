@@ -76,8 +76,8 @@
 (test* "/../"
        "/" (sanitize-path "/../"))
 
-(use yogomacs.render)
-(test-module 'yogomacs.render)
+(use yogomacs.fix)
+(test-module 'yogomacs.fix)
 (use yogomacs.dests.root-dir)
 (test-module 'yogomacs.dests.root-dir)
 (use yogomacs.dests.srpmix-dir)
@@ -122,7 +122,7 @@
 
 (test* "/etc/passwd"
        "/etc/passwd" (readable? "/etc" "passwd"))
-(test* "/etc/passwd-"
-       #f (readable? "/etc" "passwd-"))
+(test* "/var/log/messages"
+       #f (readable? "/var/log" "messages"))
 
 (exit (if (zero? (test-end)) 0 1))

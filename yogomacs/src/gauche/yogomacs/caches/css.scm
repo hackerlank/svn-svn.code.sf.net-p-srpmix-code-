@@ -11,7 +11,7 @@
 (select-module yogomacs.caches.css)
 
 (define (css-cache-dir config)
-  (format "/var/lib/yogomacs/~a/css_cache"
+  (format "/var/lib/yogomacs/~a/css"
 	  (config 'spec-conf)))
 
 (define (prepare-cache config file action)

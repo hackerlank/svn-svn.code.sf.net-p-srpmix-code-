@@ -180,7 +180,8 @@
 			 dentires))
 	 (max-column (+ (floor->exact (log max-size 10))
 			1)))
-    (dired0 dir dentires 
+    (dired0 dir (sort dentires 
+		      (lambda (a b) (string<? (dname-of a) (dname-of b))))
 	    (+ (floor->exact (log (length dentires) 10)) 1)
 	    max-column
 	    (or css-prefix css-prefix-default))

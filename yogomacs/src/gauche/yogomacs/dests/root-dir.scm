@@ -17,7 +17,7 @@
 (define root-dir-spec
   `(("."  #t "/")
     (".." #t "/")
-    (#/^(?:package|sources|dists)$/ #t ,(lambda (fs-dentry) 
+    (#/^(?:packages|sources|dists)$/ #t ,(lambda (fs-dentry) 
 					  (build-path "/"
 						      (dname-of fs-dentry))))))
 
