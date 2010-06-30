@@ -22,7 +22,7 @@
 	       '((#/^plugins$/ #f #f)
 		 (#/^vanilla$/ #f #f))))
 
-(define (file-handler path params config)
+(define (file-and-dir-handler path params config)
   (let* ((last (last path))
 	 (head (path->head path))
 	 (real-src-dir (build-path (cdr (assq 'real-sources-dir config)) head)))
