@@ -1,13 +1,13 @@
 moduledir=@GAUCHE_MODULEDIR@/yogomacs/dests
 dist_module_DATA =   \
 	\
+	css.scm					\
 	debug.scm				\
-	deliver-css.scm				\
-	dir.scm 				\
+	dir.scm					\
 	pkg-dir.scm				\
 	print-alist.scm				\
 	root-dir.scm				\
-	sources-dir.scm                         \
+	sources-dir.scm				\
 	srpmix-dir.scm                          \
         \
 	$(NULL)
