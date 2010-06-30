@@ -101,7 +101,7 @@
        (cgi-header)
        (render
 	(dired (compose-path path)
-	       (read-dentries+ (build-path "/srv/sources" head last)
+	       (read-dentries+ (build-path (cdr (assq 'real-sources-dir config)) head last)
 			       (dir-spec (build-path "/" head) last extra))
 	       "/web/css")))))
    ((path params config)

@@ -28,6 +28,9 @@
     (#/^.*$/ ,print-path)
     ))
 
+(define (install-constant config)
+  config)
+   
 (define (yogomacs params)
   (sys-putenv "HOME" "/var/www")
   (let ((path (cgi-get-parameter "path" params :default "/"))

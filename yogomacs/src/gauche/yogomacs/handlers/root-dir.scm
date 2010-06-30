@@ -26,7 +26,7 @@
    (cgi-header)
    (render
     (dired (compose-path path)
-	   (read-dentries+ "/srv/sources" root-dir-spec)
+	   (read-dentries+ (cdr (assq 'real-sources-dir config)) root-dir-spec)
 	   "/web/css"))))
 
 (provide "yogomacs/handlers/root-dir")
