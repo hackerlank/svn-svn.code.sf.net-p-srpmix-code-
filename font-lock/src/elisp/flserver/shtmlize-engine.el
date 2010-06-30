@@ -49,7 +49,7 @@
       (shtmlize-enqueue queue '(span))
       (setq queue (shtmlize-push engine))
       (shtmlize-enqueue queue `(|@|
-				(class ,(cssize-fstruct-css-name (car fstruct-list)))
+				(class ,(cssize-fstruct-css-name fstruct))
 				,@(if id
 				      `((id ,id))
 				    ())
