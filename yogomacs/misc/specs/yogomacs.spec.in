@@ -74,7 +74,6 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/config.scm
 %{_datadir}/gauche/site/lib/yogomacs/css-cache.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
-%{_datadir}/gauche/site/lib/yogomacs/dired.scm
 %{_datadir}/gauche/site/lib/yogomacs/flserver.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
@@ -89,6 +88,10 @@ fi
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/dests
 %{_datadir}/gauche/site/lib/yogomacs/dests/*.scm
+
+%dir %{_datadir}/gauche/site/lib/yogomacs/renderers
+%{_datadir}/gauche/site/lib/yogomacs/renderers/*.scm
+
 
 %dir %{_localstatedir}/lib/yogomacs
 %dir %{_localstatedir}/www/.emacs.d

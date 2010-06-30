@@ -1,6 +1,7 @@
 SUBDIRS  = .
 SUBDIRS += dentries
 SUBDIRS += dests
+SUBDIRS += renderers
 
 moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \
@@ -9,7 +10,6 @@ dist_module_DATA =   \
 	config.scm   \
 	css-cache.scm \
 	dentry.scm   \
-	dired.scm    \
 	flserver.scm \
 	main.scm     \
 	path.scm     \
