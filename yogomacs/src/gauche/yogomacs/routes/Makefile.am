@@ -1,4 +1,4 @@
-moduledir=@GAUCHE_MODULEDIR@/yogomacs/handlers
+moduledir=@GAUCHE_MODULEDIR@/yogomacs/routes
 dist_module_DATA =   \
 	\
 	debug.scm				\

@@ -1,17 +1,17 @@
-(define-module yogomacs.handlers.pkg-dir
-  (export pkg-dir-handler)
+(define-module yogomacs.dests.pkg-dir
+  (export pkg-dir-dest)
   ;;
   (use yogomacs.route)
   (use yogomacs.dentry)
 
   (use yogomacs.path)
-  (use yogomacs.handlers.dir)
+  (use yogomacs.dests.dir)
 
-  (use yogomacs.handlers.srpmix-dir)
+  (use yogomacs.dests.srpmix-dir)
   (use srfi-1)
   (use file.util)
   )
-(select-module yogomacs.handlers.pkg-dir)
+(select-module yogomacs.dests.pkg-dir)
 
 (define (lcopy-spec path)
   (let ((last (last path))
@@ -28,20 +28,20 @@
 		     (format "~a,~a" last ((#/\^lcopy-([^\/]+)/ (dname-of fs-dentry)) 1))
 		     )))))
 
-(define (handler path params config)
-  (dir-handler path params config
+(define (dest path params config)
+  (dir-dest path params config
 	       `(
 		 ,@(lcopy-spec path)
 		 )))
 
 (define routing-table
-  `((#/^\/sources\/[a-zA-Z0-9]\/[^\/]+$/ ,handler)
-    ;; (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)(?:\/.+)?$/ ,lcopy-dir-handler)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)(?:\/.+)?$/ ,srpmix-dir-handler)
+  `((#/^\/sources\/[a-zA-Z0-9]\/[^\/]+$/ ,dest)
+    ;; (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)(?:\/.+)?$/ ,lcopy-dir-dest)
+    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)(?:\/.+)?$/ ,srpmix-dir-dest)
     ))
 
-(define (pkg-dir-handler path params config)
+(define (pkg-dir-dest path params config)
   (route routing-table (compose-path path) params config))
 
 
-(provide "yogomacs/handlers/pkg-dir")
+(provide "yogomacs/dests/pkg-dir")

@@ -1,6 +1,6 @@
 SUBDIRS  = .
 SUBDIRS += dentries
-SUBDIRS += routes
+SUBDIRS += dests
 
 moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \

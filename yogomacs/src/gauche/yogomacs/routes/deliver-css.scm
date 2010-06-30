@@ -1,5 +1,5 @@
-(define-module yogomacs.handlers.deliver-css
-  (export deliver-css-handler)
+(define-module yogomacs.dests.deliver-css
+  (export deliver-css-dest)
   (use www.cgi)  
   (use file.util)
   (use yogomacs.access)
@@ -7,9 +7,9 @@
   (use srfi-1)
   )
 
-(select-module yogomacs.handlers.deliver-css)
+(select-module yogomacs.dests.deliver-css)
 
-(define (deliver-css-handler path params config)
+(define (deliver-css-dest path params config)
   (let1 last (last path)
     (let1 real (readable? (css-cache-dir config)
 			  last)
@@ -20,4 +20,4 @@
 	  (cgi-header :status "404 Not Found")
 	  ))))
 
-(provide "yogomacs/handlers/deliver-css")
+(provide "yogomacs/dests/deliver-css")

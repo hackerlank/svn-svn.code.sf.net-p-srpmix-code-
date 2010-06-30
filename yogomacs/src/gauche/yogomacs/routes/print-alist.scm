@@ -1,9 +1,9 @@
-(define-module yogomacs.handlers.print-alist
+(define-module yogomacs.dests.print-alist
   (export print-alist)
   (use text.html-lite)
   (use www.cgi)
   )
-(select-module yogomacs.handlers.print-alist)
+(select-module yogomacs.dests.print-alist)
 
 (define (print-alist path params config title alist)
   (list (cgi-header)
@@ -17,4 +17,4 @@
 		    (html:dd (html-escape-string (cdr e)))))
 	    alist))))))
 
-(provide "yogomacs/handlers/print-alist")
+(provide "yogomacs/dests/print-alist")

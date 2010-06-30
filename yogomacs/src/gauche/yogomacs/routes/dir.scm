@@ -1,7 +1,7 @@
-(define-module yogomacs.handlers.dir
+(define-module yogomacs.dests.dir
   (export prepare-dired-faces
 	  read-dentries+
-	  dir-handler
+	  dir-dest
 	  path->head)
   (use srfi-1)
   (use www.cgi)  
@@ -18,7 +18,7 @@
   ;;
   (use util.match)
   )
-(select-module yogomacs.handlers.dir)
+(select-module yogomacs.dests.dir)
 
 (define (prepare-dired-faces config)
   (for-each
@@ -91,7 +91,7 @@
 		   filter)))
 
 
-(define dir-handler 
+(define dir-dest 
   (match-lambda*
    ((path params config extra)
     (let ((last (last path))
@@ -105,7 +105,7 @@
 			       (dir-spec (build-path "/" head) last extra))
 	       "/web/css")))))
    ((path params config)
-    (dir-handler path params config (list)))))
+    (dir-dest path params config (list)))))
 
 (define dir-spec
   (match-lambda*
@@ -126,4 +126,4 @@
 	""
 	(apply build-path l))))
 
-(provide "yogomacs/handlers/dir")
+(provide "yogomacs/dests/dir")

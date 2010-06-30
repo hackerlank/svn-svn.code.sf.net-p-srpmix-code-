@@ -1,21 +1,21 @@
-(define-module yogomacs.handlers.sources-dir
-  (export sources-dir-handler)
+(define-module yogomacs.dests.sources-dir
+  (export sources-dir-dest)
   ;;
   (use yogomacs.route)
   (use yogomacs.path)
-  (use yogomacs.handlers.dir)
-  (use yogomacs.handlers.pkg-dir)
+  (use yogomacs.dests.dir)
+  (use yogomacs.dests.pkg-dir)
   ;;
   )
-(select-module yogomacs.handlers.sources-dir)
+(select-module yogomacs.dests.sources-dir)
 
 (define routing-table
   `(
-    (#/^\/sources$/ ,dir-handler)
-    (#/^\/sources\/[a-zA-Z0-9]$/ ,dir-handler)
-    (#/^\/sources\/[a-zA-Z0-9]\// ,pkg-dir-handler)))
+    (#/^\/sources$/ ,dir-dest)
+    (#/^\/sources\/[a-zA-Z0-9]$/ ,dir-dest)
+    (#/^\/sources\/[a-zA-Z0-9]\// ,pkg-dir-dest)))
 
-(define (sources-dir-handler path params config)
+(define (sources-dir-dest path params config)
   (route routing-table (compose-path path) params config))
 
-(provide "yogomacs/handlers/sources-dir")
+(provide "yogomacs/dests/sources-dir")

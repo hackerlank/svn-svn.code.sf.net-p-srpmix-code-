@@ -4,24 +4,24 @@
   (use yogomacs.config)
   (use www.cgi)
   ;;
-  (use yogomacs.handlers.root-dir)
-  (use yogomacs.handlers.sources-dir)
-;  (use yogomacs.handlers.dists-dir)
+  (use yogomacs.dests.root-dir)
+  (use yogomacs.dests.sources-dir)
+;  (use yogomacs.dests.dists-dir)
   ;;
-  (use yogomacs.handlers.deliver-css)
+  (use yogomacs.dests.deliver-css)
   ;;
-  (use yogomacs.handlers.debug)
+  (use yogomacs.dests.debug)
   ;;
   )
 (select-module yogomacs.main)
 
 (define routing-table
-  `((#/^\/$/ ,root-dir-handler)
-    (#/^\/sources(?:\/.+)?$/ ,sources-dir-handler)
+  `((#/^\/$/ ,root-dir-dest)
+    (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
     ;; (#/^\/dists[\/]$/ ,dists-dir)
     ;; (#/^\/dists\// ,dists-dir)
     ;;
-    (#/^\/web\/css\/[^\/]+.css/ ,deliver-css-handler)
+    (#/^\/web\/css\/[^\/]+.css/ ,deliver-css-dest)
     ;;
     (#/^\/web\/debug\/metavariables$/ ,print-metavariables)
     (#/^\/web\/debug\/config$/ ,print-config)

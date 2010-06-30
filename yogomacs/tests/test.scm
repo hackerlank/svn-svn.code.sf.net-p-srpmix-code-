@@ -91,14 +91,14 @@
 (use yogomacs.dentries.fs)
 (test-module 'yogomacs.dentries.fs)
 
-(use yogomacs.handlers.deliver-css)
-(test-module 'yogomacs.handlers.deliver-css)
+(use yogomacs.dests.deliver-css)
+(test-module 'yogomacs.dests.deliver-css)
 
-(use yogomacs.handlers.print-alist)
-(test-module 'yogomacs.handlers.print-alist)
+(use yogomacs.dests.print-alist)
+(test-module 'yogomacs.dests.print-alist)
 
-(use yogomacs.handlers.root-dir)
-(test-module 'yogomacs.handlers.root-dir)
+(use yogomacs.dests.root-dir)
+(test-module 'yogomacs.dests.root-dir)
 
 (use yogomacs.access)
 (test-module 'yogomacs.access)

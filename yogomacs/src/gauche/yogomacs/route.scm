@@ -1,6 +1,6 @@
 (define-module yogomacs.route
   (export route)
-  (use yogomacs.handlers.debug)
+  (use yogomacs.routes.debug)
   (use yogomacs.sanitize)
   (use yogomacs.path)
   )
