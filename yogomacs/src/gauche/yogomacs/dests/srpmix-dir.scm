@@ -14,6 +14,7 @@
   (use yogomacs.css-cache)
   (use yogomacs.render)
   (use font-lock.rearrange.css-href)
+  (use yogomacs.dests.css)
   )
 (select-module yogomacs.dests.srpmix-dir)
 
@@ -43,7 +44,7 @@
 		    (rearrange-css-href 
 		     (call-with-input-file real-dest-path read)
 		     (lambda (css-href)
-		       (build-path "/web/css" (sys-basename css-href))))))
+		       (build-path css-route (sys-basename css-href))))))
 		  (print-echo path path config "FALSE!")
 		  )
 	      ))

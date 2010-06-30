@@ -8,6 +8,7 @@
   (use yogomacs.dired)
   (use yogomacs.path)
   (use yogomacs.dests.dir)
+  (use yogomacs.dests.css)
   ;;
   (use yogomacs.render)
   )
@@ -27,6 +28,6 @@
    (render
     (dired (compose-path path)
 	   (read-dentries+ (cdr (assq 'real-sources-dir config)) root-dir-spec)
-	   "/web/css"))))
+	   css-route))))
 
 (provide "yogomacs/dests/root-dir")

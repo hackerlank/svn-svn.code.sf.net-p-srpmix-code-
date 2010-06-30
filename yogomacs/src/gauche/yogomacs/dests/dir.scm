@@ -17,6 +17,7 @@
   (use yogomacs.css-cache)
   ;;
   (use util.match)
+  (use yogomacs.dests.css)
   )
 (select-module yogomacs.dests.dir)
 
@@ -103,7 +104,7 @@
 	(dired (compose-path path)
 	       (read-dentries+ (build-path (cdr (assq 'real-sources-dir config)) head last)
 			       (dir-spec (build-path "/" head) last extra))
-	       "/web/css")))))
+	       css-route)))))
    ((path params config)
     (dir-dest path params config (list)))))
 
