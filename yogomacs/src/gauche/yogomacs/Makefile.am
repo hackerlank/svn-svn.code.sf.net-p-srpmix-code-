@@ -1,4 +1,5 @@
 SUBDIRS  = .
+SUBDIRS += caches
 SUBDIRS += dentries
 SUBDIRS += dests
 SUBDIRS += renderers
@@ -14,6 +15,7 @@ dist_module_DATA =   \
 	main.scm     \
 	path.scm     \
 	render.scm   \
+	renderer.scm \
 	route.scm    \
 	sanitize.scm \
         \

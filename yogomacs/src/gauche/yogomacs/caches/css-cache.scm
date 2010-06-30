@@ -1,13 +1,14 @@
-(define-module yogomacs.css-cache
+(define-module yogomacs.caches.css
   (export css-cache-dir
 	  prepare-css-cache)
   (use file.util)
   ;;
   (use yogomacs.flserver)
   (use font-lock.flclient)
+  (use yogomacs.renderer)
   )
 
-(select-module yogomacs.css-cache)
+(select-module yogomacs.caches.css)
 
 (define (css-cache-dir config)
   (format "/var/lib/yogomacs/~a/css_cache"
@@ -22,7 +23,7 @@
 
 (define (prepare-css-cache config face style requires)
   (let* ((dir (css-cache-dir config))
-	 (entry (format "~a--~a.css" face style))
+	 (entry (face->css-file face style))
 	 (file (build-path dir entry))
 	 (cssize (lambda ()
 		   (flclient-cssize face
@@ -34,4 +35,4 @@
 				    ))))
     (prepare-cache config file cssize)))
 
-(provide "yogomacs/css-cache")
+(provide "yogomacs/caches/css")

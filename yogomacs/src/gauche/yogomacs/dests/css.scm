@@ -2,9 +2,8 @@
   (export css-dest
 	  css-route)
   (use www.cgi)  
-  (use file.util)
   (use yogomacs.access)
-  (use yogomacs.css-cache)
+  (use yogomacs.cache.css)
   (use srfi-1)
   )
 

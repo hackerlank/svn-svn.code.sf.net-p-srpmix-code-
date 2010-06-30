@@ -11,7 +11,7 @@
   (use yogomacs.dests.debug)
   (use yogomacs.flserver)
   (use font-lock.flclient)
-  (use yogomacs.css-cache)
+  (use yogomacs.caches.css)
   (use yogomacs.render)
   (use font-lock.rearrange.css-href)
   (use yogomacs.dests.css)

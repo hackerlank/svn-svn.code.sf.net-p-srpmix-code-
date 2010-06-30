@@ -17,8 +17,7 @@
 ;; . -> /srv/sources...
 ;; .. -> /srv/sources...
 ;; http://planet.plt-scheme.org/package-source/lizorkin/ssax.plt/2/0/SXML-tree-trans.ss
-(debug-print-width #f)
-(define-module yogomacs.dired
+(define-module yogomacs.renderers.dired
   (export dired
 	  dired-native-faces
 	  dired-foreign-faces
@@ -29,8 +28,9 @@
   (use gauche.sequence)
   (use srfi-19)
   (use yogomacs.dentry)
+  (use yogomacs.renderer)
   )
-(select-module yogomacs.dired)
+(select-module yogomacs.renderers.dired)
 
 (define-constant font-lock-built-in-faces 
   '(
@@ -66,13 +66,9 @@
     ,@font-lock-built-in-faces
     ,@dired-native-faces
     ,@dired-foreign-faces
-    )
-  )
+    ))
 
 (define dired-styles '(Default Invert))
-
-(define (face->css-url face style css-prefix)
-  (format "~a/~a--~a.css" css-prefix face style))
 
 (define (stylesheets css-prefix)
   (reverse
@@ -81,7 +77,7 @@
       (cons "\n" (cons `(link (|@| 
 			       (rel "stylesheet")
 			       (type "text/css")
-			       (href ,(face->css-url (car face-style) (cadr face-style) css-prefix))
+			       (href ,(face->css-route (car face-style) (cadr face-style) css-prefix))
 			       (title ,(x->string (cadr face-style)))
 			       )) 
 		       (cons "	" result))))
@@ -212,4 +208,4 @@
 		   "\n"
 		   ))))
 
-(provide "yogomacs/dired")
+(provide "yogomacs/renderers/dired")

@@ -1,7 +1,6 @@
 (define-module yogomacs.render
   (export render)
-  (use sxml.serializer)
-  (use util.combinations))
+  (use sxml.serializer))
 (select-module yogomacs.render)
 
 (define (render sxml)

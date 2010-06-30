@@ -5,7 +5,7 @@
   ;;
   (use yogomacs.dentry)
   (use yogomacs.dentries.fs)
-  (use yogomacs.dired)
+  (use yogomacs.renderers.dired)
   (use yogomacs.path)
   (use yogomacs.dests.dir)
   (use yogomacs.dests.css)

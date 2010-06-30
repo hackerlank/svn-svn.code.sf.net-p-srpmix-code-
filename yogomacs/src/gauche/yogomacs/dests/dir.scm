@@ -9,12 +9,12 @@
   ;;
   (use yogomacs.dentry)
   (use yogomacs.dentries.fs)  
-  (use yogomacs.dired)
+  (use yogomacs.renderers.dired)
   (use util.combinations)
   (use yogomacs.path)
   ;;
   (use yogomacs.render)
-  (use yogomacs.css-cache)
+  (use yogomacs.caches.css)
   ;;
   (use util.match)
   (use yogomacs.dests.css)
