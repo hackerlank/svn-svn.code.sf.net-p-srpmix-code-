@@ -15,6 +15,11 @@
 	  )
   )
 
+(define (prepare-cache config file action)
+  (if (file-exists? file)
+      #t
+      (flserver action config)))
+
 (define (prepare-css-cache config face style requires)
   (let* ((dir (css-cache-dir config))
 	 (entry (format "~a--~a.css" face style))
@@ -27,8 +32,6 @@
 				    :verbose (cdr (assq 'client-verbose config))
 				    ;;
 				    ))))
-    (if (file-exists? file)
-	#t
-	(flserver cssize config))))
+    (prepare-cache config file cssize)))
 
 (provide "yogomacs/css-cache")

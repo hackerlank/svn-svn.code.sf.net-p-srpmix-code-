@@ -8,7 +8,7 @@
   (use yogomacs.dests.sources-dir)
 ;  (use yogomacs.dests.dists-dir)
   ;;
-  (use yogomacs.dests.deliver-css)
+  (use yogomacs.dests.css)
   ;;
   (use yogomacs.dests.debug)
   ;;
@@ -21,14 +21,14 @@
     ;; (#/^\/dists[\/]$/ ,dists-dir)
     ;; (#/^\/dists\// ,dists-dir)
     ;;
-    (#/^\/web\/css\/[^\/]+.css/ ,deliver-css-dest)
+    (#/^\/web\/css\/[^\/]+.css/ ,css-dest)
     ;;
     (#/^\/web\/debug\/metavariables$/ ,print-metavariables)
     (#/^\/web\/debug\/config$/ ,print-config)
     (#/^.*$/ ,print-path)
     ))
 
-(define (install-constant config)
+(define (install-constants config)
   config)
    
 (define (yogomacs params)
@@ -36,7 +36,7 @@
   (let ((path (cgi-get-parameter "path" params :default "/"))
 	(config (load-config)))
     (if config
-	(route routing-table path params config)
+	(route routing-table path params (install-constants config))
 	(cgi-header :status "500 Internal server Error")
 	)))
 
