@@ -87,8 +87,8 @@ fi
 %dir %{_datadir}/gauche/site/lib/yogomacs/dentries
 %{_datadir}/gauche/site/lib/yogomacs/dentries/*.scm
 
-%dir %{_datadir}/gauche/site/lib/yogomacs/handlers
-%{_datadir}/gauche/site/lib/yogomacs/handlers/*.scm
+%dir %{_datadir}/gauche/site/lib/yogomacs/routes
+%{_datadir}/gauche/site/lib/yogomacs/routes/*.scm
 
 %dir %{_localstatedir}/lib/yogomacs
 %dir %{_localstatedir}/www/.emacs.d

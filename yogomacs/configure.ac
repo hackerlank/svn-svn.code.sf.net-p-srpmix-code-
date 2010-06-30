@@ -115,7 +115,7 @@ AC_OUTPUT([
 	   src/gauche/yogomacs/config.scm
 	   src/gauche/yogomacs/default.scm
 	   src/gauche/yogomacs/dentries/Makefile
-	   src/gauche/yogomacs/handlers/Makefile
+	   src/gauche/yogomacs/routes/Makefile
 	   src/base/Makefile
 	   src/data/Makefile
 	   src/apache-home/Makefile
