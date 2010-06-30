@@ -26,7 +26,7 @@
 (define (file-and-dir-dest path params config)
   (let* ((last (last path))
 	 (head (path->head path))
-	 (real-src-dir (build-path (cdr (assq 'real-sources-dir config)) head)))
+	 (real-src-dir (build-path (config 'real-sources-dir) head)))
     (if (readable? real-src-dir last)
 	(if (directory? real-src-dir last)
 	    (dir-dest path params config)
@@ -35,7 +35,7 @@
 				  (build-path real-src-dir last)
 				  real-dest-path
 				  (css-cache-dir config)
-				  :verbose (cdr (assq 'client-verbose config)))))
+				  :verbose (config 'client-verbose))))
 	      (flserver shtmlize config)
 	      (if (file-exists? real-dest-path)
 		  (list

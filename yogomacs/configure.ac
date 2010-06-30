@@ -112,6 +112,7 @@ AC_OUTPUT([
 	   src/elisp/flserver/plugins/Makefile
 	   src/gauche/Makefile
 	   src/gauche/yogomacs/Makefile
+	   src/gauche/yogomacs/caches/Makefile
 	   src/gauche/yogomacs/config.scm
 	   src/gauche/yogomacs/default.scm
 	   src/gauche/yogomacs/dentries/Makefile

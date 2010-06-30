@@ -76,32 +76,49 @@
 (test* "/../"
        "/" (sanitize-path "/../"))
 
-(use yogomacs.main)
-(test-module 'yogomacs.main)
-
-(use yogomacs.dentry)
-(test-module 'yogomacs.dentry)
-
-(use yogomacs.dired)
-(test-module 'yogomacs.dired)
-
-(use yogomacs.route)
-(test-module 'yogomacs.route)
-
-(use yogomacs.dentries.fs)
-(test-module 'yogomacs.dentries.fs)
-
-(use yogomacs.dests.deliver-css)
-(test-module 'yogomacs.dests.deliver-css)
-
-(use yogomacs.dests.print-alist)
-(test-module 'yogomacs.dests.print-alist)
-
+(use yogomacs.render)
+(test-module 'yogomacs.render)
 (use yogomacs.dests.root-dir)
 (test-module 'yogomacs.dests.root-dir)
-
+(use yogomacs.dests.srpmix-dir)
+(test-module 'yogomacs.dests.srpmix-dir)
+(use yogomacs.dests.css)
+(test-module 'yogomacs.dests.css)
+(use yogomacs.dests.sources-dir)
+(test-module 'yogomacs.dests.sources-dir)
+(use yogomacs.dests.pkg-dir)
+(test-module 'yogomacs.dests.pkg-dir)
+(use yogomacs.dests.dir)
+(test-module 'yogomacs.dests.dir)
+(use yogomacs.dests.debug)
+(test-module 'yogomacs.dests.debug)
+(use yogomacs.dests.print-alist)
+(test-module 'yogomacs.dests.print-alist)
+(use yogomacs.dentry)
+(test-module 'yogomacs.dentry)
+;(use yogomacs.compress)
+;(test-module 'yogomacs.compress)
+(use yogomacs.dentries.fs)
+(test-module 'yogomacs.dentries.fs)
+(use yogomacs.main)
+(test-module 'yogomacs.main)
+(use yogomacs.renderers.dired)
+(test-module 'yogomacs.renderers.dired)
 (use yogomacs.access)
 (test-module 'yogomacs.access)
+
+(use yogomacs.caches.css)
+(test-module 'yogomacs.caches.css)
+(use yogomacs.sanitize)
+(test-module 'yogomacs.sanitize)
+(use yogomacs.path)
+(test-module 'yogomacs.path)
+(use yogomacs.route)
+(test-module 'yogomacs.route)
+(use yogomacs.config)
+(test-module 'yogomacs.config)
+(use yogomacs.flserver)
+(test-module 'yogomacs.flserver)
 
 (test* "/etc/passwd"
        "/etc/passwd" (readable? "/etc" "passwd"))

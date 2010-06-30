@@ -85,6 +85,12 @@
     (cartesian-product `(,dired-faces
 			 ,dired-styles )))))
 
+(define (url&dname dentry)
+  (let1 url (url-of dentry)
+    (if url
+	`(a (|@| (href ,url))
+	    ,(dname-of dentry))
+	(dname-of dentry))))
 (define (generic-entry dentry)
   `(
     (span (|@| (class ,(case (type-maker-of dentry)
@@ -94,8 +100,9 @@
 			  "dired-directory")
 			 (else
 			  "dired-unknown"))))
-	  (a (|@| (href ,(url-of dentry)))
-	     ,(dname-of dentry)))
+	  ;;
+	  ,(url&dname dentry)
+	  )
     "\n"))
 
 (define (symlink-entry dentry)
@@ -103,8 +110,7 @@
     (if symlink-to-dname
       	`(
 	  (span (|@| (class "dired-symlink"))
-		(a (|@| (href ,(url-of dentry)))
-		   ,(dname-of dentry)))
+		,(url&dname dentry))
 	  (span (|@| (class "dired-symlink-arrow"))
 		" -> ")
 	  (span (|@| (class "dired-symlink-to"))
@@ -118,8 +124,7 @@
 (define (executable-entry dentry)
   `(
     (span (|@| (class "dired-executable"))
-	  (a (|@| (href ,(url-of dentry)))
-	     ,(dname-of dentry)))
+	  ,(url&dname dentry))
     "\n"))
 
 (define (linum&fringe dentry linum linum-column)

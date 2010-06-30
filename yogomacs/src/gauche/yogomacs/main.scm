@@ -40,7 +40,8 @@
   (let ((path (cgi-get-parameter "path" params :default "/"))
 	(config (load-config)))
     (if config
-	(route routing-table path params (install-constants config))
+	(route routing-table path params 
+	       (config->proc (install-constants config)))
 	(cgi-header :status "500 Internal server Error")
 	)))
 

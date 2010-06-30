@@ -9,7 +9,6 @@ dist_module_DATA =   \
 	\
 	access.scm   \
 	config.scm   \
-	css-cache.scm \
 	dentry.scm   \
 	flserver.scm \
 	main.scm     \
@@ -28,6 +27,3 @@ conf_DATA=
 dist_noinst_DATA=default.scm
 install-data-hook:
 	install default.scm $(DESTDIR)$(sysconfdir)/yogomacs/@SPEC_CONFIG@.scm
-
-csscachedir=$(localstatedir)/lib/yogomacs/@SPEC_CONFIG@/css_cache
-csscache_DATA=

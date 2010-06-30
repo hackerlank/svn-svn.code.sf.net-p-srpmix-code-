@@ -1,6 +1,10 @@
 moduledir=@GAUCHE_MODULEDIR@/yogomacs/caches
 dist_module_DATA =   \
 	\
-	dired.scm    \
+	css.scm    \
         \
 	$(NULL)
+
+
+csscachedir=$(localstatedir)/lib/yogomacs/@SPEC_CONFIG@/css_cache
+csscache_DATA=

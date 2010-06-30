@@ -67,29 +67,33 @@
 		  dname-of
 		  (make-conv 3)))
 
-(define (make-filter specs)
+(define (make-filter specs dname-of ref-spec)
   (make-make-make specs
-		  (lambda (dname) dname)
+		  dname-of
 		  (lambda (spec dname) 
-		    (let1 filter (cadr spec)
+		    (let1 filter (ref-spec spec)
 		      (cond
 		       ((boolean? filter) filter)
 		       (else (filter dname)))))))
 
 ;; read-dentries+
-;; ( ( PATTERN FILTER MAKE-URL [MAKE-SYMLINK-TO-DNAME] ) ... )
+;; ( ( PATTERN PRE-FILTER MAKE-URL [MAKE-SYMLINK-TO-DNAME] [POST-FILTER]) ... )
 ;;  PATTERN: regex, string
-;;  FILTER: #t, #f, (lambda (e) ) -> #t|#f
+;;  PRE-FILTER: #t, #f, (lambda (e) ) -> #t|#f
 ;;  MAKE-URL: string, #f, (lambda (e) ) -> string|#f
 ;;  MAKE-SYMLINK-TO-DNAME: string, #f, (lambda (e) ) -> string|#f
+;;  POST-FILTER: #t, #f, (lambda (e) ) -> #t|#f
 (define (read-dentries+ path specs)
+  (define (id x) x)
   (let ((make-url (make-make-url specs))	      
 	(make-symlink-to-dname (make-make-symlink-to-dname specs))
-	(filter (make-filter specs)))
+	(pre-filter (make-filter specs id cadr))
+	(post-filter (make-filter specs dname-of (cute list-ref <> 4 #t))))
     (read-dentries path
 		   make-url
 		   make-symlink-to-dname
-		   filter)))
+		   pre-filter
+		   post-filter)))
 
 
 (define dir-dest 
@@ -102,7 +106,7 @@
        (cgi-header)
        (render
 	(dired (compose-path path)
-	       (read-dentries+ (build-path (cdr (assq 'real-sources-dir config)) head last)
+	       (read-dentries+ (build-path (config 'real-sources-dir) head last)
 			       (dir-spec (build-path "/" head) last extra))
 	       css-route)))))
    ((path params config)

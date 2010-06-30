@@ -12,7 +12,7 @@
 (define (flserver action config)
   (define (ping) (eq? (flclient-ping) 0))
   (define (launch-server)
-    (let ((harness-object (choose-harness (cdr (assq 'harness config))))
+    (let ((harness-object (choose-harness (config 'harness)))
 	  (server-cmdline (emacs-cmdline #f #f #f)))
       (launch harness-object server-cmdline 
 	      ;; TODO
@@ -20,7 +20,7 @@
 	      #t)))
   (let ((pong (ping)))
     (unless pong (launch-server))
-    (let loop ((timeout (cdr (assq 'harness-timeout config)))
+    (let loop ((timeout (config 'harness-timeout))
 	       (pong (or pong (ping))))
       (cond
        (pong (action))

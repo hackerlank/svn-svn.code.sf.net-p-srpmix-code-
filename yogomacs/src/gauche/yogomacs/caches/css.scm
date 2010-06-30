@@ -12,9 +12,7 @@
 
 (define (css-cache-dir config)
   (format "/var/lib/yogomacs/~a/css_cache"
-	  (cdr (assq 'spec-conf config))
-	  )
-  )
+	  (config 'spec-conf)))
 
 (define (prepare-cache config file action)
   (if (file-exists? file)
@@ -30,7 +28,7 @@
 				    dir
 				    requires
 				    ;;
-				    :verbose (cdr (assq 'client-verbose config))
+				    :verbose (config 'client-verbose)
 				    ;;
 				    ))))
     (prepare-cache config file cssize)))

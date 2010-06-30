@@ -73,12 +73,22 @@
 	  (else #f))
     (sys-readlink (path-of fs-dentry))))
 
+(define (const-proc value) (lambda rest value))
+(define-macro (define-const-proc name value)
+  `(define ,name ,(const-proc value)))
+
 (define (read-dentries path 
 		       make-url 
 		       make-symlink-to-dname
-		       filter)
-  (define (reject . e) #f)
-  (define (accept . e) #t)
+		       pre-filter
+		       post-filter)
+  (define-const-proc accept #f)
+  (define (make-conv conv accept-conv)
+    (cond
+     ((eq? conv #t) accept-conv)
+     (conv conv)
+     (else (const-proc #f))))
+
   (if (file-is-directory? path)
       (fold-right 
        (lambda (entry kdr)
@@ -90,36 +100,22 @@
 			  :entry entry
 			  :stat stat)))
 	   (when (symlink? dentry)
-	     (set! (ref dentry 'symlink-to-dname) (#?=(cond
-						       ((eq? make-symlink-to-dname #t)
-							make-symlink-to-dname-default)
-						       (make-symlink-to-dname
-							make-symlink-to-dname)
-						       (else
-							reject))
-						      dentry)))
-	   (set! (ref dentry 'url) (#?=(cond
-					((eq? make-url #t)
-					 make-url-default)
-					(make-url
-					 make-url)
-					(else
-					 reject))
-				       dentry))
-	   (if (ref dentry 'url)
+	     (set! (ref dentry 'symlink-to-dname) ((make-conv
+						    make-symlink-to-dname
+						    make-symlink-to-dname-default)
+						   dentry)))
+	   (set! (ref dentry 'url) ((make-conv
+				     make-url
+				     make-url-default)
+				    dentry))
+	   (if ((make-conv post-filter accept) dentry)
 	       (cons dentry kdr)
 	       kdr)))
        (list)
        (directory-list path
 		       :add-path? #f 
 		       :children? #f
-		       :filter (cond
-				((eq? filter #t)
-				 accept)
-				(filter filter)
-				(else
-				 reject))
-		       ))
+		       :filter (make-conv pre-filter accept)))
       #f))
 
 (provide "yogomacs/dentries/fs")

@@ -3,7 +3,7 @@
 	  css-route)
   (use www.cgi)  
   (use yogomacs.access)
-  (use yogomacs.cache.css)
+  (use yogomacs.caches.css)
   (use srfi-1)
   )
 

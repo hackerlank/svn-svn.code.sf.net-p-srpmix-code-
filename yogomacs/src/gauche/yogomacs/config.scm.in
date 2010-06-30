@@ -1,6 +1,7 @@
 ;; -*- scheme -*-
 (define-module yogomacs.config
-  (export load-config)
+  (export load-config
+	  config->proc)
   (use www.cgi)
   (use yogomacs.access)
   (use file.util)
@@ -28,5 +29,8 @@
      (else 
       (cons (cons 'spec-conf conf-name)
 	    conf)))))
+
+(define (config->proc config)
+  (lambda (key) (cdr (assq key config))))
 
 (provide "yogomacs/config")
