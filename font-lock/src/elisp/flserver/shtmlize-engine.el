@@ -99,6 +99,19 @@
 			"\n"
 			"    " (title ,title)
 			"\n")) 
+    ;; TODO: do this in plugin (http-equivcontent-type, charset, expires...)
+    (mapc
+     (lambda (elt)
+       (shtmlize-enqueue
+	queue
+	`("    " (meta (|@| (name ,(car elt))
+			    (content ,(cdr elt))
+			    ))
+	  "\n"))
+       )
+     `(("major-mode" . ,(format "%s" major-mode))
+       ))
+    
 
     (lexical-let ((queue queue))
       (dolist (face (xhtmlize-external-css-enumerate-faces (oref engine buffer-faces)
@@ -115,7 +128,7 @@
 								 (xhtmlize-css-make-file-name face title)))
 						  (title ,title)))
 				"\n"))))))
-    
+    ;;
     (setq queue (shtmlize-pop engine))
     (shtmlize-enqueue queue '("\n" "    "))
     ))
@@ -137,6 +150,7 @@
 
 (defmethod xhtmlize-engine-epilogue ((engine <shtmlize-engine>))
   (let ((queue (shtmlize-pop engine))) 
+    ;;
     (shtmlize-enqueue queue '("\n"))))
 
 (defmethod xhtmlize-engine-process ((engine <shtmlize-engine>))
