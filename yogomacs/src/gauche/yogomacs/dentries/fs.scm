@@ -10,7 +10,8 @@
 	  url-of
 	  symlink-to-dname-of
 	  ;;
-	  read-dentries)
+	  read-dentries
+	  glob-dentries)
   ;;
   (use yogomacs.dentry)
   (use file.util)
@@ -117,5 +118,72 @@
 		       :children? #f
 		       :filter (make-conv pre-filter accept)))
       #f))
+
+(define (make-make-make specs dname-of conv)
+  (lambda (dentry-or-dname)
+    (let1 dname (dname-of dentry-or-dname)
+      (let loop ((specs specs))
+	(if (null? specs)
+	    #f
+	    (let* ((spec (car specs))
+		   (pattern (car spec)))
+	      (cond
+	       ((and (string? pattern)
+		     (equal? pattern dname)) 
+		(conv spec dentry-or-dname))
+	       ((and (regexp? pattern)
+		     (rxmatch pattern dname))
+		(conv spec dentry-or-dname))
+	       (else
+		(loop (cdr specs))))))))))
+
+(define (make-conv n)
+  (lambda (spec dentry)
+    (let1 maker (list-ref spec n #f)
+      (cond
+       ((string? maker)
+	maker)
+       ((not maker)
+	#f)
+       (else
+	(maker dentry))))))
+
+(define (make-make-url specs)
+  (make-make-make specs 
+		  dname-of
+		  (make-conv 2)))
+
+(define (make-make-symlink-to-dname specs)
+  (make-make-make specs 
+		  dname-of
+		  (make-conv 3)))
+
+(define (make-filter specs dname-of ref-spec)
+  (make-make-make specs
+		  dname-of
+		  (lambda (spec dname) 
+		    (let1 filter (ref-spec spec)
+		      (cond
+		       ((boolean? filter) filter)
+		       (else (filter dname)))))))
+
+;; glob-dentries
+;; ( ( PATTERN PRE-FILTER MAKE-URL [MAKE-SYMLINK-TO-DNAME] [POST-FILTER]) ... )
+;;  PATTERN: regex, string
+;;  PRE-FILTER: #t, #f, (lambda (e) ) -> #t|#f
+;;  MAKE-URL: string, #f, (lambda (e) ) -> string|#f
+;;  MAKE-SYMLINK-TO-DNAME: string, #f, (lambda (e) ) -> string|#f
+;;  POST-FILTER: #t, #f, (lambda (e) ) -> #t|#f
+(define (glob-dentries path globs)
+  (define (id x) x)
+  (let ((make-url (make-make-url globs))	      
+	(make-symlink-to-dname (make-make-symlink-to-dname globs))
+	(pre-filter (make-filter globs id cadr))
+	(post-filter (make-filter globs dname-of (cute list-ref <> 4 #t))))
+    (read-dentries path
+		   make-url
+		   make-symlink-to-dname
+		   pre-filter
+		   post-filter)))
 
 (provide "yogomacs/dentries/fs")

@@ -2,6 +2,7 @@
   (export srpmix-dir-dest)
   (use yogomacs.route)
   (use yogomacs.path)
+  (use yogomacs.dests.fs)
   (use yogomacs.dests.dir)
   (use yogomacs.access)
   (use srfi-1)
@@ -9,11 +10,8 @@
   (use file.util)
   (use www.cgi)
   (use yogomacs.dests.debug)
-  (use yogomacs.flserver)
-  (use font-lock.flclient)
   (use yogomacs.caches.css)
   (use yogomacs.fix)
-  (use font-lock.rearrange.css-href)
   (use yogomacs.dests.css)
   )
 (select-module yogomacs.dests.srpmix-dir)
@@ -23,45 +21,12 @@
 	       '((#/^plugins$/ #f #f)
 		 (#/^vanilla$/ #f #f))))
 
-;; Renderer
-(define (file-dest path params config)
-  (let* ((last (last path))
-	 (head (path->head path))
-	 (real-src-dir (build-path (config 'real-sources-dir) head))
-	 ;; cache
-	 (real-dest-path (build-path "/tmp" (format "~a.~a" last "shtml")))
-	 (shtmlize (pa$ flclient-shtmlize
-			(build-path real-src-dir last)
-			real-dest-path
-			(css-cache-dir config)
-			:verbose (config 'client-verbose))))
-    (flserver shtmlize config)
-    (if (file-exists? real-dest-path)
-	(list
-	 (cgi-header)
-	 (fix
-	  (rearrange-css-href 
-	   (call-with-input-file real-dest-path read)
-	   (lambda (css-href)
-	     (build-path css-route (sys-basename css-href))))))
-	(print-echo path path config "Flserver Rendering Timeout"))))
-
-(define (file-and-dir-dest path params config)
-  (let* ((last (last path))
-	 (head (path->head path))
-	 (real-src-dir (build-path (config 'real-sources-dir) head)))
-    (if (readable? real-src-dir last)
-	(if (directory? real-src-dir last)
-	    (dir-dest path params config)
-	    (file-dest path params config))
-	(cgi-header :status "404 Not Found"))))
-
 (define routing-table
   `((#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)$/               ,dest)
     (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/pre-build$/    ,dir-dest)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/pre-build\/.*/ ,file-and-dir-dest)
+    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/pre-build\/.*/ ,fs-dest)
     (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/archives$/     ,dir-dest)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/archives\/.*/  ,file-and-dir-dest)
+    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/archives\/.*/  ,fs-dest)
     ;; (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+/([^^\/]+)\/vanilla$/ ,dir-dest)
     ))
 
