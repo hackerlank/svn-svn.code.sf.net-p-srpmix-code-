@@ -1,5 +1,6 @@
 (define-module yogomacs.dests.file
-  (export file-dest)
+  (export file-dest
+	  fix-css-href)
   (use srfi-1)
   (use www.cgi)  
   (use file.util)
@@ -17,7 +18,11 @@
   (use font-lock.rearrange.css-href))
 (select-module yogomacs.dests.file)
 
-;; Renderer
+
+(define fix-css-href (cute rearrange-css-href <>
+			   (lambda (css-href)
+			     (build-path css-route (sys-basename css-href)))))
+
 (define (file-dest path params config)
   (let* ((last (last path))
 	 (head (path->head path))
@@ -34,10 +39,10 @@
 	(list
 	 (cgi-header)
 	 (fix
-	  (rearrange-css-href 
-	   (call-with-input-file real-dest-path read)
-	   (lambda (css-href)
-	     (build-path css-route (sys-basename css-href))))))
+	  (call-with-input-file real-dest-path read)
+	  fix-css-href
+	  ))
 	(print-echo path path config "Flserver Rendering Timeout"))))
+
 
 (provide "yogomacs/dests/file")
