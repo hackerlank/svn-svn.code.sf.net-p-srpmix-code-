@@ -20,7 +20,13 @@
   (let ((str (apply #'format fmt args)))
     (log-string str)))
 
+(defun log+error (fmt &rest args)
+  (let ((str (apply #'format fmt args)))
+    (log-string str)
+    (error "%s" str)))
+
 (defmacro with-log-string (key str &rest body)
+  
   `(progn
      (log-format "%s-start %s" ,key ,str)
      ,@body

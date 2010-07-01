@@ -36,7 +36,7 @@
 (require 'cssize)
 (require 'assoc)
 (require 'eieio)
-
+(require 'log)				;TODO
 
 (eval-when-compile
   (defvar font-lock-auto-fontify)
@@ -298,6 +298,7 @@ output.")
 	  (< (overlay-start o0) (overlay-start o1)))))
 
 (defun xhtmlize-next-change (pos prop &optional limit)
+  ;; (message "<%d, %s>" pos limit) 
   (let ((r0 (next-char-property-change pos limit))
 	(r1 (next-single-char-property-change pos prop nil limit)))
     (if (< r0 r1)
@@ -1205,7 +1206,7 @@ it's called with the same value of KEY.  All other times, the cached
     (let (;; Declare variables used in loop body outside the loop
 	  ;; because it's faster to establish `let' bindings only
 	  ;; once.
-	  next-change text face-list fstruct-list trailing-ellipsis)
+	  next-change text face-list fstruct-list trailing-ellipsis pnt)
       ;; This loop traverses and reads the source buffer, appending
       ;; the resulting HTML to HTMLBUF with `princ'.  This method is
       ;; fast because: 1) it doesn't require examining the text
@@ -1214,6 +1215,7 @@ it's called with the same value of KEY.  All other times, the cached
       ;; require buffer switches, which are slow in Emacs.
       (goto-char (point-min))
       (while (not (eobp))
+	(setq pnt (point))
 	(mapc (lambda (o)
 		(xhtmlize-width0-overlay o 
 					 insert-text-with-id-method
@@ -1222,7 +1224,12 @@ it's called with the same value of KEY.  All other times, the cached
 		)
 	      (xhtmlize-overlays-at (point)))
 	
-	(setq next-change (xhtmlize-next-change (point) 'face))
+	(setq next-change (xhtmlize-next-change pnt 'face))
+	(cond
+	 ((not (numberp next-change))
+	  (log+error "ERROR: %s is not number" next-change))
+	 ((< next-change pnt)
+	  (log+error "ERROR: next-change:%d < (point:%d)" next-change pnt)))
 	;; Get faces in use between (point) and NEXT-CHANGE, and
 	;; convert them to fstructs.
 	(setq face-list (xhtmlize-faces-at-point)
@@ -1232,7 +1239,7 @@ it's called with the same value of KEY.  All other times, the cached
 	;; Extract buffer text, sans the invisible parts.  Then
 	;; untabify it and escape the HTML metacharacters.
 	(setq text (xhtmlize-buffer-substring-no-invisible
-		    (point) next-change))
+		    pnt next-change))
 	(when trailing-ellipsis
 	  (setq text (xhtmlize-trim-ellipsis text)))
 	;; If TEXT ends up empty, don't change trailing-ellipsis.
@@ -1248,7 +1255,7 @@ it's called with the same value of KEY.  All other times, the cached
 	  ;; represent faces in FSTRUCT-LIST.
 	  (funcall insert-text-with-id-method text 
 					;(format "font-lock:%s" (point))
-		   (concat "F:" (number-to-string (point)))
+		   (concat "F:" (number-to-string pnt))
 		   nil
 		   fstruct-list
 		   engine))
