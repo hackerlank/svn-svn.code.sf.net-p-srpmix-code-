@@ -7,6 +7,7 @@
 
 (define (print-alist path params config title alist)
   (list (cgi-header)
+	(html-doctype)
 	(html:html
 	 (html:head (html:title title))
 	 (html:body 

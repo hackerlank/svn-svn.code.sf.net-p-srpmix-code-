@@ -23,8 +23,9 @@
     ;;
     (#/^\/web\/css\/[^\/]+.css/ ,css-dest)
     ;;
-    (#/^\/web\/debug\/metavariables$/ ,print-metavariables)
-    (#/^\/web\/debug\/config$/ ,print-config)
+    (#/^\/debug\/metavariables$/ ,print-metavariables)
+    (#/^\/debug\/config$/ ,print-config)
+    ;;
     (#/^.*$/ ,print-path)
     ))
 
