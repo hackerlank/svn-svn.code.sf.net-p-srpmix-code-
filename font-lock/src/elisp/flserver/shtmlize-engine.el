@@ -41,30 +41,52 @@
 
 (defun shtmlize-expand (engine)
   (shtmlize-expand-0 (shtmlize-top engine)))
-
-
 (defun shtmlize-enqueue-text-with-id (text id href fstruct-list engine)
   (let ((queue (shtmlize-top engine)))
-    (dolist (fstruct fstruct-list)
-      (setq queue (shtmlize-push engine))
-      (shtmlize-enqueue queue `(span
-				(|@|
-				 (class ,(cssize-fstruct-css-name fstruct))
-				 ,@(if id
-				       `((id ,id))
-				     ())))))
-    (when href
-      (setq queue (shtmlize-push engine))
-      (shtmlize-enqueue queue
-			`(a (|@| (href ,href)))))
-
-    (shtmlize-enqueue queue (list text))
-
-    (when href
-      (setq queue (shtmlize-pop engine)))
+    (if (and (car fstruct-list) (null (cdr fstruct-list)))
+	(shtmlize-enqueue queue `((span
+				   (|@|
+				    (class ,(cssize-fstruct-css-name (car fstruct-list)))
+				    ,@(if id
+					  `((id ,id))
+					()))
+				   ,(if href
+					`(a (|@| (href ,href))
+					    ,text)
+				      text))))
+      (let ((temp fstruct-list)
+	    fstruct)
+	(while temp
+	  (setq fstruct (car temp)
+		temp (cdr temp)
+		queue (shtmlize-push engine))
+	  (shtmlize-enqueue queue `(span
+				    (|@|
+				     (class ,(cssize-fstruct-css-name fstruct))
+				     ,@(if id
+					   `((id ,id))
+					 ()))
+				    ,@(if temp
+					  ()
+					;; No rest span, make A inline.
+					(if href
+					    `(
+					      (a (|@| (href ,href))
+						 ,text)
+					      )
+					  `(,text))))))))
+    (unless fstruct-list
+      (when href
+	(setq queue (shtmlize-push engine))
+	(shtmlize-enqueue queue
+			  `(a (|@| (href ,href)))))
+      (shtmlize-enqueue queue (list text))
+      (when href
+	(setq queue (shtmlize-pop engine))))
     
-    (dolist (fstruct fstruct-list)
-      (setq queue (shtmlize-pop engine)))))
+    (unless (and (car fstruct-list) (null (cdr fstruct-list)))
+      (dolist (fstruct fstruct-list)
+	(setq queue (shtmlize-pop engine))))))
 
 (defmethod xhtmlize-engine-prepare ((engine <shtmlize-engine>))
   (call-next-method)

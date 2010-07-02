@@ -1206,7 +1206,7 @@ it's called with the same value of KEY.  All other times, the cached
     (let (;; Declare variables used in loop body outside the loop
 	  ;; because it's faster to establish `let' bindings only
 	  ;; once.
-	  next-change text face-list fstruct-list trailing-ellipsis pnt)
+	  next-change text len face-list fstruct-list trailing-ellipsis pnt)
       ;; This loop traverses and reads the source buffer, appending
       ;; the resulting HTML to HTMLBUF with `princ'.  This method is
       ;; fast because: 1) it doesn't require examining the text
@@ -1238,19 +1238,21 @@ it's called with the same value of KEY.  All other times, the cached
 					     face-list)))
 	;; Extract buffer text, sans the invisible parts.  Then
 	;; untabify it and escape the HTML metacharacters.
-	(setq text (xhtmlize-buffer-substring-no-invisible
-		    pnt next-change))
+	(setq text (xhtmlize-buffer-substring-no-invisible pnt next-change)
+	      len  (length text))
 	(when trailing-ellipsis
-	  (setq text (xhtmlize-trim-ellipsis text)))
+	  (setq text (xhtmlize-trim-ellipsis text)
+		len (length text)))
 	;; If TEXT ends up empty, don't change trailing-ellipsis.
-	(when (> (length text) 0)
+	(when (> len 0)
 	  (setq trailing-ellipsis
-		(get-text-property (1- (length text))
+		(get-text-property (1- len)
 				   'xhtmlize-ellipsis text)))
-	(setq text (xhtmlize-untabify text (current-column)))
+	(setq text (xhtmlize-untabify text (current-column))
+	      len  (length text))
 	;; Don't bother writing anything if there's no text (this
 	;; happens in invisible regions).
-	(when (> (length text) 0)
+	(when (> len 0)
 	  ;; Insert the text, along with the necessary markup to
 	  ;; represent faces in FSTRUCT-LIST.
 	  (funcall insert-text-with-id-method text 
