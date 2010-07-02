@@ -15,6 +15,8 @@ rhcmsys8.es  \
 rhcmsys7u2.es \
 rhcmsys7u3.es \
 \
+rhel6b1.es \
+\
 ds7.es   \
 ds8u0.es \
 ds8u1.es \

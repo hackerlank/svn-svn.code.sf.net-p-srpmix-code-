@@ -1,3 +1,9 @@
+2010-07-02  Masatake YAMATO  <yaamto@redhat.com>
+
+	* src/dist-mapping/ftp.redhat.com/rhel6b1.es: New file.
+
+	* src/dist-mapping/ftp.redhat.com/Makefile.am: Added rhel6b1.es.
+	
 2010-05-24  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cradle-confs/jpackage-generic (mirrorlist): Use jpackage-6.0.
