@@ -42,20 +42,17 @@
 (defun shtmlize-expand (engine)
   (shtmlize-expand-0 (shtmlize-top engine)))
 
+
 (defun shtmlize-enqueue-text-with-id (text id href fstruct-list engine)
   (let ((queue (shtmlize-top engine)))
     (dolist (fstruct fstruct-list)
       (setq queue (shtmlize-push engine))
-      (shtmlize-enqueue queue '(span))
-      (setq queue (shtmlize-push engine))
-      (shtmlize-enqueue queue `(|@|
-				(class ,(cssize-fstruct-css-name fstruct))
-				,@(if id
-				      `((id ,id))
-				    ())
-				))
-      (setq queue (shtmlize-pop engine))
-      )
+      (shtmlize-enqueue queue `(span
+				(|@|
+				 (class ,(cssize-fstruct-css-name fstruct))
+				 ,@(if id
+				       `((id ,id))
+				     ())))))
     (when href
       (setq queue (shtmlize-push engine))
       (shtmlize-enqueue queue
