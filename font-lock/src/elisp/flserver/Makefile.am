@@ -22,5 +22,6 @@ dist_flserver_LISP = \
 	\
 	log.el       \
 	text-tree.el \
+	time.el      \
 	\
 	$(NULL)

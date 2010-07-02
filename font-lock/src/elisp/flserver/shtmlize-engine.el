@@ -162,5 +162,9 @@
 	(print-escape-newlines t))
     (prin1 (shtmlize-expand engine) buf)
     buf))
+
+(defmethod xhtmlize-engine-make-file-name ((engine <shtmlize-engine>) file)
+  (concat file ".shtml"))
+
 (provide 'shtmlize-engine)
 

@@ -1266,12 +1266,18 @@ it's called with the same value of KEY.  All other times, the cached
 (defmethod xhtmlize-engine-process ((engine <xhtmlize-common-engine>))
   )
 
+(defmethod xhtmlize-engine-make-file-name ((engine <xhtmlize-common-engine>) file)
+  )
+
 (defmacro with-xhtmlize-engine-canvas (name engine &rest body)
   `(let ((,name (oref ,engine canvas)))
 	      ,@body))
+
 (put 'with-xhtmlize-engine-canvas 'lisp-indent-function 2)
 
-(defun xhtmlize-buffer-1 (&optional engine-name)
+(defun xhtmlize-buffer-1 (&optional engine)
+  (unless engine
+    (setq engine (xhtmlize-engine-for nil)))
   ;; Internal function; don't call it from outside this file.  Xhtmlize
   ;; current buffer, writing the resulting HTML to a new buffer, and
   ;; return it.  Unlike xhtmlize-buffer, this doesn't change current
@@ -1285,15 +1291,15 @@ it's called with the same value of KEY.  All other times, the cached
     (xhtmlize-ensure-fontified)
     (clrhash xhtmlize-extended-character-cache)
     (clrhash xhtmlize-memoization-table)
-    (let* ((engine (xhtmlize-engine-for engine-name)))
-      (xhtmlize-engine-prepare engine)
-      (xhtmlize-engine-prologue engine (if (buffer-file-name)
-					   (file-name-nondirectory (buffer-file-name))
-					 (buffer-name)))
-      (xhtmlize-engine-body engine)
-      (xhtmlize-engine-epilogue engine)
-      (xhtmlize-engine-process engine)
-      )))
+    ;;
+    (xhtmlize-engine-prepare engine)
+    (xhtmlize-engine-prologue engine (if (buffer-file-name)
+					 (file-name-nondirectory (buffer-file-name))
+				       (buffer-name)))
+    (xhtmlize-engine-body engine)
+    (xhtmlize-engine-epilogue engine)
+    (xhtmlize-engine-process engine)
+    ))
 
 ;; Utility functions.
 
@@ -1355,7 +1361,7 @@ plain.  Likewise, if you don't like the choice of colors, fix the mode
 that created them, or simply alter the faces it uses."
   (interactive)
   (let ((htmlbuf (with-current-buffer (or buffer (current-buffer))
-		   (xhtmlize-buffer-1 engine-name))))
+		   (xhtmlize-buffer-1 (xhtmlize-engine-for engine-name)))))
     (when (interactive-p)
       (switch-to-buffer htmlbuf))
     htmlbuf))
@@ -1388,29 +1394,6 @@ the text to another HTML buffer."
 			    (plist-get xhtmlize-buffer-places 'content-end)))
       (kill-buffer htmlbuf))))
 
-(defun xhtmlize-make-file-name (file)
-  "Make an HTML file name from FILE.
-
-In its default implementation, this simply appends `.html' to FILE.
-This function is called by xhtmlize to create the buffer file name, and
-by `xhtmlize-file' to create the target file name.
-
-More elaborate transformations are conceivable, such as changing FILE's
-extension to `.html' (\"file.c\" -> \"file.html\").  If you want them,
-overload this function to do it and xhtmlize will comply."
-  (concat file ".html"))
-
-;; Older implementation of xhtmlize-make-file-name that changes FILE's
-;; extension to ".html".
-;(defun xhtmlize-make-file-name (file)
-;  (let ((extension (file-name-extension file))
-;	(sans-extension (file-name-sans-extension file)))
-;    (if (or (equal extension "html")
-;	    (equal extension "htm")
-;	    (equal sans-extension ""))
-;	(concat file ".html")
-;      (concat sans-extension ".html"))))
-
 ;;;###autoload
 (defun xhtmlize-file (file &optional target engine-name)
   "Load FILE, fontify it, convert it to HTML, and save the result.
@@ -1433,22 +1416,23 @@ does not name a directory, it will be used as output file name."
 		      nil nil nil (and (buffer-file-name)
 				       (file-name-nondirectory
 					(buffer-file-name))))))
-  (let ((output-file (if (and target (not (file-directory-p target)))
-			 target
-		       (expand-file-name
-			(xhtmlize-make-file-name (file-name-nondirectory file))
-			(or target (file-name-directory file)))))
-	;; Try to prevent `find-file-noselect' from triggering
-	;; font-lock because we'll fontify explicitly below.
-	(font-lock-mode nil)
-	(font-lock-auto-fontify nil)
-	(global-font-lock-mode nil)
-	;; Ignore the size limit for the purposes of htmlization.
-	(font-lock-maximum-size nil)
-	;; Disable font-lock support modes.  This will only work in
-	;; more recent Emacs versions, so xhtmlize-buffer-1 still needs
-	;; to call xhtmlize-ensure-fontified.
-	(font-lock-support-mode nil))
+  (let* ((engine (xhtmlize-engine-for engine-name))
+	 (output-file (if (and target (not (file-directory-p target)))
+			  target
+			(expand-file-name
+			 (xhtmlize-engine-make-file-name engine (file-name-nondirectory file))
+			 (or target (file-name-directory file)))))
+	 ;; Try to prevent `find-file-noselect' from triggering
+	 ;; font-lock because we'll fontify explicitly below.
+	 (font-lock-mode nil)
+	 (font-lock-auto-fontify nil)
+	 (global-font-lock-mode nil)
+	 ;; Ignore the size limit for the purposes of htmlization.
+	 (font-lock-maximum-size nil)
+	 ;; Disable font-lock support modes.  This will only work in
+	 ;; more recent Emacs versions, so xhtmlize-buffer-1 still needs
+	 ;; to call xhtmlize-ensure-fontified.
+	 (font-lock-support-mode nil))
     (with-temp-buffer
       ;; Insert FILE into the temporary buffer.
       (if (file-directory-p file)
@@ -1472,7 +1456,7 @@ does not name a directory, it will be used as output file name."
 	  ;; contrary to the documentation.  This seems to work.
 	  (font-lock-fontify-buffer))
 	;; xhtmlize the buffer and save the HTML.
-	(with-current-buffer (xhtmlize-buffer-1 engine-name)
+	(with-current-buffer (xhtmlize-buffer-1 engine)
 	  (unwind-protect
 	      (progn
 		(run-hooks 'xhtmlize-file-hook)

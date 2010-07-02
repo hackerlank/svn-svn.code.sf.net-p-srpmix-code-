@@ -3,7 +3,7 @@
 
 (defun shtmlize-file (file &optional target)
   (interactive (list (read-file-name
-		      "HTML-ize file: "
+		      "SHTML-ize file: "
 		      nil nil nil (and (buffer-file-name)
 				       (file-name-nondirectory
 					(buffer-file-name))))))

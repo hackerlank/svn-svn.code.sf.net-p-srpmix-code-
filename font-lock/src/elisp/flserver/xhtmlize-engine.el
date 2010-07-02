@@ -130,5 +130,31 @@
 (defmethod xhtmlize-engine-process ((engine <xhtmlize-engine>))
   (oref engine canvas))
 
+(defmethod xhtmlize-engine-make-file-name ((engine <xhtmlize-engine>) file)
+  "Make an HTML file name from FILE.
+
+In its default implementation, this simply appends `.html' to FILE.
+This function is called by xhtmlize to create the buffer file name, and
+by `xhtmlize-file' to create the target file name.
+
+More elaborate transformations are conceivable, such as changing FILE's
+extension to `.html' (\"file.c\" -> \"file.html\").  If you want them,
+overload this function to do it and xhtmlize will comply."
+  (concat file ".html"))
+
+
+;; Older implementation of xhtmlize-make-file-name that changes FILE's
+;; extension to ".html".
+;(defun xhtmlize-make-file-name (file)
+;  (let ((extension (file-name-extension file))
+;	(sans-extension (file-name-sans-extension file)))
+;    (if (or (equal extension "html")
+;	    (equal extension "htm")
+;	    (equal sans-extension ""))
+;	(concat file ".html")
+;      (concat sans-extension ".html"))))
+
+
+
 
 (provide 'xhtmlize-engine)
