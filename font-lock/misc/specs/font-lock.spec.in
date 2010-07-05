@@ -91,7 +91,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gauche/site/lib/font-lock/harness.scm
 
 %dir %{_datadir}/gauche/site/lib/font-lock/rearrange
-%{_datadir}/gauche/site/lib/font-lock/rearrange/css-href.scm
 %{_datadir}/gauche/site/lib/font-lock/rearrange/range.scm
 %{_datadir}/gauche/site/lib/font-lock/rearrange/title.scm
 
