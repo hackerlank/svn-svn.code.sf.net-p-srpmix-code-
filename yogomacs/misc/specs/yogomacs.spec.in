@@ -92,6 +92,9 @@ fi
 %dir %{_datadir}/gauche/site/lib/yogomacs/dests
 %{_datadir}/gauche/site/lib/yogomacs/dests/*.scm
 
+%dir %{_datadir}/gauche/site/lib/yogomacs/rearranges
+%{_datadir}/gauche/site/lib/yogomacs/rearranges/*.scm
+
 %dir %{_datadir}/gauche/site/lib/yogomacs/renderers
 %{_datadir}/gauche/site/lib/yogomacs/renderers/*.scm
 

@@ -117,6 +117,7 @@ AC_OUTPUT([
 	   src/gauche/yogomacs/default.scm
 	   src/gauche/yogomacs/dentries/Makefile
 	   src/gauche/yogomacs/dests/Makefile
+	   src/gauche/yogomacs/rearranges/Makefile
 	   src/gauche/yogomacs/renderers/Makefile
 	   src/base/Makefile
 	   src/data/Makefile

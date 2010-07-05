@@ -15,7 +15,9 @@
   ;;
   (use yogomacs.dests.debug)
   (use yogomacs.dests.css)
-  (use font-lock.rearrange.css-href))
+  (use yogomacs.rearranges.css-href)
+  (use yogomacs.rearranges.css-integrates)
+  )
 (select-module yogomacs.dests.file)
 
 
@@ -41,6 +43,7 @@
 	 (fix
 	  (call-with-input-file real-dest-path read)
 	  fix-css-href
+	  
 	  ))
 	(print-echo path path config "Flserver Rendering Timeout"))))
 

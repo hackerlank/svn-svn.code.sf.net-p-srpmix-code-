@@ -2,6 +2,7 @@ SUBDIRS  = .
 SUBDIRS += caches
 SUBDIRS += dentries
 SUBDIRS += dests
+SUBDIRS += rearranges
 SUBDIRS += renderers
 
 moduledir=@GAUCHE_MODULEDIR@/yogomacs
