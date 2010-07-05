@@ -40,7 +40,8 @@
   (call-next-method)
   (oset engine 
 	canvas (generate-new-buffer (if (buffer-file-name)
-					(xhtmlize-make-file-name
+					(xhtmlize-engine-make-file-name
+					 engine
 					 (file-name-nondirectory
 					  (buffer-file-name)))
 				      "*xhtml*"))))
