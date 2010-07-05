@@ -1,0 +1,120 @@
+/* Mostly taken from lisp files in GNU Emacs
+   
+;; Copyright (C) 1985, 1986, 1987, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+;;   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
+
+;; Maintainer: FSF
+;; Keywords: internal
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
+body {
+        /* default */
+        color: #ffffff;
+        background-color: #000000;
+}
+
+.default {
+        /* default */
+        color: #ffffff;
+        background-color: #000000;
+}
+/* About copyright see c source code of GNU Emacs */
+.comment-delimiter {
+        /* font-lock-comment-delimiter-face */
+        color: #ff7f24;
+}
+/* About copyright see c source code of GNU Emacs */
+.comment {
+        /* font-lock-comment-face */
+        color: #ff7f24;
+}
+/* About copyright see c source code of GNU Emacs */
+.constant {
+        /* font-lock-constant-face */
+        color: #7fffd4;
+}
+/* About copyright see c source code of GNU Emacs */
+.doc {
+        /* font-lock-doc-face */
+        color: #ffa07a;
+}
+/* About copyright see c source code of GNU Emacs */
+.function-name {
+        /* font-lock-function-name-face */
+        color: #87cefa;
+}
+/* About copyright see c source code of GNU Emacs */
+.keyword {
+        /* font-lock-keyword-face */
+        color: #00ffff;
+}
+/* About copyright see c source code of GNU Emacs */
+.negation-char {
+}
+/* About copyright see c source code of GNU Emacs */
+.preprocessor {
+        /* font-lock-preprocessor-face */
+        color: #b0c4de;
+}
+/* About copyright see c source code of GNU Emacs */
+.string {
+        /* font-lock-string-face */
+        color: #ffa07a;
+}
+/* About copyright see c source code of GNU Emacs */
+.type {
+        /* font-lock-type-face */
+        color: #98fb98;
+}
+/* About copyright see c source code of GNU Emacs */
+.variable-name {
+        /* font-lock-variable-name-face */
+        color: #eedd82;
+}
+a { color: inherit; background-color: inherit; font: inherit; text-decoration: inherit; }
+
+a:hover {
+        /* highlight */
+        background-color: #556b2f;
+}
+
+.highlight {
+        /* highlight */
+        background-color: #556b2f;
+}
+
+.lfringe {
+        /* lfringe */
+        background-color: #1a1a1a;
+        float: left;
+}
+
+.linum {
+        /* linum */
+        color: #b3b3b3;
+        background-color: #000000;
+        float: left;
+}
+
+.rfringe {
+        /* rfringe */
+        background-color: #1a1a1a;
+        float: right;
+}

@@ -112,9 +112,12 @@ fi
 %config %{_sysconfdir}/yogomacs/@SPEC_CONFIG@.scm
 %attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@
 %attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css
+%{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css/*.css
+
 %attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/@SPEC_CONFIG@
 %attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/@SPEC_CONFIG@/shtml
 
+%config %{_sysconfdir}/font-lock/flserver/yogomacs-@SPEC_CONFIG@.el
 
 %changelog
 * Tue Jun  8 2010 Masatake YAMATO <yamato@redhat.com> - 0.0.0-0

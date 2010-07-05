@@ -3,4 +3,6 @@
  (harness-timeout . 20)
  (client-verbose . #f)
  (real-sources-dir . "/srv/sources")
+ (emacs . "emacs")
+ (config . "yogomacs-@SPEC_CONFIG@")
  )

@@ -7,7 +7,15 @@ dist_module_DATA =   \
 
 
 csscachedir=$(localstatedir)/lib/yogomacs/@SPEC_CONFIG@/css
-csscache_DATA=
+dist_csscache_DATA= \
+	file-font-lock--Default.css  \
+	file-font-lock--Invert.css   \
+	dired-font-lock--Default.css \
+	dired-font-lock--Invert.css  \
+	\
+	$(NULL)
+
 
 shtmlcachedir=$(localstatedir)/cache/yogomacs/@SPEC_CONFIG@/shtml
-shtmlcache_DATA=
+dist_shtmlcache_DATA=
+

@@ -13,7 +13,9 @@
   (define (ping) (eq? (flclient-ping) 0))
   (define (launch-server)
     (let ((harness-object (choose-harness (config 'harness)))
-	  (server-cmdline (emacs-cmdline #f #f #f)))
+	  (server-cmdline (emacs-cmdline (config 'emacs)
+					 #f
+					 (config->config-file (config 'config)))))
       (launch harness-object server-cmdline 
 	      ;; TODO
 	      (list)
