@@ -73,6 +73,8 @@ rm -rf $RPM_BUILD_ROOT
 %{emacs_lispdir}/flserver/queue-m.elc
 %{emacs_lispdir}/flserver/text-tree.el
 %{emacs_lispdir}/flserver/text-tree.elc
+%{emacs_lispdir}/flserver/time.el
+%{emacs_lispdir}/flserver/time.elc
 
 
 %dir %{emacs_lispdir}/flserver/plugins

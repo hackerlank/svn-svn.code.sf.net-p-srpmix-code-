@@ -1257,7 +1257,7 @@ it's called with the same value of KEY.  All other times, the cached
 	  ;; represent faces in FSTRUCT-LIST.
 	  (funcall insert-text-with-id-method text 
 					;(format "font-lock:%s" (point))
-		   (concat "F:" (number-to-string pnt))
+		   (concat "P:" (number-to-string pnt))
 		   nil
 		   fstruct-list
 		   engine))

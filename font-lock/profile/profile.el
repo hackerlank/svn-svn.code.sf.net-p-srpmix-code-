@@ -28,7 +28,8 @@
 (defun raw-profile ()
   (interactive)
   (elp-reset-all)
-  (time-expr '(shtmlize-file "/tmp/xdisp.c")))
+  (let ((toggle-debug-on-quit t))
+    (time-expr '(shtmlize-file "/tmp/xdisp.c"))))
   
 ;; xhtmlize-file <IO>: 10
 ;; xhtmlize-engine-body-common: 24

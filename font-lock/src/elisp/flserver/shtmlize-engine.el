@@ -103,6 +103,16 @@
   (oset engine
 	canvas (list (queue-create))))
 
+(defvar shtmlize-predefined-face-css-func nil)
+(defun shtmlize-predefined-face-css (title)
+  (when shtmlize-predefined-face-css-func
+    (funcall shtmlize-predefined-face-css-func title)))
+
+(defvar xhtmlize-external-css-predefined-faces
+  (list))
+(defun xhtmlize-external-css-predefined-facep (face)
+  (member face xhtmlize-external-css-predefined-faces))
+		  
 (defmethod xhtmlize-engine-prologue ((engine <shtmlize-engine>) title)
   (let ((queue (shtmlize-top engine)))
     (shtmlize-enqueue 
@@ -142,22 +152,28 @@
        ("font-lock-support-mode" . ,(format "%s" font-lock-support-mode))
        ))
     
-
+    (let ((css-link (shtmlize-predefined-face-css "Default")))
+      (shtmlize-enqueue queue css-link))
+    
+    (let ((css-link (shtmlize-predefined-face-css "Invert")))
+      (shtmlize-enqueue queue css-link))
+    
     (lexical-let ((queue queue))
       (dolist (face (xhtmlize-external-css-enumerate-faces (oref engine buffer-faces)
 							   (oref engine face-map)))
-	(xhtmlize-css-link face 
-			   xhtmlize-external-css-base-dir
-			   (lambda (face title)
-			     (shtmlize-enqueue
-			      queue
-			      `("    " (link (|@| (rel "stylesheet")
-						  (type "text/css")
-						  (href ,(format "%s/%s"
-								 xhtmlize-external-css-base-url
-								 (xhtmlize-css-make-file-name face title)))
-						  (title ,title)))
-				"\n"))))))
+	(unless (xhtmlize-external-css-predefined-facep face)
+	  (xhtmlize-css-link face 
+			     xhtmlize-external-css-base-dir
+			     (lambda (face title)
+			       (shtmlize-enqueue
+				queue
+				`("    " (link (|@| (rel "stylesheet")
+						    (type "text/css")
+						    (href ,(format "%s/%s"
+								   xhtmlize-external-css-base-url
+								   (xhtmlize-css-make-file-name face title)))
+						    (title ,title)))
+				  "\n")))))))
     ;;
     (setq queue (shtmlize-pop engine))
     (shtmlize-enqueue queue '("\n" "    "))
