@@ -19,7 +19,7 @@
 
 
 (defun xhtmlize-linum-acceptable-p (o)
-  (if (overlay-get o 'linum-str) t nil))
+  (overlay-get o 'linum-str))
 
 (defvar xhtmlize-linum-fstruct-list-cache nil)
 (defun xhtmlize-linum-fstruct-list-cache (face-map)
@@ -29,39 +29,50 @@
 	  (mapcar (lambda (f) (gethash f face-map)) '(linum)))
     xhtmlize-linum-fstruct-list-cache))
 
+(defsubst xhtmlize-linum-drop-whitespace (str)
+  (let ((i 0))
+    (while (eq (aref str i) ?\ )
+      (setq i (1+ i)))
+    (substring-no-properties str i)))
+
 (defun xhtmlize-linum-render-direct (o insert-method face-map engine)
   (let* ((str0 (overlay-get o 'linum-str))
 	 (str (substring-no-properties str0))
 	 (line-str (car (split-string str)))
+	 ;(line-str (xhtmlize-linum-drop-whitespace (overlay-get o 'linum-str)))
+	 ;(line (string-to-number line-str))
+	 ;(line (car (read-from-string (overlay-get o 'linum-str))))
+	 ;(line-str (number-to-string line))
 	 (point (point))
 	 (id (concat "L:" line-str))
 	 (href (concat "#" id)) ; TODO: "L:" is needed?
 	 (fstruct-list (xhtmlize-linum-fstruct-list-cache face-map))
-	 (line (string-to-number line-str)))
+	 ;(line (string-to-number line-str))
+	 )
+
     (when xhtmlize-pre-linum-handlers
       (mapc
        (lambda (handler)
 	 (let ((render-direct (cdr (assq 'render-direct handler))))
 	   (when render-direct
-	     (funcall render-direct line point insert-method face-map engine)
+	     (funcall render-direct line-str point insert-method face-map engine)
 	     )
 	   ))
        xhtmlize-pre-linum-handlers))
     (funcall insert-method 
-	     str
+	     line-str
 	     id
 	     href
 	     fstruct-list
 	     engine)
-    (when xhtmlize-post-linum-handlers
-      (mapc
+    (mapc
        (lambda (handler)
 	 (let ((render-direct (cdr (assq 'render-direct handler))))
 	   (when render-direct
-	     (funcall render-direct line point insert-method face-map engine)
+	     (funcall render-direct line-str point insert-method face-map engine)
 	     )
 	   ))
-       xhtmlize-post-linum-handlers))))
+       xhtmlize-post-linum-handlers)))
 
 (defun xhtmlize-linum-prepare  (o)
   (let ((str (overlay-get o 'linum-str)))

@@ -5,14 +5,14 @@
 
 ;; TODO: define macro.
 (defvar xhtmlize-linum-lfringe-fstruct-list-cache nil)
-(defun xhtmlize-linum-lfringe-fstruct-list-cache (face-map)
+(defsubst xhtmlize-linum-lfringe-fstruct-list-cache (face-map)
   (if xhtmlize-linum-lfringe-fstruct-list-cache
       xhtmlize-linum-lfringe-fstruct-list-cache
     (setq xhtmlize-linum-lfringe-fstruct-list-cache 
 	  (mapcar (lambda (f) (gethash f face-map)) '(lfringe)))
     xhtmlize-linum-lfringe-fstruct-list-cache))
 (defvar xhtmlize-linum-rfringe-fstruct-list-cache nil)
-(defun xhtmlize-linum-rfringe-fstruct-list-cache (face-map)
+(defsubst xhtmlize-linum-rfringe-fstruct-list-cache (face-map)
   (if xhtmlize-linum-rfringe-fstruct-list-cache
       xhtmlize-linum-rfringe-fstruct-list-cache
     (setq xhtmlize-linum-rfringe-fstruct-list-cache 
@@ -20,19 +20,10 @@
     xhtmlize-linum-rfringe-fstruct-list-cache))
 
 (define-xhtmlize-post-linum-handler 'xhtmlize-linum-rfringe-render-direct)
-(defun xhtmlize-linum-rfringe-render-direct (line point insert-method face-map engine)
+(defun xhtmlize-linum-rfringe-render-direct (line-str point insert-method face-map engine)
   (let* ((text  " ")
-	 (line-str (number-to-string line))
-	 (lid (concat "f:L"
-		      "/"
-		      "P:" (number-to-string point)
-		      "/"
-		      "L:" line-str
-		      ))
-	 (rid (concat "f:R"
-		      "/"
-		      "L:" line-str
-		      ))
+	 (lid (concat "f:L/P:" (number-to-string point) "/L:" line-str))
+	 (rid (concat "f:R/L:" line-str))
 	 (lfstruct-list (xhtmlize-linum-lfringe-fstruct-list-cache face-map))
 	 (rfstruct-list (xhtmlize-linum-rfringe-fstruct-list-cache face-map))
 	 )

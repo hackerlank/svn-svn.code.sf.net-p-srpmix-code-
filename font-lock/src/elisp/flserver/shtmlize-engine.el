@@ -31,19 +31,29 @@
    elts))
 
 (defun shtmlize-expand-0 (queue)
-  (mapcar
-   (lambda (elt)
-     (cond
-      ((queue-p elt) (shtmlize-expand-0 elt))
-      ;((and (stringp elt) (string= elt "\n")) "\\n")
-      (t elt)))
-   (queue-all queue)))
+  (let* ((as-list (queue-all queue))
+	 (temp as-list))
+    (while temp
+      (when (queue-p (car temp))
+	(setcar temp (shtmlize-expand-0 (car temp))))
+      (setq temp (cdr temp)))
+    as-list))
+
+;; (defun shtmlize-expand-0 (queue)
+;;   (mapcar
+;;    (lambda (elt)
+;;      (cond
+;;       ((queue-p elt) (shtmlize-expand-0 elt))
+;;       ;((and (stringp elt) (string= elt "\n")) "\\n")
+;;       (t elt)))
+;;    (queue-all queue)))
 
 (defun shtmlize-expand (engine)
   (shtmlize-expand-0 (shtmlize-top engine)))
 (defun shtmlize-enqueue-text-with-id (text id href fstruct-list engine)
-  (let ((queue (shtmlize-top engine)))
-    (if (and (car fstruct-list) (null (cdr fstruct-list)))
+  (let ((queue (shtmlize-top engine))
+	(single (and (car fstruct-list) (null (cdr fstruct-list)))))
+    (if single
 	(shtmlize-enqueue queue `((span
 				   (|@|
 				    (class ,(cssize-fstruct-css-name (car fstruct-list)))
@@ -84,7 +94,7 @@
       (when href
 	(setq queue (shtmlize-pop engine))))
     
-    (unless (and (car fstruct-list) (null (cdr fstruct-list)))
+    (unless single
       (dolist (fstruct fstruct-list)
 	(setq queue (shtmlize-pop engine))))))
 
@@ -128,7 +138,8 @@
 			    ))
 	  "\n"))
        )
-     `(("major-mode" . ,(format "%s" major-mode))
+     `(("major-mode" . ,(symbol-name major-mode))
+       ("font-lock-support-mode" . ,(format "%s" font-lock-support-mode))
        ))
     
 
@@ -179,6 +190,7 @@
 					(buffer-file-name)))
 				    "*shtml*")))
 	(print-escape-newlines t))
+    (buffer-disable-undo buf)
     (prin1 (shtmlize-expand engine) buf)
     buf))
 
