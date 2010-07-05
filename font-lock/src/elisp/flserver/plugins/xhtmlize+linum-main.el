@@ -44,7 +44,7 @@
 	 ;(line (car (read-from-string (overlay-get o 'linum-str))))
 	 ;(line-str (number-to-string line))
 	 (point (point))
-	 (id (concat "L:" line-str))
+	 (id line-str)
 	 (href (concat "#" id)) ; TODO: "L:" is needed?
 	 (fstruct-list (xhtmlize-linum-fstruct-list-cache face-map))
 	 ;(line (string-to-number line-str))
@@ -60,7 +60,7 @@
 	   ))
        xhtmlize-pre-linum-handlers))
     (funcall insert-method 
-	     line-str
+	     str
 	     id
 	     href
 	     fstruct-list
@@ -79,8 +79,8 @@
     (put-text-property 0 (length str) 'face 'linum str)
     str))
 (defun xhtmlize-linum-make-id  (o)
-  (let ((str (overlay-get o 'linum-str)))
-    (concat "L:" (car (split-string str)))))
+  (let ((str (substring-no-properties (overlay-get o 'linum-str))))
+    (car (split-string str))))
 (defun xhtmlize-linum-make-href (o)
   (let ((file (buffer-file-name (overlay-buffer o))))
     (concat "#" (xhtmlize-linum-make-id o))))

@@ -1229,7 +1229,7 @@ it's called with the same value of KEY.  All other times, the cached
 	 ((not (numberp next-change))
 	  (log+error "ERROR: %s is not number" next-change))
 	 ((< next-change pnt)
-	  (log+error "ERROR: next-change:%d < (point:%d)" next-change pnt)))
+	  (log+error "ERROR<0>: next-change:%d < (point:%d)" next-change pnt)))
 	;; Get faces in use between (point) and NEXT-CHANGE, and
 	;; convert them to fstructs.
 	(setq face-list (xhtmlize-faces-at-point)
@@ -1261,6 +1261,9 @@ it's called with the same value of KEY.  All other times, the cached
 		   nil
 		   fstruct-list
 		   engine))
+	(cond
+	 ((< next-change pnt)
+	  (log+error "ERROR<1>: next-change:%d < (point:%d)" next-change pnt)))
 	(goto-char next-change)))))
 
 (defmethod xhtmlize-engine-epilogue ((engine <xhtmlize-common-engine>))
