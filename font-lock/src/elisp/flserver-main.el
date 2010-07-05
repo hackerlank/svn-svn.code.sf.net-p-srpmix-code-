@@ -15,12 +15,12 @@
 (setq enable-local-variables nil
       enable-local-eval nil
       local-enable-local-variables nil)
+(set 'font-lock-support-mode nil)
 
 ;;
 ;; Don't create backup file
 ;;
 (setq make-backup-files nil)
-
 
 ;;
 ;; Server setup
