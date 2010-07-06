@@ -16,6 +16,7 @@
       enable-local-eval nil
       local-enable-local-variables nil)
 (set 'font-lock-support-mode nil)
+(remove-hook 'find-file-hook 'vc-find-file-hook)
 
 ;;
 ;; Don't create backup file
