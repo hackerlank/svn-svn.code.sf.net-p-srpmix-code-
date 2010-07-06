@@ -8,6 +8,8 @@
   ;;
   (use yogomacs.path)
   ;;
+  (use yogomacs.flserver)
+  (use font-lock.flclient)
   (use yogomacs.renderers.find-file)
   ;;
   (use yogomacs.fix)
