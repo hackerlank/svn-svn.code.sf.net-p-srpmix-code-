@@ -1,14 +1,14 @@
 (define-module yogomacs.dests.file
   (export file-dest
-	  fix-css-href)
+	  fix-css-href
+	  integrate-file-face)
   (use srfi-1)
   (use www.cgi)  
   (use file.util)
   ;;
   (use yogomacs.path)
   ;;
-  (use yogomacs.flserver)
-  (use font-lock.flclient)
+  (use yogomacs.renderers.find-file)
   ;;
   (use yogomacs.fix)
   (use yogomacs.caches.css)
@@ -16,14 +16,17 @@
   (use yogomacs.dests.debug)
   (use yogomacs.dests.css)
   (use yogomacs.rearranges.css-href)
-  (use yogomacs.rearranges.css-integrates)
+  (use yogomacs.rearranges.face-integrates)
   )
 (select-module yogomacs.dests.file)
 
-
 (define fix-css-href (cute rearrange-css-href <>
 			   (lambda (css-href)
-			     (build-path css-route (sys-basename css-href)))))
+			     (build-path css-route
+					 (sys-basename css-href)))))
+
+(define integrate-file-face
+   (cute face-integrates <> "file-font-lock" find-file-faces))
 
 (define (file-dest path params config)
   (let* ((last (last path))
@@ -43,7 +46,7 @@
 	 (fix
 	  (call-with-input-file real-dest-path read)
 	  fix-css-href
-	  
+	  integrate-file-face
 	  ))
 	(print-echo path path config "Flserver Rendering Timeout"))))
 

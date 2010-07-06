@@ -28,6 +28,7 @@
    (fix
     (dired (compose-path path)
 	   (glob-dentries (config 'real-sources-dir) root-globs)
-	   css-route))))
+	   css-route)
+    integrate-dired-face)))
 
 (provide "yogomacs/dests/root-dir")

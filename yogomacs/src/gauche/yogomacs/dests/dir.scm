@@ -1,5 +1,6 @@
 (define-module yogomacs.dests.dir
   (export prepare-dired-faces
+	  integrate-dired-face
 	  dir-dest)
   (use srfi-1)
   (use www.cgi)  
@@ -8,7 +9,6 @@
   (use yogomacs.path)
   (use yogomacs.dentry)
   (use yogomacs.dentries.fs)
-  (use yogomacs.renderer)
   (use yogomacs.renderers.dired)
   (use util.combinations)
   ;;
@@ -17,41 +17,21 @@
   ;;
   (use util.match)
   (use yogomacs.dests.css)
-  (use yogomacs.rearranges.css-integrates))
+  (use yogomacs.rearranges.face-integrates))
 
 (select-module yogomacs.dests.dir)
 
-(define (link-face-css base-name style)
-  `(link (|@|
-	  (rel "stylesheet") 
-	  (type "text/css")
-	  (href ,(face->css-route base-name style css-route))
-	  (title ,style))))
-
-(define (integrate-stylesheets sxml base-name)
-  (css-integrates sxml
-		  `("\n" "    "
-		    ,(link-face-css base-name "Default")
-		    "\n" "    "
-		    ,(link-face-css base-name "Invert"))
-		  (cute href-for-faces? <> dired-faces)))
-
-(define (href-for-faces? href faces)
-  ((apply any-pred
-	  (map (lambda (x) 
-		 (string->regexp 
-		  (string-append "/"
-				 (symbol->string x)  
-				 "--(?:Default|Invert)\.css$")))
-	       faces))
-   href))
+(define integrate-dired-face
+   (cute face-integrates <> "dired-font-lock" dired-faces))
 
 (define (prepare-dired-faces config)
   (for-each
    (lambda (face-style)
-     (prepare-css-cache config (car face-style) (cadr face-style) '(dired)))
-   (cartesian-product `(,dired-faces
-			,dired-styles))))
+     (prepare-css-cache config
+			(car face-style)
+			(cadr face-style)
+			'(dired)))
+   (cartesian-product `(,dired-faces ,dired-styles))))
 
 (define dir-dest 
   (match-lambda*
@@ -63,10 +43,13 @@
        (cgi-header)
        (fix
 	(dired (compose-path path)
-	       (glob-dentries (build-path (config 'real-sources-dir) head last)
-			      (make-dir-globs (build-path "/" head) last extra))
+	       (glob-dentries (build-path (config 'real-sources-dir)
+					  head last)
+			      (make-dir-globs (build-path "/" head)
+					      last
+					      extra))
 	       css-route)
-	(cute integrate-stylesheets <> "dired-font-lock")))))
+	integrate-dired-face))))
    ((path params config)
     (dir-dest path params config (list)))))
 
