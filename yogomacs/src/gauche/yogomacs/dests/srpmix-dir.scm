@@ -4,6 +4,7 @@
   (use yogomacs.path)
   (use yogomacs.dests.fs)
   (use yogomacs.dests.dir)
+  (use yogomacs.dests.file)
   (use yogomacs.access)
   (use srfi-1)
   ;;
@@ -27,6 +28,7 @@
     (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/pre-build\/.*/ ,fs-dest)
     (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/archives$/     ,dir-dest)
     (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/archives\/.*/  ,fs-dest)
+    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/specs.spec$/   ,file-dest)
     ;; (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+/([^^\/]+)\/vanilla$/ ,dir-dest)
     ))
 
