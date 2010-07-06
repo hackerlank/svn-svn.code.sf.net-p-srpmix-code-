@@ -9,7 +9,7 @@
 
 (define (emacs-cmdline emacs load-path config-file)
   `(,(or emacs "emacs")
-    "-Q"
+    "-q" "--no-splash"			; -Q?
     ,@(if load-path `("-L" ,load-path) (list))
     "-l" "flserver-boot"
     "-l" "flserver-decl"
