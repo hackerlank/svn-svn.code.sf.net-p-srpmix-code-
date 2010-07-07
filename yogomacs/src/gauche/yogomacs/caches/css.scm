@@ -23,14 +23,13 @@
   (let* ((dir (css-cache-dir config))
 	 (entry (face->css-file face style))
 	 (file (build-path dir entry))
-	 (cssize (lambda ()
-		   (flclient-cssize face
-				    dir
-				    requires
-				    ;;
-				    :verbose (config 'client-verbose)
-				    ;;
-				    ))))
+	 (cssize (pa$ flclient-cssize face
+		      dir
+		      requires
+		      ;;
+		      :verbose (config 'client-verbose)
+		      ;;
+		      )))
     (prepare-cache config file cssize)))
 
 (provide "yogomacs/caches/css")
