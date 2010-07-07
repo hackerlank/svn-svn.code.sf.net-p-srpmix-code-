@@ -8,12 +8,9 @@
   ;;
   (use yogomacs.path)
   ;;
-  (use yogomacs.flserver)
-  (use font-lock.flclient)
   (use yogomacs.renderers.find-file)
   ;;
   (use yogomacs.fix)
-  (use yogomacs.caches.css)
   ;;
   (use yogomacs.dests.debug)
   (use yogomacs.dests.css)
@@ -34,23 +31,24 @@
   (let* ((last (last path))
 	 (head (path->head path))
 	 (real-src-dir (build-path (config 'real-sources-dir) head))
-	 ;; cache
-	 (real-dest-path (build-path "/tmp" (format "~a.~a" last "shtml")))
-	 (shtmlize (pa$ flclient-shtmlize
-			(build-path real-src-dir last)
-			real-dest-path
-			(css-cache-dir config)
-			:verbose (config 'client-verbose))))
-    (flserver shtmlize config)
-    (if (file-exists? real-dest-path)
-	(list
-	 (cgi-header)
-	 (fix
-	  (call-with-input-file real-dest-path read)
-	  fix-css-href
-	  integrate-file-face
-	  ))
-	(print-echo path path config "Flserver Rendering Timeout"))))
-
+	 (real-src-file (build-path real-src-dir last)))
+    (guard (e
+	    ((<find-file-error> e) 
+	     (list
+	      (cgi-header :status (condition-ref e 'status))
+	      (print-echo0 path path config (condition-ref e 'message))))
+	    ((<error> e)
+	     (list
+	      (cgi-header :status "502 Bad Gateway")
+	      (print-echo0 path path config (condition-ref e 'message))))
+	    (else
+	     (list
+	      (cgi-header :status "500 Internal Server Error"))))
+	   (list
+	    (cgi-header)
+	    (fix
+	     (find-file real-src-file config)
+	     fix-css-href
+	     integrate-file-face)))))
 
 (provide "yogomacs/dests/file")

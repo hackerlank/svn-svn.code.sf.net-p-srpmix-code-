@@ -108,6 +108,8 @@
 (test-module 'yogomacs.main)
 (use yogomacs.renderers.dired)
 (test-module 'yogomacs.renderers.dired)
+(use yogomacs.renderers.find-file)
+(test-module 'yogomacs.renderers.find-file)
 (use yogomacs.access)
 (test-module 'yogomacs.access)
 
