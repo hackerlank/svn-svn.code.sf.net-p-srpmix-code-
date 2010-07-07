@@ -172,6 +172,7 @@
     (xhtmlize-engine-body-common engine
 				 #'shtmlize-enqueue-text-with-id
 				 )
+    
     (setq queue (shtmlize-pop engine))
     (shtmlize-enqueue queue '("\n" "    "))
     (setq queue (shtmlize-pop engine))
@@ -191,6 +192,11 @@
     (buffer-disable-undo buf)
     (prin1 (shtmlize-expand engine) buf)
     buf))
+
+(defmethod xhtmlize-engine-insert-comment ((engine <shtmlize-engine>) 
+					   comment)
+  (let ((queue (shtmlize-top engine)))
+    (shtmlize-enqueue queue `((*COMMENT* ,comment)))))
 
 (defmethod xhtmlize-engine-make-file-name ((engine <shtmlize-engine>) file)
   (concat file ".shtml"))

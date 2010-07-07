@@ -300,16 +300,22 @@ output.")
 (defun xhtmlize-next-change (pos prop &optional limit)
   ;; (message "<%d, %s>" pos limit) 
   (let ((r0 (next-char-property-change pos limit))
-	(r1 (next-single-char-property-change pos prop nil limit)))
-    (if (< r0 r1)
-	(let* ((ovs (xhtmlize-overlays-between r0 r1))
-	       (r00 (some (lambda (o) 
-			    (and (xhtmlize-width0-overlay-acceptable-p o)
-				 (overlay-start o))
-			    )
-			  ovs)))
-	  (or r00 r1))
-      r1)))
+	(r1 (next-single-char-property-change pos prop nil limit))
+	(r2 (next-single-property-change pos 'face nil limit)))
+    (when (boundp 'engine)
+      (xhtmlize-engine-insert-comment engine (format "%s/%s/%s" r0 r1 r2))
+      )
+    (cond
+     ((< r0 r1)
+      (let* ((ovs (xhtmlize-overlays-between r0 r1))
+	     (r00 (some (lambda (o) 
+			  (and (xhtmlize-width0-overlay-acceptable-p o)
+			       (overlay-start o))
+			  )
+			ovs)))
+	(or r00 r1)))
+     (t
+      r1))))
       
 ;;; Transformation of buffer text: HTML escapes, untabification, etc.
 
@@ -683,7 +689,8 @@ property and by buffer overlays that specify `face'."
     (let ((pos (point-min)) face-prop next)
       (while (< pos (point-max))
 	(setq face-prop (get-text-property pos 'face)
-	      next (or (next-single-property-change pos 'face) (point-max)))
+	      next (or (next-single-property-change pos 'face) 
+		       (point-max)))
 	;; FACE-PROP can be a face/attrlist or a list thereof.
 	(setq faces (if (xhtmlize-face-list-p face-prop)
 			(nunion (mapcar #'xhtmlize-unstringify-face face-prop)
@@ -1229,7 +1236,10 @@ it's called with the same value of KEY.  All other times, the cached
 	 ((not (numberp next-change))
 	  (log+error "ERROR: %s is not number" next-change))
 	 ((< next-change pnt)
-	  (log+error "ERROR<0>: next-change:%d < (point:%d)" next-change pnt)))
+	  (log+error "ERROR<0>: next-change:%d < (point:%d)" next-change pnt))
+	 (t
+	  (xhtmlize-engine-insert-comment engine (format "n:%d/%d" next-change (point-max)))
+	  ))
 	;; Get faces in use between (point) and NEXT-CHANGE, and
 	;; convert them to fstructs.
 	(setq face-list (xhtmlize-faces-at-point)
@@ -1272,6 +1282,9 @@ it's called with the same value of KEY.  All other times, the cached
   )
 
 (defmethod xhtmlize-engine-make-file-name ((engine <xhtmlize-common-engine>) file)
+  )
+
+(defmethod xhtmlize-engine-insert-comment ((engine <xhtmlize-common-engine>) comment)
   )
 
 (defmacro with-xhtmlize-engine-canvas (name engine &rest body)

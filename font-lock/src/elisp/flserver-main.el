@@ -97,10 +97,13 @@
   (with-log-string
    "shtmlize" (format "src-file: %s, shtml-file: %s, css-dir: %s"
 		      src-file shtml-file css-dir)
-   (let ((xhtmlize-external-css-base-dir css-dir)
-	 (xhtmlize-external-css-base-url (or flserver-xhtmlize-external-css-base-url
-					     (concat "file://" css-dir))))
-     (shtmlize-file src-file shtml-file))))
+   (condition-case e
+       (let ((xhtmlize-external-css-base-dir css-dir)
+	     (xhtmlize-external-css-base-url (or flserver-xhtmlize-external-css-base-url
+						 (concat "file://" css-dir))))
+	 (shtmlize-file src-file shtml-file))
+     (error 
+      (log-string (error-message-string e))))))
 
 (defun flserver-cssize (face css-dir requires)
   (with-log-string
