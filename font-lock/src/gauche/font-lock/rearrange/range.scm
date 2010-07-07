@@ -8,6 +8,7 @@
 
 (define (id . args) args)
 
+(define linum-regex #/^([0-9]+)$/)
 (define (linum-of line)
   (and-let* (( (not (null? line)) )
 	     (attrs (car line))
@@ -16,7 +17,7 @@
 	     (class-value (assq 'class (cdr attrs)))
 	     ( (equal? "linum" (cadr class-value)) )
 	     (id-value (assq 'id (cdr attrs)))
-	     (match (#/^L:([0-9])+/ (cadr id-value)))
+	     (match (linum-regex (cadr id-value)))
 	     (line-str (match 1)))
     (string->number line-str)))
 
