@@ -36,17 +36,21 @@
   )
 
 (define (find-file src-path config)
-  (let* ((dest-path (build-path "/tmp" (format "~a.~a" (sys-basename src-path) "shtml")))
-	 (shtmlize (pa$ flclient-shtmlize
-			src-path
-			dest-path
-			(css-cache-dir config)
-			:verbose (config 'client-verbose))))
-    (flserver shtmlize config)
-    (if (file-exists? dest-path)
-	(call-with-input-file dest-path read)
-	(error <find-file-error>
-	       :status "504 Gateway Timeout"
-	       "Flserver Rendering Timeout"))))
+  (if (readable? src-path)
+      (let* ((dest-path (build-path "/tmp" (format "~a.~a" (sys-basename src-path) "shtml")))
+	     (shtmlize (pa$ flclient-shtmlize
+			    src-path
+			    dest-path
+			    (css-cache-dir config)
+			    :verbose (config 'client-verbose))))
+	(flserver shtmlize config)
+	(if (file-exists? dest-path)
+	    (call-with-input-file dest-path read)
+	    (error <find-file-error>
+		   :status "504 Gateway Timeout"
+		   "Flserver Rendering Timeout")))
+      (error <find-file-error>
+	     :status "403 Not Found"
+	     "File not found")))
 
 (provide "yogomacs/renderers/find-file")
