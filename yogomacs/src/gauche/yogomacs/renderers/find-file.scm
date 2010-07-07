@@ -29,6 +29,8 @@
     lfringe
     linum
     rfringe
+    ;;
+    ;; spec, c
     ))
 
 (define-condition-type <find-file-error> <error> 
@@ -37,7 +39,10 @@
 
 (define (find-file src-path config)
   (if (readable? src-path)
-      (let* ((dest-path (build-path "/tmp" (format "~a.~a" (sys-basename src-path) "shtml")))
+      (let* ((dest-path (build-path "/tmp" (format "~a--~a.~a" 
+						   (sys-getpid)
+						   (sys-basename src-path)
+						   "shtml")))
 	     (shtmlize (pa$ flclient-shtmlize
 			    src-path
 			    dest-path
@@ -45,7 +50,9 @@
 			    :verbose (config 'client-verbose))))
 	(flserver shtmlize config)
 	(if (file-exists? dest-path)
-	    (call-with-input-file dest-path read)
+	    (unwind-protect
+	     (call-with-input-file dest-path read)
+	     (sys-unlink  dest-path))
 	    (error <find-file-error>
 		   :status "504 Gateway Timeout"
 		   "Flserver Rendering Timeout")))
