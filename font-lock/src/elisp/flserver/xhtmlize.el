@@ -303,7 +303,8 @@ output.")
 	(r1 (next-single-char-property-change pos prop nil limit))
 	(r2 (next-single-property-change pos 'face nil limit)))
     (when (boundp 'engine)
-      (xhtmlize-engine-insert-comment engine (format "%s/%s/%s" r0 r1 r2))
+      (unless r2
+	(xhtmlize-engine-insert-comment engine (format "nil => %s" limit)))
       )
     (cond
      ((< r0 r1)
@@ -687,6 +688,9 @@ property and by buffer overlays that specify `face'."
     ;; FSF Emacs code.
     ;; Faces used by text properties.
     (let ((pos (point-min)) face-prop next)
+      ;;(let ((x (next-single-property-change pos 'face)))
+      ;;	(xhtmlize-engine-insert-comment engine (format "%s <=" x))
+      ;; )
       (while (< pos (point-max))
 	(setq face-prop (get-text-property pos 'face)
 	      next (or (next-single-property-change pos 'face) 
@@ -1237,9 +1241,7 @@ it's called with the same value of KEY.  All other times, the cached
 	  (log+error "ERROR: %s is not number" next-change))
 	 ((< next-change pnt)
 	  (log+error "ERROR<0>: next-change:%d < (point:%d)" next-change pnt))
-	 (t
-	  (xhtmlize-engine-insert-comment engine (format "n:%d/%d" next-change (point-max)))
-	  ))
+	 )
 	;; Get faces in use between (point) and NEXT-CHANGE, and
 	;; convert them to fstructs.
 	(setq face-list (xhtmlize-faces-at-point)
