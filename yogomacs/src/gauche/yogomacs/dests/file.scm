@@ -29,6 +29,9 @@
 (define integrate-file-face
    (cute face-integrates <> "file-font-lock" find-file-faces))
 
+(define (log msg)
+  (print msg (current-error-port)))
+
 (define (file-dest path params config)
   (let* ((last (last path))
 	 (head (path->head path))
@@ -36,6 +39,7 @@
 	 (real-src-file (build-path real-src-dir last)))
     (guard (e
 	    ((<renderer-error> e) 
+	     (log (condition-ref e 'log))
 	     (list
 	      (cgi-header :status (condition-ref e 'status))
 	      (print-echo0 path path config (condition-ref e 'message))))

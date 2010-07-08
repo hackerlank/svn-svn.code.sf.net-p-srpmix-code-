@@ -4,14 +4,15 @@
    (use util.digest)
    (use file.util)
    (use yogomacs.renderer)
-   (use yogomacs.access))
+   (use yogomacs.access)
+   (use yogomacs.gzip)
+   (use gauche.process))
 
 (select-module yogomacs.renderers.cache)
 
 (define (sha1->cache-file sha1 config)
   (let1 dir (sha1->cache-dir sha1 config)
-    (values (build-path dir sha1)
-	    dir)))
+    (build-path dir sha1)))
 
 (define (sha1->cache-dir sha1 config)
   (format "/var/cache/yogomacs/~a/shtml/~a/~a/~a/~a/~a/~a"
@@ -24,50 +25,77 @@
 		    (substring sha1 10 12)
 		    ))
 
+(define-macro (ignore-exception . body)
+  (let ((e (gensym)))
+    `(guard (,e (else #f))
+	    ,@body)))
+
+(define (remove-safe file)
+  (ignore-exception (sys-unlink  file)))
+
+(define (cached? cache-file)
+  (file-is-readable? cache-file))
+
+(define (read-cache cache-file)
+  (guard (e (<read-error> 
+	     (remove-safe cache-file)
+	     (internal-error "Broken Cache"
+			     (format "~s (~a)" cache-file
+				     (condition-ref e 'message))))
+	    (<process-abnormal-exit>
+	     (remove-safe cache-file)
+	     (internal-error "Failed to Read Cache"
+			     (format "~s (~a)" cache-file
+				     (condition-ref e 'message))))
+	    (else
+	     (internal-error "Cache Lost"
+			     (format "~s (~a)" 
+				     cache-file
+				     (condition-ref e 'message)))))
+	 (with-input-from-gzip-file cache-file
+				    read)))
+				    
+
+(define (build-cache prepare-proc cache-file)
+  (let1 cache-dir (sys-dirname cache-file)
+    (guard (e (else (internal-error "Failed to prepare cache directory"
+				    (format "~s (~a)"
+					    cache-dir
+					    (condition-ref e 'message)))))
+	   (make-directory* cache-dir))
+    (let ((shtml (prepare-proc))
+	  (tmp   (format "~a/.~a--~a" 
+			 cache-dir 
+			 (sys-basename cache-file)
+			 (sys-getpid))))
+      (with-output-to-file tmp
+	(pa$ write shtml)
+	:if-exists :error
+	:if-does-not-exist :create)
+      ;; TODO gzip
+      (ignore-exception 
+       (gzip tmp)
+       (sys-rename (format "~a.gz" tmp) cache-file))
+      shtml)))
+
+(define (newer-than? cache-file src-path)
+  (file-mtime>? cache-file src-path))
+
 (define (cache src-path prepare-proc config)
-  (define (e403)
-    (error <renderer-error>
-	   :status "403 Not Found"
-	   "File Not Found"))
-  (define (e500 msg)
-    (error <renderer-error>
-	   :status "500 Internal Error"
-	   msg))
   (unless (readable? src-path)
-    (e403))
-  (let1 sha1 (guard (e (else 
-			(e403)))
-		    (with-input-from-file src-path
-		      (compose digest-hexify sha1-digest)
-		      :if-does-not-exist :error
-		      :element-type :binary))
-    (receive  (cache-file cache-dir) (sha1->cache-file sha1 config)
-      (if (file-is-readable? cache-file)
-	  (guard (e (<read-error> 
-		     (unwind-protect (sys-unlink  cache-file) #t)
-		     (e500 "Broken Cache"))
-		    (<error>
-		     (e500 "Cache Lost")))
-		 (with-input-from-file cache-file
-		   ;; TODO ungzip
-		   read
-		   :if-does-not-exist :error))
-	  (begin
-	    (guard (e (else e500))
-		   (make-directory* cache-dir))
-	    (let ((shtml (prepare-proc src-path config))
-		  (tmp   (format "~a/.~a--~a" 
-				 cache-dir 
-				 (sys-basename cache-file)
-				 (sys-getpid))))
-	      (with-output-to-file tmp
-		(pa$ write shtml)
-		:if-exists :error
-		:if-does-not-exist :create)
-	      ;; TODO gzip
-	      (sys-rename tmp cache-file)
-	      shtml))))))
-	  
-      
+    (not-found "File Not Found" src-path))
+  (let* ((sha1 (guard (e (else 
+			  (not-found "Failed to prepare cache name"
+				     src-path)))
+		      (with-input-from-file src-path
+			(compose digest-hexify sha1-digest)
+			:if-does-not-exist :error
+			:element-type :binary)))
+	 (cache-file (sha1->cache-file sha1 config)))
+    (if (and (cached? cache-file)
+	     (newer-than? cache-file src-path))
+	(read-cache cache-file)
+	(build-cache (pa$ prepare-proc src-path config) 
+		     cache-file))))
 
 (provide "yogomacs/renderers/cache")

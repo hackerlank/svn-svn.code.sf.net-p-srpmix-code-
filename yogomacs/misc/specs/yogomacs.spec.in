@@ -15,7 +15,7 @@ Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs gauche-devel font-lock
-Requires: emacs emacs-common gauche font-lock httpd
+Requires: emacs emacs-common gauche font-lock httpd gzip
 
 %description
 sources web frontend
@@ -75,6 +75,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
 %{_datadir}/gauche/site/lib/yogomacs/fix.scm
 %{_datadir}/gauche/site/lib/yogomacs/flserver.scm
+%{_datadir}/gauche/site/lib/yogomacs/gzip.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/path.scm

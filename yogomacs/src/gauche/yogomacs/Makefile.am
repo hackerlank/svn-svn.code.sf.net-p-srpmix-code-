@@ -12,6 +12,7 @@ dist_module_DATA =   \
 	config.scm   \
 	dentry.scm   \
 	flserver.scm \
+	gzip.scm     \
 	main.scm     \
 	path.scm     \
 	fix.scm      \

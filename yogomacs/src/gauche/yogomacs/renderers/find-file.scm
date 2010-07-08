@@ -1,7 +1,6 @@
 (define-module yogomacs.renderers.find-file
   (export find-file-faces
-	  find-file
-	  )
+	  find-file)
   (use file.util)
   (use font-lock.flclient)
   (use yogomacs.flserver)
@@ -35,26 +34,26 @@
     ))
 
 (define (find-file src-path config)
-  (if (readable? src-path)
-      (let* ((dest-path (build-path "/tmp" (format "~a--~a.~a" 
-						   (sys-getpid)
-						   (sys-basename src-path)
-						   "shtml")))
-	     (shtmlize (pa$ flclient-shtmlize
-			    src-path
-			    dest-path
-			    (css-cache-dir config)
-			    :verbose (config 'client-verbose))))
-	(flserver shtmlize config)
-	(if (file-exists? dest-path)
-	    (unwind-protect
-	     (call-with-input-file dest-path read)
-	     (sys-unlink  dest-path))
-	    (error <renderer-error>
-		   :status "504 Gateway Timeout"
-		   "Flserver Rendering Timeout")))
-      (error <renderer-error>
-	     :status "403 Not Found"
-	     "File not found")))
+   (if (readable? src-path)
+       (let* ((dest-path (build-path "/tmp" (format "~a--~a.~a" 
+						    (sys-basename src-path)
+						    (sys-getpid)
+						    "shtml")))
+	      (shtmlize (pa$ flclient-shtmlize
+			     src-path
+			     dest-path
+			     (css-cache-dir config)
+			     :verbose (config 'client-verbose))))
+	  ;;
+	  (flserver shtmlize config)
+	  ;;
+	  (if (file-exists? dest-path)
+	      (unwind-protect
+		 (call-with-input-file dest-path read)
+		 (sys-unlink  dest-path))
+	      (timeout "Rendering Timeout"
+		 (format "~s -> ~s" src-path dest-path))))
+       (not-found "File not found"
+		  src-path)))	 
 
 (provide "yogomacs/renderers/find-file")
