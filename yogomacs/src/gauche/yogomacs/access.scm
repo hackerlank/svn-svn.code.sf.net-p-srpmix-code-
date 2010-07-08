@@ -3,6 +3,7 @@
 	  directory?
 	  )
   (use file.util)
+  (use util.match)
   )
 (select-module yogomacs.access)
 
@@ -17,8 +18,12 @@
 	    (car real)
 	    #f))))
 
-(define (readable? dir ent)
-  (file? dir ent file-is-readable?))
+(define readable?
+   (match-lambda*
+    ((dir ent)
+     (file? dir ent file-is-readable?))
+    ((file)
+     (readable? (sys-dirname file) (sys-basename file)))))
 
 (define (directory? dir ent)
   (file? dir ent file-is-directory?))

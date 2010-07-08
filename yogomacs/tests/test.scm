@@ -106,6 +106,8 @@
 (test-module 'yogomacs.dentries.fs)
 (use yogomacs.main)
 (test-module 'yogomacs.main)
+(use yogomacs.renderers.cache)
+(test-module 'yogomacs.renderers.cache)
 (use yogomacs.renderers.dired)
 (test-module 'yogomacs.renderers.dired)
 (use yogomacs.renderers.find-file)

@@ -1,12 +1,13 @@
 (define-module yogomacs.renderers.find-file
   (export find-file-faces
 	  find-file
-	  <find-file-error>
 	  )
   (use file.util)
   (use font-lock.flclient)
   (use yogomacs.flserver)
   (use yogomacs.caches.css)
+  (use yogomacs.renderer)
+  (use yogomacs.access)
   )
 
 (select-module yogomacs.renderers.find-file)
@@ -33,10 +34,6 @@
     ;; spec, c
     ))
 
-(define-condition-type <find-file-error> <error> 
-  (status)
-  )
-
 (define (find-file src-path config)
   (if (readable? src-path)
       (let* ((dest-path (build-path "/tmp" (format "~a--~a.~a" 
@@ -53,10 +50,10 @@
 	    (unwind-protect
 	     (call-with-input-file dest-path read)
 	     (sys-unlink  dest-path))
-	    (error <find-file-error>
+	    (error <renderer-error>
 		   :status "504 Gateway Timeout"
 		   "Flserver Rendering Timeout")))
-      (error <find-file-error>
+      (error <renderer-error>
 	     :status "403 Not Found"
 	     "File not found")))
 

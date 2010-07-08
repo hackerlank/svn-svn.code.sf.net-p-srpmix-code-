@@ -8,7 +8,9 @@
   ;;
   (use yogomacs.path)
   ;;
+  (use yogomacs.renderer)
   (use yogomacs.renderers.find-file)
+  (use yogomacs.renderers.cache)
   ;;
   (use yogomacs.fix)
   ;;
@@ -33,7 +35,7 @@
 	 (real-src-dir (build-path (config 'real-sources-dir) head))
 	 (real-src-file (build-path real-src-dir last)))
     (guard (e
-	    ((<find-file-error> e) 
+	    ((<renderer-error> e) 
 	     (list
 	      (cgi-header :status (condition-ref e 'status))
 	      (print-echo0 path path config (condition-ref e 'message))))
@@ -47,7 +49,7 @@
 	   (list
 	    (cgi-header)
 	    (fix
-	     (find-file real-src-file config)
+	     (cache real-src-file find-file config)
 	     fix-css-href
 	     integrate-file-face)))))
 
