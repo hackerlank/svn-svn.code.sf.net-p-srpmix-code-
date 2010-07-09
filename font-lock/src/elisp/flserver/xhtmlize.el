@@ -287,15 +287,22 @@ output.")
 
 ;; TODO: Merge following two functions.
 ;; xhtmlize-overlays-between and xhtmlize-next-change
+;; (defun xhtmlize-overlays-between (p q)
+;;   (sort (xhtmlize-fold (lambda (kar kdr)
+;; 			(if (xhtmlize-width0-overlay-acceptable-p kar)
+;; 			    (cons kar kdr)
+;; 			  kdr))
+;; 		(overlays-in p q)
+;; 		(list))
+;; 	(lambda (o0 o1)
+;; 	  (< (overlay-start o0) (overlay-start o1)))))
 (defun xhtmlize-overlays-between (p q)
-  (sort (xhtmlize-fold (lambda (kar kdr)
-			(if (xhtmlize-width0-overlay-acceptable-p kar)
-			    (cons kar kdr)
-			  kdr))
-		(overlays-in p q)
-		(list))
-	(lambda (o0 o1)
-	  (< (overlay-start o0) (overlay-start o1)))))
+  (xhtmlize-fold (lambda (kar kdr)
+		   (if (xhtmlize-width0-overlay-acceptable-p kar)
+		       (cons kar kdr)
+		     kdr))
+		 (overlays-in p q)
+		 (list)))
 
 (defun xhtmlize-next-change (pos prop &optional limit)
   ;; (message "<%d, %s>" pos limit) 
@@ -307,6 +314,9 @@ output.")
 	(xhtmlize-engine-insert-comment engine (format "nil => %s" limit)))
       )
     (cond
+     ;((eq r1 (point-max))
+      ;;  (line-beginning-position 2)
+      ;)
      ((< r0 r1)
       (let* ((ovs (xhtmlize-overlays-between r0 r1))
 	     (r00 (some (lambda (o) 
@@ -1208,7 +1218,7 @@ it's called with the same value of KEY.  All other times, the cached
 			  (oref engine buffer-faces) :test 'equal))))
 (defmethod xhtmlize-engine-prologue ((engine <xhtmlize-common-engine>) title)
   )
-(defmethod xhtmlize-engine-body ((engine <xhtmlize-common-engine>))
+(defnnnmethod xhtmlize-engine-body ((engine <xhtmlize-common-engine>))
   )
 
 (defmethod xhtmlize-engine-body-common ((engine <xhtmlize-common-engine>)
@@ -1217,6 +1227,7 @@ it's called with the same value of KEY.  All other times, the cached
     (let (;; Declare variables used in loop body outside the loop
 	  ;; because it's faster to establish `let' bindings only
 	  ;; once.
+	  ;; (linum-mode-p (and (boundp 'linum-mode) linum-mode))
 	  next-change text len face-list fstruct-list trailing-ellipsis pnt)
       ;; This loop traverses and reads the source buffer, appending
       ;; the resulting HTML to HTMLBUF with `princ'.  This method is
@@ -1235,7 +1246,10 @@ it's called with the same value of KEY.  All other times, the cached
 		)
 	      (xhtmlize-overlays-at (point)))
 	
-	(setq next-change (xhtmlize-next-change pnt 'face))
+	(setq next-change (xhtmlize-next-change 
+			   pnt 
+			   'face
+			   ))
 	(cond
 	 ((not (numberp next-change))
 	  (log+error "ERROR: %s is not number" next-change))
