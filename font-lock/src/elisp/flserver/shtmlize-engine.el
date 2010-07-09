@@ -114,8 +114,12 @@
 	       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd")
        "\n"
        (*COMMENT* ,(format " Created by xhtmlize-%s in external-css mode. " xhtmlize-version))
+       ,@(mapcar
+	  (lambda (comment)
+	    `(*COMMENT* ,comment))
+	  (reverse (oref engine early-comments)))
        "\n"))
-
+    (oset engine prepared-p t)
     (setq queue (shtmlize-push engine))
     (shtmlize-enqueue queue
 		      '(html 
@@ -195,8 +199,10 @@
 
 (defmethod xhtmlize-engine-insert-comment ((engine <shtmlize-engine>) 
 					   comment)
-  (let ((queue (shtmlize-top engine)))
-    (shtmlize-enqueue queue `((*COMMENT* ,comment)))))
+  (if (oref engine prepared-p)
+      (let ((queue (shtmlize-top engine)))
+	(shtmlize-enqueue queue `((*COMMENT* ,comment))))
+    (call-next-method)))
 
 (defmethod xhtmlize-engine-make-file-name ((engine <shtmlize-engine>) file)
   (concat file ".shtml"))

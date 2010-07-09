@@ -280,29 +280,42 @@ output.")
 
 (defun xhtmlize-overlays-at (p)
   (xhtmlize-overlays-between p
-			    (let ((e0 (1+ p)))
+			     (let ((e0 (1+ p)))
 			      (if (< (point-max) e0)
 				  p
-				e0))))
+				e0))
+			     t))
 
 ;; TODO: Merge following two functions.
 ;; xhtmlize-overlays-between and xhtmlize-next-change
+(defun xhtmlize-overlays-between (p q require-sort-p)
+  (let ((ovs (xhtmlize-fold (lambda (kar kdr)
+			(if (xhtmlize-width0-overlay-acceptable-p kar)
+			    (cons kar kdr)
+			  kdr))
+		(overlays-in p q)
+		(list))))
+    (if require-sort-p
+	(sort ovs
+	      (lambda (o0 o1)
+		(< (overlay-start o0) (overlay-start o1))))
+      (xhtmlize-fold (lambda (kar kdr)
+		       (if (null kdr)
+			   (cons kar nil)
+			 (if (<= (overlay-start kar)
+				 (overlay-start (car kdr)))
+			     (cons kar nil)
+			   kdr)))
+		     ovs
+		     nil))))
+
 ;; (defun xhtmlize-overlays-between (p q)
-;;   (sort (xhtmlize-fold (lambda (kar kdr)
-;; 			(if (xhtmlize-width0-overlay-acceptable-p kar)
-;; 			    (cons kar kdr)
-;; 			  kdr))
-;; 		(overlays-in p q)
-;; 		(list))
-;; 	(lambda (o0 o1)
-;; 	  (< (overlay-start o0) (overlay-start o1)))))
-(defun xhtmlize-overlays-between (p q)
-  (xhtmlize-fold (lambda (kar kdr)
-		   (if (xhtmlize-width0-overlay-acceptable-p kar)
-		       (cons kar kdr)
-		     kdr))
-		 (overlays-in p q)
-		 (list)))
+;;   (xhtmlize-fold (lambda (kar kdr)
+;; 		   (if (xhtmlize-width0-overlay-acceptable-p kar)
+;; 		       (cons kar kdr)
+;; 		     kdr))
+;; 		 (overlays-in p q)
+;; 		 (list)))
 
 (defun xhtmlize-next-change (pos prop &optional limit)
   ;; (message "<%d, %s>" pos limit) 
@@ -318,13 +331,11 @@ output.")
       ;;  (line-beginning-position 2)
       ;)
      ((< r0 r1)
-      (let* ((ovs (xhtmlize-overlays-between r0 r1))
-	     (r00 (some (lambda (o) 
-			  (and (xhtmlize-width0-overlay-acceptable-p o)
-			       (overlay-start o))
-			  )
-			ovs)))
-	(or r00 r1)))
+      (let* ((ovs (xhtmlize-overlays-between r0 r1 nil))
+	     (r00 (car ovs)))
+	(or (and r00
+		 (overlay-start r00))
+	    r1)))
      (t
       r1))))
       
@@ -657,7 +668,7 @@ without modifying their meaning."
       ;; faces.
       (not attrlist-p)))))
 
-(defun xhtmlize-make-face-map (faces)
+(defun xhtmlize-make-face-map (engine faces)
   ;; Return a hash table mapping Emacs faces to xhtmlize's fstructs.
   ;; The keys are either face symbols or attrlists, so the test
   ;; function must be `equal'.
@@ -689,7 +700,13 @@ without modifying their meaning."
       (intern face)
     face))
 
-(defun xhtmlize-faces-in-buffer ()
+(defun xhtmlize-record-first-single-property-change (engine fmt)
+  (xhtmlize-engine-insert-comment engine
+				  (format fmt
+					  (next-single-property-change (point-min)
+								       'face))))
+
+(defun xhtmlize-faces-in-buffer (engine)
   "Return a list of faces used in the current buffer.
 Under
 GNU Emacs, it returns the set of faces specified by the `face' text
@@ -698,9 +715,8 @@ property and by buffer overlays that specify `face'."
     ;; FSF Emacs code.
     ;; Faces used by text properties.
     (let ((pos (point-min)) face-prop next)
-      ;;(let ((x (next-single-property-change pos 'face)))
-      ;;	(xhtmlize-engine-insert-comment engine (format "%s <=" x))
-      ;; )
+      (xhtmlize-record-first-single-property-change engine
+						    "in-buffer(0): %s")
       (while (< pos (point-max))
 	(setq face-prop (get-text-property pos 'face)
 	      next (or (next-single-property-change pos 'face) 
@@ -721,6 +737,8 @@ property and by buffer overlays that specify `face'."
 				faces :test 'equal)
 		      (adjoin (xhtmlize-unstringify-face face-prop)
 			      faces :test 'equal)))))
+    (xhtmlize-record-first-single-property-change engine
+						  "in-buffer(1): %s")
     faces))
 
 ;; xhtmlize-faces-at-point returns the faces in use at point.  The
@@ -992,6 +1010,13 @@ it's called with the same value of KEY.  All other times, the cached
   (insert xhtmlize-hyperlink-style
 	  "    -->\n    </style>\n"))
 
+
+(defmacro with-xhtmlize-engine-canvas (name engine &rest body)
+  `(let ((,name (oref ,engine canvas)))
+	      ,@body))
+
+(put 'with-xhtmlize-engine-canvas 'lisp-indent-function 2)
+
 (defun xhtmlize-css-insert-text-with-id (text id href fstruct-list engine)
   ;; Insert TEXT colored with FACES into BUFFER.  In CSS mode, this is
   ;; easy: just nest the text in one <span class=...> tag for each
@@ -1208,17 +1233,21 @@ it's called with the same value of KEY.  All other times, the cached
    ;; (plist-put places foo bar).
    (places :initform (nil nil))
    (buffer-faces :initform nil)
-   (face-map :initform nil)))
+   (face-map :initform nil)
+   (prepared-p :initform nil)
+   (early-comments :initform nil)))
+
 (defmethod xhtmlize-engine-prepare ((engine <xhtmlize-common-engine>))
   (oset engine
-	buffer-faces (xhtmlize-faces-in-buffer))
+	buffer-faces (xhtmlize-faces-in-buffer engine))
   (oset engine
-	face-map (xhtmlize-make-face-map 
+	face-map (xhtmlize-make-face-map
+		  engine
 		  (nunion (cons 'default xhtmlize-builtin-faces)
 			  (oref engine buffer-faces) :test 'equal))))
 (defmethod xhtmlize-engine-prologue ((engine <xhtmlize-common-engine>) title)
   )
-(defnnnmethod xhtmlize-engine-body ((engine <xhtmlize-common-engine>))
+(defmethod xhtmlize-engine-body ((engine <xhtmlize-common-engine>))
   )
 
 (defmethod xhtmlize-engine-body-common ((engine <xhtmlize-common-engine>)
@@ -1246,10 +1275,7 @@ it's called with the same value of KEY.  All other times, the cached
 		)
 	      (xhtmlize-overlays-at (point)))
 	
-	(setq next-change (xhtmlize-next-change 
-			   pnt 
-			   'face
-			   ))
+	(setq next-change (xhtmlize-next-change pnt 'face))
 	(cond
 	 ((not (numberp next-change))
 	  (log+error "ERROR: %s is not number" next-change))
@@ -1301,13 +1327,9 @@ it's called with the same value of KEY.  All other times, the cached
   )
 
 (defmethod xhtmlize-engine-insert-comment ((engine <xhtmlize-common-engine>) comment)
-  )
-
-(defmacro with-xhtmlize-engine-canvas (name engine &rest body)
-  `(let ((,name (oref ,engine canvas)))
-	      ,@body))
-
-(put 'with-xhtmlize-engine-canvas 'lisp-indent-function 2)
+  (unless (oref engine prepared-p)
+    (oset engine
+	  early-comments (cons comment (oref engine early-comments)))))
 
 (defun xhtmlize-buffer-1 (&optional engine)
   (unless engine
@@ -1327,9 +1349,11 @@ it's called with the same value of KEY.  All other times, the cached
     (clrhash xhtmlize-memoization-table)
     ;;
     (xhtmlize-engine-prepare engine)
+    (xhtmlize-record-first-single-property-change engine "enter prologue: %s")
     (xhtmlize-engine-prologue engine (if (buffer-file-name)
 					 (file-name-nondirectory (buffer-file-name))
 				       (buffer-name)))
+    (xhtmlize-record-first-single-property-change engine "enter body: %s")
     (xhtmlize-engine-body engine)
     (xhtmlize-engine-epilogue engine)
     (xhtmlize-engine-process engine)
