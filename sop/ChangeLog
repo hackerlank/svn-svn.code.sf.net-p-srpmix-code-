@@ -1,3 +1,9 @@
+2010-07-09  Masatake YAMATO  <yaamto@redhat.com>
+
+	* src/dist-mapping/ftp.redhat.com/rhel6b2.es: New file.
+
+	* src/dist-mapping/ftp.redhat.com/Makefile.am: Added rhel6b2.es.
+
 2010-07-02  Masatake YAMATO  <yaamto@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/rhel6b1.es: New file.
