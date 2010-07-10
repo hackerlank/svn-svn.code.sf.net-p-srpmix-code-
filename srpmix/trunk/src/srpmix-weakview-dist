@@ -81,7 +81,7 @@ function parse_arguments
 	        DUMP_SPEC=1
 		;;
 	    (--alias=*)
-	    	ALIAS==$(echo $1 | sed 's/--alias=//')
+	    	ALIAS=$(echo $1 | sed 's/--alias=//')
 		;;
 	    *)
 		break
@@ -110,10 +110,13 @@ function parse_arguments
 
 function create_dist_weakview
 {
-    name=$1
+    local name=$1
+    shift
+    local alias=$1
     shift
 
-    spec=$MY_TMPDIR/SPECS/srpmix-weakview-dist-$name.spec
+
+    local spec=$MY_TMPDIR/SPECS/srpmix-weakview-dist-$name.spec
     if test "x${DUMP_SPEC}" != "x"; then
 	spec="/dev/stdout"
 	if test ! -w "${spec}"; then
@@ -122,9 +125,10 @@ function create_dist_weakview
 	fi
     fi
 	
-    rootdir=${SRPMIX_VAR_DIR}
-    distdir=${rootdir}/dists
-    builddistdir_body="srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE/$distdir/$name"
+    local rootdir=${SRPMIX_VAR_DIR}
+    local distdir=${rootdir}/dists
+    local builddistdir_body="srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE/$distdir/$name"
+    local aliasln_body="srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE/$distdir/$alias"
 
     cat > $spec <<EOF
 Summary: Srpmix weakview for $name distribution
@@ -155,6 +159,13 @@ builddistdir=%{_builddir}/$builddistdir_body
 mkdir -p \$builddistdir/plugins
 
 EOF
+
+if [ -n "$alias" ]; then
+    cat >> $spec <<EOF
+ln -sf ./$name %{_builddir}/$aliasln_body
+
+EOF
+fi
 
 # in %build
 DISTMAP=`mktemp`
@@ -187,7 +198,16 @@ rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$distdir/$name
 
 rsync -va \$builddistdir \$RPM_BUILD_ROOT/$distdir
+EOF
 
+if [ -n "$alias" ]; then
+    cat >> $spec <<EOF
+mv %{_builddir}/$aliasln_body \$RPM_BUILD_ROOT/$distdir
+
+EOF
+fi
+
+    cat >> $spec <<EOF
 %files
 %defattr(-,root,root)
 $SRPMIX_VAR_DIR/dists/*
@@ -228,7 +248,7 @@ function main
 	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 
-    create_dist_weakview $NAME
+    create_dist_weakview $NAME $ALIAS
 }
 
 RUN=

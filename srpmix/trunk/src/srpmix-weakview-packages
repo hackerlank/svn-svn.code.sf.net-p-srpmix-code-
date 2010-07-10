@@ -84,7 +84,7 @@ function parse_arguments
 	        DUMP_SPEC=1
 		;;
 	    (--alias=*)
-	    	ALIAS==$(echo $1 | sed 's/--alias=//')
+	    	ALIAS=$(echo $1 | sed 's/--alias=//')
 		;;
 	    *)
 		break
