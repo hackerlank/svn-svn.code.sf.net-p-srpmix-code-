@@ -72,10 +72,11 @@
 			xhtmlize-html-charset)
 	      "")
 	    xhtmlize-head-tags)
-    (xhtmlize-method insert-head
-		     (oref engine buffer-faces)
-		     (oref engine face-map)
-		     )
+    (when (xhtmlize-method insert-head
+			   (oref engine buffer-faces)
+			   (oref engine face-map)
+			   )
+      (oset engine wrote-css-p t))
     (insert "  </head>")
     (plist-put (oref engine places) 'head-end (point-marker))
     (insert "\n  ")

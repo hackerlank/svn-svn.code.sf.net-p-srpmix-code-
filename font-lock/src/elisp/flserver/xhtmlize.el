@@ -715,8 +715,6 @@ property and by buffer overlays that specify `face'."
     ;; FSF Emacs code.
     ;; Faces used by text properties.
     (let ((pos (point-min)) face-prop next)
-      (xhtmlize-record-first-single-property-change engine
-						    "in-buffer(0): %s")
       (while (< pos (point-max))
 	(setq face-prop (get-text-property pos 'face)
 	      next (or (next-single-property-change pos 'face) 
@@ -737,8 +735,6 @@ property and by buffer overlays that specify `face'."
 				faces :test 'equal)
 		      (adjoin (xhtmlize-unstringify-face face-prop)
 			      faces :test 'equal)))))
-    (xhtmlize-record-first-single-property-change engine
-						  "in-buffer(1): %s")
     faces))
 
 ;; xhtmlize-faces-at-point returns the faces in use at point.  The
@@ -884,15 +880,21 @@ it's called with the same value of KEY.  All other times, the cached
   "<body>")
 
 ;;; External CSS based output support.
+;; Return nil if css files exist.
 (defun xhtmlize-css-link (face css-dir insert-func)
-  (xhtmlize-css-link0 face css-dir "black" "white" "Default" insert-func)
-  (xhtmlize-css-link0 face css-dir "white" "black" "Invert" insert-func)) 
+  (let ((default 
+	  (xhtmlize-css-link0 face css-dir "black" "white" "Default" insert-func))
+	(invert
+	 (xhtmlize-css-link0 face css-dir "white" "black" "Invert" insert-func)) )
+    (or default invert)))
 
 (defun xhtmlize-css-link0 (face css-dir fg bg title insert-func)
-  (unless (xhtmlize-css-cached-on-disk-p face css-dir title)
-    (set-foreground-color fg)
-    (set-background-color bg)
-    (xhtmlize-css-make-cache-on-disk face css-dir title))
+  (prog1
+      (if (xhtmlize-css-cached-on-disk-p face css-dir title)
+	  nil
+	(set-foreground-color fg)
+	(set-background-color bg)
+	(xhtmlize-css-make-cache-on-disk face css-dir title)))
   (funcall insert-func face title))
 
 (defun xhtmlize-css-link-insert (face title)
@@ -915,10 +917,13 @@ it's called with the same value of KEY.  All other times, the cached
 		  (cssize-fstruct-css-name (gethash f face-map)))))))
 
 (defun xhtmlize-external-css-insert-head (buffer-faces face-map)
-  (dolist (face (xhtmlize-external-css-enumerate-faces buffer-faces face-map))
-      (xhtmlize-css-link face 
-			 xhtmlize-external-css-base-dir
-			 #'xhtmlize-css-link-insert)))
+  (let ((wrote-css-p nil))
+    (dolist (face (xhtmlize-external-css-enumerate-faces buffer-faces face-map))
+      (when (xhtmlize-css-link face 
+			       xhtmlize-external-css-base-dir
+			       #'xhtmlize-css-link-insert)
+	(setq wrote-css-p t)))
+    wrote-css-p))
 
 (defun xhtmlize-css-make-file-name (face title)
   (concat (cssize-clean-up-face-name face) "--" title "." "css"))
@@ -1008,7 +1013,8 @@ it's called with the same value of KEY.  All other times, the cached
 		(mapconcat #'identity specs "\n        ")))
       (insert "\n      }\n")))
   (insert xhtmlize-hyperlink-style
-	  "    -->\n    </style>\n"))
+	  "    -->\n    </style>\n")
+  nil)
 
 
 (defmacro with-xhtmlize-engine-canvas (name engine &rest body)
@@ -1235,7 +1241,9 @@ it's called with the same value of KEY.  All other times, the cached
    (buffer-faces :initform nil)
    (face-map :initform nil)
    (prepared-p :initform nil)
-   (early-comments :initform nil)))
+   (early-comments :initform nil)
+   (wrote-css-p :initform nil)
+   ))
 
 (defmethod xhtmlize-engine-prepare ((engine <xhtmlize-common-engine>))
   (oset engine
@@ -1349,11 +1357,15 @@ it's called with the same value of KEY.  All other times, the cached
     (clrhash xhtmlize-memoization-table)
     ;;
     (xhtmlize-engine-prepare engine)
-    (xhtmlize-record-first-single-property-change engine "enter prologue: %s")
     (xhtmlize-engine-prologue engine (if (buffer-file-name)
 					 (file-name-nondirectory (buffer-file-name))
 				       (buffer-name)))
-    (xhtmlize-record-first-single-property-change engine "enter body: %s")
+    ;;
+    (when (oref engine wrote-css-p)
+      (log-string "refontification...")
+      (font-lock-fontify-buffer)
+      (log-string "refontification...done"))
+    ;;
     (xhtmlize-engine-body engine)
     (xhtmlize-engine-epilogue engine)
     (xhtmlize-engine-process engine)

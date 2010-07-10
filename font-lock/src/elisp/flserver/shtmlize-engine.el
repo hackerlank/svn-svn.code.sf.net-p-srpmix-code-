@@ -121,14 +121,12 @@
        "\n"))
     (oset engine prepared-p t)
 
-    (xhtmlize-record-first-single-property-change engine "enter html: %s")
     (setq queue (shtmlize-push engine))
     (shtmlize-enqueue queue
 		      '(html 
 			(|@| (xmlns "http://www.w3.org/1999/xhtml") (xml:lang "en") (lang "en"))
 			"\n"))
 
-    (xhtmlize-record-first-single-property-change engine "enter head: %s")
     (setq queue (shtmlize-push engine))
     (shtmlize-enqueue queue 
 		      `(head 
@@ -136,7 +134,6 @@
 			"    " (title ,title)
 			"\n")) 
     ;; TODO: do this in plugin (http-equivcontent-type, charset, expires...)
-    (xhtmlize-record-first-single-property-change engine "enter metas: %s")
     (mapc
      (lambda (elt)
        (shtmlize-enqueue
@@ -150,22 +147,22 @@
        ("font-lock-support-mode" . ,(format "%s" font-lock-support-mode))
        ))
 
-    (xhtmlize-record-first-single-property-change engine "enter links: %s")
     (lexical-let ((queue queue))
-      (dolist (face (xhtmlize-external-css-enumerate-faces (oref engine buffer-faces)
-							   (oref engine face-map)))
-	(xhtmlize-css-link face 
-			     xhtmlize-external-css-base-dir
-			     (lambda (face title)
-			       (shtmlize-enqueue
-				queue
-				`("    " (link (|@| (rel "stylesheet")
-						    (type "text/css")
-						    (href ,(format "%s/%s"
-								   xhtmlize-external-css-base-url
-								   (xhtmlize-css-make-file-name face title)))
-						    (title ,title)))
-				  "\n"))))))
+	(dolist (face (xhtmlize-external-css-enumerate-faces (oref engine buffer-faces)
+							     (oref engine face-map)))
+	  (when (xhtmlize-css-link face 
+				   xhtmlize-external-css-base-dir
+				   (lambda (face title)
+				     (shtmlize-enqueue
+				      queue
+				      `("    " (link (|@| (rel "stylesheet")
+							  (type "text/css")
+							  (href ,(format "%s/%s"
+									 xhtmlize-external-css-base-url
+									 (xhtmlize-css-make-file-name face title)))
+							  (title ,title)))
+					"\n"))))
+	    (oset engine wrote-css-p t))))
     ;;
     (setq queue (shtmlize-pop engine))
     (shtmlize-enqueue queue '("\n" "    "))
@@ -177,8 +174,7 @@
     (shtmlize-enqueue queue '(body "\n" "    "))
     (setq queue (shtmlize-push engine))
     (shtmlize-enqueue queue '(pre "\n"))
-
-    (xhtmlize-record-first-single-property-change engine "enter body-common: %s")    
+        
     (xhtmlize-engine-body-common engine
 				 #'shtmlize-enqueue-text-with-id
 				 )
