@@ -1,3 +1,10 @@
+2010-07-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sbuild (parse_arguments): Fix broken test -n
+	condition about $tmpfs_size.
+	(create_weakview_packages, create_weakview_dist)
+	(create_weakview): Pass --alias option if GC is yet.
+
 2010-01-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/builders/run-package-plugin: Remove unused code.

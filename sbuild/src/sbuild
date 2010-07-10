@@ -136,7 +136,7 @@ function parse_arguments
     done
 
     mkdir -p ${SBUILD_TMPDIR}
-    if [ -n tmpfs_size ]; then
+    if [ -n "${tmpfs_size}" ]; then
 	if { mount | grep ${SBUILD_TMPDIR}; } > /dev/null; then
 	    :
 	else
@@ -209,7 +209,7 @@ function run_rsync
 	fi
     fi
 
-    if [ -n ${SBUILD_TSTAMPDIR} ] && [ -d "${SBUILD_TSTAMPDIR}/${name}" ]; then
+    if [ -n "${SBUILD_TSTAMPDIR}" ] && [ -d "${SBUILD_TSTAMPDIR}/${name}" ]; then
 	mkdir -p ${SOP_CRADLES_DIR}/${name}/sbuild
 	rsync -a --delete ${SBUILD_TSTAMPDIR}/${name}/ ${SOP_CRADLES_DIR}/${name}/sbuild
     fi
@@ -309,24 +309,26 @@ function create_weakview
 	if test -f $f; then
 	    local body0=$(basename $f .es)
 	    local body=$(echo $body0 | tr . -)
+	    local alias=
 	    dist_pattern=${output}/srpmix-weakview-dist-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*.noarch.rpm
 	    pkg_pattern=${output}/srpmix-weakview-packages-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*.noarch.rpm
 
 	    if test ${GC} = yes && test "$body0" = "${name}" ; then
 		rm -f ${dist_pattern}
 		rm -f ${pkg_pattern}
+		alias=${body}
 		body=${body}-${DATE}
 	    fi
 	
 	    if ( ! test -f ${output}/srpmix-weakview-dist-${body}*.noarch.rpm ) || \
 		test $f -nt ${output}/srpmix-weakview-dist-${body}*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-dist-${body}*.noarch.rpm
-		create_weakview_dist $f ${body} ${repo} 
+		create_weakview_dist $f ${body} ${repo} ${alias}
 	    fi
 	    if ( ! test -f ${output}/srpmix-weakview-packages-${body}*.noarch.rpm ) || \
 		test $f -nt ${output}/srpmix-weakview-packages-${body}*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-packages-${body}*.noarch.rpm
-		create_weakview_packages $f ${body} ${repo} 
+		create_weakview_packages $f ${body} ${repo} ${alias}
 	    fi
 	fi
     done
@@ -395,9 +397,13 @@ function create_weakview_dist
     local es_file=$1
     local name=$2
     local output=$3
-    
+    local alias=$4
 
-    cat $es_file | srpmix-weakview-dist --name=${name} --output-dir=$output --make-rpm
+    if [ -n "${alias}" ]; then
+	alias="--alias=$alias"
+    fi
+
+    cat $es_file | srpmix-weakview-dist --name=${name} --output-dir=$output --make-rpm $alias
 }
 
 function create_weakview_packages
@@ -405,9 +411,13 @@ function create_weakview_packages
     local es_file=$1
     local name=$2
     local output=$3
+    local alias=$4
+
+    if [ -n "${alias}" ]; then
+	alias="--alias=$alias"
+    fi
     
-    
-    cat $es_file | srpmix-weakview-packages --name=${name} --output-dir=$output --make-rpm
+    cat $es_file | srpmix-weakview-packages --name=${name} --output-dir=$output --make-rpm $alias
 }
 
 function main
