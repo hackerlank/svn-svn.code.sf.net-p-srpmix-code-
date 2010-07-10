@@ -316,7 +316,11 @@ function create_weakview
 	    if test ${GC} = yes && test "$body0" = "${name}" ; then
 		rm -f ${dist_pattern}
 		rm -f ${pkg_pattern}
-		alias=${body}
+		if [ -n "${ALIAS}" ]; then
+		    alias="${ALIAS}"
+		else
+		    alias=${body}
+		fi
 		body=${body}-${DATE}
 	    fi
 	
