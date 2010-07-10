@@ -1,9 +1,15 @@
+2010-07-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist: Added new option --alias.
+
+	* src/srpmix-weakview-packages: Ditto.
+
 2010-02-15  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-kindex (main): Don't use spec file name
 	to detect 2.4 kernel. Use kversion definition in the spec file
 	instead.
-	
+
 2010-02-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/libsrpmix.sh.in (srpmix_chmod): Don't refer
@@ -15,7 +21,7 @@
 
 	* src/srpmix-plugin (list_plugin_candidates): List all plugins if
 	ENABLE_PLUGIN is not specified.
-	
+
 	* src/srpmix-db (print_usage): Added --ignoresize option.
 
 	* src/srpmix-wrap (parse_arguments): Fix a typo
@@ -24,7 +30,7 @@
 2010-01-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/_60srpmix-hyperestraier (list_files): Addes specs.spec.
-	
+
 
 2010-01-14  Masatake YAMATO  <yamato@redhat.com>
 

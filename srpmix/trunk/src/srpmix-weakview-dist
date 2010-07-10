@@ -35,6 +35,7 @@ function try_source
 try_source ${LIBSRPMIX}
 
 NAME=
+ALIAS=
 OUTPUTDIR=
 MY_TMPDIR=
 DUMP_SPEC=
@@ -45,7 +46,7 @@ function print_usage
     echo "Usage: "
     echo "  srpmix-weakview-dist [--help|-h]"
     echo "  srpmix-weakview-dist --name=NAME [--dump-spec]"
-    echo "  srpmix-weakview-dist --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE] [--make-rpm]"
+    echo "  srpmix-weakview-dist --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE] [--make-rpm] [--alias=ALIAS]"
     echo 
 }
 
@@ -78,6 +79,9 @@ function parse_arguments
 		;;
 	    --dump-spec)
 	        DUMP_SPEC=1
+		;;
+	    (--alias=*)
+	    	ALIAS==$(echo $1 | sed 's/--alias=//')
 		;;
 	    *)
 		break
