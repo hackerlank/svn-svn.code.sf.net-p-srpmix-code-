@@ -1,5 +1,11 @@
 2010-07-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/60srpmix-kindex (main): Don't run etags, 
+	ctags and cscope only if TAGS, tags and cscope.out files exist. 
+	Useless directory level checking is removed.
+
+2010-07-11  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-weakview-dist (create_dist_weakview): implment
 	alias link.
 

@@ -155,8 +155,7 @@ function main
 
     perarch_kernel=
 # TODO: xen    
-    if test -d "${BUILDDIR}" &&
-       ( ! test -d "${PLUGINDIR}" ); then
+    if test -d "${BUILDDIR}"; then
 	for t in $TARGETS; do
 	    if test -d ${BUILDDIR}/kernel-*/linux-*.${t}; then
 		perarch_kernel=1
@@ -164,15 +163,18 @@ function main
 		cd ${BUILDDIR}/kernel-*/linux-*.${t}
 		
 
-		if ! make O=${MY_TMPDIR}/$t TAGS; then
-		    return
+  
+		if ! test -f "${PLUGINDIR}/${t}.TAGS"; then
+		    make O=${MY_TMPDIR}/$t TAGS
 		fi
 		
-		if ! make O=${MY_TMPDIR}/$t tags; then
-		    return
+		if ! test -f "${PLUGINDIR}/${t}.TAGS"; then
+		    make O=${MY_TMPDIR}/$t tags
 		fi
-		
-		make O=${MY_TMPDIR}/$t cscope
+
+		if ! test -f "${PLUGINDIR}/${t}.cscope.out"; then
+		    make O=${MY_TMPDIR}/$t cscope
+		fi
 	    fi
 	done
 
@@ -182,15 +184,19 @@ function main
 		    if grep '\(^TAGS:\)\|\( TAGS \)' $x > /dev/null 2>&1; then
 			mkdir -p ${MY_TMPDIR}/generic
 			cd $(dirname $x)
-			if ! make O=${MY_TMPDIR}/generic TAGS; then
-			    continue
+
+			if test -f "${PLUGINDIR}/generic.TAGS"; then
+			    make O=${MY_TMPDIR}/generic TAGS )
 			fi
 
-			if ! make O=${MY_TMPDIR}/generic tags; then
-			    continue
+			if (test -f "${PLUGINDIR}/generic.tags"; then
+			    make O=${MY_TMPDIR}/generic tags
 			fi
 
-			make O=${MY_TMPDIR}/generic cscope
+			
+			if ! test -f "${PLUGINDIR}/generic.cscope.out"; then
+			    make O=${MY_TMPDIR}/generic cscope
+			fi			
 		    fi
 		fi
 	    done
