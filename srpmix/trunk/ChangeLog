@@ -1,5 +1,10 @@
 2010-07-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-weakview-dist (create_dist_weakview): implment
+	alias link.
+
+2010-07-11  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-weakview-dist: Added new option --alias.
 
 	* src/srpmix-weakview-packages: Ditto.
