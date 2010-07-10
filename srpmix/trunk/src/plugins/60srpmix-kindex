@@ -185,11 +185,11 @@ function main
 			mkdir -p ${MY_TMPDIR}/generic
 			cd $(dirname $x)
 
-			if test -f "${PLUGINDIR}/generic.TAGS"; then
-			    make O=${MY_TMPDIR}/generic TAGS )
+			if ! test -f "${PLUGINDIR}/generic.TAGS"; then
+			    make O=${MY_TMPDIR}/generic TAGS
 			fi
 
-			if (test -f "${PLUGINDIR}/generic.tags"; then
+			if ! test -f "${PLUGINDIR}/generic.tags"; then
 			    make O=${MY_TMPDIR}/generic tags
 			fi
 
