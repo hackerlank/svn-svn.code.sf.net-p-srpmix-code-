@@ -111,10 +111,7 @@ function parse_arguments
 function create_dist_weakview
 {
     local name=$1
-    shift
-    local alias=$1
-    shift
-
+    local alias=$2
 
     local spec=$MY_TMPDIR/SPECS/srpmix-weakview-dist-$name.spec
     if test "x${DUMP_SPEC}" != "x"; then

@@ -113,10 +113,10 @@ function parse_arguments
 
 function create_packages_weakview
 {
-    name=$1
-    shift
+    local name=$1
+    local alias=$2
 
-    spec=$MY_TMPDIR/SPECS/srpmix-weakview-packages-$name.spec
+    local spec=$MY_TMPDIR/SPECS/srpmix-weakview-packages-$name.spec
     if test "x${DUMP_SPEC}" != "x"; then
 	spec="/dev/stdout"
 	if test ! -w "${spec}"; then
@@ -125,9 +125,9 @@ function create_packages_weakview
 	fi
     fi
 	
-    rootdir=${SRPMIX_VAR_DIR}
-    sourcesdir=${rootdir}/sources
-    packagesdir=${rootdir}/packages
+    local rootdir=${SRPMIX_VAR_DIR}
+    local sourcesdir=${rootdir}/sources
+    local packagesdir=${rootdir}/packages
 
     cat > $spec <<EOF
 Summary: Srpmix weakview $name label to specfied version of packages
@@ -168,6 +168,10 @@ srpmix_distmap_to_pvr | while read package version release; do
   slink="$sdir/$name"
   echo "mkdir -p \${buildpackagesdir}${sdir}"
   echo "ln -sf $d \${buildpackagesdir}${slink}"
+  if [ -n "$alias" ];then
+      slink="$sdir/$alias"
+      echo "ln -sf ./$name \${buildpackagesdir}${slink}"
+  fi
 done >> $spec
 
 
@@ -218,7 +222,7 @@ function main
 	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
     fi
 
-    create_packages_weakview $NAME
+    create_packages_weakview $NAME $ALIAS
 }
 
 RUN=

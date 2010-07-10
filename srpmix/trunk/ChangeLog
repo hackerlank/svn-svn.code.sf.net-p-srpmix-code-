@@ -1,5 +1,13 @@
 2010-07-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/60srpmix-kindex (MY_TMPDIR): Dont mkdir 
+	srpmix-plugins. 
+
+	* src/plugins/10srpmix-vanilla (MY_TMPDIR): Ditto.
+	
+	* src/srpmix-weakview-packages (create_packages_weakview): Implment
+	alias links.
+
 	* src/plugins/60srpmix-kindex (main): Don't run etags, 
 	ctags and cscope only if TAGS, tags and cscope.out files exist. 
 	Useless directory level checking is removed.
