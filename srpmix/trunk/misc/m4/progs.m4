@@ -22,6 +22,12 @@ AC_DEFUN([SRPMIX_PROGS],[
   AC_CHECK_PROGS([FASTJAR], [fastjar])
   if test "x$FASTJAR" = "x"; then AC_MSG_ERROR([fastjar (maybe in libgcj pkg) not found]); fi
 
+  AC_CHECK_PROGS([GEM], [gem])
+  if test "x$GEM" = "x"; then AC_MSG_ERROR([gem (maybe in rubygems pkg) not found]); fi
+
+  AC_CHECK_PROGS([XZ], [xz])
+  if test "x$XZ" = "x"; then AC_MSG_ERROR([xz (maybe in xz pkg) not found]); fi
+
   AC_CHECK_PROGS([RPMBUILD], [rpmbuild])
   if test "x$RPMBUILD" = "x"; then AC_MSG_ERROR(rpmbuild not found); fi
 

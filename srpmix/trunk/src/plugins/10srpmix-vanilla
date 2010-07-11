@@ -187,6 +187,27 @@ function run_vanilla
 		(cd "$o"; unlzma --force --stdout $f > $(basename $f .lzma)  &&
 		    es_print vanilla-expand --command=\"lzma\" --input=\"$f\" --status=\"$?\" | tee -a $l)
 		;;
+	    *.gem)
+		count=`expr $count + 1`
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
+		(cd "$o"; gem unpack $f &&
+		    es_print vanilla-expand --command=\"gem\" --input=\"$f\" --status=\"$?\" | tee -a $l)
+		;;
+	    *.tar.xz)
+		count=`expr $count + 1`
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
+		(cd "$o"; unxz --force --stdout $f > $(basename $f .xz) &&
+		    tar xfm $(basename $f .xz); 
+		    rm $(basename $f .xz);
+		    es_print vanilla-expand --command=\"xz+tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
+		;;
+	    *.xz)
+		count=`expr $count + 1`
+		# --force is needed to decompress a file specified by a soft link.
+		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
+		(cd "$o"; unxz --force --stdout $f > $(basename $f .xz)  &&
+		    es_print vanilla-expand --command=\"xz\" --input=\"$f\" --status=\"$?\" | tee -a $l)
+		;;
 	esac
     done
     es_print vanilla-end --count=${count} --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l

@@ -1,3 +1,13 @@
+2010-07-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (run_vanilla): Added gem, xz and
+	tar.xz supports.
+
+	* misc/specs/srpmix.spec.in (plugin-vanilla::Requires): Require 
+	rubygems and xz.
+
+	* misc/m4/progs.m4: Check gem and xz.
+
 2010-07-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 3.114.0.
