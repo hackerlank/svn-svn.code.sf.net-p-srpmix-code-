@@ -144,7 +144,7 @@
 	  "\n"))
        )
      `(("major-mode" . ,(symbol-name major-mode))
-       ("font-lock-support-mode" . ,(format "%s" font-lock-support-mode))
+       ;;
        ))
 
     (lexical-let ((queue queue))
