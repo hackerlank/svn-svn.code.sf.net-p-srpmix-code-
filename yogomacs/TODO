@@ -1,3 +1,15 @@
+- Timeout configuration
+- Multi server
+- /var/run file
+- File selection
+- Version number embedding
+- File name with version number
+- Reverse map(sha1->paths)
+- Modification time...
+- cmd line interface
+- /var/log/message separation
+
+
 - Invoke flserver
 - Cache facility
 - Config

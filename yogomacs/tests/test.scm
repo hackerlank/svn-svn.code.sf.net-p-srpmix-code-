@@ -127,8 +127,8 @@
 (test-module 'yogomacs.config)
 (use yogomacs.flserver)
 (test-module 'yogomacs.flserver)
-(use yogomacs.gzip)
-(test-module 'yogomacs.gzip)
+(use yogomacs.compress)
+(test-module 'yogomacs.compress)
 
 (test* "/etc/passwd"
        "/etc/passwd" (readable? "/etc" "passwd"))

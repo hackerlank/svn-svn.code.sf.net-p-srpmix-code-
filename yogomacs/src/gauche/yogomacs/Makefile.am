@@ -9,10 +9,10 @@ moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \
 	\
 	access.scm   \
+	compress.scm \
 	config.scm   \
 	dentry.scm   \
 	flserver.scm \
-	gzip.scm     \
 	main.scm     \
 	path.scm     \
 	fix.scm      \

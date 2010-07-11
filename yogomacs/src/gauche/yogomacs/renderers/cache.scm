@@ -5,7 +5,7 @@
    (use file.util)
    (use yogomacs.renderer)
    (use yogomacs.access)
-   (use yogomacs.gzip)
+   (use yogomacs.compress)
    (use gauche.process))
 
 (select-module yogomacs.renderers.cache)
@@ -52,7 +52,7 @@
 			     (format "~s (~a)" 
 				     cache-file
 				     (condition-ref e 'message)))))
-	 (with-input-from-gzip-file cache-file
+	 (with-input-from-compressed-file cache-file
 				    read)))
 				    
 
@@ -72,10 +72,9 @@
 	(pa$ write shtml)
 	:if-exists :error
 	:if-does-not-exist :create)
-      ;; TODO gzip
       (ignore-exception 
-       (gzip tmp)
-       (sys-rename (format "~a.gz" tmp) cache-file))
+       (compress tmp)
+       (sys-rename (format "~a.xz" tmp) cache-file))
       shtml)))
 
 (define (newer-than? cache-file src-path)
