@@ -26,6 +26,7 @@
   (use file.util)
   (use util.combinations)
   (use gauche.sequence)
+  (use srfi-1)
   (use srfi-19)
   (use yogomacs.dentry)
   (use yogomacs.renderer)
@@ -197,6 +198,15 @@
 		  (head 
 		   "\n"
 		   "	" (title ,dir) "\n"
+		   ;;
+		   ,@(append-map
+		      (lambda (elt)
+			(list "	"
+			      `(meta (|@|
+				      (name ,(car elt))
+				      (content ,(cdr elt))))
+			      "\n"))
+		      '(("major-mode" . "dired-mode")))
 		   ,@(stylesheets css-prefix))
 		  "\n"
 		  (body
