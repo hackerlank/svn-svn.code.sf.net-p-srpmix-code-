@@ -125,7 +125,7 @@ function bzr_checkout
     fi
 
     ( 
-	cd ${output_dir}
+	cd "${output_dir}"
 
 	common_spawn bzr branch "${BZR_REPOSITORY}"
     )
