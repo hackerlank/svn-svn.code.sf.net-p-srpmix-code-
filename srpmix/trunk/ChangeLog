@@ -1,5 +1,8 @@
 2010-07-12  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/99default.scm (#/kernel-2\.6\.3[0-9].*/): Added
+	new rule.
+
 	* src/plugins/10srpmix-vanilla (run_vanilla): Added gem, xz and
 	tar.xz supports.
 

@@ -4,7 +4,7 @@
 ;; ia64 and ppc64 should be built, However, with these
 ;; targets, created swrfs becomes too large.
 (#/kernel-2\.6\.18.*/ "--target=x86_64,i686"  )
-
+(#/kernel-2\.6\.3[0-9].*/ "--target=x86_64,i686"  )
 ;;
 (#/kernel-2\.4\.9.*/  "--target=i686" )
 (#/kernel-2\.4\.21.*/ "--target=i686")
