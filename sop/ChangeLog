@@ -1,6 +1,7 @@
 2010-07-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-garbages (main): Added --output-dir.
+	(main): Added --nosignature.
 
 2010-07-09  Masatake YAMATO  <yaamto@redhat.com>
 

@@ -113,7 +113,7 @@ function main
     touch $list_in_mirrors
     for d in ${SOP_CRADLES_DIR}/*/mirror; do
 	for s in $(find $d -type f | grep 'src.rpm$'); do
-	    rpm -qp --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" $s
+	    rpm -qp --nosignature --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" $s
 	done
     done | LANG=C sort | uniq > $list_in_mirrors
 
