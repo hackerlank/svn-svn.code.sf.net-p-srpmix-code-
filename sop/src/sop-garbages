@@ -121,7 +121,7 @@ function main
     local output
     if [ -n "$OUTPUT_DIR" ]; then
 	local date=$(date --rfc-3339=date)
-	output="${$OUTPUT_DIR}/sop-gc-${date}"
+	output="${OUTPUT_DIR}/sop-gc-${date}"
     else
 	output=/dev/stdout
     fi
