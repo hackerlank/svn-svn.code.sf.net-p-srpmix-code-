@@ -270,8 +270,8 @@ function twig_verify_soruces
 	-d "$1/pre-build"        -a \
 	-d "$1/archives"         -a \
 	"$(cat $1/STATUS)" = "0" &&
-    [[	"$(cat $1/SRPMIX)" =~ "3.99.[[:digit:]]"  ||           \
-	"$(cat $1/SRPMIX)" =~ "3.10[[:digit:]].[[:digit:]]"    \
+    [[	"$(cat $1/SRPMIX)" =~ 3.99.[[:digit:]]  ||           \
+	"$(cat $1/SRPMIX)" =~ 3.1[[:digit:]][[:digit:]].[[:digit:]]    \
     ]]
 }
 
