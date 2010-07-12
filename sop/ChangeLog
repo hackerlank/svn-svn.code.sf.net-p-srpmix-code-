@@ -1,5 +1,8 @@
 2010-07-12  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/sop-mirror (mirror): Remove double quote from right 
+	side operand of =~.
+
 	* src/sop-garbages (main): Added --output-dir.
 	(main): Added --nosignature.
 
