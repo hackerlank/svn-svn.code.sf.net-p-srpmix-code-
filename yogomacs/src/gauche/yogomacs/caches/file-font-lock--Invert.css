@@ -149,43 +149,61 @@ a:hover {
         float: right;
 }
 
-/* About copyright see nil */
+.diff-added {
+}
+.diff-context {
+        /* diff-context */
+        color: #b3b3b3;
+}
+.diff-file-header {
+        /* diff-file-header */
+        background-color: #999999;
+        font-weight: bold;
+}
+.diff-header {
+        /* diff-header */
+        background-color: #737373;
+}
+.diff-hunk-header {
+        /* diff-hunk-header */
+        background-color: #737373;
+}
+.diff-indicator-added {
+}
+.diff-indicator-removed {
+}
+.diff-removed {
+}
+
 .rpm-spec-dir {
         /* rpm-spec-dir-face */
         color: #00ff00;
 }
-/* About copyright see nil */
 .rpm-spec-doc {
         /* rpm-spec-doc-face */
         color: #ff00ff;
 }
-/* About copyright see nil */
 .rpm-spec-ghost {
         /* rpm-spec-ghost-face */
         color: #ff0000;
 }
-/* About copyright see nil */
 .rpm-spec-macro {
         /* rpm-spec-macro-face */
         color: #ffff00;
 }
-/* About copyright see nil */
 .rpm-spec-package {
         /* rpm-spec-package-face */
         color: #ff0000;
 }
-/* About copyright see nil */
 .rpm-spec-section {
         /* rpm-spec-section-face */
         color: #ffff00;
         text-decoration: underline;
 }
-/* About copyright see nil */
 .rpm-spec-tag {
         /* rpm-spec-tag-face */
         color: #0000ff;
 }
-/* About copyright see nil */
 .rpm-spec-var {
         /* rpm-spec-var-face */
         color: #b03060;

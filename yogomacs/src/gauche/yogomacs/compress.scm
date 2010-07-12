@@ -7,12 +7,12 @@
 (select-module yogomacs.compress)
 
 (define (with-input-from-compressed-file zfile thunk)
-  (with-input-from-process `(xz --stdout ,zfile)
+  (with-input-from-process `(xz --uncompress --stdout ,zfile)
     thunk
     :on-abnormal-exit  :error))
 
 (define (compress file)
-  (run-process `(compress ,file) :wait #t))
+  (run-process `(xz --compress ,file) :wait #t))
 
 (provide "yogomacs/compress")
 	       
