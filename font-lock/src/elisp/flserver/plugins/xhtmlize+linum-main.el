@@ -44,8 +44,8 @@
 	 ;(line (car (read-from-string (overlay-get o 'linum-str))))
 	 ;(line-str (number-to-string line))
 	 (point (point))
-	 (id (concat "N:" line-str))
-	 (href (concat "#N:" id)) ; TODO: "L:" is needed?
+	 (id (concat "L:" line-str))
+	 (href (concat "#L:" id)) 
 	 (fstruct-list (xhtmlize-linum-fstruct-list-cache face-map))
 	 ;(line (string-to-number line-str))
 	 )
