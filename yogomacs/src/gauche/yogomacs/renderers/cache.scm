@@ -1,6 +1,6 @@
 (define-module yogomacs.renderers.cache
    (export cache)
-   (use rfc.sha1)
+   (use rfc.md5)
    (use util.digest)
    (use file.util)
    (use yogomacs.renderer)
@@ -10,19 +10,19 @@
 
 (select-module yogomacs.renderers.cache)
 
-(define (sha1->cache-file sha1 config)
-  (let1 dir (sha1->cache-dir sha1 config)
-    (build-path dir sha1)))
+(define (md5->cache-file md5 config)
+  (let1 dir (md5->cache-dir md5 config)
+    (build-path dir md5)))
 
-(define (sha1->cache-dir sha1 config)
+(define (md5->cache-dir md5 config)
   (format "/var/cache/yogomacs/~a/shtml/~a/~a/~a/~a/~a/~a"
 		    (config 'spec-conf)
-		    (substring sha1 0 2)
-		    (substring sha1 2 4)
-		    (substring sha1 4 6)
-		    (substring sha1 6 8)
-		    (substring sha1 8 10)
-		    (substring sha1 10 12)
+		    (substring md5 0 2)
+		    (substring md5 2 4)
+		    (substring md5 4 6)
+		    (substring md5 6 8)
+		    (substring md5 8 10)
+		    (substring md5 10 12)
 		    ))
 
 (define-macro (ignore-exception . body)
@@ -83,14 +83,14 @@
 (define (cache src-path prepare-proc config)
   (unless (readable? src-path)
     (not-found "File Not Found" src-path))
-  (let* ((sha1 (guard (e (else 
+  (let* ((md5 (guard (e (else 
 			  (not-found "Failed to prepare cache name"
 				     src-path)))
 		      (with-input-from-file src-path
-			(compose digest-hexify sha1-digest)
+			(compose digest-hexify md5-digest)
 			:if-does-not-exist :error
 			:element-type :binary)))
-	 (cache-file (sha1->cache-file sha1 config)))
+	 (cache-file (md5->cache-file md5 config)))
     (if (and (cached? cache-file)
 	     (newer-than? cache-file src-path))
 	(read-cache cache-file)

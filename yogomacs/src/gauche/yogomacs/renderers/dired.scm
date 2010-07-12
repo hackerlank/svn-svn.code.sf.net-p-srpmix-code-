@@ -33,6 +33,10 @@
   )
 (select-module yogomacs.renderers.dired)
 
+(define-constant dired-major-version 0)
+(define-constant dired-minor-version 0)
+(define-constant dired-micro-version 0)
+
 (define-constant font-lock-built-in-faces 
   '(
     default
@@ -135,8 +139,8 @@
 	    (a (|@| (href ,(format "#~a" id)))
 	       ,(format (string-append "~" (number->string linum-column) ",d")
 			linum)))
-      (span (|@| (class "lfringe") (id ,(format "f:L/N:~a/L:~d" dname linum))) " ")
-      (span (|@| (class "rfringe") (id ,(format "f:R/L:~d" linum))) " "))))
+      (span (|@| (class "lfringe") (id ,(format "l/N:~a" dname))) " ")
+      (span (|@| (class "rfringe") (id ,(format "r/N:~a" dname))) " "))))
 
 (define (type&size&date dentry size-column)
   `(
@@ -167,7 +171,11 @@
 
 (define (line dir linum dentry linum-column size-column result)
   (append (reverse 
-	   (line0 dir linum dentry linum-column size-column))
+	   (line0 dir
+		  linum
+		  dentry 
+		  linum-column
+		  size-column))
 	  result))
 
 (define css-prefix-default "file:///tmp")
@@ -206,7 +214,13 @@
 				      (name ,(car elt))
 				      (content ,(cdr elt))))
 			      "\n"))
-		      '(("major-mode" . "dired-mode")))
+		      `(("major-mode" . "dired-mode")
+			("created-time" . ,(date->string (time-utc->date (current-time)) "~5"))
+			("version" . ,(format "~d.~d.~d"
+					      dired-major-version
+					      dired-minor-version
+					      dired-micro-version))
+			))
 		   ,@(stylesheets css-prefix))
 		  "\n"
 		  (body

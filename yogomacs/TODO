@@ -5,7 +5,8 @@ For batch converting
 - Multi server
 - /var/run file
 - File selection(exclude wrong type file)
-- Version number embedding*
+- Version number embedding <done>
+- #ref definition
 - File name with version number
 - Reverse map(sha1->paths)
 - md5
@@ -13,6 +14,7 @@ For batch converting
 - cmd line interface
 - /var/log/message separation
 - URL query string for yogomacs*
+- use #`,format
 # --------------------------------------------------------
 
 - http://nanasi.jp/articles/vim/2html_vim.html
