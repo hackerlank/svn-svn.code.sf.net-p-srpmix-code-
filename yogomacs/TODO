@@ -5,14 +5,14 @@ For batch converting
 - Multi server
 - /var/run file
 - File selection(exclude wrong type file)
-- Version number embedding
+- Version number embedding*
 - File name with version number
 - Reverse map(sha1->paths)
 - md5
 - Modification time...
 - cmd line interface
 - /var/log/message separation
-- URL query string for yogomacs
+- URL query string for yogomacs*
 # --------------------------------------------------------
 
 - http://nanasi.jp/articles/vim/2html_vim.html
