@@ -320,12 +320,7 @@ output.")
 (defun xhtmlize-next-change (pos prop &optional limit)
   ;; (message "<%d, %s>" pos limit) 
   (let ((r0 (next-char-property-change pos limit))
-	(r1 (next-single-char-property-change pos prop nil limit))
-	(r2 (next-single-property-change pos 'face nil limit)))
-    (when (boundp 'engine)
-      (unless r2
-	(xhtmlize-engine-insert-comment engine (format "nil => %s" limit)))
-      )
+	(r1 (next-single-char-property-change pos prop nil limit)))
     (cond
      ;((eq r1 (point-max))
       ;;  (line-beginning-position 2)

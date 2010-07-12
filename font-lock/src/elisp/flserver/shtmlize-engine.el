@@ -8,6 +8,10 @@
 
 (define-xhtmlize-engine 'shtmlize <shtmlize-engine>)
 
+(defconst shtmlize-major-version 0)
+(defconst shtmlize-minor-version 0)
+(defconst shtmlize-micro-version 0)
+
 (defun shtmlize-make-file-name (file)
   (concat file ".shtml"))
 
@@ -144,7 +148,14 @@
 	  "\n"))
        )
      `(("major-mode" . ,(symbol-name major-mode))
-       ;;
+       ("created-time" . ,(format-time-string "%Y-%m-%dT%T"))
+       ("version" . ,(format "%d.%d.%d"
+			     shtmlize-major-version
+			     shtmlize-minor-version
+			     shtmlize-micro-version))
+       ("point-max" . ,(format "%d" (point-max)))
+       ("count-lines" . ,(format "%d" (count-lines (point-min) 
+						   (point-max))))
        ))
 
     (lexical-let ((queue queue))
