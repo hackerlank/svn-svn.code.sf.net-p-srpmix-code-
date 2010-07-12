@@ -1,3 +1,7 @@
+2010-07-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/backends/bzr (bzr_update): Set BZR_LOG /dev/null.
+
 2010-07-02  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/backends/bzr (bzr_update): Use bzr pull instead

@@ -150,6 +150,7 @@ function bzr_update
 
     cd "${update_dir}"
 
+    export BZR_LOG=/dev/null
     if common_spawn bzr pull | tee $log; then
 	if [ "$(wc -l < $log)" = 1 ] && \
 	   LANG=C grep  '^No revisions to pull.$' $log > /dev/null 2>&1; then
