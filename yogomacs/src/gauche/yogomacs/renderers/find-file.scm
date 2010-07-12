@@ -14,6 +14,7 @@
 (define find-file-faces
   '(
     default 
+    font-lock-built-in-faces
     font-lock-comment-delimiter-face
     font-lock-comment-face
     font-lock-constant-face
@@ -30,7 +31,14 @@
     linum
     rfringe
     ;;
-    ;; spec, c
+    rpm-spec-dir
+    rpm-spec-doc
+    rpm-spec-ghost
+    rpm-spec-macro
+    rpm-spec-package
+    rpm-spec-section
+    rpm-spec-tag
+    rpm-spec-var
     ))
 
 (define (find-file src-path config)

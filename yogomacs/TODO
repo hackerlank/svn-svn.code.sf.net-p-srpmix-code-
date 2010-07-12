@@ -6,7 +6,7 @@ For batch converting
 - /var/run file
 - File selection(exclude wrong type file)
 - Version number embedding <done>
-- #ref definition
+- #ref definition <done>
 - File name with version number
 - Reverse map(sha1->paths)
 - md5
