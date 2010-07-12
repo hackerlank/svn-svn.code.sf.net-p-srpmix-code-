@@ -84,7 +84,7 @@ function mirror
     fi
 
     # TODO: share the code
-    if [[ "$BUILDERS" =~ "^srpmix$|,srpmix|srpmix,|,srpmix," ]]; then
+    if [[ "$BUILDERS" =~ ^srpmix$|,srpmix|srpmix,|,srpmix, ]]; then
 	# TODO: This should be part of builder backend.
 	find ${odir} -name '*.src.rpm'		\
 	    | while read p; do dirname $p; done	\
