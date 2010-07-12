@@ -2,11 +2,12 @@
 
 SOPCONFDIR=/etc/sop
 CONF=sop.cf
+OUTPUT_DIR=
 
 function print_usage
 {
     echo "Usage: "
-    echo "	$0 [--help|-h]"
+    echo "	$0 [--help|-h] [--output-dir=DIR]"
 }
 
 if test -f ${SOPCONFDIR}/${CONF}; then
@@ -61,6 +62,15 @@ function parse_arguments
 		print_usage
 		exit 0
 		;;
+	    (--output-dir=*)
+	    	OUTPUT_DIR=${1/--output-dir=}
+		if [ -d "${OUTPUT_DIR}" ]; then
+		    OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
+		else
+		    echo "No such directory: ${OUTPUT_DIR}" 1>&2
+		    exit 1
+		fi
+		;;
 	esac
 	shift
     done
@@ -108,7 +118,14 @@ function main
     done | LANG=C sort | uniq > $list_in_mirrors
 
 
-    report $list_in_fs $list_swrf $list_in_mirrors
+    local output
+    if [ -n "$OUTPUT_DIR" ]; then
+	local date=$(date --rfc-3339=date)
+	output="${$OUTPUT_DIR}/sop-gc-${date}"
+    else
+	output=/dev/stdout
+    fi
+    report $list_in_fs $list_swrf $list_in_mirrors > $output
 }
 
 time main "$@"

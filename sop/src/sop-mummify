@@ -67,7 +67,7 @@ function parse_arguments
 		    if [ -d "${OUTPUT_DIR}" ]; then
 			OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
 		    else
-			echo "No such directory: ${OUTPUT_DIR}" 2>&1
+			echo "No such directory: ${OUTPUT_DIR}" 1>&2
 			exit 1
 		    fi
 		    ;;
@@ -84,7 +84,7 @@ function parse_arguments
 			     KS_FILE=$(ls $(pwd)/${KS_FILE})
 			 fi
 		     else
-			 echo "No such file: ${KS_FILE}" 2>&1
+			 echo "No such file: ${KS_FILE}" 1>&2
 			 exit 1
 		     fi
 		     ;;
