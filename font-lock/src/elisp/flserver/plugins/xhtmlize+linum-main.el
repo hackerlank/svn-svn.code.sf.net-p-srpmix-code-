@@ -45,7 +45,7 @@
 	 ;(line-str (number-to-string line))
 	 (point (point))
 	 (id (concat "L:" line-str))
-	 (href (concat "#L:" id)) 
+	 (href (concat "#" id)) 
 	 (fstruct-list (xhtmlize-linum-fstruct-list-cache face-map))
 	 ;(line (string-to-number line-str))
 	 )
