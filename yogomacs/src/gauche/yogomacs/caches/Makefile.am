@@ -16,6 +16,6 @@ dist_csscache_DATA= \
 	$(NULL)
 
 
-shtmlcachedir=$(localstatedir)/cache/yogomacs/@SPEC_CONFIG@/shtml
-dist_shtmlcache_DATA=
+ffcachedir=$(localstatedir)/cache/yogomacs/@SPEC_CONFIG@/find-file
+dist_ffcache_DATA=
 

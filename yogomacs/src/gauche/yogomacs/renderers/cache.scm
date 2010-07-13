@@ -12,10 +12,10 @@
 
 (define (md5->cache-file md5 config)
   (let1 dir (md5->cache-dir md5 config)
-    (build-path dir md5)))
+    (build-path dir "xz")))
 
 (define (md5->cache-dir md5 config)
-  (format "/var/cache/yogomacs/~a/shtml/~a/~a/~a/~a/~a/~a"
+  (format "/var/cache/yogomacs/~a/find-file/~a/~a/~a/~a/~a/~a/~a"
 		    (config 'spec-conf)
 		    (substring md5 0 2)
 		    (substring md5 2 4)
@@ -23,6 +23,7 @@
 		    (substring md5 6 8)
 		    (substring md5 8 10)
 		    (substring md5 10 12)
+		    (substring md5 12 -1)
 		    ))
 
 (define-macro (ignore-exception . body)
@@ -52,11 +53,11 @@
 			     (format "~s (~a)" 
 				     cache-file
 				     (condition-ref e 'message)))))
-	 (with-input-from-compressed-file cache-file
-				    read)))
+    (with-input-from-compressed-file cache-file
+				     read)))
 				    
 
-(define (build-cache prepare-proc cache-file)
+(define (build-cache prepare-proc cache-file src-path)
   (let1 cache-dir (sys-dirname cache-file)
     (guard (e (else (internal-error "Failed to prepare cache directory"
 				    (format "~s (~a)"
@@ -70,11 +71,16 @@
 			 (sys-getpid))))
       (with-output-to-file tmp
 	(pa$ write shtml)
-	:if-exists :error
+	:if-exists :supersede
 	:if-does-not-exist :create)
       (ignore-exception 
        (compress tmp)
        (sys-rename (format "~a.xz" tmp) cache-file))
+      (remove-safe tmp)
+      (let1 back-ptr (digest-hexify (md5-digest-string src-path))
+	(ignore-exception
+	 (sys-symlink src-path (build-path cache-dir back-ptr))
+	 ))
       shtml)))
 
 (define (newer-than? cache-file src-path)
@@ -95,6 +101,7 @@
 	     (newer-than? cache-file src-path))
 	(read-cache cache-file)
 	(build-cache (pa$ prepare-proc src-path config) 
-		     cache-file))))
+		     cache-file
+		     src-path))))
 
 (provide "yogomacs/renderers/cache")

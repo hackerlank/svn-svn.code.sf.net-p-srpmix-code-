@@ -8,7 +8,7 @@ For batch converting
 - Version number embedding <done>
 - #ref definition <done>
 - File name with version number
-- Reverse map(sha1->paths)
+- Reverse map(sha1->paths) <mostly done>
 - md5
 - Modification time...
 - cmd line interface

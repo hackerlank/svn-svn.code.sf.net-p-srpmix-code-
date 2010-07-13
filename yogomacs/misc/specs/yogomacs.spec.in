@@ -119,7 +119,7 @@ fi
 %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css/*.css
 
 %attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/@SPEC_CONFIG@
-%attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/@SPEC_CONFIG@/shtml
+%attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/@SPEC_CONFIG@/find-file
 
 %config %{_sysconfdir}/font-lock/flserver/yogomacs-@SPEC_CONFIG@.el
 
