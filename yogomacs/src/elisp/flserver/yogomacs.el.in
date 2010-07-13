@@ -1,0 +1,4 @@
+(setq flserver-server-name "yogomacs-@SPEC_CONFIG@")
+;;
+;;
+(provide 'yogomacs)

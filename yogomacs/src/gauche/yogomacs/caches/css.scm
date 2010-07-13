@@ -26,8 +26,9 @@
 	 (cssize (pa$ flclient-cssize face
 		      dir
 		      requires
-		      ;;
+		      ;; THIS SHOULD BE MERGEDTO fserver.
 		      :verbose (config 'client-verbose)
+		      :socket-name (config 'client-socket-name)
 		      ;;
 		      )))
     (prepare-cache config file cssize)))

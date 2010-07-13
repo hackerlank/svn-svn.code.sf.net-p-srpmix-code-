@@ -2,6 +2,7 @@
  (harness . "xvnc")
  (harness-timeout . 20)
  (client-verbose . #f)
+ (client-socket-name . "yogomacs-@SPEC_CONFIG@")
  (real-sources-dir . "/srv/sources")
  (emacs . "emacs")
  (config . "yogomacs-@SPEC_CONFIG@")

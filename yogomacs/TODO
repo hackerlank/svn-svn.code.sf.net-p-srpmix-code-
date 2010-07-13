@@ -2,7 +2,7 @@
 For batch converting
 # --------------------------------------------------------
 - Timeout configuration
-- Multi server
+- Multi server...
 - /var/run file
 - File selection(exclude wrong type file)
 - Version number embedding <done>
@@ -15,6 +15,7 @@ For batch converting
 - /var/log/message separation
 - URL query string for yogomacs*
 - use #`,format
+- storage separations
 # --------------------------------------------------------
 
 - http://nanasi.jp/articles/vim/2html_vim.html

@@ -109,6 +109,7 @@ AC_OUTPUT([
 	   src/cmds/Makefile
 	   src/elisp/Makefile
 	   src/elisp/flserver/Makefile
+	   src/elisp/flserver/yogomacs.el
 	   src/elisp/flserver/plugins/Makefile
 	   src/gauche/Makefile
 	   src/gauche/yogomacs/Makefile

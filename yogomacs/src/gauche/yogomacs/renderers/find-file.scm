@@ -60,7 +60,9 @@
 			     src-path
 			     dest-path
 			     (css-cache-dir config)
-			     :verbose (config 'client-verbose))))
+			     :verbose (config 'client-verbose)
+			     :socket-name (config 'client-socket-name)
+			     )))
 	  ;;
 	  (flserver shtmlize config)
 	  ;;

@@ -10,7 +10,9 @@
 (select-module yogomacs.flserver)
 
 (define (flserver action config)
-  (define (ping) (eq? (flclient-ping) 0))
+  (define (ping) (eq? (flclient-ping
+		       :verbose (config 'client-verbose)
+		       :socket-name (config 'client-socket-name)) 0))
   (define (launch-server)
     (let ((harness-object (choose-harness (config 'harness)))
 	  (server-cmdline (emacs-cmdline (config 'emacs)
