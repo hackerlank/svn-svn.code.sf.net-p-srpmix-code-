@@ -835,6 +835,7 @@
 	 nil)))))
 
 (defun stitch-insert-annotation-fuzzy (file entry)
+  (setq stitch-search-region-total-total-total (1+ stitch-search-region-total-total-total))
   (unless (equal (stitch-klist-value entry :registered-as) file)
     (when
 	(with-current-buffer (current-buffer) 
@@ -885,23 +886,31 @@
 	  (mapc
 	   (lambda (entry) (stitch-insert-annotation-strict file entry))
 	   ;; TODO: This should be done in registration
-	   (reverse (sort entries 'stitch-annotation-compare))))))))
+	   (sort (reverse entries) 'stitch-annotation-compare)))))))
 
 (defun stitch-insert-annotations-fuzzy (buffer)
-  (with-current-buffer buffer
-    (let ((file (stitch-buffer-file-name (current-buffer))))
-      (when file
-	(let ((entries (gethash 
-			;; TODO: This depends on major mode.
-			(if (eq major-mode 'dired-mode)
-			    (file-name-nondirectory (directory-file-name file))
-			  (file-name-nondirectory file))
-			stitch-annotations-fuzzy nil)))
-	  (mapc
-	   (lambda (entry) 
-	     (stitch-insert-annotation-fuzzy file entry))
-	   ;; TODO: This should be done in registration
-	   (reverse (sort entries 'stitch-annotation-compare))))))))
+  (message "before<0>: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
+  (prog1
+      (with-current-buffer buffer
+	(let ((file (stitch-buffer-file-name (current-buffer))))
+	  (when file
+	    (message "before<1>: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
+	    (let ((entries (gethash 
+			    ;; TODO: This depends on major mode.
+			    (if (eq major-mode 'dired-mode)
+				(file-name-nondirectory (directory-file-name file))
+			      (file-name-nondirectory file))
+			    stitch-annotations-fuzzy nil)))
+	      (message "before<2>: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
+	      (mapc
+	       (lambda (entry) 
+		 (message "before..: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
+		 (stitch-insert-annotation-fuzzy file entry)
+		 (message "after..: %d" (length (gethash "main.c" stitch-annotations-fuzzy))))
+	       ;; TODO: This should be done in registration
+	       (sort (reverse entries) 'stitch-annotation-compare))))))
+    (message "after: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun stitch-insert-annotations (&optional buffer)
@@ -928,8 +937,24 @@
 	    rb
 	  (concat rb newline f))))))
 
+
+(defvar stitch-search-region-total-total-total 0)
+(defvar stitch-search-region-total-total 0)
+(defvar stitch-search-region-total 0)
+(defvar stitch-search-region-hit 0)
+(defvar stitch-search-region-miss 0)
+(defun stitch-search-region-reset-counter ()
+  (interactive)
+  (setq 
+   stitch-search-region-total-total-total 0
+   stitch-search-region-total-total 0
+   stitch-search-region-total 0
+   stitch-search-region-hit 0
+   stitch-search-region-miss 0))
 (defun stitch-search-region (buffer target)
   ;; TODO: Directory fuzzy insertion is not supported now.
+  (setq stitch-search-region-total-total 
+	(1+ stitch-search-region-total-total))
   (with-current-buffer buffer
     (when (eq (stitch-klist-value target :type) 'file)
       (let* ((point (stitch-klist-value target :point))
@@ -944,7 +969,12 @@
 	  (save-excursion
 	    (goto-char (point-max))
 	    (let ((points (list)))
-	      (message "=>%s<=" surround-text)
+	      (save-excursion
+		(setq stitch-search-region-total (1+ stitch-search-region-total))
+		(if (search-backward surround-text nil t)
+		    (setq stitch-search-region-hit (1+ stitch-search-region-hit))
+		  (setq stitch-search-region-miss (1+ stitch-search-region-miss))
+		  ))
 	      (while (search-backward surround-text nil t)
 		(setq points (cons (+ (point) extra-length) points)))
 	      (let ((delta (point-max))
@@ -1943,11 +1973,11 @@
 				     (stitch-target-get-label
 				      (stitch-klist-value e :target)
 				      k) "\n"
-				      (format "Home: %S\n" (stitch-klist-value e :annotation-home))
-				      (if show-keyword
-					  (format "Keywords: %S\n"
-						  (stitch-klist-value e :keywords))
-					""))
+				     (format "Home: %S\n" (stitch-klist-value e :annotation-home))
+				     (if show-keyword
+					 (format "Keywords: %S\n"
+						 (stitch-klist-value e :keywords))
+				       ""))
 				    'face 'stitch-annotation-base
 				    'mouse-face 'highlight
 				    'stitch-file   k
@@ -1963,9 +1993,9 @@
 	     (insert "\n")
 	     (insert "\n")
 	     ))
-	 (sort filter-annotations (lambda (a1 a2)
-				    (stitch-annotation-compare (nth 1 a1)
-								(nth 1 a2)))))
+	 (sort (copy-list filter-annotations) (lambda (a1 a2)
+						(stitch-annotation-compare (nth 1 a1)
+									   (nth 1 a2)))))
 
 	(local-set-key [return]  'stitch-list-jump-to-target)
 	(local-set-key [(shift return)]  'stitch-list-jump-to-home)
@@ -2033,7 +2063,7 @@
 			     (car f)
 			     ))
 	     ))
-	 (sort files
+	 (sort (copy-list files)
 	       (lambda (a b)
 		 (> (cdr a) (cdr b)))))
 	(goto-char (point-min))
