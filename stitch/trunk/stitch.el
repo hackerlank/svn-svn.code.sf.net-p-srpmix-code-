@@ -885,7 +885,7 @@
 	  (mapc
 	   (lambda (entry) (stitch-insert-annotation-strict file entry))
 	   ;; TODO: This should be done in registration
-	   (nreverse (sort entries 'stitch-annotation-compare))))))))
+	   (reverse (sort entries 'stitch-annotation-compare))))))))
 
 (defun stitch-insert-annotations-fuzzy (buffer)
   (with-current-buffer buffer
@@ -898,9 +898,10 @@
 			  (file-name-nondirectory file))
 			stitch-annotations-fuzzy nil)))
 	  (mapc
-	   (lambda (entry) (stitch-insert-annotation-fuzzy file entry))
+	   (lambda (entry) 
+	     (stitch-insert-annotation-fuzzy file entry))
 	   ;; TODO: This should be done in registration
-	   (nreverse (sort entries 'stitch-annotation-compare))))))))
+	   (reverse (sort entries 'stitch-annotation-compare))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun stitch-insert-annotations (&optional buffer)
@@ -943,6 +944,7 @@
 	  (save-excursion
 	    (goto-char (point-max))
 	    (let ((points (list)))
+	      (message "=>%s<=" surround-text)
 	      (while (search-backward surround-text nil t)
 		(setq points (cons (+ (point) extra-length) points)))
 	      (let ((delta (point-max))
