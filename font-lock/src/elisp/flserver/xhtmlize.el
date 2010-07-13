@@ -889,8 +889,8 @@ it's called with the same value of KEY.  All other times, the cached
 	  nil
 	(set-foreground-color fg)
 	(set-background-color bg)
-	(xhtmlize-css-make-cache-on-disk face css-dir title)))
-  (funcall insert-func face title))
+	(xhtmlize-css-make-cache-on-disk face css-dir title))
+    (funcall insert-func face title)))
 
 (defun xhtmlize-css-link-insert (face title)
   (insert "    <link rel=\"stylesheet\" type=\"text/css\""
