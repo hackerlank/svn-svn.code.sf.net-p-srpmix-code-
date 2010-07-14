@@ -71,6 +71,7 @@ fi
 
 %dir %{_datadir}/gauche/site/lib/yogomacs
 %{_datadir}/gauche/site/lib/yogomacs/access.scm
+%{_datadir}/gauche/site/lib/yogomacs/batch.scm
 %{_datadir}/gauche/site/lib/yogomacs/compress.scm
 %{_datadir}/gauche/site/lib/yogomacs/config.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm

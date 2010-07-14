@@ -36,7 +36,7 @@
   (sys-putenv "HOME" "/var/www")
   (debug-print-width #f))
 
-(define (yogomacs argv params)
+(define (yogomacs params)
   (init)
   (let ((path (cgi-get-parameter "path" params :default "/"))
 	(config (load-config)))

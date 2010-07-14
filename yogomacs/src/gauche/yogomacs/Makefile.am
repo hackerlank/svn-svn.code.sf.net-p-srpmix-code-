@@ -9,6 +9,7 @@ moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \
 	\
 	access.scm   \
+	batch.scm    \
 	compress.scm \
 	config.scm   \
 	dentry.scm   \
