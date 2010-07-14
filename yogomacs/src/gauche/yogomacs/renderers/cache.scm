@@ -15,8 +15,7 @@
     (build-path dir "xz")))
 
 (define (md5->cache-dir md5 config)
-  (format "/var/cache/yogomacs/~a/find-file/~a/~a/~a/~a/~a/~a/~a"
-		    (config 'spec-conf)
+  (format "/var/cache/yogomacs/find-file/~a/~a/~a/~a/~a/~a/~a"
 		    (substring md5 0 2)
 		    (substring md5 2 4)
 		    (substring md5 4 6)

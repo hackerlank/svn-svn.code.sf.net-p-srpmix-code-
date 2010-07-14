@@ -108,6 +108,7 @@ fi
 %attr(0700,apache,apache) %{_localstatedir}/www/.vnc/passwd
 %dir %{_sysconfdir}/yogomacs
 
+%attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/find-file
 
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*
@@ -117,9 +118,6 @@ fi
 %attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@
 %attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css
 %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css/*.css
-
-%attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/@SPEC_CONFIG@
-%attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/@SPEC_CONFIG@/find-file
 
 %config %{_sysconfdir}/font-lock/flserver/yogomacs-@SPEC_CONFIG@.el
 
