@@ -1,0 +1,1 @@
+time vim -n -u NONE -i NONE -N -S ~/var/srpmix/syntax/syntax-batch.vim -- /srv/sources/attic/cradles/lcopy.sys/mirror/k/kernel/trunk/pre-build/linux-2.6/drivers/Kconfig 
