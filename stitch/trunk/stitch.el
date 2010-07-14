@@ -885,32 +885,25 @@
 	(let ((entries (gethash file stitch-annotations nil)))
 	  (mapc
 	   (lambda (entry) (stitch-insert-annotation-strict file entry))
-	   ;; TODO: This should be done in registration
-	   (sort (reverse entries) 'stitch-annotation-compare)))))))
+	   (reverse (sort (copy-list entries) 'stitch-annotation-compare))))))))
 
 (defun stitch-insert-annotations-fuzzy (buffer)
-  (message "before<0>: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
   (prog1
       (with-current-buffer buffer
 	(let ((file (stitch-buffer-file-name (current-buffer))))
 	  (when file
-	    (message "before<1>: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
 	    (let ((entries (gethash 
 			    ;; TODO: This depends on major mode.
 			    (if (eq major-mode 'dired-mode)
 				(file-name-nondirectory (directory-file-name file))
 			      (file-name-nondirectory file))
 			    stitch-annotations-fuzzy nil)))
-	      (message "before<2>: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
 	      (mapc
 	       (lambda (entry) 
-		 (message "before..: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
 		 (stitch-insert-annotation-fuzzy file entry)
-		 (message "after..: %d" (length (gethash "main.c" stitch-annotations-fuzzy))))
+		 )
 	       ;; TODO: This should be done in registration
-	       (sort (reverse entries) 'stitch-annotation-compare))))))
-    (message "after: %d" (length (gethash "main.c" stitch-annotations-fuzzy)))
-    ))
+	       (reverse (sort (copy-list entries) 'stitch-annotation-compare)))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun stitch-insert-annotations (&optional buffer)
