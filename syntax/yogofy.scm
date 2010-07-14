@@ -50,20 +50,57 @@
 		  )
         (assoc-ref mapping class class)))
 ;;; http://okmij.org/ftp/Scheme/lib/SXML-tree-trans.scm
+(define (built-in-links)
+  (define (built-in-link title face)
+    `(link (|@| (rel "stylesheet")
+	    (type "text/css")
+	    ;(href ,#`"file:///var/lib/yogomacs/local/css/,|face|--,|title|.css")
+	    (href ,#`"file:///tmp/,|face|--,|title|.css")
+	    (title ,title))))
+  (let1 base-names '(default
+		      font-lock-builtin-face
+		      font-lock-comment-delimiter-face
+		      font-lock-comment-face
+		      font-lock-constant-face
+		      font-lock-doc-face
+		      font-lock-function-name-face
+		      font-lock-keyword-face
+		      font-lock-negation-char-face
+		      font-lock-regexp-grouping-backslash
+		      font-lock-regexp-grouping-construct
+		      font-lock-string-face
+		      font-lock-type-face
+		      font-lock-variable-name-face
+		      font-lock-warning-face
+		      highlight
+		      lfringe
+		      linum
+		      rfringe)
+    (append
+     (map
+      (pa$ built-in-link "Default")
+      base-names)
+     (map
+      (pa$ built-in-link "Invert")
+      base-names))))
+
 (define (trx sxml)
   (pre-post-order sxml
 		  `((head . ,(lambda (tag . rest)
-			       (cons tag (reverse
-					  (fold (lambda (kar kdr)
-						 (cond
-						  ((string? kar)
-						   (cons kar kdr))
-						  ((eq? (car kar) 'style)
-						   kdr)
-						  (else
-						   (cons kar kdr))))
-					       (list)
-					       rest)))))
+			       (cons tag (append
+					  (reverse
+					   (fold (lambda (kar kdr)
+						   (cond
+						    ((string? kar)
+						     (cons kar kdr))
+						    ((eq? (car kar) 'style)
+						     kdr)
+						    (else
+						     (cons kar kdr))))
+						 (list)
+						 rest))
+					  (built-in-links)
+					  ))))
 		    (span
 		     ((class . ,(lambda (tag str)
 				  (list tag (vim->emacs str))
