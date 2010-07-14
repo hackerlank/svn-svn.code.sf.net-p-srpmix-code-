@@ -6,6 +6,7 @@
    (use yogomacs.renderer)
    (use yogomacs.access)
    (use yogomacs.compress)
+   (use yogomacs.caches.shtml)
    (use gauche.process))
 
 (select-module yogomacs.renderers.cache)
@@ -15,15 +16,16 @@
     (build-path dir "xz")))
 
 (define (md5->cache-dir md5 config)
-  (format "/var/cache/yogomacs/find-file/~a/~a/~a/~a/~a/~a/~a"
-		    (substring md5 0 2)
-		    (substring md5 2 4)
-		    (substring md5 4 6)
-		    (substring md5 6 8)
-		    (substring md5 8 10)
-		    (substring md5 10 12)
-		    (substring md5 12 -1)
-		    ))
+  (format "~a/~a/~a/~a/~a/~a/~a/~a"
+	  (shtml-cache-dir config)
+	  (substring md5 0 2)
+	  (substring md5 2 4)
+	  (substring md5 4 6)
+	  (substring md5 6 8)
+	  (substring md5 8 10)
+	  (substring md5 10 12)
+	  (substring md5 12 -1)
+	  ))
 
 (define-macro (ignore-exception . body)
   (let ((e (gensym)))

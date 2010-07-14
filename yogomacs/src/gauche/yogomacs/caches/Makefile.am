@@ -2,6 +2,7 @@ moduledir=@GAUCHE_MODULEDIR@/yogomacs/caches
 dist_module_DATA =   \
 	\
 	css.scm    \
+	shtml.scm  \
         \
 	$(NULL)
 
@@ -16,6 +17,6 @@ dist_csscache_DATA= \
 	$(NULL)
 
 
-ffcachedir=$(localstatedir)/cache/yogomacs/find-file
-dist_ffcache_DATA=
+shtmlcachedir=$(localstatedir)/cache/yogomacs/shtml
+dist_shtmlcache_DATA=
 
