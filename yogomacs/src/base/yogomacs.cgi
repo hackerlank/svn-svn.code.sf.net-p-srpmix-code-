@@ -4,4 +4,4 @@
 (use www.cgi)
 (use yogomacs.main)
 
-(cgi-main yogomacs)
+(cgi-main (pa$ yogomacs *argv*))
