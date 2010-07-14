@@ -82,7 +82,7 @@ function acceptable_p
     local u=$1
     local c=$2
 
-    [[ "$u" =~ "${SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT[$c]}" ]]
+    [[ "$u" =~ ${SVNWEB_TAG_ACCEPTABLE_REGEXP_DICT[$c]} ]]
     return $?
 }
 
