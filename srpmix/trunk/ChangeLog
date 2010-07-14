@@ -1,3 +1,11 @@
+2010-07-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Turn off alias
+	link to avoid trouble when updating sources.
+
+	* src/srpmix-weakview-packages (create_packages_weakview):
+	Ditto.
+	
 2010-07-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-wrap (create_plugin_spec): Remove double quotes from right 

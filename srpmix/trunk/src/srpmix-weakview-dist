@@ -157,11 +157,16 @@ mkdir -p \$builddistdir/plugins
 
 EOF
 
+#
+# TEMPORARY DISABLED
+# 
+alias=
 if [ -n "$alias" ]; then
     cat >> $spec <<EOF
 ln -sf ./$name %{_builddir}/$aliasln_body
 
 EOF
+
 fi
 
 # in %build

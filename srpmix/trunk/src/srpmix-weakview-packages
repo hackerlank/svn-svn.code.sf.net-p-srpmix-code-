@@ -168,6 +168,7 @@ srpmix_distmap_to_pvr | while read package version release; do
   slink="$sdir/$name"
   echo "mkdir -p \${buildpackagesdir}${sdir}"
   echo "ln -sf $d \${buildpackagesdir}${slink}"
+  alias=
   if [ -n "$alias" ];then
       slink="$sdir/$alias"
       echo "ln -sf ./$name \${buildpackagesdir}${slink}"
