@@ -44,8 +44,8 @@
 						(cons (car node) new-kids)
 						new-kids) 
 					    new-forest)
-				      new-forest))))))))
-    ) (let*-values (((new-forest keep?) (loop forest #t '()))) new-forest))
+				      new-forest)))))))))
+  (let*-values (((new-forest keep?) (loop forest #t '()))) new-forest))
 
 
 
