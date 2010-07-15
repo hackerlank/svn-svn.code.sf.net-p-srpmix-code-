@@ -11,14 +11,13 @@
 
 (define css-route "/web/css")
 (define (css-dest path params config)
-  (let1 last (last path)
-    (let1 real (readable? (css-cache-dir config)
-			  last)
-      (if real
-	  (list (cgi-header :content-type "text/css")
-		(call-with-input-file real
-		  port->string))
-	  (cgi-header :status "404 Not Found")
-	  ))))
+   (let1 last (last path)
+	 (let1 real (readable? (css-cache-dir config) last)
+	       (if real
+		   (list (cgi-header :content-type "text/css")
+			 (call-with-input-file real
+			    port->string))
+		   (cgi-header :status "404 Not Found")
+		   ))))
 
 (provide "yogomacs/dests/css")

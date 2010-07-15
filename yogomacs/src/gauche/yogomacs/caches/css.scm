@@ -6,6 +6,8 @@
   (use yogomacs.flserver)
   (use font-lock.flclient)
   (use yogomacs.renderer)
+  ;;
+  (use yogomacs.cache)
   )
 
 (select-module yogomacs.caches.css)
@@ -14,23 +16,29 @@
   (format "/var/lib/yogomacs/~a/css"
 	  (config 'spec-conf)))
 
-(define (prepare-cache config file action)
-  (if (file-exists? file)
-      #t
-      (flserver action config)))
+(define (css-cache-storage config face style)
+    (let* ((dir (css-cache-dir config))
+	   (entry (face->css-file face style))
+	   (file (build-path dir entry)))
+      file))
 
-(define (prepare-css-cache config face style requires)
-  (let* ((dir (css-cache-dir config))
-	 (entry (face->css-file face style))
-	 (file (build-path dir entry))
-	 (cssize (pa$ flclient-cssize face
-		      dir
+(define (css-cache-avaiable? face style config)
+    (file-exists? (css-cache-storage config face style)))
+
+(define (css-cache-prepare! face style requires config)
+  (let1 cssize (pa$ flclient-cssize face
+		      (css-cache-dir config)
 		      requires
 		      ;; THIS SHOULD BE MERGEDTO fserver.
 		      :verbose (config 'client-verbose)
 		      :socket-name (config 'client-socket-name)
 		      ;;
-		      )))
-    (prepare-cache config file cssize)))
+		      )
+      (flserver cssize config)))
+
+(define (prepare-css-cache config face style requires)
+  (cache-kernel (pa$ css-cache-avaiable? face style config)
+		(pa$ css-cache-prepare! face style requires config)
+		#f))
 
 (provide "yogomacs/caches/css")

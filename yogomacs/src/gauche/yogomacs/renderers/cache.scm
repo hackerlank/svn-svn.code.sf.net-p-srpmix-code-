@@ -7,7 +7,8 @@
    (use yogomacs.access)
    (use yogomacs.compress)
    (use yogomacs.caches.shtml)
-   (use gauche.process))
+   (use gauche.process)
+   (use yogomacs.cache))
 
 (select-module yogomacs.renderers.cache)
 
@@ -16,16 +17,16 @@
     (build-path dir "xz")))
 
 (define (md5->cache-dir md5 config)
-  (format "~a/~a/~a/~a/~a/~a/~a/~a"
-	  (shtml-cache-dir config)
-	  (substring md5 0 2)
-	  (substring md5 2 4)
-	  (substring md5 4 6)
-	  (substring md5 6 8)
-	  (substring md5 8 10)
-	  (substring md5 10 12)
-	  (substring md5 12 -1)
-	  ))
+   (let1 n 6
+	 (apply format (apply build-path (shtml-cache-dir config)
+			      (make-list (+ n 1) "~a"))
+		(append
+		 (map
+		  (pa$ apply substring)
+		  (zip (make-list n md5)
+		       (iota n 0 2)
+		       (iota n 2 2)))
+		 (list  (substring md5 (* n 2) -1)))))))
 
 (define-macro (ignore-exception . body)
   (let ((e (gensym)))
@@ -82,7 +83,8 @@
 	(ignore-exception
 	 (sys-symlink src-path (build-path cache-dir back-ptr))
 	 ))
-      shtml)))
+      ;; shtml
+      cache-file)))
 
 (define (newer-than? cache-file src-path)
   (file-mtime>? cache-file src-path))
@@ -98,11 +100,15 @@
 			:if-does-not-exist :error
 			:element-type :binary)))
 	 (cache-file (md5->cache-file md5 config)))
-    (if (and (cached? cache-file)
-	     (newer-than? cache-file src-path))
-	(read-cache cache-file)
-	(build-cache (pa$ prepare-proc src-path config) 
-		     cache-file
-		     src-path))))
+     ;;
+     (cache-kernel (lambda ()
+		      (if (and (cached? cache-file)
+			       (newer-than? cache-file src-path))
+			  cache-file
+			  #f))
+		   (pa$ (build-cache (pa$ prepare-proc src-path config) 
+				     cache-file
+				     src-path))
+		   read-cache)))
 
 (provide "yogomacs/renderers/cache")

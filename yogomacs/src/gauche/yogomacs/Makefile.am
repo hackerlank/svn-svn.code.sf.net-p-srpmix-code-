@@ -10,6 +10,7 @@ dist_module_DATA =   \
 	\
 	access.scm   \
 	batch.scm    \
+	cache.scm    \
 	compress.scm \
 	config.scm   \
 	dentry.scm   \
