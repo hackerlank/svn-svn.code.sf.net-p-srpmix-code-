@@ -146,13 +146,15 @@
 		 ( (equal? (car (assq-ref attrs 'class '(#f))) "linum"))
 		 (text (ref b 2))
 		 (id ((#/ *([0-9]+)/ text) 1))
+		 (point (car (assq-ref attrs 'point)))
 		 )
-	`((span (|@| ,@(append attrs `((id ,#`"L:,|id|"))))
+	`((span (|@| ,@(append (alist-delete 'point attrs eq?)
+			       `((id ,#`"L:,|id|"))))
 		(a (|@| (href ,#`"#L:,|id|"))
 		   ,text))
 	  (span (|@| 
 		 (class "lfringe")
-		 (id    ,#`"l/P:?/L:,|id|"))
+		 (id    ,#`"l/P:,|point|/L:,|id|"))
 		" ")
 	  (span (|@| 
 		 (class "rfringe")
@@ -225,7 +227,10 @@
 					 (equal? (car (assq-ref (cdr attrs) 'class '(#f)))
 						 "linum"))
 				    (let1 linum ((#/( *[0-9]+) / (car rest)) 1)
-				      (list tag attrs linum))
+				      (list tag (append attrs
+							`((point ,#`",|point|"))
+							)
+							linum))
 				    (let1 result (cons* tag (append attrs
 								    `((id ,#`"P:,|point|"))
 								    )
