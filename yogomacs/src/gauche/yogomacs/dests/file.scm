@@ -53,7 +53,7 @@
 	   (list
 	    (cgi-header)
 	    (fix
-	     (cache real-src-file find-file config)
+	     (cache real-src-file find-file "shtml" config)
 	     fix-css-href
 	     integrate-file-face)))))
 

@@ -117,6 +117,8 @@
 
 (use yogomacs.caches.css)
 (test-module 'yogomacs.caches.css)
+(use yogomacs.caches.shtml)
+(test-module 'yogomacs.caches.shtml)
 (use yogomacs.sanitize)
 (test-module 'yogomacs.sanitize)
 (use yogomacs.path)
@@ -129,6 +131,8 @@
 (test-module 'yogomacs.flserver)
 (use yogomacs.compress)
 (test-module 'yogomacs.compress)
+(use yogomacs.cache)
+(test-module 'yogomacs.cache)
 
 (test* "/etc/passwd"
        "/etc/passwd" (readable? "/etc" "passwd"))

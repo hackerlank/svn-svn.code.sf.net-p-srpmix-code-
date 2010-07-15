@@ -21,7 +21,7 @@
        (handler val)
        val))
 
-(define (prepare-and-deliver prepare! deliver)
+(define (prepare-and-deliver prepare! deliver obj)
    (if prepare!
        (let1 obj (prepare!)
 	     (if obj
@@ -34,9 +34,7 @@
        (let1 obj (available?)
 	     (if obj
 		 (do-if-exists deliver obj)
-		 (prepare-and-deliver prepare! deliver)))
-       (if prepare!
-	   (prepare-and-deliver prepare! deliver)
-	   #f)))
+		 (prepare-and-deliver prepare! deliver obj)))
+       (prepare-and-deliver prepare! deliver #f)))
 
 (provide "yogomacs/cache")
