@@ -7,7 +7,8 @@
 :syntax enable
 :set filetype
 
-:runtime! syntax/2html.vim
+":runtime! syntax/2html.vim
+:source /home/yamato/var/srpmix/syntax/2html.vim
 :write $SYNTAX_OUTPUT_FILE
 :quit!
 :quit!

@@ -2,7 +2,8 @@
 (use srfi-1)
 (use util.list)
 (use srfi-11)
-  (use sxml.serializer)
+(use srfi-19)
+(use sxml.serializer)
 
 
 (define (replace-range beg-pred end-pred forest)
@@ -100,9 +101,16 @@
   (define (built-in-link title face)
     `(link (|@| (rel "stylesheet")
 	    (type "text/css")
-	    ;(href ,#`"file:///var/lib/yogomacs/local/css/,|face|--,|title|.css")
+					;(href ,#`"file:///var/lib/yogomacs/local/css/,|face|--,|title|.css")
 	    (href ,#`"file:///tmp/,|face|--,|title|.css")
 	    (title ,title))))
+  (define (built-in-link0 title names)
+    (apply
+     append
+     (map
+      (lambda (face)
+	(list "	" (built-in-link title face) "\n"))
+      names)))
   (let1 base-names '(default
 		      font-lock-builtin-face
 		      font-lock-comment-delimiter-face
@@ -122,75 +130,141 @@
 		      lfringe
 		      linum
 		      rfringe)
-    (append
-     (map
-      (pa$ built-in-link "Default")
-      base-names)
-     (map
-      (pa$ built-in-link "Invert")
-      base-names))))
+    `(
+      ,@(built-in-link0 "Default" base-names)
+      ,@(built-in-link0 "Invert" base-names))))
 
 (define (replacex sxml)
   (replace-range 
    (lambda (b) 
-     (and-let* (( (pair? b) )
-		( (eq? (car b) 'span) )
-		( (list? (ref b 1)) )
-		( (eq? (car (ref b 1)) '|@|) )
-		(attrs (cdr (ref b 1)))
-		( (equal? (car (assoc-ref attrs 'class '(#f))) "linum"))
-		(text (ref b 2))
-		(id ((#/ *([0-9]+)/ text) 1))
-		)
-       `((span (|@| ,@(append attrs `((id ,id))))
-	       (a (|@| (href ,#`"#,|id|"))
-		  ,text))
-	 (span (|@| 
-		(class "lfringe")
-		(id    ,#`"l/P:?/L:,|id|")
-		" "))
-	 (span (|@| 
-		(class "rfringe")
-		(id    ,#`"r/L:,|id|")
-		" "))
-	 )))
+     (or 
+      (and-let* (( (pair? b) )
+		 ( (eq? (car b) 'span) )
+		 ( (list? (ref b 1)) )
+		 ( (eq? (car (ref b 1)) '|@|) )
+		 (attrs (cdr (ref b 1)))
+		 ( (equal? (car (assq-ref attrs 'class '(#f))) "linum"))
+		 (text (ref b 2))
+		 (id ((#/ *([0-9]+)/ text) 1))
+		 )
+	`((span (|@| ,@(append attrs `((id ,#`"L:,|id|"))))
+		(a (|@| (href ,#`"#L:,|id|"))
+		   ,text))
+	  (span (|@| 
+		 (class "lfringe")
+		 (id    ,#`"l/P:?/L:,|id|"))
+		" ")
+	  (span (|@| 
+		 (class "rfringe")
+		 (id    ,#`"r/L:,|id|"))
+		" ")))
+      #f)
+      )
    (lambda (e) `(,e))
-   sxml)
-  )
+   sxml))
 
-(define (trx sxml)
-  (replacex
-   (pre-post-order sxml
-		   `((head . ,(lambda (tag . rest)
-				(cons tag (append
-					   (reverse
-					    (fold (lambda (kar kdr)
-						    (cond
-						     ((string? kar)
-						      (cons kar kdr))
-						     ((eq? (car kar) 'style)
-						      kdr)
-						     (else
-						      (cons kar kdr))))
-						  (list)
-						  rest))
-					   (built-in-links)
-					   ))))
-		     (span
-		      ((class . ,(lambda (tag str)
-				   (list tag (vim->emacs str))
-				   ))) .
-				       ,(lambda (tag attrs . rest)
-					  (if (and (eq? (car attrs) '|@|)
-						   (equal? (car (assoc-ref (cdr attrs) 'class '(#f)))
-							   "linum"))
-					      (let1 linum ((#/( *[0-9]+) / (car rest)) 1)
-						(list tag attrs linum))
-					      (cons* tag attrs rest))))
-		     (*text* . ,(lambda (tag str) str))
-		     (*default* . ,(lambda x x))
-		     ))))
+(define (trx sxml point-max count-lines)
+  (let ((point 0))
+    (replacex
+     (pre-post-order sxml
+		     `((head 
+			((meta . ,(lambda (tag attrs . rest)
+				    (or 
+				     (and-let* (( (list? attrs) )
+						( (eq? (car attrs) '|@|) )
+						(attrs (cdr attrs))
+						( (equal? (car (assq-ref attrs 'name '(#f)))
+							  "syntax") )
+						(syntax (car (assq-ref attrs 'content '(#f)))))
+				       `(,tag (|@| 
+					       (name "major-mode")
+					       (content ,#`",|syntax|-mode"))))
+				     `(,tag ,attrs . ,rest))))) 
+			. ,(lambda (tag . rest)
+			     (cons tag (append
+					(reverse
+					 (fold (lambda (kar kdr)
+						 (cond
+						  ((string? kar)
+						   (cons kar kdr))
+						  ((eq? (car kar) 'style)
+						   kdr)
+						  (else
+						   (cons kar kdr))))
+					       (list)
+					       rest))
+					(list "	" `(meta (|@| 
+							  (name "created-time")
+							  (content ,(date->string (time-utc->date (current-time)) "~5"))))
+					      "\n"
+					      "	" `(meta (|@| 
+							  (name "version")
+							  (content "0.0.0")))
+					      "\n"
+					      "	" `(meta (|@| 
+							  (name "point-max")
+							  (content ,point-max)))
+					      "\n"
+					      "	" `(meta (|@| 
+							  (name "count-lines")
+							  (content ,count-lines)))
+					      "\n"
+					      )
+					(built-in-links)
+					))))
+		       (pre 
+			((span
+			  ((class *preorder* . ,(lambda (tag str)
+						  (list tag (vim->emacs str))
+						  ))
+			   (*text* . ,(lambda (tag str) str))
+			   (*default* . ,(lambda x x))
+			   ) .
+			     ,(lambda (tag attrs . rest)
+				(if (and (eq? (car attrs) '|@|)
+					 (equal? (car (assq-ref (cdr attrs) 'class '(#f)))
+						 "linum"))
+				    (let1 linum ((#/( *[0-9]+) / (car rest)) 1)
+				      (list tag attrs linum))
+				    (let1 result (cons* tag (append attrs
+								    `((id ,#`"P:,|point|"))
+								    )
+							rest)
+				      (set! point (+ point (string-length (car rest))))
+				      result
+				      ))))
+			 (*text* . ,(lambda (tag str) 
+				      (set! point (+ point (string-length str)))
+				      str))
+			 )
+			. ,(lambda x x))
+		       (*text* . ,(lambda (tag str) str))
+		       (*default* . ,(lambda x x))
+		       )))))
+
+(define (buffer-info shtml)
+  (let ((point-max 0)
+	(count-lines "0"))
+    (pre-post-order shtml
+		    `((span . ,(lambda (tag attrs text)
+				 (if (equal? (car (assq-ref (cdr attrs) 'class '(#f))) "lnr")
+				     (set! count-lines text)
+				     (set! point-max (+ point-max (string-length text)))
+				     )
+				 (list tag attrs text)
+				 ))
+		      (pre . ,(lambda (tag . rests)
+				(for-each (lambda (elt) 
+					    (when (string? elt)
+					      (set! point-max (+ point-max (string-length elt)))))
+					  rests)
+				(cons tag rests)
+				))
+		      (*text* . ,(lambda (tag str) str))
+		      (*default* . ,(lambda x x))))
+    (values (x->string point-max) ((#/([0-9]+) / count-lines) 1))))
 
 (let1 shtml (read)
-  (write (srl:sxml->xml-noindent (trx shtml))))
+  (let*-values (((point-max count-lines) (buffer-info shtml)))
+    (display (srl:sxml->xml-noindent (trx shtml point-max count-lines)))))
 
