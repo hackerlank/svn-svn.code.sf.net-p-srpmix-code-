@@ -11,7 +11,7 @@
 :set filetype
 
 "
-:source @PKGDATADIR@/3html.vim
+:source @prefix@/share/syntax/3html.vim
 :write $SYNTAX_OUTPUT_FILE
 
 "

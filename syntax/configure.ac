@@ -33,11 +33,7 @@ AC_OUTPUT([
 	   src/Makefile
 	   src/cmds/Makefile
 	   src/vim/Makefile
-	   src/vim/flserver/Makefile
-	   src/vim/flserver/plugins/Makefile
-	   src/vim/flserver/modes/Makefile
+	   src/vim/syntax-batch.vim
 	   src/gauche/Makefile
 	   src/gauche/syntax/Makefile
-	   src/gauche/syntax/rearrange/Makefile
-	   src/gauche/syntax/harnesses/Makefile
 	   ])
