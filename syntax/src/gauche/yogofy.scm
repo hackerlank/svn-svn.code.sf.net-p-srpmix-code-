@@ -1,11 +1,17 @@
-(use sxml.tree-trans)
-(use srfi-1)
-(use util.list)
-(use srfi-11)
-(use srfi-19)
-(use sxml.serializer)
+(define-module syntax.syntax
+  (use srfi-1)
+  (use srfi-11)
+  (use srfi-19)
+  (use util.list)
+  (use sxml.tree-trans)
+  (use sxml.serializer))
+(select-module syntax.syntax)
 
+;; See /www.ac.cyberhome.ne.jp/~yakahaira/vimdoc/syntax.html
 
+;; replace-range in gauche-0.8.x is broken: let*-values
+;; is not imported in sxml.tree-trans.
+;; So redefine it here.
 (define (replace-range beg-pred end-pred forest)
   (define (loop forest keep? new-forest)
     (if (null? forest) 
@@ -47,10 +53,7 @@
 				      new-forest)))))))))
   (let*-values (((new-forest keep?) (loop forest #t '()))) new-forest))
 
-
-
-;; See /www.ac.cyberhome.ne.jp/~yakahaira/vimdoc/syntax.html
-(define (vim->emacs class)
+(define (syntax->font-lock class)
   (let1 mapping '(("lnr" . "linum")
 		  ("Comment" . "comment")
 		  ;;
@@ -217,7 +220,7 @@
 		       (pre 
 			((span
 			  ((class *preorder* . ,(lambda (tag str)
-						  (list tag (vim->emacs str))
+						  (list tag (syntax->font-lock str))
 						  ))
 			   (*text* . ,(lambda (tag str) str))
 			   (*default* . ,(lambda x x))
@@ -273,3 +276,4 @@
   (let*-values (((point-max count-lines) (buffer-info shtml)))
     (display (srl:sxml->xml-noindent (trx shtml point-max count-lines)))))
 
+(provide "syntax/syntax")

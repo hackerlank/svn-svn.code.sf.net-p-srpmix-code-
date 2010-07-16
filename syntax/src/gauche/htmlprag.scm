@@ -1,3 +1,9 @@
+;; define-module/select-module/provide for gauche 
+;; is done by Masatake YAMATO <yamato@redhat.com>
+(define-module syntax.htmlprag
+  (export html->shtml))
+(select-module syntax.htmlprag)
+
 ;;; @Package     HtmlPrag
 ;;; @Subtitle    Pragmatic Parsing and Emitting of HTML using SXML and SHTML
 ;;; @HomePage    http://www.neilvandyke.org/htmlprag/
@@ -2380,6 +2386,7 @@
 ;;; considered a preview to invite comments.
 ;;;
 ;;; @end table
-
-(define (main args)
-  (write (html->shtml (current-input-port))))
+(provide "syntax/htmlprag")
+; .e.g.
+;(define (main args)
+;  (write (html->shtml (current-input-port))))
