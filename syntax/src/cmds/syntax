@@ -1,4 +1,39 @@
-export SYNTAX_OUTPUT_FILE=/tmp/Kconfig.html
-rm $SYNTAX_OUTPUT_FILE
-vim -n -u NONE -i NONE -N -S ~/var/srpmix/syntax/syntax-batch.vim -- /srv/sources/attic/cradles/lcopy.sys/mirror/k/kernel/trunk/pre-build/linux-2.6/drivers/Kconfig 
-gosh ~/var/srpmix/syntax/htmlprag-0-16.scm < $SYNTAX_OUTPUT_FILE  > $(dirname $SYNTAX_OUTPUT_FILE)/$(basename $SYNTAX_OUTPUT_FILE .html).shtml
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
+(use syntax.syntax)
+(use gauche.parseopt)
+(use sxml.serializer)
+
+
+
+(define (show-help n)
+  (format #t "Usage: \n")
+  (format #t "	~a --help|-h\n" *program-name*)
+  (format #t "	~a [--html] FILE\n" *program-name*)
+  (exit n))
+
+(define (with-output-to-stderr thunk)
+  (with-output-to-port (current-error-port)
+    (thunk)))
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cute show-help 0))
+       (html "html" #f)
+       . rest)
+    (unless (eq? (length rest) 1)
+      (with-output-to-stderr
+       (lambda ()
+	 (print "Wrong number of argument")
+	 (show-help 1))))
+    (let* ((input-file (car rest))
+	   (shtml (syntax input-file)))
+      (if html
+	  (display (srl:sxml->xml-noindent shtml))
+	  (write shtml))
+      0)))
+
+
+

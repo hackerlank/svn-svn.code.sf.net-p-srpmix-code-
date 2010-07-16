@@ -12,9 +12,8 @@
 
 "
 :source @prefix@/share/syntax/3html.vim
-:write $SYNTAX_OUTPUT_FILE
+:write! /dev/stdout
 
 "
 :quit!
 :quit!
-

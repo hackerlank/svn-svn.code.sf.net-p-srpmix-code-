@@ -36,4 +36,5 @@ AC_OUTPUT([
 	   src/vim/syntax-batch.vim
 	   src/gauche/Makefile
 	   src/gauche/syntax/Makefile
+	   src/gauche/syntax/syntax.scm
 	   ])

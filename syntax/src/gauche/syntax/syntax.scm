@@ -1,10 +1,12 @@
 (define-module syntax.syntax
+  (export syntax)
   (use srfi-1)
   (use srfi-11)
   (use srfi-19)
   (use util.list)
   (use sxml.tree-trans)
-  (use sxml.serializer))
+  (use syntax.htmlprag)
+  (use gauche.process))
 (select-module syntax.syntax)
 
 ;; See /www.ac.cyberhome.ne.jp/~yakahaira/vimdoc/syntax.html
@@ -275,5 +277,18 @@
 (let1 shtml (read)
   (let*-values (((point-max count-lines) (buffer-info shtml)))
     (display (srl:sxml->xml-noindent (trx shtml point-max count-lines)))))
+
+;; (display (srl:sxml->xml-noindent ))
+(define prefix "@prefix@")
+(define (syntax source-file)
+  (let1 shtml (with-input-from-process
+		  `(vim -n -u NONE -i NONE -N 
+			-S ,#`",|prefix|/share/syntax/3html.vim" 
+			-- ,source-file)
+		html->shtml
+		:input "/dev/null"			; ???
+		)
+    (let*-values (((point-max count-lines) (buffer-info shtml)))
+      (trx shtml point-max count-lines))))
 
 (provide "syntax/syntax")
