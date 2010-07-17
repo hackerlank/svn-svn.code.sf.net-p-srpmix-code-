@@ -1,22 +1,31 @@
-Summary: 
+Summary: A tool converting a file to html format with Vim
 Name: syntax
-Version: 
-Release: 1
-License: 
-Group: 
-URL: 
-Source0: %{name}-%{version}.tar.gz
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPLv2+ and Vim
+Group: Development/Tools
+Buildarch: noarch
+URL: http://srpmix.org
+Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
+Requires: gauche vim-enhanced screen
+
 %description
+A tool converting a file to html format with Vim.
+Syntax highlighting is done with syntax feature of Vim.
+
 
 %prep
 %setup -q
 
 %build
+%configure
+make
 
 %install
 rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -26,6 +35,11 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc
 
+%{_bindir}/syntax
+%{_datadir}/gauche/site/lib/syntax/syntax.scm
+%{_datadir}/gauche/site/lib/syntax/htmlprag.scm
+%{_datadir}/syntax/3html.vim
+%{_datadir}/syntax/syntax-batch.vim
 
 %changelog
 * Fri Jul 16 2010 Masatake YAMATO <yamato@yamato@redhat.com> - 

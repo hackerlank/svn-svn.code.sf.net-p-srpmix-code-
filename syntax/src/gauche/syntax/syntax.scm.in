@@ -274,21 +274,23 @@
 		      (*default* . ,(lambda x x))))
     (values (x->string point-max) ((#/([0-9]+) / count-lines) 1))))
 
-(let1 shtml (read)
-  (let*-values (((point-max count-lines) (buffer-info shtml)))
-    (display (srl:sxml->xml-noindent (trx shtml point-max count-lines)))))
-
-;; (display (srl:sxml->xml-noindent ))
 (define prefix "@prefix@")
+(debug-print-width #f)
 (define (syntax source-file)
-  (let1 shtml (with-input-from-process
-		  `(vim -n -u NONE -i NONE -N 
-			-S ,#`",|prefix|/share/syntax/3html.vim" 
-			-- ,source-file)
-		html->shtml
-		:input "/dev/null"			; ???
-		)
-    (let*-values (((point-max count-lines) (buffer-info shtml)))
-      (trx shtml point-max count-lines))))
+  (receive (port fname) (sys-mkstemp "/tmp/SYNTAX")
+    (sys-putenv "SYNTAX_OUTPUT_FILE" fname)
+    (let1 proc (run-process
+		`(screen
+		  -D -m
+		  vim -n -u NONE |-i| NONE -N 
+		  -S ,#`",|prefix|/share/syntax/syntax-batch.vim" 
+		  -- ,source-file)
+		:wait #t)
+      (let1 status (process-exit-status proc)
+	(let1 shtml (call-with-input-file fname html->shtml)
+	  (sys-unlink fname)
+	  (sys-unsetenv "SYNTAX_OUTPUT_FILE")
+	  (let*-values (((point-max count-lines) (buffer-info shtml)))
+	    (trx shtml point-max count-lines)))))))
 
 (provide "syntax/syntax")
