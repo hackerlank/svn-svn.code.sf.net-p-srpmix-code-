@@ -290,7 +290,9 @@
 	(let1 shtml (call-with-input-file fname html->shtml)
 	  (sys-unlink fname)
 	  (sys-unsetenv "SYNTAX_OUTPUT_FILE")
-	  (let*-values (((point-max count-lines) (buffer-info shtml)))
-	    (trx shtml point-max count-lines)))))))
+	  (if (equal? shtml '(*TOP*))
+	      #f
+	      (let*-values (((point-max count-lines) (buffer-info shtml)))
+		(trx shtml point-max count-lines))))))))
 
 (provide "syntax/syntax")
