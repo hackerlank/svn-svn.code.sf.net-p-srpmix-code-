@@ -10,6 +10,7 @@
   ;;
   (use yogomacs.renderer)
   (use yogomacs.renderers.find-file)
+  (use yogomacs.renderers.syntax)
   (use yogomacs.renderers.cache)
   ;;
   (use yogomacs.fix)
@@ -47,13 +48,15 @@
 	     (list
 	      (cgi-header :status "502 Bad Gateway")
 	      (print-echo0 path path config (condition-ref e 'message))))
-	    (else
+	    #;(else
 	     (list
-	      (cgi-header :status "500 Internal Server Error"))))
+	      (cgi-header :status "500 Internal Server Error")))
+	    )
 	   (list
 	    (cgi-header)
 	    (fix
-	     (cache real-src-file find-file "shtml" config)
+	     ;(cache real-src-file find-file "shtml" config)
+	     (cache real-src-file syntax "shtml" config)
 	     fix-css-href
 	     integrate-file-face)))))
 

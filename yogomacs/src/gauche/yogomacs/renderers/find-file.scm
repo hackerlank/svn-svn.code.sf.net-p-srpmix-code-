@@ -14,7 +14,7 @@
 (define find-file-faces
   '(
     default 
-    font-lock-builtin-faces
+    font-lock-builtin-face
     font-lock-comment-delimiter-face
     font-lock-comment-face
     font-lock-constant-face
@@ -23,9 +23,12 @@
     font-lock-keyword-face
     font-lock-negation-char-face
     font-lock-preprocessor-face
+    font-lock-regexp-grouping-backslash
+    font-lock-regexp-grouping-construct
     font-lock-string-face
     font-lock-type-face
     font-lock-variable-name-face
+    font-lock-warning-face
     highlight
     lfringe
     linum

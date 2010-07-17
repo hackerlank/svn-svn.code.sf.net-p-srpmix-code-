@@ -4,5 +4,6 @@ dist_module_DATA =   \
 	cache.scm     \
 	dired.scm     \
 	find-file.scm \
+	syntax.scm    \
         \
 	$(NULL)

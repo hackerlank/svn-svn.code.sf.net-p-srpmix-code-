@@ -103,6 +103,22 @@ body {
         /* font-lock-preprocessor-face */
         color: #b0c4de;
 }
+/* About copyright see nil */
+.regexp-grouping-backslash {
+        /* font-lock-regexp-grouping-backslash */
+        font-weight: bold;
+}
+/* About copyright see nil */
+.regexp-grouping-construct {
+        /* font-lock-regexp-grouping-construct */
+        font-weight: bold;
+}
+/* About copyright see c source code of GNU Emacs */
+.warning {
+        /* font-lock-warning-face */
+        color: #ffc0cb;
+        font-weight: bold;
+}
 /* About copyright see c source code of GNU Emacs */
 .string {
         /* font-lock-string-face */
