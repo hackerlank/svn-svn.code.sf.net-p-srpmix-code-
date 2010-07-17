@@ -2388,5 +2388,7 @@
 ;;; @end table
 (provide "syntax/htmlprag")
 ; .e.g.
+;(select-module user)
 ;(define (main args)
+;  (use syntax.htmlprag)
 ;  (write (html->shtml (current-input-port))))
