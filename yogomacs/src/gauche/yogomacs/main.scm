@@ -1,15 +1,16 @@
 (define-module yogomacs.main
-  (export yogomacs)
+  (export yogomacs-cgi)
+  (use www.cgi)
+  ;;
   (use yogomacs.route)
   (use yogomacs.config)
-  (use www.cgi)
+  (use yogomacs.reply)
+  (use yogomacs.error)
   ;;
   (use yogomacs.dests.root-dir)
   (use yogomacs.dests.sources-dir)
 ;  (use yogomacs.dests.dists-dir)
-  ;;
   (use yogomacs.dests.css)
-  ;;
   (use yogomacs.dests.debug)
   ;;
   )
@@ -30,20 +31,23 @@
     ))
 
 (define (install-constants config)
-  config)
+  ;; config could be #f.
+  (if config
+      config
+      config))
 
-(define (init)
+(define (yogomacs-cgi)
+  (debug-print-width #f)
   (sys-putenv "HOME" "/var/www")
-  (debug-print-width #f))
+  (let1 config (install-constants (load-config))
+    (cgi-main (cute yogomacs <> config)
+	      :output-proc reply
+	      :on-error    error-handler)))
 
-(define (yogomacs params)
-  (init)
-  (let ((path (cgi-get-parameter "path" params :default "/"))
-	(config (load-config)))
+(define (yogomacs params config)
+  (let ((path (cgi-get-parameter "path" params :default "/")))
     (if config
-	(route routing-table path params 
-	       (config->proc (install-constants config)))
-	(cgi-header :status "500 Internal server Error")
-	)))
+	(route routing-table path params (config->proc config))
+	(cgi-header :status "500 Internal server Error"))))
 
 (provide "yogomacs/main")

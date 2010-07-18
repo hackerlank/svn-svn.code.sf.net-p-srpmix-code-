@@ -5,7 +5,7 @@
   (use font-lock.flclient)
   (use yogomacs.flserver)
   (use yogomacs.caches.css)
-  (use yogomacs.renderer)
+  (use yogomacs.error)
   (use yogomacs.access)
   )
 

@@ -5,6 +5,8 @@ For batch converting
 - Multi server...
 - /var/run file
 - File selection(exclude wrong type file)
+-- asis renderer <done>
+- Generic error handler <done>
 - Version number embedding <done>
 - #ref definition <done>
 - File name with version number
@@ -16,6 +18,8 @@ For batch converting
 - URL query string for yogomacs*
 - use #`,format
 - storage separations
+-- 	 (real-src-dir (build-path (config 'real-sources-dir) head)) in yogomacs/dests/file.scm
+    => (sources-path head last) => (values real-src-dir real-src-path)
 # --------------------------------------------------------
 
 - http://nanasi.jp/articles/vim/2html_vim.html

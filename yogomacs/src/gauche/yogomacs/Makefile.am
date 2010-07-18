@@ -14,11 +14,13 @@ dist_module_DATA =   \
 	compress.scm \
 	config.scm   \
 	dentry.scm   \
+	error.scm    \
 	flserver.scm \
 	main.scm     \
 	path.scm     \
 	fix.scm      \
 	renderer.scm \
+	reply.scm    \
 	route.scm    \
 	sanitize.scm \
         \

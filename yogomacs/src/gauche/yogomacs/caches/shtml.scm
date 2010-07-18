@@ -7,8 +7,7 @@
   (use yogomacs.compress)
   (use gauche.process)
   (use yogomacs.cache)
-  ;; TODO
-  (use yogomacs.renderer)
+  (use yogomacs.error)
   )
 
 (select-module yogomacs.caches.shtml)

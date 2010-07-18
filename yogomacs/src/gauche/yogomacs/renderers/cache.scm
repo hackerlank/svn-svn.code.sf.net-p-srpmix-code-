@@ -1,6 +1,6 @@
 (define-module yogomacs.renderers.cache
    (export cache)
-   (use yogomacs.renderer)
+   (use yogomacs.error)
    (use yogomacs.access)
    (use yogomacs.caches.shtml))
 
