@@ -2,7 +2,7 @@
   (export syntax)
   (use syntax.syntax)
   (use yogomacs.access)
-  (use yogomacs.renderer)
+  (use yogomacs.error)
   )
 (select-module yogomacs.renderers.syntax)
 

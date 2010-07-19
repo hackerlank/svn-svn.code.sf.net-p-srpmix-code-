@@ -5,7 +5,7 @@
   ;;
   (use yogomacs.flserver)
   (use font-lock.flclient)
-  (use yogomacs.renderer)
+  (use yogomacs.face)
   ;;
   (use yogomacs.cache)
   )

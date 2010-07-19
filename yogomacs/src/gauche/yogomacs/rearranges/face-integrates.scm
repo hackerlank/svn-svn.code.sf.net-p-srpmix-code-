@@ -1,7 +1,7 @@
 (define-module yogomacs.rearranges.face-integrates
    (export face-integrates)
    (use yogomacs.dests.css)
-   (use yogomacs.renderer)
+   (use yogomacs.face)
    (use yogomacs.rearranges.css-integrates))
 
 (select-module yogomacs.rearranges.face-integrates)

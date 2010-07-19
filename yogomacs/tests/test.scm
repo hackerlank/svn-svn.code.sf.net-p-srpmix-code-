@@ -7,6 +7,63 @@
 
 (define *test-report-error* #t)
 (test-start "Yogomacs self test")
+
+(test-section "bindings")
+(define-macro (use-and-test-module m)
+  `(begin
+     (use ,m)
+     (test-module (quote ,m))))
+(define-macro (for-each-use-and-test-module . modules)
+  `(begin
+     ,@(map (lambda (m) (list 'use-and-test-module m)) modules)))
+
+(for-each-use-and-test-module
+;; find -name '*.scm' -type f | sed -e's|\./|/|' -e 's|\.scm||' -e 's|.*|yogomacs\0|' -e 's|/|.|g' | grep -v default  
+ yogomacs.rearranges.css-href
+ yogomacs.rearranges.face-integrates
+ yogomacs.rearranges.css-integrates
+ yogomacs.dests.root-dir
+ yogomacs.dests.srpmix-dir
+ yogomacs.dests.css
+ yogomacs.dests.sources-dir
+ yogomacs.dests.fs
+ yogomacs.dests.pkg-dir
+ yogomacs.dests.dir
+ yogomacs.dests.debug
+ yogomacs.dests.print-alist
+ yogomacs.dests.file
+ yogomacs.error
+ yogomacs.dentry
+ yogomacs.compress
+ yogomacs.dentries.fs
+ yogomacs.cache
+ yogomacs.face
+ yogomacs.main
+ yogomacs.renderers.asis
+ yogomacs.renderers.find-file
+ yogomacs.renderers.cache
+ yogomacs.renderers.dired
+ yogomacs.renderers.syntax
+ yogomacs.reply
+ yogomacs.batch
+ yogomacs.access
+ yogomacs.fix
+ yogomacs.sanitize
+ yogomacs.path
+ yogomacs.route
+ yogomacs.config
+;; yogomacs.caches.check
+ yogomacs.caches.css
+ yogomacs.caches.shtml
+ yogomacs.flserver
+)
+
+
+
+
+
+
+
 (test-module 'yogomacs.sanitize)
 
 (test-section "sanitize")
@@ -76,64 +133,7 @@
 (test* "/../"
        "/" (sanitize-path "/../"))
 
-(use yogomacs.fix)
-(test-module 'yogomacs.fix)
-(use yogomacs.dests.root-dir)
-(test-module 'yogomacs.dests.root-dir)
-(use yogomacs.dests.srpmix-dir)
-(test-module 'yogomacs.dests.srpmix-dir)
-(use yogomacs.dests.css)
-(test-module 'yogomacs.dests.css)
-(use yogomacs.dests.sources-dir)
-(test-module 'yogomacs.dests.sources-dir)
-(use yogomacs.dests.pkg-dir)
-(test-module 'yogomacs.dests.pkg-dir)
-(use yogomacs.dests.dir)
-(test-module 'yogomacs.dests.dir)
-(use yogomacs.dests.fs)
-(test-module 'yogomacs.dests.fs)
-(use yogomacs.dests.file)
-(test-module 'yogomacs.dests.file)
-(use yogomacs.dests.debug)
-(test-module 'yogomacs.dests.debug)
-(use yogomacs.dests.print-alist)
-(test-module 'yogomacs.dests.print-alist)
-(use yogomacs.dentry)
-(test-module 'yogomacs.dentry)
-;(use yogomacs.compress)
-;(test-module 'yogomacs.compress)
-(use yogomacs.dentries.fs)
-(test-module 'yogomacs.dentries.fs)
-(use yogomacs.main)
-(test-module 'yogomacs.main)
-(use yogomacs.renderers.cache)
-(test-module 'yogomacs.renderers.cache)
-(use yogomacs.renderers.dired)
-(test-module 'yogomacs.renderers.dired)
-(use yogomacs.renderers.find-file)
-(test-module 'yogomacs.renderers.find-file)
 (use yogomacs.access)
-(test-module 'yogomacs.access)
-
-(use yogomacs.caches.css)
-(test-module 'yogomacs.caches.css)
-(use yogomacs.caches.shtml)
-(test-module 'yogomacs.caches.shtml)
-(use yogomacs.sanitize)
-(test-module 'yogomacs.sanitize)
-(use yogomacs.path)
-(test-module 'yogomacs.path)
-(use yogomacs.route)
-(test-module 'yogomacs.route)
-(use yogomacs.config)
-(test-module 'yogomacs.config)
-(use yogomacs.flserver)
-(test-module 'yogomacs.flserver)
-(use yogomacs.compress)
-(test-module 'yogomacs.compress)
-(use yogomacs.cache)
-(test-module 'yogomacs.cache)
-
 (test* "/etc/passwd"
        "/etc/passwd" (readable? "/etc" "passwd"))
 (test* "/var/log/messages"

@@ -29,7 +29,7 @@
   (use srfi-1)
   (use srfi-19)
   (use yogomacs.dentry)
-  (use yogomacs.renderer)
+  (use yogomacs.face)
   )
 (select-module yogomacs.renderers.dired)
 

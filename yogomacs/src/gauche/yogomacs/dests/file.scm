@@ -19,6 +19,10 @@
   ;;
   (use yogomacs.rearranges.css-href)
   (use yogomacs.rearranges.face-integrates)
+  ;;
+  (use gauche.process)
+  (use yogomacs.access)
+  (use yogomacs.error)
   )
 (select-module yogomacs.dests.file)
 
@@ -30,22 +34,32 @@
 (define integrate-file-face
    (cute face-integrates <> "file-font-lock" find-file-faces))
 
+
+(define (file-type file)
+  (if (readable? file)
+      (string-split (call-with-input-process 
+			`(file --brief --mime-type ,file)
+		      read-line)
+		    #\/)
+      (not-found "File not redable"
+		 file)))
+
 (define (file-dest path params config)
   (let* ((last (last path))
 	 (head (path->head path))
 	 (real-src-dir (build-path (config 'real-sources-dir) head))
-	 (real-src-file (build-path real-src-dir last)))
-    (if #t
-	(let1 mime-type "text/plain"
-	  (make <asis-data> 
-	    :data (asis real-src-file mime-type config)
-	    :mime-type mime-type))
+	 (real-src-file (build-path real-src-dir last))
+	 (file-type (file-type real-src-file)))
+    (if (equal? (car file-type) "text")
 	(list
 	 (cgi-header)
 	 (fix
 	  (cache real-src-file syntax "shtml" config)
 	  fix-css-href
-	  integrate-file-face)))))
-
+	  integrate-file-face))
+	(let1 mime-type (apply format "~a/~a" file-type)
+	  (make <asis-data> 
+	    :data (asis real-src-file mime-type config)
+	    :mime-type mime-type)))))
 
 (provide "yogomacs/dests/file")

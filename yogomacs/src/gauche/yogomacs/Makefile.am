@@ -15,11 +15,11 @@ dist_module_DATA =   \
 	config.scm   \
 	dentry.scm   \
 	error.scm    \
+	face.scm     \
 	flserver.scm \
 	main.scm     \
 	path.scm     \
 	fix.scm      \
-	renderer.scm \
 	reply.scm    \
 	route.scm    \
 	sanitize.scm \

@@ -15,7 +15,7 @@ Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs gauche-devel font-lock
-Requires: emacs emacs-common gauche font-lock httpd xz syntax
+Requires: emacs emacs-common gauche font-lock httpd xz syntax file
 
 %description
 sources web frontend
@@ -23,7 +23,7 @@ sources web frontend
 %package @SPEC_CONFIG@
 Summary: httpd configuration for @PACKAGE@(@CONFIG configuration)
 Group: Development/System
-Requires: @PACKAGE@
+Requires: @PACKAGE@ = %{version}
 
 
 %description @SPEC_CONFIG@
@@ -77,12 +77,12 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/config.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
 %{_datadir}/gauche/site/lib/yogomacs/error.scm
+%{_datadir}/gauche/site/lib/yogomacs/face.scm
 %{_datadir}/gauche/site/lib/yogomacs/fix.scm
 %{_datadir}/gauche/site/lib/yogomacs/flserver.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/path.scm
-%{_datadir}/gauche/site/lib/yogomacs/renderer.scm
 %{_datadir}/gauche/site/lib/yogomacs/reply.scm
 %{_datadir}/gauche/site/lib/yogomacs/route.scm
 %{_datadir}/gauche/site/lib/yogomacs/sanitize.scm

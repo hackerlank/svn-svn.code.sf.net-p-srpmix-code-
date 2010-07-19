@@ -45,7 +45,7 @@
 	      :on-error    error-handler)))
 
 (define (yogomacs params config)
-  (let ((path (cgi-get-parameter "path" params :default "/")))
+  (let1 path (cgi-get-parameter "path" params :default "/")
     (if config
 	(route routing-table path params (config->proc config))
 	(cgi-header :status "500 Internal server Error"))))

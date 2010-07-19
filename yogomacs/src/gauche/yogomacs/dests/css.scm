@@ -4,6 +4,7 @@
   (use www.cgi)  
   (use yogomacs.access)
   (use yogomacs.caches.css)
+  (use yogomacs.face)
   (use srfi-1)
   )
 
