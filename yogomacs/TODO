@@ -17,6 +17,11 @@
 ** /var/log/message separation
 ** GC
 
+* FS strcture
+** dists
+** packages
+** attic
+
 * Clean up
 ** use #`,format
 ** storage separations
