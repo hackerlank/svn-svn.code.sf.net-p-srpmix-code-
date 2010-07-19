@@ -12,7 +12,6 @@
   (use www.cgi)
   (use yogomacs.dests.debug)
   (use yogomacs.caches.css)
-  (use yogomacs.fix)
   (use yogomacs.dests.css)
   )
 (select-module yogomacs.dests.srpmix-dir)

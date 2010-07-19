@@ -65,6 +65,7 @@
 			     (css-cache-dir config)
 			     :verbose (config 'client-verbose)
 			     :socket-name (config 'client-socket-name)
+			     :timeout (config 'find-file-timeout)
 			     )))
 	  ;;
 	  (flserver shtmlize config)

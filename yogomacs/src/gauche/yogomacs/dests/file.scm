@@ -6,7 +6,6 @@
   (use www.cgi)  
   (use file.util)
   ;;
-  (use yogomacs.fix)
   (use yogomacs.path)
   (use yogomacs.reply)
   ;;
@@ -51,15 +50,16 @@
 	 (real-src-file (build-path real-src-dir last))
 	 (file-type (file-type real-src-file)))
     (if (equal? (car file-type) "text")
-	(list
-	 (cgi-header)
-	 (fix
-	  (cache real-src-file syntax "shtml" config)
-	  fix-css-href
-	  integrate-file-face))
-	(let1 mime-type (apply format "~a/~a" file-type)
+	(receive (shtml last-modified-time) 
+	    (cache real-src-file find-file "shtml" config)
+	  (make <shtml-data>
+	    :data ((compose fix-css-href integrate-file-face) shtml)
+	    :last-modification-time last-modified-time))
+	(receive (asis last-modified-time)
+	    (asis (asis real-src-file config))
 	  (make <asis-data> 
-	    :data (asis real-src-file mime-type config)
-	    :mime-type mime-type)))))
+	    :data asis
+	    :last-modification-time last-modified-time
+	    :mime-type (apply format "~a/~a" file-type))))))
 
 (provide "yogomacs/dests/file")

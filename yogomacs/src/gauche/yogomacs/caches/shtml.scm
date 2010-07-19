@@ -63,8 +63,10 @@
 			     (format "~s (~a)" 
 				     cache-file
 				     (condition-ref e 'message)))))
-    (with-input-from-compressed-file cache-file
-				     read)))
+    (values
+     (with-input-from-compressed-file cache-file
+				      read)
+     (ref (sys-stat cache-file) 'mtime))))
 
 
 (define (build-cache prepare-proc cache-file src-path)

@@ -1,32 +1,47 @@
 -*- outline -*-
-* For batch converting
-** Timeout configuration
-** Multi server...
-** /var/run file
-** cmd line interface and batch
+* Just viewable
+** For batch converting
+*** Timeout configuration <done>
+*** Multi server*
+*** /var/run file*
+*** cmd line interface and batch(overriding conf)*
 
-* Fine grading server side cache control
-** File selection(exclude wrong type file)
-** File name with version number
+** Fine grading server side cache control
+*** File selection(exclude wrong type file)*
+*** File name with version number*
 
-* Fine grading client side cache control
-** Modification time 
-** <sthml-data> object
+** Fine grading client side cache control
+*** Modification time *
+*** <sthml-data> object*
+*** flate&deflate
 
-* Server Administration
-** /var/log/message separation
-** GC
+** Server Administration
+*** /var/log/message separation*
+*** GC
 
-* FS strcture
-** dists
-** packages
-** attic
+** FS strcture
+*** dists*
+*** packages*
+*** attic*
 
-* Clean up
-** use #`,format
-** storage separations
-*** (real-src-dir (build-path (config 'real-sources-dir) head)) in yogomacs/dests/file.scm
+** Clean up
+*** Don't use `fix'.
+*** use #`,format
+*** storage separations
+**** (real-src-dir (build-path (config 'real-sources-dir) head)) in yogomacs/dests/file.scm
     => (sources-path head last) => (values real-src-dir real-src-path)
+*** raw-mode in dired
+*** create-time format
+
+* Prompt, Ysh
+* Single user annotation
+* Multi user annotation
+* Realtime multi user annotation
+* Mobile
+* External data stitching
+* Public server
+
+
 
 - http://nanasi.jp/articles/vim/2html_vim.html
 
@@ -38,24 +53,6 @@
 -- Virtual entry
 --- Directory & entry model?
 
-- FLATE&DEFLATE
-
-- FSTAB
-
-
-- mile stone
-* Just viewable
-* prompt
-* single user annotation
-* multi user
-* mobile
-* chat
-* external data stitching
-* public server
-
-- other
-* make  /srv/www a package
- 
 -- asis renderer <done>
 - Generic error handler <done>
 - Version number embedding <done>

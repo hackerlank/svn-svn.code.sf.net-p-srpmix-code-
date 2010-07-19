@@ -9,10 +9,14 @@
 (define (cache src-path prepare-proc namespace config)
   (unless (readable? src-path)
     (not-found "File Not Found" src-path))
-  (do-shtml-cache src-path
-		  ;; TODO: Here I should injenct rederer own error raisers.
-		  (pa$ prepare-proc src-path config)
-		  namespace
-		  config))
+  (call-with-values
+      (pa$ do-shtml-cache src-path
+	   (pa$ prepare-proc src-path config)
+	   namespace
+	   config)
+    (lambda r 
+      (if (null? (cdr r))
+	  (values (car r) #f)
+	  (values (car r) (cadr r))))))
 
 (provide "yogomacs/renderers/cache")

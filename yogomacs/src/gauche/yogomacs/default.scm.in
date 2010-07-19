@@ -6,4 +6,5 @@
  (real-sources-dir . "/srv/sources")
  (emacs . "emacs")
  (config . "yogomacs-@SPEC_CONFIG@")
+ (find-file-timeout . 30)		; #t for waiting forever
  )
