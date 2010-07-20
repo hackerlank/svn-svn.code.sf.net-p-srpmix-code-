@@ -47,7 +47,6 @@
  yogomacs.reply
  yogomacs.batch
  yogomacs.access
- yogomacs.fix
  yogomacs.sanitize
  yogomacs.path
  yogomacs.route

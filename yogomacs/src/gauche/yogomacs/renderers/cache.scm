@@ -6,13 +6,14 @@
 
 (select-module yogomacs.renderers.cache)
 
-(define (cache src-path prepare-proc namespace config)
+(define (cache src-path prepare-proc namespace force-update? config)
   (unless (readable? src-path)
     (not-found "File Not Found" src-path))
   (call-with-values
       (pa$ do-shtml-cache src-path
 	   (pa$ prepare-proc src-path config)
 	   namespace
+	   force-update?
 	   config)
     (lambda r 
       (if (null? (cdr r))

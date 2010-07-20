@@ -12,7 +12,7 @@
   (use yogomacs.renderers.dired)
   (use util.combinations)
   ;;
-  (use yogomacs.fix)
+  (use yogomacs.reply)
   (use yogomacs.caches.css)
   ;;
   (use util.match)
@@ -36,20 +36,21 @@
 (define dir-dest 
   (match-lambda*
    ((path params config extra)
-    (let ((last (last path))
-	  (head (path->head path)))
+    (let* ((last (last path))
+	   (head (path->head path))
+	   (real-src-dir (build-path (config 'real-sources-dir)
+				     head last)))
       (prepare-dired-faces config)
-      (list
-       (cgi-header)
-       (fix
-	(dired (compose-path path)
-	       (glob-dentries (build-path (config 'real-sources-dir)
-					  head last)
-			      (make-dir-globs (build-path "/" head)
-					      last
-					      extra))
-	       css-route)
-	integrate-dired-face))))
+      (make <shtml-data>
+	:data ((compose integrate-dired-face) (dired 
+					       (compose-path path)
+					       (glob-dentries real-src-dir 
+							      (make-dir-globs (build-path "/" head)
+									      last
+									      extra))
+					       css-route))
+	:last-modification-time #f
+	)))
    ((path params config)
     (dir-dest path params config (list)))))
 

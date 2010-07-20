@@ -10,7 +10,7 @@
   (use yogomacs.dests.css)
   (use yogomacs.dests.dir)
   ;;
-  (use yogomacs.fix)
+  (use yogomacs.reply)
   )
 (select-module yogomacs.dests.root-dir)
 
@@ -22,13 +22,14 @@
 						       (dname-of fs-dentry))))))
 
 (define (root-dir-dest path params config)
-  (prepare-dired-faces config)
-  (list
-   (cgi-header)
-   (fix
-    (dired (compose-path path)
-	   (glob-dentries (config 'real-sources-dir) root-globs)
-	   css-route)
-    integrate-dired-face)))
+  (let1 real-src-dir #?=(config 'real-sources-dir)
+    (prepare-dired-faces config)
+    (make <shtml-data>
+      :data ((compose integrate-dired-face) (dired
+					     (compose-path path)
+					     (glob-dentries real-src-dir
+							    root-globs)
+					     css-route)))))
+
 
 (provide "yogomacs/dests/root-dir")

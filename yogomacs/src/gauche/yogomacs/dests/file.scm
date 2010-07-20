@@ -22,6 +22,8 @@
   (use gauche.process)
   (use yogomacs.access)
   (use yogomacs.error)
+  ;;
+  (use sxml.sxpath)
   )
 (select-module yogomacs.dests.file)
 
@@ -43,6 +45,20 @@
       (not-found "File not redable"
 		 file)))
 
+(define (retrieve-shtml real-src-file config)
+  (receive (shtml last-modified-time) 
+      (cache real-src-file find-file "shtml" #f config)
+    (if (and shtml
+	     (let1 q (if-car-sxpath '(// 
+				      head
+				      meta
+				      (@ (name (equal? "major-mode")))
+				      content 
+				      *text*))
+	       (member (q shtml) '("fundamental-mode" "text-mode"))))
+	(cache real-src-file syntax "shtml" #t config)
+	(values shtml last-modified-time))))
+
 (define (file-dest path params config)
   (let* ((last (last path))
 	 (head (path->head path))
@@ -51,12 +67,12 @@
 	 (file-type (file-type real-src-file)))
     (if (equal? (car file-type) "text")
 	(receive (shtml last-modified-time) 
-	    (cache real-src-file find-file "shtml" config)
+	    (retrieve-shtml real-src-file config)
 	  (make <shtml-data>
 	    :data ((compose fix-css-href integrate-file-face) shtml)
 	    :last-modification-time last-modified-time))
 	(receive (asis last-modified-time)
-	    (asis (asis real-src-file config))
+	    (asis real-src-file config)
 	  (make <asis-data> 
 	    :data asis
 	    :last-modification-time last-modified-time

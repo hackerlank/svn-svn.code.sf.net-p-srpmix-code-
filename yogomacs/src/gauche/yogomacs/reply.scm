@@ -37,7 +37,7 @@
 (define-method  reply ((shtml <shtml-data>))
   (write-tree
    (list
-    (cgi-header :content-type (ref asis 'mime-type))
+    (cgi-header :content-type (ref shtml 'mime-type))
     (srl:sxml->xml-noindent  (ref shtml 'data)))))
 
 (provide "yogomacs/reply")

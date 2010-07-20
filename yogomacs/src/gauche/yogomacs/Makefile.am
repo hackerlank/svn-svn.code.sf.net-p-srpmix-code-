@@ -19,7 +19,6 @@ dist_module_DATA =   \
 	flserver.scm \
 	main.scm     \
 	path.scm     \
-	fix.scm      \
 	reply.scm    \
 	route.scm    \
 	sanitize.scm \

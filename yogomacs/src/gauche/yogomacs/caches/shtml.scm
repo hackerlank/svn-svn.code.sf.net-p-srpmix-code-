@@ -96,7 +96,7 @@
       ;; shtml
       cache-file)))
 
-(define (do-shtml-cache src-path prepare-thunk namespace config)
+(define (do-shtml-cache src-path prepare-thunk namespace force-update? config)
   (let* ((md5 (guard (e (else 
 			 (not-found "Failed to prepare cache name"
 				    src-path)))
@@ -108,10 +108,13 @@
 
     (cache-kernel
      (lambda ()
-       (if (and (cached? cache-file)
-		(newer-than? cache-file src-path))
-	   cache-file
-	   #f))
+	(cond
+	   (force-update? #f)
+	   ((and (cached? cache-file)
+		 (newer-than? cache-file src-path))
+	    cache-file)
+	   (else
+	    #f)))
      (pa$ build-cache prepare-thunk 
 	  cache-file
 	  src-path)
