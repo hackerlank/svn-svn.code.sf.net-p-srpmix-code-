@@ -25,11 +25,14 @@
   (let1 real-src-dir #?=(config 'real-sources-dir)
     (prepare-dired-faces config)
     (make <shtml-data>
+      :params params
+      :config config
       :data ((compose integrate-dired-face) (dired
 					     (compose-path path)
 					     (glob-dentries real-src-dir
 							    root-globs)
-					     css-route)))))
+					     css-route))
+      :last-modification-time #f)))
 
 
 (provide "yogomacs/dests/root-dir")

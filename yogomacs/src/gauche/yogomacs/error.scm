@@ -26,10 +26,12 @@
      (cgi-header :status (condition-ref e 'status))
      #;(print-echo0 path path config (condition-ref e 'message))))
    ((condition-has-type? e <error>)
+    (log (condition-ref e 'message))
     (list
      (cgi-header :status "502 Bad Gateway")
      #;(print-echo0 path path config (condition-ref e 'message))))
    (else
+    (log (condition-ref e 'message))
     (list
      (cgi-header :status "500 Internal Server Error")))))
 

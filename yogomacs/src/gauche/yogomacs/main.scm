@@ -45,6 +45,7 @@
 	      :on-error    error-handler)))
 
 (define (yogomacs params config)
+  (set! (port-buffering (current-error-port)) :line)
   (let1 path (cgi-get-parameter "path" params :default "/")
     (if config
 	(route routing-table path params (config->proc config))

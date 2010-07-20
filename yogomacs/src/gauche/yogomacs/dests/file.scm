@@ -55,7 +55,7 @@
 				      (@ (name (equal? "major-mode")))
 				      content 
 				      *text*))
-	       (member (q shtml) '("fundamental-mode" "text-mode"))))
+	       (member (q shtml) '("fundamental-mode"))))
 	(cache real-src-file syntax "shtml" #t config)
 	(values shtml last-modified-time))))
 
@@ -69,11 +69,15 @@
 	(receive (shtml last-modified-time) 
 	    (retrieve-shtml real-src-file config)
 	  (make <shtml-data>
+	    :params params
+	    :config config
 	    :data ((compose fix-css-href integrate-file-face) shtml)
 	    :last-modification-time last-modified-time))
 	(receive (asis last-modified-time)
 	    (asis real-src-file config)
 	  (make <asis-data> 
+	    :params params
+	    :config config
 	    :data asis
 	    :last-modification-time last-modified-time
 	    :mime-type (apply format "~a/~a" file-type))))))

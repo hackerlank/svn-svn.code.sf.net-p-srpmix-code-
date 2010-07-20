@@ -6,16 +6,13 @@
 *** /var/run file*
 *** cmd line interface and batch(overriding conf)*
 *** Remove http-equiv
-*** Broken line handling http://localhost:81/sources/Q/QuantLib/1.0.1-3.fc14/pre-build/QuantLib-1.0.1/Contributors.txt
 
 ** Fine grading server side cache control
-*** File selection(exclude wrong type file)*
-**** emacs->sxpath->fundamental/text->syntax
 *** File name with version number*
+*** Modification time <*>
 
 ** Fine grading client side cache control
-*** Modification time *
-*** <sthml-data> object*
+*** create-time format<*>
 *** flate&deflate
 
 ** Server Administration
@@ -28,14 +25,13 @@
 *** attic*
 
 ** Clean up
-*** passing params and conf to reply func
+*** File selection(exclude wrong type file)*
 *** use #`,format
 *** storage separations
 **** (real-src-dir (build-path (config 'real-sources-dir) head)) in yogomacs/dests/file.scm
     => (sources-path head last) => (values real-src-dir real-src-path)
 *** raw-mode in dired
-*** create-time format
-*** show error message when internal crash, see error handler
+*** show error message when internal crash, see error handler<*>
 
 * Prompt, Ysh
 * Single user annotation
@@ -67,3 +63,7 @@
 * URL query string for yogomacs*<done>
 * Don't use `fix'. <done>
 * Timeout configuration <done>
+*** Broken line handling http://localhost:81/sources/Q/QuantLib/1.0.1-3.fc14/pre-build/QuantLib-1.0.1/Contributors.txt <done>
+**** emacs->sxpath->fundamental/text->syntax
+*** passing params and conf to reply func<done>
+*** <sthml-data> object*

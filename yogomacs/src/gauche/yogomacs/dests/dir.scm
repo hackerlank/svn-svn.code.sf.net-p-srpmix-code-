@@ -42,6 +42,8 @@
 				     head last)))
       (prepare-dired-faces config)
       (make <shtml-data>
+	:params params
+	:config config
 	:data ((compose integrate-dired-face) (dired 
 					       (compose-path path)
 					       (glob-dentries real-src-dir 
