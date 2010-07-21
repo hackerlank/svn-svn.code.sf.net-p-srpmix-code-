@@ -41,6 +41,7 @@
  yogomacs.main
  yogomacs.renderers.asis
  yogomacs.renderers.find-file
+ yogomacs.renderers.fundamental
  yogomacs.renderers.cache
  yogomacs.renderers.dired
  yogomacs.renderers.syntax
@@ -137,5 +138,8 @@
        "/etc/passwd" (readable? "/etc" "passwd"))
 (test* "/var/log/messages"
        #f (readable? "/var/log" "messages"))
+
+(test* "fundamental foo.c"
+       #f (fundamental "./foo.c" ()))
 
 (exit (if (zero? (test-end)) 0 1))
