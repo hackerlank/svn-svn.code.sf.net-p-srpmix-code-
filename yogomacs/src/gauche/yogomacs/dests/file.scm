@@ -47,19 +47,22 @@
 		 file)))
 
 (define (retrieve-shtml real-src-file config)
-   (fundamental real-src-file config)   
-   #;(receive (shtml last-modified-time) 
-      (cache real-src-file find-file "shtml" #f config)
-      (if (and shtml
-	       (let1 q (if-car-sxpath '(// 
-					head
-					meta
-					(@ (name (equal? "major-mode")))
-					content 
-					*text*))
+  (receive (shtml last-modified-time)
+      (fundamental real-src-file (config 'fundamental-mode-threshold) config) 
+    (if shtml
+	(values shtml last-modified-time)
+	(receive (shtml last-modified-time) 
+	    (cache real-src-file find-file "shtml" #f config)
+	  (if (and shtml
+		   (let1 q (if-car-sxpath '(// 
+					    head
+					    meta
+					    (@ (name (equal? "major-mode")))
+					    content 
+					    *text*))
 		     (member (q shtml) '("fundamental-mode"))))
-	  (cache real-src-file syntax "shtml" #t config)
-	  (values shtml last-modified-time))))
+	      (cache real-src-file syntax "shtml" #t config)
+	      (values shtml last-modified-time))))))
 
 (define (file-dest path params config)
   (let* ((last (last path))
