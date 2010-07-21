@@ -140,6 +140,6 @@
        #f (readable? "/var/log" "messages"))
 
 (test* "fundamental foo.c"
-       #f (fundamental "./foo.c" ()))
+       #f (fundamental "./foo.c" #f ()))
 
 (exit (if (zero? (test-end)) 0 1))
