@@ -1259,8 +1259,9 @@ it's called with the same value of KEY.  All other times, the cached
     (let (;; Declare variables used in loop body outside the loop
 	  ;; because it's faster to establish `let' bindings only
 	  ;; once.
-	  ;; (linum-mode-p (and (boundp 'linum-mode) linum-mode))
-	  next-change text len face-list fstruct-list trailing-ellipsis pnt)
+	  (linum-mode-p (and (boundp 'linum-mode) linum-mode))
+	  next-change text len face-list fstruct-list trailing-ellipsis pnt 
+		      (pmax (point-max)))
       ;; This loop traverses and reads the source buffer, appending
       ;; the resulting HTML to HTMLBUF with `princ'.  This method is
       ;; fast because: 1) it doesn't require examining the text
@@ -1270,6 +1271,7 @@ it's called with the same value of KEY.  All other times, the cached
       (goto-char (point-min))
       (while (not (eobp))
 	(setq pnt (point))
+	(message "POINT: %d/%d<1>" pnt (point-max))
 	(mapc (lambda (o)
 		(xhtmlize-width0-overlay o 
 					 insert-text-with-id-method
@@ -1277,8 +1279,15 @@ it's called with the same value of KEY.  All other times, the cached
 					 engine)
 		)
 	      (xhtmlize-overlays-at (point)))
-	
-	(setq next-change (xhtmlize-next-change pnt 'face))
+	;(message "POINT: %d/%d<2>, LINUM: %s" pnt (point-max) linum-mode-p)
+	(setq next-change (xhtmlize-next-change pnt 'face
+						(cond
+						 (linum-mode-p
+						  ;(message "LINUM: %d/%d<2>" pnt (point-max))
+						  (min (1+ (line-end-position)) pmax))
+						 (t
+						  ;(message "!LINUM: %d/%d<2>" pnt (point-max))
+						  nil))))
 	(cond
 	 ((not (numberp next-change))
 	  (log+error "ERROR: %s is not number" next-change))
@@ -1287,6 +1296,7 @@ it's called with the same value of KEY.  All other times, the cached
 	 )
 	;; Get faces in use between (point) and NEXT-CHANGE, and
 	;; convert them to fstructs.
+	;(message "POINT: %d/%d<3>" pnt (point-max))
 	(setq face-list (xhtmlize-faces-at-point)
 	      fstruct-list (delq nil (mapcar (lambda (f)
 					       (gethash f face-map))
@@ -1295,16 +1305,19 @@ it's called with the same value of KEY.  All other times, the cached
 	;; untabify it and escape the HTML metacharacters.
 	(setq text (xhtmlize-buffer-substring-no-invisible pnt next-change)
 	      len  (length text))
+	;(message "POINT: %d/%d<4>" pnt (point-max))
 	(when trailing-ellipsis
 	  (setq text (xhtmlize-trim-ellipsis text)
 		len (length text)))
 	;; If TEXT ends up empty, don't change trailing-ellipsis.
+	;(message "POINT: %d/%d<5>" pnt (point-max))
 	(when (> len 0)
 	  (setq trailing-ellipsis
 		(get-text-property (1- len)
 				   'xhtmlize-ellipsis text)))
 	(setq text (xhtmlize-untabify text (current-column))
 	      len  (length text))
+	;(message "POINT: %d/%d<6>" pnt (point-max))
 	;; Don't bother writing anything if there's no text (this
 	;; happens in invisible regions).
 	(when (> len 0)
@@ -1316,6 +1329,7 @@ it's called with the same value of KEY.  All other times, the cached
 		   nil
 		   fstruct-list
 		   engine))
+	;(message "POINT: %d/%d<7>" pnt (point-max))
 	(cond
 	 ((< next-change pnt)
 	  (log+error "ERROR<1>: next-change:%d < (point:%d)" next-change pnt)))

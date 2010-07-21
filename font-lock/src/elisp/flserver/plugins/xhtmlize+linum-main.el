@@ -96,6 +96,7 @@
           'xhtmlize-linum-update-buffer)
 
 (defun xhtmlize-linum-update-buffer ()
+  (linum-mode t)
   (flet ((window-start (win) (point-min))
          (window-end (win &optional update) (point-max))
          (set-window-margins (win width &rest ignore)))
