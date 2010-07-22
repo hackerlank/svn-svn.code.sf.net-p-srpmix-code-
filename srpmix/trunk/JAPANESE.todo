@@ -1,3 +1,7 @@
+* lcopy用のdists
+
+* alternativeを駆使して変動するdists名へのsymbolic linkをで作る。
+
 * 10srpmix-vanilla --- xz の対応
 
 * --disable-pluginを復活すること
