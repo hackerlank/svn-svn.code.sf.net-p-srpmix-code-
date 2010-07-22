@@ -83,41 +83,41 @@
 		       make-symlink-to-dname
 		       pre-filter
 		       post-filter)
-  (define-const-proc accept #f)
-  (define (make-conv conv accept-conv)
-    (cond
-     ((eq? conv #t) accept-conv)
-     (conv conv)
-     (else (const-proc #f))))
+   (define-const-proc accept #f)
+   (define (make-conv conv accept-conv)
+      (cond
+	 ((eq? conv #t) accept-conv)
+	 (conv conv)
+	 (else (const-proc #f))))
 
-  (if (file-is-directory? path)
-      (fold-right 
-       (lambda (entry kdr)
-	 (let* ((stat (sys-lstat (build-path path entry)))
-		(dentry (make (if (eq? (ref stat 'type) 'symlink)
-				  <fs-symlink-dentry>
-				  <fs-dentry>)
-			  :parent path
-			  :entry entry
-			  :stat stat)))
-	   (when (symlink? dentry)
-	     (set! (ref dentry 'symlink-to-dname) ((make-conv
-						    make-symlink-to-dname
-						    make-symlink-to-dname-default)
-						   dentry)))
-	   (set! (ref dentry 'url) ((make-conv
-				     make-url
-				     make-url-default)
-				    dentry))
-	   (if ((make-conv post-filter accept) dentry)
-	       (cons dentry kdr)
-	       kdr)))
-       (list)
-       (directory-list path
-		       :add-path? #f 
-		       :children? #f
-		       :filter (make-conv pre-filter accept)))
-      #f))
+   (if (file-is-directory? path)
+       (fold-right 
+	(lambda (entry kdr)
+	   (let* ((stat (sys-lstat (build-path path entry)))
+		  (dentry (make (if (eq? (ref stat 'type) 'symlink)
+				    <fs-symlink-dentry>
+				    <fs-dentry>)
+				:parent path
+				:entry entry
+				:stat stat)))
+	      (when (symlink? dentry)
+		 (set! (ref dentry 'symlink-to-dname) ((make-conv
+							make-symlink-to-dname
+							make-symlink-to-dname-default)
+						       dentry)))
+	      (set! (ref dentry 'url) ((make-conv
+					make-url
+					make-url-default)
+				       dentry))
+	      (if ((make-conv post-filter accept) dentry)
+		  (cons dentry kdr)
+		  kdr)))
+	(list)
+	(directory-list path
+			:add-path? #f 
+			:children? #f
+			:filter (make-conv pre-filter accept)))
+       #f))
 
 (define (make-make-make specs dname-of conv)
   (lambda (dentry-or-dname)

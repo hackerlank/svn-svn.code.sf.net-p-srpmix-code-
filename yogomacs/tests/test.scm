@@ -26,6 +26,8 @@
  yogomacs.dests.srpmix-dir
  yogomacs.dests.css
  yogomacs.dests.sources-dir
+ yogomacs.dests.dists-dir
+ yogomacs.dests.packages-dir
  yogomacs.dests.fs
  yogomacs.dests.pkg-dir
  yogomacs.dests.dir

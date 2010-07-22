@@ -9,7 +9,8 @@
   ;;
   (use yogomacs.dests.root-dir)
   (use yogomacs.dests.sources-dir)
-;  (use yogomacs.dests.dists-dir)
+  (use yogomacs.dests.dists-dir)
+  (use yogomacs.dests.packages-dir)
   (use yogomacs.dests.css)
   (use yogomacs.dests.debug)
   ;;
@@ -19,8 +20,8 @@
 (define routing-table
   `((#/^\/$/ ,root-dir-dest)
     (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
-    ;; (#/^\/dists[\/]$/ ,dists-dir)
-    ;; (#/^\/dists\// ,dists-dir)
+    (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
+    (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
     ;;
     (#/^\/web\/css\/[^\/]+.css/ ,css-dest)
     ;;

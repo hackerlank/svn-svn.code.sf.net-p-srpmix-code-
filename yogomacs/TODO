@@ -10,6 +10,7 @@
 ** Fine grading server side cache control
 *** File name with version number*
 *** Modification time <*>
+*** force no cache & lcopy
 
 ** Fine grading client side cache control
 *** create-time format<*>
@@ -20,8 +21,8 @@
 *** GC
 
 ** FS strcture
-*** dists*
-*** packages*
+*** dists<done>
+**** Sending dist-mapping.es in asis
 *** attic*
 
 ** Clean up
@@ -32,6 +33,9 @@
     => (sources-path head last) => (values real-src-dir real-src-path)
 *** raw-mode in dired
 *** show error message when internal crash, see error handler<*>
+
+** Dired
+*** link-to URL
 
 * Prompt, Ysh
 * Single user annotation
@@ -67,3 +71,4 @@
 **** emacs->sxpath->fundamental/text->syntax
 *** passing params and conf to reply func<done>
 *** <sthml-data> object*
+*** packages*

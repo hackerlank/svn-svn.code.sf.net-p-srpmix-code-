@@ -1,5 +1,7 @@
 (define-module yogomacs.dests.srpmix-dir
-  (export srpmix-dir-dest)
+  (export srpmix-dir-dest
+	  srpmix-dir-make-dest
+	  )
   (use yogomacs.route)
   (use yogomacs.path)
   (use yogomacs.dests.fs)
@@ -21,17 +23,21 @@
 	       '((#/^plugins$/ #f #f)
 		 (#/^vanilla$/ #f #f))))
 
-(define routing-table
-  `((#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)$/               ,dest)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/pre-build$/    ,dir-dest)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/pre-build\/.*/ ,fs-dest)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/archives$/     ,dir-dest)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/archives\/.*/  ,fs-dest)
-    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)\/specs.spec$/   ,file-dest)
-    ;; (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+/([^^\/]+)\/vanilla$/ ,dir-dest)
-    ))
+(define (srpmix-dir-make-routing-table prefix)
+   `((,(string->regexp (string-append prefix "$")) ,dest)
+     (,(string->regexp (string-append prefix "/pre-build$")) ,dir-dest)
+     (,(string->regexp (string-append prefix "/pre-build/.*")) ,fs-dest)
+     (,(string->regexp (string-append prefix "/archives$")) ,dir-dest)
+     (,(string->regexp (string-append prefix "/archives/.*")) ,fs-dest)
+     (,(string->regexp (string-append prefix "/specs.spec$")) ,file-dest)
+     (,(string->regexp (string-append prefix "/STATUS$")) ,file-dest)
+     (,(string->regexp (string-append prefix "/SRPMIX$")) ,file-dest)
+     ))
 
-(define (srpmix-dir-dest path params config)
-  (route routing-table (compose-path path) params config))
+(define (srpmix-dir-make-dest prefix)
+  (lambda (path params config)
+    (route (srpmix-dir-make-routing-table prefix) (compose-path path) params config)))
+
+(define srpmix-dir-dest (srpmix-dir-make-dest "^/sources/[a-zA-Z0-9]/[^/]+/([^^/]+)"))
 
 (provide "yogomacs/dests/srpmix-dir")
