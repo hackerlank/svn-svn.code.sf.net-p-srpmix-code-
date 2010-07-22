@@ -22,7 +22,7 @@
 						       (dname-of fs-dentry))))))
 
 (define (root-dir-dest path params config)
-  (let1 real-src-dir #?=(config 'real-sources-dir)
+  (let1 real-src-dir (config 'real-sources-dir)
     (prepare-dired-faces config)
     (make <shtml-data>
       :params params
