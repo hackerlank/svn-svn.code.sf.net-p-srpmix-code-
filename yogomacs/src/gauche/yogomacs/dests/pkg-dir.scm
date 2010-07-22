@@ -26,13 +26,13 @@
 		  ;;
 		  ,(lambda (fs-dentry)
 		     (format "~a,~a" last ((#/\^lcopy-([^\/]+)/ (dname-of fs-dentry)) 1))
-		     )))))
+		     )
+		  ;; XXX
+		  ))))
 
 (define (dest path params config)
   (dir-dest path params config
-	       `(
-		 ,@(lcopy-spec path)
-		 )))
+	       (lcopy-spec path)))
 
 (define routing-table
   `((#/^\/sources\/[a-zA-Z0-9]\/[^\/]+$/ ,dest)

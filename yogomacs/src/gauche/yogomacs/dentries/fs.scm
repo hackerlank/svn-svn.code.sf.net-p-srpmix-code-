@@ -9,6 +9,7 @@
 	  mtime-of
 	  url-of
 	  symlink-to-dname-of
+	  symlink-to-url-of
 	  ;;
 	  read-dentries
 	  glob-dentries)
@@ -29,7 +30,10 @@
    ))
 
 (define-class <fs-symlink-dentry> (<symlink-dentry> <fs-dentry>)
-  (symlink-to-dname))
+  (
+   symlink-to-dname
+   symlink-to-url
+   ))
 
 
 (define-method type-maker-of ((fs-dentry <dentry>))
@@ -59,6 +63,8 @@
 (define-method symlink-to-dname-of ((fs-symlink-dentry <fs-symlink-dentry>))
   (ref fs-symlink-dentry 'symlink-to-dname))
 
+(define-method symlink-to-url-of ((fs-symlink-dentry <fs-symlink-dentry>))
+  (ref fs-symlink-dentry 'symlink-to-url))
 
 (define-method make-url-default ((fs-dentry <fs-dentry>))
   (uri-compose :scheme "file"
@@ -67,12 +73,15 @@
 					     )))
 (define-method make-url-default ((fs-symlink-dentry <fs-symlink-dentry>))
   (uri-compose :scheme "file"
-		 :path (ref fs-dentry 'symlink-to-dname)))
+	       :path (ref fs-dentry 'symlink-to-dname)))
 
 (define (make-symlink-to-dname-default fs-dentry)
   (guard (e
 	  (else #f))
     (sys-readlink (path-of fs-dentry))))
+
+(define (make-symlink-to-url-default fs-dentry)
+  #f)
 
 (define (const-proc value) (lambda rest value))
 (define-macro (define-const-proc name value)
@@ -81,43 +90,48 @@
 (define (read-dentries path 
 		       make-url 
 		       make-symlink-to-dname
+		       make-symlink-to-url
 		       pre-filter
 		       post-filter)
-   (define-const-proc accept #f)
-   (define (make-conv conv accept-conv)
-      (cond
-	 ((eq? conv #t) accept-conv)
-	 (conv conv)
-	 (else (const-proc #f))))
+  (define-const-proc accept #f)
+  (define (make-conv conv accept-conv)
+    (cond
+     ((eq? conv #t) accept-conv)
+     (conv conv)
+     (else (const-proc #f))))
 
-   (if (file-is-directory? path)
-       (fold-right 
-	(lambda (entry kdr)
-	   (let* ((stat (sys-lstat (build-path path entry)))
-		  (dentry (make (if (eq? (ref stat 'type) 'symlink)
-				    <fs-symlink-dentry>
-				    <fs-dentry>)
-				:parent path
-				:entry entry
-				:stat stat)))
-	      (when (symlink? dentry)
-		 (set! (ref dentry 'symlink-to-dname) ((make-conv
-							make-symlink-to-dname
-							make-symlink-to-dname-default)
-						       dentry)))
-	      (set! (ref dentry 'url) ((make-conv
-					make-url
-					make-url-default)
-				       dentry))
-	      (if ((make-conv post-filter accept) dentry)
-		  (cons dentry kdr)
-		  kdr)))
-	(list)
-	(directory-list path
-			:add-path? #f 
-			:children? #f
-			:filter (make-conv pre-filter accept)))
-       #f))
+  (if (file-is-directory? path)
+      (fold-right 
+       (lambda (entry kdr)
+	 (let* ((stat (sys-lstat (build-path path entry)))
+		(dentry (make (if (eq? (ref stat 'type) 'symlink)
+				  <fs-symlink-dentry>
+				  <fs-dentry>)
+			  :parent path
+			  :entry entry
+			  :stat stat)))
+	   (when (symlink? dentry)
+	     (set! (ref dentry 'symlink-to-dname) ((make-conv
+						    make-symlink-to-dname
+						    make-symlink-to-dname-default)
+						   dentry))
+	     (set! (ref dentry 'symlink-to-url) ((make-conv
+						  make-symlink-to-url
+						  make-symlink-to-url-default)
+						 dentry)))
+	   (set! (ref dentry 'url) ((make-conv
+				     make-url
+				     make-url-default)
+				    dentry))
+	   (if ((make-conv post-filter accept) dentry)
+	       (cons dentry kdr)
+	       kdr)))
+       (list)
+       (directory-list path
+		       :add-path? #f 
+		       :children? #f
+		       :filter (make-conv pre-filter accept)))
+      #f))
 
 (define (make-make-make specs dname-of conv)
   (lambda (dentry-or-dname)
@@ -158,6 +172,11 @@
 		  dname-of
 		  (make-conv 3)))
 
+(define (make-make-symlink-to-url specs)
+  (make-make-make specs 
+		  dname-of
+		  (make-conv 4)))
+
 (define (make-filter specs dname-of ref-spec)
   (make-make-make specs
 		  dname-of
@@ -168,21 +187,24 @@
 		       (else (filter dname)))))))
 
 ;; glob-dentries
-;; ( ( PATTERN PRE-FILTER MAKE-URL [MAKE-SYMLINK-TO-DNAME] [POST-FILTER]) ... )
+;; ( ( PATTERN PRE-FILTER MAKE-URL [MAKE-SYMLINK-TO-DNAME] [MAKE-SYMLINK-TO-URL] [POST-FILTER]) ... )
 ;;  PATTERN: regex, string
 ;;  PRE-FILTER: #t, #f, (lambda (e) ) -> #t|#f
 ;;  MAKE-URL: string, #f, (lambda (e) ) -> string|#f
 ;;  MAKE-SYMLINK-TO-DNAME: string, #f, (lambda (e) ) -> string|#f
+;;  MAKE-SYMLINK-TO-URL: string, #f, (lambda (e) ) -> string|#f
 ;;  POST-FILTER: #t, #f, (lambda (e) ) -> #t|#f
 (define (glob-dentries path globs)
   (define (id x) x)
   (let ((make-url (make-make-url globs))	      
 	(make-symlink-to-dname (make-make-symlink-to-dname globs))
+	(make-symlink-to-url (make-make-symlink-to-url globs))
 	(pre-filter (make-filter globs id cadr))
-	(post-filter (make-filter globs dname-of (cute list-ref <> 4 #t))))
+	(post-filter (make-filter globs dname-of (cute list-ref <> 5 #t))))
     (read-dentries path
 		   make-url
 		   make-symlink-to-dname
+		   make-symlink-to-url
 		   pre-filter
 		   post-filter)))
 

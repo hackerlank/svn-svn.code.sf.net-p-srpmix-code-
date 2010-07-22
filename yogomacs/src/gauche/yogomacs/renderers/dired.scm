@@ -116,10 +116,17 @@
       	`(
 	  (span (|@| (class "dired-symlink"))
 		,(url&dname dentry))
+	  ;;
+	  " "
 	  (span (|@| (class "dired-symlink-arrow"))
-		" -> ")
+		"->")
+	  " "
 	  (span (|@| (class "dired-symlink-to"))
-		,symlink-to-dname)
+		,(let1 url (symlink-to-url-of dentry)
+		   (if url
+		       `(a (|@| (href ,url))
+			   ,symlink-to-dname)
+		       symlink-to-dname)))
 	  "\n")
 	`(
 	  (span (|@| (class "dired-broken-symlink"))

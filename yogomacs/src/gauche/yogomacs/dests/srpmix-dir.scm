@@ -20,8 +20,11 @@
 
 (define (dest path params config)
   (dir-dest path params config
-	       '((#/^plugins$/ #f #f)
-		 (#/^vanilla$/ #f #f))))
+	    `((#/^plugins$/ #f #f)
+	      (#/^vanilla$/ #t
+			    ,(pa$ dir-make-url path)
+			    ,"./vanilla" ; ???
+			    ))))
 
 (define (srpmix-dir-make-routing-table prefix)
    `((,(string->regexp (string-append prefix "$")) ,dest)
@@ -32,6 +35,8 @@
      (,(string->regexp (string-append prefix "/specs.spec$")) ,file-dest)
      (,(string->regexp (string-append prefix "/STATUS$")) ,file-dest)
      (,(string->regexp (string-append prefix "/SRPMIX$")) ,file-dest)
+     (,(string->regexp (string-append prefix "/vanilla$")) ,dir-dest)
+     (,(string->regexp (string-append prefix "/vanilla/.*")) ,fs-dest)
      ))
 
 (define (srpmix-dir-make-dest prefix)

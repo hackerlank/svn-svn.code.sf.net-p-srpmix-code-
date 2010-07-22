@@ -1,7 +1,12 @@
 (define-module yogomacs.dests.dir
   (export prepare-dired-faces
 	  integrate-dired-face
-	  dir-dest)
+	  dir-dest
+	  ;;
+	  dir-make-url
+	  dir-make-symlink-to-dname
+	  dir-make-symlink-to-url
+	  )
   (use srfi-1)
   (use www.cgi)  
   (use file.util)
@@ -47,7 +52,8 @@
 	:data ((compose integrate-dired-face) (dired 
 					       (compose-path path)
 					       (glob-dentries real-src-dir 
-							      (make-dir-globs (build-path "/" head)
+							      (make-dir-globs (build-path "/" 
+											  head)
 									      last
 									      extra))
 					       css-route))
@@ -55,6 +61,30 @@
 	)))
    ((path params config)
     (dir-dest path params config (list)))))
+
+(define (dir-make-url path e)
+  (let1 entry-path (path-of e)
+    (if (file-is-readable? entry-path)
+	(compose-path* path (dname-of e))
+	#f)))
+
+(define (dir-make-symlink-to-dname e)
+  (let1 entry-path (path-of e)
+    (guard (e (else #f))
+      (sys-basename (sys-readlink entry-path)))))
+
+(define (dir-make-symlink-to-url get-pkg e)
+  (let* ((pkg (get-pkg e))
+	 (entry-path (path-of e))
+	 (ver (guard (e
+		      (else #f))
+		(sys-basename (sys-readlink entry-path)))))
+    (if ver
+	(build-path "/sources"
+		    (substring pkg 0 1)
+		    pkg
+		    ver)
+	#f)))
 
 (define make-dir-globs
   (match-lambda*

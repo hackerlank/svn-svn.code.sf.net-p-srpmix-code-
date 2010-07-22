@@ -8,7 +8,6 @@
   (use yogomacs.dests.srpmix-dir)
   (use yogomacs.dests.file)
   ;;
-  (use file.util)
   (use yogomacs.dentry)
   (use yogomacs.dentries.fs)
   (use yogomacs.path)
@@ -17,20 +16,16 @@
 (select-module yogomacs.dests.packages-dir)
 
 (define (dest path params config)
-  (dir-dest path params config
-	    `((#/^[0-9a-zA-Z].*$/ 
-		  #t 
-		  ,(lambda (e) 
-		     (let1 entry-path (path-of e)
-		       (if (file-is-readable? entry-path)
-			   (compose-path* path (dname-of e))
-			   #f)))
-		  ,(lambda (e) 
-		     (let1 entry-path (path-of e)
-		       (guard (e
-			       (else #f))
-			      (sys-basename (sys-readlink entry-path))))
-		     )))))
+  (let1 get-pkg (lambda (_)
+		  (car (reverse path)))
+    (dir-dest path params config
+	      `((#/^[0-9a-zA-Z].*$/ 
+		    #t 
+		    ,(pa$ dir-make-url path)
+		    ,dir-make-symlink-to-dname
+		    ,(pa$ dir-make-symlink-to-url
+			  get-pkg)
+		    )))))
 
 (define routing-table
   (let1 packages-srpmix-dir-dest (srpmix-dir-make-dest 

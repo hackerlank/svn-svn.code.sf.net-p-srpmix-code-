@@ -10,6 +10,7 @@
 	  mtime-of
 	  url-of
 	  symlink-to-dname-of
+	  symlink-to-url-of
 	  ))
  
 (select-module yogomacs.dentry)
@@ -34,5 +35,6 @@
 (define-method url-of ((d <dentry>)))
 
 (define-method symlink-to-dname-of ((d <symlink-dentry>)))
+(define-method symlink-to-url-of ((d <symlink-dentry>)))
 
 (provide "yogomacs/dentry")
