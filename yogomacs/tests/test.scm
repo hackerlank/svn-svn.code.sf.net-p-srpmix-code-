@@ -34,10 +34,12 @@
  yogomacs.dests.debug
  yogomacs.dests.print-alist
  yogomacs.dests.file
+ yogomacs.dests.text
  yogomacs.error
  yogomacs.dentry
  yogomacs.compress
  yogomacs.dentries.fs
+ yogomacs.dentries.text
  yogomacs.cache
  yogomacs.face
  yogomacs.main

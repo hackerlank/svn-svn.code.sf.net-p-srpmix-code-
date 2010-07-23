@@ -11,7 +11,9 @@
 	  url-of
 	  symlink-to-dname-of
 	  symlink-to-url-of
-	  ))
+	  dentry-for
+	  )
+  (use srfi-1))
  
 (select-module yogomacs.dentry)
 
@@ -36,5 +38,11 @@
 
 (define-method symlink-to-dname-of ((d <symlink-dentry>)))
 (define-method symlink-to-url-of ((d <symlink-dentry>)))
+
+
+(define (dentry-for dentries dname)
+  (find (lambda (dentry)
+	  (equal? (dname-of dentry) dname))
+	dentries))
 
 (provide "yogomacs/dentry")

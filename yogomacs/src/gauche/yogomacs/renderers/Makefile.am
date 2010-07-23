@@ -7,5 +7,6 @@ dist_module_DATA =   \
 	find-file.scm				\
 	fundamental.scm				\
 	syntax.scm                              \
+	text.scm                                \
         \
 	$(NULL)

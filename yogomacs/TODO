@@ -21,9 +21,9 @@
 *** GC
 
 ** FS strcture
-*** dists<done>
-**** Sending dist-mapping.es in asis
+*** Sending dist-mapping.es in asis
 *** attic*
+*** vanilla
 
 ** Clean up
 *** File selection(exclude wrong type file)*
@@ -39,6 +39,11 @@
 
 * Prompt, Ysh
 * Single user annotation
+** plugins
+** home
+** plugins/loging
+** plugins/ysh
+
 * Multi user annotation
 * Realtime multi user annotation
 * Mobile
@@ -71,4 +76,5 @@
 **** emacs->sxpath->fundamental/text->syntax
 *** passing params and conf to reply func<done>
 *** <sthml-data> object*
-*** packages*
+*** packages*<done>
+*** dists<done>

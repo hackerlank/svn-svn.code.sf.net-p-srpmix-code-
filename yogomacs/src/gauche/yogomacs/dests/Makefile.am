@@ -13,5 +13,6 @@ dist_module_DATA =   \
 	root-dir.scm				\
 	sources-dir.scm				\
 	srpmix-dir.scm                          \
+	text.scm                                \
         \
 	$(NULL)

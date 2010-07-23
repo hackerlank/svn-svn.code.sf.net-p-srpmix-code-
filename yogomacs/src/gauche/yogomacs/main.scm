@@ -8,9 +8,6 @@
   (use yogomacs.error)
   ;;
   (use yogomacs.dests.root-dir)
-  (use yogomacs.dests.sources-dir)
-  (use yogomacs.dests.dists-dir)
-  (use yogomacs.dests.packages-dir)
   (use yogomacs.dests.css)
   (use yogomacs.dests.debug)
   ;;
@@ -19,14 +16,13 @@
 
 (define routing-table
   `((#/^\/$/ ,root-dir-dest)
-    (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
-    (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
-    (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
     ;;
     (#/^\/web\/css\/[^\/]+.css/ ,css-dest)
     ;;
     (#/^\/debug\/metavariables$/ ,print-metavariables)
     (#/^\/debug\/config$/ ,print-config)
+    ;;
+    (#/^\/.*/ ,root-dir-dest)
     ;;
     (#/^.*$/ ,print-path)
     ))
@@ -40,13 +36,13 @@
 (define (yogomacs-cgi)
   (debug-print-width #f)
   (sys-putenv "HOME" "/var/www")
+  (set! (port-buffering (current-error-port)) :line)
   (let1 config (install-constants (load-config))
     (cgi-main (cute yogomacs <> config)
 	      :output-proc reply
 	      :on-error    error-handler)))
 
 (define (yogomacs params config)
-  (set! (port-buffering (current-error-port)) :line)
   (let1 path (cgi-get-parameter "path" params :default "/")
     (if config
 	(route routing-table path params (config->proc config))
