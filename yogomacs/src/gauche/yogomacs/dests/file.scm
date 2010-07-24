@@ -66,12 +66,12 @@
 	      (cache real-src-file syntax "shtml" #t config)
 	      (values shtml last-modified-time))))))
 
-(define (make-narrow-down params)
+(define (make-narrow-down param)s
   (or (and-let* ((range-string (cgi-get-parameter "range" params :default #f))
 		 (range (guard (e (else #f
 					)) 
 			  (parse-range range-string))))
-	#?=(cute rearrange-range <> (car range) (cdr range)))
+	(cute rearrange-range <> (car range) (cdr range)))
       (lambda (shtml) shtml)))
 
 (define (file-dest path params config)
@@ -80,7 +80,9 @@
 	 (real-src-dir (build-path (config 'real-sources-dir) head))
 	 (real-src-file (build-path real-src-dir last))
 	 (file-type (file-type real-src-file))
-	 (narrow-down (make-narrow-down params)))
+	 (narrow-down (make-narrow-down params))
+	 
+	 )
     (if (equal? (car file-type) "text")
 	(receive (shtml last-modified-time) 
 	    (retrieve-shtml real-src-file config)
