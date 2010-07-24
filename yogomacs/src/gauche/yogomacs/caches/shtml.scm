@@ -18,8 +18,10 @@
    namespace))
 
 (define (md5->cache-file namespace md5 config)
-  (let1 dir (md5->cache-dir namespace md5 config)
-    (build-path dir "xz")))
+  (let ((major-version 0)
+	(minor-version 0)
+	(dir (md5->cache-dir namespace md5 config)))
+    (build-path dir #`"xz_,|major-version|_,|minor-version|")))
 
 (define (md5->cache-dir namespace md5 config)
   (let1 n 6
@@ -31,7 +33,9 @@
 	     (zip (make-list n md5)
 		  (iota n 0 2)
 		  (iota n 2 2)))
-	    (list  (substring md5 (* n 2) -1))))))
+	    (list  #;(substring md5 (* n 2) -1)
+	     md5
+	     )))))
 
 (define (newer-than? cache-file src-path)
   (file-mtime>? cache-file src-path))
