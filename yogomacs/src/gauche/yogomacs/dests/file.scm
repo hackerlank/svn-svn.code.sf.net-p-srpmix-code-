@@ -25,6 +25,8 @@
   (use yogomacs.error)
   ;;
   (use sxml.sxpath)
+  ;;
+  (use font-lock.rearrange.range)
   )
 (select-module yogomacs.dests.file)
 
@@ -64,19 +66,28 @@
 	      (cache real-src-file syntax "shtml" #t config)
 	      (values shtml last-modified-time))))))
 
+(define (make-narrow-down params)
+  (or (and-let* ((range-string (cgi-get-parameter "range" params :default #f))
+		 (range (guard (e (else #f
+					)) 
+			  (parse-range range-string))))
+	#?=(cute rearrange-range <> (car range) (cdr range)))
+      (lambda (shtml) shtml)))
+
 (define (file-dest path params config)
   (let* ((last (last path))
 	 (head (path->head path))
 	 (real-src-dir (build-path (config 'real-sources-dir) head))
 	 (real-src-file (build-path real-src-dir last))
-	 (file-type (file-type real-src-file)))
+	 (file-type (file-type real-src-file))
+	 (narrow-down (make-narrow-down params)))
     (if (equal? (car file-type) "text")
 	(receive (shtml last-modified-time) 
 	    (retrieve-shtml real-src-file config)
 	  (make <shtml-data>
 	    :params params
 	    :config config
-	    :data ((compose fix-css-href integrate-file-face) shtml)
+	    :data ((compose fix-css-href integrate-file-face narrow-down) shtml)
 	    :last-modification-time last-modified-time))
 	(receive (asis last-modified-time)
 	    (asis real-src-file config)
