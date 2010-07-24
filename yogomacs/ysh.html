@@ -30,19 +30,38 @@
     <link rel="stylesheet" type="text/css" href="file:///tmp/font-lock-string-face--Invert.css" title="Invert">
     <link rel="stylesheet" type="text/css" href="file:///tmp/font-lock-variable-name-face--Default.css" title="Default">
     <link rel="stylesheet" type="text/css" href="file:///tmp/font-lock-variable-name-face--Invert.css" title="Invert">
+    <style type="text/css">
+    <!--
+	.header {
+	          position: fixed; left: 0; width: 100%; 
+		  top: 0; height: 1em;
+		  background: #e5e5e5; foreground: #333333;
+                }
+        .modeline {
+	           position: fixed; left: 0; width: 100%; 
+                   bottom: 1em; height: 1em; margin: auto 0;
+                   foreground: #000000; background: #bfbfbf;
+                  }
+        .minibuffer {
+                      position: fixed; left: 0; width: 100%; 
+                      bottom: 0; height: 1em; margin: auto 0;
+                    }
+        .buffer {
+	              position: fixed; left: 0; width: 100%; 
+                      top: 1em; bottom: 2em; overflow: auto
+                }
+    -->
+    </style>
   </head>
   <body>
-    <div style="position: fixed; left: 0; width: 100%; background: #e5e5e5; foreground: #333333;  top: 0;    height: 1em;">
-    </div>
-<div style="position: fixed; left: 0; width: 100%; top: 1em; bottom: 2em; overflow: auto">
+    <pre><div class="header">[&lt;]</div></pre>
+<div class="buffer">
     <pre>
 <span class="linum" id="L:1"><a href="#L:1"> 1</a></span><span class="lfringe" id="f:L;P:1;L:1"> </span><span class="rfringe" id="f:R;L:1"> </span><span class="comment-delimiter" id="F:1">/* </span><span class="comment" id="F:4">Assembly code template for system call stubs.
 </pre>
 </div>
-<div style="position: fixed; left: 0; width: 100%; foreground: #000000; background: #bfbfbf;  bottom: 1em; height: 1em; margin: auto 0;">
--U:--- list.html	Top L32 (XHTML)-------------------------------------------------------------------------
-</div>
-<div style="position: fixed; left: 0; width: 100%; bottom: 0; height: 1em; margin: auto 0;">
+<pre><div class="modeline">[&lt;]</div></pre>
+<div class="minibuffer">
 <form><input type="text" style="position: relative; width: 100%;"></form>
 </div>
   </body>
