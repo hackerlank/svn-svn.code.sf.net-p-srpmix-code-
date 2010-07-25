@@ -8,7 +8,6 @@
 *** Remove http-equiv
 
 ** Fine grading server side cache control
-*** File name with version number*
 *** Modification time <*>
 *** force no cache & lcopy
 
@@ -23,7 +22,7 @@
 ** FS strcture
 *** Sending dist-mapping.es in asis
 *** attic*
-*** vanilla
+*** lcopy
 
 ** Clean up
 *** File selection(exclude wrong type file)*
@@ -31,6 +30,7 @@
 *** storage separations
 **** (real-src-dir (build-path (config 'real-sources-dir) head)) in yogomacs/dests/file.scm
     => (sources-path head last) => (values real-src-dir real-src-path)
+**** storage-of: sources, text-field...
 *** raw-mode in dired
 *** show error message when internal crash, see error handler<*>
 
@@ -79,3 +79,5 @@
 *** <sthml-data> object*
 *** packages*<done>
 *** dists<done>
+*** File name with version number* <done>
+*** vanilla

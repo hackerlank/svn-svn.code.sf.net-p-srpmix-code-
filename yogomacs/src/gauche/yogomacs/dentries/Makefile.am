@@ -1,7 +1,9 @@
 moduledir=@GAUCHE_MODULEDIR@/yogomacs/dentries
 dist_module_DATA =   \
 	\
-	fs.scm   \
-	text.scm \
+	fs.scm       \
+	redirect.scm \
+	text.scm     \
+	virtual.scm  \
         \
 	$(NULL)

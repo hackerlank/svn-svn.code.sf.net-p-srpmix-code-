@@ -194,7 +194,7 @@
 				 current-max-size)))
 			 0
 			 dentires))
-	 (max-column (+ (floor->exact (log max-size 10))
+	 (max-column (+ (floor->exact (log (max max-size 1) 10))
 			1)))
     (dired0 dir (sort dentires 
 		      (lambda (a b) (string<? (dname-of a) (dname-of b))))

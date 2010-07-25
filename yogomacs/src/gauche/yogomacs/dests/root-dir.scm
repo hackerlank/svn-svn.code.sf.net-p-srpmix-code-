@@ -10,6 +10,7 @@
   (use yogomacs.dentry)
   (use yogomacs.dentries.fs)
   (use yogomacs.dentries.text)
+  (use yogomacs.dentries.redirect)
   (use yogomacs.renderers.dired)
   (use yogomacs.path)
   (use yogomacs.dests.css)
@@ -19,7 +20,7 @@
   (use yogomacs.dests.sources-dir)
   (use yogomacs.dests.dists-dir)
   (use yogomacs.dests.packages-dir)
-  #; (use yogomacs.dests.root-plugins-dir)
+  (use yogomacs.dests.root-plugins-dir)
   (use yogomacs.dests.debug)
   ;;
   (use yogomacs.reply)
@@ -38,6 +39,10 @@
     :parent (compose-path parent-path)
     :dname "README"
     :text "Use the Source, Luke."))
+(define (plugins-entry parent-path)
+  (make <redirect-dentry>
+    :parent (compose-path parent-path)
+    :dname "plugins"))
 
 (define (dest path params config)
   (let1 shtml (dired
@@ -47,6 +52,7 @@
 			       root-globs)
 		(list 
 		 (README-entry path)
+		 (plugins-entry path)
 		 ))
 	       css-route)
     (prepare-dired-faces config)
@@ -65,7 +71,7 @@
      (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
      (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
-     #;(#/^\/plugins(?:\/.+)?$/   ,root-plugins-dir-dest)
+     (#/^\/plugins(?:\/.+)?$/   ,root-plugins-dir-dest)
      (#/^\/README$/  ,README-dest)
      (#/^.*$/ ,print-path)
      ))

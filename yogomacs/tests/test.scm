@@ -23,6 +23,7 @@
  yogomacs.rearranges.face-integrates
  yogomacs.rearranges.css-integrates
  yogomacs.dests.root-dir
+ yogomacs.dests.root-plugins-dir
  yogomacs.dests.srpmix-dir
  yogomacs.dests.css
  yogomacs.dests.sources-dir
@@ -40,6 +41,8 @@
  yogomacs.compress
  yogomacs.dentries.fs
  yogomacs.dentries.text
+ yogomacs.dentries.virtual
+ yogomacs.dentries.redirect
  yogomacs.cache
  yogomacs.face
  yogomacs.main
