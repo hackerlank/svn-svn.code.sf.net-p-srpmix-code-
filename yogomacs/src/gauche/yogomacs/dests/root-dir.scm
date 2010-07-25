@@ -2,6 +2,7 @@
   (export root-dir-dest)
   (use www.cgi) 
   (use file.util)
+  (use srfi-1)
   (use srfi-19)
   ;;
   (use yogomacs.route)
@@ -18,6 +19,7 @@
   (use yogomacs.dests.sources-dir)
   (use yogomacs.dests.dists-dir)
   (use yogomacs.dests.packages-dir)
+  #; (use yogomacs.dests.root-plugins-dir)
   (use yogomacs.dests.debug)
   ;;
   (use yogomacs.reply)
@@ -31,21 +33,21 @@
 					   (build-path "/"
 						       (dname-of fs-dentry))))))
 
-(define (dentries config)
-  (append 
-   (glob-dentries (config 'real-sources-dir)
-		  root-globs)
-   (list 
-    (make <text-dentry>
-      :parent "/"
-      :dname "README"
-      :text "Use the Source, Luke.")
-    )))
+(define (README-entry parent-path)
+  (make <text-dentry>
+    :parent (compose-path parent-path)
+    :dname "README"
+    :text "Use the Source, Luke."))
 
 (define (dest path params config)
   (let1 shtml (dired
 	       (compose-path path)
-	       (dentries config)
+	       (append 
+		(glob-dentries (config 'real-sources-dir)
+			       root-globs)
+		(list 
+		 (README-entry path)
+		 ))
 	       css-route)
     (prepare-dired-faces config)
     (make <shtml-data>
@@ -56,15 +58,14 @@
 
 (define (README-dest path params config)
   (text-dest path params config
-	     ;;
-	     (dentries config) 
-	     (car (reverse path))))
+	     (README-entry (drop-right path 1))))
 
 (define routing-table
    `((#/^\/$/ ,dest)
      (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
      (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
+     #;(#/^\/plugins(?:\/.+)?$/   ,root-plugins-dir-dest)
      (#/^\/README$/  ,README-dest)
      (#/^.*$/ ,print-path)
      ))

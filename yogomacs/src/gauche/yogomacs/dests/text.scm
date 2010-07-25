@@ -13,12 +13,11 @@
 
 (select-module yogomacs.dests.text)
 
-(define (text-dest path params config dentries dname)
-  (let* ((dentry (dentry-for dentries dname))
-	 (shtml (text (compose-path path) 
-		      config
-		      (text-of dentry)
-		      (time-second (mtime-of dentry)))))
+(define (text-dest path params config dentry)
+  (let1 shtml (text (compose-path path) 
+		    config
+		    (text-of dentry)
+		    (time-second (mtime-of dentry)))
     ;; TODO :     (prepare-file-faces config)
     (make <shtml-data>
       :params params

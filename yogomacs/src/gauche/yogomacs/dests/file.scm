@@ -66,7 +66,7 @@
 	      (cache real-src-file syntax "shtml" #t config)
 	      (values shtml last-modified-time))))))
 
-(define (make-narrow-down param)s
+(define (make-narrow-down params)
   (or (and-let* ((range-string (cgi-get-parameter "range" params :default #f))
 		 (range (guard (e (else #f
 					)) 

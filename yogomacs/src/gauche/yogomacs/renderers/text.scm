@@ -14,7 +14,7 @@
     (link (|@| 
 	   (rel "stylesheet") 
 	   (type "text/css")
-	   (href ,#`"file:///tmp/,|face|-,|title|.css") (title ,title)))
+	   (href ,#`"file:///tmp/,|face|--,|title|.css") (title ,title)))
     "\n"))
 
 (define (lines0 src-path config lines mtime)
