@@ -45,13 +45,22 @@
 		   margin: 0;
 		   padding-bottom: 0.2em;
                    foreground: #000000; background: #bfbfbf;
-                   overflow: auto
+                   overflow: auto;
                   }
-        .minibuffer {
-                      position: fixed; left: 0; width: 100%; 
+        .prompt {
+	              position: fixed; left: 0; // width: 100%; 
                       bottom: 0; height: 1em;
 		      border: 0;
-		      overflow: auto
+		      margin: 0;
+		      padding-bottom: 0.2em;
+		      overflow: auto;
+	}
+        .minibuffer {
+                      position: fixed; right: 0; //width: 100%; 
+                      bottom: 0; height: 1em;
+		      border: 0;
+		      padding-top: 0;
+		      overflow: auto;
                     }
         .buffer {
 	              position: fixed; left: 0; width: 100%; 
@@ -113,6 +122,6 @@
 </pre>
 </div>
 <div><pre class="modeline"><span>/srv/sources/sources/k/kernel/2.6.9-89.0.15.EL/pre-build/kernel-2.6.9/linux-2.6.9/net/ipv4/netfilter/ip_conntrack_proto_generic.c</span></pre></div>
-<div><form><input type="text" class="minibuffer"/></form><pre></div>
+<div><pre><span class="prompt">biwascheme&gt; </span><form><input type="text" class="minibuffer"/></form><pre></div>
   </body>
 </html>
