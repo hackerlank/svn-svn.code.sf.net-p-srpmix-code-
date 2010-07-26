@@ -36,6 +36,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc
 
 %{_bindir}/syntax
+%{_bindir}/html->shtml
 %{_datadir}/gauche/site/lib/syntax/syntax.scm
 %{_datadir}/gauche/site/lib/syntax/htmlprag.scm
 %{_datadir}/syntax/3html.vim
