@@ -67,10 +67,10 @@
 	      (values shtml last-modified-time))))))
 
 (define (make-narrow-down params)
-  (or (and-let* ((range-string (cgi-get-parameter "range" params :default #f))
-		 (range (guard (e (else #f
-					)) 
-			  (parse-range range-string))))
+  (or (and-let* ((range-string (cgi-get-parameter "range" params 
+						  :default #f))
+		 (range (guard (e (else #f)) 
+			       (parse-range range-string))))
 	(cute rearrange-range <> (car range) (cdr range)))
       (lambda (shtml) shtml)))
 
@@ -80,9 +80,7 @@
 	  (real-src-dir (build-path (config 'real-sources-dir) head))
 	  (real-src-file (build-path real-src-dir last))
 	  (file-type (file-type real-src-file))
-	  (narrow-down (make-narrow-down params))
-	  
-	  )
+	  (narrow-down (make-narrow-down params)))
       (if (equal? (car file-type) "text")
 	  (guard (e (else (receive (asis last-modified-time)
 			     (asis real-src-file config)
