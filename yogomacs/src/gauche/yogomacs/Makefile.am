@@ -8,20 +8,21 @@ SUBDIRS += renderers
 moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \
 	\
-	access.scm   \
-	batch.scm    \
-	cache.scm    \
-	compress.scm \
-	config.scm   \
-	dentry.scm   \
-	error.scm    \
-	face.scm     \
-	flserver.scm \
-	main.scm     \
-	path.scm     \
-	reply.scm    \
-	route.scm    \
-	sanitize.scm \
+	access.scm				\
+	batch.scm				\
+	cache.scm				\
+	compress.scm				\
+	config.scm				\
+	dentry.scm				\
+	error.scm				\
+	face.scm				\
+	flserver.scm				\
+	main.scm				\
+	path.scm				\
+	reply.scm				\
+	route.scm				\
+	sanitize.scm				\
+	scheme2js.scm				\
         \
 	$(NULL)
 

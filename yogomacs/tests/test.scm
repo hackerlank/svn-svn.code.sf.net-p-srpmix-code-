@@ -22,7 +22,7 @@
  yogomacs.rearranges.css-href
  yogomacs.rearranges.face-integrates
  yogomacs.rearranges.css-integrates
- yogomacs.rearranges.ysh-fragment
+ yogomacs.rearranges.yogomacs-fragment
  yogomacs.dests.root-dir
  yogomacs.dests.root-plugins-dir
  yogomacs.dests.srpmix-dir
@@ -55,6 +55,7 @@
  yogomacs.renderers.cache
  yogomacs.renderers.dired
  yogomacs.renderers.syntax
+ yogomacs.renderers.yogomacs
  yogomacs.reply
  yogomacs.batch
  yogomacs.access

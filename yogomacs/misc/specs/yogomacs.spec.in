@@ -15,7 +15,7 @@ Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs gauche-devel font-lock
-Requires: emacs emacs-common gauche font-lock httpd xz syntax file
+Requires: emacs emacs-common gauche font-lock httpd xz syntax file scheme2js
 
 %description
 sources web frontend
@@ -85,6 +85,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/reply.scm
 %{_datadir}/gauche/site/lib/yogomacs/route.scm
 %{_datadir}/gauche/site/lib/yogomacs/sanitize.scm
+%{_datadir}/gauche/site/lib/yogomacs/scheme2js.scm
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/caches
 %{_datadir}/gauche/site/lib/yogomacs/caches/*.scm

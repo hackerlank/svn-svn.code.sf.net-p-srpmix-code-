@@ -8,5 +8,6 @@ dist_module_DATA =   \
 	fundamental.scm				\
 	syntax.scm                              \
 	text.scm                                \
+	yogomacs.scm				\
         \
 	$(NULL)

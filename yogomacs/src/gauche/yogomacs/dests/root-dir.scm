@@ -67,7 +67,7 @@
   (text-dest path params config
 	     (README-entry (drop-right path 1))))
 
-(define routing-table
+(define (routing-table path)
    `((#/^\/$/ ,dest)
      (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
@@ -80,7 +80,7 @@
 
 
 (define (root-dir-dest path params config)
-   (route routing-table (compose-path path) params config))
+   (route (routing-table path) (compose-path path) params config))
 
 
 
