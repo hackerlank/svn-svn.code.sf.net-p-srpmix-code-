@@ -8,7 +8,7 @@
 
 (define (id . args) args)
 
-(define linum-regex #/^L:([0-9]+)$/)
+(define linum-regex #/L:([0-9]+)/)
 (define (linum-of line)
   (and-let* (( (not (null? line)) )
 	     (attrs (car line))
