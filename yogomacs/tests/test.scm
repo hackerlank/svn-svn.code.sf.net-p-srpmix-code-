@@ -22,10 +22,12 @@
  yogomacs.rearranges.css-href
  yogomacs.rearranges.face-integrates
  yogomacs.rearranges.css-integrates
+ yogomacs.rearranges.ysh-fragment
  yogomacs.dests.root-dir
  yogomacs.dests.root-plugins-dir
  yogomacs.dests.srpmix-dir
  yogomacs.dests.css
+ yogomacs.dests.js
  yogomacs.dests.sources-dir
  yogomacs.dests.dists-dir
  yogomacs.dests.packages-dir
@@ -62,6 +64,7 @@
  yogomacs.config
 ;; yogomacs.caches.check
  yogomacs.caches.css
+ yogomacs.caches.js
  yogomacs.caches.shtml
  yogomacs.flserver
 )

@@ -113,6 +113,11 @@ fi
 
 %attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/shtml
 
+%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/js
+%{_localstatedir}/lib/yogomacs/js/*.js
+
+
+
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*
 

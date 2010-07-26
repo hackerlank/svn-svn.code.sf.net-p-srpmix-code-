@@ -6,7 +6,8 @@
   (use www.cgi)
   (use sxml.serializer)
   (use text.tree)
-  (use srfi-19))
+  (use srfi-19)
+  (use yogomacs.rearranges.ysh-fragment))
 
 (select-module yogomacs.reply)
 
@@ -21,7 +22,7 @@
 (define-class <data> ()
   ((data :init-keyword :data)
    (params :init-keyword :params)
-   (conf :init-keyword :conf)
+   (config :init-keyword :config)
    (last-modification-time :init-keyword :last-modification-time 
 			   :init-value #f)
    (mime-type :init-keyword :mime-type)))
@@ -42,10 +43,9 @@
   (display (ref asis 'data)))
 
 (define-class <shtml-data> (<data>)
-  ;; TODO: xml?
   ((mime-type :init-value "text/html")))
 
-(define-method  reply ((shtml <shtml-data>))
+(define-method  reply-xhtml ((shtml <shtml-data>))
   (write-tree
    (list
     (apply cgi-header :content-type (ref shtml 'mime-type)
@@ -59,5 +59,16 @@
 	#;(with-output-to-file "/tmp/result"
 	(pa$ write result))
 	result)))))
+
+(define-method  reply ((shtml <shtml-data>))
+  (if (cgi-get-parameter "ysh" (ref shtml 'params)  :default #f)
+      (let1 new (make <shtml-data>
+		  :data (ysh-fragment (ref shtml 'data))
+		  :params (ref shtml 'params)
+		  :config (ref shtml 'config)
+		  :last-modification-time (ref shtml 'last-modification-time)
+		  :mime-type "text/xml")
+	(reply-xhtml new))
+      (reply-xhtml shtml)))
 
 (provide "yogomacs/reply")

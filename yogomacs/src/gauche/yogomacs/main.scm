@@ -9,6 +9,7 @@
   ;;
   (use yogomacs.dests.root-dir)
   (use yogomacs.dests.css)
+  (use yogomacs.dests.js)
   (use yogomacs.dests.debug)
   ;;
   )
@@ -17,7 +18,8 @@
 (define routing-table
   `((#/^\/$/ ,root-dir-dest)
     ;;
-    (#/^\/web\/css\/[^\/]+.css/ ,css-dest)
+    (#/^\/web\/css\/[^\/]+\.css/ ,css-dest)
+    (#/^\/web\/js\/[^\/]+\.js/ ,js-dest)
     ;;
     (#/^\/debug\/metavariables$/ ,print-metavariables)
     (#/^\/debug\/config$/ ,print-config)

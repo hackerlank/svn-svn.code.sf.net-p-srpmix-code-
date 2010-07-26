@@ -2,10 +2,12 @@
   (export ysh-dir-dest)
   (use yogomacs.reply)
   (use yogomacs.dests.file)
+  (use yogomacs.dests.dir)
+  (use yogomacs.dests.js)
   )
 (select-module yogomacs.dests.ysh-dir)
 
-(define template '(*TOP* (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n" 
+(define template `(*TOP* (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n" 
 			 (*DECL* DOCTYPE 
 				 html
 				 PUBLIC
@@ -24,8 +26,11 @@
 				(link (|@| (rel "stylesheet") (type "text/css") (href "file:///tmp/ysh--Default.css") (title "Default")))
 				"\n" "    "
 				(link (|@| (rel "stylesheet") (type "text/css") (href "file:///tmp/ysh--Invert.css") (title "Invert")))
-				"\n" "  ") 
-			       "\n" "  "
+				"\n" "    "
+				(script (|@| (type "text/javascript") (src ,(js-route$ "prototype.js"))) " ")
+				"\n" "    "
+				) 
+			       "\n" "    "
 			       (body 
 				"\n" "    "
 				(div (pre (|@| (class "header-line"))))
@@ -43,7 +48,9 @@
 				(form (|@| (class "minibuffer-shell")) (input (|@| (type "text") (id "minibuffer") (class "minibuffer"))))
 				"\n"
 				(pre (|@| (class "minibuffer-prompt-shell")) (span (|@| (id "prompt") (class "minibuffer-prompt")) " <ysh"))
-				"\n" "  ") "\n")
+				"\n" "  ") 
+			       "\n" "  "
+			       "\n")
 			 "\n"))
 
 (define (ysh-dir-dest path params config)
@@ -51,7 +58,11 @@
     (make <shtml-data>
       :params params
       :config config
-      :data ((compose fix-css-href integrate-file-face) shtml)
-      :last-modification-time #f) 
-    ))
+      ;; title
+      ;; lazy-loading
+      :data ((compose fix-css-href
+		      integrate-file-face
+		      integrate-dired-face) shtml)
+      :last-modification-time #f)))
+
 (provide "yogomacs/dests/ysh-dir")

@@ -4,5 +4,6 @@ dist_module_DATA =   \
 	css-href.scm        \
 	css-integrates.scm  \
 	face-integrates.scm \
+        ysh-fragment.scm    \
         \
 	$(NULL)

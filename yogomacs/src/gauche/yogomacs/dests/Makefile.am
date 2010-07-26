@@ -7,6 +7,7 @@ dist_module_DATA =   \
 	dists-dir.scm				\
 	file.scm				\
 	fs.scm					\
+	js.scm					\
 	packages-dir.scm			\
 	pkg-dir.scm				\
 	print-alist.scm				\

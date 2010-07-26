@@ -2,6 +2,7 @@ moduledir=@GAUCHE_MODULEDIR@/yogomacs/caches
 dist_module_DATA =   \
 	\
 	css.scm    \
+	js.scm     \
 	shtml.scm  \
         \
 	$(NULL)
@@ -18,6 +19,11 @@ dist_csscache_DATA= \
 	\
 	$(NULL)
 
+jscachedir=$(localstatedir)/lib/yogomacs/js
+dist_jscache_DATA = \
+	prototype.js \
+	\
+	$(NULL)
 
 shtmlcachedir=$(localstatedir)/cache/yogomacs/shtml
 dist_shtmlcache_DATA=
