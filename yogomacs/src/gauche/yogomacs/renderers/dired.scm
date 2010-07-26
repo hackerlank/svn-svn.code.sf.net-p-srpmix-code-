@@ -198,13 +198,11 @@
 	 (max-column (+ (floor->exact (log (max max-size 1) 10))
 			1)))
     (dired0 dir (sort dentires
-		      ; TODO version<?
 		      (lambda (a b)
 			 (let ((a-name (dname-of a))
 			       (b-name (dname-of b)))
-			    (if (or (#/^\^.*/ a-name) (#/^\^.*/ b-name))
-				(string<? a-name b-name)
-				(version<? a-name b-name)))))
+			    (guard (e (else (string<? a-name b-name)))
+				(string<? a-name b-name)))))
 	    (+ (floor->exact (log (length dentires) 10)) 1)
 	    max-column
 	    (or css-prefix css-prefix-default))
