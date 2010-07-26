@@ -1,6 +1,7 @@
 (define-module yogomacs.dests.root-plugins-dir
   (export root-plugins-dir-dest)
   (use yogomacs.dentry)
+  (use www.cgi)
   ;(use yogomacs.dentries.virtual)
   (use yogomacs.dentries.redirect)
   (use yogomacs.dests.css)
@@ -12,6 +13,7 @@
   )
 (select-module yogomacs.dests.root-plugins-dir)
 
+(define ysh-url "/ysh")
 (define (ysh-entry parent-path)
   (make <redirect-dentry>
     :parent (compose-path parent-path) :dname "ysh" :url "/ysh"))
@@ -39,7 +41,9 @@
       :last-modification-time #f)))
 
 (define (ysh-dest path params config)
-  )
+  (list
+   (cgi-header :status "302 Moved Temporarily"
+	       :location ysh-url)))
 
 (define routing-table
   `((#/^\/plugins$/ ,dest)

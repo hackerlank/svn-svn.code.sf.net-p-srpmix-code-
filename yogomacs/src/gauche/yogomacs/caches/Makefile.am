@@ -13,6 +13,8 @@ dist_csscache_DATA= \
 	file-font-lock--Invert.css   \
 	dired-font-lock--Default.css \
 	dired-font-lock--Invert.css  \
+	ysh--Default.css \
+	ysh--Invert.css  \
 	\
 	$(NULL)
 

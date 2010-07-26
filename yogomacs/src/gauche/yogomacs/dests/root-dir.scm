@@ -21,6 +21,7 @@
   (use yogomacs.dests.dists-dir)
   (use yogomacs.dests.packages-dir)
   (use yogomacs.dests.root-plugins-dir)
+  (use yogomacs.dests.ysh-dir)
   (use yogomacs.dests.debug)
   ;;
   (use yogomacs.reply)
@@ -72,6 +73,7 @@
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
      (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
      (#/^\/plugins(?:\/.+)?$/   ,root-plugins-dir-dest)
+     (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
      (#/^\/README$/  ,README-dest)
      (#/^.*$/ ,print-path)
      ))

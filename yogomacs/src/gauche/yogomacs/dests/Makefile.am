@@ -15,5 +15,6 @@ dist_module_DATA =   \
 	sources-dir.scm				\
 	srpmix-dir.scm                          \
 	text.scm                                \
+	ysh-dir.scm				\
         \
 	$(NULL)
