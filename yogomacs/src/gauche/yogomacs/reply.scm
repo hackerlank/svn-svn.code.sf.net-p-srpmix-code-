@@ -7,6 +7,7 @@
   (use sxml.serializer)
   (use text.tree)
   (use srfi-19)
+  (use font-lock.rearrange.range)
   (use yogomacs.rearranges.ysh-fragment))
 
 (select-module yogomacs.reply)
@@ -60,15 +61,32 @@
 	(pa$ write result))
 	result)))))
 
+;; TODO: THIS SHOULD NOT BE HERE.
+(define (make-narrow-down params)
+  (or (and-let* ((range-string (cgi-get-parameter "range" params 
+						  :default #f))
+		 (range (guard (e (else #f)) 
+			       (parse-range range-string))))
+	(cute rearrange-range <> (car range) (cdr range)))
+      (lambda (shtml) shtml)))
+
 (define-method  reply ((shtml <shtml-data>))
-  (if (cgi-get-parameter "ysh" (ref shtml 'params)  :default #f)
-      (let1 new (make <shtml-data>
-		  :data (ysh-fragment (ref shtml 'data))
-		  :params (ref shtml 'params)
-		  :config (ref shtml 'config)
-		  :last-modification-time (ref shtml 'last-modification-time)
-		  :mime-type "text/xml")
-	(reply-xhtml new))
-      (reply-xhtml shtml)))
+  (let1 narrow-down (make-narrow-down (ref shtml 'params))
+    (if (cgi-get-parameter "ysh" (ref shtml 'params)  :default #f)
+	(let1 new (make <shtml-data>
+		    :data ((compose ysh-fragment narrow-down) (ref shtml 'data))
+		    :params (ref shtml 'params)
+		    :config (ref shtml 'config)
+		    :last-modification-time (ref shtml 'last-modification-time)
+		    :mime-type "text/xml")
+	  (reply-xhtml new))
+	(let1 new (make <shtml-data>
+		    :data ((compose narrow-down) (ref shtml 'data))
+		    :params (ref shtml 'params)
+		    :config (ref shtml 'config)
+		    :last-modification-time (ref shtml 'last-modification-time)
+		    :mime-type (ref shtml 'mime-type))
+	  (reply-xhtml new)))))
+
 
 (provide "yogomacs/reply")
