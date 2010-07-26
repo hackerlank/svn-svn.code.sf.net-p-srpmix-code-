@@ -36,8 +36,8 @@
 		
 (define-method  reply ((asis <asis-data>))
   (write-tree (apply cgi-header :content-type (ref asis 'mime-type)
-		     (if (ref shtml 'last-modification-time)
-			 (list :last-modified  (rfc822 (ref shtml 'last-modification-time)))
+		     (if (ref asis 'last-modification-time)
+			 (list :last-modified  (rfc822 (ref asis 'last-modification-time)))
 			 (list))))
   (display (ref asis 'data)))
 

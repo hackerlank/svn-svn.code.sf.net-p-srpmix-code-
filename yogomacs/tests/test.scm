@@ -36,6 +36,7 @@
  yogomacs.dests.print-alist
  yogomacs.dests.file
  yogomacs.dests.text
+ yogomacs.dests.ysh-dir
  yogomacs.error
  yogomacs.dentry
  yogomacs.compress

@@ -75,29 +75,37 @@
       (lambda (shtml) shtml)))
 
 (define (file-dest path params config)
-  (let* ((last (last path))
-	 (head (path->head path))
-	 (real-src-dir (build-path (config 'real-sources-dir) head))
-	 (real-src-file (build-path real-src-dir last))
-	 (file-type (file-type real-src-file))
-	 (narrow-down (make-narrow-down params))
-	 
-	 )
-    (if (equal? (car file-type) "text")
-	(receive (shtml last-modified-time) 
-	    (retrieve-shtml real-src-file config)
-	  (make <shtml-data>
-	    :params params
-	    :config config
-	    :data ((compose fix-css-href integrate-file-face narrow-down) shtml)
-	    :last-modification-time last-modified-time))
-	(receive (asis last-modified-time)
-	    (asis real-src-file config)
-	  (make <asis-data> 
-	    :params params
-	    :config config
-	    :data asis
-	    :last-modification-time last-modified-time
-	    :mime-type (apply format "~a/~a" file-type))))))
+   (let* ((last (last path))
+	  (head (path->head path))
+	  (real-src-dir (build-path (config 'real-sources-dir) head))
+	  (real-src-file (build-path real-src-dir last))
+	  (file-type (file-type real-src-file))
+	  (narrow-down (make-narrow-down params))
+	  
+	  )
+      (if (equal? (car file-type) "text")
+	  (guard (e (else (receive (asis last-modified-time)
+			     (asis real-src-file config)
+			     (make <asis-data> 
+				   :params params
+				   :config config
+				   :data asis
+				   :last-modification-time last-modified-time
+				   :mime-type (apply format "~a/~a" file-type)))))
+		 (receive (shtml last-modified-time) 
+		    (retrieve-shtml real-src-file config)
+		    (make <shtml-data>
+			  :params params
+			  :config config
+			  :data ((compose fix-css-href integrate-file-face narrow-down) shtml)
+			  :last-modification-time last-modified-time)))
+	  (receive (asis last-modified-time)
+	     (asis real-src-file config)
+	     (make <asis-data> 
+		   :params params
+		   :config config
+		   :data asis
+		   :last-modification-time last-modified-time
+		   :mime-type (apply format "~a/~a" file-type))))))
 
 (provide "yogomacs/dests/file")
