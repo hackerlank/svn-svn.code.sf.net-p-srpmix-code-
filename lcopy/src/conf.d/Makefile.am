@@ -2,6 +2,7 @@ confddir = $(sysconfdir)/lcopy/conf.d
 dist_confd_DATA = \
 	\
 	ConsoleKit,trunk.lcopy \
+	Kahua,trunk.lcopy \
 	anaconda,trunk.lcopy \
 	autoconf,trunk.lcopy \
 	automake,trunk.lcopy \
@@ -70,6 +71,7 @@ dist_confd_DATA = \
 	wfo,trunk.lcopy \
 	wireshark,trunk.lcopy \
 	with-log,trunk.lcopy \
+	xorg-x11-server,trunk.lcopy \
 	xtrace,trunk.lcopy \
 	ymacs,trunk.lcopy \
 	zsh,trunk.lcopy \
