@@ -76,7 +76,7 @@
 		   "\n" "    "
 		   (div (pre (|@| (class "header-line") (id "header-line"))))
 		   "\n"
-		   (pre (|@| (class "buffer") (id "buffer")) ,#`"Loading ...,|url|\n")
+		   (pre (|@| (class "buffer") (id "buffer")) ,#`"Loading...,|url|\n")
 		   "\n"
 		   (pre (|@| (class "modeline") (id "modeline"))  ,@url-list)
 		   "\n"
