@@ -76,17 +76,28 @@
 		  "\n" "    "
 		  (body 
 		   "\n" "    "
-		   (div (pre (|@| (class "header-line") (id "header-line"))))
+		   (pre (|@| (class "header-line") (id "header-line")))
+		   (pre (|@| (class "header-line-control") (id "header-line-control")) "|-")
+		   "\n"
 		   "\n"
 		   (pre (|@| (class "buffer") (id "buffer")) ,#`"Loading...,|url|\n")
 		   "\n"
+		   ;;
+		   ;;
+		   ;;
 		   (pre (|@| (class "modeline") (id "modeline"))  ,@url-list)
+		   (pre (|@| (class "modeline-control") (id "modeline-control"))  "|-")
 		   "\n"
+		   ;;
+		   ;;
+		   ;;
 		   (form (|@| (class "minibuffer-shell")) (input (|@| (type "text") (id "minibuffer") (class "minibuffer"))))
-		   "\n"
 		   (pre (|@| (class "minibuffer-prompt-shell")) (span (|@| (id "minibuffer-prompt") (class "minibuffer-prompt")) 
 								      ,(ref shell 'prompt)))
 		   "\n" "  "
+		   ;;
+		   ;;
+		   ;;
 		   (script (|@| (type "text/javascript") (src ,(js-route$ "prototype.js"))) " ")
 		   "\n" "  "
 		   (script (|@| (type "text/javascript") )
