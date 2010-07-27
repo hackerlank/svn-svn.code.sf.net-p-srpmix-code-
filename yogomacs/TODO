@@ -4,7 +4,7 @@
 * Use onload
 * recursive ysh
 * narrow-down code
-* css inclusion
+* css inclusion and auto rebuild facility
 * Dired markers
 
 * Just viewable
@@ -57,7 +57,7 @@
 * Mobile
 * External data stitching
 * Public server
-
+* Working set
 
 
 - http://nanasi.jp/articles/vim/2html_vim.html
