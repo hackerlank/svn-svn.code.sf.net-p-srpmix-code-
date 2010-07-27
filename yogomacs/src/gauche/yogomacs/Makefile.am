@@ -4,6 +4,7 @@ SUBDIRS += dentries
 SUBDIRS += dests
 SUBDIRS += rearranges
 SUBDIRS += renderers
+SUBDIRS += shells
 
 moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \
@@ -23,6 +24,7 @@ dist_module_DATA =   \
 	route.scm				\
 	sanitize.scm				\
 	scheme2js.scm				\
+	shell.scm				\
         \
 	$(NULL)
 

@@ -1,11 +1,13 @@
 -*- outline -*-
-* ysh renderer
-* ysh -> yogomacs
+* ysh renderer <done>
+* ysh -> yogomacs <done>
 * Use onload
-* recursive ysh
+* recursive ysh <done>
 * narrow-down code
 * css inclusion and auto rebuild facility
 * Dired markers
+* shrink button
+* shell selection
 
 * Just viewable
 ** For batch converting

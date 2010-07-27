@@ -6,6 +6,7 @@
   (use yogomacs.path)
   (use yogomacs.dests.js)
   (use yogomacs.scheme2js)
+  (use yogomacs.shell)
   )
 
 (select-module yogomacs.renderers.yogomacs)
@@ -39,8 +40,9 @@
 
 
 
-(define (yogomacs path params shell-name initial-prompt)
-  (let* ((title (compose-path path))
+(define (yogomacs path params shell)
+  (let* ((shell-name (ref shell 'name))
+	 (title (compose-path path))
 	 (url title)
 	 (yogomacs-params #`"yogomacs=,|shell-name|")
 	 (yogomacs-params (or (and-let* ((range (cgi-get-parameter "range" params
@@ -83,7 +85,7 @@
 		   (form (|@| (class "minibuffer-shell")) (input (|@| (type "text") (id "minibuffer") (class "minibuffer"))))
 		   "\n"
 		   (pre (|@| (class "minibuffer-prompt-shell")) (span (|@| (id "minibuffer-prompt") (class "minibuffer-prompt")) 
-								      ,initial-prompt))
+								      ,(ref shell 'prompt)))
 		   "\n" "  "
 		   (script (|@| (type "text/javascript") (src ,(js-route$ "prototype.js"))) " ")
 		   "\n" "  "

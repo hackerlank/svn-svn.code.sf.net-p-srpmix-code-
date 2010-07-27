@@ -86,6 +86,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/route.scm
 %{_datadir}/gauche/site/lib/yogomacs/sanitize.scm
 %{_datadir}/gauche/site/lib/yogomacs/scheme2js.scm
+%{_datadir}/gauche/site/lib/yogomacs/shell.scm
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/caches
 %{_datadir}/gauche/site/lib/yogomacs/caches/*.scm
@@ -102,6 +103,9 @@ fi
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/renderers
 %{_datadir}/gauche/site/lib/yogomacs/renderers/*.scm
+
+%dir %{_datadir}/gauche/site/lib/yogomacs/shells
+%{_datadir}/gauche/site/lib/yogomacs/shells/*.scm
 
 
 %dir %{_localstatedir}/lib/yogomacs

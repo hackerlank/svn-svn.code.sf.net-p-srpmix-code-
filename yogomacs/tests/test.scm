@@ -68,6 +68,7 @@
  yogomacs.caches.js
  yogomacs.caches.shtml
  yogomacs.flserver
+ yogomacs.shell
 )
 
 

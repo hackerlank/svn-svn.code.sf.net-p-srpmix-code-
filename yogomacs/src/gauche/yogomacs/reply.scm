@@ -8,7 +8,8 @@
   (use text.tree)
   (use srfi-19)
   (use font-lock.rearrange.range)
-  (use yogomacs.rearranges.yogomacs-fragment))
+  (use yogomacs.rearranges.yogomacs-fragment)
+  (use yogomacs.shell))
 
 (select-module yogomacs.reply)
 
@@ -72,7 +73,7 @@
 
 (define-method  reply ((shtml <shtml-data>))
   (let* ((narrow-down (make-narrow-down (ref shtml 'params)))
-	 (shell-name (cgi-get-parameter "yogomacs" (ref shtml 'params)  :default #f)))
+	 (shell-name (in-shell? (ref shtml 'params))))
     (if shell-name
 	(let1 new (make <shtml-data>
 		    :data ((compose (cute yogomacs-fragment <> shell-name) narrow-down) (ref shtml 'data))
