@@ -68,13 +68,12 @@
 .minibuffer-prompt-shell {
     position: fixed; right: 0; 
     bottom: 0; height: 1em;
-    padding-bottom: 0.2em;
 }
 
-/* About copyright see nil */
 .minibuffer-prompt {
         /* minibuffer-prompt */
         color: #00ffff;
+	background-color: #000000;
 }
 
 .minibuffer-shell {

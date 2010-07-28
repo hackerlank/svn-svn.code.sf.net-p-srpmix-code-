@@ -74,7 +74,7 @@
 		  "\n" "    "
 		  (body 
 		   "\n" "    "
-		   (pre (|@| (class "header-line") (id "header-line")))
+		   (pre (|@| (class "header-line") (id "header-line")) " ")
 		   (pre (|@| (class "header-line-control") (id "header-line-control")) "|-")
 		   "\n"
 		   "\n"
@@ -90,8 +90,16 @@
 		   ;;
 		   ;;
 		   (form (|@| (class "minibuffer-shell")) (input (|@| (type "text") (id "minibuffer") (class "minibuffer"))))
-		   (pre (|@| (class "minibuffer-prompt-shell")) (span (|@| (id "minibuffer-prompt") (class "minibuffer-prompt")) 
+		   #;(pre (|@| (class "minibuffer-prompt-shell")) (span (|@| (id "minibuffer-prompt") (class "minibuffer-prompt")) 
 								      ,(ref shell 'prompt)))
+		   (form (|@| (class "minibuffer-prompt-shell")) (select (|@| 
+									  (type "select") 
+									  (id "minibuffer-prompt")
+									  (size "1")
+									  (id "minibuffer-prompt")
+									  (class "minibuffer-prompt"))
+									 (option (|@| (selected "selected"))
+										 ,(ref shell 'prompt))))
 		   "\n" "  "
 		   ;;
 		   ;;
