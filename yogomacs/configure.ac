@@ -97,6 +97,29 @@ args_for_configure_in_spec="${args_for_configure_in_spec} --with-config-name=$co
 AC_SUBST([ARGS_FOR_CONFIGURE_IN_SPEC], [$args_for_configure_in_spec])
 AC_SUBST([SPEC_CONFIG], [$config_name])
 
+
+AC_CHECK_PROG(SCHEME2JS,scheme2js,scheme2js,no)
+if test "$SCHEME2JS" = no; then
+   AC_MSG_ERROR([Cannot find scheme2js compiler])
+fi
+AC_SUBST([SCHEME2JS])
+
+scheme2js_runtime_dir="/usr/share/scheme2js"
+AC_ARG_WITH([scheme2js_runtime_dir],
+	    AS_HELP_STRING([--with-scheme2js-runtime-dir=DIR],
+	                   [Directory where scheme2js runtime files are.]),
+            scheme2js_runtime_dir=$with_scheme2js_runtime_dir)
+
+for f in runtime.js \
+         runtime_callcc.js \
+         runtime_interface.js \
+	 runtime_interface_callcc.js; do
+    AC_CHECK_FILE($scheme2js_runtime_dir/$f,, AC_MSG_ERROR([Cannot find $f scheme2js runtime file]))
+done
+
+AC_SUBST([SCHEME2JS_RUNTIME_DIR], [$scheme2js_runtime_dir])
+
+
 AC_CONFIG_COMMANDS([chmod],[
 chmod 0755 src/cmds/*
 chmod 0755 tests/test.scm

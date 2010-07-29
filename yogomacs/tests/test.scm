@@ -69,6 +69,7 @@
  yogomacs.caches.shtml
  yogomacs.flserver
  yogomacs.shell
+ yogomacs.window
 )
 
 

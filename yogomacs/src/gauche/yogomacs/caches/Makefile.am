@@ -21,9 +21,24 @@ dist_csscache_DATA= \
 
 jscachedir=$(localstatedir)/lib/yogomacs/js
 dist_jscache_DATA = \
-	prototype.js \
+	prototype.js        \
+	yogomacs_builtin.js \
 	\
 	$(NULL)
+install-exec-hook:
+	mkdir -p $(DESTDIR)$(jscachedir)
+	for x in runtime.js runtime_callcc.js runtime_interface.js runtime_interface_callcc.js; do \
+		$(LN_S) @SCHEME2JS_RUNTIME_DIR@/$$x $(DESTDIR)$(jscachedir)/scheme2js_$$x; \
+        done
+EXTRA_DIST = yogomacs-builtin.scm yogomacs-macs.scm
+yogomacs_builtin.scm: yogomacs-macs.scm yogomacs-builtin.scm
+	cat $^ > $@ 
+yogomacs_builtin.js: yogomacs_builtin.scm
+	@SCHEME2JS@ -o $@ $<
+	rm $<
+
+macrodir=$(pkgdatadir)/scheme2js
+dist_macro_DATA = yogomacs-macs.scm
 
 shtmlcachedir=$(localstatedir)/cache/yogomacs/shtml
 dist_shtmlcache_DATA=

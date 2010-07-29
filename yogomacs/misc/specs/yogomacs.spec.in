@@ -87,6 +87,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/sanitize.scm
 %{_datadir}/gauche/site/lib/yogomacs/scheme2js.scm
 %{_datadir}/gauche/site/lib/yogomacs/shell.scm
+%{_datadir}/gauche/site/lib/yogomacs/window.scm
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/caches
 %{_datadir}/gauche/site/lib/yogomacs/caches/*.scm
@@ -121,7 +122,8 @@ fi
 %attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/js
 %{_localstatedir}/lib/yogomacs/js/*.js
 
-
+%dir %{_datadir}/yogomacs/scheme2js
+%{_datadir}/yogomacs/scheme2js/yogomacs-macs.scm
 
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*

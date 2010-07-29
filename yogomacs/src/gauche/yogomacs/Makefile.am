@@ -25,6 +25,7 @@ dist_module_DATA =   \
 	sanitize.scm				\
 	scheme2js.scm				\
 	shell.scm				\
+	window.scm				\
         \
 	$(NULL)
 
