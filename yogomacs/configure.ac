@@ -97,7 +97,6 @@ args_for_configure_in_spec="${args_for_configure_in_spec} --with-config-name=$co
 AC_SUBST([ARGS_FOR_CONFIGURE_IN_SPEC], [$args_for_configure_in_spec])
 AC_SUBST([SPEC_CONFIG], [$config_name])
 
-
 AC_CONFIG_COMMANDS([chmod],[
 chmod 0755 src/cmds/*
 chmod 0755 tests/test.scm

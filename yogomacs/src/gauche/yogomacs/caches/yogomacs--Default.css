@@ -1,4 +1,4 @@
-/* modeline, header-line, minibuffer-prompt and minibuffer faces are taken from GNU Emacs.
+/* -*- css -*- modeline, header-line, minibuffer-prompt and minibuffer faces are taken from GNU Emacs.
 
 ;; Copyright (C) 1985, 1986, 1987, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
 ;;   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
@@ -86,3 +86,6 @@
     background-color: #ffffff;
     width: 100%; 
 }
+
+@include(dired-font-lock,Default)
+@include(file-font-lock,Default)

@@ -19,9 +19,12 @@
    (let1 last (last path)
 	 (let1 real (readable? (css-cache-dir config) last)
 	       (if real
-		   (list (cgi-header :content-type "text/css")
-			 (call-with-input-file real
-			    port->string))
+		   (let1 css (call-with-input-css-file real port->string config)
+			 (if css
+			     (list (cgi-header :content-type "text/css")
+				   css)
+			     (cgi-header :status "404 Not Found")
+			     ))
 		   (cgi-header :status "404 Not Found")
 		   ))))
 

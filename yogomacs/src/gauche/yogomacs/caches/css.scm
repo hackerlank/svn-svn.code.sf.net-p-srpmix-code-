@@ -1,6 +1,7 @@
 (define-module yogomacs.caches.css
   (export css-cache-dir
-	  prepare-css-cache)
+	  prepare-css-cache
+	  call-with-input-css-file)
   (use file.util)
   ;;
   (use yogomacs.flserver)
@@ -40,5 +41,32 @@
   (cache-kernel (pa$ css-cache-avaiable? face style config)
 		(pa$ css-cache-prepare! face style requires config)
 		#f))
+
+(define (css-file->face&style css-file)
+  (let1 m (#/^(.*)--(.*)\.css$/ (sys-basename css-file))
+    (values (m 1) (m 2))))
+    
+(define (call-with-input-file-with-inclusion path handler expand-path)
+  (if (file-is-readable? path)
+      (handler
+       (open-input-string
+	(apply string-append (map (lambda (line)
+				    (string-append
+				     (rxmatch-cond
+				       ((#/@include\( *([^(),]+) *, *([^(),]+) *\)/ line)
+					(#f face style)
+					(or 
+					 (call-with-input-file-with-inclusion (expand-path face style)
+									      port->string
+									      expand-path)
+					 ""))
+				       (else
+					line)) "\n"))
+				  (call-with-input-file path port->string-list)))))
+      #f))
+
+(define (call-with-input-css-file path handler config)
+  (call-with-input-file-with-inclusion path handler
+				       (pa$ css-cache-storage config)))
 
 (provide "yogomacs/caches/css")
