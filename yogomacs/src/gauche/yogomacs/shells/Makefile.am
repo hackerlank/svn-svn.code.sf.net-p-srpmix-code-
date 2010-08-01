@@ -1,6 +1,7 @@
 moduledir=@GAUCHE_MODULEDIR@/yogomacs/shells
 dist_module_DATA =   \
 	\
-	ysh.scm
+	bscm.scm \
+	ysh.scm  \
         \
 	$(NULL)

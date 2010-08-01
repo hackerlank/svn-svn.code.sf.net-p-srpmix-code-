@@ -22,6 +22,7 @@
   (use yogomacs.dests.packages-dir)
   (use yogomacs.dests.root-plugins-dir)
   (use yogomacs.dests.ysh-dir)
+  (use yogomacs.dests.bscm-dir)
   (use yogomacs.dests.debug)
   ;;
   (use yogomacs.reply)
@@ -74,6 +75,7 @@
      (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
      (#/^\/plugins(?:\/.+)?$/   ,root-plugins-dir-dest)
      (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
+     (#/^\/bscm(?:\/.+)?$/   ,bscm-dir-dest)
      (#/^\/README$/  ,README-dest)
      (#/^.*$/ ,print-path)
      ))

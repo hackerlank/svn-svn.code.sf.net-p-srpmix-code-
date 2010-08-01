@@ -32,15 +32,10 @@
 	padding-bottom: 0.2em;
 
 }
-.modeline-control {
-        /* modeline */
-        color: #000000;
-        background-color: #bfbfbf;
-	position: fixed; right: 0;
-        bottom: 1.2em; height: 1em; 
-	padding-bottom: 0.2em;
-
+.modeline-control:hover {
+    background-color: #556b2f;
 }
+
 /* About copyright see nil */
 .header-line {
         /* header-line */
@@ -50,6 +45,10 @@
 	top: 0; height: 1em;
 	padding-bottom: 0.2em;
 }
+.header-line-control {
+    background-color: #556b2f;
+}
+
 .header-line-control {
         /* header-line */
         color: #e5e5e5;

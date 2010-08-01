@@ -19,7 +19,21 @@
 (define ysh-name "ysh")
 (define (ysh-entry parent-path)
   (make <redirect-dentry>
-    :parent (compose-path parent-path) :dname ysh-name :url ysh-url))
+    :parent "/plugins" :dname ysh-name :url ysh-url))
+(define (ysh-dest path params config)
+  (list
+   (cgi-header :status "302 Moved Temporarily"
+	       :location ysh-url)))
+
+(define bscm-url  "/bscm")
+(define bscm-name "bscm")
+(define (bscm-entry parent-path)
+  (make <redirect-dentry>
+    :parent "/plugins" :dname bscm-name :url bscm-url))
+(define (bscm-dest path params config)
+  (list
+   (cgi-header :status "302 Moved Temporarily"
+	       :location bscm-url)))
 
 
 (define (dest path params config)
@@ -36,8 +50,11 @@
 		    :dname ".." 
 		    :url (compose-path* path ".."))
 		  (cond
-		   ((equal? yogomacs ysh-name) (list))
-		   (else (list  (ysh-entry path)))))
+		   ((equal? yogomacs ysh-name) (list (bscm-entry path)))
+		   ((equal? yogomacs bscm-name) (list (ysh-entry path)))
+		   (else (list  
+			  (bscm-entry path)
+			  (ysh-entry path)))))
 		 css-route)))
     (prepare-dired-faces config)
     (make <shtml-data>
@@ -46,14 +63,10 @@
       :data ((compose integrate-dired-face) shtml)
       :last-modification-time #f)))
 
-(define (ysh-dest path params config)
-  (list
-   (cgi-header :status "302 Moved Temporarily"
-	       :location ysh-url)))
-
 (define routing-table
   `((#/^\/plugins$/ ,dest)
     (#/^\/plugins/ysh$/ ,ysh-dest)
+    (#/^\/plugins/bscm$/ ,bscm-dest)
     #;(#/^\/plugins/login$/ ,dest)
     ))
 

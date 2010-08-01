@@ -3,7 +3,8 @@
 	  <shell>
 	  define-shell
 	  define-shell0
-	  shell-ref)
+	  shell-ref
+	  all-shells)
   (use www.cgi)
   (use util.list))
 
@@ -20,12 +21,14 @@
 (define-macro (define-shell name object)
   `(define-shell0 (quote ,name) ,object))
 
-(define-values (define-shell0 shell-ref)
+(define-values (define-shell0 shell-ref all-shells)
   (let1 shells (list)
     (values
      (lambda (name shell-object)
        (set! shells (cons `(,name . ,shell-object) shells)))
      (lambda (name)
-       (assq-ref shells name #f)))))
+       (assq-ref shells name #f))
+     (lambda ()
+       (map cdr shells)))))
 
 (provide "yogomacs/shell")

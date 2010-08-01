@@ -9,11 +9,9 @@
 
 (select-module yogomacs.renderers.yogomacs)
 
-;`(js-field-set! *js* "load_lazy" 
-;		   (lambda () (load-lazy ,url ,params)))
-(define (make-updater url params)
-  (list
-   `(add-hook find-file-pre-hook (pa$ load-lazy ,url ,params))))
+(define (extra-scripts url params)
+  `((add-hook find-file-pre-hook (pa$ load-lazy ,url ,params))
+    (add-hook toggle-full-screen-hook toggle-full-screen)))
 
 (define (yogomacs path params shell)
   (yogomacs0 path params shell
@@ -31,11 +29,11 @@
   (let* ((shell-name (ref shell 'name))
 	 (title (compose-path path))
 	 (url title)
-	 (yogomacs-params (or (and-let* ((range (cgi-get-parameter "range" params
+	 (next-params (or (and-let* ((range (cgi-get-parameter "range" params
 								   :default #f)))
 				(format "range=~a&~a"  (html-escape-string range) params))
 			      #`"yogomacs=,|shell-name|"))
-	 (js-list (reverse (cons `(,(make-updater url yogomacs-params) . inline)
+	 (js-list (reverse (cons `(,(extra-scripts url next-params) . inline)
 				 (reverse
 				  js-list))))
 	 (prompt (ref shell 'prompt))

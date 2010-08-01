@@ -3,6 +3,9 @@
   (use yogomacs.dests.js)		;wrong?
   (use yogomacs.dests.css)		;wrong?
   (use yogomacs.scheme2js)
+  (use yogomacs.shell)
+  (use yogomacs.shells.ysh)
+  (use yogomacs.shells.bscm)
   (use util.list)
   (use srfi-1))
 (select-module yogomacs.window)
@@ -57,6 +60,15 @@
 			      ,(sys-basename elt)))
 			splited-list)))))
 
+(define (expand-shell-list shell prompt)
+  (map 
+   (lambda (s)
+     (if (and (equal? shell (ref s 'name))
+	      (equal? prompt (ref s 'prompt)))
+	 `(option (|@| (selected "selected")) ,prompt)
+	 `(option ,(ref s 'prompt))))
+   (all-shells)))
+
 (define (window title url css-list js-list shell prompt)
   `(*TOP* (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n" 
 	  (*DECL* DOCTYPE 
@@ -79,24 +91,40 @@
 		(body (|@| (onload "run_find_file_pre_hook();"))
 		      "\n" "    "
 		      (pre (|@| (class "header-line") (id "header-line")) " ")
-		      (pre (|@| (class "header-line-control") (id "header-line-control")) "|-") "\n"
+		      (pre (|@| 
+			    (class "header-line-control")
+			    (id "header-line-control")
+			    (onclick "run_toggle_full_screen_hook();")
+			    ) ">") "\n"
 		      ;;
 		      (pre (|@| (class "buffer") (id "buffer")) ,#`"Loading...,|url|\n") "\n"
 		      ;;
 		      (pre (|@| (class "modeline") (id "modeline"))  ,@(make-url-list url shell))
-		      (pre (|@| (class "modeline-control") (id "modeline-control"))  "|-")
+		      (pre (|@| 
+			    (class "modeline-control") 
+			    (id "modeline-control")
+			    (onclick "run_toggle_full_screen_hook();")) 
+			   ">")
 		      "\n"
 		      ;;
-		      (form (|@| (class "minibuffer-shell")) (input (|@| (type "text") (id "minibuffer") (class "minibuffer"))))
+		      (form (|@| 
+			     (id "minibuffer-shell")
+			     (class "minibuffer-shell")) 
+			    (input (|@|
+				    (type "text") 
+				    (id "minibuffer")
+				    (class "minibuffer"))))
 		      #;(pre (|@| (class "minibuffer-prompt-shell")) (span (|@| (id "minibuffer-prompt") (class "minibuffer-prompt")) 
 		      ,(ref shell 'prompt)))
-		      (form (|@| (class "minibuffer-prompt-shell")) (select (|@| 
-									     (type "select") 
-									     (id "minibuffer-prompt")
-									     (size "1")
-									     (class "minibuffer-prompt"))
-									    (option (|@| (selected "selected"))
-										    ,prompt)))
+		      (form (|@| 
+			     (id "minibuffer-prompt-shell")
+			     (class "minibuffer-prompt-shell")) 
+			    (select (|@| 
+				     (type "select") 
+				     (id "minibuffer-prompt")
+				     (size "1")
+				     (class "minibuffer-prompt"))
+				    ,@(expand-shell-list shell prompt)))
 		      "\n" "    "
 		      ) 
 		"\n" "  "
