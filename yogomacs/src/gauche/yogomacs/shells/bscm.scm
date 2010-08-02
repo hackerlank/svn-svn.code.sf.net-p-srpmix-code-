@@ -3,6 +3,9 @@
   )
 (select-module yogomacs.shells.bscm)
 
-(define-shell bscm (make <shell> :name "bscm" :prompt " <bscm"))
+(define-shell bscm (make <shell> 
+		     :name "bscm"
+		     :prompt " <bscm"
+		     :interpreter 'bscm-interpret))
 
 (provide "yogomacs/shells/bscm")

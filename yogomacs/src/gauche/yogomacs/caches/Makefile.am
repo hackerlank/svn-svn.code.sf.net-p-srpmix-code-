@@ -21,6 +21,7 @@ dist_csscache_DATA= \
 
 jscachedir=$(localstatedir)/lib/yogomacs/js
 dist_jscache_DATA = \
+	biwascheme.js       \
 	prototype.js        \
 	yogomacs_builtin.js \
 	\

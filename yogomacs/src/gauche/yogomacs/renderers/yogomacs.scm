@@ -9,9 +9,11 @@
 
 (select-module yogomacs.renderers.yogomacs)
 
-(define (extra-scripts url params)
+(define (extra-scripts url params shell)
   `((add-hook find-file-pre-hook (pa$ load-lazy ,url ,params))
-    (add-hook toggle-full-screen-hook toggle-full-screen)))
+    (add-hook toggle-full-screen-hook toggle-full-screen)
+    (add-hook read-from-minibuffer-hook ,(ref shell 'interpreter))
+    ))
 
 (define (yogomacs path params shell)
   (yogomacs0 path params shell
@@ -22,6 +24,7 @@
 	       ("scheme2js_runtime_callcc.js" . file)
 	       ("scheme2js_runtime_interface.js" . file)
 	       ("scheme2js_runtime_interface_callcc.js" . file)
+	       ("biwascheme.js" . defer)
 	       ("yogomacs_builtin.js" . file)
 	       )))
 
@@ -34,7 +37,7 @@
 								   :default #f)))
 			    (format "range=~a&~a"  (html-escape-string range) next-params))
 			  next-params))
-	 (js-list (reverse (cons `(,(extra-scripts url next-params) . inline)
+	 (js-list (reverse (cons `(,(extra-scripts url next-params shell) . inline)
 				 (reverse
 				  js-list))))
 	 (prompt (ref shell 'prompt))

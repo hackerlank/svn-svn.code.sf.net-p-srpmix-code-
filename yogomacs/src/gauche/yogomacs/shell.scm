@@ -16,7 +16,9 @@
 
 (define-class <shell> ()
   ((name :init-keyword :name)
-   (prompt :init-keyword :prompt)))
+   (prompt :init-keyword :prompt)
+   (interpreter :init-keyword :interpreter)
+   ))
 
 (define-macro (define-shell name object)
   `(define-shell0 (quote ,name) ,object))

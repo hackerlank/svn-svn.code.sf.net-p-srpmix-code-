@@ -6,13 +6,13 @@
 
 (define ($ elt)
   ((js-field *js* "$") elt))
-(define (-> elt)
+(define (<- elt)
   ((js-field *js* "$F") elt))
-(define (<- elt val)
+(define (-> val elt)
   (let1 field ($ elt)
     (field.setValue val)))
 
-
+;; TODO (sxml->xhtml), (html-escape)
 ;;
 ;; JS <-> Scheme interface
 ;;
@@ -73,7 +73,8 @@
   (set! full-screen #t)
   (for-each (lambda (id)
 	      (let1 elt ($ id)
-		(elt.update "<<<")))
+		;; (elt.update (sxml->html (a (|@| (href "#")) "<<<")))
+		(elt.update "<a href=\"#\">&lt;&lt;&lt;</a>")))
 	    '("header-line-control"))
   (for-each (lambda (id)
 	      (let1 elt ($ id)
@@ -89,7 +90,7 @@
   (set! full-screen #f)
   (for-each (lambda (id)
 	      (let1 elt ($ id)
-		(elt.update ">>>")))
+		(elt.update "<a href=\"#\">&gt;&gt;&gt;</a>")))
 	    '("header-line-control"))
   (for-each (lambda (id)
 	      (let1 elt ($ id)
@@ -101,22 +102,34 @@
 				   (position . "fixed")
 				   (z-index . "0"))))))
 
+(define (common-interpret eval output-prefix)
+  (let1 str (<- "minibuffer")
+    (let1 result (with-error-handler 
+		   (lambda (e) (with-output-to-string (write e)))
+		   (pa$ eval str))
+      (-> (string-append output-prefix result) "minibuffer")))
+  (let1 elt ($ "minibuffer")
+    (elt.focus)
+    (elt.select)))
+
+(define bscm #f)
 (define (bscm-eval str)
-  (let1 sexp (with-input-from-string str read)
-    (let1 result (cond
-		  ((eof-object? sexp) "")
-		  ((null? sexp) '())
-		  ((pair? sexp) (with-output-to-string (write (pa$ apply (car sexp) (cdr sexp)))))
-		  (else (with-output-to-string (lambda () (write sexp)))))
-      result)))
+  (unless bscm
+    (set! bscm (js-new BiwaScheme.Interpreter)))
+  (let1 result #f
+    (bscm.evaluate str
+		   (lambda (r) 
+		     (set! result (BiwaScheme.to_write r))))
+    result))
 
 (define (bscm-interpret)
-  (let1 str (-> "minibuffer")
-    (let1 result (bscm-eval str)
-	;; (alert result)
-	(<- "minibuffer" (string-append ";; " result)))))
+  (common-interpret bscm-eval ";; "))
 
-(add-hook read-from-minibuffer-hook bscm-interpret)
+(define (ysh-eval str)
+  str)
+(define (ysh-interpret)
+  (common-interpret ysh-eval "# "))
+
 ;; TODO
 ;; - highlight
 ;; - shell switching

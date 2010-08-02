@@ -26,23 +26,44 @@
 
 ;; js-list:  ((js-file . file)  (js-exps . inlin)...)
 (define (expand-js-list js-list)
-   (fold-right (lambda (js result)
-		  (cons*
-		   (if (eq? (cdr js) 'file)
-		       `(script (|@|
-				  (type "text/javascript") 
-				  (src ,(js-route$ (car js)))) " ")
-		       `(script (|@| (type "text/javascript") )
-				(*COMMENT*
-				 ,(string-append "\n"
-						 (scm->js (car js))
-						 "// "
-						 ))))
-		   "\n"
-		   "    "
-		   result))
-	       (list)
-	       js-list))
+  (fold-right (lambda (js result)
+		(cons*
+		 (case (cdr js)
+		   ('file
+		    `(script (|@|
+			      (type "text/javascript") 
+			      (src ,(js-route$ (car js)))) " "))
+		   ('defer
+		     `(*COMMENT* ,(js-route$ (car js)))
+		     )
+		   (else
+		    `(script (|@| (type "text/javascript") )
+			     (*COMMENT*
+			      ,(string-append "\n"
+					      (scm->js (car js))
+					      "// "
+					      )))))
+		 "\n"
+		 "    "
+		 result))
+	      (list)
+	      js-list))
+
+
+(define (expand-deferred-js-list js-list)
+  (fold-right (lambda (js result)
+		(if (eq? (cdr js) 'defer)
+		    (cons*
+		     `(script  (|@|
+				(type "text/javascript") 
+				(defer "defer")
+				(src ,(js-route$ (car js)))) " ")
+		     "\n"
+		     "    "
+		     result)
+		    result))
+	      (list)
+	      js-list))
 
 
 (define (make-url-list url shell)
@@ -92,10 +113,10 @@
 		      "\n" "    "
 		      (pre (|@| (class "header-line") (id "header-line")) " ")
 		      (pre (|@| 
-			    (class "header-line-control")
-			    (id "header-line-control")
-			    (onclick "run_toggle_full_screen_hook();")
-			    ) ">>>") "\n"
+			       (class "header-line-control")
+			       (id "header-line-control")
+			       (onclick "run_toggle_full_screen_hook();")
+			       ) (a (|@| (href "#"))  ">>>")) "\n"
 		      ;;
 		      (pre (|@| (class "buffer") (id "buffer")) ,#`"Loading...,|url|\n") "\n"
 		      ;;
@@ -137,6 +158,7 @@
 				     )
 				    ,@(expand-shell-list shell prompt)))
 		      "\n" "    "
+		      ,@(expand-deferred-js-list js-list)
 		      ) 
 		"\n" "  "
 		"\n")
