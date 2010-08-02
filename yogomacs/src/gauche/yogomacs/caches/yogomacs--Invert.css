@@ -32,8 +32,19 @@
 	padding-bottom: 0.2em;
 
 }
+
 .modeline-control:hover {
+    /* highlight */
     background-color: #556b2f;
+}
+.modeline-control {
+        /* modeline */
+        color: #000000;
+        background-color: #bfbfbf;
+	position: fixed; right: 0;
+        bottom: 1.2em; height: 1em; 
+	padding-bottom: 0.2em;
+	cursor: pointer;
 }
 
 /* About copyright see nil */
@@ -45,10 +56,10 @@
 	top: 0; height: 1em;
 	padding-bottom: 0.2em;
 }
-.header-line-control {
+
+.header-line-control:hover {
     background-color: #556b2f;
 }
-
 .header-line-control {
         /* header-line */
         color: #e5e5e5;
@@ -56,6 +67,7 @@
 	position: fixed; right: 0;
 	top: 0; height: 1em;
 	padding-bottom: 0.2em;
+	cursor: pointer;
 }
 
 .buffer {

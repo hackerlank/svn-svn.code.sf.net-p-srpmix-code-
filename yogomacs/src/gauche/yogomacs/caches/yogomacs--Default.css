@@ -32,6 +32,11 @@
 	padding-bottom: 0.2em;
 
 }
+
+.modeline-control:hover {
+        /* highlight */
+        background-color: #b4eeb4;    
+}
 .modeline-control {
         /* modeline */
         color: #000000;
@@ -39,11 +44,7 @@
 	position: fixed; right: 0;
         bottom: 1.2em; height: 1em; 
 	padding-bottom: 0.2em;
-
-}
-.modeline-control:hover {
-        /* highlight */
-        background-color: #b4eeb4;    
+	cursor: pointer;
 }
 
 /* About copyright see nil */
@@ -55,6 +56,11 @@
 	top: 0; height: 1em;
 	padding-bottom: 0.2em;
 }
+
+.header-line-control:hover {
+        /* highlight */
+        background-color: #b4eeb4;    
+}
 .header-line-control {
         /* header-line */
         color: #333333;
@@ -62,10 +68,7 @@
 	position: fixed; right: 0;
 	top: 0; height: 1em;
 	padding-bottom: 0.2em;
-}
-.header-line-control:hover {
-        /* highlight */
-        background-color: #b4eeb4;    
+	cursor: pointer;
 }
 
 .buffer {
@@ -81,6 +84,8 @@
 
 .minibuffer-prompt {
         /* minibuffer-prompt */
+    position: fixed; right: 0; 
+    bottom: 0; height: 1em;
         color: #0000cd;
 	background-color: #ffffff;
 }

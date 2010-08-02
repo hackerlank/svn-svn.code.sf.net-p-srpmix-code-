@@ -60,14 +60,14 @@
 			      ,(sys-basename elt)))
 			splited-list)))))
 
-(define (expand-shell-list shell prompt)
-  (map 
-   (lambda (s)
-     (if (and (equal? shell (ref s 'name))
-	      (equal? prompt (ref s 'prompt)))
-	 `(option (|@| (selected "selected")) ,prompt)
-	 `(option ,(ref s 'prompt))))
-   (all-shells)))
+;; (define (expand-shell-list shell prompt)
+;;   (map 
+;;    (lambda (s)
+;;      (if (and (equal? shell (ref s 'name))
+;; 	      (equal? prompt (ref s 'prompt)))
+;; 	 `(option (|@| (selected "selected")) ,prompt)
+;; 	 `(option ,(ref s 'prompt))))
+;;    (all-shells)))
 
 (define (window title url css-list js-list shell prompt)
   `(*TOP* (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n" 
@@ -109,21 +109,31 @@
 		      ;;
 		      (form (|@| 
 			     (id "minibuffer-shell")
-			     (class "minibuffer-shell")) 
+			     (class "minibuffer-shell")
+			     (onsubmit "return false;") )
 			    (input (|@|
 				    (type "text") 
 				    (id "minibuffer")
-				    (class "minibuffer"))))
-		      #;(pre (|@| (class "minibuffer-prompt-shell")) (span (|@| (id "minibuffer-prompt") (class "minibuffer-prompt")) 
-		      ,(ref shell 'prompt)))
-		      (form (|@| 
+				    (class "minibuffer")
+				    (onchange "run_read_from_minibuffer_hook();")
+				    )))
+		      (pre (|@| 
+			    (id "minibuffer-prompt-shell")
+			    (class "minibuffer-prompt-shell"))
+			   (span (|@| 
+				  (id "minibuffer-prompt")
+				  (class "minibuffer-prompt")) 
+				 ,prompt))
+		      #;(form (|@| 
 			     (id "minibuffer-prompt-shell")
 			     (class "minibuffer-prompt-shell")) 
 			    (select (|@| 
 				     (type "select") 
 				     (id "minibuffer-prompt")
 				     (size "1")
-				     (class "minibuffer-prompt"))
+				     (class "minibuffer-prompt")
+				     
+				     )
 				    ,@(expand-shell-list shell prompt)))
 		      "\n" "    "
 		      ) 
