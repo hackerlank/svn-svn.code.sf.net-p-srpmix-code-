@@ -58,6 +58,7 @@
 }
 
 .header-line-control:hover {
+        /* highlight */
     background-color: #556b2f;
 }
 .header-line-control {
@@ -79,6 +80,7 @@
 .minibuffer-prompt-shell {
     position: fixed; right: 0; 
     bottom: 0; height: 1em;
+    padding-bottom: 0.2em;
 }
 
 .minibuffer-prompt {
