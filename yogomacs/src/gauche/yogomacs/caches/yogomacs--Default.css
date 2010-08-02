@@ -80,14 +80,13 @@
 .minibuffer-prompt-shell {
     position: fixed; right: 0; 
     bottom: 0; height: 1em;
+    padding-bottom: 0.2em;
 }
 
 .minibuffer-prompt {
-        /* minibuffer-prompt */
-    position: fixed; right: 0; 
-    bottom: 0; height: 1em;
-        color: #0000cd;
-	background-color: #ffffff;
+    /* minibuffer-prompt */
+    color: #0000cd;
+    background-color: #ffffff;
 }
 
 .minibuffer-shell {

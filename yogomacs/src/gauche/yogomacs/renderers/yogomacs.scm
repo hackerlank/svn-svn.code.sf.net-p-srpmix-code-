@@ -29,10 +29,11 @@
   (let* ((shell-name (ref shell 'name))
 	 (title (compose-path path))
 	 (url title)
+	 (next-params #`"yogomacs=,|shell-name|")
 	 (next-params (or (and-let* ((range (cgi-get-parameter "range" params
 								   :default #f)))
-				(format "range=~a&~a"  (html-escape-string range) params))
-			      #`"yogomacs=,|shell-name|"))
+			    (format "range=~a&~a"  (html-escape-string range) next-params))
+			  next-params))
 	 (js-list (reverse (cons `(,(extra-scripts url next-params) . inline)
 				 (reverse
 				  js-list))))

@@ -95,7 +95,7 @@
 			    (class "header-line-control")
 			    (id "header-line-control")
 			    (onclick "run_toggle_full_screen_hook();")
-			    ) ">") "\n"
+			    ) ">>>") "\n"
 		      ;;
 		      (pre (|@| (class "buffer") (id "buffer")) ,#`"Loading...,|url|\n") "\n"
 		      ;;
@@ -103,8 +103,9 @@
 		      (pre (|@| 
 			    (class "modeline-control") 
 			    (id "modeline-control")
-			    (onclick "run_toggle_full_screen_hook();")) 
-			   ">")
+			    ) 
+			   "[" (a (|@| (href ,#`"file:///srv/sources,|url|")) "file")  "]"
+			   )
 		      "\n"
 		      ;;
 		      (form (|@| 

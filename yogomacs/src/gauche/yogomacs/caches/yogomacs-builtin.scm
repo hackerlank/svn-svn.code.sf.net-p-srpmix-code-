@@ -73,9 +73,8 @@
   (set! full-screen #t)
   (for-each (lambda (id)
 	      (let1 elt ($ id)
-		(elt.update "<")))
-	    '("header-line-control"
-	      "modeline-control"))
+		(elt.update "<<<")))
+	    '("header-line-control"))
   (for-each (lambda (id)
 	      (let1 elt ($ id)
 		(elt.hide)))
@@ -90,9 +89,8 @@
   (set! full-screen #f)
   (for-each (lambda (id)
 	      (let1 elt ($ id)
-		(elt.update ">")))
-	    '("header-line-control"
-	      "modeline-control"))
+		(elt.update ">>>")))
+	    '("header-line-control"))
   (for-each (lambda (id)
 	      (let1 elt ($ id)
 		(elt.show)))
