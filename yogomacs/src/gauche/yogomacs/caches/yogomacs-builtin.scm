@@ -105,17 +105,34 @@
 (define (common-interpret eval output-prefix)
   (let1 str (<- "minibuffer")
     (let1 result (with-error-handler 
-		   (lambda (e) (with-output-to-string (write e)))
+		   (lambda (e) (with-output-to-string (pa$ write e)))
 		   (pa$ eval str))
       (-> (string-append output-prefix result) "minibuffer")))
   (let1 elt ($ "minibuffer")
     (elt.focus)
     (elt.select)))
 
+(define (scm->scm bscm exp)
+  (let1 str (with-output-to-string (pa$ write exp))
+    (bscm.evaluate str)))
+
 (define bscm #f)
+(define (new-bscm)
+  (let1 bscm (js-new BiwaScheme.Interpreter)
+    (scm->scm bscm
+	      '(define (cd entry) 
+		 (let* ((location (js-eval "location"))
+			(pathname (js-ref location "pathname")))
+		   (js-set! location "pathname" (string-append pathname "/" entry)))))
+    (scm->scm bscm
+	      '(define less cd))
+    (scm->scm bscm
+	      '(define lv cd))
+    bscm))
+
 (define (bscm-eval str)
   (unless bscm
-    (set! bscm (js-new BiwaScheme.Interpreter)))
+    (set! bscm (new-bscm)))
   (let1 result #f
     (bscm.evaluate str
 		   (lambda (r) 
