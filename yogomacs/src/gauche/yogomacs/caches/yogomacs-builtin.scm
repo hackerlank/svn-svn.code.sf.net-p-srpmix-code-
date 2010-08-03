@@ -3,6 +3,21 @@
 ;;
 (define (pa$ proc . args)
   (lambda rest (apply proc (append args rest))))
+(define (fold proc initial lst)
+  (if (null? lst)
+      initial
+      (let1 result (proc (car lst) initial)
+	(fold proc result (cdr lst)))))
+(define (tree->string tree)
+  (cond
+   ((pair? tree)
+    (string-append (tree->string (car tree))
+		   (tree->string (cdr tree))))
+   ((string? tree)
+    tree)
+   (else
+    (error "wrong type given to tree->string"))))
+
 
 (define ($ elt)
   ((js-field *js* "$") elt))
