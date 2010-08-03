@@ -123,7 +123,11 @@
 	      '(define (cd entry) 
 		 (let* ((location (js-eval "location"))
 			(pathname (js-ref location "pathname")))
-		   (js-set! location "pathname" (string-append pathname "/" entry)))))
+		   (if (and (< 0 (string-length entry))
+			    (eq? (string-ref entry 0) #\/))
+		       (js-set! location "pathname" (string-append "/bscm" entry))
+		       (js-set! location "pathname" (string-append pathname "/" entry))
+		       ))))
     (scm->scm bscm
 	      '(define less cd))
     (scm->scm bscm
