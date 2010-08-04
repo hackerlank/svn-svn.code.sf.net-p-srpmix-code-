@@ -14,7 +14,7 @@ URL: http://srpmix.org
 Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
-BuildRequires: emacs gauche-devel font-lock
+BuildRequires: emacs emacs-el gauche-devel font-lock 
 Requires: emacs emacs-common gauche font-lock httpd xz syntax file scheme2js
 
 %description
