@@ -21,7 +21,8 @@
 (define (prepare-startup-file startup-file)
   ;; TODO: error?
   (call-with-output-file startup-file
-    (pa$ display "metacity\n")))
+    (pa$ display "metacity\n"))
+  (sys-chmod startup-file #o744))
 
 (define-method launch ((xvnc-harness <xvnc-harness>)
 		       cmdline
