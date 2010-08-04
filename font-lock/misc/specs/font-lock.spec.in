@@ -14,7 +14,7 @@ URL: http://srpmix.org
 Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
-BuildRequires: emacs gauche-devel
+BuildRequires: emacs emacs-el gauche-devel
 Requires: emacs gauche screen util-linux-ng tigervnc-server metacity
 
 %description
