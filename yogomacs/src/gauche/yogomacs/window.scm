@@ -125,7 +125,7 @@
 			    (class "modeline-control") 
 			    (id "modeline-control")
 			    ) 
-			   "[" (a (|@| (href ,#`"file:///srv/sources,|url|")) "file")  "]"
+			   (a (|@| (href ,#`"file:///srv/sources,|url|")) "@")
 			   )
 		      "\n"
 		      ;;
