@@ -137,8 +137,8 @@
   (set! full-screen #t)
   (for-each (lambda (id)
 	      (let1 elt ($ id)
-		(elt.update (sxml->xhtml '(a (|@| (href "#")) "<<<")))))
-	    '("header-line-control"))
+		(elt.update (sxml->xhtml "<"))))
+	    '("toggle-full-screen"))
   (for-each (lambda (id)
 	      (let1 elt ($ id)
 		(elt.hide)))
@@ -153,8 +153,8 @@
   (set! full-screen #f)
   (for-each (lambda (id)
 	      (let1 elt ($ id)
-		(elt.update (sxml->xhtml '(a (|@| (href "#")) ">>>")))))
-	    '("header-line-control"))
+		(elt.update (sxml->xhtml ">"))))
+	    '("toggle-full-screen"))
   (for-each (lambda (id)
 	      (let1 elt ($ id)
 		(elt.show)))
@@ -165,7 +165,7 @@
 				   (position . "fixed")
 				   (z-index . "0"))))))
 
-(define (common-interpret eval output-prefix)
+(define (repl eval output-prefix)
   (let1 str (<- "minibuffer")
     (let1 result (with-error-handler 
 		   (lambda (e) (with-output-to-string (pa$ write e)))
@@ -178,7 +178,7 @@
 (define bscm #f)
 (define bscm-dir "/bscm")
 (define ysh #f)
-(define ysh-dir "/ysh"))
+(define ysh-dir "/ysh")
 
 (define (new-bscm shell-dir)
   (let1 bscm (js-new BiwaScheme.Interpreter)
@@ -247,7 +247,7 @@
     result))
 
 (define (bscm-interpret)
-  (common-interpret bscm-eval ";; "))
+  (repl bscm-eval ";; "))
 
 (define (ysh-eval str)
   (unless ysh
@@ -267,7 +267,16 @@
       result)))
 
 (define (ysh-interpret)
-  (common-interpret ysh-eval "# "))
+  (repl ysh-eval "# "))
+
+(define (highlight id)
+  (let1 elt ($ id)
+    (elt.addClassName "highlight")))
+(export "highlight" highlight)
+(define (unhighlight id)
+  (let1 elt ($ id)
+    (elt.removeClassName "highlight")))
+(export "unhighlight" unhighlight)
 
 ;; TODO
 ;; - highlight

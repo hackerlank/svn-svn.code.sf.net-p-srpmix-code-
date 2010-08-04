@@ -115,8 +115,21 @@
 		      (pre (|@| 
 			       (class "header-line-control")
 			       (id "header-line-control")
-			       (onclick "run_toggle_full_screen_hook();")
-			       ) (a (|@| (href "#"))  ">>>")) "\n"
+			       ) 
+			   ,(let ((id "move-parent-directory")
+				  (parent ".."))
+				`(a (|@| 
+				     (href ,parent)
+				     (id ,id))
+				    "^"))
+			   "|"
+			   ,(let1 id "toggle-full-screen"
+			      `(span (|@| 
+				      (id ,id)
+				      (onmouseover ,#`"highlight(\",|id|\");")
+				      (onmouseout ,#`"unhighlight(\",|id|\");")
+				      (onclick "run_toggle_full_screen_hook();")) ">"))
+			   ) "\n"
 		      ;;
 		      (pre (|@| (class "buffer") (id "buffer")) ,#`"Loading...,|url|\n") "\n"
 		      ;;
