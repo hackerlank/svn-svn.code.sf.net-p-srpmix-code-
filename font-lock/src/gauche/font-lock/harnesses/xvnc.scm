@@ -48,6 +48,7 @@
 	(let ((proc (run-process `("vncserver"
 				   ,(format ":~d" display))
 				 :wait #t
+				 :output (if verbose #f "/dev/null")
 				 :error (if verbose #f "/dev/null")))
 	      (daemonize-harness (choose-harness "daemonize"))
 	      )
