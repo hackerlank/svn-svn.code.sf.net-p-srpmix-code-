@@ -10,6 +10,8 @@
 	(fold proc result (cdr lst)))))
 (define (tree->string tree)
   (cond
+   ((null? tree)
+    "")
    ((pair? tree)
     (string-append (tree->string (car tree))
 		   (tree->string (cdr tree))))
@@ -27,7 +29,43 @@
   (let1 field ($ elt)
     (field.setValue val)))
 
-;; TODO (sxml->xhtml), (html-escape)
+(define (html-escape-string str)
+  (str.escapeHTML))
+
+(define (sxml->xhtml0 sxml)
+  (cond
+   ((string? sxml) (html-escape-string sxml))
+   ((eq? '|@| (car sxml)) (map
+			   (lambda (elt)
+			      (let ((prop (car elt))
+				    (val  (cadr elt)))
+				 (list " " (symbol->string prop)
+				       "=" (with-output-to-string 
+					     (pa$ write 
+						  (html-escape-string val))))
+				 ))
+			   (cdr sxml)))
+   (else 
+    (let* ((tag (symbol->string (car sxml)))
+	   (attrs (if (and (pair? (cdr sxml))
+			   (pair? (cadr sxml))
+			   (eq? (car (cadr sxml)) '|@|))
+		     (cadr sxml)
+		     #f))
+	   (body (if attrs
+		     (cddr sxml)
+		     (cdr sxml))))
+      (if (null? body)
+	  (list "<" tag (if attrs (sxml->xhtml0 attrs) "") "/>")
+	  (list "<" tag (if attrs (sxml->xhtml0 attrs) "") ">"
+		(map sxml->xhtml0 body)
+		"</" tag ">"))))))
+
+(define (sxml->xhtml sxml)
+  (tree->string (sxml->xhtml0 sxml)))
+
+
+
 ;;
 ;; JS <-> Scheme interface
 ;;
@@ -51,6 +89,13 @@
     o))
 
 ;;
+;; Scheme2js -> Biwascheme
+;;
+(define (scm->scm bscm exp)
+  (let1 str (with-output-to-string (pa$ write exp))
+    (bscm.evaluate str)))
+
+;;
 ;; Yogomacs level
 ;;
 (define-hook find-file-pre-hook)
@@ -58,6 +103,10 @@
 (define-hook read-from-minibuffer-hook)
 
 
+(add-hook find-file-pre-hook (lambda ()  
+			       (let1 elt ($ "minibuffer") 
+				 (elt.focus)
+				 (elt.select))))
 (define (load-lazy url params)
       (let ((options (js-new Object)))
 	(set! options.method "get")
@@ -88,8 +137,7 @@
   (set! full-screen #t)
   (for-each (lambda (id)
 	      (let1 elt ($ id)
-		;; (elt.update (sxml->html (a (|@| (href "#")) "<<<")))
-		(elt.update "<a href=\"#\">&lt;&lt;&lt;</a>")))
+		(elt.update (sxml->xhtml '(a (|@| (href "#")) "<<<")))))
 	    '("header-line-control"))
   (for-each (lambda (id)
 	      (let1 elt ($ id)
@@ -105,7 +153,7 @@
   (set! full-screen #f)
   (for-each (lambda (id)
 	      (let1 elt ($ id)
-		(elt.update "<a href=\"#\">&gt;&gt;&gt;</a>")))
+		(elt.update (sxml->xhtml '(a (|@| (href "#")) ">>>")))))
 	    '("header-line-control"))
   (for-each (lambda (id)
 	      (let1 elt ($ id)
@@ -127,31 +175,71 @@
     (elt.focus)
     (elt.select)))
 
-(define (scm->scm bscm exp)
-  (let1 str (with-output-to-string (pa$ write exp))
-    (bscm.evaluate str)))
-
 (define bscm #f)
-(define (new-bscm)
+(define bscm-dir "/bscm")
+(define ysh #f)
+(define ysh-dir "/ysh"))
+
+(define (new-bscm shell-dir)
   (let1 bscm (js-new BiwaScheme.Interpreter)
     (scm->scm bscm
-	      '(define (cd entry) 
+	      ;; Handle ...
+	      `(define (normalize-path path)
+		 (let1 len (string-length path)
+		   (cond 
+		    ((eq? len 0) "")
+		    ((equal? (substring path (- len 1) len) "/") 
+		     (normalize-path (substring path 0 (- len 1))))
+		    (else path)))))
+    (scm->scm bscm
+	      `(define (exit . rest)
 		 (let* ((location (js-eval "location"))
 			(pathname (js-ref location "pathname")))
-		   (if (and (< 0 (string-length entry))
+		   (js-set! location "pathname" (substring
+						 (normalize-path pathname)
+						 (string-length ,shell-dir)
+						 (string-length pathname))))))
+    (scm->scm bscm
+	      `(define (bscm . rest)
+		 (let* ((location (js-eval "location"))
+			(pathname (js-ref location "pathname")))
+		   (js-set! location "pathname" (string-append ,bscm-dir
+							       (substring
+								(normalize-path pathname)
+								(string-length ,shell-dir)
+								(string-length pathname)))))))
+    (scm->scm bscm
+	      `(define (ysh . rest)
+		 (let* ((location (js-eval "location"))
+			(pathname (js-ref location "pathname")))
+		   (js-set! location "pathname" (string-append ,ysh-dir
+							       (substring
+								(normalize-path pathname)
+								(string-length ,shell-dir)
+								(string-length pathname)))))))
+    (scm->scm bscm
+	      `(define (find-file entry) 
+		 (let* ((location (js-eval "location"))
+			(pathname (js-ref location "pathname"))
+			(entry (normalize-path entry))
+			(len (string-length entry)))
+		   (if (and (< 0 len)
 			    (eq? (string-ref entry 0) #\/))
-		       (js-set! location "pathname" (string-append "/bscm" entry))
-		       (js-set! location "pathname" (string-append pathname "/" entry))
+		       (js-set! location "pathname" (string-append ,shell-dir
+								   entry))
+		       (js-set! location "pathname" (string-append 
+						     (normalize-path pathname)
+						     "/"
+						     entry))
 		       ))))
-    (scm->scm bscm
-	      '(define less cd))
-    (scm->scm bscm
-	      '(define lv cd))
+    (scm->scm bscm '(define cd find-file))
+    (scm->scm bscm '(define less find-file))
+    (scm->scm bscm '(define lv find-file))
     bscm))
 
 (define (bscm-eval str)
   (unless bscm
-    (set! bscm (new-bscm)))
+    (set! bscm (new-bscm bscm-dir)))
   (let1 result #f
     (bscm.evaluate str
 		   (lambda (r) 
@@ -162,7 +250,22 @@
   (common-interpret bscm-eval ";; "))
 
 (define (ysh-eval str)
-  str)
+  (unless ysh
+    (set! ysh (new-bscm ysh-dir)))
+  (let1 str
+      (let1 exp (with-input-from-string 
+		    (string-append "(" str ")") 
+		  read)
+	(with-output-to-string 
+	  (pa$ write
+	       (cons (car exp)
+		     (map symbol->string (cdr exp))))))
+    (let1 result #f
+      (ysh.evaluate str
+		    (lambda (r) 
+		      (set! result (BiwaScheme.to_write r))))
+      result)))
+
 (define (ysh-interpret)
   (common-interpret ysh-eval "# "))
 
