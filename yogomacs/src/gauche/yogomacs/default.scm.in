@@ -7,5 +7,6 @@
  (emacs . "emacs")
  (config . "yogomacs-@SPEC_CONFIG@")
  (find-file-timeout . 30)		; #t for waiting forever
- (fundamental-mode-threshold . 3000)
+ (fundamental-mode-line-threshold . 3500)
+ (fundamental-mode-column-threshold . 350)
  )

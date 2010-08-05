@@ -47,7 +47,10 @@
 
 (define (retrieve-shtml real-src-file config)
   (receive (shtml last-modified-time)
-      (fundamental real-src-file (config 'fundamental-mode-threshold) config) 
+      (fundamental real-src-file 
+		   (config 'fundamental-mode-line-threshold)
+		   (config 'fundamental-mode-column-threshold)
+		   config) 
     (if shtml
 	(values shtml last-modified-time)
 	(receive (shtml last-modified-time) 

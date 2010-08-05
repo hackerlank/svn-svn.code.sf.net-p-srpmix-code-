@@ -64,8 +64,6 @@
 (define (sxml->xhtml sxml)
   (tree->string (sxml->xhtml0 sxml)))
 
-
-
 ;;
 ;; JS <-> Scheme interface
 ;;
@@ -277,7 +275,3 @@
   (let1 elt ($ id)
     (elt.removeClassName "highlight")))
 (export "unhighlight" unhighlight)
-
-;; TODO
-;; - highlight
-;; - shell switching
