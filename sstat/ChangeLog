@@ -1,3 +1,9 @@
+2010-08-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sstat.stp: Don't Include linux/nfsd/nfsd.h.
+	It is gone in the latest kernel. Instead include
+	linux/fs.h. Don't use NFSD_MAY_READ. Use MAY_READ.
+
 2010-04-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.3.1.
@@ -11,9 +17,9 @@
 
 	* sstat-post (print_usage): Added --full-build option.
 
-	* sstat-post.scm (link): Use users only if they are in 
+	* sstat-post.scm (link): Use users only if they are in
 	the mapping table.
 	(main): Build directory only past two days.
 	Added --full-build option.
-	
+
 

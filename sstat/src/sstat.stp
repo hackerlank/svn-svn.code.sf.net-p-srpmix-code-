@@ -2,11 +2,11 @@
 
 %{
 #include <linux/sunrpc/svc.h>
-#include <linux/nfsd/nfsd.h>
+#include <linux/fs.h>
 %}
 
 function may_read_p:long(access:long) %{
-  THIS->__retvalue = (THIS->access == NFSD_MAY_READ)? 1: 0;
+  THIS->__retvalue = (THIS->access == MAY_READ)? 1: 0;
 %}
 
 function ifreg_p:long(type:long) %{
