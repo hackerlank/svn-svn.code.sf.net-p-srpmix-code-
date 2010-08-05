@@ -2,7 +2,7 @@
 #| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
 
-(use yogomacs.dired)
+(use yogomacs.renderers.dired)
 (use yogomacs.dentries.fs)
 (use gauche.parseopt)
 (use file.util)
@@ -33,13 +33,16 @@
       (unless (file-is-readable? dir)
 	(format (current-error-port)
 		"Cannot read: ~a\n" dir))
-      (let1 dentires (read-dentries dir #t #t #t #t)
+      (let1 dentires (read-dentries dir #t #t #t
+				    (lambda rest #t)
+				    (lambda rest #t))
 	(when dentires
 	  (for-each
 	   (cute flclient-cssize <> css-output-dir (list 'dired))
 	   dired-faces)
-	  (write (dired dir dentires #f)))
-	(exit (if dentires 0 1))
-	))))
+	  (let1 shtml (dired dir dentires #f)
+	    (write shtml)
+	    ))
+	(exit (if dentires 0 1))))))
 
 
