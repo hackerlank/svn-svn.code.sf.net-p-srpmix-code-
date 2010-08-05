@@ -66,6 +66,11 @@
 	      js-list))
 
 
+(define (make-parent-url url shell)
+  (let1 dir (sys-dirname url)
+    (let1 dir (if (equal? dir "/") "" dir)
+      #`"/,|shell|,|dir|")))
+
 (define (make-url-list url shell)
   (let1 splited-list (let loop ((url url)
 				(result (list)))
@@ -117,7 +122,7 @@
 			       (id "header-line-control")
 			       ) 
 			   ,(let ((id "move-parent-directory")
-				  (parent ".."))
+				  (parent (make-parent-url url shell)))
 				`(a (|@| 
 				     (href ,parent)
 				     (id ,id))
