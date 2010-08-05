@@ -1,5 +1,6 @@
 dist_bin_SCRIPTS = \
 	\
-	dired     \
+	dired          \
+	yogomacs-batch \
 	\
 	$(NULL)

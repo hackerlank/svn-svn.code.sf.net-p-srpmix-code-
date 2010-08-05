@@ -1,5 +1,6 @@
 (define-module yogomacs.main
-  (export yogomacs-cgi)
+  (export yogomacs-cgi
+	  yogomacs)
   (use www.cgi)
   ;;
   (use yogomacs.route)
@@ -39,7 +40,7 @@
   (debug-print-width #f)
   (sys-putenv "HOME" "/var/www")
   (set! (port-buffering (current-error-port)) :line)
-  (let1 config (install-constants (load-config))
+  (let1 config (install-constants (load-config #f))
     (cgi-main (cute yogomacs <> config)
 	      :output-proc reply
 	      :on-error    error-handler)))

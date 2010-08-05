@@ -57,6 +57,7 @@ fi
 
 
 %{_bindir}/dired
+%{_bindir}/yogomacs-batch
 
 %dir @WWWDIR@
 %dir @WWWDIR@/cgi-bin

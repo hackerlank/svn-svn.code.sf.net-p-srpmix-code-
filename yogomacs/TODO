@@ -1,18 +1,21 @@
 -*- outline -*-
 * ysh renderer <done>
 * ysh -> yogomacs <done>
-* Use onload
+* Use onload <done>
 * recursive ysh <done>
-* narrow-down code
-* css inclusion and auto rebuild facility
+* narrow-down code <done>
+* enumeration in dired
+* css inclusion<done> and auto rebuild facility
 * Dired markers
-* shrink button
-* shell selection
+* shrink button <done>
+* shell selection <abort>
+
+
 
 * Just viewable
 ** For batch converting
 *** Disable auto-killing
-*** Multi server*
+*** Multi server <done>
 *** /var/run file*
 *** cmd line interface and batch(overriding conf)*
 *** Remove http-equiv
@@ -35,7 +38,7 @@
 *** lcopy
 
 ** Clean up
-*** File selection(exclude wrong type file)*
+*** File selection(exclude wrong type file) <done>
 *** use #`,format
 *** storage separations
 **** (real-src-dir (build-path (config 'real-sources-dir) head)) in yogomacs/dests/file.scm
@@ -47,14 +50,19 @@
 ** Dired
 *** link-to URL
 
+* more virtual entries
 * Prompt, Ysh
 * Single user annotation
 ** plugins
 ** home
+** proc --- cookie
 ** plugins/loging
 ** plugins/ysh
+** read-only
 
 * Multi user annotation
+** login
+** writeable
 * Realtime multi user annotation
 * Mobile
 * External data stitching

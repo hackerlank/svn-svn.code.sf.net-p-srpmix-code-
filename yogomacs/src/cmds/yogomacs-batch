@@ -1,0 +1,24 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
+(use gauche.parseopt)
+(use yogomacs.batch)
+
+(define (show-help n)
+  (format #t "Usage:\n")
+  (format #t "	~a --help\n" *program-name*)
+  (format #t "	~a PATH CONFIG-NAME\n" *program-name*)
+  (newline)
+  (format #t "e.g.\n")
+  (format #t "	sudo -u apache yogomacs-batch /srv/sources/sources/k/kernel/2.6.9-89.EL/pre-build/kernel-2.6.9/linux-2.6.9/ipc/util.h local\n")
+  (exit n))
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (pa$ show-help 0))
+       . rest)
+    (if (eq? (length rest) 2)
+	(yogomacs-batch (ref rest 0) (ref rest 1))
+	(with-output-to-port (current-error-port)
+	  (pa$ show-help 1)))))

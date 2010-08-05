@@ -8,8 +8,9 @@
   )
 (select-module yogomacs.config)
 
-(define (load-config)
-  (and-let* ((env-val (cgi-get-metavariable "SCRIPT_NAME"))
+(define (load-config script-name)
+  (and-let* ((env-val (or script-name 
+			  (cgi-get-metavariable "SCRIPT_NAME")))
 	     (m (#/^yogomacs-(.*)\.cgi$/ (sys-basename env-val)))
 	     (conf-name (m 1))
 	     (entry (format "~a.scm" conf-name))
