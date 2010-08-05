@@ -19,12 +19,13 @@
   (yogomacs0 path params shell
 	     '(("yogomacs--Default.css" . "Default")
 	       ("yogomacs--Invert.css" . "Invert"))
-	     `(("prototype.js" . file)
+	     `(
+	       ("biwascheme.js" . file)
+	       #;("prototype.js" . file)
 	       ("scheme2js_runtime.js" . file)
-	       ("scheme2js_runtime_callcc.js" . file)
-	       ("scheme2js_runtime_interface.js" . file)
-	       ("scheme2js_runtime_interface_callcc.js" . file)
-	       ("biwascheme.js" . defer)
+	       #;("scheme2js_runtime_callcc.js" . file)
+	       #;("scheme2js_runtime_interface.js" . file)
+	       #;("scheme2js_runtime_interface_callcc.js" . file)
 	       ("yogomacs_builtin.js" . file)
 	       )))
 
