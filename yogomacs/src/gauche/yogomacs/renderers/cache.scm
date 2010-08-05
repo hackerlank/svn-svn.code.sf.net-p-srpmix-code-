@@ -11,7 +11,9 @@
     (not-found "File Not Found" src-path))
   (call-with-values
       (pa$ do-shtml-cache src-path
-	   (pa$ prepare-proc src-path config)
+	   (if prepare-proc
+	       (pa$ prepare-proc src-path config)
+	       #f)
 	   namespace
 	   force-update?
 	   config)

@@ -221,14 +221,17 @@
 			(pathname (js-ref location "pathname"))
 			(entry (normalize-path entry))
 			(len (string-length entry)))
-		   (if (and (< 0 len)
-			    (eq? (string-ref entry 0) #\/))
-		       (js-set! location "pathname" (string-append ,shell-dir
-								   entry))
-		       (js-set! location "pathname" (string-append 
-						     (normalize-path pathname)
-						     "/"
-						     entry))
+		   (cond
+		    ((or (and (< 0 len)
+			      (eq? (string-ref entry 0) #\/))
+			 (eq? len 0))
+		     (js-set! location "pathname" (string-append ,shell-dir
+								 entry)))
+		    (else
+		     (js-set! location "pathname" (string-append 
+						   (normalize-path pathname)
+						   "/"
+						   entry)))
 		       ))))
     (scm->scm bscm '(define cd find-file))
     (scm->scm bscm '(define less find-file))

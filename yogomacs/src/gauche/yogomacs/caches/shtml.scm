@@ -119,9 +119,11 @@
 	    cache-file)
 	   (else
 	    #f)))
-     (pa$ build-cache prepare-thunk 
-	  cache-file
-	  src-path)
+     (if prepare-thunk
+	 (pa$ build-cache prepare-thunk 
+	      cache-file
+	      src-path)
+	 #f)
      deliver)))
 
 (provide "yogomacs/caches/shtml")
