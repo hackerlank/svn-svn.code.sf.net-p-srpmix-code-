@@ -6,7 +6,14 @@
  (real-sources-dir . "/srv/sources")
  (emacs . "emacs")
  (config . "yogomacs-@SPEC_CONFIG@")
- (find-file-timeout . 30)		; #t for waiting forever
- (fundamental-mode-line-threshold . 3500)
+
+ ;; #t for waiting forever
+ (find-file-timeout . 30)		
+ 
+ ;; Non-number for no limit
+ (fundamental-mode-line-threshold . 3500) 
  (fundamental-mode-column-threshold . 350)
+
+ ;; stand-alone, read-only and cache-build
+ (mode . stand-alone)
  )

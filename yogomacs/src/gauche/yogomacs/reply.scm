@@ -2,6 +2,7 @@
   (export reply
 	  <asis-data>
 	  <shtml-data>
+	  <empty-data>
 	  )
   (use www.cgi)
   (use sxml.serializer)
@@ -29,8 +30,15 @@
 			   :init-value #f)
    (mime-type :init-keyword :mime-type)))
 
+(define-class <empty-data> ()
+  ())
+(define-method reply ((empty <empty-data>))
+  (write-tree (cgi-header :content-type "text/plain"))
+  (display ""))
+
 (define-class <asis-data> (<data>)
   ())
+
 
 ;; Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
 (define (rfc822 t)

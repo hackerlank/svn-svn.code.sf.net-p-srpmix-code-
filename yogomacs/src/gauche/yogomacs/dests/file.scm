@@ -45,7 +45,7 @@
       (not-found "File not redable"
 		 file)))
 
-(define (retrieve-shtml real-src-file config)
+(define (retrieve-shtml real-src-file mode config)
   (receive (shtml last-modified-time)
       (fundamental real-src-file 
 		   (config 'fundamental-mode-line-threshold)
@@ -72,29 +72,44 @@
 	  (real-src-dir (build-path (config 'real-sources-dir) head))
 	  (real-src-file (build-path real-src-dir last))
 	  (file-type (file-type real-src-file)))
-      (if (equal? (car file-type) "text")
-	  (guard (e (else (receive (asis last-modified-time)
-			     (asis real-src-file config)
-			     (make <asis-data> 
-				   :params params
-				   :config config
-				   :data asis
-				   :last-modification-time last-modified-time
-				   :mime-type (apply format "~a/~a" file-type)))))
-		 (receive (shtml last-modified-time) 
-		    (retrieve-shtml real-src-file config)
-		    (make <shtml-data>
-			  :params params
-			  :config config
-			  :data ((compose fix-css-href integrate-file-face) shtml)
-			  :last-modification-time last-modified-time)))
-	  (receive (asis last-modified-time)
-	     (asis real-src-file config)
-	     (make <asis-data> 
-		   :params params
-		   :config config
-		   :data asis
-		   :last-modification-time last-modified-time
-		   :mime-type (apply format "~a/~a" file-type))))))
+     (file-dest0 real-src-file file-type (config 'mode) params config)))
+
+(define (file-dest0 real-src-file file-type mode params config)
+  (cond
+   ((not (equal? (car file-type) "text"))
+    (if (eq? mode 'cache-build)
+	(make <empty-data>)
+	(receive (asis last-modified-time)
+	    (asis real-src-file config)
+	  (make <asis-data> 
+	    :params params
+	    :config config
+	    :data asis
+	    :last-modification-time last-modified-time
+	    :mime-type (apply format "~a/~a" file-type)))))
+   ((eq? mode 'cache-build)
+    ;; TODO Do retrieve-shtml then return empty-data
+    )
+   ((eq? mode 'read-only)
+    ;; TODO: Just reading cache if available, then fundamental 
+    )
+   ((eq? mode 'stand-alone)
+    (guard (e (else (receive (asis last-modified-time)
+			(asis real-src-file config)
+		      (make <asis-data> 
+			:params params
+			:config config
+			:data asis
+			:last-modification-time last-modified-time
+			:mime-type (apply format "~a/~a" file-type)))))
+	   (receive (shtml last-modified-time) 
+	       (retrieve-shtml mode real-src-file config)
+	     (make <shtml-data>
+	       :params params
+	       :config config
+	       :data ((compose fix-css-href integrate-file-face) shtml)
+	       :last-modification-time last-modified-time))))
+   (else
+    (errorf "Unknown mode: ~s" mode))))
 
 (provide "yogomacs/dests/file")
