@@ -76,7 +76,6 @@
 		 (sys-unlink  dest-path))
 	      (timeout "Rendering Timeout"
 		 (format "~s -> ~s" src-path dest-path))))
-       (not-found "File not found"
-		  src-path)))	 
+       (not-found "File not found" src-path)))	 
 
 (provide "yogomacs/renderers/find-file")

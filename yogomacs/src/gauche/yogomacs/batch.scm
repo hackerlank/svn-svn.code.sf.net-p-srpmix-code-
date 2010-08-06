@@ -19,7 +19,9 @@
 
 (define (yogomacs-batch path conf-name)
   (debug-print-width #f)
-  (sys-putenv "HOME" "/var/www")
+  (let1 apache-home "/var/www"
+    (sys-putenv "HOME" apache-home)
+    (sys-chdir apache-home))
   (let1 config (install-constants (load-config #`"yogomacs-,|conf-name|.cgi"))
     (let1 prefix (assq-ref config 'real-sources-dir)
       (let1 path (if (string-prefix? prefix path)

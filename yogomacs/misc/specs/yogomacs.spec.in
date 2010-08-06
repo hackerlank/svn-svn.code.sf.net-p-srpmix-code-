@@ -15,10 +15,17 @@ Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs emacs-el gauche-devel font-lock 
-Requires: emacs emacs-common gauche font-lock httpd xz syntax file scheme2js
+Requires: emacs emacs-common gauche font-lock httpd xz syntax file scheme2js yogomacs-cachedir
 
 %description
 sources web frontend
+
+%package cachedir
+Summary: Cache directory for yogomacs
+Group: Development/System
+%description cachedir
+Cache directory for yogomacs
+
 
 %package @SPEC_CONFIG@
 Summary: httpd configuration for @PACKAGE@(@CONFIG configuration)
@@ -55,7 +62,6 @@ fi
 
 %doc
 
-
 %{_bindir}/dired
 %{_bindir}/yogomacs-cache-build
 
@@ -80,7 +86,6 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/error.scm
 %{_datadir}/gauche/site/lib/yogomacs/face.scm
 %{_datadir}/gauche/site/lib/yogomacs/flserver.scm
-%{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/path.scm
 %{_datadir}/gauche/site/lib/yogomacs/reply.scm
@@ -111,20 +116,22 @@ fi
 
 
 %dir %{_localstatedir}/lib/yogomacs
-%dir %{_localstatedir}/cache/yogomacs
 %dir %{_localstatedir}/www/.emacs.d
 %dir %{_localstatedir}/www/.emacs.d/init.el
 %attr(0700,apache,apache) %dir %{_localstatedir}/www/.vnc
 %attr(0700,apache,apache) %{_localstatedir}/www/.vnc/passwd
 %dir %{_sysconfdir}/yogomacs
 
-%attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/shtml
-
 %attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/js
 %{_localstatedir}/lib/yogomacs/js/*.js
 
 %dir %{_datadir}/yogomacs/scheme2js
 %{_datadir}/yogomacs/scheme2js/yogomacs-macs.scm
+
+%files cachedir
+%dir %{_localstatedir}/cache/yogomacs
+%attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/shtml
+
 
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*

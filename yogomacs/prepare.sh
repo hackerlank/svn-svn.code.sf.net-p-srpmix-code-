@@ -8,8 +8,9 @@ if [ -z "$PORT" ] || [ -z "$NAME" ]; then
     exit 1
 fi
 
+set -x
 bash ./autogen.sh
-./configure --with-vhost-port=$PORT --with-vhost-servername=localhost --with-config-name=local
+./configure --with-vhost-port=$PORT --with-vhost-servername=localhost --with-config-name=$NAME
 make rpm
 sudo rpm -e yogomacs-$NAME
 sudo rpm  -Uvh build/RPMS/noarch/yogomacs-${NAME}*.rpm
