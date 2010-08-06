@@ -1,6 +1,6 @@
 dist_bin_SCRIPTS = \
 	\
-	dired          \
-	yogomacs-batch \
+	dired                \
+	yogomacs-cache-build \
 	\
 	$(NULL)

@@ -1,0 +1,15 @@
+#!/bin/sh
+PORT=$1
+NAME=$2
+
+if [ -z "$PORT" ] || [ -z "$NAME" ]; then
+    echo "Usage: " 1>&2
+    echo "	$0 PORT CONFIG-NAME" 1>&2
+    exit 1
+fi
+
+bash ./autogen.sh
+./configure --with-vhost-port=$PORT --with-vhost-servername=localhost --with-config-name=local
+make rpm
+sudo rpm -e yogomacs-$NAME
+sudo rpm  -Uvh build/RPMS/noarch/yogomacs-${NAME}*.rpm

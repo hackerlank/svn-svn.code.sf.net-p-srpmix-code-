@@ -8,6 +8,13 @@
   )
 (select-module yogomacs.config)
 
+(define config-dir "/etc/yogomacs")
+
+(define (all-config-names)
+  (map (compose sys-basename (lambda (n)
+			       ((#/(.*)\.scm/ n) 1)))
+       (glob #`",|config-dir|/*.scm")))
+
 (define (load-config script-name)
   (and-let* ((env-val (or script-name 
 			  (cgi-get-metavariable "SCRIPT_NAME")))
@@ -15,7 +22,7 @@
 	     (conf-name (m 1))
 	     (entry (format "~a.scm" conf-name))
 	     ;; TODO
-	     (dir "/etc/yogomacs")
+	     (dir config-dir)
 	     ( (readable?  dir entry) )
 	     (port (open-input-file 
 		    (build-path dir entry)

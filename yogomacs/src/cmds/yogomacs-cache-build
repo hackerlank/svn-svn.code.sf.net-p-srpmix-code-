@@ -4,11 +4,17 @@
 
 (use gauche.parseopt)
 (use yogomacs.batch)
+(use yogomacs.config)
 
 (define (show-help n)
   (format #t "Usage:\n")
   (format #t "	~a --help\n" *program-name*)
   (format #t "	~a PATH CONFIG-NAME\n" *program-name*)
+  (newline)
+  (format #t "available CONFIG-NAME:\n")
+  (for-each
+   (pa$ format #t "	~a\n")
+   (all-config-names))
   (newline)
   (format #t "e.g.\n")
   (format #t "	sudo -u apache yogomacs-batch /srv/sources/sources/k/kernel/2.6.9-89.EL/pre-build/kernel-2.6.9/linux-2.6.9/ipc/util.h local\n")

@@ -142,7 +142,7 @@
 
 (define (linum&fringe dentry linum linum-column)
   (let* ((dname (dname-of dentry))
-	 (id (format "N:~a/L:~a" dname linum)))
+	 (id (format "N:~a" dname)))
     `((span (|@| (class "linum") (id ,id))
 	    (a (|@| (href ,(format "#~a" id)))
 	       ,(format (string-append "~" (number->string linum-column) ",d")
