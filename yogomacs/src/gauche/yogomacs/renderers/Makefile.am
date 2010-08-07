@@ -6,6 +6,7 @@ dist_module_DATA =   \
 	dired.scm				\
 	find-file.scm				\
 	fundamental.scm				\
+	ewoc.scm				\
 	syntax.scm                              \
 	text.scm                                \
 	yogomacs.scm				\

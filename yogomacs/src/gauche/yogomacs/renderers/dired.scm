@@ -31,6 +31,7 @@
   (use yogomacs.dentry)
   (use yogomacs.face)
   (use gauche.version)
+  (use yogomacs.renderers.ewoc)
   )
 (select-module yogomacs.renderers.dired)
 
@@ -76,21 +77,9 @@
 
 (define dired-styles '(Default Invert))
 
-(define (stylesheets css-prefix)
-  (reverse
-   (fold
-    (lambda (face-style result)
-      (cons "\n" (cons `(link (|@| 
-			       (rel "stylesheet")
-			       (type "text/css")
-			       (href ,(face->css-route (car face-style) (cadr face-style) css-prefix))
-			       (title ,(x->string (cadr face-style)))
-			       )) 
-		       (cons "	" result))))
-    (list)
-    (cartesian-product `(,dired-faces
-			 ,dired-styles )))))
-
+;;
+;;
+;;
 (define (url&dname dentry)
   (let1 url (url-of dentry)
     (if url
@@ -140,24 +129,11 @@
 	  ,(url&dname dentry))
     "\n"))
 
-(define (linum&fringe dentry linum linum-column)
-  (let* ((dname (dname-of dentry))
-	 (id (format "N:~a" dname)))
-    `((span (|@| (class "linum") (id ,id))
-	    (a (|@| (href ,(format "#~a" id)))
-	       ,(format (string-append "~" (number->string linum-column) ",d")
-			linum)))
-      (span (|@| (class "lfringe") (id ,(format "l/N:~a" dname))) " ")
-      (span (|@| (class "rfringe") (id ,(format "r/N:~a" dname))) " "))))
-
-(define (type&size&date dentry size-column)
+(define (size&date dentry size-column)
   `(
     " "
-    (span (|@| (class "dired-entry-type"))
-	  ,(x->string (type-maker-of dentry)))
-    " "
     (span (|@| (class "dired-size"))
-	  ,(format (string-append "~" (number->string size-column) ",d")
+	  ,(format #`"~,(number->string size-column),,d"
 		   (size-of dentry)))
     "  "
     (span (|@| (class "dired-date"))
@@ -168,86 +144,77 @@
     "  "
     ))
 
-(define (line0 dir linum dentry linum-column size-column)
+;;
+;;
+;;
+
+
+(define css-prefix-default "file:///tmp")
+
+(define-class <dired> (<ewoc>)
+  ((dir :init-keyword :dir)
+   (size-column)
+   ))
+
+(define (dired dir dentries css-prefix)
+  (render-entries 
+   (make <dired> :dir dir)
+   (sort dentries
+	 (lambda (a b)
+	   (let ((a-name (dname-of a))
+		 (b-name (dname-of b)))
+	     (guard (e (else (string<? a-name b-name)))
+	       (string<? a-name b-name)))))
+   (or css-prefix css-prefix-default)))
+
+(define-method title-of ((dired <dired>))
+  (ref dired 'dir))
+
+(define-method meta-tags-of ((dired <dired>))
+  `(("major-mode" . "dired-mode")
+    ("created-time" . ,(date->string (time-utc->date (current-time)) "~5"))
+    ("version" . ,(format "~d.~d.~d"
+			  dired-major-version
+			  dired-minor-version
+			  dired-micro-version))
+    ))
+
+(define-method faces-and-styles-of ((dired <dired>))
+  (cartesian-product `(,dired-faces
+		       ,dired-styles )))
+
+(define-method href-id-of ((dired <dired>)
+			   (dentry <dentry>)
+			   (index <integer>))
+  #`"N:,(dname-of dentry)"
+  )
+
+(define-method render-entry ((dired <dired>)
+			     (dentry <dentry>))
   `(
-    ,@(linum&fringe dentry (+ 1 linum) linum-column)
-    ,@(type&size&date dentry size-column)
+    " "
+    (span (|@| (class "dired-entry-type"))
+	  ,(x->string (type-maker-of dentry)))
+    
+    ,@(size&date dentry (ref dired 'size-column))
     ,@(cond
        ((symlink? dentry) (symlink-entry dentry))
        ((executable? dentry) (executable-entry dentry))
        (else (generic-entry dentry)))))
 
-(define (line dir linum dentry linum-column size-column result)
-  (append (reverse 
-	   (line0 dir
-		  linum
-		  dentry 
-		  linum-column
-		  size-column))
-	  result))
-
-(define css-prefix-default "file:///tmp")
-(define (dired dir dentires css-prefix)
-  (let* ((max-size (fold (lambda (dentry current-max-size)
-			   (let1 size (size-of dentry)
-			     (if (< current-max-size size)
-				 size
-				 current-max-size)))
-			 0
-			 dentires))
-	 (max-column (+ (floor->exact (log (max max-size 1) 10))
-			1)))
-    (dired0 dir (sort dentires
-		      (lambda (a b)
-			 (let ((a-name (dname-of a))
-			       (b-name (dname-of b)))
-			    (guard (e (else (string<? a-name b-name)))
-				(string<? a-name b-name)))))
-	    (+ (floor->exact (log (length dentires) 10)) 1)
-	    max-column
-	    (or css-prefix css-prefix-default))
-    ))
-
-(define (dired0 dir entries linum-column size-column css-prefix)
-  `(*TOP* 
-    (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n"
-    (*DECL* DOCTYPE html PUBLIC 
-	    "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd") "\n"
-	    (html (|@| (xmlns "http://www.w3.org/1999/xhtml") (xml:lang "en") (lang "en"))
-		  "\n"
-		  (head 
-		   "\n"
-		   "	" (title ,dir) "\n"
-		   ;;
-		   ,@(append-map
-		      (lambda (elt)
-			(list "	"
-			      `(meta (|@|
-				      (name ,(car elt))
-				      (content ,(cdr elt))))
-			      "\n"))
-		      `(("major-mode" . "dired-mode")
-			("created-time" . ,(date->string (time-utc->date (current-time)) "~5"))
-			("version" . ,(format "~d.~d.~d"
-					      dired-major-version
-					      dired-minor-version
-					      dired-micro-version))
-			))
-		   ,@(stylesheets css-prefix))
-		  "\n"
-		  (body
-		   "\n"
-		   (pre
-		    ,@(reverse (fold-with-index (cute line 
-						      dir
-						      <>
-						      <>
-						      linum-column
-						      size-column
-						      <>)
-						(list)
-						entries)))
-		   "\n"
-		   ))))
+(define-method render-entries ((dired <dired>)
+			       (dentries <list>)
+			       (css-prefix <string>))
+  (let1 max-size (fold (lambda (dentry current-max-size)
+			 (let1 size (size-of dentry)
+			   (if (< current-max-size size)
+			       size
+			       current-max-size)))
+		       0
+		       dentries)
+    (set! (ref dired 'size-column)
+	  (+ (floor->exact (log (max max-size 1) 10))
+	     1))
+    (next-method)))
 
 (provide "yogomacs/renderers/dired")

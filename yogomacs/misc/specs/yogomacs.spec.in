@@ -83,6 +83,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/compress.scm
 %{_datadir}/gauche/site/lib/yogomacs/config.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
+%{_datadir}/gauche/site/lib/yogomacs/entry.scm
 %{_datadir}/gauche/site/lib/yogomacs/error.scm
 %{_datadir}/gauche/site/lib/yogomacs/face.scm
 %{_datadir}/gauche/site/lib/yogomacs/flserver.scm

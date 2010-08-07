@@ -13,11 +13,12 @@
 	  symlink-to-url-of
 	  dentry-for
 	  )
+  (use yogomacs.entry)
   (use srfi-1))
  
 (select-module yogomacs.dentry)
 
-(define-class <dentry> ()
+(define-class <dentry> (<entry>)
   ())
 
 (define-class <symlink-dentry> (<dentry>)

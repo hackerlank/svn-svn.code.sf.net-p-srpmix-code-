@@ -17,7 +17,7 @@
    (all-config-names))
   (newline)
   (format #t "e.g.\n")
-  (format #t "	sudo -u apache yogomacs-batch /srv/sources/sources/k/kernel/2.6.9-89.EL/pre-build/kernel-2.6.9/linux-2.6.9/ipc/util.h local\n")
+  (format #t "	sudo -u apache yogomacs-cache-build /srv/sources/sources/k/kernel/2.6.9-89.EL/pre-build/kernel-2.6.9/linux-2.6.9/ipc/util.h local\n")
   (exit n))
 
 (define (main args)
