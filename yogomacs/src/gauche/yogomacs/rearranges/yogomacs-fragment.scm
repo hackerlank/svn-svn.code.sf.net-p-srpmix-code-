@@ -22,6 +22,8 @@
 							       ((member entry (map (cut ref <> 'name)
 										  (all-shells)))))
 						      #t) text)
+						   ((#/^http:.*/ text) text)
+						   ((#/^ftp:.*/ text) text)
 						   (else (string-append #`"/,|shell-name|" text))))))
 				 (*text* . ,(lambda (tag str) str))
 				 (*default* . ,(lambda x x))))))
