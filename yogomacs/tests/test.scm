@@ -76,6 +76,7 @@
  yogomacs.domain
  yogomacs.params
  yogomacs.lcopy
+ yogomacs.dests.stitch
 )
 
 

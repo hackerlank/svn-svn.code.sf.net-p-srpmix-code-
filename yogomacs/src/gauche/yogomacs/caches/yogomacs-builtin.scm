@@ -105,16 +105,36 @@
 			       (let1 elt ($ "minibuffer") 
 				 (elt.focus)
 				 (elt.select))))
+
+;; TODO alist->params
+(define (stitch stitches)
+  (alert (apply string-append stitches)))
+
+(define (require-stitches url params)
+  (let1 options (alist->object `((method . "get")
+				 (parameters . ,params)
+				 (onSuccess . ,(lambda (response)
+						 (stitch
+						  (with-input-from-string response.responseText
+						    read))
+						 ))))
+    (js-new Ajax.Request
+	    "/web/stitch/x/y/y"
+	    options)))
+
 (define (load-lazy url params)
-      (let ((options (js-new Object)))
-	(set! options.method "get")
-	(set! options.parameters params)
-	(set! options.onFailure (lambda ()
-				  (alert "An error occured")))
-	(js-new Ajax.Updater
+  (let1 options (alist->object `((method . "get")
+				 (parameters . ,params)
+				 (onFailure . ,(lambda ()
+						 (alert "An error occured")))
+				 (onComplete . ,(lambda ()
+						  (require-stitches url params)))
+				 ))
+    (js-new Ajax.Updater
 		"buffer"
 		url
 		options)))
+			       
 
 (define full-screen #f)
 (define (full-screen?)  full-screen)

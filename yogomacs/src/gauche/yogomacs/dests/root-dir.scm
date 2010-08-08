@@ -77,7 +77,7 @@
      (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
      (#/^\/bscm(?:\/.+)?$/   ,bscm-dir-dest)
      ;; TODO: use path
-     (#/^\/README$/  ,README-entry)
+     (#/^\/README$/  ,README-dest)
      (#/^.*$/ ,print-path)
      ))
 

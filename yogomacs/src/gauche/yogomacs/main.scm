@@ -12,6 +12,7 @@
   (use yogomacs.dests.root-dir)
   (use yogomacs.dests.css)
   (use yogomacs.dests.js)
+  (use yogomacs.dests.stitch)
   (use yogomacs.dests.debug)
   ;;
   )
@@ -22,12 +23,13 @@
     ;;
     (#/^\/web\/css\/[^\/]+\.css/ ,css-dest)
     (#/^\/web\/js\/[^\/]+\.js/ ,js-dest)
+    (#/^\/web\/stitch\/.*/ ,stitch-dest)
     ;;
     (#/^\/debug\/metavariables$/ ,print-metavariables)
     (#/^\/debug\/config$/ ,print-config)
     ;;
     (#/^\/.*/ ,root-dir-dest)
-    ;;
+    ;; TODO: 403
     (#/^.*$/ ,print-path)
     ))
 
