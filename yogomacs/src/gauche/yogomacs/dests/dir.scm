@@ -4,8 +4,8 @@
 	  dir-dest
 	  ;;
 	  dir-make-url
-	  dir-make-symlink-to-dname
-	  dir-make-symlink-to-url
+	  dir-make-arrowy-to-dname
+	  dir-make-arrowy-to-url
 	  )
   (use srfi-1)
   (use www.cgi)  
@@ -68,12 +68,12 @@
 	(compose-path* path (dname-of e))
 	#f)))
 
-(define (dir-make-symlink-to-dname e)
+(define (dir-make-arrowy-to-dname e)
   (let1 entry-path (path-of e)
     (guard (e (else #f))
       (sys-basename (sys-readlink entry-path)))))
 
-(define (dir-make-symlink-to-url get-pkg e)
+(define (dir-make-arrowy-to-url get-pkg e)
   (let* ((pkg (get-pkg e))
 	 (entry-path (path-of e))
 	 (ver (guard (e

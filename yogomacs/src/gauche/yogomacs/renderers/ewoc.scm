@@ -104,6 +104,11 @@
 									     entry
 									     index
 									     linum-column)
+							      '( 
+								;; ewoc-marker
+								" " ; Slot for marking: TODO
+								" " ; Just space
+							       )
 							      (render-entry ewoc
 									    entry)))
 							    result))

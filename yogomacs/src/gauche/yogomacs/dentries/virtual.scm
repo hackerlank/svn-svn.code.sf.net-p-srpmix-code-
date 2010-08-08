@@ -10,8 +10,7 @@
    (size :init-keyword :size :init-value 0)
    (mtime :init-keyword :mtime :init-value (current-time))))
 
-(define-method executable? ((d <virtual-dentry>)) #t)
-(define-method type-maker-of ((d <virtual-dentry>)) #\x)
+(define-method type-marker-of ((d <virtual-dentry>)) #\v)
 
 (define-method dname-of ((d <virtual-dentry>))
   (ref d 'dname))

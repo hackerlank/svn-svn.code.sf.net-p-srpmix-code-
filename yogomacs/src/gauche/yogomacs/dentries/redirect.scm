@@ -6,8 +6,15 @@
   )
 (select-module yogomacs.dentries.redirect)
 
-(define-class <redirect-dentry> (<virtual-dentry>)
+(define-class <redirect-dentry> (<virtual-dentry> <arrowy-dentry>)
   ((url :init-keyword :url :init-value #f)))
+
+(define-method type-marker-of ((d <redirect-dentry>))
+  (let1 url (url-of d)
+    (if (or (#/^http:\/\/.*/ url)
+	    (#/^ftp:\/\/.*/ url))
+	#\x
+	#\v)))
 
 (define-method url-of ((redirect <redirect-dentry>))
   (or (ref redirect 'url)

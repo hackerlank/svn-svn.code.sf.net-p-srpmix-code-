@@ -88,7 +88,7 @@
 	(dname-of dentry))))
 (define (generic-entry dentry)
   `(
-    (span (|@| (class ,(case (type-maker-of dentry)
+    (span (|@| (class ,(case (type-marker-of dentry)
 			 ((#\-)
 			  "dired-regular")
 			 ((#\d)
@@ -100,28 +100,33 @@
 	  )
     "\n"))
 
-(define (symlink-entry dentry)
-  (let1 symlink-to-dname (symlink-to-dname-of dentry)
-    (if symlink-to-dname
-      	`(
+(define (arrowy-entry dentry)
+  (let ((arrowy-from-shtml (url&dname dentry))
+	(arrowy-to-dname (arrowy-to-dname-of dentry)))
+    (cond
+     (arrowy-to-dname
+      `(
 	  (span (|@| (class "dired-symlink"))
-		,(url&dname dentry))
+		,arrowy-from-shtml)
 	  ;;
 	  " "
 	  (span (|@| (class "dired-symlink-arrow"))
 		"->")
 	  " "
 	  (span (|@| (class "dired-symlink-to"))
-		,(let1 url (symlink-to-url-of dentry)
+		,(let1 url (arrowy-to-url-of dentry)
 		   (if url
 		       `(a (|@| (href ,url))
-			   ,symlink-to-dname)
-		       symlink-to-dname)))
-	  "\n")
-	`(
-	  (span (|@| (class "dired-broken-symlink"))
-		,(dname-of dentry))
-	  "\n"))))
+			   ,arrowy-to-dname)
+		       arrowy-to-dname)))
+	  "\n"))
+     (arrowy-from-shtml
+      `(,arrowy-from-shtml "\n"))
+     (else
+      `(
+	(span (|@| (class "dired-broken-symlink"))
+	      ,(dname-of dentry))
+	"\n")))))
 
 (define (executable-entry dentry)
   `(
@@ -192,14 +197,16 @@
 (define-method render-entry ((dired <dired>)
 			     (dentry <dentry>))
   `(
-    " "
     (span (|@| (class "dired-entry-type"))
-	  ,(x->string (type-maker-of dentry)))
-    
+	  ,(x->string (type-marker-of dentry)))
+    ,(x->string (input-marker-of dentry))
+    ,(x->string (output-marker-of dentry))
+    ,(x->string (delete-marker-of dentry))
+    ,(x->string (command-marker-of dentry))
+    " "
     ,@(size&date dentry (ref dired 'size-column))
     ,@(cond
-       ((symlink? dentry) (symlink-entry dentry))
-       ((executable? dentry) (executable-entry dentry))
+       ((arrowy? dentry) (arrowy-entry dentry))
        (else (generic-entry dentry)))))
 
 (define-method render-entries ((dired <dired>)

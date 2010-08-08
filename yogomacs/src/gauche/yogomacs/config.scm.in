@@ -5,6 +5,7 @@
   (use www.cgi)
   (use yogomacs.access)
   (use file.util)
+  (use util.match)
   )
 (select-module yogomacs.config)
 
@@ -39,6 +40,11 @@
 	    conf)))))
 
 (define (config->proc config)
-  (lambda (key) (cdr (assq key config))))
+  (match-lambda*
+   ((key)
+    (cdr (assq key config)))
+   ((key value)
+    (config->proc (cons `(,key . ,value)
+			config)))))
 
 (provide "yogomacs/config")

@@ -25,8 +25,8 @@
 	      `((#/^[0-9a-zA-Z].*$/ 
 		    #t 
 		    ,(pa$ dir-make-url path)
-		    ,dir-make-symlink-to-dname
-		    ,(pa$ dir-make-symlink-to-url
+		    ,dir-make-arrowy-to-dname
+		    ,(pa$ dir-make-arrowy-to-url
 			  get-pkg))))))
 
 (define routing-table

@@ -2,14 +2,14 @@
   (export <fs-dentry>
 	  <fs-symlink-dentry>
 	  ;;
-	  type-maker-of
+	  type-marker-of
 	  dname-of
 	  path-of
 	  size-of
 	  mtime-of
 	  url-of
-	  symlink-to-dname-of
-	  symlink-to-url-of
+	  arrowy-to-dname-of
+	  arrowy-to-url-of
 	  ;;
 	  read-dentries
 	  glob-dentries)
@@ -29,19 +29,19 @@
    url
    ))
 
-(define-class <fs-symlink-dentry> (<symlink-dentry> <fs-dentry>)
+(define-class <fs-symlink-dentry> (<arrowy-dentry> <fs-dentry>)
   (
    symlink-to-dname
    symlink-to-url
    ))
 
 
-(define-method type-maker-of ((fs-dentry <dentry>))
+(define-method type-marker-of ((fs-dentry <fs-dentry>))
   (case (ref (ref fs-dentry 'stat) 'type)
-    ('symlink #\s)
+    ('symlink   #\l)
     ('directory #\d)
-    ('regular #\-)
-    (else #\?)))
+    ('regular   #\-)
+    (else       #\?)))
 
 (define-method dname-of ((fs-dentry <fs-dentry>))
   (ref fs-dentry 'entry))
@@ -60,10 +60,10 @@
 (define-method url-of ((fs-dentry <fs-dentry>))
   (ref fs-dentry 'url))
 
-(define-method symlink-to-dname-of ((fs-symlink-dentry <fs-symlink-dentry>))
+(define-method arrowy-to-dname-of ((fs-symlink-dentry <fs-symlink-dentry>))
   (ref fs-symlink-dentry 'symlink-to-dname))
 
-(define-method symlink-to-url-of ((fs-symlink-dentry <fs-symlink-dentry>))
+(define-method arrowy-to-url-of ((fs-symlink-dentry <fs-symlink-dentry>))
   (ref fs-symlink-dentry 'symlink-to-url))
 
 (define-method make-url-default ((fs-dentry <fs-dentry>))
@@ -110,7 +110,7 @@
 			  :parent path
 			  :entry entry
 			  :stat stat)))
-	   (when (symlink? dentry)
+	   (when (arrowy? dentry)
 	     (set! (ref dentry 'symlink-to-dname) ((make-conv
 						    make-symlink-to-dname
 						    make-symlink-to-dname-default)
