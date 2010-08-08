@@ -5,6 +5,8 @@
 	  not-found
 	  internal-error)
   (use www.cgi)  
+  (use text.html-lite)
+  
   )
 (select-module yogomacs.error)
 
@@ -14,26 +16,18 @@
   (log)
   )
 
-
 (define (log msg)
-  (print msg (current-error-port)))
+  (with-output-to-port (current-error-port)
+    (pa$ print msg)))
 
-(define (error-handler e)
+(define (error-handler raw-config e)
   (cond
    ((condition-has-type? e <yogomacs-error>)
-    (log (condition-ref e 'log))
-    (list
-     (cgi-header :status (condition-ref e 'status))
-     #;(print-echo0 path path config (condition-ref e 'message))))
-   ((condition-has-type? e <error>)
-    (log (condition-ref e 'message))
-    (list
-     (cgi-header :status "502 Bad Gateway")
-     #;(print-echo0 path path config (condition-ref e 'message))))
-   (else
-    (log (condition-ref e 'message))
-    (list
-     (cgi-header :status "500 Internal Server Error")))))
+    ;; TODO: This permits log overflow attacks.
+    (log (condition-ref e 'log)))
+   ((condition-has-type? e <message-condition>)
+    (log (condition-ref e 'message))))
+  e)
 
 (define (base-error status)
    (lambda (msg log)

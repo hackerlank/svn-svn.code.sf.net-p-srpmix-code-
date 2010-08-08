@@ -43,7 +43,7 @@
   (let1 config (install-constants (load-config #f))
     (cgi-main (cute yogomacs <> config)
 	      :output-proc reply
-	      :on-error    error-handler)))
+	      :on-error    (pa$ error-handler config))))
 
 (define (yogomacs params config)
   (let1 path (cgi-get-parameter "path" params :default "/")

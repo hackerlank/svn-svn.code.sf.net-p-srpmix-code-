@@ -10,7 +10,11 @@
   (use srfi-19)
   (use font-lock.rearrange.range)
   (use yogomacs.rearranges.yogomacs-fragment)
-  (use yogomacs.shell))
+  (use yogomacs.shell)
+  (use yogomacs.error)
+  ;;
+  (use text.html-lite)
+  )
 
 (select-module yogomacs.reply)
 
@@ -70,7 +74,8 @@
 	(pa$ write result))
 	result)))))
 
-;; TODO: THIS SHOULD NOT BE HERE.
+;; TODO: THIS SHOULD NOT BE HERE. THIS SHOULE BE AT REARRANGES.
+;; TODO: enum for dired.
 (define (make-narrow-down params)
   (or (and-let* ((range-string (cgi-get-parameter "range" params 
 						  :default #f))
@@ -98,5 +103,25 @@
 		    :mime-type (ref shtml 'mime-type))
 	  (reply-xhtml new)))))
 
+
+(define-method reply ((e <yogomacs-error>))
+  (reply (list
+	  (cgi-header :status (condition-ref e 'status))
+	  (html-doctype)
+	  (html:html
+	   (html:head (html:title "Error"))
+	   (html:body (html:pre (html-escape-string (slot-ref e 'message))))))))
+
+(define-method reply ((e <error>))
+  (reply (list
+	  (cgi-header :status "502 Bad Gateway")
+	  (html-doctype)
+	  (html:html
+	   (html:head (html:title "Error"))
+	   (html:body (html:pre (html-escape-string (slot-ref e 'message))))))))
+
+(define-method reply ((e <condition>))
+  (reply (list
+	  (cgi-header :status "500 Internal Server Error"))))
 
 (provide "yogomacs/reply")

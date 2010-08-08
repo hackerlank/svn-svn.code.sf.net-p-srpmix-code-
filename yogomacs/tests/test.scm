@@ -159,4 +159,17 @@
 (test* "fundamental foo.c"
        #f (fundamental "./foo.c" #f #f ()))
 
+(use yogomacs.config)
+(define config-proc0 (config->proc '((key0 . "value0"))))
+(define config-proc1 ((config-proc0 'key0 "value-1") 'key1 "value1"))
+(test* "config proc"
+       "value0"
+       (config-proc0 'key0))
+(test* "config proc"
+       "value-1"
+       (config-proc1 'key0))
+(test* "config proc"
+       "value1"
+       (config-proc1 'key1))
+
 (exit (if (zero? (test-end)) 0 1))

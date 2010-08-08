@@ -19,10 +19,10 @@
 	  size-of
 	  mtime-of
 	  url-of
-	  arrowy-from-dname-of
-	  arrowy-from-url-of
+
 	  arrowy-to-dname-of
 	  arrowy-to-url-of
+
 	  dentry-for
 	  )
   (use yogomacs.entry)
