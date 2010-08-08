@@ -114,11 +114,7 @@
 
 (define-method reply ((e <error>))
   (reply (list
-	  (cgi-header :status "502 Bad Gateway")
-	  (html-doctype)
-	  (html:html
-	   (html:head (html:title "Error"))
-	   (html:body (html:pre (html-escape-string (slot-ref e 'message))))))))
+	  (cgi-header :status "502 Bad Gateway"))))
 
 (define-method reply ((e <condition>))
   (reply (list

@@ -16,6 +16,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs emacs-el gauche-devel font-lock 
 Requires: emacs emacs-common gauche font-lock httpd xz syntax file scheme2js yogomacs-cachedir
+Requires: lcopy
 
 %description
 sources web frontend
@@ -83,6 +84,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/compress.scm
 %{_datadir}/gauche/site/lib/yogomacs/config.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
+%{_datadir}/gauche/site/lib/yogomacs/domain.scm
 %{_datadir}/gauche/site/lib/yogomacs/entry.scm
 %{_datadir}/gauche/site/lib/yogomacs/error.scm
 %{_datadir}/gauche/site/lib/yogomacs/face.scm

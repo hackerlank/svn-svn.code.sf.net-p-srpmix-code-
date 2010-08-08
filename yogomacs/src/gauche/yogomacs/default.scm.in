@@ -16,4 +16,8 @@
 
  ;; stand-alone, read-only and cache-build
  (mode . stand-alone)
+ ;; These are used by domain.scm.
+ (domains . ("/srv/sources"
+	     "/net/sources/srv/sources"
+	     "/net/sop/srv/sources"))
  )

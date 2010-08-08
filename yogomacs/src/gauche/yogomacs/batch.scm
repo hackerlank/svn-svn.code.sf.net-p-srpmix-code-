@@ -9,6 +9,7 @@
   )
 (select-module yogomacs.batch)
 
+;; TODO: Use new config overriding mechanism.
 (define (install-constants config)
   (map
    (lambda (entry)

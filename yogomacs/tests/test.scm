@@ -73,6 +73,7 @@
  yogomacs.window
  yogomacs.entry
  yogomacs.renderers.ewoc
+ yogomacs.domain
 )
 
 
@@ -171,5 +172,38 @@
 (test* "config proc"
        "value1"
        (config-proc1 'key1))
+
+
+(use yogomacs.domain)
+(define (srv-sources key) "/srv/sources")
+(test* "in-domain? #t"
+       #t
+       (in-domain? "/srv/sources/sources/k/kernel/2.6.9-78.EL/specs.spec"
+		   srv-sources
+		   ))
+
+(test* "in-domain? non-slash"
+       #f
+       (in-domain? "srv/sources/sources/k/kernel/2.6.9-78.EL/specs.spec"
+		   srv-sources
+		   ))
+(test* "in-domain? non-slash"
+       #f
+       (in-domain? ""
+		   srv-sources
+		   ))
+
+(define (srv-sources+domains key) 
+  (if (eq? key 'real-sources-dir)
+      "/srv/sources"
+      '("/srv/sources"
+	"/net/sources/srv/sources"
+	"/net/sop/srv/sources")))
+
+(test* "to-domain? "
+       #t
+       (to-domain? "/srv/sources/sources/k/kernel/2.6.9-78.EL/specs.spec"
+		   srv-sources+domains
+		   ))
 
 (exit (if (zero? (test-end)) 0 1))

@@ -22,6 +22,7 @@
   (use gauche.process)
   (use yogomacs.access)
   (use yogomacs.error)
+  (use yogomacs.domain)
   ;;
   (use sxml.sxpath)
   )
@@ -67,13 +68,14 @@
 	      (values shtml last-modified-time))))))
 
 (define (file-dest path params config)
-   (let* ((last (last path))
-	  (head (path->head path))
-	  (real-src-dir (build-path (config 'real-sources-dir) head))
-	  (real-src-file (build-path real-src-dir last))
-	  (file-type (file-type real-src-file)))
-     (file-dest0 real-src-file file-type (config 'mode) params config)))
-
+  (let* ((last (last path))
+	 (head (path->head path))
+	 (real-src-dir (build-path (config 'real-sources-dir) head))
+	 (real-src-file (build-path real-src-dir last))
+	 (file-type (file-type real-src-file)))
+    (if (to-domain? real-src-file config)
+	(file-dest0 real-src-file file-type (config 'mode) params config)
+	(forbidden "Out of domain" real-src-file))))
 
 (define-macro (guard-with-asis real-src-file config . body)
   `(guard (e (else (receive (asis last-modified-time)

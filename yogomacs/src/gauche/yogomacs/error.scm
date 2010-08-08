@@ -3,6 +3,7 @@
 	  <yogomacs-error>
 	  timeout
 	  not-found
+	  forbidden
 	  internal-error)
   (use www.cgi)  
   (use text.html-lite)
@@ -39,7 +40,9 @@
 (define timeout
    (base-error "504 Gateway Timeout"))
 (define not-found
-   (base-error "403 Not Found"))
+   (base-error "404 Not Found"))
+(define forbidden
+  (base-error "403 Forbidden"))
 (define internal-error
    (base-error "500 Internal Error"))
 

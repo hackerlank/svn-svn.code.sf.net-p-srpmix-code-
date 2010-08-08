@@ -25,6 +25,7 @@
   (use yogomacs.rearranges.face-integrates)
   ;;
   (use yogomacs.error)
+  (use yogomacs.domain)
   )
 
 (select-module yogomacs.dests.dir)
@@ -47,24 +48,28 @@
     (let* ((last (last path))
 	   (head (path->head path))
 	   (real-src-dir (build-path (config 'real-sources-dir)
-				     head last))
-	   (dentries (glob-dentries real-src-dir 
+				     head last)))
+      ;;
+      (unless (to-domain? real-src-dir config)
+	(forbidden "Out of domain" real-src-dir))
+      ;;
+      (let1 dentries (glob-dentries real-src-dir 
 				    (make-dir-globs (build-path "/" 
 								head)
 						    last
-						    extra))))
-      (if dentries
-	  (begin (prepare-dired-faces config)
-		 (make <shtml-data>
-		   :params params
-		   :config config
-		   :data ((compose integrate-dired-face) (dired 
-							  (compose-path path)
-							  dentries
-							  css-route))
-		   :last-modification-time #f))
-	  (not-found #`"Cannot find ,(compose-path path)" 
-		     #`"Cannot find ,|real-src-dir| for ,(compose-path path)"))))
+						    extra))
+	(if dentries
+	    (begin (prepare-dired-faces config)
+		   (make <shtml-data>
+		     :params params
+		     :config config
+		     :data ((compose integrate-dired-face) (dired 
+							    (compose-path path)
+							    dentries
+							    css-route))
+		     :last-modification-time #f))
+	    (not-found #`"Cannot find ,(compose-path path)" 
+		       #`"Cannot find ,|real-src-dir| for ,(compose-path path)")))))
    ((path params config)
     (dir-dest path params config (list)))))
 
