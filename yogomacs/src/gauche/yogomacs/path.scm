@@ -2,7 +2,9 @@
   (export decompose-path
 	  compose-path
 	  compose-path*
-	  path->head)
+	  path->head
+	  parent-of
+	  )
   (use file.util))
 
 (select-module yogomacs.path)
@@ -16,8 +18,11 @@
 (define (compose-path* path-list elt)
    (compose-path (reverse! (cons elt (reverse path-list)))))
 
+(define (parent-of path)
+  (reverse (cdr (reverse path))))
+
 (define (path->head path)
-  (let1 l (reverse (cdr (reverse path)))
+  (let1 l (parent-of path)
     (if (null? l)
 	""
 	(apply build-path l))))

@@ -2,7 +2,6 @@
   (export root-dir-dest)
   (use www.cgi) 
   (use file.util)
-  (use srfi-1)
   (use srfi-19)
   ;;
   (use yogomacs.route)
@@ -65,8 +64,9 @@
       :last-modification-time #f)))
 
 (define (README-dest path params config)
-  (text-dest path params config
-	     (README-entry (drop-right path 1))))
+  (text-dest (README-entry (parent-of path))
+	     path params config
+	     ))
 
 (define (routing-table path)
    `((#/^\/$/ ,dest)
@@ -76,7 +76,8 @@
      (#/^\/plugins(?:\/.+)?$/   ,root-plugins-dir-dest)
      (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
      (#/^\/bscm(?:\/.+)?$/   ,bscm-dir-dest)
-     (#/^\/README$/  ,README-dest)
+     ;; TODO: use path
+     (#/^\/README$/  ,README-entry)
      (#/^.*$/ ,print-path)
      ))
 

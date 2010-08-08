@@ -13,7 +13,7 @@
 
 (select-module yogomacs.dests.text)
 
-(define (text-dest path params config dentry)
+(define (text-dest dentry path params config)
   (let1 shtml (text (compose-path path) 
 		    config
 		    (text-of dentry)
@@ -25,4 +25,4 @@
       :data ((compose fix-css-href integrate-file-face) shtml)
       :last-modification-time #f)))
 
-(provide "yogomacs/dests/text")
+(provide "yogomacs/dests/text") 
