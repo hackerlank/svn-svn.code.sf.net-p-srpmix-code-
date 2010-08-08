@@ -22,7 +22,7 @@
 
 ** Fine grading server side cache control
 *** Modification time <*>
-*** force no cache & lcopy
+*** force no cache & lcopy <done>
 
 ** Fine grading client side cache control
 *** create-time format<*>
@@ -35,17 +35,17 @@
 ** FS strcture
 *** Sending dist-mapping.es in asis
 *** attic*
-*** lcopy
+*** lcopy <done>
 
 ** Clean up
 *** File selection(exclude wrong type file) <done>
 *** use #`,format
-*** storage separations
+*** storage separations <partially done>
 **** (real-src-dir (build-path (config 'real-sources-dir) head)) in yogomacs/dests/file.scm
     => (sources-path head last) => (values real-src-dir real-src-path)
 **** storage-of: sources, text-field...
 *** raw-mode in dired
-*** show error message when internal crash, see error handler<*>
+*** show error message when internal crash, see error handler<done>
 
 ** Dired
 *** link-to URL
@@ -56,7 +56,8 @@
 ** plugins
 ** home
 ** proc --- cookie
-** plugins/loging
+** plugins/login
+** plugins/exit
 ** plugins/ysh
 ** read-only
 
