@@ -8,6 +8,7 @@
 
 (define (route rtable path params config)
   (route0 rtable
+	  ;; TODO check ((sanitize-path path) == path) => redirect
 	  (sanitize-path path)
 	  params
 	  config))

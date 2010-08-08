@@ -1,6 +1,5 @@
 (define-module yogomacs.renderers.yogomacs
   (export yogomacs)
-  (use www.cgi)
   (use text.html-lite)
   (use yogomacs.path)
   (use yogomacs.shell)
@@ -34,8 +33,7 @@
 	 (title (compose-path path))
 	 (url title)
 	 (next-params #`"yogomacs=,|shell-name|")
-	 (next-params (or (and-let* ((range (cgi-get-parameter "range" params
-								   :default #f)))
+	 (next-params (or (and-let* ((range (params "range")))
 			    (format "range=~a&~a"  (html-escape-string range) next-params))
 			  next-params))
 	 (js-list (reverse (cons `(,(extra-scripts url next-params shell) . inline)

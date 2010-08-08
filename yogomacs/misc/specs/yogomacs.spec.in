@@ -89,7 +89,9 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/error.scm
 %{_datadir}/gauche/site/lib/yogomacs/face.scm
 %{_datadir}/gauche/site/lib/yogomacs/flserver.scm
+%{_datadir}/gauche/site/lib/yogomacs/lcopy.scm
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
+%{_datadir}/gauche/site/lib/yogomacs/params.scm
 %{_datadir}/gauche/site/lib/yogomacs/path.scm
 %{_datadir}/gauche/site/lib/yogomacs/reply.scm
 %{_datadir}/gauche/site/lib/yogomacs/route.scm

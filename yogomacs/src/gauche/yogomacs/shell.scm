@@ -5,14 +5,12 @@
 	  define-shell0
 	  shell-ref
 	  all-shells)
-  (use www.cgi)
   (use util.list))
 
 (select-module yogomacs.shell)
 
 (define (in-shell? params)
-  (cgi-get-parameter "yogomacs" params  
-		     :default #f))
+  (params "yogomacs"))
 
 (define-class <shell> ()
   ((name :init-keyword :name)

@@ -77,8 +77,7 @@
 ;; TODO: THIS SHOULD NOT BE HERE. THIS SHOULE BE AT REARRANGES.
 ;; TODO: enum for dired.
 (define (make-narrow-down params)
-  (or (and-let* ((range-string (cgi-get-parameter "range" params 
-						  :default #f))
+  (or (and-let* ((range-string (params "range"))
 		 (range (guard (e (else #f)) 
 			       (parse-range range-string))))
 	(cute rearrange-range <> (car range) (cdr range)))

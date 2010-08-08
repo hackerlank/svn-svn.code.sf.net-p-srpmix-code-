@@ -7,6 +7,7 @@
   (use yogomacs.config)
   (use yogomacs.reply)
   (use yogomacs.error)
+  (use yogomacs.params)
   ;;
   (use yogomacs.dests.root-dir)
   (use yogomacs.dests.css)
@@ -45,10 +46,15 @@
 	      :output-proc reply
 	      :on-error    (pa$ error-handler config))))
 
+(define default-params '(("path" . "/")
+			 ("range" . #f)
+			 ("yogomacs" . #f)))
+
 (define (yogomacs params config)
-  (let1 path (cgi-get-parameter "path" params :default "/")
-    (if config
-	(route routing-table path params (config->proc config))
-	(cgi-header :status "500 Internal server Error"))))
+  (let1 params (params->proc params default-params)
+    (let1 path (params "path")
+      (if config
+	  (route routing-table path params (config->proc config))
+	  (cgi-header :status "500 Internal server Error")))))
 
 (provide "yogomacs/main")

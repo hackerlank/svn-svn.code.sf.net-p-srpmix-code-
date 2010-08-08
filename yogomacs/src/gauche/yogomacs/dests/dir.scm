@@ -69,7 +69,7 @@
 							    css-route))
 		     :last-modification-time #f))
 	    (not-found #`"Cannot find ,(compose-path path)" 
-		       #`"Cannot find ,|real-src-dir| for ,(compose-path path)")))))
+		       #`",|real-src-dir| for ,(compose-path path)")))))
    ((path params config)
     (dir-dest path params config (list)))))
 

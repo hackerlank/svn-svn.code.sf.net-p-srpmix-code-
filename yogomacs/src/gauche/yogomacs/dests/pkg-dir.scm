@@ -8,35 +8,39 @@
   (use yogomacs.dests.dir)
 
   (use yogomacs.dests.srpmix-dir)
+  (use yogomacs.dests.lcopy-dir)
   (use srfi-1)
   (use file.util)
+  (use yogomacs.lcopy)
   )
 (select-module yogomacs.dests.pkg-dir)
 
-(define (lcopy-spec path)
-  (let ((last (last path))
-	(head (path->head path)))
+(define (lcopy-spec path config)
+  (let* ((last (last path))
+	 (head (path->head path))
+	 (lcopy-path (lambda (root e) 
+		       (build-path root 
+				   head
+				   last
+				   (dname-of e)))))
     `((,#/\^lcopy-[^\/]+/ 
 		  #t
+		  ,(lambda (fs-dentry) 
+		     (lcopy-path "/" fs-dentry))
 		  ,(lambda (fs-dentry)
-		     (build-path "/" 
-				 head
-				 last
-				 (dname-of fs-dentry)))
-		  ;;
-		  ,(lambda (fs-dentry)
-		     (format "~a,~a" last ((#/\^lcopy-([^\/]+)/ (dname-of fs-dentry)) 1))
-		     )
+		     (lcopy-dir->checkout-cmdline 
+		      (lcopy-path (config 'real-sources-dir)
+				  fs-dentry)))
 		  ;; XXX
 		  ))))
 
 (define (dest path params config)
   (dir-dest path params config
-	       (lcopy-spec path)))
+	       (lcopy-spec path config)))
 
 (define routing-table
   `((#/^\/sources\/[a-zA-Z0-9]\/[^\/]+$/ ,dest)
-    ;; (#/^\/sources\/[a-zA-Z0-9]\/\^lcopy-([^\/]+)(?:\/.+)?$/ ,lcopy-dir-dest)
+    (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/\^lcopy-([^\/]+)(?:\/.+)?$/ ,lcopy-dir-dest)
     (#/^\/sources\/[a-zA-Z0-9]\/[^\/]+\/([^^\/]+)(?:\/.+)?$/ ,srpmix-dir-dest)
     ))
 

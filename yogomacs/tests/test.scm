@@ -74,6 +74,8 @@
  yogomacs.entry
  yogomacs.renderers.ewoc
  yogomacs.domain
+ yogomacs.params
+ yogomacs.lcopy
 )
 
 
@@ -205,5 +207,10 @@
        (to-domain? "/srv/sources/sources/k/kernel/2.6.9-78.EL/specs.spec"
 		   srv-sources+domains
 		   ))
+
+(use yogomacs.lcopy)
+(test* "lcopy kernel trunk"
+       "git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git"
+       (lcopy-dir->checkout-cmdline "/srv/sources/sources/k/kernel/^lcopy-trunk"))
 
 (exit (if (zero? (test-end)) 0 1))

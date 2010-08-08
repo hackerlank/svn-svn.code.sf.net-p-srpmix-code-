@@ -20,7 +20,9 @@ dist_module_DATA =   \
 	error.scm				\
 	face.scm				\
 	flserver.scm				\
+	lcopy.scm				\
 	main.scm				\
+	params.scm				\
 	path.scm				\
 	reply.scm				\
 	route.scm				\
