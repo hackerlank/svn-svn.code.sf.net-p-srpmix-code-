@@ -16,7 +16,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs emacs-el gauche-devel font-lock 
 Requires: emacs emacs-common gauche font-lock httpd xz syntax file scheme2js yogomacs-cachedir
-Requires: lcopy
+Requires: lcopy >= 0.2.7
 
 %description
 sources web frontend
