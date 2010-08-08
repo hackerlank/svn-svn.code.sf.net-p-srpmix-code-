@@ -134,6 +134,36 @@ function darcs_checkout
 }
 
 #
+# PRINT_CMDLINE
+#
+function darcs_help_print_cmdline
+{
+    echo "	$0 " "print_cmdline" "FILE.lcopy" "checkout"
+}
+
+function darcs_print_cmdline
+{
+    local input=$1
+    local cmd=$2
+
+    if ! source "$input"; then
+	return 1
+    fi
+
+    if [ "$cmd" = "checkout" ]; then
+	if [ -z "${DARCS_REPOSITORY}" ]; then
+	    echo "no DARCS_REPOSITORY in $input" 1>&2
+	    return 1
+	fi
+	echo darcs get "${DARCS_REPOSITORY}"
+    else
+	return 1
+    fi
+
+    return 0
+}
+
+#
 # UPDATE
 #
 function darcs_help_update

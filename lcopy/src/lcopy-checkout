@@ -10,6 +10,7 @@ LCOPY_VCS=
 LCOPY_PACKAGE=
 LCOPY_BRANCH=
 NO_ERROR_MESSAGE_IF_EXISTING=
+JUST_PRINT_CMDLINE=
 
 readonly ERROR=1
 readonly EXISTED=2
@@ -19,6 +20,7 @@ function print_usage
     echo "Usage: "
     echo "$0 --help|-h"
     echo "$0 [--output-dir=OUTPUT-DIR] [--no-error-message-if-existing] FILE.lcopy"
+    echo "$0 --just-print-cmdline [FILE.lcopy]"
     echo ""
     echo "(taking checkout configurations from stdin)"
     echo "Exit status: "
@@ -42,6 +44,10 @@ function parse_arguments
 	    --no-error-message-if-existing)
 	        NO_ERROR_MESSAGE_IF_EXISTING=yes
 		;;
+            --just-print-cmdline)
+		JUST_PRINT_CMDLINE=yes
+		NO_ERROR_MESSAGE_IF_EXISTING=yes
+		;;
 	    --*)
 		echo "unknown option: $1" 1>&2
 		print_usage 1>&2
@@ -61,16 +67,29 @@ function parse_arguments
 	shift
     done
 
-    if ! [ -d "$OUTPUT_DIR" ]; then
-	echo "no such directory: $OUTPUT_DIR" 1>&2
-	exit $ERROR
-    fi
+    if [ -z "$JUST_PRINT_CMDLINE" ]; then
+	if ! [ -d "$OUTPUT_DIR" ]; then
+	    echo "no such directory: $OUTPUT_DIR" 1>&2
+	    exit $ERROR
+	fi
     
-    if ! [ -w "$OUTPUT_DIR" ]; then
-	echo "cannot write to: $OUTPUT_DIR" 1>&2
-	exit $ERROR
+	if ! [ -w "$OUTPUT_DIR" ]; then
+	    echo "cannot write to: $OUTPUT_DIR" 1>&2
+	    exit $ERROR
+	fi
     fi
-		  
+
+
+    if [ -z "$INPUT" ] && [ -n "$JUST_PRINT_CMDLINE" ]; then
+	if ! [ -f "checkout.lcopy" ]; then
+	    echo "Not found: checkout.lcopy" 1>&2
+	    print_usage 1>&2
+	    exit $ERROR
+	else
+	    INPUT="checkout.lcopy"
+	fi
+    fi
+
     if [ -z "$INPUT" ]; then
 	echo "no lcopy file given" 1>&2
 	print_usage 1>&2
@@ -138,7 +157,10 @@ function main
     parse_arguments "$@"
     load_input $INPUT
 
-    if [ -d "${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH}" ]; then
+    if [ x"$JUST_PRINT_CMDLINE" = x"yes" ]; then
+	lcopy_backend_print_cmdline "$LCOPY_VCS" "$INPUT" checkout
+	return $?
+    elif [ -d "${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH}" ]; then
 	if [ "${NO_ERROR_MESSAGE_IF_EXISTING}" != "yes" ]; then
 	    echo "${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH} already exits" 1>&2
 	fi

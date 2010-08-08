@@ -3,7 +3,7 @@
 # VERSION=
 
 
-COMMON_SUBCMDS="genconf checkout update dirp rebirth genconf_format"
+COMMON_SUBCMDS="checkout dirp genconf genconf_format print_cmdline rebirth update"
 
 function common_help_help
 {

@@ -136,6 +136,36 @@ function svn_checkout
 }
 
 #
+# PRINT_CMDLINE
+#
+function svn_help_print_cmdline
+{
+    echo "	$0 " "print_cmdline" "FILE.lcopy" "checkout"
+}
+
+function svn_print_cmdline
+{
+    local input=$1
+    local cmd=$2
+
+    if ! source "$input"; then
+	return 1
+    fi
+
+    if [ "$cmd" = "checkout" ]; then
+	if [ -z "${SVN_REPOSITORY}" ]; then
+	    echo "no SVN_REPOSITORY in $input" 1>&2
+	    return 1
+	fi
+	echo svn checkout "${SVN_REPOSITORY}"
+    else
+	return 1
+    fi
+
+    return 0
+}
+
+#
 # UPDATE
 #
 function svn_help_update

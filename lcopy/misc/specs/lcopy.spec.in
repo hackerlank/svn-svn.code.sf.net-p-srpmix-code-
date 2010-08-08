@@ -4,7 +4,20 @@ Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 Requires: cvs subversion git mercurial darcs bzr
+
+
+
 # Requires: srpmix
+# ----------------------------------------------------
+# See lcopy_srpmix_plugin in lcopy/src/liblcopy.sh
+# Use srpmix-plugin command if it is available.
+# lcopy-envelop uses srpmix heavily. The command is
+# invoked as sbuild backend.
+#
+# FIXME: wgetx uses vanilla srpmix-plugin.
+#
+# TODO: Put lcopy-envelop to a sub package of lcopy.
+# ----------------------------------------------------
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root

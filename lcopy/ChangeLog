@@ -1,3 +1,31 @@
+2010-08-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.2.7.
+
+	* src/liblcopy_backends.sh.in (COMMON_SUBCMDS): Added print_cmdline
+	
+	* src/lcopy-checkout: Added --just-print-cmdline option.
+
+	* src/liblcopy.sh.in (lcopy_backend_print_cmdline): New function.
+
+	* src/backends/wgetx (wgetx_print_cmdline): New function.
+
+	* src/backends/svn (svn_print_cmdline): New function.
+
+	* src/backends/hg (hg_print_cmdline): New function.
+
+	* src/backends/git (git_print_cmdline): New function.
+
+	* src/backends/darcs (darcs_print_cmdline): New function.
+
+	* src/backends/cvs (cvs_print_cmdline): New function.
+
+	* src/backends/bzr (bzr_print_cmdline): New function.
+
+	* misc/specs/lcopy.spec.in (Require): Write comment
+	about the relationship between lcopy commands and
+	srpmix/sbuild.
+
 2010-07-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/backends/bzr (bzr_update): Set BZR_LOG /dev/null.

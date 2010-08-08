@@ -204,6 +204,40 @@ function cvs_checkout
 }
 
 #
+# PRINT_CMDLINE
+#
+function cvs_help_print_cmdline
+{
+    echo "	$0 " "print_cmdline" "FILE.lcopy" "checkout"
+}
+function cvs_print_cmdline
+{
+    local input=$1
+    local cmd=$2
+
+    if ! source "$input"; then
+	return 1
+    fi
+
+    if [ "$cmd" = "checkout" ]; then
+	if [ -z "${CVS_REPOSITORY}" ]; then
+	    echo "no CVS_REPOSITORY in $input" 1>&2
+	    return 1
+	fi
+
+	if [ -z "${CVS_MODULE}" ]; then
+	    echo "no CVS_MODULE in $input" 1>&2
+	    return 1
+	fi
+	echo cvs -d"${CVS_REPOSITORY}" checkout -P "${CVS_MODULE}"
+    else
+	return 1
+    fi
+
+    return 0
+}
+
+#
 # UPDATE
 #
 function cvs_help_update

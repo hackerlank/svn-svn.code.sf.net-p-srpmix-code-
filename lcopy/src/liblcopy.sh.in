@@ -93,6 +93,24 @@ function lcopy_backend_checkout
     lcopy_backend_call $vcs checkout "$@"
 }
 
+function lcopy_backend_print_cmdline
+{
+    local vcs=$1
+    shift
+    local input=$1
+    shift
+    local cmd=$1
+    shift
+
+    if [ "$cmd" = "checkout" ]; then
+	lcopy_backend_call "$vcs" print_cmdline "$input" "$cmd"
+	return $?
+    else
+	echo "$cmd is not supported in command printing" 1>&2
+	return 1
+    fi
+}
+
 function lcopy_backend_update
 {
     local vcs=$1

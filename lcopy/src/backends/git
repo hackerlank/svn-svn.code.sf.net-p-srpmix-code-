@@ -134,6 +134,35 @@ function git_checkout
 
     return $?
 }
+#
+# PRINT_CMDLINE
+#
+function git_help_print_cmdline
+{
+    echo "	$0 " "print_cmdline" "FILE.lcopy" "checkout"
+}
+
+function git_print_cmdline
+{
+    local input=$1
+    local cmd=$2
+
+    if ! source "$input"; then
+	return 1
+    fi
+
+    if [ "$cmd" = "checkout" ]; then
+	if [ -z "${GIT_REPOSITORY}" ]; then
+	    echo "no GIT_REPOSITORY in $input" 1>&2
+	    return 1
+	fi
+	echo git clone "${GIT_REPOSITORY}"
+    else
+	return 1
+    fi
+
+    return 0
+}
 
 #
 # UPDATE

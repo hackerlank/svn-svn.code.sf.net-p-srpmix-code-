@@ -135,6 +135,36 @@ function bzr_checkout
 }
 
 #
+# PRINT_CMDLINE
+#
+function bzr_help_print_cmdline
+{
+    echo "	$0 " "print_cmdline" "FILE.lcopy" "checkout"
+}
+
+function bzr_print_cmdline
+{
+    local input=$1
+    local cmd=$2
+
+    if ! source "$input"; then
+	return 1
+    fi
+
+    if [ "$cmd" = "checkout" ]; then
+	if [ -z "${BZR_REPOSITORY}" ]; then
+	    echo "no BZR_REPOSITORY in $input" 1>&2
+	    return 1
+	fi
+	echo bzr branch "${BZR_REPOSITORY}"
+    else
+	return 1
+    fi
+
+    return 0
+}
+
+#
 # UPDATE
 #
 function bzr_help_update
