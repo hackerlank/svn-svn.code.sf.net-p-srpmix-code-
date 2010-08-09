@@ -3,6 +3,9 @@
 ;;
 (define (pa$ proc . args)
   (lambda rest (apply proc (append args rest))))
+(define (paste thunk)
+  (lambda rest (thunk)))
+
 (define (fold proc initial lst)
   (if (null? lst)
       initial
@@ -20,6 +23,30 @@
    (else
     (error "wrong type given to tree->string"))))
 
+(define (read-from-string string)
+  (with-input-from-string string
+    read))
+(define (write-to-string exp)
+  (with-output-to-string (pa$ write exp)))
+
+;; This is workaround for brkoken scheme2js read proc.
+(define (keyword->symbol key)
+  (string->symbol 
+   (string-append ":" 
+		  (keyword->string key))))
+
+;; TODO: Report 
+;;(define-method ref ((list <list>) (keyword <keyword>))
+;;  (get-keyword ...)
+(define (kref klist key default)
+  (cond
+   ((null? klist) default)
+   ((eq? (car klist) key) (cadr klist))
+   ((and (keyword? key) 
+	 (eq? (keyword->symbol key) 
+	      (car klist)))
+    (cadr klist))
+   (else (kref (cddr klist) key default))))
 
 (define ($ elt)
   ((js-field *js* "$") elt))
@@ -40,9 +67,8 @@
 			      (let ((prop (car elt))
 				    (val  (cadr elt)))
 				 (list " " (symbol->string prop)
-				       "=" (with-output-to-string 
-					     (pa$ write 
-						  (html-escape-string val))))
+				       "=" (write-to-string
+					    (html-escape-string val)))
 				 ))
 			   (cdr sxml)))
    (else 
@@ -86,16 +112,23 @@
      a)
     o))
 
+(define (read-from-response response)
+  (read-from-string response.responseText))
+
+
 ;;
 ;; Scheme2js -> Biwascheme
 ;;
 (define (scm->scm bscm exp)
-  (let1 str (with-output-to-string (pa$ write exp))
+  (let1 str (write-to-string exp)
     (bscm.evaluate str)))
 
 ;;
 ;; Yogomacs level
 ;;
+;; TODO alist->params ;;
+
+
 (define-hook find-file-pre-hook)
 (define-hook toggle-full-screen-hook)
 (define-hook read-from-minibuffer-hook)
@@ -106,21 +139,10 @@
 				 (elt.focus)
 				 (elt.select))))
 
-;; TODO alist->params
-(define (keyword->symbol key)
-  (string->symbol 
-   (string-append ":" 
-		  (keyword->string key))))
-(define (kref klist key default)
-  (cond
-   ((null? klist) default)
-   ((eq? (car klist) key) (cadr klist))
-   ((and (keyword? key) 
-	 (eq? (keyword->symbol key) 
-	      (car klist)))
-    (cadr klist))
-   (else (kref (cddr klist) key default))))
 
+;;
+;; Stitch
+;;
 (define (stitch-make-insertion-proc type)
   (cond
    ((eq? type 'file) (lambda (posinfo frag) 
@@ -137,43 +159,47 @@
 
 (define (stitch-make-render-proc type)
   (cond
-   ((eq? type 'text)  (lambda (anon date full-name mailing-address keywords)
+   ((eq? type 'text)  (lambda (text date full-name mailing-address keywords)
 			(sxml->xhtml 
-			 `(div (|@| (class "stitch"))
+			 `(div (|@|
+				(class "annotation-div")
+				;(id ...)
+				)
 			   "\n"
-			   (span (|@| (class "stitch-date-face"))
+			   (span (|@| 
+				  (class "annotation-date-face"))
 				 ,date)
 			   "  "
-			   (span  (|@| (class "stitch-name"))
+			   (span  (|@| (class "annotation-name"))
 				  ,full-name)
 			   "  "
 			   "<"
-			   (span  (|@| (class "stitch-email"))
+			   (span  (|@| (class "annotation-email"))
 				  ,mailing-address)
 			   ">"
 			   "\n"
 			   "\n"
-			   (span  (|@| (class "stitch-text"))
-				  ,anon)
+			   (span  (|@| (class "annotation-text"))
+				  ,text)
 			   "\n"
 			   "\n")
 			 )))
-   (else (lambda (anon date full-name mailing-address keywords)
+   (else (lambda (content date full-name mailing-address keywords)
 	   #f))))
 
 (define (stitch-annotation elt)
   (let1 elt (cdr elt)
     (let* ((target (kref elt :target #f))
-	   (annotation (kref elt :annotation #f))
+	   (content (kref elt :content #f))
 	   (date (kref elt :date #f))
 	   (full-name (kref elt :full-name #f))
 	   (mailing-address (kref elt :mailing-address #f))
 	   (keywords (kref elt :keywords (list))))
       (let ((insertion-proc (stitch-make-insertion-proc (car target)))
-	    (render-proc (stitch-make-render-proc (car annotation)))
+	    (render-proc (stitch-make-render-proc (car content)))
 	    ;;(filter-proc (stitch-make-filter-proc keywords))
 	    )
-	(let1 frag  (render-proc (cadr annotation)
+	(let1 frag  (render-proc (cadr content)
 				 date
 				 full-name
 				 mailing-address
@@ -181,27 +207,27 @@
 	  (insertion-proc (cadr target)
 			  frag))))))
 
-(define (do-stitch stitches)
+(define (stitch-annotations annotations)
   (cond 
-   ((eq? (car stitches) 'stitch-container)
+   ((eq? (car annotations) 'annotation-container)
     (for-each
      (lambda (elt)     
        (cond
 	((eq? (car elt) 'annotation)
 	 (stitch-annotation elt))))
-     (cdr stitches)
+     (cdr annotations)
      ))))
 
-(define (require-stitches url params)
+
+(define (require-annotations url params)
   (let1 options (alist->object `((method . "get")
 				 (parameters . ,params)
 				 (onSuccess . ,(lambda (response)
-						 (do-stitch
-						  (with-input-from-string response.responseText
-						    read))
+						 (stitch-annotations
+						  (read-from-response response))
 						 ))))
     (js-new Ajax.Request
-	    (string-append "/web/stitch" url)
+	    (string-append "/web/annotation" url)
 	    options)))
 
 (define (load-lazy url params)
@@ -210,10 +236,12 @@
 				 (onFailure . ,(lambda ()
 						 (alert "An error occured")))
 				 (onComplete . ,(lambda ()
-						  (require-stitches url params)))
+						  (require-annotations url params)))
 				 ))
     (js-new Ajax.Updater "buffer" url options)))
 			       
+
+
 
 (define full-screen #f)
 (define (full-screen?)  full-screen)
@@ -262,10 +290,13 @@
 				   (position . "fixed")
 				   (z-index . "0"))))))
 
+;;
+;; Repl
+;;
 (define (repl eval output-prefix)
   (let1 str (<- "minibuffer")
     (let1 result (with-error-handler 
-		   (lambda (e) (with-output-to-string (pa$ write e)))
+		   write-to-string
 		   (pa$ eval str))
       (-> (string-append output-prefix result) "minibuffer")))
   (let1 elt ($ "minibuffer")
@@ -354,13 +385,11 @@
   (unless ysh
     (set! ysh (new-bscm ysh-dir)))
   (let1 str
-      (let1 exp (with-input-from-string 
-		    (string-append "(" str ")") 
-		  read)
-	(with-output-to-string 
-	  (pa$ write
-	       (cons (car exp)
-		     (map symbol->string (cdr exp))))))
+      (let1 exp (read-from-string
+		 (string-append "(" str ")") )
+	(write-to-string (cons (car exp)
+			       (map symbol->string (cdr exp))) 
+			 ))
     (let1 result #f
       (ysh.evaluate str
 		    (lambda (r) 
@@ -369,6 +398,9 @@
 
 (define (ysh-interpret)
   (repl ysh-eval "# "))
+
+
+
 
 (define (highlight id)
   (let1 elt ($ id)

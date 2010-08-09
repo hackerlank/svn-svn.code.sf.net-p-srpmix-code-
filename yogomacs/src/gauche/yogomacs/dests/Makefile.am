@@ -1,6 +1,7 @@
 moduledir=@GAUCHE_MODULEDIR@/yogomacs/dests
 dist_module_DATA =   \
 	\
+	annotation.scm				\
 	bscm-dir.scm				\
 	css.scm					\
 	debug.scm				\
@@ -17,7 +18,6 @@ dist_module_DATA =   \
 	root-plugins-dir.scm			\
 	sources-dir.scm				\
 	srpmix-dir.scm                          \
-	stitch.scm                              \
 	text.scm                                \
 	ysh-dir.scm				\
         \

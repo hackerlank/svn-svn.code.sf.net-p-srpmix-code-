@@ -1,6 +1,8 @@
 (define-module yogomacs.renderers.yogomacs
   (export yogomacs)
   (use text.html-lite)
+  (use srfi-1)
+  (use util.list)
   (use yogomacs.path)
   (use yogomacs.shell)
   (use yogomacs.window)
@@ -8,10 +10,22 @@
 
 (select-module yogomacs.renderers.yogomacs)
 
+(define smart-phone-user-agents '(#/HTCX06HT/))
+(define (insert-user-agent-action)
+  (let1 user-agent (assoc-ref (sys-environ->alist) "HTTP_USER_AGENT" "")
+    (list
+     (cond
+      ((any (cute <> user-agent) smart-phone-user-agents)
+       '(add-hook find-file-pre-hook enter-full-screen))
+      (else
+       '())))))
+	
 (define (extra-scripts url params shell)
+  
   `((add-hook find-file-pre-hook (pa$ load-lazy ,url ,params))
     (add-hook toggle-full-screen-hook toggle-full-screen)
     (add-hook read-from-minibuffer-hook ,(ref shell 'interpreter))
+    ,@(insert-user-agent-action)
     ))
 
 (define (yogomacs path params shell)

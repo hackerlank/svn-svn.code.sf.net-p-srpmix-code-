@@ -22,25 +22,26 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
-.stitch {
+.annotation-div {
     background-color: #444444;
+    padding-left: 1em;
 }
 
-.stitch-date-face {
+.annotation-date-face {
     /* change-log-date-face */
     color: #ffa07a
 }
 
-.stitch-name {
+.annotation-name {
     /* change-log-name */
     color: #7fffd4;
 }
 
-.stitch-email {
+.annotation-email {
     /* change-log-email */
     color: #eedd82;
 }
 
-.stitch-text {
+.annotation-text {
     color: #ffffff;
 }

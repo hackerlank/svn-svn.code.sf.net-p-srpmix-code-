@@ -103,4 +103,4 @@
 
 @include(dired-font-lock,Default)
 @include(file-font-lock,Default)
-@include(stitch,Default)
+@include(annotation,Default)

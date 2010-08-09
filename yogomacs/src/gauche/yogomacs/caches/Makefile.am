@@ -10,14 +10,14 @@ dist_module_DATA =   \
 
 csscachedir=$(localstatedir)/lib/yogomacs/@SPEC_CONFIG@/css
 dist_csscache_DATA= \
-	file-font-lock--Default.css  \
-	file-font-lock--Invert.css   \
-	dired-font-lock--Default.css \
-	dired-font-lock--Invert.css  \
-	yogomacs--Default.css \
-	yogomacs--Invert.css  \
-	stitch--Default.css   \
-	stitch--Invert.css    \
+	file-font-lock--Default.css		\
+	file-font-lock--Invert.css		\
+	dired-font-lock--Default.css		\
+	dired-font-lock--Invert.css		\
+	yogomacs--Default.css			\
+	yogomacs--Invert.css			\
+	annotation--Default.css			\
+	annotation--Invert.css                  \
 	\
 	$(NULL)
 
