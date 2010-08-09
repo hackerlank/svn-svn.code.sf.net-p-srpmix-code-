@@ -17,8 +17,12 @@
 		     path)
      (any (cute string-prefix? <> path) (config 'domains))))))
 
+(define (realpath path)
+  #;(sys-realpath symlink)
+  path)
+
 (define (to-domain? symlink config)
-  (in-domain? (sys-realpath symlink)
+  (in-domain? (realpath symlink)
 	      config))
 
 (provide "yogomacs/domain")

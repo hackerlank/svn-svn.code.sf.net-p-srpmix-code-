@@ -107,19 +107,101 @@
 				 (elt.select))))
 
 ;; TODO alist->params
-(define (stitch stitches)
-  (alert (apply string-append stitches)))
+(define (keyword->symbol key)
+  (string->symbol 
+   (string-append ":" 
+		  (keyword->string key))))
+(define (kref klist key default)
+  (cond
+   ((null? klist) default)
+   ((eq? (car klist) key) (cadr klist))
+   ((and (keyword? key) 
+	 (eq? (keyword->symbol key) 
+	      (car klist)))
+    (cadr klist))
+   (else (kref (cddr klist) key default))))
+
+(define (stitch-make-insertion-proc type)
+  (cond
+   ((eq? type 'file) (lambda (posinfo frag) 
+		       (let1 id (string-append "L:" (number->string posinfo))
+			 (let1 elt ($ id)
+			   (when elt
+			     (elt.insert (alist->object `((before . ,frag)))))))))
+   ((eq? type 'directory) (lambda (posinfo frag) 
+		       (let1 id (string-append "N:" posinfo)
+			 (let1 elt ($ id)
+			   (when elt
+			     (elt.insert (alist->object `((before . ,frag)))))))))
+   (else (lambda (posinfo frag) #f))))
+
+(define (stitch-make-render-proc type)
+  (cond
+   ((eq? type 'text)  (lambda (anon date full-name mailing-address keywords)
+			(sxml->xhtml 
+			 `(div (|@| (class "stitch"))
+			   "\n"
+			   (span (|@| (class "stitch-date-face"))
+				 ,date)
+			   "  "
+			   (span  (|@| (class "stitch-name"))
+				  ,full-name)
+			   "  "
+			   "<"
+			   (span  (|@| (class "stitch-email"))
+				  ,mailing-address)
+			   ">"
+			   "\n"
+			   "\n"
+			   (span  (|@| (class "stitch-text"))
+				  ,anon)
+			   "\n"
+			   "\n")
+			 )))
+   (else (lambda (anon date full-name mailing-address keywords)
+	   #f))))
+
+(define (stitch-annotation elt)
+  (let1 elt (cdr elt)
+    (let* ((target (kref elt :target #f))
+	   (annotation (kref elt :annotation #f))
+	   (date (kref elt :date #f))
+	   (full-name (kref elt :full-name #f))
+	   (mailing-address (kref elt :mailing-address #f))
+	   (keywords (kref elt :keywords (list))))
+      (let ((insertion-proc (stitch-make-insertion-proc (car target)))
+	    (render-proc (stitch-make-render-proc (car annotation)))
+	    ;;(filter-proc (stitch-make-filter-proc keywords))
+	    )
+	(let1 frag  (render-proc (cadr annotation)
+				 date
+				 full-name
+				 mailing-address
+				 keywords)
+	  (insertion-proc (cadr target)
+			  frag))))))
+
+(define (do-stitch stitches)
+  (cond 
+   ((eq? (car stitches) 'stitch-container)
+    (for-each
+     (lambda (elt)     
+       (cond
+	((eq? (car elt) 'annotation)
+	 (stitch-annotation elt))))
+     (cdr stitches)
+     ))))
 
 (define (require-stitches url params)
   (let1 options (alist->object `((method . "get")
 				 (parameters . ,params)
 				 (onSuccess . ,(lambda (response)
-						 (stitch
+						 (do-stitch
 						  (with-input-from-string response.responseText
 						    read))
 						 ))))
     (js-new Ajax.Request
-	    "/web/stitch/x/y/y"
+	    (string-append "/web/stitch" url)
 	    options)))
 
 (define (load-lazy url params)
@@ -130,10 +212,7 @@
 				 (onComplete . ,(lambda ()
 						  (require-stitches url params)))
 				 ))
-    (js-new Ajax.Updater
-		"buffer"
-		url
-		options)))
+    (js-new Ajax.Updater "buffer" url options)))
 			       
 
 (define full-screen #f)

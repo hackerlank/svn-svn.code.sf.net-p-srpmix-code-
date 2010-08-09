@@ -16,6 +16,8 @@ dist_csscache_DATA= \
 	dired-font-lock--Invert.css  \
 	yogomacs--Default.css \
 	yogomacs--Invert.css  \
+	stitch--Default.css   \
+	stitch--Invert.css    \
 	\
 	$(NULL)
 

@@ -102,3 +102,4 @@
 
 @include(dired-font-lock,Invert)
 @include(file-font-lock,Invert)
+@include(stitch,Invert)
