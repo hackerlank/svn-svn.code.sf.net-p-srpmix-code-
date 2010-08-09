@@ -10,7 +10,12 @@
 
 (select-module yogomacs.renderers.yogomacs)
 
-(define smart-phone-user-agents '(#/HTCX06HT/))
+(define smart-phone-user-agents '(
+				  ;; doesn't have real keyboard.
+				  #/HTCX06HT/
+				  ;; has real keyboard....
+				  #/Android Dev Phone 1/
+				  ))
 (define (insert-user-agent-action)
   (let1 user-agent (assoc-ref (sys-environ->alist) "HTTP_USER_AGENT" "")
     (list
