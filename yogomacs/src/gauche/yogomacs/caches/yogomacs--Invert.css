@@ -102,4 +102,4 @@
 
 @include(dired-font-lock,Invert)
 @include(file-font-lock,Invert)
-@include(annotation,Invert)
+@include(yarn,Invert)

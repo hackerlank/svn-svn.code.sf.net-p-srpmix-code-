@@ -1,23 +1,23 @@
-(define-module yogomacs.dests.annotation
-  (export annotation-dest
-	  annotation-route
-	  annotation-route$)
+(define-module yogomacs.dests.yarn
+  (export yarn-dest
+	  yarn-route
+	  yarn-route$)
   (use www.cgi)  
   #;(use yogomacs.access)
-  #;(use yogomacs.caches.annotation)
+  #;(use yogomacs.caches.yarn)
   #;(use srfi-1)
   (use file.util)
   )
 
-(select-module yogomacs.dests.annotation)
+(select-module yogomacs.dests.yarn)
 
-(define annotation-route "/web/annotation")
-(define (annotation-route$ elt)
-   (build-path annotation-route elt))
+(define yarn-route "/web/yarn")
+(define (yarn-route$ elt)
+   (build-path yarn-route elt))
 
 #;(define payload
-  '(annotation-container
-    (annotation
+  '(yarn-container
+    (yarn
      :version 0
      :target (file 215)
      :content (text
@@ -26,7 +26,7 @@
      :full-name "Masatake YAMATO"
      :mailing-address "yamato@redhat.com"
      :keywords (reading-corosync))
-    (annotation
+    (yarn
      :version 0
      :target (file 205)
      :content (text
@@ -35,7 +35,7 @@
      :full-name "Masatake YAMATO"
      :mailing-address "yamato@redhat.com"
      :keywords (reading-corosync))
-    (annotation
+    (yarn
      :version 0
      :target (file 195)
      :content (text
@@ -45,8 +45,8 @@
      :mailing-address "yamato@redhat.com"
      :keywords (reading-corosync))))
 (define payload
-  '(annotation-container
-    (annotation
+  '(yarn-container
+    (yarn
      :version 0
      :target (directory "..")
      :content (text "親ディレクトリへ行く。")
@@ -55,9 +55,9 @@
      :mailing-address "yamato@redhat.com"
      :keywords (reading-corosync))))
 
-(define (annotation-dest path params config)
+(define (yarn-dest path params config)
   (list (cgi-header :content-type "text/x-es")
 	(with-output-to-string
 	   (pa$ write payload))))
 
-(provide "yogomacs/dests/annotation")
+(provide "yogomacs/dests/yarn")

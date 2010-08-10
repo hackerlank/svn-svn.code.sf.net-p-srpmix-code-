@@ -340,31 +340,31 @@
   (cond
    ((eq? type 'text)  (lambda (text date full-name mailing-address keywords)
 			`(div (|@|
-			       (class "annotation-div")
+			       (class "yarn-div")
 					;(id ...)
 			       )
 			      "\n"
 			      (span (|@| 
-				     (class "annotation-date-face"))
+				     (class "yarn-date-face"))
 				    ,date)
 			      "  "
-			      (span  (|@| (class "annotation-name"))
+			      (span  (|@| (class "yarn-name"))
 				     ,full-name)
 			      "  "
 			      "<"
-			      (span  (|@| (class "annotation-email"))
+			      (span  (|@| (class "yarn-email"))
 				     ,mailing-address)
 			      ">"
 			      "\n"
 			      "\n"
-			      (span  (|@| (class "annotation-text"))
+			      (span  (|@| (class "yarn-text"))
 				     ,text)
 			      "\n"
 			      "\n")))
    (else (lambda (content date full-name mailing-address keywords)
 	   #f))))
 
-(define (stitch-annotation elt)
+(define (stitch-yarn elt)
   (let1 elt (cdr elt)
     (let* ((target (kref elt :target #f))
 	   (content (kref elt :content #f))
@@ -385,27 +385,27 @@
 		(insertion-proc (cadr target)
 				shtml-frag)))))))
 
-(define (stitch-annotations annotations)
+(define (stitch-yarns yarns)
   (cond 
-   ((eq? (car annotations) 'annotation-container)
+   ((eq? (car yarns) 'yarn-container)
     (for-each
      (lambda (elt)     
        (cond
-	((eq? (car elt) 'annotation)
-	 (stitch-annotation elt))))
-     (cdr annotations)
+	((eq? (car elt) 'yarn)
+	 (stitch-yarn elt))))
+     (cdr yarns)
      ))))
 
 
-(define (require-annotations url params)
+(define (require-yarns url params)
   (let1 options (alist->object `((method . "get")
 				 (parameters . ,params)
 				 (onSuccess . ,(lambda (response)
-						 (stitch-annotations
+						 (stitch-yarns
 						  (read-from-response response))
 						 ))))
     (js-new Ajax.Request
-	    (string-append "/web/annotation" url)
+	    (string-append "/web/yarn" url)
 	    options)))
 
-(add-hook find-file-post-hook require-annotations)
+(add-hook find-file-post-hook require-yarns)

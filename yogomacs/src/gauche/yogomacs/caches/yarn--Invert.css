@@ -22,26 +22,26 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
-.annotation-div {
+.yarn-div {
     background-color: #444444;
     padding-left: 1em;
 }
 
-.annotation-date-face {
+.yarn-date-face {
     /* change-log-date-face */
     color: #ffa07a
 }
 
-.annotation-name {
+.yarn-name {
     /* change-log-name */
     color: #7fffd4;
 }
 
-.annotation-email {
+.yarn-email {
     /* change-log-email */
     color: #eedd82;
 }
 
-.annotation-text {
+.yarn-text {
     color: #ffffff;
 }
