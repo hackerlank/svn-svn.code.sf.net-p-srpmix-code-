@@ -194,7 +194,7 @@
 
 
 (server-start)
-(let ((flat t))
+(let ((flag t))
   (while flag
     (when (> (nth 1 (time-subtract (current-time) old)) 90)
       (flserver-log 
