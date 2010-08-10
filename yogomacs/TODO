@@ -100,3 +100,16 @@
 *** dists<done>
 *** File name with version number* <done>
 *** vanilla
+
+
+
+(define (init-console)
+  (let ((js-print (js-field *js* "print"))
+	(js-GenericOutputPort-prototype  (js-field *js* "sc_GenericOutputPort")))
+    (js-field-set! *js* 
+		   "SC_DEFAULT_OUT"
+		   (js-new  js-GenericOutputPort-prototype js-print))
+    (js-field-set! *js*
+		   "SC_ERROR_OUT"
+		   (js-field *js* "SC_DEFAULT_OUT"))))
+(init-console)

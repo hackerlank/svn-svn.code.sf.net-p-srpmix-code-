@@ -374,7 +374,7 @@
 	   (keywords (kref elt :keywords (list))))
       (let ((insertion-proc (stitch-make-insertion-proc (car target)))
 	    (render-proc (stitch-make-render-proc (car content)))
-	    ;;(filter-proc (stitch-make-filter-proc keywords))
+	    ;(filter-proc (stitch-make-filter-proc keywords))
 	    )
 	(let1 shtml-frag  (render-proc (cadr content)
 				       date
