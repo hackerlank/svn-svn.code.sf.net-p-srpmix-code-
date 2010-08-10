@@ -99,6 +99,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/scheme2js.scm
 %{_datadir}/gauche/site/lib/yogomacs/shell.scm
 %{_datadir}/gauche/site/lib/yogomacs/window.scm
+%{_datadir}/gauche/site/lib/yogomacs/yarn.scm
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/caches
 %{_datadir}/gauche/site/lib/yogomacs/caches/*.scm
@@ -132,6 +133,8 @@ fi
 
 %dir %{_datadir}/yogomacs/scheme2js
 %{_datadir}/yogomacs/scheme2js/yogomacs-macs.scm
+
+%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/yarn
 
 %files cachedir
 %dir %{_localstatedir}/cache/yogomacs

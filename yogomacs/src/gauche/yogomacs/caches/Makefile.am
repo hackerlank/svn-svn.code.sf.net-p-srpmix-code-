@@ -4,6 +4,7 @@ dist_module_DATA =   \
 	css.scm    \
 	js.scm     \
 	shtml.scm  \
+	yarn.scm   \
         \
 	$(NULL)
 

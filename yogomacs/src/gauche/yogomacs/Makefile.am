@@ -5,6 +5,7 @@ SUBDIRS += dests
 SUBDIRS += rearranges
 SUBDIRS += renderers
 SUBDIRS += shells
+SUBDIRS += yarns
 
 moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \
@@ -30,6 +31,7 @@ dist_module_DATA =   \
 	scheme2js.scm				\
 	shell.scm				\
 	window.scm				\
+	yarn.scm				\
         \
 	$(NULL)
 

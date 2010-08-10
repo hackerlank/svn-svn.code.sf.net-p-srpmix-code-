@@ -1,12 +1,15 @@
 (define-module yogomacs.dests.yarn
   (export yarn-dest
 	  yarn-route
-	  yarn-route$)
+	  yarn-route$
+	  yarn-for)
   (use www.cgi)  
   #;(use yogomacs.access)
   #;(use yogomacs.caches.yarn)
   #;(use srfi-1)
   (use file.util)
+  (use yogomacs.yarn)
+  (use yogomacs.path)
   )
 
 (select-module yogomacs.dests.yarn)
@@ -58,6 +61,7 @@
 (define (yarn-dest path params config)
   (list (cgi-header :content-type "text/x-es")
 	(with-output-to-string
-	   (pa$ write payload))))
+	  (pa$ yarn-for (compose-path path) params config)
+	  )))
 
 (provide "yogomacs/dests/yarn")
