@@ -47,6 +47,6 @@ dist_macro_DATA = yogomacs-macs.scm
 shtmlcachedir=$(localstatedir)/cache/yogomacs/shtml
 dist_shtmlcache_DATA=
 
-EXTRA_DIST += stitch.es
+# EXTRA_DIST += stitch.es
 yarncachedir=$(localstatedir)/lib/yogomacs/yarn
 dist_yarncache_DATA = 
