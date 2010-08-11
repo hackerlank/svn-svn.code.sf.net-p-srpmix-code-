@@ -120,6 +120,9 @@ fi
 %dir %{_datadir}/gauche/site/lib/yogomacs/shells
 %{_datadir}/gauche/site/lib/yogomacs/shells/*.scm
 
+%dir %{_datadir}/gauche/site/lib/yogomacs/yarns
+%{_datadir}/gauche/site/lib/yogomacs/yarns/*.scm
+
 
 %dir %{_localstatedir}/lib/yogomacs
 %dir %{_localstatedir}/www/.emacs.d

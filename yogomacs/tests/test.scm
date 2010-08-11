@@ -76,7 +76,11 @@
  yogomacs.domain
  yogomacs.params
  yogomacs.lcopy
- yogomacs.dests.annotation
+ yogomacs.dests.yarn
+ yogomacs.yarns.stitch-es
+ yogomacs.yarn
+ yogomacs.caches.yarn
+ ;;
 )
 
 

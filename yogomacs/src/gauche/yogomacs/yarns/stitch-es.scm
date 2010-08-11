@@ -1,4 +1,4 @@
-(define-module yogomacs.yarn.stitch-es
+(define-module yogomacs.yarns.stitch-es
   (export stitch-es->yarn)
   (use yogomacs.caches.yarn)
   (use file.util)
@@ -6,9 +6,9 @@
   (use srfi-13)
   )
 
-(select-module yogomacs.yarn.stitch-es)
+(select-module yogomacs.yarns.stitch-es)
 
-(define-const stitch-es (build-path yarn-cache-dir "stitch.es"))
+(define-constant stitch-es "stitch.es")
 
 (define (make-es-provider file-name)
   (let1 port (open-input-file file-name :if-does-not-exist #f)
@@ -27,42 +27,44 @@
 
 (define (targeted? path target)
   (guard (e (else #f))
-    ((not (list? target)) #f)
-    ((null?  target) #f)
-    ((not (eq? (car target) 'target)) #f)
-    (else
-     (let1 type (get-keyword :type (cdr target))
-       (cond
-	((eq? type 'file)
-	 (let-keywords (cdr target)
-	     ((file (not-found :file))
-	      (line (not-found :line))
-	      (surround (not-found :surround))
-	      . rest)
-	   (cond
-	    ((equal? file path)
-	     `((:target (file ,line))))
-	    ;; TODO /srv/sources should taken from conf or something else
-	    ((and (string-prefix? "/srv/sources" file)
-		  (equal? (build-path "/srv/sources" path) file))
-	     `((:target (file ,line))))
-	    (else
-	     #f)))))))))
+    (cond
+     ((not (list? target)) #f)
+     ((null?  target) #f)
+     ((not (eq? (car target) 'target)) #f)
+     (else
+      (let1 type (get-keyword :type (cdr target))
+	(cond
+	 ((eq? type 'file)
+	  (let-keywords (cdr target)
+	      ((file (not-given :file))
+	       (line (not-given :line))
+	       (surround (not-given :surround))
+	       . rest)
+	    (cond
+	     ((equal? file path)
+	      `((:target (file ,line))))
+	     ;; TODO /srv/sources should taken from conf or something else
+	     ((and (string-prefix? "/srv/sources" file)
+		   (equal? (build-path "/srv/sources" path) file))
+	      `((:target (file ,line))))
+	     (else
+	      #f))))))))))
 
 (define (make-annotation-yarn-frag annotation)
   (guard (e (else #f))
-    ((not (list? annotation)) #f)
-    ((null? annotation) #f)
-    ((not (eq? (car annotation) 'annotation) #f))
-    (else
-     (let1 type (get-keyword :type (cdr annotation))
-       (cond
-	((eq? type 'text)
-	 (let-keywords (cdr annotation)
-	     ((data (not-found :date)))
-	   `((:content (text ,data))))))
-       (else
-	#f)))))
+    (cond
+     ((not (list? annotation)) #f)
+     ((null? annotation) #f)
+     ((not (eq? (car annotation) 'annotation)) #f)
+     (else
+      (let1 type (get-keyword :type (cdr annotation))
+	(cond
+	 ((eq? type 'text)
+	  (let-keywords (cdr annotation)
+	      ((data (not-given :date)))
+	    `((:content (text ,data)))))
+	 (else
+	  #f)))))))
 
 (define (make-yarn target-yarn-frag
 		   annotation
@@ -104,22 +106,27 @@
 		     (to to))
 	    (if (null? target*annotation)
 		to
-		(let ((target (car (car target*annotation)))
-		      (annotation (cadr (car target*annotation)))
-		      (target-yarn-frag (targeted? path target)))
+		(let* ((target (car (car target*annotation)))
+		       (annotation (cadr (car target*annotation)))
+		       (target-yarn-frag (targeted? path target)))
 		  (if target-yarn-frag
-		    (loop (cdr target*annotation)
-			  (let1 yarn (make-yarn target-yarn-frag
-					   annotation
-					   date
-					   full-name
-					   mailing-address
-					   keywords)
-			    (if yarn
-				(cons yarn to)
-				to)))
-		    (loop (cdr target*annotation)
-			  to)))))))))))
+		      (loop (cdr target*annotation)
+			    (let1 yarn (make-yarn target-yarn-frag
+						  annotation
+						  date
+						  full-name
+						  mailing-address
+						  keywords)
+			      (if yarn
+				  (cons yarn to)
+				  to)))
+		      (loop (cdr target*annotation)
+			    to)))))))))))
 
-;(port-fold (make-yarn-filter path) (list) (make-es-provider stitch-es))
-(provide "yogomacs/yarn/stitch-es")
+(define (stitch-es->yarn path params config)
+  (port-fold (make-yarn-filter path) 
+	     (list)
+	     (make-es-provider (build-path (yarn-cache-dir config) 
+					   stitch-es))))
+
+(provide "yogomacs/yarns/stitch-es")
