@@ -1,6 +1,7 @@
 (define-module yogomacs.yarns.stitch-es
   (export stitch-es->yarn)
   (use yogomacs.caches.yarn)
+  (use yogomacs.path)
   (use file.util)
   (use util.combinations)
   (use srfi-13)
@@ -42,13 +43,32 @@
 	       . rest)
 	    (cond
 	     ((equal? file path)
-	      `((:target (file ,line))))
+	      `(:target (file ,line)))
 	     ;; TODO /srv/sources should taken from conf or something else
 	     ((and (string-prefix? "/srv/sources" file)
-		   (equal? (build-path "/srv/sources" path) file))
-	      `((:target (file ,line))))
+		   ;; TODO: Use build-path
+		   (equal? (string-append "/srv/sources" path) file))
+	      `(:target (file ,line)))
 	     (else
-	      #f))))))))))
+	      #f))))
+	 ((eq? type 'directory)
+	  (let-keywords (cdr target)
+	      ((directory (not-given :directory))
+	       (item (not-given :item))
+	       . rest)
+	     (set! directory (directory-file-name directory))
+	     (cond
+	      ((equal? directory path)
+	       `(:target (directory ,item)))
+	      ;; TODO /srv/sources should taken from conf or something else
+	      ((and (string-prefix? "/srv/sources" directory)
+		    ;; TODO: Use build-path
+		    (equal? (string-append "/srv/sources" path) directory))
+	       `(:target (directory ,item)))
+	      (else
+	       #f))))
+	 (else
+	  #f)))))))
 
 (define (make-annotation-yarn-frag annotation)
   (guard (e (else #f))
@@ -59,10 +79,11 @@
      (else
       (let1 type (get-keyword :type (cdr annotation))
 	(cond
-	 ((eq? type 'text)
+	 ((or (eq? type 'text)
+	      (eq? type 'oneline))
 	  (let-keywords (cdr annotation)
-	      ((data (not-given :date)))
-	    `((:content (text ,data)))))
+	      ((data (not-given :date)) . rest)
+	    `(:content (text ,data))))
 	 (else
 	  #f)))))))
 
@@ -78,6 +99,8 @@
 	  :version 0
 	  ,@target-yarn-frag
 	  ,@annotation-yarn-frag
+	  :full-name ,full-name
+	  :mailing-address ,mailing-address
 	  :date ,date
 	  :keywords ,keywords)
 	#f)))

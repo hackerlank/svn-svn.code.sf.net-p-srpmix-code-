@@ -7,7 +7,8 @@
 (select-module yogomacs.yarn)
 
 (define (yarn-for path params config)
-  (append
-   (stitch-es->yarn path params config)))
+  (cons 'yarn-container
+	(append
+	 (stitch-es->yarn path params config))))
 
 (provide "yogomacs/yarn")

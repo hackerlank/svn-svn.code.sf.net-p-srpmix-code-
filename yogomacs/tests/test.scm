@@ -218,4 +218,16 @@
        "git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git"
        (lcopy-dir->checkout-cmdline "/srv/sources/sources/k/kernel/^lcopy-trunk"))
 
+(use yogomacs.path)
+(test* "directory-file-name1"
+       "/a/b"
+       (directory-file-name "/a/b/"))
+(test* "directory-file-name2"
+       "/a/b"
+       (directory-file-name "/a/b"))
+
+(test* "directory-file-name3"
+       "/"
+       (directory-file-name "/"))
+
 (exit (if (zero? (test-end)) 0 1))

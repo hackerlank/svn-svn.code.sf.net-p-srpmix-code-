@@ -4,6 +4,7 @@
 	  compose-path*
 	  path->head
 	  parent-of
+	  directory-file-name
 	  )
   (use file.util))
 
@@ -26,5 +27,8 @@
     (if (null? l)
 	""
 	(apply build-path l))))
+
+(define (directory-file-name dpath)
+  (build-path (sys-dirname dpath) (sys-basename dpath)))
 
 (provide "yogomacs/path")
