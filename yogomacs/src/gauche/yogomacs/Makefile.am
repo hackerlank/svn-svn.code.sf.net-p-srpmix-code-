@@ -17,6 +17,7 @@ dist_module_DATA =   \
 	config.scm				\
 	dentry.scm				\
 	domain.scm				\
+	ebuf.scm				\
 	entry.scm				\
 	error.scm				\
 	face.scm				\

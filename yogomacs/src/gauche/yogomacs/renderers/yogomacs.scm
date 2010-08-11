@@ -13,6 +13,7 @@
 (define smart-phone-user-agents '(
 				  ;; doesn't have real keyboard.
 				  #/HTCX06HT/
+				  #/HTC Magic/
 				  ;; has real keyboard....
 				  #/Android Dev Phone 1/
 				  ))

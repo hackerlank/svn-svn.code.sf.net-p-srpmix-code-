@@ -85,6 +85,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/config.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
 %{_datadir}/gauche/site/lib/yogomacs/domain.scm
+%{_datadir}/gauche/site/lib/yogomacs/ebuf.scm
 %{_datadir}/gauche/site/lib/yogomacs/entry.scm
 %{_datadir}/gauche/site/lib/yogomacs/error.scm
 %{_datadir}/gauche/site/lib/yogomacs/face.scm
