@@ -343,27 +343,28 @@
 			       (class "yarn-div")
 					;(id ...)
 			       )
-			      "\n"
-			      (span (|@| 
-				     (class "yarn-date-face"))
-				    ,date)
-			      "  "
-			      (span  (|@| (class "yarn-name"))
-				     ,full-name)
-			      "  "
-			      "<"
-			      (span  (|@| (class "yarn-email"))
-				     ,mailing-address)
-			      ">"
-			      "\n"
-			      "\n"
-			      (span  (|@| (class ,(if transited 
-						      "yarn-text yarn-transited"
-						      "yarn-text"
-						      )))
-				     ,text)
-			      "\n"
-			      "\n")))
+			      (div (|@|
+				    (class "yarn-header"))
+			       (span (|@| 
+				      (class "yarn-date-face"))
+				     ,date)
+			       "  "
+			       (span  (|@| (class "yarn-name"))
+				      ,full-name)
+			       "  "
+			       "<"
+			       (span  (|@| (class "yarn-email"))
+				      ,mailing-address)
+			       ">"
+			       )
+			      (div (|@| 
+				    (class "yarn-content"))
+				   (span  (|@| (class ,(if transited 
+							   "yarn-text yarn-transited"
+							   "yarn-text"
+							   )))
+					  ,text))
+			      )))
    (else (lambda (content date full-name mailing-address keywords)
 	   #f))))
 
