@@ -1,28 +1,25 @@
 -*- outline -*-
-* ysh renderer <done>
-* ysh -> yogomacs <done>
-* Use onload <done>
-* recursive ysh <done>
-* narrow-down code <done>
-* enumeration in dired
-* css inclusion<done> and auto rebuild facility
-* Dired markers
-* shrink button <done>
-* shell selection <abort>
-
-
+* prioritized task
+** enumeration in dired
+** move range rearranging code to yogomacs from font-lock
+** css inclusion <done> and auto rebuild facility
+** give styles for dired markers
+** unified js. Propose the way to insert asis text 
+   into result js file scheme2js project.
+** helpers directory
+** svn update stitch.es
+** utils.scm
 
 * Just viewable
 ** For batch converting
 *** Disable auto-killing
 *** Multi server <done>
 *** /var/run file*
-*** cmd line interface and batch(overriding conf)*
 *** Remove http-equiv
+*** Coloring lcopy non-updating area
 
 ** Fine grading server side cache control
 *** Modification time <*>
-*** force no cache & lcopy <done>
 
 ** Fine grading client side cache control
 *** create-time format<*>
@@ -35,75 +32,62 @@
 ** FS strcture
 *** Sending dist-mapping.es in asis
 *** attic*
-*** lcopy <done>
 
 ** Clean up
-*** File selection(exclude wrong type file) <done>
-*** use #`,format
 *** storage separations <partially done>
 **** (real-src-dir (build-path (config 'real-sources-dir) head)) in yogomacs/dests/file.scm
     => (sources-path head last) => (values real-src-dir real-src-path)
 **** storage-of: sources, text-field...
 *** raw-mode in dired
-*** show error message when internal crash, see error handler<done>
 
 ** Dired
-*** link-to URL
+*** kojipkgs-fedoraproject-org with no date
+*** experimental link-to URL
 
-* more virtual entries
-* Prompt, Ysh
-* read-only annotation<done>
-* Single user annotation
-** plugins
-** home
-** proc --- cookie
-** plugins/login
-** plugins/exit
-** plugins/ysh
-** read-only
+* Virtual entries
+** bugzilla
 
-* Multi user annotation
+* Interactive shell
+** real shell
+** grep
+** diff
+** exit
+** completion
+** proc and writeable target
+** cookie
+*** invert/default
+*** yarn filter
 ** login
-** writeable
-* Realtime multi user annotation
-* Mobile
-* External data stitching
+** API
+
+* Annotation
+** private/public/publish
+** tour, compiled from annotations.
+** image
+** rendering backend
+** post
+** filter
+
+* Multi user collaboration
+** home
+** queue
+** ping/pong
+
+* Real time interaction
+** special backend rendering method: ajax
+
+* Moblile
+
+* machine generated yarns
+** implicit yarn
+** amazon
+** bugzilla id
+** program symbol
+
 * Public server
-* Working set
 
 
-- http://nanasi.jp/articles/vim/2html_vim.html
-
-- Invoke flserver
-- Cache facility
-- Config
-
-- Dired
--- Virtual entry
---- Directory & entry model?
-
--- tour, compiled from annotations.
-
-* DONE
-* asis renderer <done>
-* Generic error handler <done>
-* Version number embedding <done>
-* #ref definition <done>
-* md5
-* URL query string for yogomacs*<done>
-* Don't use `fix'. <done>
-* Timeout configuration <done>
-*** Broken line handling http://localhost:81/sources/Q/QuantLib/1.0.1-3.fc14/pre-build/QuantLib-1.0.1/Contributors.txt <done>
-**** emacs->sxpath->fundamental/text->syntax
-*** passing params and conf to reply func<done>
-*** <sthml-data> object*
-*** packages*<done>
-*** dists<done>
-*** File name with version number* <done>
-*** vanilla
-
-
-
+* improve scheme2js
 (define (init-console)
   (let ((js-print (js-field *js* "print"))
 	(js-GenericOutputPort-prototype  (js-field *js* "sc_GenericOutputPort")))
@@ -114,3 +98,6 @@
 		   "SC_ERROR_OUT"
 		   (js-field *js* "SC_DEFAULT_OUT"))))
 (init-console)
+
+* improve biwascheme
+

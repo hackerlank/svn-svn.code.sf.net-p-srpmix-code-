@@ -37,6 +37,7 @@
 	 (list (delta (car lines)) (car lines))
 	 (zip (map delta lines) lines))))
 
+(define surround-size 1)
 (define (find-line-transit file surround line)
   (let ((ebuf (make <ebuf>))
 	(str  (apply string-append surround)))
@@ -46,7 +47,7 @@
 		  (let1 n (search-forward ebuf str start-from)
 		    (if n
 			(loop (+ n 1) 
-			      (cons (line-for ebuf (+ n 1)) lines))
+			      (cons (line-for ebuf (+ n 1 surround-size)) lines))
 			lines)))
       (if (null? lines)
 	  #f
