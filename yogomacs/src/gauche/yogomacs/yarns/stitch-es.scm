@@ -2,9 +2,12 @@
   (export stitch-es->yarn)
   (use yogomacs.caches.yarn)
   (use yogomacs.path)
+  (use yogomacs.ebuf)
   (use file.util)
   (use util.combinations)
   (use srfi-13)
+  (use srfi-1)
+  (use gauche.sequence)
   )
 
 (select-module yogomacs.yarns.stitch-es)
@@ -26,6 +29,29 @@
 (define (not-given key)
   (error "Field not given:" key))
 
+(define (find-the-best-lines lines line)
+  (define (delta l) (abs (- l line)))
+  (cadr (reduce
+	 (lambda (a b)
+	   (if (< (car a) (car b)) a b))
+	 (list (delta (car lines)) (car lines))
+	 (zip (map delta lines) lines))))
+
+(define (find-line-transit file surround line)
+  (let ((ebuf (make <ebuf>))
+	(str  (apply string-append surround)))
+    (find-file! ebuf file)
+    (let1 lines (let loop ((start-from 0)
+			   (lines (list)))
+		  (let1 n (search-forward ebuf str start-from)
+		    (if n
+			(loop (+ n 1) 
+			      (cons (line-for ebuf (+ n 1)) lines))
+			lines)))
+      (if (null? lines)
+	  #f
+	  (find-the-best-lines lines line)))))
+    
 (define (targeted? path target)
   (guard (e (else #f))
     (cond
@@ -39,7 +65,7 @@
 	  (let-keywords (cdr target)
 	      ((file (not-given :file))
 	       (line (not-given :line))
-	       (surround (not-given :surround))
+	       (surround #f)
 	       . rest)
 	    (cond
 	     ((equal? file path)
@@ -49,6 +75,16 @@
 		   ;; TODO: Use build-path
 		   (equal? (string-append "/srv/sources" path) file))
 	      `(:target (file ,line)))
+	     ((and surround
+		   (equal? (sys-basename file)
+			   (sys-basename path))
+		   ;; TODO
+		   (file-is-readable? (string-append "/srv/sources" path)))
+	      (let1 transited-line (find-line-transit (string-append "/srv/sources" path)
+						      surround line)
+		(if transited-line
+		    `(:target (file ,transited-line) :transited ,path)
+		    #f)))
 	     (else
 	      #f))))
 	 ((eq? type 'directory)

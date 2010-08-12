@@ -338,7 +338,7 @@
 
 (define (stitch-make-render-proc type)
   (cond
-   ((eq? type 'text)  (lambda (text date full-name mailing-address keywords)
+   ((eq? type 'text)  (lambda (text date full-name mailing-address keywords transited)
 			`(div (|@|
 			       (class "yarn-div")
 					;(id ...)
@@ -357,7 +357,10 @@
 			      ">"
 			      "\n"
 			      "\n"
-			      (span  (|@| (class "yarn-text"))
+			      (span  (|@| (class ,(if transited 
+						      "yarn-text yarn-transited"
+						      "yarn-text"
+						      )))
 				     ,text)
 			      "\n"
 			      "\n")))
@@ -371,7 +374,9 @@
 	   (date (kref elt :date #f))
 	   (full-name (kref elt :full-name #f))
 	   (mailing-address (kref elt :mailing-address #f))
-	   (keywords (kref elt :keywords (list))))
+	   (keywords (kref elt :keywords (list)))
+	   (transited (kref elt :transited #f))
+	   )
       (let ((insertion-proc (stitch-make-insertion-proc (car target)))
 	    (render-proc (stitch-make-render-proc (car content)))
 	    ;(filter-proc (stitch-make-filter-proc keywords))
@@ -380,7 +385,8 @@
 				       date
 				       full-name
 				       mailing-address
-				       keywords)
+				       keywords
+				       transited)
 	  (when shtml-frag
 		(insertion-proc (cadr target)
 				shtml-frag)))))))

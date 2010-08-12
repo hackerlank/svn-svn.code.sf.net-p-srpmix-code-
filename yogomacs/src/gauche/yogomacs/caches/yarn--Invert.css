@@ -45,3 +45,7 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
 .yarn-text {
     color: #ffffff;
 }
+
+.yarn-transited {
+    font-style: italic;
+}

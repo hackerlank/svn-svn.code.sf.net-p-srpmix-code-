@@ -23,7 +23,7 @@
 
 (define-method find-file! ((buf <ebuf>)
 			   (file-name <string>))
-  (let* ((str (with-input-from-file file-name port->string))
+  (let* ((str (call-with-input-file file-name port->string))
 	 (pmax (string-length str)))
     (set! (ref buf 'buffer-string) str)
     (set! (ref buf 'point-max) pmax)

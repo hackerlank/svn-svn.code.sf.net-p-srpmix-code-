@@ -80,6 +80,7 @@
  yogomacs.yarns.stitch-es
  yogomacs.yarn
  yogomacs.caches.yarn
+ yogomacs.ebuf
  ;;
 )
 
