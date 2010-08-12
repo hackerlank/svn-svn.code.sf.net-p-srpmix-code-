@@ -1,6 +1,7 @@
 TESTS = \
 	\
 	test.scm \
+	ebuf.scm \
 	\
 	$(NULL)
 
