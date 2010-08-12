@@ -52,6 +52,7 @@
 
 * more virtual entries
 * Prompt, Ysh
+* read-only annotation<done>
 * Single user annotation
 ** plugins
 ** home

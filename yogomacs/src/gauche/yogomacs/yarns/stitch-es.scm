@@ -52,7 +52,7 @@
 	  #f
 	  (find-the-best-lines lines line)))))
     
-(define (targeted? path target)
+(define (targeted? path target config)
   (guard (e (else #f))
     (cond
      ((not (list? target)) #f)
@@ -73,14 +73,14 @@
 	     ;; TODO /srv/sources should taken from conf or something else
 	     ((and (string-prefix? "/srv/sources" file)
 		   ;; TODO: Use build-path
-		   (equal? (string-append "/srv/sources" path) file))
+		   (equal? (string-append (config 'real-sources-dir) path) file))
 	      `(:target (file ,line)))
 	     ((and surround
 		   (equal? (sys-basename file)
 			   (sys-basename path))
 		   ;; TODO
-		   (file-is-readable? (string-append "/srv/sources" path)))
-	      (let1 transited-line (find-line-transit (string-append "/srv/sources" path)
+		   (file-is-readable? (string-append (config 'real-sources-dir) path)))
+	      (let1 transited-line (find-line-transit (string-append (config 'real-sources-dir) path)
 						      surround line)
 		(if transited-line
 		    `(:target (file ,transited-line) :transited ,path)
@@ -143,7 +143,7 @@
 
 
 
-(define (make-yarn-filter path)
+(define (make-yarn-filter path config)
   (lambda (es to)
     (guard (e (else to))
       (cond
@@ -167,7 +167,7 @@
 		to
 		(let* ((target (car (car target*annotation)))
 		       (annotation (cadr (car target*annotation)))
-		       (target-yarn-frag (targeted? path target)))
+		       (target-yarn-frag (targeted? path target config)))
 		  (if target-yarn-frag
 		      (loop (cdr target*annotation)
 			    (let1 yarn (make-yarn target-yarn-frag
@@ -183,7 +183,7 @@
 			    to)))))))))))
 
 (define (stitch-es->yarn path params config)
-  (port-fold (make-yarn-filter path) 
+  (port-fold (make-yarn-filter path config) 
 	     (list)
 	     (make-es-provider (build-path (yarn-cache-dir config) 
 					   stitch-es))))
