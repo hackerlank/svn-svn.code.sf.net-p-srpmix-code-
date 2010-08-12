@@ -122,7 +122,7 @@ AC_SUBST([SCHEME2JS_RUNTIME_DIR], [$scheme2js_runtime_dir])
 
 AC_CONFIG_COMMANDS([chmod],[
 chmod 0755 src/cmds/*
-chmod 0755 tests/test.scm
+chmod 0755 tests/*.scm
 ])
 
 AC_OUTPUT([
