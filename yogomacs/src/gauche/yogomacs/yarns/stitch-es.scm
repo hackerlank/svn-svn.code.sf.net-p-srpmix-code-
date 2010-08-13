@@ -37,17 +37,17 @@
 	 (list (delta (car lines)) (car lines))
 	 (zip (map delta lines) lines))))
 
-(define surround-size 1)
 (define (find-line-transit file surround line)
   (let ((ebuf (make <ebuf>))
-	(str  (apply string-append surround)))
+	(str  (apply string-append surround))
+	(surround-size (string-count (car surround) #\newline)))
     (find-file! ebuf file)
     (let1 lines (let loop ((start-from 0)
 			   (lines (list)))
 		  (let1 n (search-forward ebuf str start-from)
 		    (if n
 			(loop (+ n 1) 
-			      (cons (line-for ebuf (+ n 1 surround-size)) lines))
+			      (cons (+ (line-for ebuf n) surround-size) lines))
 			lines)))
       (if (null? lines)
 	  #f
@@ -84,7 +84,10 @@
 	      (let1 transited-line (find-line-transit (string-append (config 'real-sources-dir) path)
 						      surround line)
 		(if transited-line
-		    `(:target (file ,transited-line) :transited ,path)
+		    `(:target (file ,transited-line) 
+			      :transited ,(if (string-prefix? (config 'real-sources-dir) file)
+					      (string-drop file (string-length (config 'real-sources-dir)))
+					      file))
 		    #f)))
 	     (else
 	      #f))))
@@ -98,9 +101,9 @@
 	      ((equal? directory path)
 	       `(:target (directory ,item)))
 	      ;; TODO /srv/sources should taken from conf or something else
-	      ((and (string-prefix? "/srv/sources" directory)
+	      ((and (string-prefix? (config 'real-sources-dir) directory)
 		    ;; TODO: Use build-path
-		    (equal? (string-append "/srv/sources" path) directory))
+		    (equal? (string-append (config 'real-sources-dir) path) directory))
 	       `(:target (directory ,item)))
 	      (else
 	       #f))))

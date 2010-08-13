@@ -343,7 +343,7 @@
 
 (define (stitch-make-render-proc type)
   (cond
-   ((eq? type 'text)  (lambda (text date full-name mailing-address keywords transited)
+   ((eq? type 'text)  (lambda (text date full-name mailing-address keywords transited-from)
 			`(div (|@|
 			       (class "yarn-div")
 					;(id ...)
@@ -364,12 +364,23 @@
 			       )
 			      (div (|@| 
 				    (class "yarn-content"))
-				   (span  (|@| (class ,(if transited 
+				   (span  (|@| (class ,(if transited-from
 							   "yarn-text yarn-transited"
 							   "yarn-text"
 							   )))
 					  ,text))
-			      )))
+			      (div (|@|
+				    (class "yarn-footer"))
+				   ,@(if transited-from
+					 `((div
+					    (span ":") (span ,(write-to-string keywords))))
+					 '())
+				   ,@(if transited-from
+					 `((div (|@| (class "yarn-transited-from"))
+						 ;; TODO Hyper link
+						(span "@") (span ,transited-from)))
+					 '())
+				   ))))
    (else (lambda (content date full-name mailing-address keywords)
 	   #f))))
 
