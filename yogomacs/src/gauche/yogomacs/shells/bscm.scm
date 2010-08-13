@@ -6,6 +6,7 @@
 (define-shell bscm (make <shell> 
 		     :name "bscm"
 		     :prompt " <bscm"
-		     :interpreter 'bscm-interpret))
+		     :interpreter 'bscm-interpret
+		     :initializer 'bscm-initializer))
 
 (provide "yogomacs/shells/bscm")

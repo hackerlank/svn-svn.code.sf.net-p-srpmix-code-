@@ -199,6 +199,7 @@
 ;;
 ;; Repl
 ;;
+(define shell-dir #f)
 (define (repl eval output-prefix)
   (let1 str (<- "minibuffer")
     (let1 result (with-error-handler 
@@ -275,6 +276,8 @@
     (scm->scm bscm '(define lv find-file))
     bscm))
 
+(define (bscm-initializer)
+  (set! shell-dir bscm-dir))
 (define (bscm-eval str)
   (unless bscm
     (set! bscm (new-bscm bscm-dir)))
@@ -287,6 +290,9 @@
 (define (bscm-interpret)
   (repl bscm-eval ";; "))
 
+
+(define (ysh-initializer)
+  (set! shell-dir ysh-dir))
 (define (ysh-eval str)
   (unless ysh
     (set! ysh (new-bscm ysh-dir)))
@@ -350,18 +356,18 @@
 			       )
 			      (div (|@|
 				    (class "yarn-header"))
-			       (span (|@| 
-				      (class "yarn-date-face"))
-				     ,date)
-			       "  "
-			       (span  (|@| (class "yarn-name"))
-				      ,full-name)
-			       "  "
-			       "<"
-			       (span  (|@| (class "yarn-email"))
-				      ,mailing-address)
-			       ">"
-			       )
+				   (span (|@| 
+					  (class "yarn-date-face"))
+					 ,date)
+				   "  "
+				   (span  (|@| (class "yarn-name"))
+					  ,full-name)
+				   "  "
+				   "<"
+				   (span  (|@| (class "yarn-email"))
+					  ,mailing-address)
+				   ">"
+				   )
 			      (div (|@| 
 				    (class "yarn-content"))
 				   (span  (|@| (class ,(if transited-from
@@ -377,8 +383,12 @@
 					 '())
 				   ,@(if transited-from
 					 `((div (|@| (class "yarn-transited-from"))
-						 ;; TODO Hyper link
-						(span "@") (span ,transited-from)))
+						(span "@") 
+						(a (|@| (href ,(if shell-dir
+								   (string-append shell-dir
+										  transited-from)
+								   transited-from)))
+						   (span ,transited-from))))
 					 '())
 				   ))))
    (else (lambda (content date full-name mailing-address keywords)

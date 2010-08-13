@@ -16,6 +16,7 @@
   ((name :init-keyword :name)
    (prompt :init-keyword :prompt)
    (interpreter :init-keyword :interpreter)
+   (initializer :init-keyword :initializer)
    ))
 
 (define-macro (define-shell name object)
