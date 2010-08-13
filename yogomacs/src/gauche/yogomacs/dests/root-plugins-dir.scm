@@ -35,6 +35,9 @@
    (cgi-header :status "302 Moved Temporarily"
 	       :location bscm-url)))
 
+(define (login-entry parent-path)
+  (make <redirect-dentry>
+    :parent "/plugins" :dname "login" :url "ysh"))
 
 (define (dest path params config)
   (let* ((yogomacs (in-shell? params))
@@ -52,9 +55,10 @@
 		  (cond
 		   ((equal? yogomacs ysh-name) (list (bscm-entry path)))
 		   ((equal? yogomacs bscm-name) (list (ysh-entry path)))
-		   (else (list  
-			  (bscm-entry path)
-			  (ysh-entry path)))))
+		   (else `(  
+			  ,(bscm-entry path)
+			  ,(login-entry path)
+			  ,(ysh-entry path)))))
 		 css-route)))
     (prepare-dired-faces config)
     (make <shtml-data>
@@ -63,14 +67,18 @@
       :data ((compose integrate-dired-face) shtml)
       :last-modification-time #f)))
 
-(define routing-table
+(define (routing-table path params)
   `((#/^\/plugins$/ ,dest)
-    (#/^\/plugins/ysh$/ ,ysh-dest)
-    (#/^\/plugins/bscm$/ ,bscm-dest)
-    #;(#/^\/plugins/login$/ ,dest)
+    (#/^\/plugins\/ysh$/ ,ysh-dest)
+    (#/^\/plugins\/bscm$/ ,bscm-dest)
+    ,@(if (in-shell? params)
+	  (list)
+	  (list
+	   `(#/^\/plugins\/login$/ ,ysh-dest)
+	   ))
     ))
 
 (define (root-plugins-dir-dest path params config)
-  (route routing-table (compose-path path) params config))
+  (route (routing-table path params) (compose-path path) params config))
 
 (provide "yogomacs/dests/root-plugins-dir")

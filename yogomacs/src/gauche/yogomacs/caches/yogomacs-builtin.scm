@@ -294,7 +294,12 @@
       (let1 exp (read-from-string
 		 (string-append "(" str ")") )
 	(write-to-string (cons (car exp)
-			       (map symbol->string (cdr exp))) 
+			       (map (lambda (elt)
+				      (cond 
+				       ((number? elt) (number->string elt))
+				       ((symbol? elt) (symbol->string elt))
+				       (else "")))
+				    (cdr exp))) 
 			 ))
     (let1 result #f
       (ysh.evaluate str

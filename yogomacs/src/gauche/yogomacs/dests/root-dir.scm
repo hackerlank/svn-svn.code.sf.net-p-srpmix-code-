@@ -12,6 +12,8 @@
   (use yogomacs.dentries.redirect)
   (use yogomacs.renderers.dired)
   (use yogomacs.path)
+  (use yogomacs.shell)
+  ;;
   (use yogomacs.dests.css)
   (use yogomacs.dests.dir)
   ;;
@@ -44,6 +46,11 @@
   (make <redirect-dentry>
     :parent (compose-path parent-path)
     :dname "plugins"))
+(define (login-entry parent-path)
+  (make <redirect-dentry>
+    :parent (compose-path parent-path)
+    :url "plugins/login"
+    :dname "login"))
 
 (define (dest path params config)
   (let1 shtml (dired
@@ -51,9 +58,13 @@
 	       (append 
 		(glob-dentries (config 'real-sources-dir)
 			       root-globs)
-		(list 
-		 (README-entry path)
-		 (plugins-entry path)
+		`( 
+		  ,(README-entry path)
+		  ,(plugins-entry path)
+		  ,@(if (in-shell? params)
+			'()
+			`(,(login-entry path))
+			)
 		 ))
 	       css-route)
     (prepare-dired-faces config)
@@ -68,7 +79,12 @@
 	     path params config
 	     ))
 
-(define (routing-table path)
+(define (login-dest path params config)
+  (list
+   (cgi-header :status "302 Moved Temporarily"
+	       :location (url-of (login-entry (parent-of path))))))
+
+(define (routing-table path params)
    `((#/^\/$/ ,dest)
      (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
@@ -76,14 +92,19 @@
      (#/^\/plugins(?:\/.+)?$/   ,root-plugins-dir-dest)
      (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
      (#/^\/bscm(?:\/.+)?$/   ,bscm-dir-dest)
-     ;; TODO: use path
+     ;;
+     ,@(if (in-shell? params)
+	   (list)
+	   (list
+	    `(#/^\/login$/  ,login-dest)
+	    ))
      (#/^\/README$/  ,README-dest)
      (#/^.*$/ ,print-path)
      ))
 
 
 (define (root-dir-dest path params config)
-   (route (routing-table path) (compose-path path) params config))
+   (route (routing-table path params) (compose-path path) params config))
 
 
 
