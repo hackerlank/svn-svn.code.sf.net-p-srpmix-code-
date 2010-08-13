@@ -1,5 +1,4 @@
 SUBDIRS  = .
-SUBDIRS += rearrange
 SUBDIRS += harnesses
 
 moduledir=@GAUCHE_MODULEDIR@/font-lock

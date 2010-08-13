@@ -1,10 +1,10 @@
-(define-module font-lock.rearrange.range
+(define-module yogomacs.rearranges.range
   (export rearrange-range
 	  parse-range)
   (use sxml.tree-trans)
   (use srfi-1)
   (use util.match))
-(select-module font-lock.rearrange.range)
+(select-module yogomacs.rearranges.range)
 
 (define (id . args) args)
 
@@ -93,4 +93,4 @@
     (else
      (errorf "broken range specification: ~s" str))))
     
-(provide "font-lock/rearrange/range")
+(provide "yogomacs/rearranges/range")

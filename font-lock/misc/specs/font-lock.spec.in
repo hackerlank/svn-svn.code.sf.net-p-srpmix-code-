@@ -90,10 +90,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gauche/site/lib/font-lock/flserver.scm
 %{_datadir}/gauche/site/lib/font-lock/harness.scm
 
-%dir %{_datadir}/gauche/site/lib/font-lock/rearrange
-%{_datadir}/gauche/site/lib/font-lock/rearrange/range.scm
-%{_datadir}/gauche/site/lib/font-lock/rearrange/title.scm
-
 %dir %{_datadir}/gauche/site/lib/font-lock/harnesses
 %{_datadir}/gauche/site/lib/font-lock/harnesses/screen.scm
 %{_datadir}/gauche/site/lib/font-lock/harnesses/xvnc.scm

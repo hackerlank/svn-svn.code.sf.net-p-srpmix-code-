@@ -1,9 +1,9 @@
-(define-module font-lock.rearrange.title
-  (export rearrange-title)
+(define-module yogomacs.rearranges.title
+  (export rearranges-title)
   (use sxml.tree-trans))
-(select-module font-lock.rearrange.title)
+(select-module yogomacs.rearranges.title)
 
-(define (rearrange-title sxml-tree title)
+(define (rearranges-title sxml-tree title)
   (pre-post-order sxml-tree
 		  `(
 		    (link *preorder* . ,(lambda x x))
@@ -13,4 +13,4 @@
 		    (*default* . ,(lambda x x))
 		    )))
 
-(provide "font-lock/rearrange/title")
+(provide "yogomacs/rearranges/title")
