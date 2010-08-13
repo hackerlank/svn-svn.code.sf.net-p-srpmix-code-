@@ -90,3 +90,6 @@ rl_forward_word (count, key)") :which-func ("rl_end_of_line"))) :annotation-list
 (stitch-annotation :version 0 :target-list ((target :type file :file "/net/sop/srv/sources/attic/cradles/lcopy.sys/mirror/k/kernel/trunk/pre-build/linux-2.6/net/ipv4/tcp.c" :point 49642 :coding-system undecided-unix :line 1865 :surround ("		/* Clear out any half completed packets.  FIN if needed. */
 " "" "		if (tcp_close_state(sk))
 			tcp_send_fin(sk);") :which-func ("tcp_shutdown"))) :annotation-list ((annotation :type text :data "sk->sk_shutdownにhowが設定されている。")) :date "Tue May 18 01:18:43 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lsof-cant-identify-protocol))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-89.EL/pre-build/kernel-2.6.9/linux-2.6.9/configs/kernel-2.6.9-x86_64.config" :point 117 :coding-system undecided-unix :line 6 :surround ("#
+" "" "CONFIG_X86_64=y
+CONFIG_64BIT=y") :which-func ("CONFIG_X86_64"))) :annotation-list ((annotation :type text :data "THIS IS AN EXAMPLE ANNOTATION.")) :date "Thu Aug 12 09:53:13 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (example))

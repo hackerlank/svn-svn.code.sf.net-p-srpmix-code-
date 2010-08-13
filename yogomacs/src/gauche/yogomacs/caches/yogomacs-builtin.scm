@@ -374,22 +374,17 @@
 							   "yarn-text yarn-transited"
 							   "yarn-text"
 							   )))
-					  ,text))
+					  ,(if transited-from
+					       `(a (|@| (href ,(if shell-dir
+								   (string-append shell-dir
+										  (car transited-from))
+								   (car transited-from))))
+						   ,text)
+					       ,text)))
 			      (div (|@|
 				    (class "yarn-footer"))
-				   ,@(if transited-from
-					 `((div
-					    (span ":") (span ,(write-to-string keywords))))
-					 '())
-				   ,@(if transited-from
-					 `((div (|@| (class "yarn-transited-from"))
-						(span "@") 
-						(a (|@| (href ,(if shell-dir
-								   (string-append shell-dir
-										  transited-from)
-								   transited-from)))
-						   (span ,transited-from))))
-					 '())
+				   (div
+				    (span ,(write-to-string keywords)))
 				   ))))
    (else (lambda (content date full-name mailing-address keywords)
 	   #f))))

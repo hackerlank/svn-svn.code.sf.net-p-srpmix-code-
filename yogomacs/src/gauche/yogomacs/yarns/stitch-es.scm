@@ -84,10 +84,12 @@
 	      (let1 transited-line (find-line-transit (string-append (config 'real-sources-dir) path)
 						      surround line)
 		(if transited-line
-		    `(:target (file ,transited-line) 
-			      :transited ,(if (string-prefix? (config 'real-sources-dir) file)
-					      (string-drop file (string-length (config 'real-sources-dir)))
-					      file))
+		    `(:target 
+		      (file ,transited-line) 
+		      :transited (,(if (string-prefix? (config 'real-sources-dir) file)
+				       (string-drop file (string-length (config 'real-sources-dir)))
+				       file)
+				  ,line))
 		    #f)))
 	     (else
 	      #f))))
