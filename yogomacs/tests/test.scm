@@ -82,6 +82,8 @@
  yogomacs.caches.yarn
  yogomacs.ebuf
  ;;
+ yogomacs.utils.range
+ ;;
 )
 
 

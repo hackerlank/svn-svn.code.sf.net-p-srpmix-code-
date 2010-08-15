@@ -1,9 +1,9 @@
 (define-module yogomacs.rearranges.range
-  (export rearrange-range
-	  parse-range)
+  (export rearrange-range)
   (use sxml.tree-trans)
   (use srfi-1)
-  (use util.match))
+  (use yogomacs.utils.range))
+
 (select-module yogomacs.rearranges.range)
 
 (define (id . args) args)
@@ -62,35 +62,9 @@
       (*default* . ,id)
       )))
 
-(define make-range (match-lambda*
-		    ((#t #t) (lambda (i) #t))
-		    ((#t e) (lambda (i) (< i e)))
-		    ((b #t) (lambda (i) (<= b i)))
-		    ((b #f) (lambda (i) (eq? b i)))
-		    ((b e)  (lambda (i) (and (<= b i) (< i e))))))
+(define (rearrange-range sxml-tree range-spec)
+  (pre-post-order sxml-tree (make-trimmer (compile-range range-spec))))
 
-(define (rearrange-range sxml-tree start end)
-  (pre-post-order sxml-tree (make-trimmer (make-range start end))))
 
-(define (parse-range str)
-  (rxmatch-cond
-    ((#/^([1-9][0-9]*)-([1-9][0-9]*)$/ str)
-     (#f start-str end-str)
-     (let ((start (string->number start-str))
-	   (end (string->number end-str)))
-       (if (<= start end)
-	   (cons start end)
-	   (errorf "end(~d) is greater than start(~d): ~a" start end str))))
-    ((#/^([1-9][0-9]*)-$/ str)
-     (#f start-str)
-     (cons (string->number start-str) #t))
-    ((#/^-([1-9][0-9]*)$/ str)
-     (#f end-str)
-     (cons #t (string->number end-str)))
-    ((#/^-$/ str)
-     (#f)
-     (cons #t #t))
-    (else
-     (errorf "broken range specification: ~s" str))))
-    
+	      
 (provide "yogomacs/rearranges/range")

@@ -8,6 +8,7 @@
   (use sxml.serializer)
   (use text.tree)
   (use srfi-19)
+  (use yogomacs.utils.range)
   (use yogomacs.rearranges.range)
   (use yogomacs.rearranges.yogomacs-fragment)
   (use yogomacs.shell)
@@ -80,7 +81,7 @@
   (or (and-let* ((range-string (params "range"))
 		 (range (guard (e (else #f)) 
 			       (parse-range range-string))))
-	(cute rearrange-range <> (car range) (cdr range)))
+	(cute rearrange-range <> range))
       (lambda (shtml) shtml)))
 
 (define-method  reply ((shtml <shtml-data>))

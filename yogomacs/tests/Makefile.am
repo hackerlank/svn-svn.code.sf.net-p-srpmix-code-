@@ -1,7 +1,8 @@
 TESTS = \
 	\
-	test.scm \
-	ebuf.scm \
+	test.scm  \
+	ebuf.scm  \
+	range.scm \
 	\
 	$(NULL)
 

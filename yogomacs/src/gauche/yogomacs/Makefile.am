@@ -5,6 +5,7 @@ SUBDIRS += dests
 SUBDIRS += rearranges
 SUBDIRS += renderers
 SUBDIRS += shells
+SUBDIRS += utils
 SUBDIRS += yarns
 
 moduledir=@GAUCHE_MODULEDIR@/yogomacs
