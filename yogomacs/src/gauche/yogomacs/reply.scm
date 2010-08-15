@@ -10,6 +10,8 @@
   (use srfi-19)
   (use yogomacs.util.range)
   (use yogomacs.rearranges.range)
+  (use yogomacs.util.enum)
+  (use yogomacs.rearranges.enum)
   (use yogomacs.rearranges.yogomacs-fragment)
   (use yogomacs.shell)
   (use yogomacs.error)
@@ -76,12 +78,15 @@
 	result)))))
 
 ;; TODO: THIS SHOULD NOT BE HERE. THIS SHOULE BE AT REARRANGES.
-;; TODO: enum for dired.
 (define (make-narrow-down params)
   (or (and-let* ((range-string (params "range"))
 		 (range (guard (e (else #f)) 
-			       (parse-range range-string))))
+			  (parse-range range-string))))
 	(cute rearrange-range <> range))
+      (and-let* ((enum-string (params "enum"))
+		 (enum (guard (e (else #f)) 
+			 (parse-enum enum-string))))
+	(cute rearrange-enum <> enum))
       (lambda (shtml) shtml)))
 
 (define-method  reply ((shtml <shtml-data>))

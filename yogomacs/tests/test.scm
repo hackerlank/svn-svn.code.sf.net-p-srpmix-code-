@@ -24,6 +24,8 @@
  yogomacs.rearranges.face-integrates
  yogomacs.rearranges.css-integrates
  yogomacs.rearranges.yogomacs-fragment
+ yogomacs.rearranges.line-trim
+ yogomacs.rearranges.range
  yogomacs.dests.root-dir
  yogomacs.dests.root-plugins-dir
  yogomacs.dests.srpmix-dir

@@ -1,12 +1,12 @@
 -*- outline -*-
 * prioritized task
-** enumeration in dired
-** login arrowy
 ** css inclusion <done> and auto rebuild facility
-** give styles for dired markers
 ** unified js. Propose the way to insert asis text 
    into result js file scheme2js project.
 ** svn update stitch.es
+** give styles for dired markers
+** Coloring lcopy non-updating area
+** Ref jump in lazy loading page 
 
 * Just viewable
 ** For batch converting
@@ -14,9 +14,7 @@
 *** Multi server <done>
 *** /var/run file*
 *** Remove http-equiv
-*** Coloring lcopy non-updating area
-*** Ref jump in lazy loading page 
- 
+
 ** Fine grading server side cache control
 *** Modification time <*>
 
@@ -48,7 +46,8 @@
 
 * Interactive shell
 ** real shell
-** grep
+** grep*
+** tag jump*
 ** diff
 ** exit
 ** completion
@@ -77,9 +76,13 @@
 
 * Moblile
 
+
+* machine generated dentry
+** bugzilla id
+** amazon
+
 * machine generated yarns
 ** implicit yarn
-** amazon
 ** bugzilla id
 ** program symbol
 

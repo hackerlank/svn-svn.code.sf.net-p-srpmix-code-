@@ -2,6 +2,7 @@ TESTS = \
 	\
 	test.scm  \
 	ebuf.scm  \
+	enum.scm  \
 	range.scm \
 	\
 	$(NULL)

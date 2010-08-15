@@ -50,6 +50,7 @@
 
 (define default-params '(("path" . "/")
 			 ("range" . #f)
+			 ("enum"  . #f)
 			 ("yogomacs" . #f)))
 
 (define (yogomacs params config)

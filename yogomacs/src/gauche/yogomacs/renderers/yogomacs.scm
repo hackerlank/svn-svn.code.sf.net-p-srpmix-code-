@@ -57,6 +57,9 @@
 	 (next-params (or (and-let* ((range (params "range")))
 			    (format "range=~a&~a"  (html-escape-string range) next-params))
 			  next-params))
+	 (next-params (or (and-let* ((enum (params "enum")))
+			    (format "enum=~a&~a"  (html-escape-string enum) next-params))
+			  next-params))
 	 (js-list (reverse (cons `(,(extra-scripts url next-params shell) . inline)
 				 (reverse
 				  js-list))))
