@@ -30,7 +30,7 @@
 (define (parse-range str)
   (if (equal? str "")
       (list)
-      (rxmatch-if (#/([^\;]+)\;(.*)/ str)
+      (rxmatch-if (#/([^\,]+)\,(.*)/ str)
 	  (#f elt rest)
 	(cons (parse-range0 elt) (parse-range rest))
 	(list (parse-range0 str)))))

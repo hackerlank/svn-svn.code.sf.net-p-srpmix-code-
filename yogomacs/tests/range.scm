@@ -6,7 +6,7 @@
 (define *test-report-error* #t)
 (test-start "Yogomacs range test")
 
-(use yogomacs.utils.range)
+(use yogomacs.util.range)
 
 (test* "range12"
        '((1 2))
@@ -22,16 +22,16 @@
 
 (test* "multiragen1"
        '((1 3) (4 9) (10 30))
-       (parse-range "1-3;4-9;10-30"))
-(test* "multiragen1;"
+       (parse-range "1-3,4-9,10-30"))
+(test* "multiragen1,"
        '((1 3) (4 9) (10 30))
-       (parse-range "1-3;4-9;10-30;"))
-(test* "multiragen;1"
+       (parse-range "1-3,4-9,10-30,"))
+(test* "multiragen,1"
        '((1 3) (4 9) (10 30))
-       (parse-range ";1-3;4-9;10-30"))
+       (parse-range ",1-3,4-9,10-30"))
 (test* "multiragen1#t"
        '((1 3) (4 #t) (10 30))
-       (parse-range ";1-3;4-;10-30"))
+       (parse-range ",1-3,4-,10-30"))
 
 (test* "make-range1"
                     '(#f #t #t #f)
@@ -42,7 +42,13 @@
 (test* "make-range2"
                     '(#f #t #t #f #f #f #t #f #f #t #t #f #t #t)
        (let ((input '( 0  1  2  3  4  6  7  8  9 10 29 30 33 39))
-	     (proc (compile-range (parse-range ";1-3;7-8;10-30;33-"))))
+	     (proc (compile-range (parse-range ",1-3,7-8,10-30,33-"))))
+	 (map proc input)))
+
+(test* "make-range3"
+                    '(#f #f #f)
+       (let ((input '( 30 33 39 ))
+	     (proc (compile-range (parse-range "4-8,2250-2290"))))
 	 (map proc input)))
 
 (exit (if (zero? (test-end)) 0 1))
