@@ -1,9 +1,15 @@
+2010-08-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.2.8.
+
+	* src/lcopy-update: Added --no-update-p option.
+
 2010-08-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.7.
 
 	* src/liblcopy_backends.sh.in (COMMON_SUBCMDS): Added print_cmdline
-	
+
 	* src/lcopy-checkout: Added --just-print-cmdline option.
 
 	* src/liblcopy.sh.in (lcopy_backend_print_cmdline): New function.
