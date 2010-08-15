@@ -121,8 +121,8 @@ fi
 %dir %{_datadir}/gauche/site/lib/yogomacs/shells
 %{_datadir}/gauche/site/lib/yogomacs/shells/*.scm
 
-%dir %{_datadir}/gauche/site/lib/yogomacs/utils
-%{_datadir}/gauche/site/lib/yogomacs/utils/*.scm
+%dir %{_datadir}/gauche/site/lib/yogomacs/util
+%{_datadir}/gauche/site/lib/yogomacs/util/*.scm
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/yarns
 %{_datadir}/gauche/site/lib/yogomacs/yarns/*.scm

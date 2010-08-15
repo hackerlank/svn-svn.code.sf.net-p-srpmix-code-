@@ -2,7 +2,7 @@
   (export rearrange-range)
   (use sxml.tree-trans)
   (use srfi-1)
-  (use yogomacs.utils.range))
+  (use yogomacs.util.range))
 
 (select-module yogomacs.rearranges.range)
 

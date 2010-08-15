@@ -8,7 +8,7 @@
   (use sxml.serializer)
   (use text.tree)
   (use srfi-19)
-  (use yogomacs.utils.range)
+  (use yogomacs.util.range)
   (use yogomacs.rearranges.range)
   (use yogomacs.rearranges.yogomacs-fragment)
   (use yogomacs.shell)
