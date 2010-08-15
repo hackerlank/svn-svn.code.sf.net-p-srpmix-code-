@@ -1,14 +1,12 @@
 -*- outline -*-
 * prioritized task
 ** enumeration in dired
-** move range rearranging code to yogomacs from font-lock
+** login arrowy
 ** css inclusion <done> and auto rebuild facility
 ** give styles for dired markers
 ** unified js. Propose the way to insert asis text 
    into result js file scheme2js project.
-** helpers directory
 ** svn update stitch.es
-** utils.scm
 
 * Just viewable
 ** For batch converting

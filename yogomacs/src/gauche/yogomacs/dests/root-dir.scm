@@ -50,7 +50,8 @@
   (make <redirect-dentry>
     :parent (compose-path parent-path)
     :url "plugins/login"
-    :dname "login"))
+    :dname "login"
+    :show-arrowy-to #t))
 
 (define (dest path params config)
   (let1 shtml (dired

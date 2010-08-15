@@ -37,7 +37,10 @@
 
 (define (login-entry parent-path)
   (make <redirect-dentry>
-    :parent "/plugins" :dname "login" :url "ysh"))
+    :parent "/plugins" 
+    :dname "login" 
+    :url "ysh"
+    :show-arrowy-to "./ysh"))
 
 (define (dest path params config)
   (let* ((yogomacs (in-shell? params))
