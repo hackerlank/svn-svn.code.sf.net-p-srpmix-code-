@@ -21,5 +21,4 @@
 	(lcopy-file->checkout-cmdline lcopy-file)
 	#f)))
 
-
 (provide "yogomacs/lcopy")

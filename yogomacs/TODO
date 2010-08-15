@@ -24,11 +24,12 @@
 
 ** Server Administration
 *** /var/log/message separation*
-*** GC
+*** cache GC 
 
 ** FS strcture
 *** Sending dist-mapping.es in asis
 *** attic*
+**** blacklist
 
 ** Clean up
 *** storage separations <partially done>
@@ -43,6 +44,7 @@
 
 * Virtual entries
 ** bugzilla
+** amazon
 
 * Interactive shell
 ** real shell
@@ -75,11 +77,6 @@
 ** special backend rendering method: ajax
 
 * Moblile
-
-
-* machine generated dentry
-** bugzilla id
-** amazon
 
 * machine generated yarns
 ** implicit yarn
