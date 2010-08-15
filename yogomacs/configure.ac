@@ -143,7 +143,7 @@ AC_OUTPUT([
 	   src/gauche/yogomacs/rearranges/Makefile
 	   src/gauche/yogomacs/renderers/Makefile
 	   src/gauche/yogomacs/shells/Makefile
-	   src/gauche/yogomacs/utils/Makefile
+	   src/gauche/yogomacs/util/Makefile
 	   src/gauche/yogomacs/yarns/Makefile
 	   src/base/Makefile
 	   src/data/Makefile
