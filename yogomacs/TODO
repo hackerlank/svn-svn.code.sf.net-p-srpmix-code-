@@ -1,12 +1,17 @@
 -*- outline -*-
 * prioritized task
+** trap style changing
+** Ref jump in lazy loading page 
+** Coloring lcopy non-updating area
+
+
 ** css inclusion <done> and auto rebuild facility
 ** unified js. Propose the way to insert asis text 
    into result js file scheme2js project.
 ** svn update stitch.es
 ** give styles for dired markers
-** Coloring lcopy non-updating area
-** Ref jump in lazy loading page 
+
+
 
 * Just viewable
 ** For batch converting
