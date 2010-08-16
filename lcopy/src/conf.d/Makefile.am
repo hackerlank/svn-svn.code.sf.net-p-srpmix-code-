@@ -11,6 +11,7 @@ dist_confd_DATA = \
 	cairo,trunk.lcopy \
 	cluster,trunk.lcopy \
 	corosync,trunk.lcopy \
+	cygwin,trunk.lcopy \
 	ddskk,trunk.lcopy \
 	device-mapper-multipath,trunk.lcopy \
 	dlm,trunk.lcopy \
@@ -49,6 +50,7 @@ dist_confd_DATA = \
 	qemu,kvm.lcopy \
 	qemu,trunk.lcopy \
 	qt-jambi,trunk.lcopy \
+	reactos,trunk.lcopy \
 	resource-agents,trunk.lcopy \
 	rgmanager,trunk.lcopy \
 	rpm,rpm5.lcopy \
