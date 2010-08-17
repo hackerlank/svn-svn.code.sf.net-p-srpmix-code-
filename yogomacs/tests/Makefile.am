@@ -3,6 +3,7 @@ TESTS = \
 	test.scm  \
 	ebuf.scm  \
 	enum.scm  \
+	lcopy.scm \
 	range.scm \
 	\
 	$(NULL)
