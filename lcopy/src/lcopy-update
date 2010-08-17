@@ -45,7 +45,14 @@ function parse_arguments
 	    *)
 		BASE_DIR=$1
 		shift
-		if ! lcopy_verify_directory "$BASE_DIR"; then
+		if [ -n "$NO_UPDATE_P" ]; then
+		    if ! [ -r "$BASE_DIR/checkout.lcopy" ]; then
+			echo "cannot read $BASE_DIR/checkout.lcopy" 1>&2
+			exit 1
+		    else
+			break
+		    fi
+		elif ! lcopy_verify_directory "$BASE_DIR"; then
 		    exit 1
 		else
 		    break
