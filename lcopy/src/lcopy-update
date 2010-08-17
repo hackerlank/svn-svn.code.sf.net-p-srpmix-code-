@@ -99,6 +99,7 @@ function update
 	    exit 0
 	else
 	    exit 1
+	fi
     fi
 
     if [ "$LCOPY_UPDATE" = "no" ]; then

@@ -1,3 +1,7 @@
+2010-08-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/lcopy-update (update): Fix a typo.
+
 2010-08-16  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.8.
