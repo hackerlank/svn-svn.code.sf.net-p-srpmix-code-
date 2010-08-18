@@ -1,0 +1,44 @@
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 0%{?dist}
+Summary: Sqlite binding for Gauche
+
+Group: Development/Languages
+License: BSD
+URL: @URL@
+Source0: %{url}/%{name}-%{version}.tgz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRequires: gauche-devel
+BuildRequires: sqlite-devel
+Requires: gauche
+Requires: sqlite
+ExcludeArch:    ppc64
+
+%description
+Sqlite binding for Gauche.
+
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+%configure
+make %{?_smp_mflags}
+
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root,-)
+%{_libdir}/gauche
+%{_datadir}/gauche
+
+%changelog
+* Wed Aug 18 2010 Masatake YAMATO <yamato@redhat.com>
+- Initial build.
+
