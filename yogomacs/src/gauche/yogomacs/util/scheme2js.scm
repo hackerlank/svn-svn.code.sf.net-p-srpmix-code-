@@ -5,6 +5,7 @@
 
 (select-module yogomacs.util.scheme2js)
 
+;; FIXMIE: THIS SHOULD NOT BE PART OF THIS MODULE.
 (define yogomacs-macs "/usr/share/yogomacs/scheme2js/yogomacs-macs.scm")
 (define (scm->js body)
   (receive (oport file) (sys-mkstemp "/tmp/scm->js") 
@@ -16,11 +17,15 @@
 	       port->sexp-list)
 	     body))
     (close-output-port oport)
-    (let1 js (call-with-input-process 
-		 `(scheme2js -o - ,file)
-	       port->string)
-      (sys-unlink file)
-      js)))
+    (dynamic-wind
+	(lambda ())
+	(lambda ()
+	  (let1 js (call-with-input-process 
+		       `(scheme2js -o - ,file)
+		     port->string)
+	    js))
+	(pa$ sys-unlink file))))
+
 
 (define (scm->js* . body)
   (apply scm->js body))
