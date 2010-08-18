@@ -1,5 +1,7 @@
 2010-08-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.2.9
+
 	* src/lcopy-update (update): Fix a typo.
 	(parse_arguments): don't use `lcopy_verify_directory'
 	function if --no-update-p given.
