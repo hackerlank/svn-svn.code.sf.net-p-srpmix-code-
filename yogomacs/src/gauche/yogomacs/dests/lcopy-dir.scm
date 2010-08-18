@@ -8,7 +8,7 @@
   (use yogomacs.dests.dir)
   (use yogomacs.dests.file)
   (use yogomacs.access)
-  (use yogomacs.lcopy)
+  (use yogomacs.util.lcopy)
   (use srfi-1)
   ;;
   (use file.util)

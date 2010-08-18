@@ -1,11 +1,11 @@
-(define-module yogomacs.lcopy
+(define-module yogomacs.util.lcopy
   (export lcopy-dir->checkout-cmdline
 	  lcopy-dir->no-update?)
   (use gauche.process)
   (use file.util)
   )
 
-(select-module yogomacs.lcopy)
+(select-module yogomacs.util.lcopy)
 
 (define (lcopy-file->checkout-cmdline lcopy-file)
   (guard (e (else #f))
@@ -30,4 +30,4 @@
 			    :wait #t)
       (eq? (process-exit-status proc) 0))))
 
-(provide "yogomacs/lcopy")
+(provide "yogomacs/util/lcopy")

@@ -6,7 +6,7 @@
 (define *test-report-error* #t)
 (test-start "Yogomacs ebuf test")
 
-(use yogomacs.ebuf)
+(use yogomacs.util.ebuf)
 (define ebuf0 (make <ebuf>))
 (insert! ebuf0 "abc\ndef\nghi\n")
 

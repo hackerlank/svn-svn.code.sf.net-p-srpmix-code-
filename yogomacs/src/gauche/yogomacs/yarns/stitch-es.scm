@@ -2,7 +2,7 @@
   (export stitch-es->yarn)
   (use yogomacs.caches.yarn)
   (use yogomacs.path)
-  (use yogomacs.ebuf)
+  (use yogomacs.util.ebuf)
   (use file.util)
   (use util.combinations)
   (use srfi-13)

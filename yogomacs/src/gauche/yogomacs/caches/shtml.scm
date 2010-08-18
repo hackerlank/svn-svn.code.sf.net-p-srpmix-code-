@@ -4,7 +4,7 @@
   (use rfc.md5)
   (use util.digest)
   (use file.util)
-  (use yogomacs.compress)
+  (use yogomacs.util.compress)
   (use gauche.process)
   (use yogomacs.cache)
   (use yogomacs.error)

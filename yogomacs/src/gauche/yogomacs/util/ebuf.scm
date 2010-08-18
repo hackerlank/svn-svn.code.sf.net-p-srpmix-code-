@@ -1,4 +1,4 @@
-(define-module yogomacs.ebuf		;:
+(define-module yogomacs.util.ebuf 
   (export <ebuf> 
 	  find-file!
 	  insert!
@@ -6,7 +6,7 @@
 	  search-forward)
   (use srfi-13))
 
-(select-module yogomacs.ebuf)
+(select-module yogomacs.util.ebuf)
 
 (define-class <ebuf> ()
   ((buffer-string)
@@ -62,4 +62,4 @@
 		   string
 		   start-from))
 
-(provide "yogomacs/ebuf")
+(provide "yogomacs/util/ebuf")

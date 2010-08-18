@@ -2,7 +2,7 @@
   (export window)
   (use yogomacs.dests.js)		;wrong?
   (use yogomacs.dests.css)		;wrong?
-  (use yogomacs.scheme2js)
+  (use yogomacs.util.scheme2js)
   (use yogomacs.shell)
   (use yogomacs.shells.ysh)
   (use yogomacs.shells.bscm)

@@ -14,23 +14,19 @@ dist_module_DATA =   \
 	access.scm				\
 	batch.scm				\
 	cache.scm				\
-	compress.scm				\
 	config.scm				\
 	dentry.scm				\
 	domain.scm				\
-	ebuf.scm				\
 	entry.scm				\
 	error.scm				\
 	face.scm				\
 	flserver.scm				\
-	lcopy.scm				\
 	main.scm				\
 	params.scm				\
 	path.scm				\
 	reply.scm				\
 	route.scm				\
 	sanitize.scm				\
-	scheme2js.scm				\
 	shell.scm				\
 	window.scm				\
 	yarn.scm				\

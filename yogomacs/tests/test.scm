@@ -44,7 +44,6 @@
  yogomacs.dests.ysh-dir
  yogomacs.error
  yogomacs.dentry
- yogomacs.compress
  yogomacs.dentries.fs
  yogomacs.dentries.text
  yogomacs.dentries.virtual
@@ -77,14 +76,18 @@
  yogomacs.renderers.ewoc
  yogomacs.domain
  yogomacs.params
- yogomacs.lcopy
  yogomacs.dests.yarn
  yogomacs.yarns.stitch-es
  yogomacs.yarn
  yogomacs.caches.yarn
- yogomacs.ebuf
+ yogomacs.util.ebuf
  ;;
+ yogomacs.util.compress
+ yogomacs.util.ebuf
+ yogomacs.util.enum
+ yogomacs.util.lcopy
  yogomacs.util.range
+ yogomacs.util.scheme2js
  ;;
 )
 

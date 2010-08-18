@@ -11,7 +11,7 @@
   (use yogomacs.dests.lcopy-dir)
   (use srfi-1)
   (use file.util)
-  (use yogomacs.lcopy)
+  (use yogomacs.util.lcopy)
   )
 (select-module yogomacs.dests.pkg-dir)
 
