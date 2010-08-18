@@ -9,8 +9,6 @@
 ** svn update stitch.es
 ** give styles for dired markers
 
-
-
 * Just viewable
 ** For batch converting
 *** Disable auto-killing
@@ -50,7 +48,7 @@
 ** amazon
 
 * Interactive shell
-** real shell
+** real parser
 ** grep*
 ** tag jump*
 ** diff
