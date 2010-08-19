@@ -147,8 +147,6 @@
 	  :keywords ,keywords)
 	#f)))
 
-
-
 (define (make-yarn-filter path config)
   (lambda (es to)
     (guard (e (else to))

@@ -2,6 +2,14 @@
 * prioritized task
 ** trap style changing
 
+** /web -> /_web
+** yarn collectors
+*** collect-yarns-by-target -> collect-yarns-by-path
+*** mapping to /annotations/keywords
+*** mapping to /home/yamato/keywords
+
+
+
 ** css inclusion <done> and auto rebuild facility
 ** unified js. Propose the way to insert asis text 
    into result js file scheme2js project.
@@ -27,6 +35,8 @@
 *** cache GC 
 
 ** FS strcture
+*** . for getting tar.gz and putting tar.gz
+*** .. for exit
 *** Sending dist-mapping.es in asis
 *** attic*
 **** blacklist
@@ -99,4 +109,6 @@
 (init-console)
 
 * improve biwascheme
+
+* calendar
 

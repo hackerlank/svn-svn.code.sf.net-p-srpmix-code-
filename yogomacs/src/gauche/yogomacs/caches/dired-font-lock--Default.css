@@ -28,6 +28,7 @@ body {
         /* default */
         color: #000000;
         background-color: #ffffff;
+	font-family: monospace;
 }
 
 .default {
