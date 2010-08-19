@@ -18,6 +18,8 @@
 (define (collect-yarns-by-keywords keywords params config)
   #f)
 
+(define (all-keywords params config)
+  #f)
 
 
 (provide "yogomacs/yarn")

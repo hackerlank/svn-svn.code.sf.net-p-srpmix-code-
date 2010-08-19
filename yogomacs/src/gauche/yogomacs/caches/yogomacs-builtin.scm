@@ -145,9 +145,6 @@
 						 (alert "An error occured")))
 				 (onComplete . ,(pa$ run-hook find-file-post-hook url params))))
     (js-new Ajax.Updater "buffer" url options)))
-			       
-
-
 
 (define full-screen #f)
 (define (full-screen?)  full-screen)
@@ -435,5 +432,16 @@
     (js-new Ajax.Request
 	    (string-append "/web/yarn" url)
 	    options)))
+
+(define (jump-lazy hash url params)
+  (when (and (string? hash)
+	     (< 0 (string-length hash))
+	     (eq? (string-ref hash 0) #\#))
+    (let* ((id (substring hash 1 (string-length hash)))
+	   (elt ($ id)))
+      ;; Not portable
+      (elt.scrollIntoView))))
+
+(add-hook find-file-post-hook (pa$ jump-lazy (js-field (js-field *js* "location") "hash")))
 
 (add-hook find-file-post-hook require-yarns)
