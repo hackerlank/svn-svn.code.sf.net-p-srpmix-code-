@@ -14,7 +14,7 @@ dist_module_DATA =   \
 	pkg-dir.scm				\
 	print-alist.scm				\
 	root-dir.scm				\
-	root-plugins-dir.scm			\
+	root-commands-dir.scm			\
 	sources-dir.scm				\
 	srpmix-dir.scm                          \
 	text.scm                                \

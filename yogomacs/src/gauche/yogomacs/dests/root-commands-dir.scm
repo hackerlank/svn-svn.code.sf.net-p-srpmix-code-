@@ -1,5 +1,5 @@
-(define-module yogomacs.dests.root-plugins-dir
-  (export root-plugins-dir-dest)
+(define-module yogomacs.dests.root-commands-dir
+  (export root-commands-dir-dest)
   (use yogomacs.dentry)
   (use srfi-1)
   (use www.cgi)
@@ -13,13 +13,13 @@
   (use yogomacs.route)
   (use yogomacs.shell)
   )
-(select-module yogomacs.dests.root-plugins-dir)
+(select-module yogomacs.dests.root-commands-dir)
 
 (define ysh-url  "/ysh")
 (define ysh-name "ysh")
 (define (ysh-entry parent-path)
   (make <redirect-dentry>
-    :parent "/plugins" :dname ysh-name :url ysh-url))
+    :parent "/commands" :dname ysh-name :url ysh-url))
 (define (ysh-dest path params config)
   (list
    (cgi-header :status "302 Moved Temporarily"
@@ -29,7 +29,7 @@
 (define bscm-name "bscm")
 (define (bscm-entry parent-path)
   (make <redirect-dentry>
-    :parent "/plugins" :dname bscm-name :url bscm-url))
+    :parent "/commands" :dname bscm-name :url bscm-url))
 (define (bscm-dest path params config)
   (list
    (cgi-header :status "302 Moved Temporarily"
@@ -37,7 +37,7 @@
 
 (define (login-entry parent-path)
   (make <redirect-dentry>
-    :parent "/plugins" 
+    :parent "/commands" 
     :dname "login" 
     :url "ysh"
     :show-arrowy-to "./ysh"))
@@ -71,17 +71,17 @@
       :last-modification-time #f)))
 
 (define (routing-table path params)
-  `((#/^\/plugins$/ ,dest)
-    (#/^\/plugins\/ysh$/ ,ysh-dest)
-    (#/^\/plugins\/bscm$/ ,bscm-dest)
+  `((#/^\/commands$/ ,dest)
+    (#/^\/commands\/ysh$/ ,ysh-dest)
+    (#/^\/commands\/bscm$/ ,bscm-dest)
     ,@(if (in-shell? params)
 	  (list)
 	  (list
-	   `(#/^\/plugins\/login$/ ,ysh-dest)
+	   `(#/^\/commands\/login$/ ,ysh-dest)
 	   ))
     ))
 
-(define (root-plugins-dir-dest path params config)
+(define (root-commands-dir-dest path params config)
   (route (routing-table path params) (compose-path path) params config))
 
-(provide "yogomacs/dests/root-plugins-dir")
+(provide "yogomacs/dests/root-commands-dir")

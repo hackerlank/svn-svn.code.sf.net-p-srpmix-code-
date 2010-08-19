@@ -21,7 +21,7 @@
   (use yogomacs.dests.sources-dir)
   (use yogomacs.dests.dists-dir)
   (use yogomacs.dests.packages-dir)
-  (use yogomacs.dests.root-plugins-dir)
+  (use yogomacs.dests.root-commands-dir)
   (use yogomacs.dests.ysh-dir)
   (use yogomacs.dests.bscm-dir)
   (use yogomacs.dests.debug)
@@ -42,14 +42,14 @@
     :parent (compose-path parent-path)
     :dname "README"
     :text "Use the Source, Luke."))
-(define (plugins-entry parent-path)
+(define (commands-entry parent-path)
   (make <redirect-dentry>
     :parent (compose-path parent-path)
-    :dname "plugins"))
+    :dname "commands"))
 (define (login-entry parent-path)
   (make <redirect-dentry>
     :parent (compose-path parent-path)
-    :url "plugins/login"
+    :url "commands/login"
     :dname "login"
     :show-arrowy-to #t))
 
@@ -61,7 +61,7 @@
 			       root-globs)
 		`( 
 		  ,(README-entry path)
-		  ,(plugins-entry path)
+		  ,(commands-entry path)
 		  ,@(if (in-shell? params)
 			'()
 			`(,(login-entry path))
@@ -90,7 +90,7 @@
      (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
      (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
-     (#/^\/plugins(?:\/.+)?$/   ,root-plugins-dir-dest)
+     (#/^\/commands(?:\/.+)?$/   ,root-commands-dir-dest)
      (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
      (#/^\/bscm(?:\/.+)?$/   ,bscm-dir-dest)
      ;;

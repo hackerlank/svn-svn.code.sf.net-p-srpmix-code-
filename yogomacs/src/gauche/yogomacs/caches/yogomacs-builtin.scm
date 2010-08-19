@@ -223,7 +223,7 @@
 		    ((equal? (substring path (- len 1) len) "/") 
 		     (normalize-path (substring path 0 (- len 1))))
 		    (else path)))))
-    ;; TODO... command should be appeared on plugins dir.
+    ;; TODO... command should be appeared on commands dir.
     (scm->scm bscm
 	      `(define (exit . rest)
 		 (let* ((location (js-eval "location"))

@@ -27,7 +27,7 @@
  yogomacs.rearranges.line-trim
  yogomacs.rearranges.range
  yogomacs.dests.root-dir
- yogomacs.dests.root-plugins-dir
+ yogomacs.dests.root-commands-dir
  yogomacs.dests.srpmix-dir
  yogomacs.dests.css
  yogomacs.dests.js
