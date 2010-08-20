@@ -3,8 +3,7 @@
 ** trap style changing
 
 ** /web -> /_web
-** yarn collectors
-*** collect-yarns-by-target -> collect-yarns-by-path
+** reels
 *** mapping to /annotations/keywords
 *** mapping to /home/yamato/keywords
 
