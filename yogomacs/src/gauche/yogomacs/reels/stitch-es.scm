@@ -1,4 +1,4 @@
-(define-module yogomacs.yarns.stitch-es
+(define-module yogomacs.reels.stitch-es
   (export stitch-es->yarn)
   (use yogomacs.caches.yarn)
   (use yogomacs.path)
@@ -10,7 +10,7 @@
   (use gauche.sequence)
   )
 
-(select-module yogomacs.yarns.stitch-es)
+(select-module yogomacs.reels.stitch-es)
 
 (define-constant stitch-es "stitch.es")
 
@@ -192,4 +192,4 @@
 	     (make-es-provider (build-path (yarn-cache-dir config) 
 					   stitch-es))))
 
-(provide "yogomacs/yarns/stitch-es")
+(provide "yogomacs/reels/stitch-es")
