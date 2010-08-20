@@ -77,7 +77,7 @@
  yogomacs.domain
  yogomacs.params
  yogomacs.dests.yarn
- yogomacs.yarns.stitch-es
+ yogomacs.reels.stitch-es
  yogomacs.yarn
  yogomacs.caches.yarn
  yogomacs.util.ebuf

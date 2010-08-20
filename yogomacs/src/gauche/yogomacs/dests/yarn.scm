@@ -61,9 +61,9 @@
 (define (yarn-dest path params config)
   (list (cgi-header :content-type "text/x-es")
 	(with-output-to-string
-	  (pa$ write (collect-yarns-by-target (compose-path (cddr path))
-					      params
-					      config))
+	  (pa$ write (collect-yarns-by-path (compose-path (cddr path))
+					    params
+					    config))
 	  )))
 
 (provide "yogomacs/dests/yarn")

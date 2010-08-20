@@ -1,6 +1,10 @@
 (define-module yogomacs.yarn
-  (export collect-yarns-by-target)
-  (use yogomacs.yarns.stitch-es)
+  (export collect-yarns-by-path
+	  collect-yarns-by-author
+	  collect-yarns-by-keywords
+	  all-keywords
+	  )
+  (use yogomacs.reels.stitch-es)
   )
 
 

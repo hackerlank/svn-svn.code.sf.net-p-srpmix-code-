@@ -120,8 +120,8 @@ fi
 %dir %{_datadir}/gauche/site/lib/yogomacs/util
 %{_datadir}/gauche/site/lib/yogomacs/util/*.scm
 
-%dir %{_datadir}/gauche/site/lib/yogomacs/yarns
-%{_datadir}/gauche/site/lib/yogomacs/yarns/*.scm
+%dir %{_datadir}/gauche/site/lib/yogomacs/reels
+%{_datadir}/gauche/site/lib/yogomacs/reels/*.scm
 
 
 %dir %{_localstatedir}/lib/yogomacs
