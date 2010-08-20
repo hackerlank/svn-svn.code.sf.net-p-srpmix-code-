@@ -131,17 +131,17 @@ fi
 %attr(0700,apache,apache) %{_localstatedir}/www/.vnc/passwd
 %dir %{_sysconfdir}/yogomacs
 
-%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/js
+%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/js
 %{_localstatedir}/lib/yogomacs/js/*.js
 
 %dir %{_datadir}/yogomacs/scheme2js
 %{_datadir}/yogomacs/scheme2js/yogomacs-macs.scm
 
-%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/yarn
+%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/yarn
 
 %files cachedir
 %dir %{_localstatedir}/cache/yogomacs
-%attr(0700,apache,apache) %dir %{_localstatedir}/cache/yogomacs/shtml
+%attr(0755,apache,apache) %dir %{_localstatedir}/cache/yogomacs/shtml
 
 
 %files @SPEC_CONFIG@
@@ -149,8 +149,9 @@ fi
 
 @WWWDIR@/cgi-bin/yogomacs-@SPEC_CONFIG@.cgi
 %config %{_sysconfdir}/yogomacs/@SPEC_CONFIG@.scm
-%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@
-%attr(0700,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css
+# TODO: THIS SHOULE BE css/@SPEC_CONFIG@
+%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@
+%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css
 %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css/*.css
 
 %config %{_sysconfdir}/font-lock/flserver/yogomacs-@SPEC_CONFIG@.el

@@ -377,12 +377,13 @@
 										  (car transited-from))
 								   (car transited-from))))
 						   ,text)
-					       ,text)))
+					       text)))
 			      (div (|@|
 				    (class "yarn-footer"))
 				   (div
 				    (span ,(write-to-string keywords)))
-				   ))))
+				   ))
+			))
    (else (lambda (content date full-name mailing-address keywords)
 	   #f))))
 
