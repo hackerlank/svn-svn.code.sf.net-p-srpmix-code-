@@ -10,7 +10,7 @@
 
 (select-module yogomacs.yarn)
 
-(define (collect-yarns-by-target path params config)
+(define (collect-yarns-by-path path params config)
   (cons 'yarn-container
 	(append
 	 (stitch-es->yarn path params config)

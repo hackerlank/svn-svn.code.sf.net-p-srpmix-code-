@@ -6,7 +6,7 @@
 (define *test-report-error* #t)
 (test-start "Yogomacs lcopy test")
 
-(use yogomacs.lcopy)
+(use yogomacs.util.lcopy)
 
 (test* "update"
        #f
