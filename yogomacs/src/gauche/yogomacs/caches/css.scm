@@ -14,7 +14,7 @@
 (select-module yogomacs.caches.css)
 
 (define (css-cache-dir config)
-  (format "/var/lib/yogomacs/~a/css"
+  (format "/var/lib/yogomacs/css/~a"
 	  (config 'spec-conf)))
 
 (define (css-cache-storage config face style)

@@ -1,6 +1,5 @@
 (define-module yogomacs.reels.stitch-es
-  (export stitch-es->yarn)
-  (use yogomacs.caches.yarn)
+  (export <stitch-es>)
   (use yogomacs.path)
   (use yogomacs.util.ebuf)
   (use file.util)
@@ -8,11 +7,12 @@
   (use srfi-13)
   (use srfi-1)
   (use gauche.sequence)
+  (use yogomacs.reel)
   )
 
 (select-module yogomacs.reels.stitch-es)
 
-(define-constant stitch-es "stitch.es")
+
 
 (define (make-es-provider file-name)
   (let1 port (open-input-file file-name :if-does-not-exist #f)
@@ -186,10 +186,33 @@
 		      (loop (cdr target*annotation)
 			    to)))))))))))
 
-(define (stitch-es->yarn path params config)
+(define (stitch-es->yarn es-file path params config)
   (port-fold (make-yarn-filter path config) 
 	     (list)
-	     (make-es-provider (build-path (yarn-cache-dir config) 
-					   stitch-es))))
+	     (make-es-provider es-file)))
+
+
+(define-class <stitch-es> (<reel>)
+  ((es-file :init-keyword :es-file)
+   )
+  )
+
+(define-method spin-for-path ((stitch-es <stitch-es>)
+			      (path <string>))
+  (stitch-es->yarn (ref stitch-es 'es-file)
+		   path
+		   (ref stitch-es 'params)
+		   (ref stitch-es 'config)))
+
+(define-method spin-of-author ((stitch-es <stitch-es>)
+			       (author <string>))
+  #f)
+
+(define-method spin-about-keywords ((stitch-es <stitch-es>)
+				    (keywords <list>))
+  #f)
+
+(define-method all-keywords ((stitch-es <stitch-es>))
+  #f)
 
 (provide "yogomacs/reels/stitch-es")

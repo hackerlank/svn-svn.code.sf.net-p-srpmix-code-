@@ -2,12 +2,13 @@
 * prioritized task
 ** trap style changing
 
-** /web -> /_web
-** reels
+** /var/lib/yogomacs/css + /var/cache/yogomacs/css/@SPEC_CONFIG@
+** /web -> /_attic
+** reel spins
 *** mapping to /annotations/keywords
 *** mapping to /home/yamato/keywords
 
-
+** path -> path/lpath
 
 ** css inclusion <done> and auto rebuild facility
 ** unified js. Propose the way to insert asis text 

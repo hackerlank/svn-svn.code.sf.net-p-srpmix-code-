@@ -91,6 +91,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/main.scm
 %{_datadir}/gauche/site/lib/yogomacs/params.scm
 %{_datadir}/gauche/site/lib/yogomacs/path.scm
+%{_datadir}/gauche/site/lib/yogomacs/reel.scm
 %{_datadir}/gauche/site/lib/yogomacs/reply.scm
 %{_datadir}/gauche/site/lib/yogomacs/route.scm
 %{_datadir}/gauche/site/lib/yogomacs/sanitize.scm
@@ -143,16 +144,16 @@ fi
 %dir %{_localstatedir}/cache/yogomacs
 %attr(0755,apache,apache) %dir %{_localstatedir}/cache/yogomacs/shtml
 
+%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/css
 
 %files @SPEC_CONFIG@
 %config %{_sysconfdir}/httpd/conf.d/*
 
 @WWWDIR@/cgi-bin/yogomacs-@SPEC_CONFIG@.cgi
 %config %{_sysconfdir}/yogomacs/@SPEC_CONFIG@.scm
-# TODO: THIS SHOULE BE css/@SPEC_CONFIG@
-%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@
-%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css
-%{_localstatedir}/lib/yogomacs/@SPEC_CONFIG@/css/*.css
+
+%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/css/@SPEC_CONFIG@
+%{_localstatedir}/lib/yogomacs/css/@SPEC_CONFIG@/*.css
 
 %config %{_sysconfdir}/font-lock/flserver/yogomacs-@SPEC_CONFIG@.el
 

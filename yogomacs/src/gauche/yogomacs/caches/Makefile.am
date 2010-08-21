@@ -9,7 +9,7 @@ dist_module_DATA =   \
 	$(NULL)
 
 
-csscachedir=$(localstatedir)/lib/yogomacs/@SPEC_CONFIG@/css
+csscachedir=$(localstatedir)/lib/yogomacs/css/@SPEC_CONFIG@
 dist_csscache_DATA= \
 	file-font-lock--Default.css		\
 	file-font-lock--Invert.css		\

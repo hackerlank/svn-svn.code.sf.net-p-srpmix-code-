@@ -24,6 +24,7 @@ dist_module_DATA =   \
 	main.scm				\
 	params.scm				\
 	path.scm				\
+	reel.scm				\
 	reply.scm				\
 	route.scm				\
 	sanitize.scm				\
