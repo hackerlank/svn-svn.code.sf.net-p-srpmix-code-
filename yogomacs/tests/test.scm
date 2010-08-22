@@ -77,6 +77,7 @@
  yogomacs.domain
  yogomacs.params
  yogomacs.dests.yarn
+ yogomacs.dests.keywords
  yogomacs.reel
  yogomacs.reels.stitch-es
  yogomacs.yarn

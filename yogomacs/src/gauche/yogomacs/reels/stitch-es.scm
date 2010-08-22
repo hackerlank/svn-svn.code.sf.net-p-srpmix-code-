@@ -206,6 +206,7 @@
 
 (define-method spin-of-author ((stitch-es <stitch-es>)
 			       (author <string>))
+  
   #f)
 
 (define-method spin-about-keywords ((stitch-es <stitch-es>)
@@ -213,6 +214,19 @@
   #f)
 
 (define-method all-keywords ((stitch-es <stitch-es>))
-  #f)
+  (port-fold (lambda (es to)
+	       (guard (e (else to))
+		 (cond
+		  ((not (list? es)) to)
+		  ((null? es) to)
+		  ((not (eq? (car es) 'stitch-annotation)) to)
+		  (else
+		   (let-keywords (cdr es)
+		       ((keywords (not-given :keywords))
+			. rest)
+		     (lset-union eq? keywords to)
+		     )))))
+	     (list)
+	     (make-es-provider (ref stitch-es 'es-file))))
 
 (provide "yogomacs/reels/stitch-es")

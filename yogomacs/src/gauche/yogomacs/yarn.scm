@@ -5,6 +5,7 @@
 	  all-keywords
 	  )
   (use file.util)
+  (use srfi-1)
   (use yogomacs.reel)
   (use yogomacs.reels.stitch-es)
   (use yogomacs.caches.yarn)
@@ -15,16 +16,19 @@
 
 (define-constant stitch-es "stitch.es")
 
+(define (all-reals params config)
+  (list
+   (make <stitch-es> 
+     :es-file (build-path (yarn-cache-dir config) 
+			  stitch-es)
+     :params params
+     :config config)))
+
 (define (collect-yarns-by-path path params config)
-  (let ((stitch-es (make <stitch-es> 
-		     :es-file (build-path (yarn-cache-dir config) 
-					  stitch-es)
-		     :params params
-		     :config config)))
-    (cons 'yarn-container
-	  (append
-	   (spin-for-path stitch-es path)
-	   ))))
+  (cons 'yarn-container
+	(append-map (cute spin-for-path <> path)
+		    (all-reals params config))))
+
 
 (define (collect-yarns-of-author author params config)
   #f)
@@ -33,6 +37,11 @@
   #f)
 
 (define-method all-keywords (params config)
-  #f)
+  (list 'yarn-keywords
+	(apply
+	 lset-union
+	 eq?
+	 (map all-keywords
+	      (all-reals params config)))))
 
 (provide "yogomacs/yarn")

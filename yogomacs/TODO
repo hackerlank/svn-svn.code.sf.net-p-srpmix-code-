@@ -3,11 +3,16 @@
 ** trap style changing
 
 ** /var/lib/yogomacs/css + /var/cache/yogomacs/css/@SPEC_CONFIG@
-** /web -> /_attic
+** /web -> /_/
+** /web -> /es
 ** reel spins
 *** mapping to /annotations/keywords
 *** mapping to /home/yamato/keywords
 
+** Look at the similarity betwenn dests/yarn.scm, dest/css.scm and dest/keywords.scm.
+** use xxx-route of dests/yarn.scm, dest/css.scm and dest/keywords.scm in main.scm.
+** /es
+** /json
 ** path -> path/lpath
 
 ** css inclusion <done> and auto rebuild facility
