@@ -223,6 +223,8 @@
 		  (else
 		   (let-keywords (cdr es)
 		       ((keywords (not-given :keywords))
+			;; "Thu Aug 12 09:53:13 2010"
+			(date (not-given :date))
 			. rest)
 		     (lset-union eq? keywords to)
 		     )))))
