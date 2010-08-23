@@ -1,6 +1,7 @@
 moduledir=@GAUCHE_MODULEDIR@/yogomacs/dests
 dist_module_DATA =   \
 	\
+	annotations-dir.scm			\
 	bscm-dir.scm				\
 	css.scm					\
 	debug.scm				\

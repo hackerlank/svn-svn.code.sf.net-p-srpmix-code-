@@ -17,7 +17,10 @@
 (define (keywords-dest path params config)
   (list (cgi-header :content-type "text/x-es")
 	(with-output-to-string
-	  (pa$ write (all-keywords params config))
+	  (pa$ write 
+	       (list
+		'yarn-keywords
+		(all-keywords params config)))
 	  )))
 
 (provide "yogomacs/dests/keywords")

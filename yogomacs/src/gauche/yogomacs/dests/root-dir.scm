@@ -17,11 +17,13 @@
   (use yogomacs.dests.css)
   (use yogomacs.dests.dir)
   ;;
-  (use yogomacs.dests.text)
-  (use yogomacs.dests.sources-dir)
+  (use yogomacs.dests.annotations-dir)
   (use yogomacs.dests.dists-dir)
   (use yogomacs.dests.packages-dir)
   (use yogomacs.dests.root-commands-dir)
+  (use yogomacs.dests.sources-dir)
+  ;;
+  (use yogomacs.dests.text)
   (use yogomacs.dests.ysh-dir)
   (use yogomacs.dests.bscm-dir)
   (use yogomacs.dests.debug)
@@ -42,6 +44,10 @@
     :parent (compose-path parent-path)
     :dname "README"
     :text "Use the Source, Luke."))
+(define (annotations-entry parent-path)
+  (make <redirect-dentry>
+    :parent (compose-path parent-path)
+    :dname "annotations"))
 (define (commands-entry parent-path)
   (make <redirect-dentry>
     :parent (compose-path parent-path)
@@ -61,6 +67,7 @@
 			       root-globs)
 		`( 
 		  ,(README-entry path)
+		  ,(annotations-entry path)
 		  ,(commands-entry path)
 		  ,@(if (in-shell? params)
 			'()
@@ -87,12 +94,14 @@
 
 (define (routing-table path params)
    `((#/^\/$/ ,dest)
-     (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
+     (#/^\/annotations(?:\/.+)?$/ ,annotations-dir-dest)
+     (#/^\/bscm(?:\/.+)?$/   ,bscm-dir-dest)
+     (#/^\/commands(?:\/.+)?$/   ,root-commands-dir-dest)
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
      (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
-     (#/^\/commands(?:\/.+)?$/   ,root-commands-dir-dest)
+     (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
      (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
-     (#/^\/bscm(?:\/.+)?$/   ,bscm-dir-dest)
+
      ;;
      ,@(if (in-shell? params)
 	   (list)
@@ -100,12 +109,13 @@
 	    `(#/^\/login$/  ,login-dest)
 	    ))
      (#/^\/README$/  ,README-dest)
+     ;; 403
      (#/^.*$/ ,print-path)
      ))
 
 
-(define (root-dir-dest path params config)
-   (route (routing-table path params) (compose-path path) params config))
+(define (root-dir-dest lpath params config)
+  (route (routing-table lpath params) (compose-path lpath) params config))
 
 
 

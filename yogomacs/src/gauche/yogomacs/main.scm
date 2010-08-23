@@ -21,8 +21,6 @@
 
 (define routing-table
   `((#/^\/$/ ,root-dir-dest)
-    ;;
-    ;; (, (string->regexp (string-append "^" css-route "/" "[^/]+\\." "css")) ,css-dest)
     (#/^\/web\/css\/[^\/]+\.css/ ,css-dest)
     (#/^\/web\/js\/[^\/]+\.js/ ,js-dest)
     (#/^\/web\/yarn(?:\/.+)?$/ ,yarn-dest)

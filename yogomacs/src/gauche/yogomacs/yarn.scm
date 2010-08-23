@@ -25,9 +25,8 @@
      :config config)))
 
 (define (collect-yarns-by-path path params config)
-  (cons 'yarn-container
-	(append-map (cute spin-for-path <> path)
-		    (all-reals params config))))
+  (append-map (cute spin-for-path <> path)
+	      (all-reals params config)))
 
 
 (define (collect-yarns-of-author author params config)
@@ -37,11 +36,10 @@
   #f)
 
 (define-method all-keywords (params config)
-  (list 'yarn-keywords
-	(apply
-	 lset-union
-	 eq?
-	 (map all-keywords
-	      (all-reals params config)))))
+  (apply
+   lset-union
+   eq?
+   (map all-keywords
+	(all-reals params config))))
 
 (provide "yogomacs/yarn")

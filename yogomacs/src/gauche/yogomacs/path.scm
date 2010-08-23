@@ -13,11 +13,11 @@
 (define (decompose-path path-string) 
   (cdr (string-split path-string #\/)))
 
-(define (compose-path path-list)
-  (apply build-path (cons "/" path-list)))
+(define (compose-path lpath)
+  (apply build-path (cons "/" lpath)))
 
-(define (compose-path* path-list elt)
-   (compose-path (reverse! (cons elt (reverse path-list)))))
+(define (compose-path* lpath elt)
+   (compose-path (reverse! (cons elt (reverse lpath)))))
 
 (define (parent-of path)
   (reverse (cdr (reverse path))))

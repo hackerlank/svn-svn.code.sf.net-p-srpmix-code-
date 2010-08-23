@@ -26,6 +26,7 @@
  yogomacs.rearranges.yogomacs-fragment
  yogomacs.rearranges.line-trim
  yogomacs.rearranges.range
+ yogomacs.dests.annotations-dir
  yogomacs.dests.root-dir
  yogomacs.dests.root-commands-dir
  yogomacs.dests.srpmix-dir

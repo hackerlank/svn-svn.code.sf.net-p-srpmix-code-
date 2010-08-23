@@ -94,7 +94,8 @@
 	 (shell-name (in-shell? (ref shtml 'params))))
     (if shell-name
 	(let1 new (make <shtml-data>
-		    :data ((compose (cute yogomacs-fragment <> shell-name) narrow-down) (ref shtml 'data))
+		    :data ((compose (cute yogomacs-fragment <> shell-name) narrow-down) 
+			   (ref shtml 'data))
 		    :params (ref shtml 'params)
 		    :config (ref shtml 'config)
 		    :last-modification-time (ref shtml 'last-modification-time)
