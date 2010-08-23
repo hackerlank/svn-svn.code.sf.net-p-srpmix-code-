@@ -31,6 +31,7 @@ dist_confd_DATA = \
 	gtk2,trunk.lcopy \
 	hachoir,trunk.lcopy \
 	hal,trunk.lcopy \
+	hieroglyph,trunk.lcopy \
 	httpclient,trunk.lcopy \
 	kernel,kvm.lcopy \
 	kernel,rt.lcopy \
@@ -41,6 +42,7 @@ dist_confd_DATA = \
 	libvirt,trunk.lcopy \
 	lm-sensors,trunk.lcopy \
 	man-pages,trunk.lcopy \
+	mew,trunk.lcopy \
 	miniascape,trunk.lcopy \
 	netbsd-kernel,trunk.lcopy \
 	openais,trunk.lcopy \
