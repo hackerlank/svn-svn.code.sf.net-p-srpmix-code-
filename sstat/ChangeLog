@@ -1,3 +1,7 @@
+2010-08-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/sstat.spec.in (%post, %preun): New section.
+
 2010-08-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sstat.stp: Don't Include linux/nfsd/nfsd.h.

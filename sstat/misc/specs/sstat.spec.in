@@ -30,6 +30,17 @@ rm -rf $RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT
 
 
+%post
+# Register the sstat service
+/sbin/chkconfig --add sstat
+
+%preun
+if [ $1 = 0 ]; then
+	/sbin/service sstat stop > /dev/null 2>&1
+	/sbin/chkconfig --del sstat
+fi
+
+
 %files
 %defattr(-,root,root,-)
 %{_sbindir}/sstat-pre
