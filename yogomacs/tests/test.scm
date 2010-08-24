@@ -47,6 +47,7 @@
  yogomacs.dentry
  yogomacs.dentries.fs
  yogomacs.dentries.text
+ yogomacs.dentries.subject
  yogomacs.dentries.virtual
  yogomacs.dentries.redirect
  yogomacs.cache
