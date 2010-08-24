@@ -4,8 +4,8 @@
 #;	  config
 	  spin-for-path
 	  spin-of-author
-	  spin-about-keywords
-	  all-keywords
+	  spin-about-subjects
+	  all-subjects
 	  )
   )
 
@@ -35,11 +35,11 @@
 			       (author <string>))
   #f)
 
-(define-method spin-about-keywords ((reel <reel>)
-				    (keywords <list>))
+(define-method spin-about-subjects ((reel <reel>)
+				    (subjects <list>))
   #f)
 
-(define-method all-keywords ((reel <reel>))
+(define-method all-subjects ((reel <reel>))
   #f)
 
 

@@ -49,6 +49,10 @@
 (define-method path-of ((fs-dentry <fs-dentry>))
   (build-path (ref fs-dentry 'parent)
 	      (ref fs-dentry 'entry)))
+
+(define-method nlink-of ((fs-dentry <fs-dentry>)) 
+  (ref (ref fs-dentry 'stat) 'nlink))
+
 (define-method size-of ((fs-dentry <fs-dentry>))
   (ref (ref fs-dentry 'stat) 'size))
 

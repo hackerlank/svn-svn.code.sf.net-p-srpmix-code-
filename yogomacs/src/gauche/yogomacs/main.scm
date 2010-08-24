@@ -13,7 +13,7 @@
   (use yogomacs.dests.css)
   (use yogomacs.dests.js)
   (use yogomacs.dests.yarn)
-  (use yogomacs.dests.keywords)
+  (use yogomacs.dests.subjects)
   (use yogomacs.dests.debug)
   ;;
   )
@@ -24,7 +24,7 @@
     (#/^\/web\/css\/[^\/]+\.css/ ,css-dest)
     (#/^\/web\/js\/[^\/]+\.js/ ,js-dest)
     (#/^\/web\/yarn(?:\/.+)?$/ ,yarn-dest)
-    (#/^\/web\/keywords$/ ,keywords-dest)
+    (#/^\/web\/subjects$/ ,subjects-dest)
     ;;
     (#/^\/debug\/metavariables$/ ,print-metavariables)
     (#/^\/debug\/config$/ ,print-config)

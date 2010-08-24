@@ -35,7 +35,6 @@
    (string-append ":" 
 		  (keyword->string key))))
 
-;; TODO: Report 
 ;;(define-method ref ((list <list>) (keyword <keyword>))
 ;;  (get-keyword ...)
 (define (kref klist key default)
@@ -346,7 +345,7 @@
 
 (define (stitch-make-render-proc type)
   (cond
-   ((eq? type 'text)  (lambda (text date full-name mailing-address keywords transited-from)
+   ((eq? type 'text)  (lambda (text date full-name mailing-address subjects transited-from)
 			`(div (|@|
 			       (class "yarn-div")
 					;(id ...)
@@ -381,10 +380,10 @@
 			      (div (|@|
 				    (class "yarn-footer"))
 				   (div
-				    (span ,(write-to-string keywords)))
+				    (span ,(write-to-string subjects)))
 				   ))
 			))
-   (else (lambda (content date full-name mailing-address keywords)
+   (else (lambda (content date full-name mailing-address subjects)
 	   #f))))
 
 (define (stitch-yarn elt)
@@ -394,18 +393,18 @@
 	   (date (kref elt :date #f))
 	   (full-name (kref elt :full-name #f))
 	   (mailing-address (kref elt :mailing-address #f))
-	   (keywords (kref elt :keywords (list)))
+	   (subjects (kref elt :subjects (list)))
 	   (transited (kref elt :transited #f))
 	   )
       (let ((insertion-proc (stitch-make-insertion-proc (car target)))
 	    (render-proc (stitch-make-render-proc (car content)))
-	    ;(filter-proc (stitch-make-filter-proc keywords))
+	    ;(filter-proc (stitch-make-filter-proc subjects))
 	    )
 	(let1 shtml-frag  (render-proc (cadr content)
 				       date
 				       full-name
 				       mailing-address
-				       keywords
+				       subjects
 				       transited)
 	  (when shtml-frag
 		(insertion-proc (cadr target)

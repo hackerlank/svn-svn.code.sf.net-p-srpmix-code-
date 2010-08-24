@@ -65,7 +65,9 @@
     dired-executable	
     dired-entry-type	
     dired-size	  
-    dired-date	  
+    dired-date
+    ;; TODO
+    ;; dired-nlink
     ))
   
 (define-constant dired-faces 
@@ -134,19 +136,23 @@
 	  ,(url&dname dentry))
     "\n"))
 
-(define (size&date dentry size-column)
+(define (nlink&size&date dentry nlink-column size-column)
   `(
+    " "
+    (span (|@| (class "dired-nlink"))
+	  ,(format #`"~,(number->string nlink-column),,d"
+		   (nlink-of dentry)))
     " "
     (span (|@| (class "dired-size"))
 	  ,(format #`"~,(number->string size-column),,d"
 		   (size-of dentry)))
-    "  "
+    " "
     (span (|@| (class "dired-date"))
 	  ,(date->string (time-utc->date (mtime-of dentry))
 			 "~b ~e ~H:~M ~Y"
 			 )
 	  )
-    "  "
+    " "
     ))
 
 ;;
@@ -159,6 +165,7 @@
 (define-class <dired> (<ewoc>)
   ((dir :init-keyword :dir)
    (size-column)
+   (nlink-column)
    ))
 
 (define (dired dir dentries css-prefix)
@@ -204,7 +211,7 @@
     ,(x->string (delete-marker-of dentry))
     ,(x->string (command-marker-of dentry))
     " "
-    ,@(size&date dentry (ref dired 'size-column))
+    ,@(nlink&size&date dentry (ref dired 'nlink-column) (ref dired 'size-column))
     ,@(cond
        ((arrowy? dentry) (arrowy-entry dentry))
        (else (generic-entry dentry)))))
@@ -212,13 +219,23 @@
 (define-method render-entries ((dired <dired>)
 			       (dentries <list>)
 			       (css-prefix <string>))
-  (let1 max-size (fold (lambda (dentry current-max-size)
-			 (let1 size (size-of dentry)
-			   (if (< current-max-size size)
-			       size
-			       current-max-size)))
-		       0
-		       dentries)
+  (let ((max-size (fold (lambda (dentry current-max-size)
+			  (let1 size (size-of dentry)
+			    (if (< current-max-size size)
+				size
+				current-max-size)))
+			0
+			dentries))
+	(max-links (fold (lambda (dentry current-max-links)
+			   (let1 nlink (nlink-of dentry)
+			     (if (< current-max-links nlink)
+				 nlink
+				 current-max-links)))
+			0
+			dentries)))
+    (set! (ref dired 'nlink-column)
+	  (+ (floor->exact (log (max max-links 1) 10))
+	     1))
     (set! (ref dired 'size-column)
 	  (+ (floor->exact (log (max max-size 1) 10))
 	     1))

@@ -10,7 +10,6 @@ dist_module_DATA =   \
 	file.scm				\
 	fs.scm					\
 	js.scm					\
-	keywords.scm				\
 	lcopy-dir.scm				\
 	packages-dir.scm			\
 	pkg-dir.scm				\
@@ -19,6 +18,7 @@ dist_module_DATA =   \
 	root-commands-dir.scm			\
 	sources-dir.scm				\
 	srpmix-dir.scm                          \
+	subjects.scm				\
 	text.scm                                \
 	yarn.scm				\
 	ysh-dir.scm				\

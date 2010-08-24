@@ -19,13 +19,13 @@
   (let1 shtml (dired
 	       (compose-path lpath)
 	       (map
-		(lambda (keyword)
+		(lambda (subject)
 		  (make <text-dentry>
 		    :parent (compose-path lpath)
-		    :dname (symbol->string keyword)
+		    :dname (symbol->string subject)
 		    :text "XXX")
 		  )
-		(all-keywords params config))
+		(all-subjects params config))
 	       css-route)
     (prepare-dired-faces config)
     (make <shtml-data>

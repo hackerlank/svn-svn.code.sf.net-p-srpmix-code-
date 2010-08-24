@@ -1,8 +1,8 @@
 (define-module yogomacs.yarn
   (export collect-yarns-by-path
 	  collect-yarns-of-author
-	  collect-yarns-about-keywords
-	  all-keywords
+	  collect-yarns-about-subjects
+	  all-subjects
 	  )
   (use file.util)
   (use srfi-1)
@@ -32,15 +32,15 @@
 (define (collect-yarns-of-author author params config)
   #f)
 
-(define (collect-yarns-about-keywords keywords params config)
+(define (collect-yarns-about-subjects subjects params config)
   #f)
 
-;(keyword n-annotations last-modified)
-(define-method all-keywords (params config)
+;(subject n-annotations last-modified)
+(define-method all-subjects (params config)
   (apply
    lset-union
    eq?
-   (map all-keywords
+   (map all-subjects
 	(all-reals params config))))
 
 (provide "yogomacs/yarn")

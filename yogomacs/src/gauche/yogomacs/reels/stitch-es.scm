@@ -134,7 +134,7 @@
 		   date
 		   full-name
 		   mailing-address
-		   keywords)
+		   subjects)
   (let1 annotation-yarn-frag (make-annotation-yarn-frag annotation)
     (if annotation-yarn-frag
 	`(yarn
@@ -144,7 +144,7 @@
 	  :full-name ,full-name
 	  :mailing-address ,mailing-address
 	  :date ,date
-	  :keywords ,keywords)
+	  :subjects ,subjects)
 	#f)))
 
 (define (make-yarn-filter path config)
@@ -162,7 +162,7 @@
 	     (date (not-given :date))
 	     (full-name (not-given :full-name))
 	     (mailing-address (not-given :mailing-address))
-	     (keywords (not-given :keywords))
+	     (subjects :keywords (not-given :subjects))
 	     . rest)
 	  (let loop ((target*annotation (cartesian-product 
 					 (list target-list annotation-list)))
@@ -179,7 +179,7 @@
 						  date
 						  full-name
 						  mailing-address
-						  keywords)
+						  subjects)
 			      (if yarn
 				  (cons yarn to)
 				  to)))
@@ -209,11 +209,11 @@
   
   #f)
 
-(define-method spin-about-keywords ((stitch-es <stitch-es>)
-				    (keywords <list>))
+(define-method spin-about-subjects ((stitch-es <stitch-es>)
+				    (subjects <list>))
   #f)
 
-(define-method all-keywords ((stitch-es <stitch-es>))
+(define-method all-subjects ((stitch-es <stitch-es>))
   (port-fold (lambda (es to)
 	       (guard (e (else to))
 		 (cond
@@ -222,11 +222,11 @@
 		  ((not (eq? (car es) 'stitch-annotation)) to)
 		  (else
 		   (let-keywords (cdr es)
-		       ((keywords (not-given :keywords))
+		       ((subjects :keywords (not-given :subjects))
 			;; "Thu Aug 12 09:53:13 2010"
 			(date (not-given :date))
 			. rest)
-		     (lset-union eq? keywords to)
+		     (lset-union eq? subjects to)
 		     )))))
 	     (list)
 	     (make-es-provider (ref stitch-es 'es-file))))
