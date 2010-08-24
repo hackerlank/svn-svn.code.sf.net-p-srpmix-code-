@@ -1,3 +1,8 @@
+2010-08-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm (#/kernel-2\.6\.3[0-9].*/): Don't
+	include i386 binary.
+
 2010-07-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-weakview-dist (create_dist_weakview): Turn off alias
