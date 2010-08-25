@@ -1,5 +1,6 @@
 (define-module yogomacs.dests.annotations-dir
   (export annotations-dir-dest)
+  (use srfi-1)
   (use yogomacs.path)
   (use yogomacs.route)
   (use yogomacs.renderers.dired)
@@ -8,7 +9,8 @@
   (use yogomacs.reply)
   
   (use yogomacs.dentry)
-  (use yogomacs.dentries.text)
+  (use yogomacs.dentries.subject)
+  (use yogomacs.dentries.redirect)
   (use yogomacs.yarn)
   )
 
@@ -18,14 +20,50 @@
 (define (dest lpath params config)
   (let1 shtml (dired
 	       (compose-path lpath)
-	       (map
-		(lambda (subject)
-		  (make <text-dentry>
-		    :parent (compose-path lpath)
-		    :dname (symbol->string subject)
-		    :text "XXX")
-		  )
-		(all-subjects params config))
+	       (list
+		(make <redirect-dentry>
+		  :parent (compose-path lpath)
+		  :dname "." 
+		  :url (compose-path* lpath "."))
+		(make <redirect-dentry>
+		  :parent (compose-path lpath)
+		  :dname ".." 
+		  :url (compose-path* lpath ".."))
+		(make <redirect-dentry>
+		  :parent (compose-path lpath)
+		  :dname "subjects" 
+		  :url (compose-path* lpath "subjects"))
+		)
+	       css-route)
+    (prepare-dired-faces config)
+    (make <shtml-data>
+      :params params
+      :config config
+      :data ((compose integrate-dired-face) shtml)
+      :last-modification-time #f)))
+
+(define (subjects-dest lpath params config)
+  (let1 shtml (dired
+	       (compose-path lpath)
+	       (cons*
+		(make <redirect-dentry>
+		  :parent (compose-path lpath)
+		  :dname "." 
+		  :url (compose-path* lpath "."))
+		(make <redirect-dentry>
+		  :parent (compose-path lpath)
+		  :dname ".." 
+		  :url (compose-path* lpath ".."))
+		(map
+		 (lambda (subject-entry)
+		   (make <subject-dentry>
+		     :parent (compose-path lpath)
+		     :dname (symbol->string (car subject-entry))
+		     :nlink (ref (cdr subject-entry) 0)
+		     :size (ref (cdr subject-entry) 1)
+		     :mtime (ref (cdr subject-entry) 2))
+		   )
+		 (all-subjects params config)))
 	       css-route)
     (prepare-dired-faces config)
     (make <shtml-data>
@@ -35,7 +73,9 @@
       :last-modification-time #f)))
 
 (define (routing-table path params)
-  `((#/^\/annotations$/ ,dest)))
+  `((#/^\/annotations$/ ,dest)
+    (#/^\/annotations\/subjects$/ ,subjects-dest)
+    ))
 
 (define (annotations-dir-dest lpath params config)
   (route (routing-table lpath params) (compose-path lpath) params config)

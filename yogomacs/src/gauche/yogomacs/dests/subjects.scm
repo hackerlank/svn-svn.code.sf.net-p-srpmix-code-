@@ -6,6 +6,7 @@
   (use www.cgi)  
   (use yogomacs.yarn)
   (use file.util)
+  (use srfi-19)
   )
 
 (select-module yogomacs.dests.subjects)
@@ -20,7 +21,13 @@
 	  (pa$ write 
 	       (list
 		'yarn-subjects
-		(all-subjects params config)))
-	  )))
+		(map
+		 (lambda (s)
+		   (list (car s)
+			 :nlink (ref (cdr s) 0)
+			 :size  (ref (cdr s) 1)
+			 :date  (date->string (time-utc->date (ref (cdr s) 2))
+					      "~a ~b ~e ~H:~M:~S ~Y")))
+		 (all-subjects params config)))))))
 
 (provide "yogomacs/dests/subjects")
