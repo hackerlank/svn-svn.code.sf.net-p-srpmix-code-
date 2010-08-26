@@ -38,7 +38,7 @@
 
 (define (merge-entry! htable old-entry new-entry)
   (let ((old-props (cdr old-entry))
-	(new-props (cdr new-props)))
+	(new-props (cdr new-entry)))
     (set! (ref  old-props 0) (+ (ref old-props 0) 
 				(ref (cdr new-props) 0)))
     (set! (ref old-props 1) (+ (ref old-props 1) 

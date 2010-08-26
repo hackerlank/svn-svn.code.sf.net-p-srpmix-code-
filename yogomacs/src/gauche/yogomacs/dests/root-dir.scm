@@ -67,10 +67,9 @@
 			       root-globs)
 		`( 
 		  ,(README-entry path)
-		  ,(annotations-entry path)
 		  ,(commands-entry path)
 		  ,@(if (in-shell? params)
-			'()
+			`(,(annotations-entry path))
 			`(,(login-entry path))
 			)
 		 ))
@@ -104,7 +103,8 @@
 
      ;;
      ,@(if (in-shell? params)
-	   (list)
+	   (list
+	    )
 	   (list
 	    `(#/^\/login$/  ,login-dest)
 	    ))
