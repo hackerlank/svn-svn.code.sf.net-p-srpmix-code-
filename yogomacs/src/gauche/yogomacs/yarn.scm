@@ -6,6 +6,7 @@
 	  )
   (use file.util)
   (use srfi-1)
+  (use srfi-19)
   (use yogomacs.reel)
   (use yogomacs.reels.stitch-es)
   (use yogomacs.caches.yarn)
@@ -35,12 +36,36 @@
 (define (collect-yarns-about-subjects subjects params config)
   #f)
 
-;(subject n-annotations last-modified)
+(define (merge-entry! htable old-entry new-entry)
+  (let ((old-props (cdr old-entry))
+	(new-props (cdr new-props)))
+    (set! (ref  old-props 0) (+ (ref old-props 0) 
+				(ref (cdr new-props) 0)))
+    (set! (ref old-props 1) (+ (ref old-props 1) 
+			       (ref new-props 1) 
+			       ))
+    (set! (ref old-props 2) (if (time<? (ref old-props 2) 
+					(ref new-props 2) )
+				(ref new-props 2)
+				(ref old-props 2)))))
+
 (define-method all-subjects (params config)
-  (apply
-   lset-union
-   eq?
-   (map all-subjects
-	(all-reals params config))))
+  (hash-table-map
+   (fold
+    (lambda (reel htable)
+      (for-each
+       (lambda (new-entry)
+	 ;; (subject . #(nlink size utc))
+	 (let1 old-entry (hash-table-get htable (car new-entry) #f)
+	   (if old-entry
+	       (merge-entry! htable old-entry new-entry)
+	       (hash-table-put! htable (car new-entry) (cdr new-entry)))))
+       (all-subjects reel))
+      htable)
+    (make-hash-table 'eq?)
+    (all-reals params config))
+   (lambda (k v)
+     (cons k v))
+   ))
 
 (provide "yogomacs/yarn")

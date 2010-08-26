@@ -8,6 +8,7 @@
   (use srfi-1)
   (use gauche.sequence)
   (use yogomacs.reel)
+  (use srfi-19)
   )
 
 (select-module yogomacs.reels.stitch-es)
@@ -213,8 +214,29 @@
 				    (subjects <list>))
   #f)
 
+;; #(nlink size date)
+;; "Thu Aug 12 09:53:13 2010"
+(define (entry-date->utc date)
+  (date->time-utc (string->date date 
+				"~a ~b ~e ~H:~M:~S ~Y")))
+
+(define (update-entry! entry size date)
+  (let ((nlink (+ (ref entry 0) 1))
+	(size (+ (ref entry 1) size))
+	(utc  (let1 utc (entry-date->utc date)
+		(if (time<? (ref entry 2) utc)
+		    utc
+		    (ref entry 2)))))
+    (set! (ref entry 0) nlink)
+    (set! (ref entry 1) size)
+    (set! (ref entry 2) utc)))
+
+(define (make-entry size date)
+  (vector 1 size (entry-date->utc date)))
+
 (define-method all-subjects ((stitch-es <stitch-es>))
-  (port-fold (lambda (es to)
+  (hash-table-map
+   (port-fold (lambda (es to)
 	       (guard (e (else to))
 		 (cond
 		  ((not (list? es)) to)
@@ -224,11 +246,19 @@
 		   (let-keywords (cdr es)
 		       ((subjects :keywords (not-given :subjects))
 			;; "Thu Aug 12 09:53:13 2010"
+			(size 0)
 			(date (not-given :date))
 			. rest)
-		     (lset-union eq? subjects to)
-		     )))))
-	     (list)
-	     (make-es-provider (ref stitch-es 'es-file))))
+		     (for-each (lambda (subj)
+				 (let1 entry (hash-table-get to subj #f)
+				   (if entry
+				       (update-entry! entry size date)
+				       (hash-table-put! to subj (make-entry size date)))))
+			       subjects)
+		     to)))))
+	     (make-hash-table 'eq?)
+	     (make-es-provider (ref stitch-es 'es-file)))
+   (lambda (k v)
+     (cons k v))))
 
 (provide "yogomacs/reels/stitch-es")

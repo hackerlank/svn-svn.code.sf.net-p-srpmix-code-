@@ -6,8 +6,12 @@
 ** /web -> /_/
 ** /web -> /es
 ** reel spins
-*** mapping to /annotations/keywords
+*** mapping to /annotations/keywords/...
+*** mapping to /annotations/spots/...
+*** mapping to /annotations/stories/...
 *** mapping to /home/yamato/keywords
+*** mapping to /home/yamato/spots
+*** mapping to /home/yamato/stories
 
 ** Look at the similarity betwenn dests/yarn.scm, dest/css.scm and dest/keywords.scm.
 ** use xxx-route of dests/yarn.scm, dest/css.scm and dest/keywords.scm in main.scm.
