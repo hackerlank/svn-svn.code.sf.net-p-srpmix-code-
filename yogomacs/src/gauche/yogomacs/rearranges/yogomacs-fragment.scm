@@ -10,7 +10,15 @@
 
 (select-module yogomacs.rearranges.yogomacs-fragment)
 
-(define (yogomacs-fragment shtml shell-name)
+;; TODO: THIS SHOULD BE PROVIDED BY TAR
+(define (tar-acceptable? path)
+  (or
+   (#/\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/ path)
+   (#/\/dists\/[^\/]+\/packages\/[a-zA-Z0-9]\/[^\/]+/ path)
+   (#/\/packages\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/ path)
+   ))
+
+(define (yogomacs-fragment shtml shell-name config)
   (let* ((title ((if-car-sxpath '(// html head title *text*)) shtml))
 	 (frag ((if-car-sxpath '(// html body pre)) shtml))
 	 (frag (pre-post-order
@@ -28,6 +36,11 @@
 						((and (equal? title "/")
 						      (equal? a-text ".."))
 						 "/"
+						 )
+						((and (equal? a-text ".")
+						      (tar-acceptable? title))
+						 ;; TODO: THIS SHOULD BE PROVIDED BY TAR
+						 #`"/commands/tar,|title|"
 						 )
 						((and-let* ((m (#/^\/(.+)/ text))
 							    (entry (m 1))

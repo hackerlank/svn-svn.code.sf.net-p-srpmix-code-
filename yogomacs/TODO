@@ -12,6 +12,8 @@
 *** mapping to /home/yamato/keywords
 *** mapping to /home/yamato/spots
 *** mapping to /home/yamato/stories
+** . for getting tar.gz and putting tar.gz
+** .. for exit
 
 ** Look at the similarity betwenn dests/yarn.scm, dest/css.scm and dest/keywords.scm.
 ** use xxx-route of dests/yarn.scm, dest/css.scm and dest/keywords.scm in main.scm.
@@ -44,8 +46,6 @@
 *** cache GC 
 
 ** FS strcture
-*** . for getting tar.gz and putting tar.gz
-*** .. for exit
 *** Sending dist-mapping.es in asis
 *** attic*
 **** blacklist
