@@ -1,6 +1,7 @@
 moduledir=@GAUCHE_MODULEDIR@/yogomacs/rearranges
 dist_module_DATA =   \
 	\
+	checkout.scm				\
 	css-href.scm				\
 	css-integrates.scm			\
 	enum.scm				\
