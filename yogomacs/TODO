@@ -14,6 +14,7 @@
 *** mapping to /home/yamato/stories
 ** . for getting tar.gz and putting tar.gz
 ** .. for exit
+** /logout
 
 ** Look at the similarity betwenn dests/yarn.scm, dest/css.scm and dest/keywords.scm.
 ** use xxx-route of dests/yarn.scm, dest/css.scm and dest/keywords.scm in main.scm.
