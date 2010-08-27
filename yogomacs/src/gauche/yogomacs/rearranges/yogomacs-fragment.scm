@@ -6,17 +6,10 @@
   (use yogomacs.shell)
   (use yogomacs.shells.bscm)
   (use yogomacs.shells.ysh)
+  (use yogomacs.access)
   )
 
 (select-module yogomacs.rearranges.yogomacs-fragment)
-
-;; TODO: THIS SHOULD BE PROVIDED BY TAR
-(define (tar-acceptable? path)
-  (or
-   (#/\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/ path)
-   (#/\/dists\/[^\/]+\/packages\/[a-zA-Z0-9]\/[^\/]+/ path)
-   (#/\/packages\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/ path)
-   ))
 
 (define (yogomacs-fragment shtml shell-name config)
   (let* ((title ((if-car-sxpath '(// html head title *text*)) shtml))
@@ -33,15 +26,18 @@
 					 (list tag
 					       (cond
 						((#/^#/ text) text)
+						;; TOOD: THIS SHOULD BE SEPARATED REARRANGE?
 						((and (equal? title "/")
 						      (equal? a-text ".."))
 						 "/"
 						 )
+						;; TOOD: THIS SHOULD BE SEPARATED REARRANGE.
 						((and (equal? a-text ".")
-						      (tar-acceptable? title))
-						 ;; TODO: THIS SHOULD BE PROVIDED BY TAR
-						 #`"/commands/tar,|title|"
-						 )
+						      (archivable?  (string-append
+								     (config 'real-sources-dir)
+								     title)
+								    config))
+						 #`"/commands/tar,|title|")
 						((and-let* ((m (#/^\/(.+)/ text))
 							    (entry (m 1))
 							    ((member entry (map (cut ref <> 'name)

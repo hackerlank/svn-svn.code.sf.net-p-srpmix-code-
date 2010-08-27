@@ -1,6 +1,8 @@
 (define-module yogomacs.access
   (export readable?
 	  directory?
+	  pickable?
+	  archivable?
 	  )
   (use file.util)
   (use util.match)
@@ -27,5 +29,25 @@
 
 (define (directory? dir ent)
   (file? dir ent file-is-directory?))
+
+(define (pickable? path config)
+  (any 
+   (lambda (r) (r path))
+   (map
+    (lambda (r)
+      (string->regexp
+       (string-append (config 'real-sources-dir) 
+		      (if (string? r)
+			  r
+			  (regexp->string r)))))
+    (config 'pickable-regexps)
+    )))
+
+(define (archivable? path config)
+  (and (pickable? path config)
+       ;; ???
+       (directory? (sys-dirname path)
+		   (sys-basename path))))
+
 
 (provide "yogomacs/access")
