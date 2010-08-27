@@ -1,5 +1,5 @@
 m4_define([pkg_name], [yogomacs])
-m4_define([pkg_version], [0.0.6])
+m4_define([pkg_version], [0.0.7])
 
 AC_INIT(pkg_name, pkg_version)
 AC_CONFIG_AUX_DIR(misc/ac-aux)
