@@ -94,8 +94,8 @@
 	 (shell-name (in-shell? (ref shtml 'params))))
     (if shell-name
 	(let1 new (make <shtml-data>
-		    :data ((compose (cute yogomacs-fragment <> shell-name (ref shtml 'config)) 
-				    narrow-down) 
+		    :data ((compose (cute yogomacs-fragment <> shell-name) 
+				    narrow-down)
 			   (ref shtml 'data))
 		    :params (ref shtml 'params)
 		    :config (ref shtml 'config)

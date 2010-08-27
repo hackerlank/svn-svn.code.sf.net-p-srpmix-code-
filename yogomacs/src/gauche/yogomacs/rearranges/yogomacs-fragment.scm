@@ -6,12 +6,11 @@
   (use yogomacs.shell)
   (use yogomacs.shells.bscm)
   (use yogomacs.shells.ysh)
-  (use yogomacs.access)
   )
 
 (select-module yogomacs.rearranges.yogomacs-fragment)
 
-(define (yogomacs-fragment shtml shell-name config)
+(define (yogomacs-fragment shtml shell-name)
   (let* ((title ((if-car-sxpath '(// html head title *text*)) shtml))
 	 (frag ((if-car-sxpath '(// html body pre)) shtml))
 	 (frag (pre-post-order
@@ -26,18 +25,12 @@
 					 (list tag
 					       (cond
 						((#/^#/ text) text)
+						((equal? a-text ".") text)
 						;; TOOD: THIS SHOULD BE SEPARATED REARRANGE?
 						((and (equal? title "/")
 						      (equal? a-text ".."))
 						 "/"
 						 )
-						;; TOOD: THIS SHOULD BE SEPARATED REARRANGE.
-						((and (equal? a-text ".")
-						      (archivable?  (string-append
-								     (config 'real-sources-dir)
-								     title)
-								    config))
-						 #`"/commands/tar,|title|")
 						((and-let* ((m (#/^\/(.+)/ text))
 							    (entry (m 1))
 							    ((member entry (map (cut ref <> 'name)

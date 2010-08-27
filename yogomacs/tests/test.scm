@@ -20,6 +20,7 @@
 (for-each-use-and-test-module
 
 ;; find -name '*.scm' -type f | sed -e's|\./|/|' -e 's|\.scm||' -e 's|.*|yogomacs\0|' -e 's|/|.|g' | grep -v default  
+ yogomacs.rearranges.checkout
  yogomacs.rearranges.css-href
  yogomacs.rearranges.face-integrates
  yogomacs.rearranges.css-integrates

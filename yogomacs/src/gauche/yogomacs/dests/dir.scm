@@ -23,6 +23,7 @@
   (use util.match)
   (use yogomacs.dests.css)
   (use yogomacs.rearranges.face-integrates)
+  (use yogomacs.rearranges.checkout)
   ;;
   (use yogomacs.error)
   (use yogomacs.domain)
@@ -63,10 +64,12 @@
 		   (make <shtml-data>
 		     :params params
 		     :config config
-		     :data ((compose integrate-dired-face) (dired 
-							    (compose-path path)
-							    dentries
-							    css-route))
+		     :data ((compose integrate-dired-face
+				     (cute checkout <> config))
+			    (dired 
+			     (compose-path path)
+			     dentries
+			     css-route))
 		     :last-modification-time #f))
 	    (not-found #`"Cannot find ,(compose-path path)" 
 		       #`",|real-src-dir| for ,(compose-path path)")))))

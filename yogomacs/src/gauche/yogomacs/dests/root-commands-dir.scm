@@ -78,8 +78,7 @@
 	  (list)
 	  (list
 	   `(#/^\/commands\/login$/ ,ysh-dest)
-	   ))
-    ))
+	   ))))
 
 (define (root-commands-dir-dest path params config)
   (route (routing-table path params) (compose-path path) params config))
