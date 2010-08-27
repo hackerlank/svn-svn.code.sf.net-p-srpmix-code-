@@ -4,6 +4,7 @@
 	  timeout
 	  not-found
 	  forbidden
+	  bad-request
 	  internal-error)
   (use www.cgi)  
   (use text.html-lite)
@@ -45,6 +46,7 @@
   (base-error "403 Forbidden"))
 (define internal-error
    (base-error "500 Internal Error"))
-
+(define bad-request
+  (base-error "400 Bad Request"))
 
 (provide "yogomacs/error")

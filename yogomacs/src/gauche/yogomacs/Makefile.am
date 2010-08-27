@@ -1,5 +1,6 @@
 SUBDIRS  = .
 SUBDIRS += caches
+SUBDIRS += commands
 SUBDIRS += dentries
 SUBDIRS += dests
 SUBDIRS += rearranges

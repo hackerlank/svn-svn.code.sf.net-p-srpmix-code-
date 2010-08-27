@@ -94,6 +94,7 @@
  yogomacs.util.range
  yogomacs.util.scheme2js
  ;;
+ yogomacs.commands.checkout
 )
 
 

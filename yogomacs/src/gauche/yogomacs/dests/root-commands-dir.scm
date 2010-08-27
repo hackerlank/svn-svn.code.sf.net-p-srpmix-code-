@@ -12,6 +12,7 @@
   (use yogomacs.reply)
   (use yogomacs.route)
   (use yogomacs.shell)
+  (use yogomacs.commands.checkout)
   )
 (select-module yogomacs.dests.root-commands-dir)
 
@@ -74,6 +75,7 @@
   `((#/^\/commands$/ ,dest)
     (#/^\/commands\/ysh$/ ,ysh-dest)
     (#/^\/commands\/bscm$/ ,bscm-dest)
+    (#/^\/commands\/checkout\/.*/ ,checkout-dest)
     ,@(if (in-shell? params)
 	  (list)
 	  (list

@@ -102,6 +102,8 @@ fi
 %dir %{_datadir}/gauche/site/lib/yogomacs/caches
 %{_datadir}/gauche/site/lib/yogomacs/caches/*.scm
 
+%dir %{_datadir}/gauche/site/lib/yogomacs/commands
+%{_datadir}/gauche/site/lib/yogomacs/commands/*.scm
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/dentries
 %{_datadir}/gauche/site/lib/yogomacs/dentries/*.scm

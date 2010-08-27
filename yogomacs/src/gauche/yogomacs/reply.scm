@@ -3,6 +3,7 @@
 	  <asis-data>
 	  <shtml-data>
 	  <empty-data>
+	  <checkout-data>
 	  )
   (use www.cgi)
   (use sxml.serializer)
@@ -45,7 +46,6 @@
 
 (define-class <asis-data> (<data>)
   ())
-
 
 ;; Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
 (define (rfc822 t)
@@ -109,6 +109,20 @@
 		    :last-modification-time (ref shtml 'last-modification-time)
 		    :mime-type (ref shtml 'mime-type))
 	  (reply-xhtml new)))))
+
+(define-class <checkout-data> (<data>)
+  ((filename :init-keyword :filename)
+  ))
+
+(define-method reply ((checkout <checkout-data>))
+  (write-tree (apply cgi-header 
+		     :content-type (ref asis 'mime-type)
+		     :content-disposition #`"attachment; filename=\",|(ref checkout 'filename) |\""
+		     (if (ref asis 'last-modification-time)
+			 (list :last-modified  (rfc822 (ref asis 'last-modification-time)))
+			 (list))))
+  ;; Do render
+  ((ref asis 'data)))
 
 
 (define-method reply ((e <yogomacs-error>))
