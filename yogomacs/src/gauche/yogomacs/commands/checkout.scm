@@ -3,28 +3,37 @@
   (use yogomacs.access)
   (use text.html-lite)
   (use www.cgi)
+  (use srfi-1)
   (use srfi-13)
   (use yogomacs.error)
   (use yogomacs.reply)
+  (use yogomacs.renderers.archive)
+  (use yogomacs.path)
   )
 
 (select-module yogomacs.commands.checkout)
 
-(define (input->filename input)
-  ...)
+(define (input->filename-base input)
+  (string-join (delete "" (string-split input #\/)) "--"))
+
 
 (define (checkout-dest lpath params config)
   (or (and-let* (( (list? lpath ) )
 		 ( (< 2 (length lpath)) )
-		 (input (compose-path (cdr (cdr lpath))))
-		 ( (archivable? input config) )
-		 (filename (input->filename input))
+		 (input-web (compose-path (cdr (cdr lpath))))
+		 (input-local (string-append (config 'real-sources-dir) 
+					     input-web))
+		 ( (archivable? input-local config) )
+		 (filename-base (input->filename-base input-web))
 		 )
-	(make <checkout-data>
-	  :mime-type "application/x-bzip2"
-	  :filename filename
-	  :data (tar input filename config)))
-      (bad-request "Cannot checkout" (write-to-string lpath))
-      ))
+	(receive (data last-modified-time) (archive input-local
+						    filename-base
+						    config)
+	  (make <checkout-data>
+	    :mime-type "application/x-bzip2"
+	    :filename (string-append filename-base ".tar.bz2")
+	    :data data
+	    :last-modification-time last-modified-time)))
+      (bad-request "Cannot checkout" (write-to-string lpath))))
 
 (provide "yogomacs/commands/checkout")

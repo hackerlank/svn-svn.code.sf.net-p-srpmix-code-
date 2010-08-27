@@ -115,15 +115,14 @@
   ))
 
 (define-method reply ((checkout <checkout-data>))
-  (write-tree (apply cgi-header 
-		     :content-type (ref asis 'mime-type)
-		     :content-disposition #`"attachment; filename=\",|(ref checkout 'filename) |\""
-		     (if (ref asis 'last-modification-time)
-			 (list :last-modified  (rfc822 (ref asis 'last-modification-time)))
+  #?=(write-tree (apply cgi-header 
+		     :content-type (ref checkout 'mime-type)
+		     :content-disposition #`"attachment; filename=\",(ref checkout 'filename)\""
+		     (if (ref checkout 'last-modification-time)
+			 (list :last-modified  (rfc822 (ref checkout 'last-modification-time)))
 			 (list))))
-  ;; Do render
-  ((ref asis 'data)))
-
+  #?=((ref checkout 'data))
+  )
 
 (define-method reply ((e <yogomacs-error>))
   (reply (list
