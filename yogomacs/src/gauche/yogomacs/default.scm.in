@@ -22,6 +22,7 @@
 	     "/net/sop/srv/sources"))
  (pickable-regexps . (#/\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/
 		      #/\/dists\/[^\/]+\/packages\/[a-zA-Z0-9]\/[^\/]+/
+		      #/\/dists\/[^\/]+\/dist-mapping\.es$/
 		      #/\/packages\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/
 		     ))
  )
