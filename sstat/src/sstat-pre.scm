@@ -91,13 +91,13 @@
 	;; 
 	(let ((ip (string->number ip))
 	      (time (string->number time)))
-	  (when (accept? ip file time)
+	  (if (accept? ip file time)
 	      (receive (port tmf) (log-port time port tmf sstat-dir)
 		(write `(nfsd-open-pre :ip ,ip :time ,time :path ,file)
 		       port)
 		(newline port)
-		(loop (read-line-safe) port tmf ip)))
-	  (loop (read-line-safe) port tmf ip))
+		(loop (read-line-safe) port tmf ip))
+	      (loop (read-line-safe) port tmf ip)))
 	(begin 
 	  (format (current-error-port) ";; Wrong input: ~s\n" line)
 	  (loop (read-line-safe) port tmf ip)))))))

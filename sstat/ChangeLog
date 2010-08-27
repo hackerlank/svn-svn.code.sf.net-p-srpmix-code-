@@ -1,3 +1,10 @@
+<<<<<<< .mine
+2010-08-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.3.2.
+
+	* src/sstat-pre.scm (run): Avoid stack over flow.
+
 2010-08-23  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/sstat.spec.in (%post, %preun): New section.
