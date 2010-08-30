@@ -27,11 +27,12 @@
 		 (filename-base (input->filename-base input-web))
 		 )
 	(receive (data last-modified-time) (archive input-local
+						    input-web
 						    filename-base
 						    config)
 	  (make <checkout-data>
-	    :mime-type "application/x-bzip2"
-	    :filename (string-append filename-base ".tar.bz2")
+	    :mime-type "application/x-tar"
+	    :filename (string-append filename-base ".tar.xz")
 	    :data data
 	    :last-modification-time last-modified-time)))
       (bad-request "Cannot checkout" (write-to-string lpath))))
