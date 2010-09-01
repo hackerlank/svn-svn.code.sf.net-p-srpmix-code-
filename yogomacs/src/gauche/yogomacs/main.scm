@@ -37,7 +37,7 @@
 (define (install-constants config)
   ;; config could be #f.
   (if config
-      config
+      (cons `(version . "version") config)
       config))
 
 (define (yogomacs-cgi)

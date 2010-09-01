@@ -1,7 +1,8 @@
 ;; -*- scheme -*-
 (define-module yogomacs.config
   (export load-config
-	  config->proc)
+	  config->proc
+	  version)
   (use www.cgi)
   (use yogomacs.access)
   (use file.util)
@@ -46,5 +47,7 @@
    ((key value)
     (config->proc (cons `(,key . ,value)
 			config)))))
+
+(define (version) "@VERSION@")
 
 (provide "yogomacs/config")

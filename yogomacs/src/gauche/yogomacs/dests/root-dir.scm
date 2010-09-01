@@ -29,6 +29,8 @@
   (use yogomacs.dests.debug)
   ;;
   (use yogomacs.reply)
+  ;;
+  (use yogomacs.config)
   )
 (select-module yogomacs.dests.root-dir)
 
@@ -43,7 +45,9 @@
   (make <text-dentry>
     :parent (compose-path parent-path)
     :dname "README"
-    :text "Use the Source, Luke."))
+    :text #`"This directory tree holds version ,(version) of yogomacs, the extensible(TODO),
+customizable(TODO), self-documenting(TODO) real-time display viewer.\n"))
+
 (define (annotations-entry parent-path)
   (make <redirect-dentry>
     :parent (compose-path parent-path)
