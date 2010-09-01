@@ -69,5 +69,5 @@ AC_OUTPUT([
     	   src/liblcopy.sh
     	   src/liblcopy_backends.sh
     	   src/conf.d/Makefile
-    	   src/conf.d/main/Makefile
+    	   src/conf.d/sys/Makefile
           ])

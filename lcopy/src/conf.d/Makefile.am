@@ -1,1 +1,1 @@
-SUBDIRS = main
+SUBDIRS = sys

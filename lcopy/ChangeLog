@@ -2,7 +2,7 @@
 
 	* configure.ac: Version 0.2.10.
 
-	* src/conf.d/main Introduce new indirect directory.
+	* src/conf.d/sys Introduce new indirect directory.
 
 2010-08-18  Masatake YAMATO  <yamato@redhat.com>
 
