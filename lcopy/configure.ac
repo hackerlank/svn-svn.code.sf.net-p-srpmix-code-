@@ -70,4 +70,5 @@ AC_OUTPUT([
     	   src/liblcopy_backends.sh
     	   src/conf.d/Makefile
     	   src/conf.d/sys/Makefile
+    	   src/conf.d/android/Makefile
           ])

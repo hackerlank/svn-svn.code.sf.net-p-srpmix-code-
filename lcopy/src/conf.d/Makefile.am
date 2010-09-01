@@ -1,1 +1,4 @@
-SUBDIRS = sys
+SUBDIRS  = .
+SUBDIRS += sys
+SUBDIRS += android
+
