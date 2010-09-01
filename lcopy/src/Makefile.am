@@ -16,6 +16,7 @@ dist_bin_SCRIPTS =     \
         lcopy-update   \
         lcopy-envelop  \
         lcopy-rebirth  \
+	lcopy-ping     \
 	\
         $(NULL)
 

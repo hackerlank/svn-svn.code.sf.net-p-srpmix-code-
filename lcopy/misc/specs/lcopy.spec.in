@@ -50,6 +50,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lcopy-update
 %{_bindir}/lcopy-envelop
 %{_bindir}/lcopy-rebirth
+%{_bindir}/lcopy-ping
 %{_bindir}/liblcopy.sh
 %{_bindir}/liblcopy_backends.sh
 %{_libexecdir}/lcopy/*
