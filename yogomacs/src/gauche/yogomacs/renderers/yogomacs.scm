@@ -17,6 +17,7 @@
 				  #/iPhone OS 4/
 				  ;; has real keyboard....
 				  #/Android Dev Phone 1/
+				  #/IS01 Build\/S8040/
 				  ))
 (define (insert-user-agent-action)
   (let1 user-agent (assoc-ref (sys-environ->alist) "HTTP_USER_AGENT" "")
