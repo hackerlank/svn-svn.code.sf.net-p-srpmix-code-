@@ -1,7 +1,7 @@
 m4_define([pkg_name],    [lcopy])
 m4_define([pkg_major_version],[0])
 m4_define([pkg_minor_version],[2])
-m4_define([pkg_micro_version],[9])
+m4_define([pkg_micro_version],[10])
 m4_define([pkg_version],pkg_major_version.pkg_minor_version.pkg_micro_version)
 
 AC_INIT(pkg_name, pkg_version)
@@ -69,4 +69,5 @@ AC_OUTPUT([
     	   src/liblcopy.sh
     	   src/liblcopy_backends.sh
     	   src/conf.d/Makefile
+    	   src/conf.d/main/Makefile
           ])
