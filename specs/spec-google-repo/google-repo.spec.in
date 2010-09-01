@@ -1,0 +1,37 @@
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 0%{?dist}
+Summary: a tool that makes it easier to work with Git in the context of Android
+
+Group: Development/Tools
+License: BSD
+URL: http://source.android.com/source/download.html
+
+Source0: http://android.git.kernel.org/repo
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildArch: noarch
+Requires: git
+
+
+%description
+Repo is a tool that makes it easier to work with Git in the context of Android
+
+
+%prep
+
+%build
+
+%install
+rm -rf $RPM_BUILD_ROOT
+install -m 755 -d $RPM_BUILD_ROOT%{_bindir}
+install -m 644 %{SOURCE0} $RPM_BUILD_ROOT%{_bindir}/google-repo
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%{_bindir}/google-repo
+
+%changelog
+* Wed Aug 18 2010 Masatake YAMATO <yamato@redhat.com>
+- Initial build.
