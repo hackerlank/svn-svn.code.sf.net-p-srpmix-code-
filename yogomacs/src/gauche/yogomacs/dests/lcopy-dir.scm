@@ -42,8 +42,8 @@
   (let1 composed-path (compose-path path)
     (let1 match (lcopy-common-prefix-regexp composed-path)
       (cond
-       (#?=(and match
-		(lcopy-dir->no-update? (string-append (config 'real-sources-dir) (match 0))))
+       ((and match
+	     (lcopy-dir->no-update? (string-append (config 'real-sources-dir) (match 0))))
 	(fs-dest path params config))
        (else
 	(fs-dest-read-only path params config))))))

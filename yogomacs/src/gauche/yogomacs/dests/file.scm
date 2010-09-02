@@ -18,6 +18,7 @@
   ;;
   (use yogomacs.rearranges.css-href)
   (use yogomacs.rearranges.face-integrates)
+  (use yogomacs.rearranges.title)
   ;;
   (use gauche.process)
   (use yogomacs.access)
@@ -67,14 +68,14 @@
 	      (cache real-src-file syntax "shtml" #t config)
 	      (values shtml last-modified-time))))))
 
-(define (file-dest path params config)
-  (let* ((last (last path))
-	 (head (path->head path))
+(define (file-dest lpath params config)
+  (let* ((last (last lpath))
+	 (head (path->head lpath))
 	 (real-src-dir (build-path (config 'real-sources-dir) head))
 	 (real-src-file (build-path real-src-dir last))
 	 (file-type (file-type real-src-file)))
     (if (to-domain? real-src-file config)
-	(file-dest0 real-src-file file-type (config 'mode) params config)
+	(file-dest0 real-src-file (compose-path lpath) file-type (config 'mode) params config)
 	(forbidden "Out of domain" real-src-file))))
 
 (define-macro (guard-with-asis real-src-file config . body)
@@ -83,12 +84,16 @@
 		     (make-asis-data asis last-modified-time))))
      ,@body))
 
-(define (file-dest0 real-src-file file-type mode params config)
+(define (file-dest0 real-src-file web-path file-type mode params config)
   (define (make-shtml-data shtml last-modified-time)
     (make <shtml-data>
       :params params
       :config config
-      :data ((compose fix-css-href integrate-file-face) shtml)
+      :data ((compose 
+	      fix-css-href
+	      integrate-file-face
+	      (cute rearranges-title <> web-path)
+	      ) shtml)
       :last-modification-time last-modified-time))
   (define (make-asis-data asis last-modified-time)
     (make <asis-data> 
