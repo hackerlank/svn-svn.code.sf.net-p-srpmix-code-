@@ -1,5 +1,6 @@
 (define-module yogomacs.commands.checkout
   (export checkout-dest)
+  (use yogomacs.command)
   (use yogomacs.access)
   (use text.html-lite)
   (use www.cgi)

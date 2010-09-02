@@ -15,6 +15,7 @@ dist_module_DATA =   \
 	access.scm				\
 	batch.scm				\
 	cache.scm				\
+	command.scm				\
 	config.scm				\
 	dentry.scm				\
 	domain.scm				\

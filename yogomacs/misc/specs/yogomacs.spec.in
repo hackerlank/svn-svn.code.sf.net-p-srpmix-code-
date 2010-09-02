@@ -81,6 +81,7 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/access.scm
 %{_datadir}/gauche/site/lib/yogomacs/batch.scm
 %{_datadir}/gauche/site/lib/yogomacs/cache.scm
+%{_datadir}/gauche/site/lib/yogomacs/command.scm
 %{_datadir}/gauche/site/lib/yogomacs/config.scm
 %{_datadir}/gauche/site/lib/yogomacs/dentry.scm
 %{_datadir}/gauche/site/lib/yogomacs/domain.scm
