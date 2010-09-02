@@ -1,5 +1,4 @@
 SUBDIRS  = .
-SUBDIRS += caches
 SUBDIRS += commands
 SUBDIRS += dentries
 SUBDIRS += dests
@@ -8,6 +7,8 @@ SUBDIRS += renderers
 SUBDIRS += shells
 SUBDIRS += util
 SUBDIRS += reels
+## ---------------------
+SUBDIRS += caches
 
 moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \

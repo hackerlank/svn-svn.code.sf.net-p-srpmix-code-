@@ -16,8 +16,7 @@
 
 (define (input->filename-base input)
   (string-join (delete "" (string-split input #\/)) "--"))
-
-
+  
 (define (checkout-dest lpath params config)
   (or (and-let* (( (list? lpath ) )
 		 ( (< 2 (length lpath)) )

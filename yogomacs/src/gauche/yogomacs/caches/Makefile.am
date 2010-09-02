@@ -8,7 +8,6 @@ dist_module_DATA =   \
         \
 	$(NULL)
 
-
 csscachedir=$(localstatedir)/lib/yogomacs/css/@SPEC_CONFIG@
 dist_csscache_DATA= \
 	file-font-lock--Default.css		\
@@ -29,13 +28,29 @@ dist_jscache_DATA = \
 	yogomacs_builtin.js \
 	\
 	$(NULL)
+
+scheme2js_runtime = \
+	runtime.js				\
+        runtime_callcc.js			\
+        runtime_interface.js			\
+	runtime_interface_callcc.js             \
+	\
+	$(NULL)
 install-exec-hook:
 	mkdir -p $(DESTDIR)$(jscachedir)
-	for x in runtime.js runtime_callcc.js runtime_interface.js runtime_interface_callcc.js; do \
+	for x in $(scheme2js_runtime); do \
 		$(LN_S) @SCHEME2JS_RUNTIME_DIR@/$$x $(DESTDIR)$(jscachedir)/scheme2js_$$x; \
         done
-EXTRA_DIST = yogomacs-builtin.scm yogomacs-macs.scm
-yogomacs_builtin.scm: yogomacs-macs.scm yogomacs-builtin.scm
+
+
+scheme2js_input = \
+	yogomacs-macs.scm    \
+	yogomacs-builtin.scm \
+	\
+	$(NULL)
+
+EXTRA_DIST = 
+yogomacs_builtin.scm: $(scheme2js_input)
 	cat $^ > $@ 
 yogomacs_builtin.js: yogomacs_builtin.scm
 	@SCHEME2JS@ -o $@ $<
