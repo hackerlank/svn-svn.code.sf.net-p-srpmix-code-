@@ -69,6 +69,7 @@ dist_confd_DATA = \
 	srpmix,trunk.lcopy \
 	stitch,trunk.lcopy \
 	strace,trunk.lcopy \
+	tog-pegasus,trunk.lcopy \
 	twig,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
 	virt-manager,trunk.lcopy \
