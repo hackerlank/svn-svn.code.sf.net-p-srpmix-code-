@@ -48,7 +48,7 @@ function report
 
 	    local v
 	    echo "$candidate"
-	    for v in "" "-archives" "-plugins"; do
+	    for v in "-srpmix" "-srpmix-archives" "-srpmix-plugins"; do
 		echo "@rm -rf ${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
 	    done
 	    (
