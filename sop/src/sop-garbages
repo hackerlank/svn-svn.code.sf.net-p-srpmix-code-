@@ -46,17 +46,23 @@ function report
 	if [ $swrfs_alive = no ]; then
 	    
 
-	    local v
+	    local v 
+	    local e
 	    echo "$candidate"
 	    for v in "-srpmix" "-srpmix-archives" "-srpmix-plugins"; do
-		echo "@test -e ${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v} || rm -rf ${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
+		e="${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
+		if [ -e ${e} ]; then
+		    echo "@[ -e ${e} ] || rm -rf ${e}"
+		fi
 	    done
 	    (
 		local c
+		local e
 		cd "${SOP_SOURCES_DIR}/${candidate:0:1}/"
 		for c in */*; do
-		    if [ "${c/\//-}" = "${candidate}" ]; then
-			echo "@test -e ${SOP_SOURCES_DIR}/${candidate:0:1}/${c} || rm -rf ${SOP_SOURCES_DIR}/${candidate:0:1}/${c}"
+		    e="${SOP_SOURCES_DIR}/${candidate:0:1}/${c}"
+		    if [ "${c/\//-}" = "${candidate}" ] && [ -e "${e}" ]; then
+			echo "@[ -e ${e} ] || rm -rf ${e}"
 		    fi
 		done
 	    )
