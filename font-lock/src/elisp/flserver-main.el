@@ -69,6 +69,8 @@
     (while bl-new
       (when (member (car bl-new) bl-old)
 	(with-current-buffer (car bl-new)
+	  (log-format "GC: %s" 
+		      (buffer-name (car bl-new)))
 	  (not-modified)
 	  (kill-buffer (current-buffer)))
 	(setq bl-new (cdr bl-new))))))
