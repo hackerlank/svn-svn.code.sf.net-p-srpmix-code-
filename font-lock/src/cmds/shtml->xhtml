@@ -3,14 +3,11 @@
 :; exec gosh -- $0 "$@"
 (use sxml.serializer)
 (use gauche.parseopt)
-(use font-lock.rearrange.range)
-(use font-lock.rearrange.title)
-
 
 (define (show-help n)
   (format #t "Usage:\n")
   (format #t "	~a --help\n" *program-name*)
-  (format #t "	~a [--rearrange-only] [--range=N-M|--range=-M|--range=N-] [--title=TITLE] < INPUT.SHTML > OUTPUT.HTML\n" 
+  (format #t "	~a < INPUT.SHTML > OUTPUT.HTML\n" 
 	   *program-name*)
   (exit n))
 
@@ -19,22 +16,9 @@
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (pa$ show-help 0))
-       (range "range=s" #f => parse-range)
-       (title "title=s" #f)
-       (rearrange-only "rearrange" #f)
        . rest)
     (unless (null? rest)
       (with-output-to-port (current-error-port)
 	(pa$ show-help 1)))
-    (let* ((shtml0 (read))
-	   (shtml1 ((if title
-			(cute rearrange-title <> title)
-			identity)
-		    ((if range
-			 (cute rearrange-range <> (car range) (cdr range))
-			 identity) shtml0))))
-      (if rearrange-only
-	  (write shtml1)
-	  (srl:sxml->xml-noindent shtml1 
-				  (current-output-port)))
-      (exit 0))))
+    (srl:sxml->xml-noindent (read) 
+			    (current-output-port))))
