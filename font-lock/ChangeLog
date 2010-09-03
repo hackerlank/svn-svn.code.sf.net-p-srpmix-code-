@@ -1,4 +1,6 @@
 2010-09-03  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/elisp/flserver-main.el (flserver): Added unwind-protect.
+
 	* flserver-main.el (flserver): Added gc-buffers.
 
