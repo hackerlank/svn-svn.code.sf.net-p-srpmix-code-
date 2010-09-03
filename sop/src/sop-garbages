@@ -113,7 +113,7 @@ function main
     touch $list_in_fs
 
     for x in ${SOP_SOURCES_DIR}/[0-9a-zA-Z]/*/*/pre-build; do
-	if ! [[ "$x" =~ .*\\^.* ]]; then
+	if ! [[ "$x" =~ .*\^.* ]]; then
 	    echo $x | \
 		sed -e "s#${SOP_SOURCES_DIR}/[0-9a-zA-Z]/##" | \
 		sed -e "s#/pre-build##" | \
