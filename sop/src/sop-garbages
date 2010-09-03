@@ -49,14 +49,14 @@ function report
 	    local v
 	    echo "$candidate"
 	    for v in "-srpmix" "-srpmix-archives" "-srpmix-plugins"; do
-		echo "@rm -rf ${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
+		echo "@test -e ${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v} || rm -rf ${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
 	    done
 	    (
 		local c
 		cd "${SOP_SOURCES_DIR}/${candidate:0:1}/"
 		for c in */*; do
 		    if [ "${c/\//-}" = "${candidate}" ]; then
-			echo "@rm -rf ${SOP_SOURCES_DIR}/${candidate:0:1}/${c}"
+			echo "@test -e ${SOP_SOURCES_DIR}/${candidate:0:1}/${c} || rm -rf ${SOP_SOURCES_DIR}/${candidate:0:1}/${c}"
 		    fi
 		done
 	    )
