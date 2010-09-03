@@ -43,13 +43,16 @@ install-exec-hook:
         done
 
 
+EXTRA_DIST =
+
+
 scheme2js_input = \
 	yogomacs-macs.scm    \
 	yogomacs-builtin.scm \
 	\
 	$(NULL)
 
-EXTRA_DIST = 
+EXTRA_DIST += $(scheme2js_input)
 yogomacs_builtin.scm: $(scheme2js_input)
 	cat $^ > $@ 
 yogomacs_builtin.js: yogomacs_builtin.scm
