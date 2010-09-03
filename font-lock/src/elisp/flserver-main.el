@@ -64,22 +64,35 @@
 ;;
 ;; Entry point for client
 ;;
+(defun gc-buffers (bl-old)
+  (let ((bl-new (buffer-list)))
+    (while bl-new
+      (when (member (car bl-new) bl-old)
+	(with-current-buffer (car bl-new)
+	  (not-modified)
+	  (kill-buffer (current-buffer)))
+	(setq bl-new (cdr bl-new))))))
+
 (defun flserver (action &rest args)
   (flserver-touch)
-  (prog1 
-      (cond 
-       ((eq action 'ping)
-	(apply #'flserver-ping (list)))
-       ((eq action 'xhtmlize)
-	(apply #'flserver-xhtmlize args))
-       ((eq action 'shtmlize)
-	(apply #'flserver-shtmlize args))
-       ((eq action 'cssize)
-	(apply #'flserver-cssize args))
-       ((eq action 'shutdown)
-	(apply #'flserver-shutdown args))
-       )
-    (flserver-touch)))
+  (let ((bl-old (buffer-list)))
+    (prog1 
+	(cond 
+	 ((eq action 'ping)
+	  (apply #'flserver-ping (list)))
+	 ((eq action 'xhtmlize)
+	  (apply #'flserver-xhtmlize args))
+	 ((eq action 'shtmlize)
+	  (apply #'flserver-shtmlize args))
+	 ((eq action 'cssize)
+	  (apply #'flserver-cssize args))
+	 ((eq action 'shutdown)
+	  (apply #'flserver-shutdown args))
+	 )
+      (flserver-touch)
+      (gc-buffers bl-old)
+      (flserver-touch)
+      )))
 
 (defun flserver-ping ()
   (with-log-string "ping" "" t))
