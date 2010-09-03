@@ -1,3 +1,10 @@
+2010-09-03  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sop-garbages (main): Remove double quotes from right
+	side operand of =~.
+	(report): Put actual garbage collection commands for file system
+	level garbage.
+
 2010-09-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.3.11.

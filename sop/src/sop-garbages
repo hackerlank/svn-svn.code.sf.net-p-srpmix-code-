@@ -17,6 +17,12 @@ else
     exit 1
 fi
 
+source libsrpmix.sh || { 
+    echo "Cannot load libsrpmix.sh file" 1>&2 
+    exit 1
+}
+
+
 function report
 {
     local fs=$1
@@ -26,19 +32,34 @@ function report
     local swrf_files=""
 
 
-    echo '#' "File system level garbages:"
+    echo '#' " @ File system level garbages:"
     diff -ruN $swrfs $fs | grep ^+[0-9a-zA-Z] | while read; do
 	local candidate="${REPLY:1}"
 	local c
 	local swrfs_alive=no
-	for c in /usr/share/srpmix/swrfs/${candidate:0:1}/${candidate}-*.swrf; do
+	for c in ${SRPMIX_SWRFS_DIR}/${candidate:0:1}/${candidate}-*.swrf; do
 	    if [ -f $c ]; then
 		swrfs_alive=yes
 		swrf_files="$swrf_files $candidate"
 	    fi
 	done
 	if [ $swrfs_alive = no ]; then
-	    echo $candidate
+	    
+
+	    local v
+	    echo "$candidate"
+	    for v in "" "-archives" "-plugins"; do
+		echo "@rm -rf ${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
+	    done
+	    (
+		local c
+		cd "${SOP_SOURCES_DIR}/${candidate:0:1}/"
+		for c in */*; do
+		    if [ "${c/\//-}" = "${candidate}" ]; then
+			echo "@rm -rf ${SOP_SOURCES_DIR}/${candidate:0:1}/${c}"
+		    fi
+		done
+	    )
 	fi
     done
     
@@ -92,7 +113,7 @@ function main
     touch $list_in_fs
 
     for x in ${SOP_SOURCES_DIR}/[0-9a-zA-Z]/*/*/pre-build; do
-	if ! [[ "$x" =~ '.*\^.*' ]]; then
+	if ! [[ "$x" =~ .*\\^.* ]]; then
 	    echo $x | \
 		sed -e "s#${SOP_SOURCES_DIR}/[0-9a-zA-Z]/##" | \
 		sed -e "s#/pre-build##" | \
