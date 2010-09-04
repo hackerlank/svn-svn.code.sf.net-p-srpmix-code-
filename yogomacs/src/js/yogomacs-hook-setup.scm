@@ -1,0 +1,6 @@
+(add-hook find-file-pre-hook (lambda ()  
+			       (let1 elt ($ "minibuffer") 
+				 (elt.focus)
+				 (elt.select))))
+(add-hook find-file-post-hook (pa$ jump-lazy (js-field (js-field *js* "location") "hash")))
+(add-hook find-file-post-hook require-yarns)
