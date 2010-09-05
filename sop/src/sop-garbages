@@ -44,25 +44,25 @@ function report
 	    fi
 	done
 	if [ $swrfs_alive = no ]; then
-	    
-
 	    local v 
 	    local e
+	    
 	    echo "$candidate"
 	    for v in "-srpmix" "-srpmix-archives" "-srpmix-plugins"; do
 		e="${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
 		if [ -e ${e} ]; then
-		    echo "@[ -e ${e} ] || rm -rf ${e}"
+		    echo "@[ -e ${e} ] && rm -rf ${e}"
 		fi
 	    done
 	    (
 		local c
 		local e
+
 		cd "${SOP_SOURCES_DIR}/${candidate:0:1}/"
 		for c in */*; do
 		    e="${SOP_SOURCES_DIR}/${candidate:0:1}/${c}"
 		    if [ "${c/\//-}" = "${candidate}" ] && [ -e "${e}" ]; then
-			echo "@[ -e ${e} ] || rm -rf ${e}"
+			echo "@[ -e ${e} ] && rm -rf ${e}"
 		    fi
 		done
 	    )
