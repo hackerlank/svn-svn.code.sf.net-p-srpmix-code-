@@ -17,66 +17,68 @@
 (define ysh #f)
 (define ysh-dir "/ysh")
 
+(define (initialize-bscm bscm shell-dir)
+  (for-each 
+   (pa$ scm->scm bscm)
+   `((define (normalize-path path)
+       (let1 len (string-length path)
+	 (cond 
+	  ((eq? len 0) "")
+	  ((equal? (substring path (- len 1) len) "/") 
+	   (normalize-path (substring path 0 (- len 1))))
+	  (else path))))
+     (define (exit . rest)
+       (let* ((location (js-eval "location"))
+	      (pathname (js-ref location "pathname")))
+	 (js-set! location "pathname" (substring
+				       (normalize-path pathname)
+				       (string-length ,shell-dir)
+				       (string-length pathname)))))
+     (define (bscm . rest)
+       (let* ((location (js-eval "location"))
+	      (pathname (js-ref location "pathname")))
+	 (js-set! location "pathname" (string-append ,bscm-dir
+						     (substring
+						      (normalize-path pathname)
+						      (string-length ,shell-dir)
+						      (string-length pathname))))))
+     (define (ysh . rest)
+       (let* ((location (js-eval "location"))
+	      (pathname (js-ref location "pathname")))
+	 (js-set! location "pathname" (string-append ,ysh-dir
+						     (substring
+						      (normalize-path pathname)
+						      (string-length ,shell-dir)
+						      (string-length pathname))))))
+     (define (find-file entry) 
+       (let* ((location (js-eval "location"))
+	      (pathname (js-ref location "pathname"))
+	      (entry (normalize-path entry))
+	      (len (string-length entry)))
+	 (cond
+	  ((or (and (< 0 len)
+		    (eq? (string-ref entry 0) #\/))
+	       (eq? len 0))
+	   (js-set! location "pathname" (string-append ,shell-dir
+						       entry)))
+	  (else
+	   (js-set! location "pathname" (string-append 
+					 (normalize-path pathname)
+					 "/"
+					 entry)))
+	  )))
+     (define (pwd . rest)
+       (let* ((location (js-eval "location"))
+	      (pathname (js-ref location "pathname")))
+	 pathname))
+     (define cd find-file)
+     (define less find-file)
+     (define lv find-file)))
+  bscm)
+
 (define (new-bscm shell-dir)
-  (let1 bscm (js-new BiwaScheme.Interpreter)
-    (scm->scm bscm
-	      ;; Handle ...
-	      `(define (normalize-path path)
-		 (let1 len (string-length path)
-		   (cond 
-		    ((eq? len 0) "")
-		    ((equal? (substring path (- len 1) len) "/") 
-		     (normalize-path (substring path 0 (- len 1))))
-		    (else path)))))
-    ;; TODO... command should be appeared on commands dir.
-    (scm->scm bscm
-	      `(define (exit . rest)
-		 (let* ((location (js-eval "location"))
-			(pathname (js-ref location "pathname")))
-		   (js-set! location "pathname" (substring
-						 (normalize-path pathname)
-						 (string-length ,shell-dir)
-						 (string-length pathname))))))
-    (scm->scm bscm
-	      `(define (bscm . rest)
-		 (let* ((location (js-eval "location"))
-			(pathname (js-ref location "pathname")))
-		   (js-set! location "pathname" (string-append ,bscm-dir
-							       (substring
-								(normalize-path pathname)
-								(string-length ,shell-dir)
-								(string-length pathname)))))))
-    (scm->scm bscm
-	      `(define (ysh . rest)
-		 (let* ((location (js-eval "location"))
-			(pathname (js-ref location "pathname")))
-		   (js-set! location "pathname" (string-append ,ysh-dir
-							       (substring
-								(normalize-path pathname)
-								(string-length ,shell-dir)
-								(string-length pathname)))))))
-    (scm->scm bscm
-	      `(define (find-file entry) 
-		 (let* ((location (js-eval "location"))
-			(pathname (js-ref location "pathname"))
-			(entry (normalize-path entry))
-			(len (string-length entry)))
-		   (cond
-		    ((or (and (< 0 len)
-			      (eq? (string-ref entry 0) #\/))
-			 (eq? len 0))
-		     (js-set! location "pathname" (string-append ,shell-dir
-								 entry)))
-		    (else
-		     (js-set! location "pathname" (string-append 
-						   (normalize-path pathname)
-						   "/"
-						   entry)))
-		       ))))
-    (scm->scm bscm '(define cd find-file))
-    (scm->scm bscm '(define less find-file))
-    (scm->scm bscm '(define lv find-file))
-    bscm))
+  (initialize-bscm (js-new BiwaScheme.Interpreter)
+		     shell-dir))
 
 (define (bscm-initializer)
   (set! shell-dir bscm-dir))

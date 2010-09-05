@@ -24,3 +24,9 @@
 				 (onComplete . ,(pa$ run-hook find-file-post-hook url params))))
     (js-new Ajax.Updater "buffer" url options)))
 
+(define (focus) 
+  (let1 elt ($ "minibuffer") 
+    (elt.focus)
+    (elt.select)))
+
+
