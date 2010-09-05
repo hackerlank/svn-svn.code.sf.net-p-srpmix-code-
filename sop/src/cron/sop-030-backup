@@ -33,7 +33,7 @@ function backup_d
     
     if [ -d ${SOP_CRADLES_DIR}/$name/$dir ]; then
 	mkdir -p ${SOP_BACKUP_DIR}/$name/$dir
-	rsync -auvH ${SOP_CRADLES_DIR}/$name/$dir ${SOP_BACKUP_DIR}/$name/$dir 2>&1 \
+	rsync -auvH ${SOP_CRADLES_DIR}/$name/$dir ${SOP_BACKUP_DIR}/$name/ 2>&1 \
 	| tee "${SOP_CRADLES_DIR}/$name/log/backup-$dir-$date"
     fi
 }

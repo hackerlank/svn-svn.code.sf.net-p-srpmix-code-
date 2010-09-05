@@ -1,5 +1,8 @@
 2010-09-06  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/cron/sop-030-backup (backup_d): Fix broken rsync backup-to
+	directory name.
+
 	* src/sop-garbages (report): Correct wrong logical expression.
 
 2010-09-03  Masatake YAMATO  <yamato@redhat.com>
