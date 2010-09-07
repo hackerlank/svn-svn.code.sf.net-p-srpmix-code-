@@ -1,0 +1,37 @@
+;; -*- scheme -*-
+(use gauche.process)
+(use sxml.ssax)
+(use sxml.sxpath)
+(use srfi-1)
+(use file.util)
+(define jbossb3rd-xml "http://anonsvn.jboss.org/repos/jbossas/tags/JBPAPP_4_2_0_GA/build/build-thirdparty.xml")
+(define-macro (with-current-directory dir proc)
+  (let ((old-dir (gensym))
+	(result  (gensym)))
+    `(let1 ,old-dir (current-directory)
+       (current-directory ,dir)
+       (let1 ,result (,proc)
+	 (current-directory ,old-dir)
+	 ,result))))
+
+(define (download-recursively url)
+  (let1 proc (run-process `(wget --recursive --no-parent
+				 ,url)
+			  :wait #t)
+    (with-output-to-file "STATUS"
+      (pa$ write (process-exit-status proc)))))  
+
+(let1 sxml (call-with-input-process
+	       `(wget -O - ,jbossb3rd-xml)
+	     (cute ssax:xml->sxml <> (list)))
+  (let1 name-version ((sxpath '(// project build componentref @)) sxml)
+    (map
+     (lambda (name version)
+       (let1 d #`",|name|/,|version|"
+	 (make-directory* d)
+	 (with-current-directory 
+	  d
+	  (lambda ()
+	    (download-recursively #`"http://repository.jboss.org/,|name|/,|version|/src")))))
+     ((sxpath '(// name *text*)) name-version)
+     ((sxpath '(// version *text*)) name-version))))
