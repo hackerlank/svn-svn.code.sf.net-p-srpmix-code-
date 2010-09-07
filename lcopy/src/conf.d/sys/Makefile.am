@@ -48,6 +48,7 @@ dist_confd_DATA = \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
 	perg,trunk.lcopy \
+	prelcopy,trunk.lcopy \
 	python-virtinst,trunk.lcopy \
 	qemu,kvm.lcopy \
 	qemu,trunk.lcopy \
@@ -79,6 +80,7 @@ dist_confd_DATA = \
 	xorg-x11-server,trunk.lcopy \
 	xtrace,trunk.lcopy \
 	ymacs,trunk.lcopy \
+	yogomacs,trunk.lcopy \
 	zsh,trunk.lcopy \
 	\
 	$(NULL)
