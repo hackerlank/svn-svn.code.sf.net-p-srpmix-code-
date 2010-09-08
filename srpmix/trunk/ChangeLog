@@ -1,5 +1,8 @@
 2010-09-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-weakview-dist (create_dist_weakview): Implment --alias with
+	alternatives command.
+
 	* misc/specs/srpmix-dir-base.SPEC.in (wvdistsdir): Added .alternatives.
 
 2010-08-24  Masatake YAMATO  <yamato@redhat.com>

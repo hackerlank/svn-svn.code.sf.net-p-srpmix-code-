@@ -112,6 +112,7 @@ function create_dist_weakview
 {
     local name=$1
     local alias=$2
+    local priority
 
     local spec=$MY_TMPDIR/SPECS/srpmix-weakview-dist-$name.spec
     if test "x${DUMP_SPEC}" != "x"; then
@@ -125,7 +126,10 @@ function create_dist_weakview
     local rootdir=${SRPMIX_VAR_DIR}
     local distdir=${rootdir}/dists
     local builddistdir_body="srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE/$distdir/$name"
-    local aliasln_body="srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE/$distdir/$alias"
+
+    if [ -n "$alias" ]; then
+	priority=${name/${alias}-}
+    fi
 
     cat > $spec <<EOF
 Summary: Srpmix weakview for $name distribution
@@ -136,7 +140,14 @@ Autoreq: 0
 BuildRequires: srpmix
 Buildarch: noarch
 Requires: srpmix-dir-base
+EOF
+if [ -n "$alias" ]; then
+    cat > $spec <<EOF
+Requires(post):   %{_sbindir}/alternatives
+Requires(postun): %{_sbindir}/alternatives
+EOF
 
+    cat > $spec <<EOF
 Buildroot: %{_tmppath}/%{name}-root
 Group: System/Daemon
 License: Unknown
@@ -156,18 +167,6 @@ builddistdir=%{_builddir}/$builddistdir_body
 mkdir -p \$builddistdir/plugins
 
 EOF
-
-#
-# TEMPORARY DISABLED
-# 
-alias=
-if [ -n "$alias" ]; then
-    cat >> $spec <<EOF
-ln -sf ./$name %{_builddir}/$aliasln_body
-
-EOF
-
-fi
 
 # in %build
 DISTMAP=`mktemp`
@@ -202,9 +201,24 @@ mkdir -p \$RPM_BUILD_ROOT/$distdir/$name
 rsync -va \$builddistdir \$RPM_BUILD_ROOT/$distdir
 EOF
 
+
 if [ -n "$alias" ]; then
     cat >> $spec <<EOF
-mv %{_builddir}/$aliasln_body \$RPM_BUILD_ROOT/$distdir
+# alternatives --altdir /var/lib/srpmix/dists/.alternatives 
+#              --install /var/lib/srpmix/dists/kojipkgs-fedoraproject-org kojipkgs-fedoraproject-org 
+#               /srv/sources/dists/kojipkgs-fedoraproject-org-20100527 20100527
+# alternatives --altdir /var/lib/srpmix/dists/.alternatives 
+#              --remove kojipkgs-fedoraproject-org /srv/sources/dists/kojipkgs-fedoraproject-org-20100527
+%post
+alternatives \\
+	--altdir $distdir/.alternatives \\
+	--install $distdir/$alias $alias /srv/sources/dists/$name $priority
+
+%postun
+if [ $1 -eq 0 ]; then
+	alternatives --altdir $distdir/.alternatives \\
+		     --remove $alias /srv/sources/dists/$name
+fi
 
 EOF
 fi
