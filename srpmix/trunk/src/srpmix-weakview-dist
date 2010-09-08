@@ -203,12 +203,16 @@ EOF
 
 
 if [ -n "$alias" ]; then
-    cat >> $spec <<EOF
 # alternatives --altdir /var/lib/srpmix/dists/.alternatives 
 #              --install /var/lib/srpmix/dists/kojipkgs-fedoraproject-org kojipkgs-fedoraproject-org 
 #               /srv/sources/dists/kojipkgs-fedoraproject-org-20100527 20100527
 # alternatives --altdir /var/lib/srpmix/dists/.alternatives 
 #              --remove kojipkgs-fedoraproject-org /srv/sources/dists/kojipkgs-fedoraproject-org-20100527
+#
+#
+# TODO: /srv/sources should not be emended here.
+#
+    cat >> $spec <<EOF
 %post
 alternatives \\
 	--altdir $distdir/.alternatives \\
