@@ -36,6 +36,7 @@ for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${sourcesdir}/${c}; done
 
 wvdistsdir=${rootdir}/dists
 mkdir -p $RPM_BUILD_ROOT${wvdistsdir}
+mkdir -p $RPM_BUILD_ROOT${wvdistsdir}/.alternatives
 
 wvpkgsdir=${rootdir}/packages
 mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}
