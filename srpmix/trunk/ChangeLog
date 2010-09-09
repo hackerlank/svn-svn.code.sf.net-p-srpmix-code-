@@ -1,5 +1,8 @@
 2010-09-10  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/specs/srpmix.spec.in (Requires): Specify the version of 
+	srpmix-dir-base package.
+
 	* src/srpmix-weakview-dist (create_dist_weakview): Added missing `fi'.
 	(create_dist_weakview): Use `>>' instead of `>'.
 	Use /srv/sources/dists as the place where altdir is placed.
