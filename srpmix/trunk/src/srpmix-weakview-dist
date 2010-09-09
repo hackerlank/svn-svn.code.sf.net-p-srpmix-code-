@@ -141,11 +141,12 @@ BuildRequires: srpmix
 Buildarch: noarch
 Requires: srpmix-dir-base
 EOF
-if [ -n "$alias" ]; then
-    cat > $spec <<EOF
+    if [ -n "$alias" ]; then
+	cat > $spec <<EOF
 Requires(post):   %{_sbindir}/alternatives
 Requires(postun): %{_sbindir}/alternatives
 EOF
+    fi
 
     cat > $spec <<EOF
 Buildroot: %{_tmppath}/%{name}-root
@@ -169,27 +170,27 @@ mkdir -p \$builddistdir/plugins
 EOF
 
 # in %build
-DISTMAP=`mktemp`
-tee "$DISTMAP" | srpmix_distmap_to_pvr | while read package version release; do
+    DISTMAP=`mktemp`
+    tee "$DISTMAP" | srpmix_distmap_to_pvr | while read package version release; do
   # Make link relative
-  seed=$(srpmix_srcdir $package $version $release)
-  d="../../../..${seed/$rootdir/}"
-  p=$(srpmix_srchash "$package")
-  echo "mkdir -p \$builddistdir/packages/$p"
-  echo "ln -sf $d \$builddistdir/packages/$p/$package"
-done >> $spec
+	seed=$(srpmix_srcdir $package $version $release)
+	d="../../../..${seed/$rootdir/}"
+	p=$(srpmix_srchash "$package")
+	echo "mkdir -p \$builddistdir/packages/$p"
+	echo "ln -sf $d \$builddistdir/packages/$p/$package"
+    done >> $spec
 
-{
-    echo
-    echo
-    echo "cat > \$builddistdir/dist-mapping.es <<\"EOF\""
-    echo ';; -*- scheme -*-'
-    cat  "$DISTMAP"
-    echo "EOF"
-    echo
-    echo
-} >> $spec
-rm "$DISTMAP"
+    {
+	echo
+	echo
+	echo "cat > \$builddistdir/dist-mapping.es <<\"EOF\""
+	echo ';; -*- scheme -*-'
+	cat  "$DISTMAP"
+	echo "EOF"
+	echo
+	echo
+    } >> $spec
+    rm "$DISTMAP"
 
     cat >> $spec <<EOF
 %install
@@ -202,7 +203,7 @@ rsync -va \$builddistdir \$RPM_BUILD_ROOT/$distdir
 EOF
 
 
-if [ -n "$alias" ]; then
+    if [ -n "$alias" ]; then
 # alternatives --altdir /var/lib/srpmix/dists/.alternatives 
 #              --install /var/lib/srpmix/dists/kojipkgs-fedoraproject-org kojipkgs-fedoraproject-org 
 #               /srv/sources/dists/kojipkgs-fedoraproject-org-20100527 20100527
@@ -212,7 +213,7 @@ if [ -n "$alias" ]; then
 #
 # TODO: /srv/sources should not be emended here.
 #
-    cat >> $spec <<EOF
+	cat >> $spec <<EOF
 %post
 alternatives \\
 	--altdir $distdir/.alternatives \\
@@ -225,7 +226,7 @@ if [ $1 -eq 0 ]; then
 fi
 
 EOF
-fi
+    fi
 
     cat >> $spec <<EOF
 %files
