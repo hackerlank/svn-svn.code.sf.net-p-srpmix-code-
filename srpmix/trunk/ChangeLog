@@ -1,6 +1,7 @@
 2010-09-10  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-weakview-dist (create_dist_weakview): Added missing `fi'.
+	(create_dist_weakview): Use `>>' instead of `>'.
 
 2010-09-09  Masatake YAMATO  <yamato@redhat.com>
 
