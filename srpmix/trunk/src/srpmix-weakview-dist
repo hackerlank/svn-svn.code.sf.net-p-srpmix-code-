@@ -142,13 +142,13 @@ Buildarch: noarch
 Requires: srpmix-dir-base
 EOF
     if [ -n "$alias" ]; then
-	cat > $spec <<EOF
+	cat >> $spec <<EOF
 Requires(post):   %{_sbindir}/alternatives
 Requires(postun): %{_sbindir}/alternatives
 EOF
     fi
 
-    cat > $spec <<EOF
+    cat >> $spec <<EOF
 Buildroot: %{_tmppath}/%{name}-root
 Group: System/Daemon
 License: Unknown
