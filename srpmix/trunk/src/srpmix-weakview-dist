@@ -45,7 +45,7 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-weakview-dist [--help|-h]"
-    echo "  srpmix-weakview-dist --name=NAME [--dump-spec]"
+    echo "  srpmix-weakview-dist --name=NAME [--dump-spec] [--alias=ALIAS]"
     echo "  srpmix-weakview-dist --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE] [--make-rpm] [--alias=ALIAS]"
     echo 
 }
@@ -211,17 +211,17 @@ EOF
 #              --remove kojipkgs-fedoraproject-org /srv/sources/dists/kojipkgs-fedoraproject-org-20100527
 #
 #
-# TODO: /srv/sources should not be emended here.
+# TODO: /srv/sources/dists should not be emended here.
 #
 	cat >> $spec <<EOF
 %post
 alternatives \\
-	--altdir $distdir/.alternatives \\
+	--altdir /srv/sources/dists/.alternatives \\
 	--install $distdir/$alias $alias /srv/sources/dists/$name $priority
 
 %postun
 if [ $1 -eq 0 ]; then
-	alternatives --altdir $distdir/.alternatives \\
+	alternatives --altdir /srv/sources/dists/.alternatives \\
 		     --remove $alias /srv/sources/dists/$name
 fi
 

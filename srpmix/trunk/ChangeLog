@@ -2,6 +2,7 @@
 
 	* src/srpmix-weakview-dist (create_dist_weakview): Added missing `fi'.
 	(create_dist_weakview): Use `>>' instead of `>'.
+	Use /srv/sources/dists as the place where altdir is placed.
 
 2010-09-09  Masatake YAMATO  <yamato@redhat.com>
 
