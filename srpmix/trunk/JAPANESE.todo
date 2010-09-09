@@ -2,10 +2,6 @@
 
 * lcopyのgrouping
 
-* alternativeを駆使して変動するdists名へのsymbolic linkをで作る。
-
-* 10srpmix-vanilla --- xz の対応
-
 * --disable-pluginを復活すること
 
 * nvreを保存するようにすること
@@ -510,6 +506,10 @@ done
 * mirrorスクリプトだけ独立させる<done>
 * srpmix-request -> sop/requestへ<done>
 * tarball<done>
+
+* alternativeを駆使して変動するdists名へのsymbolic linkをで作る。 <done>
+
+* 10srpmix-vanilla --- xz の対応 <done>
 
 
 After version 4
