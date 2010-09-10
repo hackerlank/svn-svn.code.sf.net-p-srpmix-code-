@@ -221,7 +221,7 @@ alternatives \\
 	--install $distdir/$alias $alias /srv/sources/dists/$name $priority
 
 %postun
-if [ $$1 -eq 0 ]; then
+if [ \$1 -eq 0 ]; then
 	alternatives --altdir /srv/sources/dists/.alternatives \\
 		     --remove $alias /srv/sources/dists/$name
 fi
