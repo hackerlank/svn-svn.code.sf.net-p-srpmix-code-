@@ -1,5 +1,7 @@
 2010-09-10  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 3.115.0.
+
 	* misc/specs/srpmix.spec.in (Requires): Specify the version of 
 	srpmix-dir-base package.
 
