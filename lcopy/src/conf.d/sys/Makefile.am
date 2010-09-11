@@ -44,6 +44,7 @@ dist_confd_DATA = \
 	lm-sensors,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
+	mock,trunk.lcopy \
 	netbsd-kernel,trunk.lcopy \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
