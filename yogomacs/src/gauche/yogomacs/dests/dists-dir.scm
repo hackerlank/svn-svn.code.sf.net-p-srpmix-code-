@@ -1,6 +1,9 @@
 (define-module yogomacs.dests.dists-dir
   (export dists-dir-dest)
   ;;
+  (use srfi-1)
+  (use file.util)
+  ;;
   (use yogomacs.route)
   (use yogomacs.path)
   (use yogomacs.dests.dir)
@@ -13,7 +16,39 @@
   (use yogomacs.path)
   ;;
   )
+
 (select-module yogomacs.dests.dists-dir)
+
+(define (dists-dir-dest0 path params config)
+  ;; TODO: This let should be part of util. 
+  (let* ((last (last path))
+	 (head (path->head path))
+	 (here (lambda (root e) 
+		 (build-path root 
+			     head
+			     last
+			     (if (string? e)
+				 e
+				 (dname-of e)))))
+	 (tangle (lambda (e)
+		   (sys-basename 
+		    (sys-readlink
+		     (sys-readlink
+		      (path-of e)))))))
+    (dir-dest path params config
+	      `((#/\.alternatives$/ #f #f)
+		(#/^\^.*$/ #t 
+			   ,(lambda (e)
+			      (here "/" e))
+			   ,(lambda (e)
+			      (guard (e (else #f))
+				     (let1 base (tangle e)
+				       base)))
+			   ,(lambda (e)
+			      (guard (e (else #f))
+				     (let1 base (tangle e)
+				       (here "/" base))
+			   )))))))
 
 (define (dest path params config)
   (dir-dest path params config
@@ -33,7 +68,7 @@
   (let1 dists-srpmix-dir-dest (srpmix-dir-make-dest 
 			       "^/dists/[^/]+/packages/[0-9a-zA-Z]/([^/]+)")
     `(
-      (#/^\/dists$/ ,dir-dest)
+      (#/^\/dists$/ ,dists-dir-dest0)
       (#/^\/dists\/[^\/]+$/ ,dest)
       ;; TODO: Use asis renderer
       (#/^\/dists\/[^\/]+\/dist-mapping\.es/ ,file-dest) 

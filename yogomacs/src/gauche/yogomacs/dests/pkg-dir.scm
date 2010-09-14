@@ -30,9 +30,7 @@
 		  ,(lambda (fs-dentry)
 		     (lcopy-dir->checkout-cmdline 
 		      (lcopy-path (config 'real-sources-dir)
-				  fs-dentry)))
-		  ;; XXX
-		  ))))
+				  fs-dentry)))))))
 
 (define (dest path params config)
   (dir-dest path params config
