@@ -1,0 +1,38 @@
+Summary: mock based srpmix srpm expander
+Name: @PACKAGE_NAME@
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPLv2
+Group: Development/Tools
+Buildarch: noarch
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: mock
+
+%description
+mock based srpmix srpm expander
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%{_bindir}/srescure
+%{python_sitelib}/mock/plugins/source_rescue.py
+%{python_sitelib}/mock/plugins/source_rescue.pyc
+%{python_sitelib}/mock/plugins/source_rescue.pyo
+
+%changelog
+* Thu Sep 16 2010 Masatake YAMATO <yamato@redhat.com> - @PACKAGE_VERSION@-@RPM_RELEASE@
+- Initial build.
+
