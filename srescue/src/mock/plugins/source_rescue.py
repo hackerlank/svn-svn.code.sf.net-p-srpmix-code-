@@ -70,4 +70,6 @@ class SourceRescue(object):
     decorate(traceLog())
     def postbuild(self):
         self.root.clean()
-        sys.exit(self.result)
+        if self.result == 0:
+            sys.exit(0)
+
