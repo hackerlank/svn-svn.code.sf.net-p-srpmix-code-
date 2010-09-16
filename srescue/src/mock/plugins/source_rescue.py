@@ -73,3 +73,4 @@ class SourceRescue(object):
         if self.result == 0:
             sys.exit(0)
 
+# mock --resultdir=/tmp/tomcat6 --enable-plugin=source_rescue -r epel-4-x86_64 --rebuild /srv/sources/attic/cradles/ftp.redhat.com/mirror/linux/enterprise/4/en/os/x86_64/SRPMS/unixODBC-2.2.9-1.src.rpm
