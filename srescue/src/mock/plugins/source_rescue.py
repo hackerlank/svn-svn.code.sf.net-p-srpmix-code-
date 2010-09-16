@@ -28,6 +28,7 @@ class SourceRescue(object):
     """Source mount dirs from host into chroot"""
     decorate(traceLog())
     def __init__(self, root, opts):
+        self.result = 1
         self.root = root
         self.opts = opts
         self.shelterdir = opts.get("shelterdir", False) or (root.resultdir + "/" + "srpmix")
@@ -63,10 +64,10 @@ class SourceRescue(object):
         bd_out = root.makeChrootPath(root.builddir)
         shutil.copytree(bd_out, self.shelterdir, symlinks=False)
 
+        self.result = 0
         raise SourceSOS
 
     decorate(traceLog())
     def postbuild(self):
         self.root.clean()
-        # 
-        sys.exit(0)
+        sys.exit(self.result)
