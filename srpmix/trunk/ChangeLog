@@ -1,3 +1,13 @@
+2010-09-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_core_spec): Remove unsed variable `spec'.
+
+	* src/srpmix-mock: New file.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-mock.
+
+	* misc/specs/srpmix.spec.in (%files): Added srpmix-mock.
+
 2010-09-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-weakview-dist (create_dist_weakview): Use `^' as prefix

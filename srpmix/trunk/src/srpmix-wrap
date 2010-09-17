@@ -146,7 +146,6 @@ function parse_arguments
 function create_core_spec
 {
     local target_srpm=$1
-    local spec=
     local wrapped_name=
     local es_name=
 

@@ -1,6 +1,11 @@
 #!/bin/bash
 # srpmix-mock cfg rootdir srpm
 
+DIST=
+ARCH=x86_64
+ROOTDIR=
+SRPM=
+
 LIBSRPMIX=libsrpmix.sh
 function try_source
 {
@@ -12,17 +17,75 @@ function try_source
 }
 try_source ${LIBSRPMIX}
 
+
+function print_usage
+{
+    echo "Usage: "
+    echo "	srpmix-mock --help|-h"
+    echo "      srpmix-mock --dist=DIST [--arch=ARCH] ROOTDIR SRPM"
+    echo 
+    echo "DIST: epel-4, epel-5..., fedora-12, fedora-13,..."
+    echo "ARCH: ..."
+    echo
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    -h|--help)
+		print_usage
+		exit 0
+		;;
+	    (--dist=*)
+                DIST=${1/--dist=}
+		;;
+	    (--arch=*)
+	        ARCH=${1/--arch=}
+		;;
+	     *)
+	        break
+		;;
+	esac
+	shift
+    done
+
+    if ! [ $# -eq 2 ]; then
+	echo "Wrong number of arguments" 1>&2
+	print_usage 1>&2
+	exit 1
+    fi
+
+    ROOTDIR=$1
+    shift
+    SRPM=$1
+    shift
+
+    if ! [ -r $SRPM ]; then
+	echo "Cannot read $SRPM srpm file" 1>&2
+	exit 1
+    fi
+
+    if [ -d $ROOTDIR ] && ( ! [ $(ls -l $ROOTDIR | wc -l) -eq 1 ] ); then
+	echo "rootdir $ROOTDIR is not empty" 1>&2
+	exit 1
+    fi
+}
+
 function main
 {
-    local cfg=$1
-    local rootdir=$2
-    local srpm=$3
+    parse_arguments "$@"
+
+    local cfg=$DIST-$ARCH
+    local rootdir=$ROOTDIR
+    local srpm=$SRPM
+    local MY_TMPDIR
 
 
     MY_TMPDIR=`mktemp -d`
     trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
 
-    if ! mock --resultdir=$MY_TMPDIR \
+    if ! mock --resultdir=$MY_TMPDIR  \
 	--enable-plugin=source_rescue \
         -r $cfg  \
         --rebuild $3; then
@@ -69,6 +132,11 @@ function main
 
     echo "${SRPMIX_PKG_VERSION}" > ${rootdir}/SRPMIX
     echo 0 > ${rootdir}/STATUS
+    
+    chmod -R og-w ${rootdir}
+
+    local id=$(whoami)
+    chown -R ${id}.${id} ${rootdir}
 
     return 0
 }

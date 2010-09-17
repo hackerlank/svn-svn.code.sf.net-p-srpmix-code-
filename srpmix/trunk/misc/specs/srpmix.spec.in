@@ -111,6 +111,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/srpmix
 %{_bindir}/srpmix-build
 %{_bindir}/srpmix-ix
+%{_bindir}/srpmix-mock
 %{_bindir}/libsrpmix.sh
 
 %{_bindir}/srpmix-wrap

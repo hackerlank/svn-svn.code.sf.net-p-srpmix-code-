@@ -9,6 +9,7 @@ dist_bin_SCRIPTS =           \
 	srpmix-build         \
 	\
 	srpmix-ix            \
+	srpmix-mock          \
 	\
 	srpmix-wrap          \
 	\
