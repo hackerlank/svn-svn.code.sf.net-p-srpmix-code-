@@ -48,12 +48,15 @@ OPT_PLUGIN_NAME=plugins
 
 SRPMIX_WRAP_DEBUG=
 
+OPT_IX=ix
+OPT_MOCK_DIST=
+
 function print_usage
 {
     echo "Usage: "
     echo "  srpmix-wrap [--help|-h]"
-    echo "  srpmix-wrap [<OPTIONS>...] [--dump-spec|--just-print] [--type=core] [SRPMS...]"
-    echo "  srpmix-wrap [<OPTIONS>...] [--output-dir=OUTPUTDIR] [--release=RELEASE] [--type=core] [SRPMS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--dump-spec|--just-print] [--type=core] [--ix=mock --mock-dist=DIST] [SRPMS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--output-dir=OUTPUTDIR] [--release=RELEASE] [--type=core] [--ix=mock --mock-dist=DIST] [SRPMS...]"
     echo "  srpmix-wrap [<OPTIONS>...] [--dump-spec|--just-print] [--type=plugin] [SWRFS...]"
     echo "  srpmix-wrap [<OPTIONS>...] [--output-dir=OUTPUTDIR] [--release=RELEASE] --type=plugin [--plugin-name=<name>] [--enable=<plugins>...] [--disable=<plugins>...] [SWRFS...]"
     echo ""
@@ -114,6 +117,12 @@ function parse_arguments
                 PS4="${PS4}[wrap]"
 	        set -x
 		;;
+            --ix=*)
+	        OPT_IX=${1/--ix=}
+		;;
+	    --mock-dist=*)
+	        OPT_MOCK_DIST=${1/--mock-dist=}
+		;;
 	    *)
 		break
 		;;
@@ -141,11 +150,25 @@ function parse_arguments
     if test ! -d "${OUTPUTDIR}"; then
 	srpmix_abort "No such directory: ${OUTPUTDIR}"
     fi
+
+    if [ "$OPT_IX" = ix ]; then
+	:
+    elif [ "$OPT_IX" = mock ]; then
+	BUILD_REQUIRES="${BUILD_REQUIRES} mock"
+	if [ -z "$OPT_MOCK_DIST" ]; then
+	    srpmix_abort "--mock-dist= is not given"
+	fi
+    else
+	srpmix_abort "Unknown IX: $OPT_IX"
+    fi
 }
 
 function create_core_spec
 {
     local target_srpm=$1
+    local ix=$2
+    local mock_dist=$3
+
     local wrapped_name=
     local es_name=
 
@@ -212,10 +235,24 @@ if test -d %{_builddir}/%{name}; then
 fi
 
 %build
+EOF
+
+
+if [ "$ix" = "ix" ]; then
+    cat <<EOF
 srpmix-ix -f -v %{_srpmix_ix_option}      \
     %{_builddir}/%{name}                  \
     %{SOURCE0}
+EOF
+elif [ "$ix" = "mock" ]; then
+    cat <<EOF
+srpmix-mock --dist=$mock_dist             \
+  %{_builddir}/%{name}                    \
+  %{SOURCE0}
+EOF
+fi
 
+cat <<EOF
 srpmix-plugin --enable=%{_srpmix_core_plugins} \
     %{_srpmix_plugin_option}                   \
     %{_builddir}/%{name}
@@ -440,7 +477,7 @@ function wrap_srpm
 
     case "$OPT_TYPE" in
         core)
-	    create_core_spec "$target" > "$spec"
+	    create_core_spec "$target" "$OPT_IX" "$OPT_MOCK_DIST" > "$spec"
             ;;
         plugin)
 	    create_plugin_spec "$target" "$OPT_PLUGIN_NAME" > "$spec"
