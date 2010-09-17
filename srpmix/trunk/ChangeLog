@@ -1,5 +1,7 @@
 2010-09-17  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 3.115.1.
+
 	* src/srpmix-build (OPT_TYPE): Added --mock.
 
 	* src/srpmix-wrap: Added srpmix-mock support.
