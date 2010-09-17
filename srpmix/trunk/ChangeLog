@@ -2,6 +2,8 @@
 
 	* configure.ac: Version 3.115.1.
 
+	* misc/specs/srpmix.spec.in (BuildRequires): Added mock and srescure.
+
 	* src/srpmix-build (OPT_TYPE): Added --mock.
 
 	* src/srpmix-wrap: Added srpmix-mock support.

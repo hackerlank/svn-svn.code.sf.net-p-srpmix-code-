@@ -8,7 +8,7 @@ Requires: srpmix-dir-base >= %{version}
 # Requires: gettext gettext-devel autoconf* automake* libtool jcommon
 Buildarch: noarch
 BuildRequires: hardlink cscope ctags emacs-common gettext gauche
-BuildRequires: hyperestraier 
+BuildRequires: hyperestraier mock srescure
 
 Buildroot: %{_tmppath}/%{name}-root
 License: GPL
