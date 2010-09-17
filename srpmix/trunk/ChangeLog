@@ -1,5 +1,11 @@
 2010-09-17  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-build (OPT_TYPE): Added --mock.
+
+	* src/srpmix-wrap: Added srpmix-mock support.
+
+2010-09-17  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-wrap (create_core_spec): Remove unsed variable `spec'.
 
 	* src/srpmix-mock: New file.

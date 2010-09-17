@@ -43,6 +43,7 @@ function print_usage
     echo "               [--type=<core|plugin>]"
     echo "               [--plugin-name=<name>]"
     echo "               [--rearrange-spec-command=COMMAND]"
+    echo "               [--mock=DIST]"
     echo "               --srpm=SRPM|--swrf=SWRF"
     echo
     echo "ARCH: i386(not for kenel), i686, x86_64, ia64, s390, s390x, ppc, or ppc64"
@@ -126,6 +127,10 @@ function parse_arguments
 		;;
 	    --rearrange-spec-command=*)
 	        export SRPMIX_REARRANGE_SPEC_COMMAND=$(echo "$1" | sed 's/--rearrange-spec-command=//')
+		;;
+	     --mock=*)
+	        local mock_dist=${1/--mock=}
+		WRAP_OPTS="$WRAP_OPTS --ix=mock --mock-dist=$mock_dist"
 		;;
 	    --debug)
                 SRPMIX_BUILD_DEBUG=yes
