@@ -1,0 +1,76 @@
+#!/bin/bash
+# srpmix-mock cfg rootdir srpm
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo ";;; ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+function main
+{
+    local cfg=$1
+    local rootdir=$2
+    local srpm=$3
+
+
+    MY_TMPDIR=`mktemp -d`
+    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
+
+    if ! mock --resultdir=$MY_TMPDIR \
+	--enable-plugin=source_rescue \
+        -r $cfg  \
+        --rebuild $3; then
+	echo "Failed in mock command" 1>&2
+	exit 1
+    fi
+    
+    local d
+
+    d=$MY_TMPDIR/srpmix/SOURCES
+    if ! [ -d $d ]; then
+	echo "Cannot find SOURCES directory" 1>&2
+	exit 1
+    fi
+
+    mkdir -p $rootdir
+
+    if ! mv $MY_TMPDIR/srpmix/SOURCES ${rootdir}/archives; then
+	echo "Cannot move SOURCES directory" 1>&2
+	exit 1
+    fi
+
+    d=$MY_TMPDIR/srpmix/BUILD
+    if ! [ -d $d ]; then
+	echo "Cannot find BUILD directory" 1>&2
+	return 1
+    fi
+    if ! mv $MY_TMPDIR/srpmix/BUILD ${rootdir}/pre-build; then
+	echo "Cannot move BUILD directory" 1>&2
+	return 1
+    fi
+
+
+    d=$MY_TMPDIR/srpmix/SPECS
+    if ! [ -d $d ]; then
+	echo "Cannot find SPECS directory" 1>&2
+	exit 1
+    fi
+    mkdir ${rootdir}/SPECS
+    mkdir ${rootdir}/srpmix-SPECS
+    cp $MY_TMPDIR/srpmix/SPECS/*spec ${rootdir}/SPECS/
+    cp $MY_TMPDIR/srpmix/SPECS/*spec ${rootdir}/srpmix-SPECS/
+    cp $MY_TMPDIR/srpmix/SPECS/*spec ${rootdir}/
+
+    echo "${SRPMIX_PKG_VERSION}" > ${rootdir}/SRPMIX
+    echo 0 > ${rootdir}/STATUS
+
+    return 0
+}
+
+time main "$@"
