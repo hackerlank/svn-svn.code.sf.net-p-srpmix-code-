@@ -202,8 +202,7 @@ rm -rf $RPM_BUILD_ROOT
 #fi
 
 %pre
-/usr/sbin/useradd -c "Srpmix" \
-	-s /sbin/nologin -r srpmix -G mock 2> /dev/null || :
+/usr/sbin/useradd -c "Srpmix" srpmix -G mock 2> /dev/null || :
 
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0

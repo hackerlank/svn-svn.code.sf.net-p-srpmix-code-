@@ -1,7 +1,8 @@
 2010-09-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in (srpmixdir): Don't delete srpmix 
-	group.
+	group. Don't specify login shell. Make srpmix normal user, not
+	system user(home directory is needed to run mock in sudo).
 
 2010-09-18  Masatake YAMATO  <yamato@redhat.com>
 
