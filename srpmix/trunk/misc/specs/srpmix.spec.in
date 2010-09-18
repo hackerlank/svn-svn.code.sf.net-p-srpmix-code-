@@ -201,6 +201,10 @@ rm -rf $RPM_BUILD_ROOT
 #  srpmix-plugin --enable=10srpmix-ctags
 #fi
 
+%pre
+/usr/sbin/useradd -c "Srpmix" \
+	-s /sbin/nologin -r srpmix -G srpmix,mock 2> /dev/null || :
+
 %changelog
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0
 - First RPM build.

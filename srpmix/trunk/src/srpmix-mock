@@ -80,12 +80,14 @@ function main
     local rootdir=$ROOTDIR
     local srpm=$SRPM
     local MY_TMPDIR
+    local USER=srpmix
+    local MOCK=mock
 
 
     MY_TMPDIR=`mktemp -d`
     trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
 
-    if ! mock --resultdir=$MY_TMPDIR  \
+    if ! sudo -u $USER -i $MOCK --resultdir=$MY_TMPDIR  \
 	--enable-plugin=source_rescue \
         -r $cfg  \
         --rebuild $3; then
