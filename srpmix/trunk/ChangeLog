@@ -1,5 +1,12 @@
 2010-09-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 3.115.3.
+
+	* src/srpmix-mock (main): Use sudo only when srpmix-mock
+	runs in the root privilege.
+
+2010-09-18  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: Version 3.115.2.
 
 	* misc/specs/srpmix.spec.in (srpmixdir): Create srpmix 

@@ -82,19 +82,22 @@ function main
     local MY_TMPDIR
     local USER=srpmix
     local MOCK=mock
-
+    local prefix_cmd
 
     MY_TMPDIR=`mktemp -d`
     trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
 
-    if ! sudo -u $USER -i $MOCK --resultdir=$MY_TMPDIR  \
+    if [ $(whoami) = root ]; then
+	prefix_cmd="sudo -u $USER -i"
+    fi
+    if ! $prefix_cmd $MOCK --resultdir=$MY_TMPDIR  \
 	--enable-plugin=source_rescue \
         -r $cfg  \
         --rebuild $3; then
 	echo "Failed in mock command" 1>&2
 	exit 1
     fi
-    
+
     local d
 
     d=$MY_TMPDIR/srpmix/SOURCES
