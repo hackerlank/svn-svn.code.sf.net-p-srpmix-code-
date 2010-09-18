@@ -1,5 +1,10 @@
 2010-09-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/specs/srpmix.spec.in (srpmixdir): Don't delete srpmix 
+	group.
+
+2010-09-18  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: Version 3.115.3.
 
 	* src/srpmix-mock (main): Use sudo only when srpmix-mock
