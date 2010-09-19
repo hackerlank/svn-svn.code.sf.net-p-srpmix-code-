@@ -1,3 +1,9 @@
+2010-09-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-mock (main): Use su instead of sudo.
+
+	* src/libsrpmix.sh.in (SRPMIX_MOCK_USER): Addes new confvar.
+
 2010-09-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in (srpmixdir): Don't delete srpmix 

@@ -75,6 +75,8 @@ if test -f "$SRPMIX_SYSCONF"; then
 fi
 srpmix_reset_var_dir "$SRPMIX_VAR_DIR"
 
+SRPMIX_MOCK_USER=${SRPMIX_MOCK_USER:-srpmix}
+
 
 HARDLINK=@HARDLINK@
 RPM2CPIO=@RPM2CPIO@
@@ -85,6 +87,7 @@ SWRFPM=@SWRFPM@
 SWRFBUILD="${SWRFBUILD:-@SWRFBUILD@}"
 GOSH=@GOSH@
 FASTJAR=@FASTJAR@
+
 
 function srpmix_abort
 {
