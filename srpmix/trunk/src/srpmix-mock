@@ -87,6 +87,7 @@ function main
     MY_TMPDIR=`mktemp -d`
     trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
 
+    # See also http://d.hatena.ne.jp/shibainu55/20090720/1248053978
     if [ $(whoami) = root ]; then
 	prefix_cmd="sudo -u $USER -i"
     fi
