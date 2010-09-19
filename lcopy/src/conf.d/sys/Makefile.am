@@ -17,6 +17,7 @@ dist_confd_DATA = \
 	dlm,trunk.lcopy \
 	emacs,trunk.lcopy \
 	emacs-mew,trunk.lcopy \
+	emacs-w3m,trunk.lcopy \
 	fence,trunk.lcopy \
 	fence-agents,trunk.lcopy \
 	gauche,trunk.lcopy \
