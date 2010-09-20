@@ -62,7 +62,7 @@ class SourceRescue(object):
 
         getLog().info("Rescuing source code to %s" % self.shelterdir)
         bd_out = root.makeChrootPath(root.builddir)
-        shutil.copytree(bd_out, self.shelterdir, symlinks=False)
+        shutil.copytree(bd_out, self.shelterdir, symlinks=True)
 
         self.result = 0
         raise SourceSOS
