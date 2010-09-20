@@ -99,8 +99,8 @@ function mirror
 	    > ${ndir}/.mirror-pkgs
 	mv -f ${ndir}/.mirror-pkgs ${ndir}/mirror-pkgs
     fi
-    
 
+    # TODO: This should be part of builder backend.
     if test "${DIST_MAPPING}" = yes; then
 	mkdir -p ${ndir}/dist-mapping
 	find ${odir} -name '*.src.rpm' \
