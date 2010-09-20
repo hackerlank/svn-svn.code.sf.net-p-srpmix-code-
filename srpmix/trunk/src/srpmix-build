@@ -260,7 +260,8 @@ function main
 
     MY_TMPDIR=`mktemp -d`
     trap "/bin/rm -rf $MY_TMPDIR" 0    
-
+    # srpmix-mock requires read access.
+    chmod a+rx $MY_TMPDIR
     
     parse_arguments "$@"
     if test -n "$SRPMIX_BUILD_DEBUG"; then

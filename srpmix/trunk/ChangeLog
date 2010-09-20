@@ -1,3 +1,8 @@
+2010-09-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-build (main): Make the temporary directory readable and
+	listable.
+
 2010-09-19  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-mock (main): Use su instead of sudo.
