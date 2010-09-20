@@ -1,3 +1,7 @@
+2010-09-21  Masatake YAMATO  <yamato@redhat.com>
+
+        * configure.ac: Version 3.115.6.
+
 2010-09-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-build (main): Make the temporary directory readable and
@@ -89,6 +93,8 @@
 	Ditto.
 
 2010-07-12  Masatake YAMATO  <yamato@redhat.com>
+	
+	* configure.ac: Version 3.115.0.
 
 	* src/srpmix-wrap (create_plugin_spec): Remove double quotes from right 
 	side operand of =~.
