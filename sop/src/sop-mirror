@@ -101,12 +101,16 @@ function mirror
     fi
 
     # TODO: This should be part of builder backend.
-    if test "${DIST_MAPPING}" = yes; then
+    if [ "${DIST_MAPPING}" = yes ]; then
 	mkdir -p ${ndir}/dist-mapping
 	find ${odir} -name '*.src.rpm' \
 	    | srpmix-wrap --just-print \
 	    > ${ndir}/dist-mapping/.${name}.es
 	mv -f ${ndir}/dist-mapping/.${name}.es ${ndir}/dist-mapping/${name}.es 
+    elif [ "${DIST_MAPPING}" = no ]; then
+	:
+    else
+	:
     fi
 
 }
