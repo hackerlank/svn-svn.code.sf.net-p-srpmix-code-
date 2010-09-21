@@ -172,3 +172,4 @@
 (#/xorg-x11-drv-i810-1.6.5-9.21.el5.*/ "--mock=epel-5")
 (#/xorg-x11-drv-nv-2.1.12-3.el5.*/ "--mock=epel-5")
 (#/xorg-x11-drv-nv-2.1.6-6.el5.*/ "--mock=epel-5")
+;; for v in 4 5; do for x in rhel$v*/packages/*/*; do ls -l $x/specs.spec>/dev/null 2>&1 || echo "(#/"$(basename $x)-$(basename $(readlink $x))"/ \"--mock=epel-$v\")"; done; done >~/BROKEN
