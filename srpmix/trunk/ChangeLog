@@ -1,3 +1,9 @@
+2010-09-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/Makefile.am (dist_optrules_DATA): Added 98mock.scm.
+
+	* misc/specs/srpmix.spec.in (srpmixdir): Added 98mock.scm.
+
 2010-09-21  Masatake YAMATO  <yamato@redhat.com>
 
         * configure.ac: Version 3.115.6.

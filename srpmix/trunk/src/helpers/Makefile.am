@@ -6,4 +6,4 @@ dist_helpers_SCRIPTS =             \
         $(NULL)
 
 optrulesdir      = $(sysconfdir)/srpmix/build-opt-rules.d
-dist_optrules_DATA    = 99default.scm
+dist_optrules_DATA    = 98mock.scm 99default.scm

@@ -5,6 +5,7 @@ DIST=
 ARCH=x86_64
 ROOTDIR=
 SRPM=
+SRPMIX_MOCK_DEBUG=
 
 LIBSRPMIX=libsrpmix.sh
 function try_source
@@ -43,8 +44,11 @@ function parse_arguments
 	    (--arch=*)
 	        ARCH=${1/--arch=}
 		;;
+	    --debug)
+		SRPMIX_MOCK_DEBUG=yes
+		;;
 	     *)
-	        break
+		break
 		;;
 	esac
 	shift
@@ -85,11 +89,17 @@ function main
     local prefix
     local suffix
     local body
+    local clean
 
     MY_TMPDIR=`mktemp -d`
-    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
+    if [ -z "$SRPMIX_MOCK_DEBUG" ]; then
+	trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
+    else
+	clean=--no-cleanup-after
+    fi
 
-    body="$MOCK --resultdir=$MY_TMPDIR --enable-plugin=source_rescue -r $cfg --rebuild $srpm"
+    
+    body="$MOCK $clean --resultdir=$MY_TMPDIR --enable-plugin=source_rescue -r $cfg --rebuild $srpm"
     if [ $(whoami) = root ]; then
 	chown $USER.mock $MY_TMPDIR
 	prefix="su --command "
