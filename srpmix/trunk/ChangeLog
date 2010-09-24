@@ -1,3 +1,7 @@
+2010-09-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-mock (LIBSRPMIX): Added --debug to help doc.
+
 2010-09-22  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/Makefile.am (dist_optrules_DATA): Added 98mock.scm.

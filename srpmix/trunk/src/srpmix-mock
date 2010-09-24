@@ -23,7 +23,7 @@ function print_usage
 {
     echo "Usage: "
     echo "	srpmix-mock --help|-h"
-    echo "      srpmix-mock --dist=DIST [--arch=ARCH] ROOTDIR SRPM"
+    echo "      srpmix-mock [--debug] --dist=DIST [--arch=ARCH] ROOTDIR SRPM"
     echo 
     echo "DIST: epel-4, epel-5..., fedora-12, fedora-13,..."
     echo "ARCH: ..."
