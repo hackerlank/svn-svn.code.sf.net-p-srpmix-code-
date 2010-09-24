@@ -1,5 +1,11 @@
 2010-09-24  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: 3.115.6.
+
+	* src/helpers/98mock.scm: Added more rules.
+
+2010-09-24  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-mock (LIBSRPMIX): Added --debug to help doc.
 
 2010-09-22  Masatake YAMATO  <yamato@redhat.com>
@@ -25,7 +31,7 @@
 
 2010-09-18  Masatake YAMATO  <yamato@redhat.com>
 
-	* misc/specs/srpmix.spec.in (srpmixdir): Don't delete srpmix 
+	* misc/specs/srpmix.spec.in (srpmixdir): Don't delete srpmix
 	group. Don't specify login shell. Make srpmix normal user, not
 	system user(home directory is needed to run mock in sudo).
 
@@ -40,7 +46,7 @@
 
 	* configure.ac: Version 3.115.2.
 
-	* misc/specs/srpmix.spec.in (srpmixdir): Create srpmix 
+	* misc/specs/srpmix.spec.in (srpmixdir): Create srpmix
 	user.
 
 	* src/srpmix-mock (main): Run mock under sudo.
