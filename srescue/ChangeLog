@@ -1,0 +1,5 @@
+2010-09-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/mock/plugins/source_rescue.py (SourceRescue.prebuild): Make the result
+	source tree readable with chmod.
+
