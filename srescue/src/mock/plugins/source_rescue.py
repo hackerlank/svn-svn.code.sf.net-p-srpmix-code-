@@ -62,6 +62,7 @@ class SourceRescue(object):
 
         getLog().info("Rescuing source code to %s" % self.shelterdir)
         bd_out = root.makeChrootPath(root.builddir)
+        os.system("chmod -R u+r %s"%bd_out)
         shutil.copytree(bd_out, self.shelterdir, symlinks=True)
 
         self.result = 0
