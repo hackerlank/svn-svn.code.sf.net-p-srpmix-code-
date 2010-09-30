@@ -1,0 +1,105 @@
+;; -*- scheme -*-
+(use gauche.parseopt)
+(use rfc.ftp)
+(use file.util)
+(use gauche.collection)
+(use gauche.version)
+
+(define host "ftp.debian.org")
+(define main-dir "/debian/pool/main")
+
+
+
+(define (show-help n)
+  (format #t "Usage: \n")
+  (format #t "	~a --help|-h\n" *program-name*)
+  (format #t "	~a DEBIAN-PACAKGE\n" *program-name*)
+  (exit n))
+
+(define (find-dhash-dir conn main-dir dpkg)
+  (let* ((dir-list (map sys-basename (ftp-name-list conn main-dir)))
+	 (regexp-list (map
+		       (compose 
+			string->regexp
+			(pa$ format "^~a.*")
+			regexp-quote)
+		       dir-list))
+	 (dhash-dir (fold (lambda (d r kdr)
+			    (if (r dpkg) 
+				(cond
+				 ((not kdr) d)
+				 ((> (string-length d) 
+				     (string-length kdr))
+				  d)
+				 (else kdr))
+				kdr))
+			  #f
+			  dir-list
+			  regexp-list)))
+    dhash-dir
+    (build-path main-dir dhash-dir)))
+
+(define (find-pkg-dir conn dhash-dir dpkg)
+  (let1 pkg-dir (build-path dhash-dir dpkg)
+    (guard (e
+	    (((with-module rfc.ftp <ftp-error>) e)
+	     #f))
+      (ftp-chdir conn pkg-dir))
+    pkg-dir))
+
+(define (find-diff-gz-list conn pkg-dir dpkg)
+  (let1 diff-gz-list (filter (lambda (elt)
+			       (and ((string->regexp
+				      (format "~a_.*\.diff\.gz$" (regexp-quote dpkg)))
+				     elt)
+				    elt))
+			     (ftp-name-list conn pkg-dir))
+    diff-gz-list))
+
+(define (find-diff-gz diff-gz-list)
+  (let1 diff-gz (find-max diff-gz-list :key sys-basename  :compare version<?)
+    diff-gz))
+    
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cute show-help 0))
+       . rest)
+    (unless (eq? (length rest) 1)
+      (show-help 1))
+    (let1 dpkg (car rest)
+      (call-with-ftp-connection 
+       host 
+       (lambda (conn)
+	 (let1 dhash-dir (find-dhash-dir conn main-dir dpkg)
+	   (unless dhash-dir
+	     (format (current-error-port) 
+		     "cannot find directory-hashing directory for ~a\n"
+		     dpkg)
+	     (exit 1))
+	   (let1 pkg-dir (find-pkg-dir conn dhash-dir dpkg)
+	     (unless pkg-dir
+	       (format (current-error-port) 
+		       "cannot find package directory for ~a\n"
+		       dpkg)
+	       (exit 1))
+	     (let1 diff-gz-list (find-diff-gz-list conn pkg-dir dpkg)
+	       (when (null? diff-gz-list)
+		 (format (current-error-port) 
+			 "empty package directory for ~a\n"
+			 dpkg)
+		 (exit 1))
+	       (let1 diff-gz (find-diff-gz diff-gz-list)
+		 (guard (e
+			 (((with-module rfc.ftp <ftp-error>) e)
+			  (format (current-error-port) 
+				  "cannot get ~a\n"
+				  diff-gz)
+			  (exit 1)))
+		   (ftp-get conn diff-gz
+			    :sink (current-output-port)
+			    :flusher flush
+			    )))))))
+       :passive #t)
+      (exit 0))))
+
+
