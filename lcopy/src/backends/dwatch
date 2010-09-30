@@ -5,6 +5,7 @@
 (use gauche.collection)
 (use gauche.version)
 (use text.tr)
+(use gauche.process)
 
 (define host "ftp.debian.org")
 (define main-dir "/debian/pool/main")
@@ -59,12 +60,12 @@
 
 (define (find-diff-gz diff-gz-list)
   (let1 diff-gz (find-max 
-		 (map (cute string-tr <> "+" "-")
-		      diff-gz-list) 
-		 :key sys-basename
+		 diff-gz-list 
+		 :key (lambda (elt) (string-tr (sys-basename elt) "+" "-"))
 		 :compare version<?)
     diff-gz))
-    
+
+(debug-print-width #f)    
 (define (main args)
   (let-args (cdr args)
       ((help "h|help" => (cute show-help 0))
@@ -90,20 +91,40 @@
 	     (let1 diff-gz-list (find-diff-gz-list conn pkg-dir dpkg)
 	       (when (null? diff-gz-list)
 		 (format (current-error-port) 
-			 "empty package directory for ~a\n"
+			 "package directory for ~a is empty\n"
 			 dpkg)
 		 (exit 1))
 	       (let1 diff-gz (find-diff-gz diff-gz-list)
-		 (guard (e
-			 (((with-module rfc.ftp <ftp-error>) e)
-			  (format (current-error-port) 
-				  "cannot get ~a\n"
-				  diff-gz)
-			  (exit 1)))
-		   (ftp-get conn diff-gz
-			    :sink (current-output-port)
-			    :flusher flush
-			    )))))))
+		 (receive (oport zfname) (sys-mkstemp "/tmp/dwatchz")
+		   (receive (_ pfname) (sys-mkstemp "/tmp/dwatchp")
+		     (guard (e
+			     (((with-module rfc.ftp <ftp-error>) e)
+			      (format (current-error-port) 
+				      "cannot get ~a\n"
+				      diff-gz)
+			      (sys-unlink zfname)
+			      (sys-unlink pfname)
+			      (exit 1))
+			     ((<error> e)
+			      (sys-unlink zfname)
+			      (sys-unlink pfname)
+			      (format (current-error-port)
+				      "~a\n" (ref e 'message))
+			      (exit 1)
+			      ))
+		       (ftp-get conn diff-gz
+				:sink oport
+				:flusher close-output-port)
+		       (unless (eq? (sys-system
+				     #`"gunzip -c ,|zfname| | filterdiff -z -i '*/debian/watch' | patch  -o - -s > ,|pfname|")
+				    0)
+			 (raise (error "cannot extract watch file" zfname)))
+		       (if (eq? (ref (sys-stat pfname) 'size) 0)
+			   (raise (error "no watch file in " diff-gz))
+			   (display (call-with-input-file pfname port->string)))
+		       (sys-unlink zfname)
+		       (sys-unlink pfname)
+		       ))))))))
        :passive #t)
       (exit 0))))
 
