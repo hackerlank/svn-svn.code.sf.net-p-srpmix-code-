@@ -264,10 +264,10 @@
 (#/xorg-x11-drv-summa-1.1.0-1.1/ "--mock=epel-5")
 
 ;;
-(#/ghostscript-7.07-33.2.*/ "--mock-epel-4")
-(#/HelixPlayer-1.0.3-1.*/ "--mock-epel-4")
-(#/kdegraphics-3.3.1-3.6.*/ "--mock-epel-4")
-(#/ypbind-1.17.2-14.*/ "--mock-epel-4")
+(#/ghostscript-7.07-33.2.*/ "--mock=epel-4")
+(#/HelixPlayer-1.0.3-1.*/ "--mock=epel-4")
+(#/kdegraphics-3.3.1-3.6.*/ "--mock=epel-4")
+(#/ypbind-1.17.2-14.*/ "--mock=epel-4")
 
 ;;
 (#/xorg-x11-drv-i810-1.6.5-9.13.el5.*/ "--mock=epel-5")

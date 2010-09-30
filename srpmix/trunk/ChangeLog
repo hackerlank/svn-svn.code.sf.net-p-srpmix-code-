@@ -1,3 +1,7 @@
+2010-09-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/98mock.scm ("--mock=epel-4"): Fix typos.
+
 2010-09-24  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: 3.115.7.
