@@ -4,6 +4,7 @@
 (use file.util)
 (use gauche.collection)
 (use gauche.version)
+(use text.tr)
 
 (define host "ftp.debian.org")
 (define main-dir "/debian/pool/main")
@@ -57,7 +58,11 @@
     diff-gz-list))
 
 (define (find-diff-gz diff-gz-list)
-  (let1 diff-gz (find-max diff-gz-list :key sys-basename  :compare version<?)
+  (let1 diff-gz (find-max 
+		 (map (cute string-tr <> "+" "-")
+		      diff-gz-list) 
+		 :key sys-basename
+		 :compare version<?)
     diff-gz))
     
 (define (main args)
