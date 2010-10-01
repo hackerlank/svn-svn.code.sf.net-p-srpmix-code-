@@ -300,8 +300,8 @@ function dwatch_info
     local dpkg=$DWATCH_PACKAGE
     local ver=$DWATCH_UPSTREAM_VERSION
     
-    echo PACKAGE: $dpkg
-    echo VERSION: $ver
+    echo "PACKAGE: $dpkg"
+    echo "VERSION: $ver"
 
     exit 0
 }
