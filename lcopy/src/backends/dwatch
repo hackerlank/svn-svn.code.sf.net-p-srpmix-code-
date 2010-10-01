@@ -129,3 +129,14 @@
       (exit 0))))
 
 
+;; gosh ~/var/srpmix/lcopy/src/backends/dwatch gimp > /tmp/gimp.watch
+;; perl -I ~/var/srpmix/lcopy/src/backends/devscripts ~/var/srpmix/lcopy/src/backends/devscripts/scripts/uscan.pl --package gimp --upstream-version 0.0.0 --watchfile /tmp/gimp.watch --download --dehs --destdir . --no-symlink
+#|<dehs>
+<package>gimp</package>
+<debian-uversion>0.0.0</debian-uversion>
+<debian-mangled-uversion>0.0.0</debian-mangled-uversion>
+<upstream-version>2.4.7</upstream-version>
+<upstream-url>ftp://ftp.gimp.org/pub/gimp/v2.4/gimp-2.4.7.tar.bz2</upstream-url>
+<status>Newer version available</status>
+<messages>Successfully downloaded updated package gimp-2.4.7.tar.bz2</messages>
+</dehs>|#
