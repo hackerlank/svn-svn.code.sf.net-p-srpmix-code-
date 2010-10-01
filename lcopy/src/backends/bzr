@@ -24,16 +24,21 @@ function repo_check
 
     local http_spec="^http://.*$"
     local https_spec="^https://.*$"
-    if  ! ( [[ "$repo" =~ $http_spec ]]  || \
-	    [[ "$repo" =~ $https_spec ]]); then
+    local lp_spec="^lp:.*$"
+
+    if  ( [[ "$repo" =~ $http_spec ]]  || \
+	  [[ "$repo" =~ $https_spec ]]); then
+	return 0
+    elif [[ "$repo" =~ $lp_spec ]]; then
+	return 0
+    else
 	echo "broken bzr command line: unrecognizable repo specification: $repo" 1>&2
 	echo "expected repo specifications: " 1>&2
-	for s in "$http_spec" "$https_spec"; do
+	for s in "$http_spec" "$https_spec" "$lp_spec"; do
 	    echo "	$s" 1>&2
 	done
 	return 1
-    else
-	return 0
+	return 1
     fi
 }
 
@@ -70,7 +75,7 @@ function bzr_help_genconf
     fi
 
     echo "	" ${prefix} bzr 'branch' URL
-    echo "	" "(acceptable scheme for URL: http://..., and https://...)"
+    echo "	" "(acceptable scheme for URL: http://..., https://... and lp:...)"
 }
 
 function bzr_genconf

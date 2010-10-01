@@ -1,3 +1,9 @@
+2010-10-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.2.11.
+
+	* src/backends/bzr: Added lp as acceptable schema.
+
 2010-09-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.10.
