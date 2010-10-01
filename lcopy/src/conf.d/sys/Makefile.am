@@ -80,6 +80,7 @@ dist_confd_DATA = \
 	wireshark,trunk.lcopy \
 	with-log,trunk.lcopy \
 	xorg-x11-server,trunk.lcopy \
+	xpad,trunk.lcopy \
 	xtrace,trunk.lcopy \
 	ymacs,trunk.lcopy \
 	yogomacs,trunk.lcopy \
