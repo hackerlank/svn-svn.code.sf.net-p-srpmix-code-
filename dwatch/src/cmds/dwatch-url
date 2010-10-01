@@ -1,0 +1,27 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+(use dwatch)
+(use gauche.parseopt)
+
+
+(define (show-help n)
+  (format #t "~a -h|--help\n" *program-name*)
+  (format #t "~a DPKG-NAME\n" *program-name*)
+  (exit n))
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (pa$ show-help 0))
+       . rest)
+    (unless (eq? (length rest) 1)
+      (with-output-to-port (current-error-port)
+	(pa$ show-help 1)))
+    (let1 dpkg (car rest)
+      (guard (e
+	      ((<error> e) 
+	       (display (ref e 'message) (current-error-port))
+	       (newline  (current-error-port))
+	       (exit 2)))
+	     (print (watch-file-url-for dpkg))
+	     (exit 0)))))
