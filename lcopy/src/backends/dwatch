@@ -1,142 +1,105 @@
-;; -*- scheme -*-
-(use gauche.parseopt)
-(use rfc.ftp)
-(use file.util)
-(use gauche.collection)
-(use gauche.version)
-(use text.tr)
-(use gauche.process)
+#!/bin/bash
 
-(define host "ftp.debian.org")
-(define main-dir "/debian/pool/main")
+BACKEND=dwatch
+VERSION="0.0.0"
 
+source liblcopy_backends.sh || exit 1
 
+function write_spec
+{
+    local dpkg=$1
 
-(define (show-help n)
-  (format #t "Usage: \n")
-  (format #t "	~a --help|-h\n" *program-name*)
-  (format #t "	~a DEBIAN-PACAKGE\n" *program-name*)
-  (exit n))
+    common_write_spec 
+    printf "DWATCH_DPKG=\"%s\"\n" "${repo}"
+}
 
-(define (find-dhash-dir conn main-dir dpkg)
-  (let* ((dir-list (map sys-basename (ftp-name-list conn main-dir)))
-	 (regexp-list (map
-		       (compose 
-			string->regexp
-			(pa$ format "^~a.*")
-			regexp-quote)
-		       dir-list))
-	 (dhash-dir (fold (lambda (d r kdr)
-			    (if (r dpkg) 
-				(cond
-				 ((not kdr) d)
-				 ((> (string-length d) 
-				     (string-length kdr))
-				  d)
-				 (else kdr))
-				kdr))
-			  #f
-			  dir-list
-			  regexp-list)))
-    dhash-dir
-    (build-path main-dir dhash-dir)))
+function dpkg_check
+{
+    local dpkg=$1
 
-(define (find-pkg-dir conn dhash-dir dpkg)
-  (let1 pkg-dir (build-path dhash-dir dpkg)
-    (guard (e
-	    (((with-module rfc.ftp <ftp-error>) e)
-	     #f))
-      (ftp-chdir conn pkg-dir))
-    pkg-dir))
+    if [ -z "${dpkg}" ]; then
+	echo "broken dwatch command line: cannot find debian package specification" 1>&2
+	return 1
+    fi
 
-(define (find-diff-gz-list conn pkg-dir dpkg)
-  (let1 diff-gz-list (filter (lambda (elt)
-			       (and ((string->regexp
-				      (format "~a_.*\.diff\.gz$" (regexp-quote dpkg)))
-				     elt)
-				    elt))
-			     (ftp-name-list conn pkg-dir))
-    diff-gz-list))
+    return 0
+}
 
-(define (find-diff-gz diff-gz-list)
-  (let1 diff-gz (find-max 
-		 diff-gz-list 
-		 :key (lambda (elt) (string-tr (sys-basename elt) "+" "-"))
-		 :compare version<?)
-    diff-gz))
+#
+# GENCONF
+# 
+function dwatch_help_genconf
+{
+    local prefix
 
-(debug-print-width #f)    
-(define (main args)
-  (let-args (cdr args)
-      ((help "h|help" => (cute show-help 0))
-       . rest)
-    (unless (eq? (length rest) 1)
-      (show-help 1))
-    (let1 dpkg (car rest)
-      (call-with-ftp-connection 
-       host 
-       (lambda (conn)
-	 (let1 dhash-dir (find-dhash-dir conn main-dir dpkg)
-	   (unless dhash-dir
-	     (format (current-error-port) 
-		     "cannot find directory-hashing directory for ~a\n"
-		     dpkg)
-	     (exit 1))
-	   (let1 pkg-dir (find-pkg-dir conn dhash-dir dpkg)
-	     (unless pkg-dir
-	       (format (current-error-port) 
-		       "cannot find package directory for ~a\n"
-		       dpkg)
-	       (exit 1))
-	     (let1 diff-gz-list (find-diff-gz-list conn pkg-dir dpkg)
-	       (when (null? diff-gz-list)
-		 (format (current-error-port) 
-			 "package directory for ~a is empty\n"
-			 dpkg)
-		 (exit 1))
-	       (let1 diff-gz (find-diff-gz diff-gz-list)
-		 (receive (oport zfname) (sys-mkstemp "/tmp/dwatchz")
-		   (receive (_ pfname) (sys-mkstemp "/tmp/dwatchp")
-		     (guard (e
-			     (((with-module rfc.ftp <ftp-error>) e)
-			      (format (current-error-port) 
-				      "cannot get ~a\n"
-				      diff-gz)
-			      (sys-unlink zfname)
-			      (sys-unlink pfname)
-			      (exit 1))
-			     ((<error> e)
-			      (sys-unlink zfname)
-			      (sys-unlink pfname)
-			      (format (current-error-port)
-				      "~a\n" (ref e 'message))
-			      (exit 1)
-			      ))
-		       (ftp-get conn diff-gz
-				:sink oport
-				:flusher close-output-port)
-		       (unless (eq? (sys-system
-				     #`"gunzip -c ,|zfname| | filterdiff -z -i '*/debian/watch' | patch  -o - -s > ,|pfname|")
-				    0)
-			 (raise (error "cannot extract watch file" zfname)))
-		       (if (eq? (ref (sys-stat pfname) 'size) 0)
-			   (raise (error "no watch file in " diff-gz))
-			   (display (call-with-input-file pfname port->string)))
-		       (sys-unlink zfname)
-		       (sys-unlink pfname)
-		       ))))))))
-       :passive #t)
-      (exit 0))))
+    if [ "$1" != "format" ]; then
+	prefix="$0 genconf"
+    fi
+
+    echo "	" ${prefix} dwatch 'checkout' DPKG
+}
+
+function dwatch_genconf
+{
+    local original=$@
+    local cmd
+    local dpkg
 
 
-;; gosh ~/var/srpmix/lcopy/src/backends/dwatch gimp > /tmp/gimp.watch
-;; perl -I ~/var/srpmix/lcopy/src/backends/devscripts ~/var/srpmix/lcopy/src/backends/devscripts/scripts/uscan.pl --package gimp --upstream-version 0.0.0 --watchfile /tmp/gimp.watch --download --dehs --destdir . --no-symlink
-#|<dehs>
-<package>gimp</package>
-<debian-uversion>0.0.0</debian-uversion>
-<debian-mangled-uversion>0.0.0</debian-mangled-uversion>
-<upstream-version>2.4.7</upstream-version>
-<upstream-url>ftp://ftp.gimp.org/pub/gimp/v2.4/gimp-2.4.7.tar.bz2</upstream-url>
-<status>Newer version available</status>
-<messages>Successfully downloaded updated package gimp-2.4.7.tar.bz2</messages>
-</dehs>|#
+    if [ $# != 2 ]; then
+	echo "wrong number of arguments: $original" 1>&2
+	return 1
+    fi
+
+
+    cmd=$1
+    shift
+    if ! [ "$cmd" = "checkout" ] ; then
+	echo "unknown command for checkout: $cmd" 1>&2
+	return 1
+    fi
+    
+    dpkg=$1
+    shift
+    if ! dpkg_check "${dpkg}"; then
+	return 1
+    fi
+    write_spec "${dpkg}"
+    return 0
+}
+
+
+# http://git.debian.org/?p=devscripts/devscripts.git;a=blob;f=scripts/uupdate.sh;h=ab24d54d0712308c2200e994c064ec5c5732e1f3;hb=HEDA
+# http://packages.debian.org/ja/sid/devscripts
+# usage: http://www.debian.org/doc/maint-guide/ch-update.en.html
+
+# # sudo yum -y install dpkg-devel
+# # git clone git://git.debian.org/devscripts/devscripts.git
+# $ cat bind.watch
+# version=3
+# http://ftp.yz.yamagata-u.ac.jp/pub/network/isc/bind/(\d.*)/ \
+#   bind-(\d.*)\.tar\.gz
+
+# $ perl -I devscripts devscripts/scripts/uscan.pl \
+#   --watchfile bind.watch \
+#  --upstream-version 9.0.0 \
+#  --package bind  \
+#  --dehs
+# <dehs>
+# <package>bind</package>
+# <debian-uversion>9.0.0</debian-uversion>
+# <debian-mangled-uversion>9.0.0</debian-mangled-uversion>
+# <upstream-version>9.7.1</upstream-version>
+# <upstream-url>http://ftp.yz.yamagata-u.ac.jp/pub/network/isc/bind/9.7.1/bind-9.7.1.tar.gz</upstream-url>
+# <status>Newer version available</status>
+# <messages>Not downloading as --package was used.  Use --download to force downloading.</messages>
+# </dehs>
+
+
+# wget -nH --mirror http://ftp.debian.org/debian/pool/main/  --accept '*.diff.gz'
+
+
+# *.watch: *.diff.gz
+# 	 ...
+
+# filterdiff -z -i '*/debian/watch' /old/tmp/debian/main/a/aggregate/aggregate_1.6-6.diff.gz |  patch  -o - -s
