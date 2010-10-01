@@ -1,7 +1,7 @@
 m4_define([pkg_name],    [lcopy])
 m4_define([pkg_major_version],[0])
 m4_define([pkg_minor_version],[2])
-m4_define([pkg_micro_version],[11])
+m4_define([pkg_micro_version],[12])
 m4_define([pkg_version],pkg_major_version.pkg_minor_version.pkg_micro_version)
 
 AC_INIT(pkg_name, pkg_version)
@@ -49,10 +49,16 @@ if test x$_BZR_ = x; then
   AC_MSG_ERROR([Cannot find bzr])
 fi			
 
+AC_PATH_PROG([_DWATCH_], [dwatch])
+if test x$_DWATCH_ = x; then
+  AC_MSG_ERROR([Cannot find dwatch])
+fi			
+
 AC_PATH_PROG([_SRPMIX_PLUGIN_], [srpmix-plugin])
 if test x$_SRPMIX_PLUGIN_ = x; then
   AC_MSG_ERROR([Cannot find srpmix-plugin])
 fi			
+
 
 AC_RPM_RELEASE
 

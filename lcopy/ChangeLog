@@ -1,3 +1,9 @@
+2010-10-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.2.12.
+
+	* src/backends/dwatch: New backend.
+
 2010-10-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.11.

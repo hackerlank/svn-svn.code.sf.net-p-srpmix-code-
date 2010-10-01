@@ -21,7 +21,7 @@ function dpkg_check
     if [ -z "${dpkg}" ]; then
 	echo "broken dwatch command line: cannot find debian package specification" 1>&2
 	return 1
-    elif ! ( [[ "${dpkg}" =~ $dpkg_spec ]]; then
+    elif ! ( [[ "${dpkg}" =~ $dpkg_spec ]] ); then
 	echo "broken dwatch command line: unrecognizable dpkg specification: $dpkg" 1>&2
 	echo "expected dpkg specification: " 1>&2
 	echo "	$dpkg_spec" 1>&2
