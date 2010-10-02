@@ -9,9 +9,6 @@
 
 (select-module dwatch)
 
-(define host "ftp.debian.org")
-(define main-dir "/debian/pool/main")
-
 (define (find-dhash-dir conn main-dir dpkg)
   (let* ((dir-list (map sys-basename (ftp-name-list conn main-dir)))
 	 (regexp-list (map
@@ -65,11 +62,11 @@
 		 :compare version<?)
     diff-gz))
 
-(define (watch-file-url-for dpkg)
+(define (watch-file-url-for host main-dir dpkg )
   (call-with-ftp-connection 
-   host
+   (or host "ftp.debian.org")
    (lambda (conn)
-     (let* ((dhash-dir (find-dhash-dir conn main-dir dpkg))
+     (let* ((dhash-dir (find-dhash-dir conn (or main-dir "/debian/pool/main") dpkg))
 	    (pkg-dir (find-pkg-dir conn dhash-dir dpkg))
 	    (diff-gz-list (find-diff-gz-list conn pkg-dir dpkg))
 	    (diff-gz (find-diff-gz diff-gz-list)))
