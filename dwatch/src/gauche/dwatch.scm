@@ -5,7 +5,9 @@
   (use gauche.version)
   (use text.tr)
   (use rfc.uri)
-  (export watch-file-url-for))
+  (export watch-file-url-for
+	  default-host
+	  default-main-dir))
 
 (select-module dwatch)
 
@@ -62,17 +64,22 @@
 		 :compare version<?)
     diff-gz))
 
+
+(define default-host "ftp.debian.org")
+(define default-main-dir "/debian/pool/main")
+
 (define (watch-file-url-for host main-dir dpkg )
-  (call-with-ftp-connection 
-   (or host "ftp.debian.org")
-   (lambda (conn)
-     (let* ((dhash-dir (find-dhash-dir conn (or main-dir "/debian/pool/main") dpkg))
-	    (pkg-dir (find-pkg-dir conn dhash-dir dpkg))
-	    (diff-gz-list (find-diff-gz-list conn pkg-dir dpkg))
-	    (diff-gz (find-diff-gz diff-gz-list)))
-       (uri-compose :scheme "ftp" 
-		    :host host
-		    :path diff-gz)))
-   :passive #t))
+  (let1 host (or host default-host)
+    (call-with-ftp-connection 
+     host
+     (lambda (conn)
+       (let* ((dhash-dir (find-dhash-dir conn (or main-dir default-main-dir) dpkg))
+	      (pkg-dir (find-pkg-dir conn dhash-dir dpkg))
+	      (diff-gz-list (find-diff-gz-list conn pkg-dir dpkg))
+	      (diff-gz (find-diff-gz diff-gz-list)))
+	 (uri-compose :scheme "ftp" 
+		      :host host
+		      :path diff-gz)))
+     :passive #t)))
 
 (provide "dwatch")

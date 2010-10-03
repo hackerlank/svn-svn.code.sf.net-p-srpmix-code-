@@ -1,10 +1,6 @@
 #!/bin/bash
-#
-# dwatch preview
-# dwatch checkout
-# dwatch update 
-# dwatch info
-#
+
+
 MY_TMPDIR=
 DWATCH_DEBUG=
 DWATCH_CACHE_DIR=~/.dwatch
@@ -17,12 +13,17 @@ function print_usage
     echo "	dwatch --help|-h"
     echo "	dwatch help"
     echo "	dwatch [--debug] devscripts"
-    echo "	dwatch [--debug] preview DPKG-NAME"
-    echo "	dwatch [--debug] checkout DPKG-NAME"
+    echo "	dwatch [--debug] preview [WATCH-SPEC] DPKG-NAME"
+    echo "	dwatch [--debug] checkout [WATCH-SPEC] DPKG-NAME"
     echo "	dwatch [--debug] update"
     echo "	dwatch [--debug] info"
+    echo ""
+    echo "WATCH SPEC: "
+    echo "	ftp://..."
+    echo "      file:///..."
+    echo "(ftp://$(dwatch-url --print-default-host)$(dwatch-url --print-default-main-dir) "
+    echo "is used as default value.)"
 }
-
 
 function dwatch_help
 {
@@ -45,20 +46,86 @@ function dwatch_devscripts
 
 function dwatch_preview
 {
+    local host
+    local main_dir
+    local watch_file
+    local -a WATCH_FILE
     local dpkg
-
-    if ! [ $# -eq 1 ]; then
+    
+    if [ $# -eq 1 ]; then
+	host=$(dwatch-url --print-default-host)
+	main_dir=$(dwatch-url --print-default-main-dir)
+	dpkg=$1
+	shift
+    elif [ $# -eq 2 ]; then
+	case "$1" in
+	    ftp://*)
+		local ftp_spec="^ftp://([-a-zA-Z0-9.]+)(/.*)$"
+		if [[ "$1" =~ ${ftp_spec} ]]; then
+		    host="${BASH_REMATCH[1]}"
+		    main_dir="${BASH_REMATCH[2]}"
+		    shift
+		    dpkg=$1
+		else
+		    echo "broken ftp spec: $1" 1>&2
+		    exit 1
+		fi
+		;;
+	    file://*)
+		local file_spec="^file://(/.*)$"
+		if [[ "$1" =~ ${file_spec} ]]; then
+		    watch_file="${BASH_REMATCH[1]}"
+		    shift
+		    dpkg=$1
+		    if ! [ -r "${watch_file}" ]; then
+			echo "Cannot read watch file: ${watch_file}" 1>&2
+			exit 1
+		    fi
+		else
+		    echo "broken file spec: $1" 1>&2
+		    exit 1
+		fi
+		mapfile WATCH_FILE < ${watch_file}
+		if [ "${#WATCH_FILE[@]}" = 0 ]; then
+		    echo "Watch file is empty: $watch_file" 1>&2
+		    exit 1
+		fi
+		;;
+	    -)
+		shift
+		dpkg=$1
+		mapfile WATCH_FILE
+		if [ "${#WATCH_FILE[@]}" = 0 ]; then
+		    echo "Watch file is empty: (stdin)" 1>&2
+		    exit 1
+		fi
+		;;
+	    *)
+		{
+		    echo "Broken dwatch command line: $1"
+		    print_usage
+		    exit 1
+		}  1>&2
+		;;
+	esac
+    else
 	{
-	    echo "Wrong number of argument(s) for sub command: " preview
+	    echo "Wrong number of argument(s) for sub command: preview" 
 	    print_usage
 	    exit 1
 	} 1>&2
     fi
+
     
-    dpkg=$1
-    shift
+    if [ "${#WATCH_FILE[@]}" -gt 0 ]; then
+	for l in "${WATCH_FILE[@]}"; do
+	    # printf "%q\n" $l
+	    echo $l
+	done
+	exit 0
+    fi
     
-    
+
     local diff_gz_url="$MY_TMPDIR/diff_gz.url"
     diff_gz_url=$(dwatch-url $dpkg)
     local dwatch_url_status=$?
@@ -92,6 +159,7 @@ function dwatch_preview
 function dwatch__get 
 {
     local dpkg
+    local ver
     local watch
 
     dpkg=$1
@@ -119,12 +187,24 @@ function extract_uversion
 
 function write_dot_dwatch
 {
+    local watch_spec=$1
+    shift
     local dpkg=$1
-    local ver=$2
+    shift
+    local ver=$1
+    shift
 
     echo '# -*- shell-script -*-'
+    echo "DWATCH_WATCH_SPEC=$watch_spec"
     echo "DWATCH_PACKAGE=$dpkg"  
     echo "DWATCH_UPSTREAM_VERSION=$ver"
+    echo -n "DWATCH_WATCH='"
+    for l in $@; do
+#	printf "%q\n" $l
+	echo $l
+    done
+    echo -n "'"
+    echo ""
 }
 
 function updated_p
@@ -138,21 +218,29 @@ function updated_p
 function dwatch_checkout
 {
     local dpkg
-
-    if ! [ $# -eq 1 ]; then
+    local watch_spec
+    local ver
+    local watch="$MY_TMPDIR/$dpkg.watch"
+    
+    if [ $# -eq 1 ]; then
+	dpkg=$1
+	shift
+    elif [ $# -eq 2 ]; then
+	watch_spec=$1
+	shift
+	dpkg=$1
+	shift
+    else
 	{
-	    echo "Wrong number of argument(s) for sub command: " checkout
+	    echo "Wrong number of argument(s) for sub command: checkout" 
 	    print_usage
 	    exit 1
 	} 1>&2
     fi
-    
-    dpkg=$1
-    shift
-    ver=${2:-0.0.0}
 
-    local watch="$MY_TMPDIR/$dpkg.watch"
-    if ! dwatch preview $dpkg > $watch; then
+    ver=${1:-0.0.0}
+
+    if ! dwatch preview ${watch_spec} $dpkg > $watch; then
 	exit 2
     fi
 
@@ -177,7 +265,14 @@ function dwatch_checkout
 
     local nver=$(extract_uversion $dehs)
     mkdir -p $dpkg
-    write_dot_dwatch $dpkg $nver > $dpkg/.dwatch
+
+    if [ -n "$watch_spec" ] && [[ "$watch_spec" =~ ^file:///.* ]]; then
+	local -a WATCH_FILE
+	mapfile WATCH_FILE < $watch
+	write_dot_dwatch "$watch_spec" $dpkg $nver "${WATCH_FILE[@]}" > $dpkg/.dwatch
+    else
+	write_dot_dwatch "$watch_spec" $dpkg $nver > $dpkg/.dwatch
+    fi
 
     (
 	cd $dpkg;
@@ -222,6 +317,10 @@ function dwatch_update
 	exit 1
     fi
 
+    if [ -z "$DWATCH_WATCH_SPEC" ]; then
+	echo "No definision for DWATCH_WATCH_SPEC" 1>&2
+    fi
+
     if [ -z "$DWATCH_PACKAGE" ]; then
 	echo "No definision for DWATCH_PACKAGE" 1>&2
     fi
@@ -234,9 +333,15 @@ function dwatch_update
     local dpkg=$DWATCH_PACKAGE
     local ver=$DWATCH_UPSTREAM_VERSION
     local watch="$MY_TMPDIR/$dpkg.watch"
-    if ! dwatch preview $dpkg > $watch; then
-	exit 2
+
+    if [ -z "${DWATCH_WATCH}" ]; then
+	if ! dwatch preview $DWATCH_WATCH_SPEC $dpkg > $watch; then
+	    exit 2
+	fi
+    else
+	echo "${DWATCH_WATCH}" > $watch
     fi
+	
 
     if ! dwatch devscripts; then
 	exit $?
@@ -257,7 +362,14 @@ function dwatch_update
     fi
 
     local nver=$(extract_uversion $dehs)
-    write_dot_dwatch $dpkg $nver > ./._dwatch
+    if [ -z "${DWATCH_WATCH}" ]; then
+	write_dot_dwatch "${DWATCH_WATCH_SPEC}" $dpkg $nver > ./._dwatch
+    else
+	local -a WATCH_FILE
+	mapfile WATCH_FILE < $watch
+	write_dot_dwatch "${DWATCH_WATCH_SPEC}" $dpkg $nver "${WATCH_FILE[@]}" > ./._dwatch
+    fi
+	
 
     local old_ls=$(ls)
     tar zxvf $MY_TMPDIR/${dpkg}_${nver}.orig.tar.gz
@@ -302,6 +414,11 @@ function dwatch_info
     
     echo "PACKAGE: $dpkg"
     echo "VERSION: $ver"
+
+    echo "WATCH: "
+    if [ -n "${DWATCH_WATCH}" ]; then
+	echo "${DWATCH_WATCH}"
+    fi
 
     exit 0
 }
