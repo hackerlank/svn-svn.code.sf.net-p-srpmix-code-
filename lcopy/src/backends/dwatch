@@ -145,7 +145,7 @@ function dwatch_print_cmdline
     fi
 
     if [ "$cmd" = "checkout" ]; then
-	if [ -z "${DWATCH_DKPG}" ]; then
+	if [ -z "${DWATCH_DPKG}" ]; then
 	    echo "no DWATCH_DPKG in $input" 1>&2
 	    return 1
 	fi
