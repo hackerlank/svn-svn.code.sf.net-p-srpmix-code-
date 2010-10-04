@@ -22,6 +22,7 @@
   (use yogomacs.dests.packages-dir)
   (use yogomacs.dests.root-commands-dir)
   (use yogomacs.dests.sources-dir)
+  (use yogomacs.dests.absentees-dir)
   ;;
   (use yogomacs.dests.text)
   (use yogomacs.dests.ysh-dir)
@@ -34,6 +35,7 @@
   )
 (select-module yogomacs.dests.root-dir)
 
+;; TODO: unavailable
 (define root-globs
   `(("."  #t "/")
     (".." #t "/")
@@ -62,6 +64,10 @@ customizable(TODO), self-documenting(TODO) real-time display viewer.\n"))
     :url "commands/login"
     :dname "login"
     :show-arrowy-to #t))
+(define (absentees-entry parent-lpath)
+  (make <redirect-dentry>
+    :parent (compose-path parent-lpath)
+    :dname "absentees"))
 
 (define (dest path params config)
   (let1 shtml (dired
@@ -72,6 +78,7 @@ customizable(TODO), self-documenting(TODO) real-time display viewer.\n"))
 		`( 
 		  ,(README-entry path)
 		  ,(commands-entry path)
+		  ,(absentees-entry path)
 		  ,@(if (in-shell? params)
 			`(,(annotations-entry path))
 			`(,(login-entry path))
@@ -103,6 +110,7 @@ customizable(TODO), self-documenting(TODO) real-time display viewer.\n"))
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
      (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)
      (#/^\/sources(?:\/.+)?$/ ,sources-dir-dest)
+     (#/^\/absentees(?:\/.+)?$/ ,absentees-dir-dest)
      (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
 
      ;;

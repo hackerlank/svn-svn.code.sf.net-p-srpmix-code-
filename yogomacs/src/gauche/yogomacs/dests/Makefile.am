@@ -1,6 +1,7 @@
 moduledir=@GAUCHE_MODULEDIR@/yogomacs/dests
 dist_module_DATA =   \
 	\
+	absentees-dir.scm			\
 	annotations-dir.scm			\
 	bscm-dir.scm				\
 	css.scm					\

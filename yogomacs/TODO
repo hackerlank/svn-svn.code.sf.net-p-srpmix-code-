@@ -1,6 +1,8 @@
 -*- outline -*-
 * prioritized task
+** /unavailable
 ** trap style changing
+** char code(latin)
 
 ** /var/lib/yogomacs/css + /var/cache/yogomacs/css/@SPEC_CONFIG@
 ** /web -> /_/
@@ -48,7 +50,6 @@
 ** FS strcture
 *** Sending dist-mapping.es in asis
 *** attic*
-**** blacklist
 
 ** Clean up
 *** storage separations <partially done>

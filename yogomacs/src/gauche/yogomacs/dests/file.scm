@@ -68,11 +68,14 @@
 	      (cache real-src-file syntax "shtml" #t config)
 	      (values shtml last-modified-time))))))
 
-(define (file-dest lpath params config)
+(define (file-dest lpath params config . rest)
   (let* ((last (last lpath))
 	 (head (path->head lpath))
-	 (real-src-dir (build-path (config 'real-sources-dir) head))
-	 (real-src-file (build-path real-src-dir last))
+	 (real-src-file (get-keyword*
+			 :real-src-file rest
+			 (build-path 
+			  (build-path (config 'real-sources-dir) head)
+			  last)))
 	 (file-type (file-type real-src-file)))
     (if (to-domain? real-src-file config)
 	(file-dest0 real-src-file (compose-path lpath) file-type (config 'mode) params config)

@@ -1,8 +1,11 @@
 (define-module yogomacs.dentries.redirect
   (export <redirect-dentry>
+	  current-directory-dentry
+	  parent-directory-dentry
 	  )
   (use yogomacs.dentry)
   (use yogomacs.dentries.virtual)
+  (use yogomacs.path)
   )
 (select-module yogomacs.dentries.redirect)
 
@@ -29,5 +32,17 @@
      ((string? show-arrowy-to) show-arrowy-to)
      (else
       #f))))
+
+(define (current-directory-dentry lpath)
+  (make <redirect-dentry>
+    :parent (compose-path lpath)
+    :dname "." 
+    :url (compose-path* lpath ".")))
+
+(define (parent-directory-dentry lpath)
+  (make <redirect-dentry>
+    :parent (compose-path lpath)
+    :dname ".." 
+    :url (compose-path* lpath "..")))
 
 (provide "yogomacs/dentries/redirect")
