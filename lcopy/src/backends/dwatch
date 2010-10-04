@@ -146,7 +146,7 @@ function dwatch_genconf
 	return 1
     fi
     
-    if [ $# = 3 ]; then
+    if [ $# = 2 ]; then
 	watch_spec=$1
 	shift
 	if ! watch_spec_check "$watch_spec"; then
@@ -208,7 +208,7 @@ function dwatch_checkout
 	    
 	    (
 		cd ${output_dir}
-		echo ${DWATCH_WATCH} | common_spawn dwatch checkout - "${DWATCH_PACKAGE}"
+		echo "${DWATCH_WATCH}" | common_spawn dwatch checkout - "${DWATCH_PACKAGE}"
 	    )
 	    ;;
 	*)
@@ -306,7 +306,7 @@ function dwatch_dirp
 {
     local dir=${1:-$(pwd)}
     
-    test -d ${dir}/.dwatch
+    test -f ${dir}/.dwatch
 }
 
 #
