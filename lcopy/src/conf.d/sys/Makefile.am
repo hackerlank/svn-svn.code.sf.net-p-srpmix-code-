@@ -6,6 +6,7 @@ dist_confd_DATA = \
 	anaconda,trunk.lcopy \
 	autoconf,trunk.lcopy \
 	automake,trunk.lcopy \
+	bind,released.lcopy \
 	binutils,trunk.lcopy \
 	biwascheme,trunk.lcopy \
 	cairo,trunk.lcopy \
