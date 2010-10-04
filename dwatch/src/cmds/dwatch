@@ -266,7 +266,7 @@ function dwatch_checkout
     local nver=$(extract_uversion $dehs)
     mkdir -p $dpkg
 
-    if [ -n "$watch_spec" ] && [[ "$watch_spec" =~ ^file:///.* ]]; then
+    if [ -n "$watch_spec" ] && ( [[ "$watch_spec" =~ ^file:///.* ]] || [ "$watch_spec" = "-" ] ); then
 	local -a WATCH_FILE
 	mapfile WATCH_FILE < $watch
 	write_dot_dwatch "$watch_spec" $dpkg $nver "${WATCH_FILE[@]}" > $dpkg/.dwatch
