@@ -228,6 +228,7 @@ function darcs_rebirth
     fi
 
 
+    cd $dir
     local darcs_repo=$(darcs show repo)
     if [ $? != 0 ]; then
 	echo "failed in darcs config invocation (pwd: $(pwd))" 1>&2

@@ -229,7 +229,7 @@ function svn_rebirth
 	return 1
     fi
 
-
+    cd $dir
     local svn_info=$(svn info)
     if [ $? != 0 ]; then
 	echo "failed in svn info invocation (pwd: $(pwd))" 1>&2

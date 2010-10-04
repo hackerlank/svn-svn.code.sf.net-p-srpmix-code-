@@ -227,7 +227,7 @@ function hg_rebirth
 	return 1
     fi
 
-
+    cd $dir
     local hg_url=$(hg showconfig -u paths.default)
     if [ $? != 0 ]; then
 	echo "failed in hg config invocation (pwd: $(pwd))" 1>&2

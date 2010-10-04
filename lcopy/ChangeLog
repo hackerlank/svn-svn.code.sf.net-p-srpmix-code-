@@ -1,3 +1,19 @@
+2010-10-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.2.13.
+
+	* src/backends/dwatch: Accept file:/// and -.
+
+	* src/backends/darcs (darcs_rebirth): do cd $dir.
+
+	* src/backends/bzr (bzr_rebirth): Ditto.
+
+	* src/backends/git (git_rebirth): Ditto.
+
+	* src/backends/hg (hg_rebirth): Ditto.
+
+	* src/backends/svn (svn_rebirth): Ditto.
+
 2010-10-02  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/backends/dwatch (dwatch_print_cmdline): Fix a typo.

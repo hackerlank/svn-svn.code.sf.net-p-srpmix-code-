@@ -228,7 +228,7 @@ function git_rebirth
 	return 1
     fi
 
-
+    cd $dir
     local git_url=$(git config --get remote.origin.url)
     if [ $? != 0 ]; then
 	echo "failed in git config invocation (pwd: $(pwd))" 1>&2

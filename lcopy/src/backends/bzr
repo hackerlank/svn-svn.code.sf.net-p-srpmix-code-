@@ -234,7 +234,8 @@ function bzr_rebirth
 	return 1
     fi
 
-
+    cd $dir
+    
     local bzr_info=$(bzr info)
     if [ $? != 0 ]; then
 	echo "failed in bzr config invocation (pwd: $(pwd))" 1>&2
