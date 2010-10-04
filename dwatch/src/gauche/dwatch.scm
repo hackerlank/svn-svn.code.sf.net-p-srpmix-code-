@@ -61,6 +61,7 @@
   (let1 diff-gz (find-max 
 		 diff-gz-list 
 		 :key (lambda (elt) (string-tr (sys-basename elt) "+" "-"))
+		 ;; TODO: dpkg --compare-versions 9.7.2 lt 9.7.2-b1
 		 :compare version<?)
     diff-gz))
 
