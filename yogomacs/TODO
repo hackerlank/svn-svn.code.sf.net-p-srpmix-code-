@@ -1,8 +1,9 @@
 -*- outline -*-
 * prioritized task
-** /unavailable
-** trap style changing
 ** char code(latin)
+** /params
+** performance
+*** trap style changing
 
 ** /var/lib/yogomacs/css + /var/cache/yogomacs/css/@SPEC_CONFIG@
 ** /web -> /_/
