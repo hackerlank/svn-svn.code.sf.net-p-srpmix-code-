@@ -48,7 +48,7 @@
     :parent (compose-path parent-path)
     :dname "README"
     :text #`"This directory tree holds version ,(version) of yogomacs, the extensible(TODO),
-customizable(TODO), self-documenting(TODO) real-time display viewer.\n"))
+customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 
 (define (annotations-entry parent-path)
   (make <redirect-dentry>
