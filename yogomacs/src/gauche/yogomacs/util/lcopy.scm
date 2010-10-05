@@ -3,6 +3,7 @@
 	  lcopy-dir->no-update?)
   (use gauche.process)
   (use file.util)
+  (use text.tr)
   )
 
 (select-module yogomacs.util.lcopy)
@@ -13,7 +14,7 @@
 	`(lcopy-checkout 
 	  --just-print-cmdline
 	  ,lcopy-file)
-      read-line
+      (lambda (p) (string-tr (port->string p) "\n" " "))
       :on-abnormal-exit :error)))
     
 (define (lcopy-dir->checkout-cmdline path)
