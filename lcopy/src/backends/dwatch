@@ -253,7 +253,7 @@ function dwatch_print_cmdline
 		;;
 	    file:///*|-)
 		# TODO
-		echo "echo ${DWATCH_WATCH} | dwatch checkout - ${DWATCH_PACKAGE}"
+		echo "echo '${DWATCH_WATCH}' | dwatch checkout - ${DWATCH_PACKAGE}"
 		;;
 	    *)
 		echo "Unrecognized format of DWATCH_WATCH_SPEC" 1>&2

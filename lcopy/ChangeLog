@@ -1,3 +1,10 @@
+2010-10-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.2.14.
+
+	* src/backends/dwatch (dwatch_print_cmdline): Modify
+	broken quotes.
+
 2010-10-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.13.
