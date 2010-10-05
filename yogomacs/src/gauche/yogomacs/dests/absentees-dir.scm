@@ -1,6 +1,7 @@
 (define-module yogomacs.dests.absentees-dir
   (export absentees-dir-dest)
   (use srfi-1)
+  (use srfi-19)
   (use gauche.collection)
   (use util.list)
   (use file.util)
@@ -57,12 +58,17 @@
 		  (fold (lambda (kar kdr)
 			  (if (equal? (substring (car kar) 0 1) dhash-char)
 			      (cons
-			       (make <redirect-dentry>
-				 :parent (compose-path lpath)
-				 :dname  (car kar)
-				 :show-arrowy-to (cadr kar)
-				 ;; TODO: date
-				 )
+			       (let1 stat (sys-lstat (caddr kar))
+				 (make <redirect-dentry>
+				   :parent (compose-path lpath)
+				   :dname  (car kar)
+				   :show-arrowy-to (cadr kar)
+				   :size (ref stat 'size)
+				   :mtime (make-time time-utc
+						     0 
+						     (ref stat 'mtime))
+				   ;; TODO: date
+				   ))
 			       kdr)
 			      kdr)
 			  )
