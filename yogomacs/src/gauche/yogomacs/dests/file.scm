@@ -106,6 +106,11 @@
       :last-modification-time last-modified-time
       :mime-type (apply format "~a/~a" file-type)))
   (cond
+   ((and (equal? (car file-type) "application")
+	 (equal? (cadr file-type) "x-empty"))
+    (receive (shtml last-modified-time)
+	(fundamental real-src-file 0 0 config)
+      (make-shtml-data shtml last-modified-time)))
    ((not (equal? (car file-type) "text"))
     (if (eq? mode 'cache-build)
 	(make <empty-data>)

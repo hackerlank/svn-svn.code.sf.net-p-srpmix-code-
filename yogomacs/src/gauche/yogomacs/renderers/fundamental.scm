@@ -11,11 +11,13 @@
 		     fundamental-mode-column-threshold
 		     config)
   (if (readable? src-path)
-      (let ((t (ref (sys-stat src-path) 'mtime))
-	    (data (call-with-input-file src-path
-		    port->string-list
-		    :if-does-not-exist :error
-		    :element-type :character)))
+      (let* ((t (ref (sys-stat src-path) 'mtime))
+	     (data (call-with-input-file src-path
+		     port->string-list
+		     :if-does-not-exist :error
+		     :element-type :character))
+	     (data (if (null? data) '("") data))
+	    )
 	(if (or (and (number? fundamental-mode-line-threshold)
 		     (<= fundamental-mode-line-threshold 
 			 (length data)))

@@ -230,7 +230,7 @@
 
 (use yogomacs.util.lcopy)
 (test* "lcopy kernel trunk"
-       "git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git"
+       "git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git "
        (lcopy-dir->checkout-cmdline "/srv/sources/sources/k/kernel/^lcopy-trunk"))
 
 (use yogomacs.path)
