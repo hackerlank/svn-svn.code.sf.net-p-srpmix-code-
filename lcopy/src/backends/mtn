@@ -1,1 +1,4 @@
+# mtn clone mtn://code.monotone.ca/monotone?net.venge.monotone
+# mtn clone monotone.ca/monotone net.venge.monotone
+# mtn pull  monotone.ca/monotone net.venge.monotone
 exit 1
