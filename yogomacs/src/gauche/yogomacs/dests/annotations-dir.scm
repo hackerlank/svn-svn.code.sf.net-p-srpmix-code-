@@ -21,14 +21,8 @@
   (let1 shtml (dired
 	       (compose-path lpath)
 	       (list
-		(make <redirect-dentry>
-		  :parent (compose-path lpath)
-		  :dname "." 
-		  :url (compose-path* lpath "."))
-		(make <redirect-dentry>
-		  :parent (compose-path lpath)
-		  :dname ".." 
-		  :url (compose-path* lpath ".."))
+		(current-directory-dentry lpath)
+		(parent-directory-dentry lpath)
 		(make <redirect-dentry>
 		  :parent (compose-path lpath)
 		  :dname "subjects" 
@@ -46,14 +40,8 @@
   (let1 shtml (dired
 	       (compose-path lpath)
 	       (cons*
-		(make <redirect-dentry>
-		  :parent (compose-path lpath)
-		  :dname "." 
-		  :url (compose-path* lpath "."))
-		(make <redirect-dentry>
-		  :parent (compose-path lpath)
-		  :dname ".." 
-		  :url (compose-path* lpath ".."))
+		(current-directory-dentry lpath)
+		(parent-directory-dentry lpath)
 		(map
 		 (lambda (subject-entry)
 		   (make <subject-dentry>

@@ -48,14 +48,8 @@
 	 (shtml (dired
 		 (compose-path path)
 		 (cons* 
-		  (make <redirect-dentry>
-		    :parent (compose-path path)
-		    :dname "." 
-		    :url (compose-path* path "."))
-		  (make <redirect-dentry>
-		    :parent (compose-path path)
-		    :dname ".." 
-		    :url (compose-path* path ".."))
+		  (current-directory-dentry lpath)
+		  (parent-directory-dentry lpath)
 		  (cond
 		   ((equal? yogomacs ysh-name) (list (bscm-entry path)))
 		   ((equal? yogomacs bscm-name) (list (ysh-entry path)))

@@ -67,7 +67,6 @@
 				   :mtime (make-time time-utc
 						     0 
 						     (ref stat 'mtime))
-				   ;; TODO: date
 				   ))
 			       kdr)
 			      kdr)
