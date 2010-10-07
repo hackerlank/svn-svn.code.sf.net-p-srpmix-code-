@@ -1,6 +1,7 @@
 -*- outline -*-
 * prioritized task
-** char code(latin)
+** specify read-only, cache-build... at configure
+** char code(latin), See enca package.
 ** /params
 ** performance
 *** trap style changing
