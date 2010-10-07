@@ -21,6 +21,7 @@ dist_confd_DATA = \
 	emacs-w3m,trunk.lcopy \
 	fence,trunk.lcopy \
 	fence-agents,trunk.lcopy \
+	flashcache,trunk.lcopy \
 	gauche,trunk.lcopy \
 	gauche-mode,trunk.lcopy \
 	gcc,trunk.lcopy \
