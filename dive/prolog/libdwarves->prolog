@@ -1,0 +1,51 @@
+;; -*- scheme -*-
+
+(use util.match)
+(use gauche.parameter)
+
+
+
+(define (make-kv-proc kv)
+  (lambda (k)
+    (cond
+     ((keyword? k)
+      (get-keyword k kv))
+     ((list? k)
+      (map (cute get-keyword <> kv) k)))))
+
+(define emit
+  (let1 current-compile-unit #f
+    (lambda (r)
+      (match r
+	(('compile_unit . kv) (=> abort)
+	 (unless (eq? '|ISO C:1989|
+		      (get-keyword :language kv))
+	   (abort))
+	 (set! current-compile-unit (get-keyword :name kv))
+	 (emit-compile-unit (make-kv-proc kv) current-compile-unit))
+	(('typedef . kv) (=> abort) 
+	 (emit-typedef (make-kv-proc kv) current-compile-unit))
+	(else #t)))))
+
+
+(define (emit-compile-unit kp ccu)
+  (format #t "bin('~a').\n" (kp :filename))
+  (apply format #t "compile_unit('~a', '~a', '~a').\n"
+	 (kp '(:name :language :filename))))
+
+; (libdwarves typedef :name "__off_t" :size 8 :base (indirect base_type :ref |0x9aa650|) :file "/usr/include/bits/types.h" :line 144 :id |0x9aa680|)
+(define (emit-typedef kp ccu)
+  (format #t "typedef('~a', ~a, '', '~a', ~a,'~a', '~a').\n"
+	  (kp :name)
+	  (kp :size)
+	  ;;
+	  (kp :file)
+	  (kp :line)
+	  (kp :id)
+	  ccu))
+
+(let loop ((r (read)))
+  (unless (eof-object? r)
+    (when (eq? (car r) 'libdwarves)
+      (emit (cdr r)))
+    (loop (read))))
