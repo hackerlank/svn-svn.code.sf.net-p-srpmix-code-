@@ -1,5 +1,5 @@
 m4_define([pkg_name], [yogomacs])
-m4_define([pkg_version], [0.0.12])
+m4_define([pkg_version], [0.0.13])
 
 AC_INIT(pkg_name, pkg_version)
 AC_CONFIG_AUX_DIR(misc/ac-aux)
@@ -77,10 +77,12 @@ AC_ARG_WITH([vhost_docroot],
 AC_SUBST([VHOST_DOCROOT], [$vhost_docroot])
 args_for_configure_in_spec="${args_for_configure_in_spec} --with-vhost-docroot=$vhost_docroot"
 
+AC_SUBST_FILE([core_conf])
+core_conf=$srcdir/misc/httpd/core.conf
 
 AC_SUBST_FILE([vhost_conf])
 if test x"$enable_vhost" = x"no"; then
-   vhost_conf=/dev/null
+   vhost_conf=$srcdir/misc/httpd/core.conf
 else
    vhost_conf=$srcdir/misc/httpd/vhost.conf
 fi
@@ -157,6 +159,7 @@ AC_OUTPUT([
 	   misc/specs/yogomacs.spec
 	   misc/makefiles/Makefile
 	   misc/httpd/Makefile
+	   misc/httpd/core.conf
 	   misc/httpd/vhost.conf
 	   misc/httpd/yogomacs.conf
 	   tests/Makefile

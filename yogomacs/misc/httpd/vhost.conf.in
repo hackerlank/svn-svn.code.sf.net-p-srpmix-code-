@@ -4,7 +4,5 @@ Listen @VHOST_PORT@
 <VirtualHost *:@VHOST_PORT@>
     DocumentRoot /srv/sources
     ServerName @VHOST_SERVERNAME@
-    RewriteEngine on
-    RewriteRule .* /cgi-bin/yogomacs-@SPEC_CONFIG@.cgi?path=$0 [PT,LAST,QSA]
-    ScriptAlias /cgi-bin @VHOST_DOCROOT@/@PACKAGE@/cgi-bin
+    @core_conf@
 </VirtualHost>
