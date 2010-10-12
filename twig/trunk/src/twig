@@ -247,6 +247,7 @@ function twig_hack_patch_apply
 	echo %patch$(( ${patch_num} + 1 )) -p3 -b .${name}
 	tail -n +$(( ${patch_line} + 1 )) ${spec}
     else
+	# TODO: This doesn't work if no patch line in the spec file. See monotone package as an example.
 	echo "INTERNAL ERROR: NOT IMPLEMENTED"
 	exit 1
     fi
