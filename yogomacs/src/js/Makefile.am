@@ -4,6 +4,13 @@ dist_jscache_DATA = \
 	prototype.js        \
 	yogomacs_builtin.js \
 	\
+	scriptaculous.js    \
+	builder.js          \
+        effects.js          \
+        dragdrop.js         \
+        controls.js         \
+        slider.js           \
+	\
 	$(NULL)
 
 scheme2js_runtime = \

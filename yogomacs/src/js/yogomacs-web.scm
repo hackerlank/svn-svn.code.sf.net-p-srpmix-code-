@@ -1,5 +1,7 @@
 (define ($ elt)
   ((js-field *js* "$") elt))
+(define ($$ elt)
+  ((js-field *js* "$$") elt))
 (define (<- elt)
   ((js-field *js* "$F") elt))
 (define (-> val elt)

@@ -48,6 +48,7 @@
 	       #;("scheme2js_runtime_callcc.js" . file)
 	       #;("scheme2js_runtime_interface.js" . file)
 	       #;("scheme2js_runtime_interface_callcc.js" . file)
+	       ("scriptaculous.js" . file)
 	       ("yogomacs_builtin.js" . file)
 	       )))
 
