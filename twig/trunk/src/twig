@@ -210,6 +210,9 @@ function twig_hack_patch_decl
     local patch_line
     local patch_num
 
+    local source_decl
+    local source_line
+
     patch_decl=$(grep -E -n -e "^Patch[0-9]+:" "${spec}" | tail -1)
     if test -n "${patch_decl}"; then
 	patch_line=$(echo $patch_decl | sed -e 's/:Patch.*//')
@@ -218,39 +221,73 @@ function twig_hack_patch_decl
 	head -${patch_line} ${spec}
 	echo Patch$(( ${patch_num} + 1 )): twig-${name}.patch
 	tail -n +$(( ${patch_line} + 1 )) ${spec}
-    else
-	echo "INTERNAL ERROR"
-	exit 1
+	return 0
     fi
+
+    source_decl=$(grep -E -n -e "^Source[0-9]+:" "${spec}" | tail -1)
+    if [ -n "${source_decl}" ]; then
+	source_line=$(echo $source_decl | sed -e 's/:Source.*//')
+
+	head -${source_line} ${spec}
+	echo
+	echo Patch0: twig-${name}.patch
+	tail -n +$(( ${source_line} + 1 )) ${spec}
+	return 0
+    fi
+	
+    
+    echo "Cannot find the line to put the patch-decl" 1>&2
+    exit 1
 }
 
 function twig_hack_patch_apply
 {
     local spec=$1
     local name=$2
+
     local patch_decl
-    local patch_line
     local patch_num
-    local patch_appy
 
     patch_decl=$(grep -E -n -e "^Patch[0-9]+:" "${spec}" | tail -1)
     if test -n "${patch_decl}"; then
 	patch_num=$(( $(echo $patch_decl | sed -e 's/.*:Patch\([0-9]*\).*/\1/') - 1 ))
-	patch_apply=$(grep -E -n -e "%patch${patch_num}.*" "${spec}")
-	if test -z "${patch_apply}"; then
-	    echo "Cannot find patch apply line: %patch${patch_num}" 1>&2
-	    return 1
-	fi
-	patch_line=$(echo $patch_apply | sed -e 's/:%patch.*//')
 
-	head -${patch_line} ${spec}
-	echo %patch$(( ${patch_num} + 1 )) -p3 -b .${name}
-	tail -n +$(( ${patch_line} + 1 )) ${spec}
-    else
-	# TODO: This doesn't work if no patch line in the spec file. See monotone package as an example.
-	echo "INTERNAL ERROR: NOT IMPLEMENTED"
-	exit 1
+	if [ "${patch_num}" = -1 ]; then
+	    local setup
+	    local setup_line
+
+	    setup=$(grep -E -n -e "^%setup.*" "${spec}" | tail -1)
+	    if [ -n "${setup}" ]; then
+		setup_line=$(echo $setup | sed -e 's/:%setup.*//')
+
+		head -${setup_line} ${spec}
+		echo %patch0 -p3 -b .${name}
+		tail -n +$(( ${setup_line} + 1 )) "${spec}"
+		return 0
+	    else
+		echo "Cannot find the line to put the patch-applying" 1>&2
+		return 1
+	    fi
+	else
+	    local patch_line
+	    local patch_appy
+	    
+	    patch_apply=$(grep -E -n -e "%patch${patch_num}.*" "${spec}")
+	    if test -z "${patch_apply}"; then
+		echo "Cannot find patch apply line: %patch${patch_num}" 1>&2
+		return 1
+	    fi
+	    patch_line=$(echo $patch_apply | sed -e 's/:%patch.*//')
+	    
+	    head -${patch_line} ${spec}
+	    echo %patch$(( ${patch_num} + 1 )) -p3 -b .${name}
+	    tail -n +$(( ${patch_line} + 1 )) ${spec}
+	    return 0
+	fi
     fi
+	
+    echo "Internal error: cannot find previously inserted patch-decl line" 1>&2
+    return 1
 }
 
 function twig_install_stub_patch
