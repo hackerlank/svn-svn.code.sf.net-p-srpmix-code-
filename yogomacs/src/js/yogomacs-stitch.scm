@@ -28,7 +28,11 @@
 				    (class "yarn-header"))
 				   (span (|@| 
 					  (class "yarn-date-face"))
-					 ,date)
+					 ,(or date
+					      (let1 d (js-new Date)
+						(string-append
+						 (d.getFullYear) "-" (+ (d.getMonth) 1) "-" (d.getDate))
+						)))
 				   "  "
 				   (span  (|@| (class "yarn-name"))
 					  ,full-name)
