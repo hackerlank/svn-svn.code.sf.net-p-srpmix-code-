@@ -11,6 +11,6 @@ autoconf
 
 # REQUIRED="hardlink gauche emacs-common"
 
-if [ -n "$1" ] && [ "$1" = --bootstrap] && which yum > /dev/null 2>&1; then
+if [ -n "$1" ] && [ "$1" = --bootstrap ] && which yum > /dev/null 2>&1; then
     sudo yum -y install ${REQUIRED}
 fi
