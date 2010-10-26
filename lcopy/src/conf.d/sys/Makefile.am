@@ -45,6 +45,7 @@ dist_confd_DATA = \
 	libbonobo,trunk.lcopy \
 	libvirt,trunk.lcopy \
 	lm-sensors,trunk.lcopy \
+	ltp,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
 	mock,trunk.lcopy \
