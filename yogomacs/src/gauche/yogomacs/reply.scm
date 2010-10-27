@@ -14,6 +14,7 @@
   (use yogomacs.util.enum)
   (use yogomacs.rearranges.enum)
   (use yogomacs.rearranges.yogomacs-fragment)
+  (use yogomacs.rearranges.eof-line)
   (use yogomacs.shell)
   (use yogomacs.error)
   ;;
@@ -95,7 +96,8 @@
     (if shell-name
 	(let1 new (make <shtml-data>
 		    :data ((compose (cute yogomacs-fragment <> shell-name) 
-				    narrow-down)
+				    narrow-down
+				    eof-line)
 			   (ref shtml 'data))
 		    :params (ref shtml 'params)
 		    :config (ref shtml 'config)
@@ -103,7 +105,7 @@
 		    :mime-type "text/xml")
 	  (reply-xhtml new))
 	(let1 new (make <shtml-data>
-		    :data ((compose narrow-down) (ref shtml 'data))
+		    :data ((compose narrow-down eof-line) (ref shtml 'data))
 		    :params (ref shtml 'params)
 		    :config (ref shtml 'config)
 		    :last-modification-time (ref shtml 'last-modification-time)
