@@ -46,17 +46,17 @@
 (define (dest lpath params config)
   (let* ((yogomacs (in-shell? params))
 	 (shtml (dired
-		 (compose-path path)
+		 (compose-path lpath)
 		 (cons* 
 		  (current-directory-dentry lpath)
 		  (parent-directory-dentry lpath)
 		  (cond
-		   ((equal? yogomacs ysh-name) (list (bscm-entry path)))
-		   ((equal? yogomacs bscm-name) (list (ysh-entry path)))
+		   ((equal? yogomacs ysh-name) (list (bscm-entry lpath)))
+		   ((equal? yogomacs bscm-name) (list (ysh-entry lpath)))
 		   (else `(  
-			  ,(bscm-entry path)
-			  ,(login-entry path)
-			  ,(ysh-entry path)))))
+			  ,(bscm-entry lpath)
+			  ,(login-entry lpath)
+			  ,(ysh-entry lpath)))))
 		 css-route)))
     (prepare-dired-faces config)
     (make <shtml-data>
