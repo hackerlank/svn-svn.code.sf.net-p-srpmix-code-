@@ -43,7 +43,7 @@
     :url "ysh"
     :show-arrowy-to "./ysh"))
 
-(define (dest path params config)
+(define (dest lpath params config)
   (let* ((yogomacs (in-shell? params))
 	 (shtml (dired
 		 (compose-path path)
