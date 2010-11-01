@@ -114,6 +114,7 @@ rm -rf \$RPM_BUILD_ROOT
 
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT${sources_hashdir}/$PKG_NAME
+mkdir -p \$RPM_BUILD_ROOT${sources_hashdir}/$PKG_NAME/^plugins
 mkdir -p \$RPM_BUILD_ROOT${db_hashdir}/$PKG_NAME
 
 %clean
@@ -123,6 +124,7 @@ rm -rf \$RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %dir ${sources_hashdir}/$PKG_NAME
+%dir ${sources_hashdir}/$PKG_NAME/^plugins
 %dir ${db_hashdir}/$PKG_NAME
 
 %changelog
