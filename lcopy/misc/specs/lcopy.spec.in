@@ -4,6 +4,7 @@ Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 Requires: cvs subversion git mercurial darcs bzr dwatch
+Requires: monotone >= 0.48.1-1
 
 
 
