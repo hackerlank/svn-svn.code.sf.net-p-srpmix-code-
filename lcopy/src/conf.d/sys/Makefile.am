@@ -49,6 +49,7 @@ dist_confd_DATA = \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
 	mock,trunk.lcopy \
+	monotone,trunk.lcopy \
 	netbsd-kernel,trunk.lcopy \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
