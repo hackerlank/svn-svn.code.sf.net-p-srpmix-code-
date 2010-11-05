@@ -5,6 +5,8 @@
 ** /params
 ** performance
 *** trap style changing
+** Running as yum repo
+** link to ftp://
 
 ** /var/lib/yogomacs/css + /var/cache/yogomacs/css/@SPEC_CONFIG@
 ** /web -> /_/
