@@ -12,11 +12,24 @@
 
 (define bsize  (* 4096 100))
 
+(define (realpath1 path)
+  (if (file-is-symlink? path)
+      (let1 lnk (sys-readlink path)
+	(let1 path (if (absolute-path? lnk)
+		       lnk
+		       (sys-normalize-pathname 
+			(build-path (sys-dirname path) lnk)
+			:canonicalize #t))
+	  ;; TODO domain check is needed here.
+	  path))
+      path))
+
 (define (tar-initial input filename-base output)
-  (run-process `(tar 
-		 --xform ,#`"s/^,(sys-basename input)\\(.*\\)/,|filename-base|\\1/"
-		 --directory ,(sys-dirname input)
-		 -cf ,output ,(sys-basename input)) :wait #t))
+  (let1 input (realpath1 input)
+    (run-process `(tar 
+		   --xform ,#`"s/^,(sys-basename input)\\(.*\\)/,|filename-base|\\1/"
+		   --directory ,(sys-dirname input)
+		   -cf ,output ,(sys-basename input)) :wait #t)))
 
 (define (tar-update base-archive cd file-to-add)
   (run-process `(tar
