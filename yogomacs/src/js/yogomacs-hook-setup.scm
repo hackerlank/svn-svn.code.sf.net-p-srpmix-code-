@@ -54,3 +54,4 @@
 					  options)))
       )))
 ;(add-hook find-file-post-hook exp-dnd)
+;(add-hook lfringe-hook (lambda () (alert "XXX")))
