@@ -131,7 +131,7 @@ function main
     local list_swrf=/$tempdir/swrf
     touch $list_swrf
 
-    for x in $(rpm -qa | grep -e -srpmix | grep -v -e srpmix-plugin  | grep -v -e srpmix-archives | grep -v -e -lcopy-); do
+    for x in $(rpm -qa | grep -e -srpmix | grep -v -e srpmix-dir-pkg-srpmix | grep -v -e srpmix-plugin  | grep -v -e srpmix-archives | grep -v -e -lcopy-); do
 	echo $x | sed -e 's/-srpmix.*$//'
     done | LANG=C sort | uniq > $list_swrf
 

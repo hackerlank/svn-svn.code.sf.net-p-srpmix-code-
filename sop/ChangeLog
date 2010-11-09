@@ -1,3 +1,10 @@
+2010-11-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.3.12.
+	
+	* src/sop-garbages (main): Don't add srpmix-dir-pkg-srpmix to
+	list_swrf.
+
 2010-09-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/cron/sop-030-backup (backup_d): Fix broken rsync backup-to
