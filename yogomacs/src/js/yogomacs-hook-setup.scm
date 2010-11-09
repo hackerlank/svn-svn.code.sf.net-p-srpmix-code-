@@ -54,4 +54,5 @@
 					  options)))
       )))
 ;(add-hook find-file-post-hook exp-dnd)
-;(add-hook lfringe-hook (lambda () (alert "XXX")))
+(add-hook lfringe-hook (lambda (lfringe) (alert lfringe)))
+(add-hook rfringe-hook (lambda (rfringe) (alert rfringe)))

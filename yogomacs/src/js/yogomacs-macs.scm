@@ -12,7 +12,7 @@
 							(string->list (symbol->string name)))))))
     `(begin
        (define ,name (list))
-       (export ,jname (lambda () (run-hook ,name))))))
+       (export ,jname (lambda args (apply run-hook ,name args))))))
 
 
 ;; TAKEN FROM /srv/sources/sources/s/scheme2js/20090717-1.fc14/pre-build/scheme2js-20090717/tests/error.scm
