@@ -145,7 +145,7 @@ a:hover {
 
 .highlight {
         /* highlight */
-        background-color: #b4eeb4;
+        background-color: #b4eeb4 !important;
 }
 
 .lfringe {

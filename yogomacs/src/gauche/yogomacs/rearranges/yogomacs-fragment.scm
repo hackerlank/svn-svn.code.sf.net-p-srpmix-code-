@@ -16,6 +16,37 @@
 	 (frag (pre-post-order
 		frag 
 		`(
+		  (span . ,(lambda (tag attrs . rest)
+			     (or (and-let* (( (list? attrs) )
+					    ( (not (null? attrs)) )
+					    ( (eq? (car attrs) '@) )
+					    (id    (assq 'id (cdr attrs)))
+					    ( id )
+					    (class (assq 'class (cdr attrs)))
+					    ( class )
+					    )
+				   (cond
+				    ((equal? (cadr class) "lfringe")
+				     (cons* tag
+					    (cons '@ 
+					     (cons* '(onclick "run_lfringe_hook();")
+						    `(onmouseover ,#`"yhl(\",(cadr id)\");")
+						    `(onmouseout ,#`"yuhl(\",(cadr id)\");")
+						    (cdr attrs)))
+					    rest)
+				     )
+				    ((equal? (cadr class) "rfringe")
+				     (cons* tag
+					    (cons '@ 
+					     (cons* '(onclick "run_rfringe_hook();")
+						    `(onmouseover ,#`"yhl(\",(cadr id)\");")
+						    `(onmouseout ,#`"yuhl(\",(cadr id)\");")
+						    (cdr attrs)))
+					    rest))
+				    (else
+				     (cons* tag attrs rest))))
+				 (cons* tag attrs rest)
+				 )))
 		  (a . ,(lambda (tag attr a-text)
 			  (list 
 			   tag

@@ -131,8 +131,8 @@
 			   ,(let1 id "toggle-full-screen"
 			      `(span (|@| 
 				      (id ,id)
-				      (onmouseover ,#`"highlight(\",|id|\");")
-				      (onmouseout ,#`"unhighlight(\",|id|\");")
+				      (onmouseover ,#`"yhl(\",|id|\");")
+				      (onmouseout ,#`"yuhl(\",|id|\");")
 				      (onclick "run_toggle_full_screen_hook();")) ">"))
 			   ) "\n"
 		      ;;

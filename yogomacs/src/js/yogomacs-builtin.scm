@@ -1,11 +1,16 @@
+;(define (prependClassName elt class-name)
+;  (let1 original-class-name (js-field elt "className")
+;    (js-field-set! elt "className" class-name)
+;    (elt.addClassName original-class-name)))
+
 (define (highlight id)
   (let1 elt ($ id)
     (elt.addClassName "highlight")))
-(export "highlight" highlight)
+(export "yhl" highlight)
 (define (unhighlight id)
   (let1 elt ($ id)
     (elt.removeClassName "highlight")))
-(export "unhighlight" unhighlight)
+(export "yuhl" unhighlight)
 
 (define (jump-lazy hash url params)
   (when (and (string? hash)
