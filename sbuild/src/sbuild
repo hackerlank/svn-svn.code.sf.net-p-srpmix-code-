@@ -215,7 +215,7 @@ function run_rsync
     fi
 }
 
-function run_creterepo
+function run_createrepo
 {
     local cf=$1
     local name=$2
@@ -456,7 +456,7 @@ function main
 		( create_weakview $cf $name )
 		( create_comps $cf $name )
 		( create_repofile $cf $name )
-		( run_creterepo $cf $name )
+		( run_createrepo $cf $name )
 	    fi
 	fi | tee ${cradle}/log/build-${DATE_FOR_LOG}.log
     done
