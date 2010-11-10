@@ -173,7 +173,10 @@ function do_install
 	    --prefix "$SRPMIX_VAR_DIR" \
 	    $IGNORESIZE \
 	    "$package"
-
+	
+	# TODO
+	# touch $package if running on a sources satellite server
+	# 
 
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
         
