@@ -129,10 +129,9 @@
 				    "^"))
 			   "|"
 			   ,(let1 id "toggle-full-screen"
-			      `(span (|@| 
+			      `(a (|@| 
 				      (id ,id)
-				      (onmouseover ,#`"yhl(\",|id|\");")
-				      (onmouseout ,#`"yuhl(\",|id|\");")
+				      (href "#")
 				      (onclick "run_toggle_full_screen_hook();")) ">"))
 			   ) "\n"
 		      ;;
