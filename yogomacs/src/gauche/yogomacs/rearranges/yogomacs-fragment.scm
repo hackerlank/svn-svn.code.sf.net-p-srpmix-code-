@@ -29,18 +29,18 @@
 				    ((equal? (cadr class) "lfringe")
 				     (cons* tag
 					    (cons '@ 
-					     (cons* '(onclick "run_lfringe_hook(this);")
-						    `(onmouseover ,#`"yhl(\",(cadr id)\");")
-						    `(onmouseout ,#`"yuhl(\",(cadr id)\");")
+					     (cons* '(onclick "run_lfringe_hook(this, \"click\");")
+						    `(onmouseover "run_lfringe_hook(this, \"mouseover\");")
+						    `(onmouseout "run_lfringe_hook(this, \"mouseout\");")
 						    (cdr attrs)))
 					    rest)
 				     )
 				    ((equal? (cadr class) "rfringe")
 				     (cons* tag
 					    (cons '@ 
-					     (cons* '(onclick "run_rfringe_hook(this);")
-						    `(onmouseover ,#`"yhl(\",(cadr id)\");")
-						    `(onmouseout ,#`"yuhl(\",(cadr id)\");")
+					     (cons* '(onclick "run_rfringe_hook(this, \"click\");")
+						    `(onmouseover "run_rfringe_hook(this, \"mouseover\");" )
+						    `(onmouseout "run_rfringe_hook(this, \"mouseout\");")
 						    (cdr attrs)))
 					    rest))
 				    (else
