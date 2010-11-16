@@ -1,7 +1,13 @@
+2010-11-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.3.13.
+
+	* ssrc/dist-mapping/ftp.redhat.com/rhel6u0.es: New file.
+
 2010-11-09  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.3.12.
-	
+
 	* src/sop-garbages (main): Don't add srpmix-dir-pkg-srpmix to
 	list_swrf.
 
