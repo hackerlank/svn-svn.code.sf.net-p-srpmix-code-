@@ -110,3 +110,39 @@
     (js-new Ajax.Request
 	    (string-append "/web/yarn" url)
 	    options)))
+
+
+
+(define (stitch-prepare-text-box lfringe)
+  (let1 prev (lfringe.previous)
+    (prev.insert (alist->object 
+		  `((before . 
+			    ,(sxml->xhtml
+			      '(div
+				(form 
+				 (div
+				  (input (|@|
+					  (type text))))
+				 (div
+				  (button "Submit")
+				  (button "Preview"))
+				 )))))))))
+
+(define (stitch-popdown-lfringe-menu lfringe type)
+  (lfringe.replace (sxml->xhtml
+		    (span (@ (class "lfringe")
+			     )
+			  " "))))
+(define (stitch-popup-lfringe-menu lfringe type)
+  (cond
+   ((equal? type "mouseover")
+    (lfringe.replace (sxml->xhtml
+		      '(div (@ (class "lfringe")
+			       (onmouseout "this.replace('<span class=lfirnge> </span>')")
+			       )
+			    " "
+			    (a (@ (href "#")) "Put")
+			    " "
+			    (a (@ (href "#")) "Hide")
+			     ))
+			    ))))
