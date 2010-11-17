@@ -14,9 +14,11 @@ function print_usage
     echo "	sop-prepare update-all"
     echo 
     echo "Known CRADLE-CONFs: "
-    for x in ${PKGDATADIR}/cradle-confs; do
-	echo "	$x"
-    done
+
+    ls ${PKGDATADIR}/cradle-confs/* | \
+	while read; do basename $REPLY; done | \
+	sort | \
+	while read; do echo "	$REPLY"; done
 }
 
 
@@ -134,10 +136,10 @@ function update
     dest_dist_mapping_dir=${SOP_CRADLES_DIR}/${cradle_name}/dist-mapping
     for s in ${src_dist_mapping_dir}/*; do
 	local d
-	if [ -r $x ] && ( ! [ -e "${dest_dist_mapping_dir}/"$(basename $x) ] ); then
-	    echo -n "copying $x to ${dest_dist_mapping_dir}..."
-	    cp $x ${dest_dist_mapping_dir}
-	    echo "done(%?)"
+	if [ -r $s ] && ( ! [ -e "${dest_dist_mapping_dir}/"$(basename $s) ] ); then
+	    echo -n "copying $s to ${dest_dist_mapping_dir}..."
+	    cp $s ${dest_dist_mapping_dir}
+	    echo "done($?)"
 	fi
     done
     return 0
@@ -147,6 +149,7 @@ function update_all
 {
     for d in ${SOP_CRADLES_DIR}/*; do
 	if [ -e $d/cf ]; then
+	    echo "[" $(basename $d) "]"
 	    update $(basename $d)
 	fi
     done

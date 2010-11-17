@@ -1,5 +1,13 @@
 2010-11-17  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.3.14.
+
+	* src/sop-prepare (main): Fix typos. 
+	(update_all): Print the name of cradles.
+	(print_usage): Print all known name of cradles.
+
+2010-11-17  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: Version 0.3.13.
 
 	* src/sop-prepare (main): Added install, update and
