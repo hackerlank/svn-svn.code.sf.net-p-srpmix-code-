@@ -7,16 +7,20 @@ PKGDATADIR=/usr/share/sop
 function print_usage
 {
     echo "Usage: "
-    echo "	sop-prepare CRADLE-CONF [NAME] [DIST-MAPPING-DIR]"
+    echo "      sop-prepare --help"
+    echo "      sop-prepare help"
+    echo "	sop-prepare install CRADLE-CONF [NAME] [DIST-MAPPING-DIR]"
+    echo "	sop-prepare update NAME"
+    echo "	sop-prepare update-all"
+    echo 
+    echo "Known CRADLE-CONFs: "
+    for x in ${PKGDATADIR}/cradle-confs; do
+	echo "	$x"
+    done
 }
 
-if [ -z "$1" ] ; then
-    print_usage 1>&2
-    exit 1
-elif [ "--help" = "$1" ] || [ "-h" = "$1" ]; then
-    print_usage
-    exit 0
-elif test -f ${SOPCONFDIR}/${CONF}; then
+
+if [ -f ${SOPCONFDIR}/${CONF} ]; then
     source ${SOPCONFDIR}/${CONF}
 else
     echo "Cannot load ${CONF} file" 1>&2
@@ -25,31 +29,69 @@ fi
 
 function main
 {
+    if [ -z "$1" ] ; then
+	print_usage 1>&2
+	exit 1
+    else
+	case "$1" in
+	    --help|-h|help)
+		print_usage
+		exit 0
+		;;
+	    install)
+		shift
+		install "$@"
+		return $?
+		;;
+	    update)
+		shift
+		update "$@"
+		return $?
+		;;
+	    update-all)
+		shift
+		update_all "$@"
+		return $?
+		;;
+	    *)
+		print_usage 1>&2
+		exit 1
+		;;
+	esac
+    fi
+}
+
+function install
+{
     local cradle_cf=$1
     local cradle_name=$2
     local dist_mapping_dir=$3
 
-    if test -z "$cradle_cf"; then
+    if [ -z "$cradle_cf" ]; then
 	print_usage 1>&2
-	exit 1
+	return 1
     fi
 
-    if ! test -r "$cradle_cf"; then
+    if ! [ -r "$cradle_cf" ]; then
+	cradle_cf=${PKGDATADIR}/cradle-confs/${cradle_cf}
+    fi
+    
+    if ! [ -r "$cradle_cf" ]; then
 	echo "cannot read $cradle_cf" 1>&2
 	exit 1
     fi
 
-    if test -z "${cradle_name}"; then
+    if [ -z "${cradle_name}" ]; then
 	cradle_name=$(basename ${cradle_cf})
     fi
 
-    if test -z "${dist_mapping_dir}"; then
-	if test -d ${PKGDATADIR}/dist-mapping/${cradle_name}; then
+    if [ -z "${dist_mapping_dir}" ]; then
+	if [ -d ${PKGDATADIR}/dist-mapping/${cradle_name} ]; then
 	    dist_mapping_dir="${PKGDATADIR}/dist-mapping/${cradle_name}"
 	fi
     fi
 
-    if test -n "${dist_mapping_dir}" && ( ! test -d "${dist_mapping_dir}" ); then
+    if [ -n "${dist_mapping_dir}" ] && ( ! [ -d "${dist_mapping_dir}" ] ); then
 	echo "No such dirname $dist_mapping_dir" 1>&2
 	exit 1
     fi
@@ -61,9 +103,54 @@ function main
     
     mkdir -p ${SOP_CRADLES_DIR}/${cradle_name}/{mirror,repo,blacklist,log,dist-mapping}
     
-    if test -n "${dist_mapping_dir}"; then
+    if [ -n "${dist_mapping_dir}" ]; then
 	cp ${dist_mapping_dir}/* ${SOP_CRADLES_DIR}/${cradle_name}/dist-mapping
     fi
 }
 
+function update
+{
+    local cradle_name=$1
+    shift
+    local src_dist_mapping_dir
+    local dest_dist_mapping_dir
+
+    if [ -z "$cradle_name" ]; then
+	echo "No cradle_name given" 1>&2
+	return 1
+    fi
+    
+    if ! [ -d "${SOP_CRADLES_DIR}/${cradle_name}" ]; then
+	echo "Not prepared yet: ${cradle_name}" 1>&2
+	return 1
+    fi
+
+    src_dist_mapping_dir="${PKGDATADIR}/dist-mapping/${cradle_name}"
+    if ! [ -d ${src_dist_mapping_dir} ]; then
+	# Nothing to do.
+	return 0
+    fi
+
+    dest_dist_mapping_dir=${SOP_CRADLES_DIR}/${cradle_name}/dist-mapping
+    for s in ${src_dist_mapping_dir}/*; do
+	local d
+	if [ -r $x ] && ( ! [ -e "${dest_dist_mapping_dir}/"$(basename $x) ] ); then
+	    echo -n "copying $x to ${dest_dist_mapping_dir}..."
+	    cp $x ${dest_dist_mapping_dir}
+	    echo "done(%?)"
+	fi
+    done
+    return 0
+}
+
+function update_all
+{
+    for d in ${SOP_CRADLES_DIR}/*; do
+	if [ -e $d/cf ]; then
+	    update $(basename $d)
+	fi
+    done
+}
+
 main "$@"
+exit $?
