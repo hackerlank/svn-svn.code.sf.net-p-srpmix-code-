@@ -9,7 +9,7 @@ SRPMIX_DB_DEBUG=
 SWRFPM_OPTS=
 IGNORESIZE=
 LIBSRPMIX=libsrpmix.sh
-
+SHRINK_SWRF=${SRPMIX_SHRINK_SWRF:-no}
 
 function try_source
 {
@@ -25,10 +25,12 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db -h|--help"
-    echo "  srpmix-db [--debug] [--hardlink] [--root=ROOT] [--quite|-q] [--ignoresize] -i|--install SWRF..."
+    echo "  srpmix-db [--debug] [--hardlink] [--root=ROOT] [--quite|-q] [--shrink-swrf] [--ignoresize] -i|--install SWRF..."
     echo "  srpmix-db [--debug] [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
     echo "  srpmix-db [--debug] -l|--list"
     echo
+    echo "environment variables:"
+    echo "SRPMIX_SHRINK_SWRF=yes|no"
 }
 
 function parse_arguments
@@ -85,6 +87,9 @@ function parse_arguments
 	        IGNORESIZE=--ignoresize
 		shift 1
 		;;
+	    --shrink-swrf)
+	       SHRINK_SWRF=yes
+	       ;;
 	    --debug)
 	        SRPMIX_DB_DEBUG=yes
 		SWRFPM_OPTS=vv
@@ -174,12 +179,12 @@ function do_install
 	    $IGNORESIZE \
 	    "$package"
 	
-	# TODO
-	# touch $package if running on a sources satellite server
-	# 
-
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
-        
+
+        if [ "$SHRINK_SWRF" = "yes" ] then
+	    truncate --size=0 "$package"
+	fi
+
         # TODO move to hardlink plugin
 	if test "x$pkgdir" != "x"; then
 	    if test "x${SRPMIX_DO_HARDLINK}" = xyes; then

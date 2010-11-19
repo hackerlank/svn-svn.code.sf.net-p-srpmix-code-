@@ -1,3 +1,10 @@
+2010-11-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.115.9.
+
+	* src/srpmix-db (do_install): Truncate swrf file to 0 size
+	if SHRINK_SWRF is yes.
+
 2010-11-02  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-dir-pkg (main): Install ^plugins dir.
