@@ -54,15 +54,15 @@
 
 
 (define (print-packages plist)
-  (define (build type name)
+  (define (packagereq type name)
     (format "   <packagereq type=\"~a\">~a</packagereq>" type name))
   (let ((full-name (cadr (memq :wrapped-name plist)))
 	(base-name (cadr (memq :package      plist))))
     (map print `(
-		 ,(build 'mandatory (format "srpmix-dir-pkg-~a" base-name))
-		 ,(build 'default full-name)
-		 ,(build 'optional (format "~a-archives" full-name))
-		 ,(build 'optional (format "~a-plugins" full-name))
+		 ,(packagereq 'mandatory (format "srpmix-dir-pkg-~a" base-name))
+		 ,(packagereq 'mandatory full-name)
+		 ,(packagereq 'default (format "~a-archives" full-name))
+		 ,(packagereq 'optional (format "~a-plugins" full-name))
 		 ))))
 
 (define (print-footer)

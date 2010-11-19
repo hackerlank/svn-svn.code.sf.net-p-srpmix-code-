@@ -1,3 +1,9 @@
+2010-11-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/create-comps.scm (print-packages): Set type attribute for srpmix packages
+	mandatory. Set type attribute for *-archives default. Set type attribute for *-plugins
+	optional.
+
 2010-11-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sbuild (main): Fix a typo.
