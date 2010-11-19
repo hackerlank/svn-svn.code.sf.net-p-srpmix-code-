@@ -1,0 +1,5 @@
+2010-11-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.0.1.
+
+	* sop-009-strap-before: make $TMP_DIR directory.

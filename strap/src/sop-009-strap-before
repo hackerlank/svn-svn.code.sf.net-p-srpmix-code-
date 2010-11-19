@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# These parameters should be shared between before/after script.
 TRAP_REQUESTS=/etc/strap/*.es
 TMP_DIR=/var/tmp/strap
 
@@ -13,6 +14,8 @@ if [ -z "$SOP_DIR" ]; then
     echo "Cannot find SOP_DIR" 1>&2
     exit 1
 fi
+
+mkdir -p $TMP_DIR
 
 for x in $TRAP_REQUESTS; do
     test -f $x && cat $x
