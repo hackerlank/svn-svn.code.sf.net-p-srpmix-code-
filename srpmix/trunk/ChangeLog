@@ -1,5 +1,9 @@
 2010-11-19  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-db (SRPMIX_DO_HARDLINK): Initialize to no.
+
+2010-11-19  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: Version 3.115.9.
 
 	* src/srpmix-db (do_install): Truncate swrf file to 0 size
