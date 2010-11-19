@@ -181,7 +181,7 @@ function do_install
 	
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
 
-        if [ "$SHRINK_SWRF" = "yes" ] then
+        if [ "$SHRINK_SWRF" = "yes" ]; then
 	    truncate --size=0 "$package"
 	fi
 
