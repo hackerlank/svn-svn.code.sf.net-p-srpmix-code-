@@ -16,6 +16,7 @@ dist_confd_DATA = \
 	ddskk,trunk.lcopy \
 	device-mapper-multipath,trunk.lcopy \
 	dlm,trunk.lcopy \
+	e2fsprogs,trunk.lcopy \
 	emacs,trunk.lcopy \
 	emacs-mew,trunk.lcopy \
 	emacs-w3m,trunk.lcopy \
@@ -83,6 +84,7 @@ dist_confd_DATA = \
 	wfo,trunk.lcopy \
 	wireshark,trunk.lcopy \
 	with-log,trunk.lcopy \
+	xorg-x11-drv-mga,trunk.lcopy \
 	xorg-x11-server,trunk.lcopy \
 	xpad,trunk.lcopy \
 	xtrace,trunk.lcopy \
