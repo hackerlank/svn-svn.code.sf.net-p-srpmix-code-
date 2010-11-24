@@ -111,8 +111,6 @@
 	    (string-append "/web/yarn" url)
 	    options)))
 
-
-
 (define (stitch-prepare-text-box lfringe)
   (let1 prev (lfringe.previous)
     (prev.insert (alist->object 
@@ -125,7 +123,8 @@
 					  (type text))))
 				 (div
 				  (button "Submit")
-				  (button "Preview"))
+				  (button "Preview")
+				  (button "Abort"))
 				 )))))))))
 
 (define-menu lfringe 
