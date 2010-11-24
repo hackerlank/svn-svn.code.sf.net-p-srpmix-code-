@@ -44,6 +44,7 @@
 	     `(
 	       ("biwascheme.js" . file)
 	       #;("prototype.js" . file)
+	       ("proto.menu.js" . file)
 	       ("scheme2js_runtime.js" . file)
 	       #;("scheme2js_runtime_callcc.js" . file)
 	       #;("scheme2js_runtime_interface.js" . file)

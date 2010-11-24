@@ -2,6 +2,7 @@ jscachedir=$(localstatedir)/lib/yogomacs/js
 dist_jscache_DATA = \
 	biwascheme.js       \
 	prototype.js        \
+	proto.menu.js	    \
 	yogomacs_builtin.js \
 	\
 	scriptaculous.js    \
@@ -37,6 +38,7 @@ scheme2js_input = \
 	yogomacs-js.scm	         \
 	yogomacs-bscm.scm        \
 	yogomacs-hook-def.scm    \
+	yogomacs-menu.scm	 \
 	yogomacs-full-screen.scm \
 	yogomacs-builtin.scm     \
 	yogomacs-repl.scm        \

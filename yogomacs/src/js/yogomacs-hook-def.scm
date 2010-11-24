@@ -2,5 +2,3 @@
 (define-hook find-file-post-hook)
 (define-hook toggle-full-screen-hook)
 (define-hook read-from-minibuffer-hook)
-(define-hook lfringe-hook)
-(define-hook rfringe-hook)

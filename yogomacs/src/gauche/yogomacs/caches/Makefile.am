@@ -14,6 +14,7 @@ dist_csscache_DATA= \
 	file-font-lock--Invert.css		\
 	dired-font-lock--Default.css		\
 	dired-font-lock--Invert.css		\
+	proto.menu--Common.css			\
 	yogomacs--Default.css			\
 	yogomacs--Invert.css			\
 	yarn--Default.css			\

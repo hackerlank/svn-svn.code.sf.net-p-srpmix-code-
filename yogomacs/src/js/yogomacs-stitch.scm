@@ -128,21 +128,7 @@
 				  (button "Preview"))
 				 )))))))))
 
-(define (stitch-popdown-lfringe-menu lfringe type)
-  (lfringe.replace (sxml->xhtml
-		    (span (@ (class "lfringe")
-			     )
-			  " "))))
-(define (stitch-popup-lfringe-menu lfringe type)
-  (cond
-   ((equal? type "mouseover")
-    (lfringe.replace (sxml->xhtml
-		      '(div (@ (class "lfringe")
-			       (onmouseout "this.replace('<span class=lfirnge> </span>')")
-			       )
-			    " "
-			    (a (@ (href "#")) "Put")
-			    " "
-			    (a (@ (href "#")) "Hide")
-			     ))
-			    ))))
+(define-menu lfringe 
+  `("Put" ,(lambda (e) (stitch-prepare-text-box (e.findElement ".lfringe"))))
+  `("Reset" ,alert)
+  `("Dog" ,alert))

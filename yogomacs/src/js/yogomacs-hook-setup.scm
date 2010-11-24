@@ -54,5 +54,5 @@
 					  options)))
       )))
 ;(add-hook find-file-post-hook exp-dnd)
-(add-hook lfringe-hook stitch-popup-lfringe-menu)
+;(add-hook lfringe-hook stitch-popup-lfringe-menu)
 ;(add-hook rfringe-hook (lambda (rfringe type) (alert type)))
