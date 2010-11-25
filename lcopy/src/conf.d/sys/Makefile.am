@@ -15,6 +15,7 @@ dist_confd_DATA = \
 	cygwin,trunk.lcopy \
 	ddskk,trunk.lcopy \
 	device-mapper-multipath,trunk.lcopy \
+	dhcp,trunk.lcopy \
 	dlm,trunk.lcopy \
 	e2fsprogs,trunk.lcopy \
 	emacs,trunk.lcopy \
