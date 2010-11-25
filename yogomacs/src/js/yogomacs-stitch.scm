@@ -120,7 +120,7 @@
 				   ;; "\C-c\C-c: for commit, C-g: for abort"
 				   (textarea (|@|
 					      (rows "2")
-					      (style "width: 100%; border: black solid 1px;"))
+					      (class "yarn-draft"))
 					     ""
 					     ))
 				 #f
