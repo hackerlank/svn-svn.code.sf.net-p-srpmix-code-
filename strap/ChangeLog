@@ -1,3 +1,7 @@
+2010-11-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/strap.scm (do-diff): Make a temporary file at /tmp.
+
 2010-11-19  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.0.1.
