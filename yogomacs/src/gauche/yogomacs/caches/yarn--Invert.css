@@ -25,6 +25,7 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
 .yarn-div {
     background-color: #444444;
     padding-left: 1em;
+    padding-right: 1em;
 }
 
 .yarn-date-face {
@@ -60,4 +61,12 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
 }
 
 .yarn-transited-from {
+}
+
+.yarn-draft {
+    background-color: black;
+    color: white;
+    width: 100%; 
+    border: white solid 1px;
+    padding: 1px;
 }
