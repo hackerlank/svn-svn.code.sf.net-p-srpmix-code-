@@ -52,7 +52,7 @@
 		(when (and pattern (string? pattern)
 			   mail-to (list? mail-to) (string? (car mail-to))
 			   subject (string? subject))
-		  (receive (port file) (sys-mkstemp "strap")
+		  (receive (port file) (sys-mkstemp "/tmp/strap")
 		    (for-each
 		     (lambda (f)
 		       (let ((new (build-path root-dir f))
