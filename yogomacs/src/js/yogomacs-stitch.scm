@@ -1,4 +1,4 @@
-;;
+;;;
 ;; Stitch
 ;;
 (define (stitch-make-insertion-proc type)
@@ -113,21 +113,22 @@
 
 (define (stitch-prepare-text-box lfringe)
   (let1 prev (lfringe.previous)
-    (prev.insert (alist->object 
-		  `((before . 
-			    ,(sxml->xhtml
-			      '(div
-				(form 
-				 (div
-				  (input (|@|
-					  (type text))))
-				 (div
-				  (button "Submit")
-				  (button "Preview")
-				  (button "Abort"))
-				 )))))))))
+    (prev.insert
+     (alist->object 
+      `((before . ,(sxml->xhtml ((stitch-make-render-proc 'text)
+				 '(div
+				   ;; "\C-c\C-c: for commit, C-g: for abort"
+				   (textarea (|@|
+					      (rows "2")
+					      (style "width: 100%; border: black solid 1px;"))
+					     ""
+					     ))
+				 #f
+				 "Shadow Man"
+				 "shadow.man@example.com"
+				 '("*DRAFT*")
+				 #f))))))))
 
 (define-menu lfringe 
-  `("Put" ,(lambda (e) (stitch-prepare-text-box (e.findElement ".lfringe"))))
-  `("Reset" ,alert)
-  `("Dog" ,alert))
+  `("Make Annotation" ,(lambda (e) (stitch-prepare-text-box (e.findElement ".lfringe"))))
+  )
