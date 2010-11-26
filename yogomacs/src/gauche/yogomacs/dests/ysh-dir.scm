@@ -9,14 +9,16 @@
 (select-module yogomacs.dests.ysh-dir)
 
 (define (id x) x)
+
 (define (ysh-dir-dest path params config)
-  (if (authorized?)
-      (let1 shtml (yogomacs (cdr path) params (shell-ref 'ysh))
-	(make <shtml-data>
-	  :params params
-	  :config config
-	  :data ((compose id) shtml)
-	  :last-modification-time #f))
-      (unauthorized config)))
+  (if-let1 user+role (authorized?)
+	   (let1 shtml (yogomacs (cdr path) params (shell-ref 'ysh))
+	     (make <shtml-data>
+	       :params params
+	       :config config
+	       :data ((compose id) shtml)
+	       :last-modification-time #f))
+	   (unauthorized config)))
+
 
 (provide "yogomacs/dests/ysh-dir")
