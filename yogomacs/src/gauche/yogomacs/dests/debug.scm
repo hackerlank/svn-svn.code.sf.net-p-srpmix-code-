@@ -36,6 +36,7 @@
     (html:body (html-escape-string (compose-path path))))))
 (define-with-cgi-header print-path print-path0)
 
+;; (cgi-metavariables)
 (define print-metavariables0
   (cute print-alist <> <> <> "Metavariables" (sys-environ->alist)))
 (define-with-cgi-header print-metavariables print-metavariables0)

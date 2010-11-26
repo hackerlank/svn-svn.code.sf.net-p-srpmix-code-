@@ -25,4 +25,5 @@
 		      #/\/dists\/[^\/]+\/dist-mapping\.es$/
 		      #/\/packages\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/
 		     ))
+ (realm . "Sources")
  )

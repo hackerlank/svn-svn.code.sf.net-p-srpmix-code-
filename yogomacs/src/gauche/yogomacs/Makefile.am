@@ -14,6 +14,7 @@ moduledir=@GAUCHE_MODULEDIR@/yogomacs
 dist_module_DATA =   \
 	\
 	access.scm				\
+	auth.scm			        \
 	batch.scm				\
 	cache.scm				\
 	command.scm				\
