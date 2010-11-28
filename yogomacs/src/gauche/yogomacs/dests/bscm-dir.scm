@@ -10,11 +10,13 @@
 
 (define (id x) x)
 (define (bscm-dir-dest path params config)
-  (let1 shtml (yogomacs (cdr path) params (shell-ref 'bscm))
-    (make <shtml-data>
-      :params params
-      :config config
-      :data ((compose id) shtml)
-      :last-modification-time #f)))
+  (if-let1 user+role (authorized?)
+	   (let* ((params params)
+		  (shtml (yogomacs (cdr path) params (shell-ref 'bscm))))
+	     (make <shtml-data>
+	       :params params
+	       :config config
+	       :data ((compose id) shtml)
+	       :last-modification-time #f))))
 
 (provide "yogomacs/dests/bscm-dir")

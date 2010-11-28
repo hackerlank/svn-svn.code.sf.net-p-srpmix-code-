@@ -24,7 +24,7 @@
 	     (user (car user+role))
 	     (role (if (null? (cdr user+role)) "main" (cadr user+role)))
 	     (passwd (cadr base64-decoded))
-	     (user? user passwd)
+	     (r (user? user passwd))
 	     )
     (list user role)
     #t))
