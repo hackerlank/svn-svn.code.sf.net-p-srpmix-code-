@@ -17,3 +17,9 @@ fi
 for x in $TRAP_REQUESTS; do
     test -f $x && cat $x
 done | gosh /usr/share/strap/strap.scm diff $SOP_DIR $TMP_DIR
+
+for x in $TMP_DIR/*; do
+    if [ -e "$x" ]; then
+	rm -rf $x
+    fi
+done
