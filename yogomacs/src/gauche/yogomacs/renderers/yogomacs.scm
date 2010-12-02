@@ -21,12 +21,14 @@
 				  ))
 (define (insert-user-agent-action)
   (let1 user-agent (assoc-ref (sys-environ->alist) "HTTP_USER_AGENT" "")
-    (list
-     (cond
+    (cond
       ((any (cute <> user-agent) smart-phone-user-agents)
-       '(add-hook find-file-pre-hook enter-full-screen))
+       (list
+	'(add-hook find-file-pre-hook enter-full-screen)
+	'(define (smart-phone?) #t)))
       (else
-       '())))))
+       (list
+	'(define (smart-phone?) #f))))))
 	
 (define (extra-scripts url params shell)
   
