@@ -59,10 +59,7 @@
 					       text)))
 			      (div (|@|
 				    (class "yarn-footer"))
-				   (div
-				    (span ,(write-to-string subjects)))
-				   ))
-			))
+				   (span ,(write-to-string subjects))))))
    (else (lambda (id content date full-name mailing-address subjects)
 	   #f))))
 
@@ -118,21 +115,21 @@
   (let1 prev (lfringe.previous)
     (prev.insert
      (alist->object 
-      `((before . ,(sxml->xhtml ((stitch-make-render-proc 'text)
-				 #f
-				 '(div
-				   ;; "\C-c\C-c: for commit, C-g: for abort"
-				   (textarea (|@|
-					      (rows "2")
-					      (class "yarn-draft"))
-					     ""
-					     ))
-				 #f
-				 "Shadow Man"
-				 "shadow.man@example.com"
-				 '("*DRAFT*")
-				 #f))))))))
+      `((before . ,(sxml->xhtml `(div
+				  ,((stitch-make-render-proc 'text)
+				    #f
+				    '(div
+				      ;; "\C-c\C-c: for commit, C-g: for abort"
+				      (textarea (|@|
+						 (rows "2")
+						 (class "yarn-draft"))
+						""
+						))
+				    #f
+				    "Shadow Man"
+				    "shadow.man@example.com"
+				    '("*DRAFT*")
+				    #f)
+				  ,(let1 buttons `((button "Abort") " " (button "Submit"))
+				     `(div ,@buttons))))))))))
 
-(define-menu lfringe 
-  `("Make Annotation" ,(lambda (e) (stitch-prepare-text-box (e.findElement ".lfringe"))))
-  )
