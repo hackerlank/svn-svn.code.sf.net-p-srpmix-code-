@@ -19,10 +19,12 @@
 
 (define (stitch-make-render-proc type)
   (cond
-   ((eq? type 'text)  (lambda (text date full-name mailing-address subjects transited-from)
+   ((eq? type 'text)  (lambda (id text date full-name mailing-address subjects transited-from)
 			`(div (|@|
 			       (class "yarn-div")
-					;(id ...)
+			       ,@(if id
+				     `((id ,id))
+				     ())
 			       )
 			      (div (|@|
 				    (class "yarn-header"))
@@ -61,7 +63,7 @@
 				    (span ,(write-to-string subjects)))
 				   ))
 			))
-   (else (lambda (content date full-name mailing-address subjects)
+   (else (lambda (id content date full-name mailing-address subjects)
 	   #f))))
 
 (define (stitch-yarn elt)
@@ -78,7 +80,8 @@
 	    (render-proc (stitch-make-render-proc (car content)))
 	    ;(filter-proc (stitch-make-filter-proc subjects))
 	    )
-	(let1 shtml-frag  (render-proc (cadr content)
+	(let1 shtml-frag  (render-proc #f ;id
+				       (cadr content)
 				       date
 				       full-name
 				       mailing-address
@@ -116,6 +119,7 @@
     (prev.insert
      (alist->object 
       `((before . ,(sxml->xhtml ((stitch-make-render-proc 'text)
+				 #f
 				 '(div
 				   ;; "\C-c\C-c: for commit, C-g: for abort"
 				   (textarea (|@|
