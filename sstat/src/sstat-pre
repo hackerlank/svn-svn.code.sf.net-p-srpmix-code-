@@ -316,7 +316,7 @@ function daemon_cmd_status()
     fi
 }
 
-function daemon_name_pid()
+function daemon_cmd_pid()
 {
     if [ -f $DAEMON_CONST_PIDFILE ]; then
 	cat $DAEMON_CONST_PIDFILE
