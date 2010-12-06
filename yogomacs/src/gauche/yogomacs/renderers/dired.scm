@@ -29,6 +29,7 @@
   (use srfi-1)
   (use srfi-19)
   (use yogomacs.dentry)
+  (use yogomacs.entry)
   (use yogomacs.face)
   (use gauche.version)
   (use yogomacs.renderers.ewoc)
@@ -168,6 +169,9 @@
    (nlink-column)
    ))
 
+(define-class <dired-header-entry> (<entry>)
+  ((dir :init-keyword :dir)))
+
 (define (dired dir dentries css-prefix)
   (render-entries 
    (make <dired> :dir dir)
@@ -216,6 +220,23 @@
        ((arrowy? dentry) (arrowy-entry dentry))
        (else (generic-entry dentry)))))
 
+(define-method render-entry ((dired <dired>)
+			     (hentry <dired-header-entry>))
+  `(
+    ;; TODO Make this to hyper link
+    (span (|@| (class "dired-header"))
+	  ,(ref hentry 'dir))
+    ":\n"
+    )
+  )
+
+(define-method href-id-of ((ewoc <dired>) 
+			   (hentry <dired-header-entry>)
+			   (index <integer>))
+  "/header"
+  )
+
+
 (define-method render-entries ((dired <dired>)
 			       (dentries <list>)
 			       (css-prefix <string>))
@@ -239,6 +260,9 @@
     (set! (ref dired 'size-column)
 	  (+ (floor->exact (log (max max-size 1) 10))
 	     1))
-    (next-method)))
+    (next-method dired 
+		 (cons (make <dired-header-entry> :dir (ref dired 'dir))
+		       dentries)
+		 css-prefix)))
 
 (provide "yogomacs/renderers/dired")
