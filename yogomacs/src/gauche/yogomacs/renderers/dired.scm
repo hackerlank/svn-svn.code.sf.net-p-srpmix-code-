@@ -31,6 +31,7 @@
   (use yogomacs.dentry)
   (use yogomacs.entry)
   (use yogomacs.face)
+  (use yogomacs.path)
   (use gauche.version)
   (use yogomacs.renderers.ewoc)
   )
@@ -225,7 +226,7 @@
   `(
     ;; TODO Make this to hyper link
     (span (|@| (class "dired-header"))
-	  ,(ref hentry 'dir))
+	  ,@(url->href-list (ref hentry 'dir) #f))
     ":\n"
     )
   )

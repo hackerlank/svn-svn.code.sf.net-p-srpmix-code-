@@ -6,7 +6,7 @@
   (use yogomacs.shell)
   (use yogomacs.shells.ysh)
   (use yogomacs.shells.bscm)
-  (use util.list)
+  (use yogomacs.path)
   (use srfi-1))
 (select-module yogomacs.window)
 
@@ -72,19 +72,7 @@
       #`"/,|shell|,|dir|")))
 
 (define (make-url-list url shell)
-  (let1 splited-list (let loop ((url url)
-				(result (list)))
-		       (if (equal? "/" url)
-			   result
-			   (loop  (sys-dirname url)
-				  (cons url result))))
-    (cons `(a (|@| (href ,#`"/,|shell|/")) "/")
-	  (intersperse "/"
-		       (map
-			(lambda (elt)
-			  `(a (|@| (href ,#`"/,|shell|,|elt|")) 
-			      ,(sys-basename elt)))
-			splited-list)))))
+  (url->href-list url shell))
 
 ;; (define (expand-shell-list shell prompt)
 ;;   (map 

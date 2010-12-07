@@ -5,8 +5,10 @@
 	  path->head
 	  parent-of
 	  directory-file-name
+	  url->href-list
 	  )
-  (use file.util))
+  (use file.util)
+  (use util.list))
 
 (select-module yogomacs.path)
 
@@ -30,5 +32,24 @@
 
 (define (directory-file-name dpath)
   (build-path (sys-dirname dpath) (sys-basename dpath)))
+
+(define (url->href-list url shell)
+  (let1 splited-list (let loop ((url url)
+				(result (list)))
+		       (if (equal? "/" url)
+			   result
+			   (loop  (sys-dirname url)
+				  (cons url result))))
+    (cons `(a (|@| (href ,(if shell 
+			      #`"/,|shell|/"
+			      "/"))) "/")
+	  (intersperse "/"
+		       (map
+			(lambda (elt)
+			  `(a (|@| (href ,(if shell
+					      #`"/,|shell|,|elt|"
+					      #`",|elt|"))) 
+			      ,(sys-basename elt)))
+			splited-list)))))
 
 (provide "yogomacs/path")
