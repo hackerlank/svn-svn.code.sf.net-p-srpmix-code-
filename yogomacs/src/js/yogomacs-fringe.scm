@@ -1,4 +1,4 @@
 (define-menu lfringe 
-  `("Make Annotation" ,(lambda (e) (stitch-prepare-text-box (e.findElement ".lfringe"))))
+  `("Make Text Annotation" ,(lambda (e) (stitch-prepare-draft-text-box (e.findElement ".lfringe"))))
   `("Leave a Footprint" ,(lambda (e) e))
   )

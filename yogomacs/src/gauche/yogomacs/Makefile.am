@@ -30,9 +30,11 @@ dist_module_DATA =   \
 	path.scm				\
 	reel.scm				\
 	reply.scm				\
+	role.scm				\
 	route.scm				\
 	sanitize.scm				\
 	shell.scm				\
+	user.scm				\
 	window.scm				\
 	yarn.scm				\
         \

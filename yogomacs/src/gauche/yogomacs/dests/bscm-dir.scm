@@ -10,7 +10,7 @@
 
 (define (id x) x)
 (define (bscm-dir-dest path params config)
-  (if-let1 user+role (authorized?)
+  (if-let1 user+role (authorized? config)
 	   (let* ((params params)
 		  (shtml (yogomacs (cdr path) params (shell-ref 'bscm))))
 	     (make <shtml-data>

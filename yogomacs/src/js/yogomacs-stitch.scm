@@ -17,50 +17,76 @@
 				   (alist->object `((before . ,(sxml->xhtml shtml-frag))))))))))
    (else (lambda (posinfo shtml-frag) #f))))
 
+(define (stitch-text-render text date full-name mailing-address subjects transited-from)
+  `(div (|@|
+	 (class "yarn-div")
+					;(id ...)
+	 )
+	(div (|@|
+	      (class "yarn-header"))
+	     (span (|@| 
+		    (class "yarn-date-face"))
+		   ,(or date
+			(let1 d (js-new Date)
+			  (string-append
+			   (d.getFullYear) "-" (+ (d.getMonth) 1) "-" (d.getDate))
+			  )))
+	     "  "
+	     (span  (|@| (class "yarn-name"))
+		    ,full-name)
+	     "  "
+	     "<"
+	     (span  (|@| (class "yarn-email"))
+		    ,mailing-address)
+	     ">"
+	     )
+	(div (|@| 
+	      (class "yarn-content"))
+	     (span  (|@| (class ,(if transited-from
+				     "yarn-text yarn-transited"
+				     "yarn-text"
+				     )))
+		    ,(if transited-from
+			 `(a (|@| (href ,(if shell-dir
+					     (string-append shell-dir
+							    (car transited-from))
+					     (car transited-from))))
+			     ,text)
+			 text)))
+	(div (|@|
+	      (class "yarn-footer"))
+	     (div
+	      (span ,(write-to-string subjects)))
+	     )))
+
+(define (stitch-draft-text-render subjects)
+  `(div (|@|
+	 (class "yarn-div")
+	 ;;(id ...)
+	 )
+	(div (|@| 
+	      (class "yarn-content"))
+	     (div (|@| (class ,"yarn-text"))
+		  ;; "\C-c\C-c: for commit, C-g: for abort"
+		  (textarea (|@|
+			     (rows "2")
+			     (class "yarn-draft"))
+			    ""
+			    )))
+	(div (|@|
+	      (class "yarn-footer"))
+	     (div
+	      (span ,(write-to-string subjects))
+	      (button "Abort")
+	      (button "Submit")
+	      )
+	     )))
+  
 (define (stitch-make-render-proc type)
   (cond
-   ((eq? type 'text)  (lambda (id text date full-name mailing-address subjects transited-from)
-			`(div (|@|
-			       (class "yarn-div")
-			       ,@(if id
-				     `((id ,id))
-				     ())
-			       )
-			      (div (|@|
-				    (class "yarn-header"))
-				   (span (|@| 
-					  (class "yarn-date-face"))
-					 ,(or date
-					      (let1 d (js-new Date)
-						(string-append
-						 (d.getFullYear) "-" (+ (d.getMonth) 1) "-" (d.getDate))
-						)))
-				   "  "
-				   (span  (|@| (class "yarn-name"))
-					  ,full-name)
-				   "  "
-				   "<"
-				   (span  (|@| (class "yarn-email"))
-					  ,mailing-address)
-				   ">"
-				   )
-			      (div (|@| 
-				    (class "yarn-content"))
-				   (span  (|@| (class ,(if transited-from
-							   "yarn-text yarn-transited"
-							   "yarn-text"
-							   )))
-					  ,(if transited-from
-					       `(a (|@| (href ,(if shell-dir
-								   (string-append shell-dir
-										  (car transited-from))
-								   (car transited-from))))
-						   ,text)
-					       text)))
-			      (div (|@|
-				    (class "yarn-footer"))
-				   (span ,(write-to-string subjects))))))
-   (else (lambda (id content date full-name mailing-address subjects)
+   ((eq? type 'draft-text) stitch-draft-text-render)
+   ((eq? type 'text) stitch-text-render)
+   (else (lambda rest
 	   #f))))
 
 (define (stitch-yarn elt)
@@ -111,25 +137,12 @@
 	    (string-append "/web/yarn" url)
 	    options)))
 
-(define (stitch-prepare-text-box lfringe)
+(define (stitch-prepare-draft-text-box lfringe)
   (let1 prev (lfringe.previous)
     (prev.insert
      (alist->object 
-      `((before . ,(sxml->xhtml `(div
-				  ,((stitch-make-render-proc 'text)
-				    #f
-				    '(div
-				      ;; "\C-c\C-c: for commit, C-g: for abort"
-				      (textarea (|@|
-						 (rows "2")
-						 (class "yarn-draft"))
-						""
-						))
-				    #f
-				    "Shadow Man"
-				    "shadow.man@example.com"
-				    '("*DRAFT*")
-				    #f)
-				  ,(let1 buttons `((button "Abort") " " (button "Submit"))
-				     `(div ,@buttons))))))))))
+      `((before . ,(sxml->xhtml ((stitch-make-render-proc 'draft-text)
+				 '("*DRAFT*")
+				 ))))))))
+
 

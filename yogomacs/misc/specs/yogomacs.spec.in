@@ -96,8 +96,10 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/reel.scm
 %{_datadir}/gauche/site/lib/yogomacs/reply.scm
 %{_datadir}/gauche/site/lib/yogomacs/route.scm
+%{_datadir}/gauche/site/lib/yogomacs/role.scm
 %{_datadir}/gauche/site/lib/yogomacs/sanitize.scm
 %{_datadir}/gauche/site/lib/yogomacs/shell.scm
+%{_datadir}/gauche/site/lib/yogomacs/user.scm
 %{_datadir}/gauche/site/lib/yogomacs/window.scm
 %{_datadir}/gauche/site/lib/yogomacs/yarn.scm
 
