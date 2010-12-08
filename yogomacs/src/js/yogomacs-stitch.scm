@@ -62,23 +62,23 @@
 (define (stitch-draft-text-render subjects)
   `(div (|@|
 	 (class "yarn-div")
-	 ;;(id ...)
+	 (id "yarn-draft-box")
 	 )
 	(div (|@| 
 	      (class "yarn-content"))
-	     (div (|@| (class ,"yarn-text"))
-		  ;; "\C-c\C-c: for commit, C-g: for abort"
-		  (textarea (|@|
+	     (textarea (|@|
 			     (rows "2")
 			     (class "yarn-draft"))
 			    ""
-			    )))
+			    ))
 	(div (|@|
 	      (class "yarn-footer"))
 	     (div
+	      (a (|@| (href "#") (onclick "run_draft_box_abort_hook();")) "Abort")
+	      " "
+	      (a (|@| (href "#") (onclick "run_draft_box_submit_hook();")) "Submit")
+	      " "
 	      (span ,(write-to-string subjects))
-	      (button "Abort")
-	      (button "Submit")
 	      )
 	     )))
   
@@ -137,12 +137,19 @@
 	    (string-append "/web/yarn" url)
 	    options)))
 
+(define stitch-draft-box #f)
 (define (stitch-prepare-draft-text-box lfringe)
-  (let1 prev (lfringe.previous)
-    (prev.insert
-     (alist->object 
-      `((before . ,(sxml->xhtml ((stitch-make-render-proc 'draft-text)
-				 '("*DRAFT*")
-				 ))))))))
+  (if stitch-draft-box
+      (alert "You can open only one Draft Box at once")
+      (let1 prev (lfringe.previous)
+	(prev.insert
+	 (alist->object 
+	  `((before . ,(sxml->xhtml ((stitch-make-render-proc 'draft-text)
+				     '("*DRAFT*")
+				     ))))))
+	(set! stitch-draft-box #t))))
 
-
+(define (stitch-delete-draft-box)
+  (set! stitch-draft-box #f)
+  (let1 elt ($ "yarn-draft-box")
+    (elt.remove)))

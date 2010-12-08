@@ -56,3 +56,4 @@
 ;(add-hook find-file-post-hook exp-dnd)
 ;(add-hook lfringe-hook stitch-popup-lfringe-menu)
 ;(add-hook rfringe-hook (lambda (rfringe type) (alert type)))
+(add-hook draft-box-abort-hook stitch-delete-draft-box)

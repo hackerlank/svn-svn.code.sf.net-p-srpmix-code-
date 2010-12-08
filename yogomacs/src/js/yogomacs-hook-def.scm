@@ -2,3 +2,5 @@
 (define-hook find-file-post-hook)
 (define-hook toggle-full-screen-hook)
 (define-hook read-from-minibuffer-hook)
+(define-hook draft-box-abort-hook)
+(define-hook draft-box-submit-hook)
