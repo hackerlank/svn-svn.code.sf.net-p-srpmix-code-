@@ -69,5 +69,6 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
     width: 100%; 
     border: black solid 1px;
     padding: 1px;
-    margin: 8px;
+    margin-top: 8px;
+    margin-bottom: 2px;
 }

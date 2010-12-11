@@ -74,10 +74,11 @@
 	(div (|@|
 	      (class "yarn-footer"))
 	     (div
+	      "["
 	      (a (|@| (href "#") (onclick "run_draft_box_abort_hook();")) "Abort")
-	      " "
+	      "]["
 	      (a (|@| (href "#") (onclick "run_draft_box_submit_hook();")) "Submit")
-	      " "
+	      "]"
 	      (span ,(write-to-string subjects))
 	      )
 	     )))
