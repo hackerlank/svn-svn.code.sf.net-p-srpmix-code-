@@ -35,7 +35,7 @@
       (#/^\/packages\/[0-9a-zA-Z]+$/ ,dir-dest)
       (#/^\/packages\/[0-9a-zA-Z]+\/[^\/]+$/ ,dest)
       (#/^\/packages\/[0-9a-zA-Z]+\/[^\/]+\/[^\/]+$/ ,packages-srpmix-dir-dest)
-      (#/^\/packages\/[0-9a-zA-Z]+\/[^\/]+\/[^\/]+\/.*/ ,packages-srpmix-dir-dest)b
+      (#/^\/packages\/[0-9a-zA-Z]+\/[^\/]+\/[^\/]+\/.*/ ,packages-srpmix-dir-dest)
       )))
 
 (define (packages-dir-dest path params config)

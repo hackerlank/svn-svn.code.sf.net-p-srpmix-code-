@@ -104,7 +104,10 @@
 		"\n" "    "
 		(body (|@| (onload "run_find_file_pre_hook();"))
 		      "\n" "    "
-		      (pre (|@| (class "header-line") (id "header-line")) " ")
+		      (pre (|@| (class "header-line") (id "header-line"))
+			   (span (|@| (id "header-line-role")) 
+				 ""
+				 ))
 		      (pre (|@| 
 			       (class "header-line-control")
 			       (id "header-line-control")

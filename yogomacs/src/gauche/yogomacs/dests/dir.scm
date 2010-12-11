@@ -14,6 +14,7 @@
   (use yogomacs.path)
   (use yogomacs.dentry)
   (use yogomacs.dentries.fs)
+  (use yogomacs.dentries.redirect)
   (use yogomacs.renderers.dired)
   (use util.combinations)
   ;;
@@ -27,6 +28,7 @@
   ;;
   (use yogomacs.error)
   (use yogomacs.domain)
+  (use yogomacs.access)
   )
 
 (select-module yogomacs.dests.dir)
@@ -43,6 +45,22 @@
 			'(dired)))
    (cartesian-product `(,dired-faces ,dired-styles))))
 
+(define (preprocess-dentries dentries config)
+  (and dentries
+       (map (lambda (dentry)
+	      (cond
+	       ((and (equal? (dname-of dentry) ".")
+		     (archivable? (path-of dentry) config))
+		(make <redirect-dentry>
+		  :parent (ref dentry 'parent)
+		  :dname "."
+		  :url #`"/commands/checkout,(path-of dentry)"
+		  :show-arrowy-to "commands/checkout")
+		)
+	       (else
+		dentry)))
+	    dentries)))
+
 (define dir-dest 
   (match-lambda*
    ((path params config extra)
@@ -54,18 +72,20 @@
       (unless (to-domain? real-src-dir config)
 	(forbidden "Out of domain" real-src-dir))
       ;;
-      (let1 dentries (glob-dentries real-src-dir 
-				    (make-dir-globs (build-path "/" 
-								head)
-						    last
-						    extra))
+      (let1 dentries (preprocess-dentries
+		      (glob-dentries real-src-dir 
+				     (make-dir-globs (build-path "/" 
+								 head)
+						     last
+						     extra))
+		      config)
+	
 	(if dentries
 	    (begin (prepare-dired-faces config)
 		   (make <shtml-data>
 		     :params params
 		     :config config
-		     :data ((compose integrate-dired-face
-				     (cute checkout <> config))
+		     :data ((compose integrate-dired-face)
 			    (dired 
 			     (compose-path path)
 			     dentries

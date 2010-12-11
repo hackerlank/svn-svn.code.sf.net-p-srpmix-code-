@@ -10,15 +10,15 @@
 
 (define (params->proc+ base-lookup key value)
   (let1 lookup (lambda (key0)
-		     (if (equal? key0 key)
-			 value
-			 (base-lookup key0)))
-		 
-  (match-lambda*
-   ((key0)
-    (lookup key0))
-   ((key0 value0)
-    (params->proc+ lookup key0 value0)))))
+		 (if (equal? key0 key)
+			value
+			(base-lookup key0)))
+    
+    (match-lambda*
+     ((key0)
+      (lookup key0))
+     ((key0 value0)
+      (params->proc+ lookup key0 value0)))))
 
 (define (params->proc params defaults)
   (let1 lookup (lambda (key) 

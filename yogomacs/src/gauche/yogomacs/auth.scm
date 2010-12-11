@@ -25,7 +25,7 @@
 	     (passwd (cadr base64-decoded))
 	     (u (user? user-name passwd))
  	     )
-    (list user-name role-name)))
+    (list u role-name)))
 
 
 (define (unauthorized config)

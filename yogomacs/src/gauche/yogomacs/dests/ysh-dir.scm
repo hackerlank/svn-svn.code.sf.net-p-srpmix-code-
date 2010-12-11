@@ -12,7 +12,7 @@
 
 (define (ysh-dir-dest path params config)
   (if-let1 user+role (authorized? config)
-	   (let* ((params params)
+	   (let* ((params ((params "user" (car user+role)) "role" (cadr user+role)))
 		  (shtml (yogomacs (cdr path) params (shell-ref 'ysh))))
 	     (make <shtml-data>
 	       :params params

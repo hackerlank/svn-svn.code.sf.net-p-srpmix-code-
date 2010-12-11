@@ -44,6 +44,7 @@ scheme2js_input = \
 	yogomacs-repl.scm        \
 	yogomacs-stitch.scm      \
 	yogomacs-fringe.scm      \
+	yogomacs-header-line.scm \
 	yogomacs-hook-setup.scm  \
 	\
 	$(NULL)
