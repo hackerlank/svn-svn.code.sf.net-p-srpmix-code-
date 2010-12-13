@@ -191,7 +191,6 @@ function rsync_update
 
 
     cd "${update_dir}"
-    cd "${RSYNC_REPOSITORY}"
 
     if common_spawn rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}" . | tee $log; then
 	# TODO
