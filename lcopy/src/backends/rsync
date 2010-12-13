@@ -80,7 +80,7 @@ function rsync_genconf
     local repo
 
 
-    if [ $# -lt 4 ]; then
+    if [ $# -lt 3 ]; then
 	echo "wrong number of arguments: $original" 1>&2
 	return 1
     fi
@@ -136,8 +136,8 @@ function rsync_checkout
     ( 
 	cd ${output_dir}
 	write_spec "${RSYNC_REPOSITORY}" $RSYNC_DELETE_P > ./.rsync
-	mkdir data
-	cd data
+	mkdir "${RSYNC_REPOSITORY}"
+	cd "${RSYNC_REPOSITORY}"
 	
 	common_spawn rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}" .
     )
@@ -191,7 +191,7 @@ function rsync_update
 
 
     cd "${update_dir}"
-    cd data
+    cd "${RSYNC_REPOSITORY}"
 
     if common_spawn rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}" . | tee $log; then
 	# TODO
