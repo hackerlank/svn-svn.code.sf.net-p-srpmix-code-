@@ -80,7 +80,7 @@ function rsync_genconf
     local repo
 
 
-    if [ $# -lt 3 ]; then
+    if [ $# -lt 2 -o $# -gt 3 ]; then
 	echo "wrong number of arguments: $original" 1>&2
 	return 1
     fi
