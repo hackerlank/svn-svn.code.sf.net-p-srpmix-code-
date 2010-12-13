@@ -1,26 +1,31 @@
 ;;;
 ;; Stitch
 ;;
+(define stitch-ids (list))
 (define (stitch-make-insertion-proc type)
   (cond
-   ((eq? type 'file) (lambda (posinfo shtml-frag) 
-		       (let1 id (string-append "L:" (number->string posinfo))
-			 (let1 elt ($ id)
-			   (when elt
-			     (elt.insert 
-			      (alist->object `((before . ,(sxml->xhtml shtml-frag))))))))))
-   ((eq? type 'directory) (lambda (posinfo shtml-frag) 
-			    (let1 id (string-append "N:" posinfo)
-			      (let1 elt ($ id)
-				(when elt
-				  (elt.insert 
-				   (alist->object `((before . ,(sxml->xhtml shtml-frag))))))))))
+   ((eq? type 'file) 
+    (lambda (posinfo shtml-frag) 
+      (let1 id (string-append "L:" (number->string posinfo))
+	(let1 elt ($ id)
+	  (when elt
+	    (elt.insert 
+	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
+	    (set! stitch-ids (cons id stitch-ids)))))))
+   ((eq? type 'directory) 
+    (lambda (posinfo shtml-frag) 
+      (let1 id (string-append "N:" posinfo)
+	(let1 elt ($ id)
+	  (when elt
+	    (elt.insert 
+	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
+	    (set! stitch-ids (cons id stitch-ids)))))))
    (else (lambda (posinfo shtml-frag) #f))))
 
-(define (stitch-text-render text date full-name mailing-address subjects transited-from)
+(define (stitch-text-render id text date full-name mailing-address subjects transited-from)
   `(div (|@|
 	 (class "yarn-div")
-					;(id ...)
+	 (id ,(string-append "S:" id))
 	 )
 	(div (|@|
 	      (class "yarn-header"))
@@ -91,29 +96,31 @@
 	   #f))))
 
 (define (stitch-yarn elt)
-  (let1 elt (cdr elt)
-    (let* ((target (kref elt :target #f))
-	   (content (kref elt :content #f))
-	   (date (kref elt :date #f))
-	   (full-name (kref elt :full-name #f))
-	   (mailing-address (kref elt :mailing-address #f))
-	   (subjects (kref elt :subjects (list)))
-	   (transited (kref elt :transited #f))
-	   )
-      (let ((insertion-proc (stitch-make-insertion-proc (car target)))
-	    (render-proc (stitch-make-render-proc (car content)))
-	    ;(filter-proc (stitch-make-filter-proc subjects))
-	    )
-	(let1 shtml-frag  (render-proc #f ;id
-				       (cadr content)
-				       date
-				       full-name
-				       mailing-address
-				       subjects
-				       transited)
-	  (when shtml-frag
-		(insertion-proc (cadr target)
-				shtml-frag)))))))
+  (let* ((elt (cdr elt))
+	 (id (kref elt :id #f)))
+    (unless (member id stitch-ids)
+      (let* ((target (kref elt :target #f))
+	     (content (kref elt :content #f))
+	     (date (kref elt :date #f))
+	     (full-name (kref elt :full-name #f))
+	     (mailing-address (kref elt :mailing-address #f))
+	     (subjects (kref elt :subjects (list)))
+	     (transited (kref elt :transited #f))
+	     )
+	(let ((insertion-proc (stitch-make-insertion-proc (car target)))
+	      (render-proc (stitch-make-render-proc (car content)))
+					;(filter-proc (stitch-make-filter-proc subjects))
+	      )
+	  (let1 shtml-frag  (render-proc id
+					 (cadr content)
+					 date
+					 full-name
+					 mailing-address
+					 subjects
+					 transited)
+	    (when shtml-frag
+	      (insertion-proc (cadr target)
+			      shtml-frag))))))))
 
 (define (stitch-yarns yarns)
   (cond 

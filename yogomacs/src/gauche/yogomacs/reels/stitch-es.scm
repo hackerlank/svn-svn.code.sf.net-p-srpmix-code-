@@ -9,6 +9,7 @@
   (use gauche.sequence)
   (use yogomacs.reel)
   (use srfi-19)
+  (use rfc.sha1)
   )
 
 (select-module yogomacs.reels.stitch-es)
@@ -106,7 +107,9 @@
 	      ;; TODO /srv/sources should taken from conf or something else
 	      ((and (string-prefix? (config 'real-sources-dir) directory)
 		    ;; TODO: Use build-path
-		    (equal? (string-append (config 'real-sources-dir) path) directory))
+		    (equal? (string-append (config 'real-sources-dir)
+					   (if (equal? path "/") "" path))
+			    directory))
 	       `(:target (directory ,item)))
 	      (else
 	       #f))))
@@ -138,14 +141,18 @@
 		   subjects)
   (let1 annotation-yarn-frag (make-annotation-yarn-frag annotation)
     (if annotation-yarn-frag
-	`(yarn
-	  :version 0
-	  ,@target-yarn-frag
-	  ,@annotation-yarn-frag
-	  :full-name ,full-name
-	  :mailing-address ,mailing-address
-	  :date ,date
-	  :subjects ,subjects)
+	(let1 y `(yarn
+		  :version 0
+		  ,@target-yarn-frag
+		  ,@annotation-yarn-frag
+		  :full-name ,full-name
+		  :mailing-address ,mailing-address
+		  :date ,date
+		  :subjects ,subjects
+		  )
+	  (let1 sha1 (digest-hexify (digest-string <sha1> (write-to-string y)))
+	    (reverse (cons* sha1 :id (reverse y)))
+	    ))
 	#f)))
 
 (define (make-yarn-filter path config)
