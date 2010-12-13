@@ -139,7 +139,7 @@ function rsync_checkout
 	mkdir data
 	cd data
 	
-	common_spawn rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}"
+	common_spawn rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}" .
     )
 
     return $?
@@ -167,7 +167,7 @@ function rsync_print_cmdline
 	    echo "no RSYNC_REPOSITORY in $input" 1>&2
 	    return 1
 	fi
-	echo rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}"
+	echo rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}" .
     else
 	return 1
     fi
@@ -193,7 +193,7 @@ function rsync_update
     cd "${update_dir}"
     cd data
 
-    if common_spawn rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}" | tee $log; then
+    if common_spawn rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}" . | tee $log; then
 	# TODO
 	rm -f $log
 	return 1
