@@ -192,6 +192,12 @@ function rsync_update
 
     cd "${update_dir}"
 
+# % lcopy-update .
+# sending incremental file list
+# 
+# sent 356991 bytes  received 12 bytes  714006.00 bytes/sec
+# total size is 147322327  speedup is 412.66
+
     if common_spawn rsync -avz $RSYNC_DELETE_P "${RSYNC_REPOSITORY}" . | tee $log; then
 	# TODO
 	rm -f $log
