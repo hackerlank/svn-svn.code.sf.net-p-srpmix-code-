@@ -56,6 +56,7 @@ dist_confd_DATA = \
 	netbsd-kernel,trunk.lcopy \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
+	openldap,trunk.lcopy \
 	perg,trunk.lcopy \
 	prelcopy,trunk.lcopy \
 	python-virtinst,trunk.lcopy \
