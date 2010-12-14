@@ -12,6 +12,7 @@ dist_module_DATA =   \
 	fs.scm					\
 	js.scm					\
 	lcopy-dir.scm				\
+	login.scm				\
 	packages-dir.scm			\
 	pkg-dir.scm				\
 	print-alist.scm				\

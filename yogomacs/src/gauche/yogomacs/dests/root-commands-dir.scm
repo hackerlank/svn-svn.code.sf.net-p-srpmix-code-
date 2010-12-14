@@ -11,37 +11,12 @@
   (use yogomacs.dests.dir)
   (use yogomacs.reply)
   (use yogomacs.route)
-  (use yogomacs.shell)
+  (use yogomacs.shells)
   (use yogomacs.commands.checkout)
+  (use yogomacs.dests.login)
+  ;;
   )
 (select-module yogomacs.dests.root-commands-dir)
-
-(define ysh-url  "/ysh")
-(define ysh-name "ysh")
-(define (ysh-entry parent-path)
-  (make <redirect-dentry>
-    :parent "/commands" :dname ysh-name :url ysh-url))
-(define (ysh-dest path params config)
-  (list
-   (cgi-header :status "302 Moved Temporarily"
-	       :location ysh-url)))
-
-(define bscm-url  "/bscm")
-(define bscm-name "bscm")
-(define (bscm-entry parent-path)
-  (make <redirect-dentry>
-    :parent "/commands" :dname bscm-name :url bscm-url))
-(define (bscm-dest path params config)
-  (list
-   (cgi-header :status "302 Moved Temporarily"
-	       :location bscm-url)))
-
-(define (login-entry parent-path)
-  (make <redirect-dentry>
-    :parent "/commands" 
-    :dname "login" 
-    :url "ysh"
-    :show-arrowy-to "./ysh"))
 
 (define (dest lpath params config)
   (let* ((yogomacs (in-shell? params))
@@ -51,12 +26,13 @@
 		  (current-directory-dentry lpath)
 		  (parent-directory-dentry lpath)
 		  (cond
-		   ((equal? yogomacs ysh-name) (list (bscm-entry lpath)))
-		   ((equal? yogomacs bscm-name) (list (ysh-entry lpath)))
-		   (else `(  
-			  ,(bscm-entry lpath)
-			  ,(login-entry lpath)
-			  ,(ysh-entry lpath)))))
+		   (filter 
+		    (lambda (shell)
+		      (not (equal? yogomacs (ref shell 'name))))
+		    (map 
+		     (lambda (shell)
+		       (entry-for shell lpath))
+		     (all-shells)))))
 		 css-route)))
     (prepare-dired-faces config)
     (make <shtml-data>
@@ -67,13 +43,13 @@
 
 (define (routing-table path params)
   `((#/^\/commands$/ ,dest)
-    (#/^\/commands\/ysh$/ ,ysh-dest)
-    (#/^\/commands\/bscm$/ ,bscm-dest)
+    (#/^\/commands\/ysh$/ ,(pa$ dest-for (shell-ref 'ysh)))
+    (#/^\/commands\/bscm$/ ,(pa$ dest-for (shell-ref 'bscm)))
     (#/^\/commands\/checkout\/.*/ ,checkout-dest)
     ,@(if (in-shell? params)
 	  (list)
 	  (list
-	   `(#/^\/commands\/login$/ ,ysh-dest)
+	   `(#/^\/commands\/login$/ ,login-dest)
 	   ))))
 
 (define (root-commands-dir-dest path params config)

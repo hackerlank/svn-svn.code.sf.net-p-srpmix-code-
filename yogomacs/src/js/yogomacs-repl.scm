@@ -119,3 +119,8 @@
 
 (define (ysh-interpret)
   (repl ysh-eval "# "))
+
+(define (nologin-initializer)
+  (set! shell-dir ""))
+(define (nologin-interpret)
+  #f)

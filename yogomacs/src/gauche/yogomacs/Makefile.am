@@ -34,6 +34,7 @@ dist_module_DATA =   \
 	route.scm				\
 	sanitize.scm				\
 	shell.scm				\
+	shells.scm				\
 	user.scm				\
 	window.scm				\
 	yarn.scm				\
