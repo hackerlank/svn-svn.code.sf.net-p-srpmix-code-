@@ -182,14 +182,13 @@
     (elt.remove)))
 
 (define (stitch-submit type)
-  (alert (js-field *js* encodeURIComponent))
   (let* ((location (js-field *js* "location"))
 	 (pathname (js-field location "pathname"))
 	 (hash     (js-field location "hash")))
     (let1 options (alist->object 
 		   `((method . "post")
 		     (parameters . ,(alist->object
-				     `((stitch . ,((js-field *js* encodeURIComponent)
+				     `((stitch . ,((js-field *js* "encodeURIComponent")
 						   (write-to-string
 						    `(yarn-container 
 						      (yarn :version 0 

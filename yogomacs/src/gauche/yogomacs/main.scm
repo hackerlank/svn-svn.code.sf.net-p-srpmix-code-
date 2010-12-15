@@ -15,7 +15,6 @@
   (use yogomacs.dests.yarn)
   (use yogomacs.dests.subjects)
   (use yogomacs.dests.debug)
-  ;;
   )
 (select-module yogomacs.main)
 
@@ -54,21 +53,7 @@
 			 ("enum"  . #f)
 			 ("yogomacs" . #f)))
 
-(define (post?)
-  (equal? 
-   (cgi-get-metavariable "REQUEST_METHOD")
-   "POST"))
-
-(define (get?)
-  (equal? 
-   (cgi-get-metavariable "REQUEST_METHOD")
-   "GET"))
-
 (define (yogomacs params config)
-  (when (equal? (cgi-get-metavariable "REQUEST_METHOD") "POST")
-    #?=(cgi-get-parameter "stitch" params))
-  ;; (use rfc.uri)
-  ;; uri-decode-string
   (let1 params (params->proc params default-params)
     (let1 path (params "path")
       (if config

@@ -3,8 +3,14 @@
   (use yogomacs.dests.debug)
   (use yogomacs.sanitize)
   (use yogomacs.path)
+  (use www.cgi)
   )
 (select-module yogomacs.route)
+
+(define (post?)
+  (equal? 
+   (cgi-get-metavariable "REQUEST_METHOD")
+   "POST"))
 
 (define (route rtable path params config)
   (route0 rtable
@@ -16,10 +22,24 @@
 (define (route0 rtable path params config)
   (if (null? rtable)
       (print-path (decompose-path path) params config)		; TODO
-      (let ((regex (car (car rtable)))
-	    (action (cadr (car rtable))))
+      (let* ((regex (car (car rtable)))
+	     (actions (cdr (car rtable)))
+	     (get-action (if (null? actions) #f (car actions)))
+	     (post-action (cond
+			   ((null? actions) #f)
+			   ((null? (cdr actions)) #f)
+			   (else (cadr actions))))
+	     (action (if (post?)
+			 post-action
+			 get-action)))
 	(if (regex path)
-	    (action (decompose-path path) params config)
+	    (if action
+		(action (decompose-path path) params config)
+		(print-path (decompose-path path) params config)		; TODO
+		)
 	    (route0 (cdr rtable) path params config)))))
+
+;  (when (equal? (cgi-get-metavariable "REQUEST_METHOD") "POST")
+;    #?=(read-from-string (uri-decode-string (cgi-get-parameter "stitch" params) :cgi-decode #t)))
 
 (provide "yogomacs/route")
