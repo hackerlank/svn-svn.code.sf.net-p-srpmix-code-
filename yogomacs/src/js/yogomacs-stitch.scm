@@ -72,17 +72,18 @@
 	(div (|@| 
 	      (class "yarn-content"))
 	     (textarea (|@|
-			     (rows "2")
-			     (class "yarn-draft"))
-			    ""
-			    ))
+			(rows "2")
+			(class "yarn-draft")
+			(id "yarn-draft"))
+		       ""
+		       ))
 	(div (|@|
 	      (class "yarn-footer"))
 	     (div
 	      "["
 	      (a (|@| (href "#") (onclick "run_draft_box_abort_hook();")) "Abort")
 	      "]["
-	      (a (|@| (href "#") (onclick "run_draft_box_submit_hook();")) "Submit")
+	      (a (|@| (href "#") (onclick "run_draft_box_submit_hook('text');")) "Submit")
 	      "]"
 	      (span ,(write-to-string subjects))
 	      )
@@ -145,19 +146,65 @@
 	    (string-append "/web/yarn" url)
 	    options)))
 
-(define stitch-draft-box #f)
+(define stitch-draft-target #f)
 (define (stitch-prepare-draft-text-box lfringe)
-  (if stitch-draft-box
-      (alert "You can open only one Draft Box at once")
-      (let1 prev (lfringe.previous)
-	(prev.insert
-	 (alist->object 
-	  `((before . ,(sxml->xhtml ((stitch-make-render-proc 'draft-text)
-				     '("*DRAFT*")
-				     ))))))
-	(set! stitch-draft-box #t))))
+  (define (target-for obj)
+    (let1 prev (obj.previous)
+      (let1 id (prev.identify)
+	(cond
+	 ((and (eq? (string-ref id  0) #\N)
+	       (eq? (string-ref id  1) #\:))
+	  `(directory . ,(substring id 2 (string-length id))))
+	 ((and (eq? (string-ref id  0) #\L)
+	       (eq? (string-ref id  1) #\:))
+	  `(file . ,(substring id 2 (string-length id))))
+	 (else
+	  #f)))))
+  (cond
+   (stitch-draft-target
+    (alert "You can open only one Draft Box at once"))
+   (else
+    (let1 target (target-for lfringe)
+      (if target
+	  (let1 prev (lfringe.previous)
+	    (prev.insert
+	     (alist->object 
+	      `((before . ,(sxml->xhtml ((stitch-make-render-proc 'draft-text)
+					 '("*DRAFT*")
+					 ))))))
+	    (set! stitch-draft-target target))
+	  (alert "INTERNAL ERROR: Cannot determine target"))))))
+
 
 (define (stitch-delete-draft-box)
-  (set! stitch-draft-box #f)
+  (set! stitch-draft-target #f)
   (let1 elt ($ "yarn-draft-box")
     (elt.remove)))
+
+(define (stitch-submit type)
+  (alert (js-field *js* encodeURIComponent))
+  (let* ((location (js-field *js* "location"))
+	 (pathname (js-field location "pathname"))
+	 (hash     (js-field location "hash")))
+    (let1 options (alist->object 
+		   `((method . "post")
+		     (parameters . ,(alist->object
+				     `((stitch . ,((js-field *js* encodeURIComponent)
+						   (write-to-string
+						    `(yarn-container 
+						      (yarn :version 0 
+							    :target ,stitch-draft-target
+							    :content (text ,(<- "yarn-draft"))
+							    :subjects ("*DRAFT*")))))))))
+		     (onSuccess . ,(lambda (response)
+				     (stitch-yarns
+				      (read-from-response response))
+				     (stitch-delete-draft-box)
+				     ))))
+      (let1 url (substring pathname
+			   (string-length shell-dir)
+			   (string-length pathname))
+	(js-new Ajax.Request
+		(string-append "/web/yarn" url)
+		options)))))
+

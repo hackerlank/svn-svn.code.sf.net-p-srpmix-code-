@@ -12,7 +12,7 @@
     (elt.removeClassName "highlight")))
 (export "yuhl" unhighlight)
 
-(define (jump-lazy hash url params)
+(define (jump-lazy hash)
   (when (and (string? hash)
 	     (< 0 (string-length hash))
 	     (eq? (string-ref hash 0) #\#))

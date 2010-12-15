@@ -14,6 +14,7 @@
 				  ;; doesn't have real keyboard.
 				  #/HTCX06HT/
 				  #/HTC Magic/
+				  #/GT-P1000/
 				  #/iPhone OS 4/
 				  ;; has real keyboard....
 				  #/Android Dev Phone 1/

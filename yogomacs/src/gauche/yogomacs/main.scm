@@ -54,11 +54,28 @@
 			 ("enum"  . #f)
 			 ("yogomacs" . #f)))
 
+(define (post?)
+  (equal? 
+   (cgi-get-metavariable "REQUEST_METHOD")
+   "POST"))
+
+(define (get?)
+  (equal? 
+   (cgi-get-metavariable "REQUEST_METHOD")
+   "GET"))
+
 (define (yogomacs params config)
+  (when (equal? (cgi-get-metavariable "REQUEST_METHOD") "POST")
+    #?=(cgi-get-parameter "stitch" params))
+  ;; (use rfc.uri)
+  ;; uri-decode-string
   (let1 params (params->proc params default-params)
     (let1 path (params "path")
       (if config
-	  (route routing-table path params (config->proc config))
+	  (route routing-table
+		 path
+		 params
+		 (config->proc config))
 	  (cgi-header :status "500 Internal server Error")))))
 
 (provide "yogomacs/main")
