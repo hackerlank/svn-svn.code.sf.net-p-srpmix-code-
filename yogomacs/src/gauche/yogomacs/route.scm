@@ -1,8 +1,10 @@
 (define-module yogomacs.route
   (export route)
-  (use yogomacs.dests.debug)
+  ;(use yogomacs.dests.debug)
+  (use yogomacs.error)
   (use yogomacs.sanitize)
   (use yogomacs.path)
+
   (use www.cgi)
   )
 (select-module yogomacs.route)
@@ -21,7 +23,7 @@
 
 (define (route0 rtable path params config)
   (if (null? rtable)
-      (print-path (decompose-path path) params config)		; TODO
+      (not-found #`"Cannot find ,|path| (,(if (post?) \"POST\" \"GET\"))")
       (let* ((regex (car (car rtable)))
 	     (actions (cdr (car rtable)))
 	     (get-action (if (null? actions) #f (car actions)))
@@ -35,7 +37,7 @@
 	(if (regex path)
 	    (if action
 		(action (decompose-path path) params config)
-		(print-path (decompose-path path) params config)		; TODO
+		(not-found #`"Cannot find POST handler for ,|path|")
 		)
 	    (route0 (cdr rtable) path params config)))))
 

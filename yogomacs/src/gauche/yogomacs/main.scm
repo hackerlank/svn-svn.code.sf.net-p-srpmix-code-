@@ -30,7 +30,7 @@
     ;;
     (#/^\/.*/ ,root-dir-dest)
     ;; TODO: 403
-    (#/^.*$/ ,print-path)
+    ;; (#/^.*$/ ,print-path)
     ))
 
 (define (install-constants config)

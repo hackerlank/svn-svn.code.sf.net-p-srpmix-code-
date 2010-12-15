@@ -122,7 +122,7 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 	    ))
      (#/^\/README$/  ,README-dest)
      ;; 403
-     (#/^.*$/ ,print-path)
+     ;(#/^.*$/ ,print-path)
      ))
 
 
