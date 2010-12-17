@@ -1,5 +1,6 @@
 (define-module yogomacs.dests.yarn
   (export yarn-dest
+	  yarn-sink
 	  yarn-route
 	  yarn-route$
 	  )
@@ -10,6 +11,8 @@
   (use file.util)
   (use yogomacs.yarn)
   (use yogomacs.path)
+  ;;
+  (use rfc.uri)
   )
 
 (select-module yogomacs.dests.yarn)
@@ -28,4 +31,7 @@
 			    config)))
 	  )))
 
+(define (yarn-sink path params config)
+  ; (read-from-string (uri-decode-string (cgi-get-parameter "stitch" params) :cgi-decode #t))
+  )
 (provide "yogomacs/dests/yarn")

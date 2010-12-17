@@ -22,7 +22,7 @@
   `((#/^\/$/ ,root-dir-dest)
     (#/^\/web\/css\/[^\/]+\.css/ ,css-dest)
     (#/^\/web\/js\/[^\/]+\.js/ ,js-dest)
-    (#/^\/web\/yarn(?:\/.+)?$/ ,yarn-dest)
+    (#/^\/web\/yarn(?:\/.+)?$/ ,yarn-dest ,yarn-sink)
     (#/^\/web\/subjects$/ ,subjects-dest)
     ;;
     (#/^\/debug\/metavariables$/ ,print-metavariables)

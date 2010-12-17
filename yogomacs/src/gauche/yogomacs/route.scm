@@ -4,7 +4,7 @@
   (use yogomacs.error)
   (use yogomacs.sanitize)
   (use yogomacs.path)
-
+  ;;
   (use www.cgi)
   )
 (select-module yogomacs.route)
@@ -25,25 +25,21 @@
   (let1 method (if (post?) "POST" "GET")
     (if (null? rtable)
 	(not-found #`"Cannot find ,|path|")
-	(let* ((regex (car (car rtable)))
-	       (actions (cdr (car rtable)))
-	       (get-action (if (null? actions) #f (car actions)))
-	       (post-action (cond
-			     ((null? actions) #f)
-			     ((null? (cdr actions)) #f)
-			     (else (cadr actions))))
-	       (action (if (post?)
-			   post-action
-			   get-action)))
+	(let1 regex (car (car rtable))
 	  (if (regex path)
-	      (if action
-		  (action (decompose-path path) params config)
-		  (not-found 
-		   #`"Cannot find ,|method| handler for ,|path|")
-		  )
+	      (let* ((actions (cdr (car rtable)))
+		     (get-action (if (null? actions) #f (car actions)))
+		     (post-action (cond
+				   ((null? actions) #f)
+				   ((null? (cdr actions)) #f)
+				   (else (cadr actions))))
+		     (action (if (post?)
+				 post-action
+				 get-action)))
+		(if action
+		    (action (decompose-path path) params config)
+		    (not-found 
+		     #`"Cannot find ,|method| handler for ,|path|")))
 	      (route0 (cdr rtable) path params config))))))
-
-;  (when (equal? (cgi-get-metavariable "REQUEST_METHOD") "POST")
-;    #?=(read-from-string (uri-decode-string (cgi-get-parameter "stitch" params) :cgi-decode #t)))
 
 (provide "yogomacs/route")
