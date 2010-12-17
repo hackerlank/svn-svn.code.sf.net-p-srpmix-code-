@@ -22,24 +22,26 @@
 	  config))
 
 (define (route0 rtable path params config)
-  (if (null? rtable)
-      (not-found #`"Cannot find ,|path| (,(if (post?) \"POST\" \"GET\"))")
-      (let* ((regex (car (car rtable)))
-	     (actions (cdr (car rtable)))
-	     (get-action (if (null? actions) #f (car actions)))
-	     (post-action (cond
-			   ((null? actions) #f)
-			   ((null? (cdr actions)) #f)
-			   (else (cadr actions))))
-	     (action (if (post?)
-			 post-action
-			 get-action)))
-	(if (regex path)
-	    (if action
-		(action (decompose-path path) params config)
-		(not-found #`"Cannot find POST handler for ,|path|")
-		)
-	    (route0 (cdr rtable) path params config)))))
+  (let1 method (if (post?) "POST" "GET")
+    (if (null? rtable)
+	(not-found #`"Cannot find ,|path|")
+	(let* ((regex (car (car rtable)))
+	       (actions (cdr (car rtable)))
+	       (get-action (if (null? actions) #f (car actions)))
+	       (post-action (cond
+			     ((null? actions) #f)
+			     ((null? (cdr actions)) #f)
+			     (else (cadr actions))))
+	       (action (if (post?)
+			   post-action
+			   get-action)))
+	  (if (regex path)
+	      (if action
+		  (action (decompose-path path) params config)
+		  (not-found 
+		   #`"Cannot find ,|method| handler for ,|path|")
+		  )
+	      (route0 (cdr rtable) path params config))))))
 
 ;  (when (equal? (cgi-get-metavariable "REQUEST_METHOD") "POST")
 ;    #?=(read-from-string (uri-decode-string (cgi-get-parameter "stitch" params) :cgi-decode #t)))
