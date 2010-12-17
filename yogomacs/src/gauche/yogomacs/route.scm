@@ -24,7 +24,7 @@
 (define (route0 rtable path params config)
   (let1 method (if (post?) "POST" "GET")
     (if (null? rtable)
-	(not-found #`"Cannot find ,|path|")
+	(not-found #`"Cannot find ,|path|" path)
 	(let1 regex (car (car rtable))
 	  (if (regex path)
 	      (let* ((actions (cdr (car rtable)))
@@ -38,8 +38,9 @@
 				 get-action)))
 		(if action
 		    (action (decompose-path path) params config)
-		    (not-found 
-		     #`"Cannot find ,|method| handler for ,|path|")))
+		    (method-not-allowed 
+		     #`"Cannot find ,|method| handler for ,|path|"
+		     path)))
 	      (route0 (cdr rtable) path params config))))))
 
 (provide "yogomacs/route")

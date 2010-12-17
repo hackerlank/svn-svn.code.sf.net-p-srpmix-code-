@@ -39,11 +39,12 @@
 			   :init-value #f)
    (mime-type :init-keyword :mime-type)))
 
+
+
 (define-class <empty-data> ()
   ())
 (define-method reply ((empty <empty-data>))
-  (write-tree (cgi-header :content-type "text/plain"))
-  (display ""))
+  (write-tree (cgi-header :status "204 No Content")))
 
 (define-class <asis-data> (<data>)
   ())

@@ -5,7 +5,8 @@
 	  not-found
 	  forbidden
 	  bad-request
-	  internal-error)
+	  internal-error
+	  method-not-allowed)
   (use www.cgi)  
   (use text.html-lite)
   
@@ -48,5 +49,6 @@
    (base-error "500 Internal Error"))
 (define bad-request
   (base-error "400 Bad Request"))
-
+(define method-not-allowed
+  (base-error "405 Method Not Allowed"))
 (provide "yogomacs/error")

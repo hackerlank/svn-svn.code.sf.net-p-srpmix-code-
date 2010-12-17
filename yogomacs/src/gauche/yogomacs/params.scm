@@ -1,6 +1,5 @@
 (define-module yogomacs.params
-  (export params->proc
-	  )
+  (export params->proc)
   (use www.cgi)
   (use util.list)
   (use util.match)

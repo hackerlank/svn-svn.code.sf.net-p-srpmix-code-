@@ -48,9 +48,10 @@
 	      :output-proc reply
 	      :on-error    (pa$ error-handler config))))
 
-(define default-params '(("path" . "/")
-			 ("range" . #f)
-			 ("enum"  . #f)
+(define default-params `(("path"     . ,(or (cgi-get-metavariable "YOGOMACS_PATH") 
+					    "/"))
+			 ("range"    . #f)
+			 ("enum"     . #f)
 			 ("yogomacs" . #f)))
 
 (define (yogomacs params config)
