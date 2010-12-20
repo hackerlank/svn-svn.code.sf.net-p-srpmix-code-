@@ -408,17 +408,7 @@ function dwatch_info
 	echo "No definision for DWATCH_UPSTREAM_VERSION" 1>&2
     fi
 
-    
-    local dpkg=$DWATCH_PACKAGE
-    local ver=$DWATCH_UPSTREAM_VERSION
-    
-    echo "PACKAGE: $dpkg"
-    echo "VERSION: $ver"
-
-    echo "WATCH: "
-    if [ -n "${DWATCH_WATCH}" ]; then
-	echo "${DWATCH_WATCH}"
-    fi
+    cat .dwatch
 
     exit 0
 }
