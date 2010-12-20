@@ -1,5 +1,5 @@
 m4_define([pkg_name], [yogomacs])
-m4_define([pkg_version], [0.0.13])
+m4_define([pkg_version], [0.0.16])
 
 AC_INIT(pkg_name, pkg_version)
 AC_CONFIG_AUX_DIR(misc/ac-aux)
@@ -130,6 +130,7 @@ chmod 0755 tests/*.scm
 AC_OUTPUT([
            Makefile
 	   src/Makefile
+	   src/css/Makefile
 	   src/cmds/Makefile
 	   src/elisp/Makefile
 	   src/elisp/flserver/Makefile
@@ -146,6 +147,7 @@ AC_OUTPUT([
 	   src/gauche/yogomacs/rearranges/Makefile
 	   src/gauche/yogomacs/renderers/Makefile
 	   src/gauche/yogomacs/shells/Makefile
+	   src/gauche/yogomacs/storages/Makefile
 	   src/gauche/yogomacs/util/Makefile
 	   src/gauche/yogomacs/reels/Makefile
 	   src/base/Makefile

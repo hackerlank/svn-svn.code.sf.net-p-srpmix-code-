@@ -13,7 +13,7 @@
   (use file.util)
   (use www.cgi)
   (use yogomacs.dests.debug)
-  (use yogomacs.caches.css)
+  (use yogomacs.storages.css)
   (use yogomacs.dests.css)
   )
 (select-module yogomacs.dests.srpmix-dir)

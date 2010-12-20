@@ -122,6 +122,9 @@ fi
 %dir %{_datadir}/gauche/site/lib/yogomacs/renderers
 %{_datadir}/gauche/site/lib/yogomacs/renderers/*.scm
 
+%dir %{_datadir}/gauche/site/lib/yogomacs/storages
+%{_datadir}/gauche/site/lib/yogomacs/storages/*.scm
+
 %dir %{_datadir}/gauche/site/lib/yogomacs/shells
 %{_datadir}/gauche/site/lib/yogomacs/shells/*.scm
 
@@ -139,8 +142,11 @@ fi
 %attr(0700,apache,apache) %{_localstatedir}/www/.vnc/passwd
 %dir %{_sysconfdir}/yogomacs
 
-%attr(0755,apache,apache) %dir %{_localstatedir}/lib/yogomacs/js
-%{_localstatedir}/lib/yogomacs/js/*.js
+%attr(0755,apache,apache) %dir %{_datadir}/yogomacs/js
+%{_datadir}/yogomacs/js/*.js
+
+%attr(0755,apache,apache) %dir %{_datadir}/yogomacs/css
+%{_datadir}/yogomacs/css/*.css
 
 %dir %{_datadir}/yogomacs/scheme2js
 %{_datadir}/yogomacs/scheme2js/yogomacs-macs.scm

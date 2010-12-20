@@ -4,7 +4,7 @@
 	  css-route$)
   (use www.cgi)  
   (use yogomacs.access)
-  (use yogomacs.caches.css)
+  (use yogomacs.storages.css)
   (use yogomacs.face)
   (use srfi-1)
   (use file.util)

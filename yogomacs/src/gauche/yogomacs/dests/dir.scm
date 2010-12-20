@@ -19,7 +19,7 @@
   (use util.combinations)
   ;;
   (use yogomacs.reply)
-  (use yogomacs.caches.css)
+  (use yogomacs.storages.css)
   ;;
   (use util.match)
   (use yogomacs.dests.css)

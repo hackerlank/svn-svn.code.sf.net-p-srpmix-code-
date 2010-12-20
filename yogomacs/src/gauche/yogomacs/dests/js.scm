@@ -4,7 +4,7 @@
 	  js-route$)
   (use www.cgi)  
   (use yogomacs.access)
-  (use yogomacs.caches.js)
+  (use yogomacs.storages.js)
   (use srfi-1)
   (use file.util)
   )

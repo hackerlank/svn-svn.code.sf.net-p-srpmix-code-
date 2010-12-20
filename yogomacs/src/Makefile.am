@@ -1,4 +1,5 @@
 SUBDIRS  = .
+SUBDIRS += css
 SUBDIRS += data
 SUBDIRS += base
 SUBDIRS += gauche

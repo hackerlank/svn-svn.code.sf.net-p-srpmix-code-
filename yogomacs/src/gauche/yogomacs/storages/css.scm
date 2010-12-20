@@ -1,4 +1,4 @@
-(define-module yogomacs.caches.css
+(define-module yogomacs.storages.css
   (export css-cache-dir
 	  prepare-css-cache
 	  call-with-input-css-file)
@@ -11,7 +11,7 @@
   (use yogomacs.cache)
   )
 
-(select-module yogomacs.caches.css)
+(select-module yogomacs.storages.css)
 
 (define (css-cache-dir config)
   (format "/var/lib/yogomacs/css/~a"
@@ -69,4 +69,4 @@
   (call-with-input-file-with-inclusion path handler
 				       (pa$ css-cache-storage config)))
 
-(provide "yogomacs/caches/css")
+(provide "yogomacs/storages/css")

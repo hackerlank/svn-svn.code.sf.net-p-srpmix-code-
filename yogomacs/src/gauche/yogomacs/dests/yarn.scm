@@ -6,7 +6,7 @@
 	  )
   (use www.cgi)  
   #;(use yogomacs.access)
-  #;(use yogomacs.caches.yarn)
+  #;(use yogomacs.storages.yarn)
   #;(use srfi-1)
   (use file.util)
   (use yogomacs.yarn)

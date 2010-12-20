@@ -9,7 +9,7 @@
   (use srfi-19)
   (use yogomacs.reel)
   (use yogomacs.reels.stitch-es)
-  (use yogomacs.caches.yarn)
+  (use yogomacs.storages.yarn)
   )
 
 (select-module yogomacs.yarn)

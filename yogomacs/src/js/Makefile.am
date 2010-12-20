@@ -1,4 +1,4 @@
-jscachedir=$(localstatedir)/lib/yogomacs/js
+jscachedir=$(pkgdatadir)/js
 dist_jscache_DATA = \
 	biwascheme.js       \
 	prototype.js        \
@@ -21,7 +21,7 @@ scheme2js_runtime = \
 	runtime_interface_callcc.js             \
 	\
 	$(NULL)
-install-exec-hook:
+install-data-hook:
 	mkdir -p $(DESTDIR)$(jscachedir)
 	for x in $(scheme2js_runtime); do \
 		$(LN_S) @SCHEME2JS_RUNTIME_DIR@/$$x $(DESTDIR)$(jscachedir)/scheme2js_$$x; \

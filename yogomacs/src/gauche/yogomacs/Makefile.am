@@ -5,6 +5,7 @@ SUBDIRS += dests
 SUBDIRS += rearranges
 SUBDIRS += renderers
 SUBDIRS += shells
+SUBDIRS += storages
 SUBDIRS += util
 SUBDIRS += reels
 ## ---------------------
