@@ -126,7 +126,7 @@ function parse_arguments
 	    --yum=*)
 	        YUM_OPTS=$(echo $1 | sed 's/--yum=//')
 		;;
-	    --wget=*
+	    --wget=*)
 	        WGET_OPTS=$(echo $1 | sed 's/--wget=//')
 		;;
 	    --*)
