@@ -3,7 +3,7 @@ DWATCH_CF_VERSION="0.0.0"
 DWATCH_WATCH_SPEC=file:///tmp/bind.watch
 DWATCH_PACKAGE=bind9
 DWATCH_WATCH='version=3
-http://ftp.isc.org/isc/bind9/cur/(\d.*)/ \
+http://ftp.isc.org/isc/bind9/(\d.*)/ \
   bind-(\d.*)\.tar\.gz
 '
 LCOPY_CF_VERSION="0.2.13"
