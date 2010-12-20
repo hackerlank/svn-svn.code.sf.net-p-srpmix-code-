@@ -2,49 +2,49 @@
 
 
 MY_TMPDIR=
-DWATCH_DEBUG=
-DWATCH_CACHE_DIR=~/.dwatch
-mkdir -p "${DWATCH_CACHE_DIR}"
+DEBWATCH_DEBUG=
+DEBWATCH_CACHE_DIR=~/.debwatch
+mkdir -p "${DEBWATCH_CACHE_DIR}"
 
 
 function print_usage
 {
     echo "Usage: "
-    echo "	dwatch --help|-h"
-    echo "	dwatch help"
-    echo "	dwatch [--debug] devscripts"
-    echo "	dwatch [--debug] preview [WATCH-SPEC] DPKG-NAME"
-    echo "	dwatch [--debug] checkout [WATCH-SPEC] DPKG-NAME"
-    echo "	dwatch [--debug] update"
-    echo "	dwatch [--debug] info"
+    echo "	debwatch --help|-h"
+    echo "	debwatch help"
+    echo "	debwatch [--debug] devscripts"
+    echo "	debwatch [--debug] preview [WATCH-SPEC] DPKG-NAME"
+    echo "	debwatch [--debug] checkout [WATCH-SPEC] DPKG-NAME"
+    echo "	debwatch [--debug] update"
+    echo "	debwatch [--debug] info"
     echo ""
     echo "WATCH SPEC: "
     echo "	ftp://..."
     echo "      file:///..."
-    echo "(ftp://$(dwatch-url --print-default-host)$(dwatch-url --print-default-main-dir) "
+    echo "(ftp://$(debwatch-url --print-default-host)$(debwatch-url --print-default-main-dir) "
     echo "is used as default value.)"
 }
 
-function dwatch_help
+function debwatch_help
 {
     print_usage
     exit 0
 }
 
-function dwatch_devscripts
+function debwatch_devscripts
 {
-    if [ -d ${DWATCH_CACHE_DIR}/devscripts ]; then
+    if [ -d ${DEBWATCH_CACHE_DIR}/devscripts ]; then
 	exit 0
     else
 	(
-	    cd ${DWATCH_CACHE_DIR}
+	    cd ${DEBWATCH_CACHE_DIR}
 	    git clone git://git.debian.org/devscripts/devscripts.git
 	    exit $?
 	)
     fi
 }
 
-function dwatch_preview
+function debwatch_preview
 {
     local host
     local main_dir
@@ -53,8 +53,8 @@ function dwatch_preview
     local dpkg
     
     if [ $# -eq 1 ]; then
-	host=$(dwatch-url --print-default-host)
-	main_dir=$(dwatch-url --print-default-main-dir)
+	host=$(debwatch-url --print-default-host)
+	main_dir=$(debwatch-url --print-default-main-dir)
 	dpkg=$1
 	shift
     elif [ $# -eq 2 ]; then
@@ -102,7 +102,7 @@ function dwatch_preview
 		;;
 	    *)
 		{
-		    echo "Broken dwatch command line: $1"
+		    echo "Broken debwatch command line: $1"
 		    print_usage
 		    exit 1
 		}  1>&2
@@ -127,15 +127,15 @@ function dwatch_preview
     
 
     local diff_gz_url="$MY_TMPDIR/diff_gz.url"
-    diff_gz_url=$(dwatch-url $dpkg)
-    local dwatch_url_status=$?
-    if [ "${dwatch_url_status}" != 0 ]; then
-	exit "${dwatch_url_status}"
+    diff_gz_url=$(debwatch-url $dpkg)
+    local debwatch_url_status=$?
+    if [ "${debwatch_url_status}" != 0 ]; then
+	exit "${debwatch_url_status}"
     fi
 
     local diff_gz="$MY_TMPDIR/$dpkg.diff.gz"
     local wget_opts
-    if [ -z "$DWATCH_DEBUG" ]; then
+    if [ -z "$DEBWATCH_DEBUG" ]; then
 	wget_opts=-q
     fi
 
@@ -156,7 +156,7 @@ function dwatch_preview
     exit 0
 }
 
-function dwatch__get 
+function debwatch__get 
 {
     local dpkg
     local ver
@@ -166,7 +166,7 @@ function dwatch__get
     ver=$2
     watch=$3
 
-    perl -I ${DWATCH_CACHE_DIR}/devscripts ${DWATCH_CACHE_DIR}/devscripts/scripts/uscan.pl \
+    perl -I ${DEBWATCH_CACHE_DIR}/devscripts ${DEBWATCH_CACHE_DIR}/devscripts/scripts/uscan.pl \
 	--package $dpkg \
 	--upstream-version $ver \
 	--watchfile $watch \
@@ -185,7 +185,7 @@ function extract_uversion
     sed -n -e 's|<upstream-version>\(.*\)</upstream-version>|\1|p' $dehs
 }
 
-function write_dot_dwatch
+function write_dot_debwatch
 {
     local watch_spec=$1
     shift
@@ -195,10 +195,10 @@ function write_dot_dwatch
     shift
 
     echo '# -*- shell-script -*-'
-    echo "DWATCH_WATCH_SPEC=$watch_spec"
-    echo "DWATCH_PACKAGE=$dpkg"  
-    echo "DWATCH_UPSTREAM_VERSION=$ver"
-    echo -n "DWATCH_WATCH='"
+    echo "DEBWATCH_WATCH_SPEC=$watch_spec"
+    echo "DEBWATCH_PACKAGE=$dpkg"  
+    echo "DEBWATCH_UPSTREAM_VERSION=$ver"
+    echo -n "DEBWATCH_WATCH='"
     for l in $@; do
 #	printf "%q\n" $l
 	echo $l
@@ -215,7 +215,7 @@ function updated_p
     return $?
 }
 
-function dwatch_checkout
+function debwatch_checkout
 {
     local dpkg
     local watch_spec
@@ -240,16 +240,16 @@ function dwatch_checkout
 
     ver=${1:-0.0.0}
 
-    if ! dwatch preview ${watch_spec} $dpkg > $watch; then
+    if ! debwatch preview ${watch_spec} $dpkg > $watch; then
 	exit 2
     fi
 
-    if ! dwatch devscripts; then
+    if ! debwatch devscripts; then
 	exit $?
     fi
 
     
-    dwatch__get $dpkg $ver $watch
+    debwatch__get $dpkg $ver $watch
     local status=$?
     local dehs=$MY_TMPDIR/${dpkg}.dehs
     if [ ! $status = 0 ]; then
@@ -269,9 +269,9 @@ function dwatch_checkout
     if [ -n "$watch_spec" ] && ( [[ "$watch_spec" =~ ^file:///.* ]] || [ "$watch_spec" = "-" ] ); then
 	local -a WATCH_FILE
 	mapfile WATCH_FILE < $watch
-	write_dot_dwatch "$watch_spec" $dpkg $nver "${WATCH_FILE[@]}" > $dpkg/.dwatch
+	write_dot_debwatch "$watch_spec" $dpkg $nver "${WATCH_FILE[@]}" > $dpkg/.debwatch
     else
-	write_dot_dwatch "$watch_spec" $dpkg $nver > $dpkg/.dwatch
+	write_dot_debwatch "$watch_spec" $dpkg $nver > $dpkg/.debwatch
     fi
 
     (
@@ -305,49 +305,49 @@ function member_p
 # 1: error
 # 2: cannot find
 # 3: not updated
-function dwatch_update
+function debwatch_update
 {
-    if ! [ -r .dwatch ]; then
-	echo "Not at dwatch directory" 1>&2
+    if ! [ -r .debwatch ]; then
+	echo "Not at debwatch directory" 1>&2
 	exit 1
     fi
 
-    if ! source .dwatch; then
-	echo "Cannot read .dwatch file" 1>&2
+    if ! source .debwatch; then
+	echo "Cannot read .debwatch file" 1>&2
 	exit 1
     fi
 
-    if [ -z "$DWATCH_WATCH_SPEC" ]; then
-	echo "No definision for DWATCH_WATCH_SPEC" 1>&2
+    if [ -z "$DEBWATCH_WATCH_SPEC" ]; then
+	echo "No definision for DEBWATCH_WATCH_SPEC" 1>&2
     fi
 
-    if [ -z "$DWATCH_PACKAGE" ]; then
-	echo "No definision for DWATCH_PACKAGE" 1>&2
+    if [ -z "$DEBWATCH_PACKAGE" ]; then
+	echo "No definision for DEBWATCH_PACKAGE" 1>&2
     fi
 
-    if [ -z "$DWATCH_UPSTREAM_VERSION" ]; then
-	echo "No definision for DWATCH_UPSTREAM_VERSION" 1>&2
+    if [ -z "$DEBWATCH_UPSTREAM_VERSION" ]; then
+	echo "No definision for DEBWATCH_UPSTREAM_VERSION" 1>&2
     fi
 
     
-    local dpkg=$DWATCH_PACKAGE
-    local ver=$DWATCH_UPSTREAM_VERSION
+    local dpkg=$DEBWATCH_PACKAGE
+    local ver=$DEBWATCH_UPSTREAM_VERSION
     local watch="$MY_TMPDIR/$dpkg.watch"
 
-    if [ -z "${DWATCH_WATCH}" ]; then
-	if ! dwatch preview $DWATCH_WATCH_SPEC $dpkg > $watch; then
+    if [ -z "${DEBWATCH_WATCH}" ]; then
+	if ! debwatch preview $DEBWATCH_WATCH_SPEC $dpkg > $watch; then
 	    exit 2
 	fi
     else
-	echo "${DWATCH_WATCH}" > $watch
+	echo "${DEBWATCH_WATCH}" > $watch
     fi
 	
 
-    if ! dwatch devscripts; then
+    if ! debwatch devscripts; then
 	exit $?
     fi
         
-    dwatch__get $dpkg $ver $watch
+    debwatch__get $dpkg $ver $watch
     local status=$?
     local dehs=$MY_TMPDIR/${dpkg}.dehs
     if [ ! $status = 0 ]; then
@@ -362,25 +362,25 @@ function dwatch_update
     fi
 
     local nver=$(extract_uversion $dehs)
-    if [ -z "${DWATCH_WATCH}" ]; then
-	write_dot_dwatch "${DWATCH_WATCH_SPEC}" $dpkg $nver > ./._dwatch
+    if [ -z "${DEBWATCH_WATCH}" ]; then
+	write_dot_debwatch "${DEBWATCH_WATCH_SPEC}" $dpkg $nver > ./._debwatch
     else
 	local -a WATCH_FILE
 	mapfile WATCH_FILE < $watch
-	write_dot_dwatch "${DWATCH_WATCH_SPEC}" $dpkg $nver "${WATCH_FILE[@]}" > ./._dwatch
+	write_dot_debwatch "${DEBWATCH_WATCH_SPEC}" $dpkg $nver "${WATCH_FILE[@]}" > ./._debwatch
     fi
 	
 
     local old_ls=$(ls)
     tar zxvf $MY_TMPDIR/${dpkg}_${nver}.orig.tar.gz
-    mv ./._dwatch ./.dwatch
+    mv ./._debwatch ./.debwatch
     local new_ls=$(ls)
 
     for n in $new_ls; do
 	if member_p $n $old_ls  && \
  	   ( !  [ $n = "." ] )  && \
 	   ( !  [ $n = ".." ] ) && \
-	   ( !  [ $n = ".dwatch" ] ); then
+	   ( !  [ $n = ".debwatch" ] ); then
 	    rm -rf ./$n
 	fi
     done
@@ -388,27 +388,27 @@ function dwatch_update
 }
 
 
-function dwatch_info
+function debwatch_info
 {
-    if ! [ -r .dwatch ]; then
-	echo "Not at dwatch directory" 1>&2
+    if ! [ -r .debwatch ]; then
+	echo "Not at debwatch directory" 1>&2
 	exit 1
     fi
 
-    if ! source .dwatch; then
-	echo "Cannot read .dwatch file" 1>&2
+    if ! source .debwatch; then
+	echo "Cannot read .debwatch file" 1>&2
 	exit 1
     fi
 
-    if [ -z "$DWATCH_PACKAGE" ]; then
-	echo "No definision for DWATCH_PACKAGE" 1>&2
+    if [ -z "$DEBWATCH_PACKAGE" ]; then
+	echo "No definision for DEBWATCH_PACKAGE" 1>&2
     fi
 
-    if [ -z "$DWATCH_UPSTREAM_VERSION" ]; then
-	echo "No definision for DWATCH_UPSTREAM_VERSION" 1>&2
+    if [ -z "$DEBWATCH_UPSTREAM_VERSION" ]; then
+	echo "No definision for DEBWATCH_UPSTREAM_VERSION" 1>&2
     fi
 
-    cat .dwatch
+    cat .debwatch
 
     exit 0
 }
@@ -423,7 +423,7 @@ function main
 		exit 0
 		;;
 	    --debug)
-		DWATCH_DEBUG=yes
+		DEBWATCH_DEBUG=yes
 		;;
 	    *)
 		break
@@ -443,7 +443,7 @@ function main
     cmd=$1
     shift
 
-    if ! type dwatch_$cmd > /dev/null 2>&1; then
+    if ! type debwatch_$cmd > /dev/null 2>&1; then
 	{
 	    echo "No such sub command: " $cmd
 	    print_usage
@@ -451,12 +451,12 @@ function main
 	} 1>&2
     else
 	MY_TMPDIR=`mktemp -d`
-	if [ -z "$DWATCH_DEBUG" ]; then
+	if [ -z "$DEBWATCH_DEBUG" ]; then
 	    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
 	else
 	    echo "TMPDIR: $MY_TMPDIR" 1>&2
 	fi
-	dwatch_$cmd "$@"
+	debwatch_$cmd "$@"
     fi
 }
 

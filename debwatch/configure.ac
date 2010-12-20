@@ -1,7 +1,7 @@
 m4_define([pkg_major_version],[0])
 m4_define([pkg_minor_version],[0])
 m4_define([pkg_micro_version],[0])
-m4_define([pkg_name],    [dwatch])
+m4_define([pkg_name],    [debwatch])
 m4_define([pkg_version], pkg_major_version.pkg_minor_version.pkg_micro_version)
 
 AC_INIT(pkg_name, pkg_version)
@@ -43,9 +43,9 @@ fi
 
 dnl dpkg
 
-AC_SUBST(DWATCH_MAJOR_VERSION, pkg_major_version)
-AC_SUBST(DWATCH_MINOR_VERSION, pkg_minor_version)
-AC_SUBST(DWATCH_MICRO_VERSION, pkg_micro_version)
+AC_SUBST(DEBWATCH_MAJOR_VERSION, pkg_major_version)
+AC_SUBST(DEBWATCH_MINOR_VERSION, pkg_minor_version)
+AC_SUBST(DEBWATCH_MICRO_VERSION, pkg_micro_version)
 
 
 AC_RPM_RELEASE
@@ -57,7 +57,7 @@ AC_OUTPUT([
            misc/m4/Makefile
            misc/makefiles/Makefile
            misc/specs/Makefile
-           misc/specs/dwatch.spec
+           misc/specs/debwatch.spec
 	   src/Makefile
 	   src/cmds/Makefile
 	   src/gauche/Makefile

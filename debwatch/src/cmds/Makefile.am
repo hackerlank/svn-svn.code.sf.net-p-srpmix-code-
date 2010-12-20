@@ -1,9 +1,9 @@
 dist_bin_SCRIPTS = \
 	\
-	dwatch     \
-	dwatch-url \
+	debwatch     \
+	debwatch-url \
 	\
 	$(NULL)
 
-cachedir=$(localstatedir)/cache/dwatch
+cachedir=$(localstatedir)/cache/debwatch
 dist_cache_DATA=

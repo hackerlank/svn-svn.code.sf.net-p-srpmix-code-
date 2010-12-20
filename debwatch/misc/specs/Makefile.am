@@ -1,1 +1,1 @@
-EXTRA_DIST=dwatch.spec
+EXTRA_DIST=debwatch.spec

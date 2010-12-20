@@ -1,4 +1,4 @@
-(define-module dwatch
+(define-module debwatch
   (use rfc.ftp)
   (use file.util)
   (use gauche.collection)
@@ -9,7 +9,7 @@
 	  default-host
 	  default-main-dir))
 
-(select-module dwatch)
+(select-module debwatch)
 
 (define (find-dhash-dir conn main-dir dpkg)
   (let* ((dir-list (map sys-basename (ftp-name-list conn main-dir)))
@@ -83,4 +83,4 @@
 		      :path diff-gz)))
      :passive #t)))
 
-(provide "dwatch")
+(provide "debwatch")

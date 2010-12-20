@@ -2,7 +2,7 @@ Summary: Scripts to get source code with using debian/watch scripts
 Name: @PACKAGE@
 Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
-Source: dwatch-@PACKAGE_VERSION@.tar.bz2
+Source: debwatch-@PACKAGE_VERSION@.tar.bz2
 Requires: gauche wget gzip patchutils perl dpkg-devel git
 Buildarch: noarch
 
@@ -31,9 +31,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%{_bindir}/dwatch
-%{_bindir}/dwatch-url
-%{_datadir}/gauche/site/lib/dwatch.scm
+%{_bindir}/debwatch
+%{_bindir}/debwatch-url
+%{_datadir}/gauche/site/lib/debwatch.scm
 
 
 %changelog
