@@ -1,3 +1,7 @@
+2010-12-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* *: Rename dwatch to debwatch.
+
 2010-12-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/conf.d/sys/Makefile.am (dist_confd_DATA): Added 

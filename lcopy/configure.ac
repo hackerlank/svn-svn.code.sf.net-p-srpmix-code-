@@ -49,9 +49,9 @@ if test x$_BZR_ = x; then
   AC_MSG_ERROR([Cannot find bzr])
 fi			
 
-AC_PATH_PROG([_DWATCH_], [dwatch])
-if test x$_DWATCH_ = x; then
-  AC_MSG_ERROR([Cannot find dwatch])
+AC_PATH_PROG([_DEBWATCH_], [debwatch])
+if test x$_DEBWATCH_ = x; then
+  AC_MSG_ERROR([Cannot find debwatch])
 fi			
 
 AC_PATH_PROG([_SRPMIX_PLUGIN_], [srpmix-plugin])

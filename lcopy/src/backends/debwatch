@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BACKEND=dwatch
+BACKEND=debwatch
 VERSION="0.0.0"
 
 source liblcopy_backends.sh || exit 1
@@ -11,9 +11,9 @@ function write_spec
     local dpkg=$2
 
     common_write_spec 
-    echo "DWATCH_WATCH_SPEC=$watch_spec"
-    echo "DWATCH_PACKAGE=${dpkg}"
-    echo -n "DWATCH_WATCH='"
+    echo "DEBWATCH_WATCH_SPEC=$watch_spec"
+    echo "DEBWATCH_PACKAGE=${dpkg}"
+    echo -n "DEBWATCH_WATCH='"
         case "$watch_spec" in
 	    ftp://*)
 		:
@@ -35,10 +35,10 @@ function dpkg_check
     local dpkg_spec="^[-a-zA-Z0-9]+$"
 
     if [ -z "${dpkg}" ]; then
-	echo "broken dwatch command line: cannot find debian package specification" 1>&2
+	echo "broken debwatch command line: cannot find debian package specification" 1>&2
 	return 1
     elif ! ( [[ "${dpkg}" =~ $dpkg_spec ]] ); then
-	echo "broken dwatch command line: unrecognizable dpkg specification: $dpkg" 1>&2
+	echo "broken debwatch command line: unrecognizable dpkg specification: $dpkg" 1>&2
 	echo "expected dpkg specification: " 1>&2
 	echo "	$dpkg_spec" 1>&2
 	return 1
@@ -92,12 +92,12 @@ function watch_spec_check
 #
 # HELP
 #
-function dwatch_help_help
+function debwatch_help_help
 {
     common_help_help "$@"
 }
 
-function dwatch_help
+function debwatch_help
 {
     common_help "$@"
 }
@@ -105,7 +105,7 @@ function dwatch_help
 #
 # GENCONF_FORMAT
 # 
-function dwatch_genconf_format
+function debwatch_genconf_format
 {
     common_genconf_format "$@"
 }
@@ -113,7 +113,7 @@ function dwatch_genconf_format
 #
 # GENCONF
 # 
-function dwatch_help_genconf
+function debwatch_help_genconf
 {
     local prefix
 
@@ -121,11 +121,11 @@ function dwatch_help_genconf
 	prefix="$0 genconf"
     fi
 
-    echo "	" ${prefix} dwatch 'checkout' [WATCH-SPEC] DPKG
-    echo "      About see \"dwatch --help\""
+    echo "	" ${prefix} debwatch 'checkout' [WATCH-SPEC] DPKG
+    echo "      About see \"debwatch --help\""
 }
 
-function dwatch_genconf
+function debwatch_genconf
 {
     local original=$@
     local cmd
@@ -153,7 +153,7 @@ function dwatch_genconf
 	    return 1
 	fi
     else
-	watch_spec="ftp://$(dwatch-url --print-default-host)$(dwatch-url --print-default-main-dir)"
+	watch_spec="ftp://$(debwatch-url --print-default-host)$(debwatch-url --print-default-main-dir)"
     fi
     
 
@@ -169,12 +169,12 @@ function dwatch_genconf
 #
 # CHECKOUT
 #
-function dwatch_help_checkout
+function debwatch_help_checkout
 {
     echo "	$0 " "checkout" "FILE.lcopy" "OUTPUT-DIR"
 }
 
-function dwatch_checkout
+function debwatch_checkout
 {
     local input=$1
     local output_dir=$2
@@ -183,36 +183,36 @@ function dwatch_checkout
 	return 1
     fi
 
-    if [ -z "${DWATCH_PACKAGE}" ]; then
-	echo "no DWATCH_PACKAGE in $input" 1>&2
+    if [ -z "${DEBWATCH_PACKAGE}" ]; then
+	echo "no DEBWATCH_PACKAGE in $input" 1>&2
 	return 1
     fi
 
-    if [ -z "${DWATCH_WATCH_SPEC}" ]; then
-	echo "no DWATCH_WATCH_SPEC in $input" 1>&2
+    if [ -z "${DEBWATCH_WATCH_SPEC}" ]; then
+	echo "no DEBWATCH_WATCH_SPEC in $input" 1>&2
 	return 1
     fi
     
-    case "${DWATCH_WATCH_SPEC}" in
+    case "${DEBWATCH_WATCH_SPEC}" in
 	ftp://*)
 	    ( 
 		cd ${output_dir}
-		common_spawn dwatch checkout "${DWATCH_WATCH_SPEC}" "${DWATCH_PACKAGE}"
+		common_spawn debwatch checkout "${DEBWATCH_WATCH_SPEC}" "${DEBWATCH_PACKAGE}"
 	    )
 	    ;;
 	file:///*|-)
-	    if [ -z "${DWATCH_WATCH}" ]; then
-		echo "no DWATCH_WATCH is $input(${DWATCH_WATCH_SPEC})" 1>&2
+	    if [ -z "${DEBWATCH_WATCH}" ]; then
+		echo "no DEBWATCH_WATCH is $input(${DEBWATCH_WATCH_SPEC})" 1>&2
 		return 1
 	    fi
 	    
 	    (
 		cd ${output_dir}
-		echo "${DWATCH_WATCH}" | common_spawn dwatch checkout - "${DWATCH_PACKAGE}"
+		echo "${DEBWATCH_WATCH}" | common_spawn debwatch checkout - "${DEBWATCH_PACKAGE}"
 	    )
 	    ;;
 	*)
-	    echo "Unrecognized format of DWATCH_WATCH_SPEC" 1>&2
+	    echo "Unrecognized format of DEBWATCH_WATCH_SPEC" 1>&2
 	    return 1
     esac
 
@@ -222,12 +222,12 @@ function dwatch_checkout
 #
 # PRINT_CMDLINE
 #
-function dwatch_help_print_cmdline
+function debwatch_help_print_cmdline
 {
     echo "	$0 " "print_cmdline" "FILE.lcopy" "checkout"
 }
 
-function dwatch_print_cmdline
+function debwatch_print_cmdline
 {
     local input=$1
     local cmd=$2
@@ -237,26 +237,26 @@ function dwatch_print_cmdline
     fi
 
     if [ "$cmd" = "checkout" ]; then
-	if [ -z "${DWATCH_PACKAGE}" ]; then
-	    echo "no DWATCH_PACKAGE in $input" 1>&2
+	if [ -z "${DEBWATCH_PACKAGE}" ]; then
+	    echo "no DEBWATCH_PACKAGE in $input" 1>&2
 	    return 1
 	fi
 	
-	if [ -z "${DWATCH_WATCH_SPEC}" ]; then
-	    echo "no DWATCH_WATCH_SPEC in $input" 1>&2
+	if [ -z "${DEBWATCH_WATCH_SPEC}" ]; then
+	    echo "no DEBWATCH_WATCH_SPEC in $input" 1>&2
 	    return 1
 	fi
 
-	case "${DWATCH_WATCH_SPEC}" in
+	case "${DEBWATCH_WATCH_SPEC}" in
 	    ftp://*)
-		echo "dwatch checkout ${DWATCH_WATCH_SPEC} ${DWATCH_PACKAGE}"
+		echo "debwatch checkout ${DEBWATCH_WATCH_SPEC} ${DEBWATCH_PACKAGE}"
 		;;
 	    file:///*|-)
 		# TODO
-		echo "echo '${DWATCH_WATCH}' | dwatch checkout - ${DWATCH_PACKAGE}"
+		echo "echo '${DEBWATCH_WATCH}' | debwatch checkout - ${DEBWATCH_PACKAGE}"
 		;;
 	    *)
-		echo "Unrecognized format of DWATCH_WATCH_SPEC" 1>&2
+		echo "Unrecognized format of DEBWATCH_WATCH_SPEC" 1>&2
 		return 1
 		;;
 	    esac
@@ -270,19 +270,19 @@ function dwatch_print_cmdline
 #
 # UPDATE
 #
-function dwatch_help_update
+function debwatch_help_update
 {
     echo "	$0 " "update" "FILE.lcopy" "UPDATE-DIR"
 }
 
-function dwatch_update
+function debwatch_update
 {
     local input=$1
     local update_dir=$2
 
     cd "${update_dir}"
 
-    common_spawn dwatch update
+    common_spawn debwatch update
     local status=$?
 
     if [ "$status" = 3 ]; then
@@ -297,50 +297,50 @@ function dwatch_update
 #
 # DIRP
 # 
-function dwatch_help_dirp
+function debwatch_help_dirp
 {
     echo "	$0 " "dirp" "[DIR]"
 }
 
-function dwatch_dirp
+function debwatch_dirp
 {
     local dir=${1:-$(pwd)}
     
-    test -f ${dir}/.dwatch
+    test -f ${dir}/.debwatch
 }
 
 #
 # REBIRTH
 #
-function dwatch_help_rebirth
+function debwatch_help_rebirth
 {
     echo "	$0 " "rebirth" "[DIR]"
 }
 
-function dwatch_rebirth
+function debwatch_rebirth
 {
     local dir=${1:-$(pwd)}
 
-    if ! dwatch_dirp ${dir}; then
-	echo "Not dwatch directory: ${dir} " 1>&2
+    if ! debwatch_dirp ${dir}; then
+	echo "Not debwatch directory: ${dir} " 1>&2
 	return 1
     fi
 
     cd $dir
-    source <(dwatch info)
+    source <(debwatch info)
     if [ $? != 0 ]; then
-	echo "failed in dwatch info invocation (pwd: $dir))" 1>&2
+	echo "failed in debwatch info invocation (pwd: $dir))" 1>&2
 	return 1
     fi
 
-    case ${DWATCH_WATCH_SPEC} in
+    case ${DEBWATCH_WATCH_SPEC} in
 	ftp://*)
 	    echo
 	    ;;
 	file:///*|-)
-	    echo "${DWATCH_WATCH}"
+	    echo "${DEBWATCH_WATCH}"
 	    ;;
-    esac | write_spec "${DWATCH_WATCH_SPEC}" "${DWATCH_PACKAGE}"
+    esac | write_spec "${DEBWATCH_WATCH_SPEC}" "${DEBWATCH_PACKAGE}"
     echo $?
 }
 

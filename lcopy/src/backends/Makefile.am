@@ -9,7 +9,7 @@ dist_backends_SCRIPTS =   \
 	darcs \
 	mtn   \
 	wgetx \
-	dwatch \
+	debwatch \
 	rsync \
 	\
 	$(NULL)
