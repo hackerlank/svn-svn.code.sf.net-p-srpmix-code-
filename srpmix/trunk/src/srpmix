@@ -24,6 +24,7 @@ SRPMIX_BUILD_OPTS="${SRPMIX_BUILD_OPTS}"
 SRPMIX_DB_OPTS="${SRPMIX_DB_OPTS}"
 SRPMIX_DIR_PKG_OPTS=
 YUM_OPTS=
+WGET_OPTS=
 
 set -e
 
@@ -41,6 +42,7 @@ function print_usage
     echo "         [--multi-targets]"
     echo "         [--keep-original]"
     echo "         [--yum=YUM_OPTIONS]"
+    echo "         [--wget=WGET_OPTIONS]"
     echo "          --name=PACKAGE|--srpm=SRPM"
     echo ""
     echo "  srpmix --help"
@@ -124,6 +126,9 @@ function parse_arguments
 	    --yum=*)
 	        YUM_OPTS=$(echo $1 | sed 's/--yum=//')
 		;;
+	    --wget=*
+	        WGET_OPTS=$(echo $1 | sed 's/--wget=//')
+		;;
 	    --*)
 	        print_usage 1>&2
 		srpmix_abort "Unknow option: $1"
@@ -160,7 +165,7 @@ function parse_arguments
 	if test ! -f "${TARGET_SRPM}"; then
 	    case "${TARGET_SRPM}" in
 		http://*|ftp://*)
-		    wget -O ${MY_TMPDIR}/$(basename ${TARGET_SRPM}) ${TARGET_SRPM}
+		    wget ${WGET_OPTS} -O ${MY_TMPDIR}/$(basename ${TARGET_SRPM}) ${TARGET_SRPM}
 		    if test $? = 0; then
 			TARGET_SRPM="${MY_TMPDIR}/$(basename ${TARGET_SRPM})"
 		    else
