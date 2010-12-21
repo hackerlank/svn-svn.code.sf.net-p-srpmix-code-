@@ -31,8 +31,8 @@
 (define (unauthorized config)
   (let1 realm (or (config 'realm) "Sources")
     (list
-     (cgi-header :status "401 Unauthorized"
-		 :WWW-Authenticate #`"Basic realm=\",|realm|\""
-		 ))))
+      (cgi-header :status "401 Unauthorized"
+		  :WWW-Authenticate #`"Basic realm=\",|realm|\""
+		  ))))
 
 (provide "yogomacs/auth")
