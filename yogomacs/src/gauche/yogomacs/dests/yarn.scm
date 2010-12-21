@@ -32,7 +32,10 @@
 			    config)))
 	  )))
 
-
+#;=lpath
+#;-    ("web" "yarn" "dists")
+#;=es, referer: http://localhost:81/ysh/dists
+#;-    (yarn-container (yarn :version 0 :target (directory . "cs4u4") :content (text "asfasfasdf") :subjects ("*DRAFT*")))
 (define (record-es lpath es params config)
   #?=lpath
   #?=es
