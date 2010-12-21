@@ -28,14 +28,17 @@
    (build-path yarn-route elt))
 
 (define (yarn-dest path params config)
-  (list (cgi-header :content-type "text/x-es")
-	(with-output-to-string
-	  (pa$ write (cons 'yarn-container
-			   (collect-yarns-by-path 
-			    (compose-path (cddr path))
-			    params
-			    config)))
-	  )))
+  (if-let1 user+role (authorized? config)
+	   (let1 params ((params "user" (car user+role)) "role" (cadr user+role))
+	     (list (cgi-header :content-type "text/x-es")
+		   (with-output-to-string
+		     (pa$ write (cons 'yarn-container
+				      (collect-yarns-by-path 
+				       (compose-path (cddr path))
+				       params
+				       config)))
+		     )))
+	   (unauthorized config)))
 #|
 lpath
     ("web" "yarn" "dists")
@@ -87,10 +90,12 @@ es
 		      (dst-target  `(target :type ,(car src-target)
 					    ,@(cond
 					       ((eq? (car src-target) 'directory)
-						(list :directory (string-append "/srv/sources" path)
+						(list :directory (string-append "/srv/sources" 
+										(if (equal? path "/") "" path))
 						      :item (cdr src-target)))
 					       ((eq? (car src-target) 'file)
-						(list :file (string-append "/srv/sources" path)
+						(list :file (string-append "/srv/sources" 
+										(if (equal? path "/") "" path))
 						      :line (cdr src-target))))))
 		      (dst-annotation `(annotation :type text :data ,(cadr src-content)))
 		      (dst-date (date->string (current-date) "~a ~b ~e ~H:~M:~S ~Y"))

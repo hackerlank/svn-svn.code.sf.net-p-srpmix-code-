@@ -5,17 +5,17 @@
 (define (stitch-make-insertion-proc type)
   (cond
    ((eq? type 'file) 
-    (lambda (posinfo shtml-frag) 
-      (let1 id (string-append "L:" (number->string posinfo))
-	(let1 elt ($ id)
+    (lambda (id posinfo shtml-frag) 
+      (let1 dom-id (string-append "L:" (number->string posinfo))
+	(let1 elt ($ dom-id)
 	  (when elt
 	    (elt.insert 
 	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
 	    (set! stitch-ids (cons id stitch-ids)))))))
    ((eq? type 'directory) 
-    (lambda (posinfo shtml-frag) 
-      (let1 id (string-append "N:" posinfo)
-	(let1 elt ($ id)
+    (lambda (id posinfo shtml-frag) 
+      (let1 dom-id (string-append "N:" posinfo)
+	(let1 elt ($ dom-id)
 	  (when elt
 	    (elt.insert 
 	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
@@ -120,7 +120,7 @@
 					 subjects
 					 transited)
 	    (when shtml-frag
-	      (insertion-proc (cadr target)
+	      (insertion-proc id (cadr target)
 			      shtml-frag))))))))
 
 (define (stitch-yarns yarns)
@@ -137,7 +137,9 @@
 
 (define (require-yarns url params)
   (let1 options (alist->object `((method . "get")
-				 (parameters . ,params)
+				 ,@(if params
+				       `((parameters . ,params))
+				       '())
 				 (onSuccess . ,(lambda (response)
 						 (stitch-yarns
 						  (read-from-response response))
@@ -184,7 +186,10 @@
 (define (stitch-submit type)
   (let* ((location (js-field *js* "location"))
 	 (pathname (js-field location "pathname"))
-	 (hash     (js-field location "hash")))
+	 (hash     (js-field location "hash"))
+	 (url      (substring pathname
+			      (string-length shell-dir)
+			      (string-length pathname))))
     (let1 options (alist->object 
 		   `((method . "post")
 		     (parameters . ,(alist->object
@@ -196,14 +201,10 @@
 							    :content (text ,(<- "yarn-draft"))
 							    :subjects ("*DRAFT*")))))))))
 		     (onSuccess . ,(lambda (response)
-				     (stitch-yarns
-				      (read-from-response response))
+				     (require-yarns url #f)
 				     (stitch-delete-draft-box)
 				     ))))
-      (let1 url (substring pathname
-			   (string-length shell-dir)
-			   (string-length pathname))
-	(js-new Ajax.Request
-		(string-append "/web/yarn" url)
-		options)))))
+      (js-new Ajax.Request
+	      (string-append "/web/yarn" url)
+	      options))))
 
