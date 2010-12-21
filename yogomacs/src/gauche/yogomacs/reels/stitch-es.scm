@@ -10,6 +10,7 @@
   (use yogomacs.reel)
   (use srfi-19)
   (use rfc.sha1)
+  (use gauche.fcntl)
   )
 
 (select-module yogomacs.reels.stitch-es)
@@ -17,7 +18,10 @@
 
 
 (define (make-es-provider file-name)
-  (let1 port (open-input-file file-name :if-does-not-exist #f)
+  (let ((port (open-input-file file-name :if-does-not-exist #f))
+	(lk (make <sys-flock> :type F_RDLCK :whence SEEK_SET :start 0 :len 0)))
+    (when port
+      (sys-fcntl port F_SETLKW lk))
     (lambda () 
        (cond
 	((not port) (eof-object))
@@ -25,6 +29,8 @@
 	(else
 	 (let1 r (read port)
 	   (when (eof-object? r)
+	     (set! (ref lk 'type) F_UNLCK)
+	     (sys-fcntl port F_SETLKW lk)
 	     (close-input-port port))
 	   r))))))
 

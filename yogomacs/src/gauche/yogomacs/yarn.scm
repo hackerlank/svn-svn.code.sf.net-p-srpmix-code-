@@ -18,12 +18,21 @@
 (define-constant stitch-es "stitch.es")
 
 (define (all-reals params config)
-  (list
-   (make <stitch-es> 
-     :es-file (build-path (yarn-cache-dir config) 
-			  stitch-es)
-     :params params
-     :config config)))
+  (delete
+   #f 
+   (list
+    (and-let* ((user (params "user")))
+      (make <stitch-es> 
+	:es-file (build-path (yarn-cache-dir config) 
+			     #`",(ref user 'name).es")
+	:params params
+	:config config))
+    (make <stitch-es> 
+      :es-file (build-path (yarn-cache-dir config) 
+			   stitch-es)
+      :params params
+      :config config)
+    )))
 
 (define (collect-yarns-by-path path params config)
   (append-map (cute spin-for-path <> path)

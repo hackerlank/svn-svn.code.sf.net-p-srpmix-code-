@@ -32,14 +32,21 @@
 			    config)))
 	  )))
 
+
+(define (record-es lpath es params config)
+  #?=lpath
+  #?=es
+  )
+
 (define (yarn-sink lpath params config)
   (if-let1 encoded-string (params "stitch")
 	   (let1 decode-string (uri-decode-string encoded-string :cgi-decode #t)
+	     decode-string
 	     (if-let1 es (guard (e
 				 (else #f))
 				(read-from-string decode-string))
 		      (begin 
-			#?=es
+			(record-es lpath es params config)
 			(make <empty-data>))
 		      (bad-request "Broken Es expression" (write-to-string lpath))))
 	   (bad-request "No stitch params" (write-to-string lpath))))
