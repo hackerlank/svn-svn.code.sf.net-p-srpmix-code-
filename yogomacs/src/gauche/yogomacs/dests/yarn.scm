@@ -39,15 +39,6 @@
 				       config)))
 		     )))
 	   (unauthorized config)))
-#|
-lpath
-    ("web" "yarn" "dists")
-es
-    (yarn-container (yarn :version 0 :target (directory . "cs4u4") :content (text "asfasfasdf") :subjects ("*DRAFT*")))
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/2.0.98-1.el5_3.8/pre-build/cman-2.0.98/fence/fenced/main.c" :point 2424 :coding-system undecided-unix :line 106 :surround ("
-" "" "	if (comline.clean_start_opt == FALSE) {
-		str = NULL;") :which-func "setup_ccs")) :annotation-list ((annotation :type text :data "優先順位: コマンドライン, ローカルで動作するccsd(cluster.conf)、ハードコードされている値(0)")) :date "Tue Aug 10 22:31:21 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-fenced-clean-start))
-|#
 
 (define (verify-yarn yarn)
   (and-let* (( (list? yarn) )
@@ -101,7 +92,8 @@ es
 		      (dst-date (date->string (current-date) "~a ~b ~e ~H:~M:~S ~Y"))
 		      (dst-full-name (ref (params "user") 'real-name))
 		      (dst-mailing-address (ref (params "user") 'name))
-		      (dst-keywords (map string->symbol src-subjects)))
+		      (dst-keywords (map string->symbol (cons #`"*role:,(params \"role\")*"
+							 src-subjects))))
 		  
 		  (and-let* ((user (params "user"))
 			     (file-name (build-path (yarn-cache-dir config) 
