@@ -17,6 +17,7 @@ dist_confd_DATA = \
 	device-mapper-multipath,trunk.lcopy \
 	dhcp,trunk.lcopy \
 	dlm,trunk.lcopy \
+	dovecot,2_1.lcopy \
 	e2fsprogs,trunk.lcopy \
 	emacs,trunk.lcopy \
 	emacs-mew,trunk.lcopy \
