@@ -2,6 +2,7 @@
   (export collect-yarns-by-path
 	  collect-yarns-of-author
 	  collect-yarns-about-subjects
+	  cast-yarns-for-path
 	  all-subjects
 	  )
   (use file.util)
@@ -10,6 +11,9 @@
   (use yogomacs.reel)
   (use yogomacs.reels.stitch-es)
   (use yogomacs.storages.yarn)
+  ;;
+  (use gauche.fcntl)
+  (use yogomacs.storages.yarn)
   )
 
 (select-module yogomacs.yarn)
@@ -17,16 +21,19 @@
 
 (define-constant stitch-es "stitch.es")
 
+(define (reel-for-user params config)
+  (and-let* ((user (params "user")))
+    (make <stitch-es> 
+      :es-file (build-path (yarn-cache-dir config) 
+			   #`",(ref user 'name).es")
+      :params params
+      :config config)))
+
 (define (all-reals params config)
   (delete
    #f 
    (list
-    (and-let* ((user (params "user")))
-      (make <stitch-es> 
-	:es-file (build-path (yarn-cache-dir config) 
-			     #`",(ref user 'name).es")
-	:params params
-	:config config))
+    (reel-for-user params config)
     (make <stitch-es> 
       :es-file (build-path (yarn-cache-dir config) 
 			   stitch-es)
@@ -76,5 +83,18 @@
    (lambda (k v)
      (cons k v))
    ))
+
+(define (cast-yarn-for-path path yarn params config)
+  (if (params "user")
+      (wind-for-path (reel-for-user params config) path yarn)
+      ;; TODO
+      #f))
+
+
+(define (cast-yarns-for-path path yarns params config)
+  (for-each
+   (cute cast-yarn-for-path path <> params config)
+   yarns))
+
 
 (provide "yogomacs/yarn")

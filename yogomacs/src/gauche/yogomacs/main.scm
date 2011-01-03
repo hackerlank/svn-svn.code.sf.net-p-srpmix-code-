@@ -55,6 +55,7 @@
 			 ("yogomacs" . #f)))
 
 (define (yogomacs params config)
+  params
   (let1 params (params->proc params default-params)
     (let1 path (params "path")
       (if config

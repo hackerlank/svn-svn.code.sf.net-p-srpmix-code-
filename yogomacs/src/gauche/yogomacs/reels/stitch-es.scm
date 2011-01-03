@@ -274,4 +274,63 @@
    (lambda (k v)
      (cons k v))))
 
+(define (make-es-consumer file-name)
+  (let ((port (open-output-file file-name
+				:if-exists :append
+				:if-does-not-exist :create))
+	(lk (make <sys-flock> :type F_WRLCK :whence SEEK_SET :start 0 :len 0)))
+    (lambda (es)
+      (when port
+	(sys-fcntl port F_SETLKW lk)
+	(write es port)
+	(newline port)
+	(set! (ref lk 'type) F_UNLCK)
+	(sys-fcntl port F_SETLKW lk)
+	(close-output-port port)))))
+
+(define-method wind-for-path ((stitch-es <stitch-es>) path (yarn <list>))
+  (let-keywords (cdr yarn) ((src-version :version (error #f))
+			    (src-target :target (error #f))
+			    (src-content :content (error #f))
+			    (src-subjects :subjects (error #f)))
+    (unless (eq? src-version 0) (error #f))
+    (unless (and (pair? src-target)
+		 (not (null? src-target))
+		 (memq (car src-target) '(directory file))
+		 (not (null? (cdr src-target)))
+		 (string? (cdr src-target)))
+      (error #f))
+    (unless (and (list? src-content)
+		 (not (null? src-content))
+		 (eq? (car src-content) 'text)
+		 (not (null? (cdr src-content)))
+		 (string? (cadr src-content)))
+      (error #f))
+    (let ((dst-version src-version)
+	  (dst-target  `(target :type ,(car src-target)
+				,@(cond
+				   ((eq? (car src-target) 'directory)
+				    (list :directory (string-append "/srv/sources" 
+								    (if (equal? path "/") "" path))
+					  :item (cdr src-target)))
+				   ((eq? (car src-target) 'file)
+				    (list :file (string-append "/srv/sources" 
+							       (if (equal? path "/") "" path))
+					  :line (cdr src-target))))))
+	  (dst-annotation `(annotation :type text :data ,(cadr src-content)))
+	  (dst-date (date->string (current-date) "~a ~b ~e ~H:~M:~S ~Y"))
+	  (dst-full-name (ref ((ref stitch-es 'params) "user") 'real-name))
+	  (dst-mailing-address (ref ((ref stitch-es 'params) "user") 'name))
+	  (dst-keywords (map string->symbol (cons #`"*role:,((ref stitch-es 'params) \"role\")*"
+						  src-subjects))))
+      
+      ((make-es-consumer (ref stitch-es 'es-file))
+	 `(stitch-annotation :version ,dst-version
+			     :target-list (,dst-target)
+			     :annotation-list (,dst-annotation)
+			     :date ,dst-date
+			     :full-name ,dst-full-name
+			     :mailing-address ,dst-mailing-address
+			     :keywords ,dst-keywords)))))
+
 (provide "yogomacs/reels/stitch-es")

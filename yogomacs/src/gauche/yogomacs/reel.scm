@@ -6,6 +6,7 @@
 	  spin-of-author
 	  spin-about-subjects
 	  all-subjects
+	  wind-for-path
 	  )
   )
 
@@ -42,5 +43,7 @@
 (define-method all-subjects ((reel <reel>))
   #f)
 
-
+(define-method wind-for-path ((reel <reel>) path (yarn <list>))
+  #f
+  )
 (provide "yogomacs/reel")

@@ -20,82 +20,94 @@
 (for-each-use-and-test-module
 
 ;; find -name '*.scm' -type f | sed -e's|\./|/|' -e 's|\.scm||' -e 's|.*|yogomacs\0|' -e 's|/|.|g' | grep -v default  
- yogomacs.rearranges.checkout
- yogomacs.rearranges.css-href
- yogomacs.rearranges.face-integrates
- yogomacs.rearranges.css-integrates
- yogomacs.rearranges.yogomacs-fragment
- yogomacs.rearranges.line-trim
- yogomacs.rearranges.range
- yogomacs.dests.annotations-dir
- yogomacs.dests.root-dir
- yogomacs.dests.root-commands-dir
- yogomacs.dests.srpmix-dir
- yogomacs.dests.css
- yogomacs.dests.js
- yogomacs.dests.sources-dir
- yogomacs.dests.dists-dir
- yogomacs.dests.packages-dir
- yogomacs.dests.fs
- yogomacs.dests.pkg-dir
- yogomacs.dests.dir
- yogomacs.dests.debug
- yogomacs.dests.print-alist
- yogomacs.dests.file
- yogomacs.dests.text
- yogomacs.dests.ysh-dir
- yogomacs.error
- yogomacs.dentry
- yogomacs.dentries.fs
- yogomacs.dentries.text
- yogomacs.dentries.subject
- yogomacs.dentries.virtual
- yogomacs.dentries.redirect
- yogomacs.cache
- yogomacs.face
- yogomacs.main
- yogomacs.renderers.asis
- yogomacs.renderers.find-file
- yogomacs.renderers.fundamental
- yogomacs.renderers.cache
- yogomacs.renderers.dired
- yogomacs.renderers.syntax
- yogomacs.renderers.yogomacs
- yogomacs.reply
- yogomacs.batch
- yogomacs.access
- yogomacs.sanitize
- yogomacs.path
- yogomacs.route
- yogomacs.config
-;; yogomacs.caches.check
- yogomacs.caches.css
- yogomacs.caches.js
- yogomacs.caches.shtml
- yogomacs.flserver
- yogomacs.shell
- yogomacs.window
- yogomacs.entry
- yogomacs.renderers.ewoc
- yogomacs.domain
- yogomacs.params
- yogomacs.dests.yarn
- yogomacs.dests.subjects
- yogomacs.reel
- yogomacs.reels.stitch-es
- yogomacs.yarn
- yogomacs.caches.yarn
- yogomacs.util.ebuf
- ;;
- yogomacs.util.compress
- yogomacs.util.ebuf
- yogomacs.util.enum
- yogomacs.util.lcopy
- yogomacs.util.range
- yogomacs.util.scheme2js
- ;;
- yogomacs.commands.checkout
- yogomacs.renderers.archive
+yogomacs.rearranges.enum
+yogomacs.rearranges.range
+yogomacs.rearranges.yogomacs-fragment
+yogomacs.rearranges.css-href
+yogomacs.rearranges.face-integrates
+yogomacs.rearranges.eof-line
+yogomacs.rearranges.title
+yogomacs.rearranges.checkout
+yogomacs.rearranges.line-trim
+yogomacs.rearranges.css-integrates
+yogomacs.commands.checkout
+yogomacs.shells.bscm
+yogomacs.shells.ysh
+yogomacs.shells.nologin
+yogomacs.domain
+yogomacs.dests.lcopy-dir
+yogomacs.dests.login
+yogomacs.dests.root-dir
+yogomacs.dests.absentees-dir
+yogomacs.dests.srpmix-dir
+yogomacs.dests.js
+yogomacs.dests.annotations-dir
+yogomacs.dests.dists-dir
+yogomacs.dests.css
+yogomacs.dests.packages-dir
+yogomacs.dests.sources-dir
+yogomacs.dests.fs
+yogomacs.dests.pkg-dir
+yogomacs.dests.ysh-dir
+yogomacs.dests.yarn
+yogomacs.dests.text
+yogomacs.dests.dir
+yogomacs.dests.root-commands-dir
+yogomacs.dests.debug
+yogomacs.dests.print-alist
+yogomacs.dests.bscm-dir
+yogomacs.dests.subjects
+yogomacs.dests.file
+yogomacs.error
+yogomacs.dentry
+yogomacs.window
+yogomacs.dentries.virtual
+yogomacs.dentries.subject
+yogomacs.dentries.fs
+yogomacs.dentries.text
+yogomacs.dentries.redirect
+yogomacs.reels.stitch-es
+yogomacs.role
+yogomacs.shells
+yogomacs.cache
+yogomacs.face
+yogomacs.reel
+yogomacs.main
+yogomacs.renderers.asis
+yogomacs.renderers.find-file
+yogomacs.renderers.cache
+yogomacs.renderers.archive
+yogomacs.renderers.dired
+yogomacs.renderers.text
+yogomacs.renderers.fundamental
+yogomacs.renderers.syntax
+yogomacs.renderers.ewoc
+yogomacs.renderers.yogomacs
+yogomacs.entry
+yogomacs.shell
+yogomacs.reply
+yogomacs.util.enum
+yogomacs.util.range
+yogomacs.util.compress
+yogomacs.util.lcopy
+yogomacs.util.scheme2js
+yogomacs.util.ebuf
+yogomacs.batch
+yogomacs.access
+yogomacs.yarn
+yogomacs.storages.js
+yogomacs.storages.css
+yogomacs.storages.yarn
+yogomacs.params
+yogomacs.sanitize
+yogomacs.path
+yogomacs.auth
+yogomacs.route
+yogomacs.config
+yogomacs.caches.shtml
+yogomacs.command
+yogomacs.user
+yogomacs.flserver
 )
 
 
