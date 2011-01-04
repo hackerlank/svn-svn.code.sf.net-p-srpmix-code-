@@ -18,20 +18,26 @@
   )
 (select-module yogomacs.main)
 
-(define routing-table
-  `((#/^\/$/ ,root-dir-dest)
-    (#/^\/web\/css\/[^\/]+\.css/ ,css-dest)
-    (#/^\/web\/js\/[^\/]+\.js/ ,js-dest)
-    (#/^\/web\/yarn(?:\/.+)?$/ ,yarn-dest ,yarn-sink)
-    (#/^\/web\/subjects$/ ,subjects-dest)
-    ;;
-    (#/^\/debug\/metavariables$/ ,print-metavariables)
-    (#/^\/debug\/config$/ ,print-config)
-    ;;
-    (#/^\/.*/ ,root-dir-dest)
-    ;; TODO: 403
-    ;; (#/^.*$/ ,print-path)
-    ))
+(define (install-overlay base overlay)
+  base)
+
+(define (routing-table config)
+  (let1 base `((#/^\/$/ ,root-dir-dest)
+	       (#/^\/web\/css\/[^\/]+\.css/ ,css-dest)
+	       (#/^\/web\/js\/[^\/]+\.js/ ,js-dest)
+	       (#/^\/web\/yarn(?:\/.+)?$/ ,yarn-dest ,yarn-sink)
+	       (#/^\/web\/subjects$/ ,subjects-dest)
+	       ;;
+	       (#/^\/debug\/metavariables$/ ,print-metavariables)
+	       (#/^\/debug\/config$/ ,print-config)
+	       ;;
+	       (#/^\/.*/ ,root-dir-dest)
+	       ;; TODO: 403
+	       ;; (#/^.*$/ ,print-path)
+	       )
+    (if-let1 overlay (config 'overlay)
+	     (install-overlay base overlay)
+	     base)))
 
 (define (install-constants config)
   ;; config could be #f.
@@ -59,10 +65,11 @@
   (let1 params (params->proc params default-params)
     (let1 path (params "path")
       (if config
-	  (route routing-table
-		 path
-		 params
-		 (config->proc config))
+	  (let1 config  (config->proc config)
+	    (route (routing-table config)
+		   path
+		   params
+		   config))
 	  (cgi-header :status "500 Internal server Error")))))
 
 (provide "yogomacs/main")
