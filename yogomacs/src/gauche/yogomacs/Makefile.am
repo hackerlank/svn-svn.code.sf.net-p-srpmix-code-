@@ -2,6 +2,7 @@ SUBDIRS  = .
 SUBDIRS += commands
 SUBDIRS += dentries
 SUBDIRS += dests
+SUBDIRS += overlays
 SUBDIRS += rearranges
 SUBDIRS += renderers
 SUBDIRS += shells
@@ -27,6 +28,8 @@ dist_module_DATA =   \
 	face.scm				\
 	flserver.scm				\
 	main.scm				\
+	overlay.scm				\
+	overlays.scm				\
 	params.scm				\
 	path.scm				\
 	reel.scm				\

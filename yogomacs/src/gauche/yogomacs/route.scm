@@ -26,7 +26,8 @@
     (if (null? rtable)
 	(not-found #`"Cannot find ,|path|" path)
 	(let1 regex (car (car rtable))
-	  (if (regex path)
+	  (if (or (and (string? regex) (equal? regex path))
+		  (and (regexp? regex) (regex path)))
 	      (let* ((actions (cdr (car rtable)))
 		     (get-action (if (null? actions) #f (car actions)))
 		     (post-action (cond

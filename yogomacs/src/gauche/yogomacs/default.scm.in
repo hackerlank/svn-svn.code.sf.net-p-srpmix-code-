@@ -26,4 +26,8 @@
 		      #/\/packages\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/
 		     ))
  (realm . "Sources")
- )
+ (overlays . ((text-file "/README" "/proc/interrupts")
+	      (not-implemented "/login")
+	      (not-implemented "/commands")
+	      (not-implemented #/\/commands\/.*/)
+	      )))
