@@ -8,6 +8,8 @@
   (use yogomacs.reply)
   (use yogomacs.error)
   (use yogomacs.params)
+  (use yogomacs.overlay)
+  (use yogomacs.overlays)
   ;;
   (use yogomacs.dests.root-dir)
   (use yogomacs.dests.css)
@@ -18,8 +20,13 @@
   )
 (select-module yogomacs.main)
 
-(define (install-overlay base overlay)
-  base)
+(define (install-overlays base overlays)
+  (fold (lambda (kar kdr) 
+	  (if-let1 r (overlay->route kar)
+		   (cons r kdr)
+		   kdr))
+	base overlays))
+	
 
 (define (routing-table config)
   (let1 base `((#/^\/$/ ,root-dir-dest)
@@ -35,8 +42,8 @@
 	       ;; TODO: 403
 	       ;; (#/^.*$/ ,print-path)
 	       )
-    (if-let1 overlay (config 'overlay)
-	     (install-overlay base overlay)
+    (if-let1 overlays (config 'overlays)
+	     (install-overlays base overlays)
 	     base)))
 
 (define (install-constants config)
