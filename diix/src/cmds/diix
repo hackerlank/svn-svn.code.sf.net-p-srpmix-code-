@@ -39,7 +39,7 @@ function print_usage
 {
     echo "Usage: "
     echo "	$0 --help|-h"
-    echo "	$0 [--conv=CONVERTER] [--ext=EXT] [--yum=YUM-OPT] DEBUGINFO-RPM-FILE|DEBUGINFO-RPM-NAME [OUTPUT-DIR]"
+    echo "	$0 [--es] [--conv=CONVERTER] [--ext=EXT] [--yum=YUM-OPT] DEBUGINFO-RPM-FILE|DEBUGINFO-RPM-NAME [OUTPUT-DIR]"
 }
 
 function main
@@ -53,6 +53,10 @@ function main
 	    --help|-h)
 		print_usage
 		exit 0
+		;;
+	    (--es)
+	        conv=es-src-libdwarves
+		ext=es
 		;;
 	    (--conv=*)
 	        conv=${1/--conv=}
