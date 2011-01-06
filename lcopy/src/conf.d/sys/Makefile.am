@@ -32,6 +32,7 @@ dist_confd_DATA = \
 	gfs2-utils,trunk.lcopy \
 	glib2,trunk.lcopy \
 	glibc,trunk.lcopy \
+	glibc,ports.lcopy \
 	gnash,trunk.lcopy \
 	goocanvas,trunk.lcopy \
 	gstreamer,trunk.lcopy \
