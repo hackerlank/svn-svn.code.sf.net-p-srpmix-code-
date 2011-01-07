@@ -5,6 +5,7 @@ dist_confd_DATA = \
 	Kahua,trunk.lcopy \
 	anaconda,trunk.lcopy \
 	autoconf,trunk.lcopy \
+	autofs,trunk.lcopy \
 	automake,trunk.lcopy \
 	bind,released.lcopy \
 	binutils,trunk.lcopy \
