@@ -14,6 +14,8 @@
 
 (define-method dname-of ((d <virtual-dentry>))
   (ref d 'dname))
+(define-method parent-path-of ((d <virtual-dentry>))
+  (ref d 'parent))
 (define-method path-of ((d <virtual-dentry>))
   (build-path (ref d 'parent)
 	      (ref d 'dname)))

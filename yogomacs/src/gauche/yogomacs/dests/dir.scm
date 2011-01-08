@@ -50,7 +50,7 @@
        (map (lambda (dentry)
 	      (cond
 	       ((and (equal? (dname-of dentry) ".")
-		     (archivable? (path-of dentry) config))
+		     (archivable? (parent-path-of dentry) config))
 		(make <redirect-dentry>
 		  :parent (ref dentry 'parent)
 		  :dname "."

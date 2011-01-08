@@ -46,6 +46,8 @@
 (define-method dname-of ((fs-dentry <fs-dentry>))
   (ref fs-dentry 'entry))
 
+(define-method parent-path-of ((fs-dentry <fs-dentry>))
+  (ref fs-dentry 'parent))
 (define-method path-of ((fs-dentry <fs-dentry>))
   (build-path (ref fs-dentry 'parent)
 	      (ref fs-dentry 'entry)))

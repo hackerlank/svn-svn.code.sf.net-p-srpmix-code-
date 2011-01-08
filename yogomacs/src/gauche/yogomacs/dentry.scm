@@ -16,6 +16,7 @@
 
 	  dname-of
 	  path-of
+	  parent-path-of
 	  nlink-of
 	  size-of
 	  mtime-of
@@ -101,6 +102,7 @@
 
 (define-method dname-of ((d <dentry>)))
 (define-method path-of ((d <dentry>)))
+(define-method parent-path-of ((d <dentry>)))
 (define-method nlink-of ((d <dentry>)) 1)
 (define-method size-of ((d <dentry>)))
 (define-method mtime-of ((d <dentry>)))
