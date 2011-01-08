@@ -10,7 +10,8 @@
 (select-module yogomacs.auth)
 
 (define (authorized? config)
-  (and-let* ((auth-string (cgi-get-metavariable "HTTP_CGI_AUTHORIZATION"))
+  (and-let* (( (config 'login) )
+	     (auth-string (cgi-get-metavariable "HTTP_CGI_AUTHORIZATION"))
 	     (m (#/ *Basic (.*)$/ auth-string))
 	     (base64-encoded (m 1))
 	     (base64-decoded (string-split 
@@ -24,7 +25,7 @@
 	     (role-name (if (null? (cdr user+role)) (default-role-name config) (cadr user+role)))
 	     (passwd (cadr base64-decoded))
 	     (u (user? user-name passwd))
- 	     )
+	     )
     (list u role-name)))
 
 
