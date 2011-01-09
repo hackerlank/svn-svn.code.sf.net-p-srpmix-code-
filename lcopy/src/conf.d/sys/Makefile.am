@@ -11,6 +11,7 @@ dist_confd_DATA = \
 	binutils,trunk.lcopy \
 	biwascheme,trunk.lcopy \
 	cairo,trunk.lcopy \
+        cc-mode,trunk.lcopy \
 	cluster,trunk.lcopy \
 	corosync,trunk.lcopy \
 	cygwin,trunk.lcopy \
