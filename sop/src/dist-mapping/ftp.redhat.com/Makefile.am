@@ -11,6 +11,7 @@ cs4u6.es  jbeap4_2_0.es  rhel3u0.es  rhel3u8.es  rhel4u6.es			\
 \
 rhel5su4.es  \
 rhel5su5.es  \
+rhel5su6.es  \
 rhcmsys8.es  \
 rhcmsys7u2.es \
 rhcmsys7u3.es \
