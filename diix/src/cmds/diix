@@ -30,7 +30,7 @@ function convert
     while read; do
 	i=$idir/$REPLY
 	t=${REPLY//\//^}
-        o=$odir/${t/./,}$4
+        o=$odir/${t/./,}."${ext}"
 	$conv "$i" > "$o"
     done
 }
@@ -56,13 +56,13 @@ function main
 		;;
 	    (--es)
 	        conv=es-src-libdwarves
-		ext=.es
+		ext=es
 		;;
 	    (--conv=*)
 	        conv=${1/--conv=}
 		;;
 	    (--ext=*)
-	        ext=.${1/--ext=}
+	        ext=${1/--ext=}
 		;;
 	    (--yum=*)
 	        yum_opts=${1/--yum=}
