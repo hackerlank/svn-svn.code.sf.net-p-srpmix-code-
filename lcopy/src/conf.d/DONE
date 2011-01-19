@@ -25,33 +25,33 @@ svn checkout svn://svn@svn.a-k-r.org/akr/wfo/trunk wfo
 git clone http://rpm.org/git/rpm.git rpm
 
 
+ON:
+
+git clone git://git.kernel.org/pub/scm/linux/kernel/git/horms/kexec-tools.git kexec-tools
+git clone git://git.kernel.org/pub/scm/linux/kernel/git/acme/pahole libdwarves
+git clone git://anongit.freedesktop.org/liboil liboil
+git clone git://git.savannah.gnu.org/libtool.git libtool
+git clone git://repo.or.cz/lunit.git lunit
+git clone git://git.sv.gnu.org/m4 m4
+git clone http://git.debian.org/git/parted/parted.git parted
+git clone git://anongit.freedesktop.org/git/pixman pixman
+git clone git://anongit.freedesktop.org/PolicyKit PolicyKit
+git clone git://git.adiscon.com/git/rsyslog.git rsyslog
+git clone git://git.savannah.gnu.org/texinfo.git texinfo
+git clone git://git.samba.org/samba.git samba
+
 NOT YET:
 
 cvs *
 hg clone http://icedtea.classpath.org/hg/icedtea6 java-1.6.0-openjdk
 hg clone http://icedtea.classpath.org/hg/openjdk6 java-1.6.0-openjdk
 hg clone http://xenbits.xensource.com/xen-3.1-testing.hg kernel
-git clone git://git.kernel.org/pub/scm/linux/kernel/git/horms/kexec-tools.git kexec-tools
 svn checkout http://www.hpccommunity.org/hpccommunity-repo/hpccommunity/projects/Lava/ lava
-git clone git://git.kernel.org/pub/scm/linux/kernel/git/acme/pahole libdwarves
 svn checkout https://libmt.svn.sourceforge.net/svnroot/libmt libmt
-git clone git://anongit.freedesktop.org/liboil liboil
-git clone git://git.savannah.gnu.org/libtool.git libtool
-git clone git://repo.or.cz/lunit.git lunit
-git clone git://git.sv.gnu.org/m4 m4
 svn checkout http://svn.gnome.org/svn/pango/trunk pango
-git clone http://git.debian.org/git/parted/parted.git parted
-git clone git://anongit.freedesktop.org/git/pixman pixman
-git clone git://anongit.freedesktop.org/PolicyKit PolicyKit
-git clone http://git.fedorahosted.org/git/rgmanager.git rgmanager
 git clone http://rpm.org/git/rpm-python.git rpm
-git clone git://git.adiscon.com/git/rsyslog.git rsyslog
 git clone git://rubyforge.org/rtags.git rtags
-git clone git://git.samba.org/samba.git samba
 svn checkout https://silentbob.svn.sourceforge.net/svnroot/silentbob/branches/silentbob2 silentbob
 git clone git://git.fedorahosted.org/spacewalk.git/ spacewalk
 svn checkout https://srpmix.svn.sourceforge.net/svnroot/srpmix srpmix
-git clone git://git.savannah.gnu.org/texinfo.git texinfo
 svn checkout https://tomoe.svn.sourceforge.net/svnroot/tomoe/tomoe/trunk tomoe
-git clone git://git.kernel.org/pub/scm/utils/util-linux-ng/util-linux-ng.git util-linux-ng
-git clone git://anongit.freedesktop.org/xorg/xserver xorg-x11-server
