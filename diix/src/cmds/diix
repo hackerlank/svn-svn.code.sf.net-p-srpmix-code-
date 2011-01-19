@@ -56,7 +56,7 @@ function main
 		;;
 	    (--es)
 	        conv=es-src-libdwarves
-		ext=es
+		ext=.es
 		;;
 	    (--conv=*)
 	        conv=${1/--conv=}
