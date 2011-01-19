@@ -8,7 +8,7 @@ function extract
 
     (
 	cd $dir
-	cpio -id
+	cpio -id 2> /dev/null
 	find . | while read; do
 	    if file $REPLY | grep ELF > /dev/null 2>&1; then
 		echo $REPLY
