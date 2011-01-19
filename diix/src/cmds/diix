@@ -102,12 +102,12 @@ function main
     tmpdir=$(mktemp -d)
     trap "chmod -R u+w $tmpdir; /bin/rm -rf $tmpdir" 0    
 
-    if [[ "$input" =~ '\.rpm$' ]]; then
+    if [[ "$input" =~ \.rpm$ ]]; then
 	if ! [ -f "$input" ]; then
 	    echo "no such file: $input" 1>&2;
 	    exit 1
 	fi
-    elif [[ "$input" =~ '^http://' ]] || [[ "$input" =~ '^https://' ]] || [[ "$input" =~ '^ftp://' ]]; then
+    elif [[ "$input" =~ ^http:// ]] || [[ "$input" =~ ^https:// ]] || [[ "$input" =~ ^ftp:// ]]; then
 	if wget -O "${tmpdir}/$(basename $input)" "$input"; then
 	    input=${tmpdir}/$(basename $input)
 	else
