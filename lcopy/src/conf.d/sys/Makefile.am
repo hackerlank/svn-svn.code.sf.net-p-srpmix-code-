@@ -54,6 +54,7 @@ dist_confd_DATA = \
 	libvirt,trunk.lcopy \
 	lm-sensors,trunk.lcopy \
 	ltp,trunk.lcopy \
+	make,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
 	mock,trunk.lcopy \
