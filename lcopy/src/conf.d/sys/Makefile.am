@@ -54,6 +54,7 @@ dist_confd_DATA = \
 	libvirt,trunk.lcopy \
 	lm-sensors,trunk.lcopy \
 	ltp,trunk.lcopy \
+	lvm2,trunk.lcopy \
 	make,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
@@ -86,6 +87,7 @@ dist_confd_DATA = \
 	srpmix,trunk.lcopy \
 	stitch,trunk.lcopy \
 	strace,trunk.lcopy \
+	systemtap,trunk.lcopy \
 	tog-pegasus,trunk.lcopy \
 	twig,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
