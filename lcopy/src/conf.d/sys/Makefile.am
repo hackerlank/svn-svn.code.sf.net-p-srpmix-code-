@@ -1,4 +1,4 @@
-confddir = $(sysconfdir)/lcopy/conf.d/sys
+confddir = $(sysconfdir)/lcopy/conf.d/$class
 dist_confd_DATA = \
 	\
 	ConsoleKit,trunk.lcopy \
@@ -11,7 +11,7 @@ dist_confd_DATA = \
 	binutils,trunk.lcopy \
 	biwascheme,trunk.lcopy \
 	cairo,trunk.lcopy \
-        cc-mode,trunk.lcopy \
+	cc-mode,trunk.lcopy \
 	cluster,trunk.lcopy \
 	corosync,trunk.lcopy \
 	cygwin,trunk.lcopy \
@@ -33,8 +33,8 @@ dist_confd_DATA = \
 	gdb,turnk.lcopy \
 	gfs2-utils,trunk.lcopy \
 	glib2,trunk.lcopy \
-	glibc,trunk.lcopy \
 	glibc,ports.lcopy \
+	glibc,trunk.lcopy \
 	gnash,trunk.lcopy \
 	goocanvas,trunk.lcopy \
 	gstreamer,trunk.lcopy \
@@ -49,12 +49,18 @@ dist_confd_DATA = \
 	kernel,rt.lcopy \
 	kernel,trunk.lcopy \
 	kernel,xen-3_2.lcopy \
+	kexec-tools,trunk.lcopy \
 	lcopy,trunk.lcopy \
 	libbonobo,trunk.lcopy \
+	libdwarves,trunk.lcopy \
+	liboil,trunk.lcopy \
+	libpcap,trunk.lcopy \
+	libtool,trunk.lcopy \
 	libvirt,trunk.lcopy \
 	lm-sensors,trunk.lcopy \
 	ltp,trunk.lcopy \
 	lvm2,trunk.lcopy \
+	m4,trunk.lcopy \
 	make,trunk.lcopy \
 	man-pages,trunk.lcopy \
 	miniascape,trunk.lcopy \
@@ -64,6 +70,7 @@ dist_confd_DATA = \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
 	openldap,trunk.lcopy \
+	openssl,trunk.lcopy \
 	perg,trunk.lcopy \
 	prelcopy,trunk.lcopy \
 	python-virtinst,trunk.lcopy \
@@ -75,9 +82,12 @@ dist_confd_DATA = \
 	rgmanager,trunk.lcopy \
 	rpm,rpm5.lcopy \
 	rpm,trunk.lcopy \
+	rsyslog,trunk.lcopy \
+	samba,trunk.lcopy \
 	sbuild,trunk.lcopy \
 	sop,trunk.lcopy \
 	sos,trunk.lcopy \
+	spacewalk,trunk.lcopy \
 	spice,qxl.lcopy \
 	spice,trunk.lcopy \
 	spice,vdesktop.lcopy \
@@ -88,6 +98,7 @@ dist_confd_DATA = \
 	stitch,trunk.lcopy \
 	strace,trunk.lcopy \
 	systemtap,trunk.lcopy \
+	texinfo,trunk.lcopy \
 	tog-pegasus,trunk.lcopy \
 	twig,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
