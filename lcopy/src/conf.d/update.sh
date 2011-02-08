@@ -5,10 +5,10 @@ class=$(basename $(pwd))
 lcopies=${dir}/*.lcopy
 
 {
-cat <<"EOF"
-confddir = $(sysconfdir)/lcopy/conf.d/$class
-dist_confd_DATA = \
-	\
+cat <<EOF
+confddir = \$(sysconfdir)/lcopy/conf.d/$class
+dist_confd_DATA = \\
+	\\
 EOF
 
 for x in $lcopies; do

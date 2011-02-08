@@ -1,4 +1,4 @@
-confddir = $(sysconfdir)/lcopy/conf.d/$class
+confddir = $(sysconfdir)/lcopy/conf.d/sys
 dist_confd_DATA = \
 	\
 	ConsoleKit,trunk.lcopy \
