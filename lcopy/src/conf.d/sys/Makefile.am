@@ -43,6 +43,7 @@ dist_confd_DATA = \
 	hal,trunk.lcopy \
 	hieroglyph,trunk.lcopy \
 	httpclient,trunk.lcopy \
+	httpd,trunk.lcopy \
 	ietf-draft,trunk.lcopy \
 	keepalived,trunk.lcopy \
 	kernel,kvm.lcopy \
