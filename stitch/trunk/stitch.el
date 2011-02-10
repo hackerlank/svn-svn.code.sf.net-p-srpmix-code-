@@ -887,6 +887,16 @@
 	   (lambda (entry) (stitch-insert-annotation-strict file entry))
 	   (reverse (sort (copy-list entries) 'stitch-annotation-compare))))))))
 
+(defun stitch-similar-directory-p (a b)
+  (let* ((am (split-string a))
+	 (bm (split-string b))
+	 (al (length am))
+	 (bl (length bm)))
+    (and (eq al bl)
+	 (> (count t (mapcar* #'equal am bm))
+	    ;; Heuristic
+	    (- al 2)))))
+
 (defun stitch-insert-annotations-fuzzy (buffer)
   (prog1
       (with-current-buffer buffer
@@ -900,7 +910,10 @@
 			    stitch-annotations-fuzzy nil)))
 	      (mapc
 	       (lambda (entry) 
-		 (stitch-insert-annotation-fuzzy file entry)
+		 (when (or (not (eq major-mode 'dired-mode))
+			   (stitch-similar-directory-p (stitch-klist-value entry :registered-as)
+							file))
+		   (stitch-insert-annotation-fuzzy file entry))
 		 )
 	       ;; TODO: This should be done in registration
 	       (reverse (sort (copy-list entries) 'stitch-annotation-compare)))))))))
