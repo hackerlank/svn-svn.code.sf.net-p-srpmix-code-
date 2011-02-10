@@ -68,6 +68,7 @@ dist_confd_DATA = \
 	mock,trunk.lcopy \
 	monotone,trunk.lcopy \
 	netbsd-kernel,trunk.lcopy \
+	nfs-utils,trunk.lcopy \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
 	openldap,trunk.lcopy \
