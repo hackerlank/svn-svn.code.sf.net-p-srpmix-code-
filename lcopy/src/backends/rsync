@@ -245,6 +245,30 @@ function rsync_rebirth
     write_spec "${RSYNC_REPOSITORY}" $RSYNC_DELETE_P
 }
 
+#
+# BRANCH SUPPORTED?
+#
+function rsync_help_branch_supported_p
+{
+    echo "	$0 " "branch_supported_p"
+}
+function rsync_branch_supported_p
+{
+    return 1
+}
+
+#
+# BRANCH GENCONF
+#
+function rsync_help_branch_genconf
+{
+    echo "	$0 " "branch_genconf " BRANCH
+}
+function rsync_branch_genconf
+{
+    return 1
+}
+
 function main
 {
     common_main "$@"

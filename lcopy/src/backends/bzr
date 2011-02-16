@@ -256,6 +256,30 @@ function bzr_rebirth
     write_spec "${repo}"
 }
 
+#
+# BRANCH SUPPORTED?
+#
+function bzr_help_branch_supported_p
+{
+    echo "	$0 " "branch_supported_p"
+}
+function bzr_branch_supported_p
+{
+    return 1
+}
+
+#
+# BRANCH GENCONF
+#
+function bzr_help_branch_genconf
+{
+    echo "	$0 " "branch_genconf " BRANCH
+}
+function bzr_branch_genconf
+{
+    return 1
+}
+
 function main
 {
     common_main "$@"

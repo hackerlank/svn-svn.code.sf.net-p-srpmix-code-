@@ -134,6 +134,26 @@ function lcopy_backend_dirp
     lcopy_backend_call $vcs dirp "$@"
 }
 
+function lcopy_backend_branch_supported_p
+{
+    local vcs=$1
+    shift
+
+    lcopy_backend_call $cvs branch_supported_p
+    return $?
+}
+
+function lcopy_backend_branch_genconf
+{
+    local vcs=$1
+    shift
+    local branch=$2
+    shift
+    
+    lcopy_backend_call $cvs branch_genconf
+    return $?
+}
+
 function lcopy_srpmix_plugin
 {
     local base_dir=$1

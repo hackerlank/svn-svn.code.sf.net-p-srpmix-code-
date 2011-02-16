@@ -243,6 +243,30 @@ function git_rebirth
     write_spec "${repo}"
 }
 
+#
+# BRANCH SUPPORTED?
+#
+function git_help_branch_supported_p
+{
+    echo "	$0 " "branch_supported_p"
+}
+function git_branch_supported_p
+{
+    return 1
+}
+
+#
+# BRANCH GENCONF
+#
+function git_help_branch_genconf
+{
+    echo "	$0 " "branch_genconf " BRANCH
+}
+function git_branch_genconf
+{
+    return 1
+}
+
 function main
 {
     common_main "$@"

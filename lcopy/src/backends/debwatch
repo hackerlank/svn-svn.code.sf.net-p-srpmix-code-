@@ -344,6 +344,30 @@ function debwatch_rebirth
     echo $?
 }
 
+#
+# BRANCH SUPPORTED?
+#
+function debwatch_help_branch_supported_p
+{
+    echo "	$0 " "branch_supported_p"
+}
+function debwatch_branch_supported_p
+{
+    return 1
+}
+
+#
+# BRANCH GENCONF
+#
+function debwatch_help_branch_genconf
+{
+    echo "	$0 " "branch_genconf " BRANCH
+}
+function debwatch_branch_genconf
+{
+    return 1
+}
+
 function main
 {
     common_main "$@"
