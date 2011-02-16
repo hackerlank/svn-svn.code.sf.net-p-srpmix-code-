@@ -1,3 +1,7 @@
+2011-02-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* Added: vc branch notation. Just framework.
+
 2010-12-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.17.
