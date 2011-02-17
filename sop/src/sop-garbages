@@ -56,14 +56,14 @@ function report
     print_section "Mirrors level garbages"
     for b in $broken_mirror; do
 	print_entry $b
-	echo ": && [ -e ${b} ] && rm -f ${b}"
+	echo ": mirros-level && [ -e ${b} ] && rm -f ${b}"
     done
     
     #
-    # FILE LEVEL GARBAGES
-    # -------------------
+    # FILE SYSTEM LEVEL GARBAGES
+    # --------------------------
     # A file with no associated swrf package file.
-    # File level garbages can be removed with rm command.
+    # File system level garbages can be removed with rm command.
     # 
     print_section "File system level garbages"
     diff -ruN $swrfs $fs | grep ^+[0-9a-zA-Z] | while read; do
@@ -84,7 +84,7 @@ function report
 	    for v in "-srpmix" "-srpmix-archives" "-srpmix-plugins"; do
 		e="${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
 		if [ -e ${e} ]; then
-		    echo ": && [ -e ${e} ] && rm -rf ${e}"
+		    echo ": filesystem-level && [ -e ${e} ] && rm -rf ${e}"
 		fi
 	    done
 	    (
@@ -95,7 +95,7 @@ function report
 		for c in */*; do
 		    e="${SOP_SOURCES_DIR}/${candidate:0:1}/${c}"
 		    if [ "${c/\//-}" = "${candidate}" ] && [ -e "${e}" ]; then
-			echo ": && [ -e ${e} ] && rm -rf ${e}"
+			echo ": filesystem-level && [ -e ${e} ] && rm -rf ${e}"
 		    fi
 		done
 	    )
@@ -142,21 +142,21 @@ function report
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-plugin-.*')
 	for e in $rpm_e; do 
-	    echo ": && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	    echo ": rpm-level && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-plugins-.*')
 	for e in $rpm_e; do 
-	    echo ": && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	    echo ": rpm-level && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-archives-.*')
 	for e in $rpm_e; do 
-	    echo ": && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	    echo ": rpm-level && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	e=$rpm
-	echo ": && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	echo ": rpm-level && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
     done
 }
 
