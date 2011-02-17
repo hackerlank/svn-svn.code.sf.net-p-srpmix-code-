@@ -237,7 +237,7 @@ function main
     else
 	output=/dev/stdout
     fi
-    report $broken_mirror_pkgs $list_in_fs $list_swrf $list_in_mirrors > $output
+    report "$broken_mirror_pkgs" "$list_in_fs" "$list_swrf" "$list_in_mirrors" > $output
 }
 
 time main "$@"
