@@ -23,6 +23,18 @@ source libsrpmix.sh || {
 }
 
 
+function print_section
+{
+    echo "##"
+    echo '##' " @ " $1 ":"
+    echo "##"    
+}
+
+function print_entry
+{
+    echo '#' $1
+}
+
 function report
 {
     local broken_mirror=$1
@@ -41,10 +53,10 @@ function report
     # Broken src.rpm in mirrros. rm command is enough 
     # to remove the garbages of this class.
     #
-    echo '#' " @ Mirrors level garbages:"
+    print_section "Mirrors level garbages"
     for b in $broken_mirror; do
-	echo $b
-	echo "@[ -e ${b} ] && rm -f ${b}"
+	print_entry $b
+	echo ": && [ -e ${b} ] && rm -f ${b}"
     done
     
     #
@@ -53,7 +65,7 @@ function report
     # A file with no associated swrf package file.
     # File level garbages can be removed with rm command.
     # 
-    echo '#' " @ File system level garbages:"
+    print_section "File system level garbages"
     diff -ruN $swrfs $fs | grep ^+[0-9a-zA-Z] | while read; do
 	local candidate="${REPLY:1}"
 	local c
@@ -68,11 +80,11 @@ function report
 	    local v 
 	    local e
 	    
-	    echo "$candidate"
+	    print_entry "$candidate"
 	    for v in "-srpmix" "-srpmix-archives" "-srpmix-plugins"; do
 		e="${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
 		if [ -e ${e} ]; then
-		    echo "@[ -e ${e} ] && rm -rf ${e}"
+		    echo ": && [ -e ${e} ] && rm -rf ${e}"
 		fi
 	    done
 	    (
@@ -83,7 +95,7 @@ function report
 		for c in */*; do
 		    e="${SOP_SOURCES_DIR}/${candidate:0:1}/${c}"
 		    if [ "${c/\//-}" = "${candidate}" ] && [ -e "${e}" ]; then
-			echo "@[ -e ${e} ] && rm -rf ${e}"
+			echo ": && [ -e ${e} ] && rm -rf ${e}"
 		    fi
 		done
 	    )
@@ -105,9 +117,9 @@ function report
     # I have never got this kind of garbages. So I have not written
     # code which generates scriptlets for removing the garbages yet.
     #
-    echo '#' "Swrf file level garbages:"
+    print_section "Swrf file level garbages"
     for c in $swrf_files; do
-	echo $c
+	print_entry $c
     done
 
     
@@ -123,28 +135,28 @@ function report
     # garbages. As noted in SWRF LEVEL GARBAGES, the dependency must
     # be considered when removing.
     #
-    echo '#' "RPM level garbages:"
+    print_section "RPM level garbages"
     diff -ruN $mirror $swrfs | grep ^+[0-9a-zA-Z] | while read; do
 	rpm="${REPLY:1}"
-	echo $rpm
+	print_entry $rpm
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-plugin-.*')
 	for e in $rpm_e; do 
-	    echo "@[ rpm -i $e 2>&1 > /dev/null ] && rpm -e $e"
+	    echo ": && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-plugins-.*')
 	for e in $rpm_e; do 
-	    echo "@[ rpm -i $e 2>&1 > /dev/null ] && rpm -e $e"
+	    echo ": && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-archives-.*')
 	for e in $rpm_e; do 
-	    echo "@[ rpm -i $e 2>&1 > /dev/null ] && rpm -e $e"
+	    echo ": && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	e=$rpm
-	echo "@rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	echo ": && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
     done
 }
 
