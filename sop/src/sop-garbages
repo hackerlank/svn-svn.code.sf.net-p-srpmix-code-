@@ -37,7 +37,7 @@ function print_entry
 
 function report
 {
-    local broken_mirror=$1
+    local broken_srpms=$1
     local fs=$2
     local swrfs=$3
     local mirror=$4
@@ -48,15 +48,15 @@ function report
     local rpm_e
 
     #
-    # MIRRORS LEEVL GARBAGES
+    # SRPM LEEVL GARBAGES
     # ---------------------
     # Broken src.rpm in mirrros. rm command is enough 
     # to remove the garbages of this class.
     #
-    print_section "Mirrors level garbages"
-    for b in $broken_mirror; do
-	print_entry $b
-	echo ": mirros-level && [ -e ${b} ] && rm -f ${b}"
+    print_section "SRPM LEVEL GARBAGES"
+    cat $broken_srpms | while read; do
+	print_entry $REPLY
+	echo ": srpm-level && [ -e ${REPLY} ] && rm -f ${REPLY}"
     done
     
     #
@@ -218,13 +218,14 @@ function main
     done | LANG=C sort | uniq > $list_swrf
 
 
-    local broken_mirror_pkgs=""
+    local broken_srpms=/$tempdir/broken_srpms
     local list_in_mirrors=/$tempdir/mirrors
+    touch $broken_srpms
     touch $list_in_mirrors
     for d in ${SOP_CRADLES_DIR}/*/mirror; do
 	for s in $(find $d -type f | grep 'src.rpm$'); do
 	    if ! rpm -qp --nosignature --queryformat "%{NAME}-%{VERSION}-%{RELEASE}\n" $s 2> /dev/null; then
-		broken_mirror_pkgs="$broken_mirror_pkgs $s"
+		echo $s >> $broken_srpms
 	    fi
 	done
     done | LANG=C sort | uniq > $list_in_mirrors
@@ -237,7 +238,7 @@ function main
     else
 	output=/dev/stdout
     fi
-    report "$broken_mirror_pkgs" "$list_in_fs" "$list_swrf" "$list_in_mirrors" > $output
+    report "$broken_srpms" "$list_in_fs" "$list_swrf" "$list_in_mirrors" > $output
 }
 
 time main "$@"
