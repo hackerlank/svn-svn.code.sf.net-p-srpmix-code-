@@ -37,14 +37,14 @@ function print_entry
 
 function report
 {
-    local broken_srpms=$1
-    local fs=$2
-    local swrfs=$3
-    local mirror=$4
+    local rpm_qa=$1
+    local broken_srpms=$2
+    local fs=$3
+    local swrfs=$4
+    local mirror=$5
     
     local swrf_files=""
     local rpm
-    local rpm_qa
     local rpm_e
 
     #
@@ -238,7 +238,7 @@ function main
     else
 	output=/dev/stdout
     fi
-    report "$broken_srpms" "$list_in_fs" "$list_swrf" "$list_in_mirrors" > $output
+    report "$rpm_qa" "$broken_srpms" "$list_in_fs" "$list_swrf" "$list_in_mirrors" > $output
 }
 
 time main "$@"
