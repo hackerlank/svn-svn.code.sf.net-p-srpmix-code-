@@ -6,16 +6,35 @@
 
 (select-module yogomacs.renderers.fundamental)
 
+(define (try-input-file->string-list path original-encodings . rest)
+  (let loop ((encodings original-encodings)
+	     (result #f))
+    (cond
+     (result result)
+     ((null? encodings)
+      (errorf <read-error> "Failed in code conversion: ~a" original-encodings))
+     (else
+      (guard (e ((<read-error> e) (loop (cdr encodings) result)))
+	(loop (cdr encodings)
+	      (apply call-with-input-file path
+		     port->string-list
+		     (if (car encodings)
+			 (cons :encoding (cons (car encodings) rest))
+			 rest))))))))
+
+(define encodings '(#f "LATIN1"))
+
 (define (fundamental src-path
 		     fundamental-mode-line-threshold
 		     fundamental-mode-column-threshold
 		     config)
   (if (readable? src-path)
       (let* ((t (ref (sys-stat src-path) 'mtime))
-	     (data (call-with-input-file src-path
-		     port->string-list
-		     :if-does-not-exist :error
-		     :element-type :character))
+	     (data (try-input-file->string-list src-path
+						encodings
+						:if-does-not-exist :error
+						:element-type :character
+						))
 	     (data (if (null? data) '("") data))
 	    )
 	(if (or (and (number? fundamental-mode-line-threshold)

@@ -1,5 +1,5 @@
 m4_define([pkg_name], [yogomacs])
-m4_define([pkg_version], [0.0.16])
+m4_define([pkg_version], [0.0.17])
 
 AC_INIT(pkg_name, pkg_version)
 AC_CONFIG_AUX_DIR(misc/ac-aux)
@@ -102,8 +102,16 @@ AC_SUBST([SPEC_CONFIG], [$config_name])
 
 AC_CHECK_PROG(SCHEME2JS,scheme2js,scheme2js,no)
 if test "$SCHEME2JS" = no; then
-   AC_MSG_ERROR([Cannot find scheme2js compiler])
+   if test -f /usr/bin/scheme2js; then
+      AC_MSG_ERROR([Cannot find scheme2js compiler.
+If you got this error though you have installed scheme2js package,
+you may have to do "chmod a+x /usr/bin/scheme2js".
+See http://bugzilla.redhat.com/show_bug.cgi?id=658812.])
+   else
+      AC_MSG_ERROR([Cannot find scheme2js compiler])
+   fi
 fi
+
 AC_SUBST([SCHEME2JS])
 
 scheme2js_runtime_dir="/usr/share/scheme2js"

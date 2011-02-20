@@ -22,7 +22,12 @@
     (make <shtml-data>
       :params params
       :config config
-      :data ((compose fix-css-href integrate-file-face) shtml)
+      :data ((compose 
+	      fix-css-href
+	      integrate-file-face
+	      ;; TODO: make url hyperlink
+	      ;; TODO: text substitution
+	      ) shtml)
       :last-modification-time #f)))
 
 (provide "yogomacs/dests/text") 
