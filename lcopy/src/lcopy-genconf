@@ -7,7 +7,7 @@ function print_usage
 {
     echo "Usage: "
     echo "$0 --help|-h"
-    echo "$0 [--output-dir=OUTPUT-DIR] [--no-update] [--generated-by=GENERATED-BY] PACKAGE,BRANCH[:VCS-BRANCH] VCS-COMMANDS..."
+    echo "$0 [--output-dir=OUTPUT-DIR] [--no-update] [--generated-by=GENERATED-BY] PACKAGE,BRANCH VCS-COMMANDS..."
     echo ""
 
     echo "VCS-COMMANDS format:"
@@ -15,16 +15,6 @@ function print_usage
 	echo "[ $v backend ] "
 	lcopy_backend_genconf_format $v
 	echo
-    done
-
-    echo "VCS-BRANCH notation is supported by following backend(s):"
-    for v in $(lcopy_backends_list); do
-	echo -n "$v..."
-	if [ lcopy_backend_branch_supported_p $v ]; then
-	    echo supported
-	else
-	    ecno "not supported"
-	fi
     done
 }
 
@@ -36,7 +26,6 @@ function main
     local package_branch
     local package
     local branch
-    local vcs_branch
     local vcs
     local vcs_args
     local status
@@ -84,22 +73,19 @@ function main
     fi
     
     # TODO: `.' shoule be accepted. See mod_cluster.prelcopy.
-    if [[ "${package_branch}" =~ ^([-a-zA-Z0-9_]+)(,([-a-zA-Z0-9_]+))?$ ]]; then
-	package=${BASH_REMATCH[1]}
-	branch=${BASH_REMATCH[3]}
-	if [ -z "${branch}" ]; then
-	    branch=trunk
-	fi
-    elif [[ "${package_branch}" =~ ^([-a-zA-Z0-9_]+),([-a-zA-Z0-9_]+):([-a-zA-Z0-9_]+)$ ]]
-	package=${BASH_REMATCH[1]}
-	branch=${BASH_REMATCH[2]}
-	vcs_branch=${BASH_REMATCH[3]}
-    else
+    if ! [[ "${package_branch}" =~ ^([-a-zA-Z0-9_]+)(,([-a-zA-Z0-9_]+))?$ ]]; then
 	echo "broken package,branch specification: ${package_branch}" 1>&2
 	print_usage 1>&2
 	exit 1
+    else
+	package=${BASH_REMATCH[1]}
+	branch=${BASH_REMATCH[3]}
     fi
     
+    if [ -z "${branch}" ]; then
+	branch=trunk
+    fi
+
     if [ $# -eq 0 ]; then
 	echo "given no vcs command: $original" 1>&2
 	print_usage 1>&2
@@ -121,11 +107,6 @@ function main
 	exit 1
     fi
 
-    if [ -n "$vcs_branch" ] && ( ! lcopy_backend_branch_supported_p "$vcs" ); then
-	echo "$vcs backend doesn't support" 1>&2
-	exit 1
-    fi
-    
     local output_file=/dev/stdout
     if [ -n "$output_dir" ]; then
 	my_tmpdir=`mktemp -d`
@@ -139,14 +120,6 @@ function main
     status=$?
 
     if [ $status = 0 ]; then
-	if [ -n "$vcs_branch" ]; then
-	    lcopy_backend_branch_genconf "$vcs" "$vcs_branch" >> ${output_file}
-	    status=$?
-	    if ! [ $status = 0 ]; then
-		return $status
-	    fi
-	fi
-
 	lcopy_print_conf "$vcs" "$package" "$branch" "$update" "$generated_by" >> ${output_file}
 	if [ -n "$output_dir" ]; then
 	    mv ${output_file} ${output_dir}/"${package},${branch}.lcopy"

@@ -327,30 +327,6 @@ function cvs_rebirth
     write_spec "${repo}" "${module}"
 }
 
-#
-# BRANCH SUPPORTED?
-#
-function cvs_help_branch_supported_p
-{
-    echo "	$0 " "branch_supported_p"
-}
-function cvs_branch_supported_p
-{
-    return 1
-}
-
-#
-# BRANCH GENCONF
-#
-function cvs_help_branch_genconf
-{
-    echo "	$0 " "branch_genconf " BRANCH
-}
-function cvs_branch_genconf
-{
-    return 1
-}
-
 function main
 {
     common_main "$@"
