@@ -7,7 +7,7 @@ Requires: gauche wget gzip patchutils perl dpkg-devel git
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root
-License: GPL
+License: GPLv3
 
 Group: Development/Tools
 
