@@ -86,7 +86,7 @@ function git_genconf
     local repo
 
 
-    if [ $# != 2 ]; then
+    if [ $# != 2 ] && [ $# != 4 ]; then
 	echo "wrong number of arguments: $original" 1>&2
 	return 1
     fi

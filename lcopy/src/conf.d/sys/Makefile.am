@@ -13,6 +13,7 @@ dist_confd_DATA = \
 	cairo,trunk.lcopy \
 	cc-mode,trunk.lcopy \
 	cluster,trunk.lcopy \
+	cluster,stable31.lcopy \
 	corosync,trunk.lcopy \
 	cygwin,trunk.lcopy \
 	ddskk,trunk.lcopy \
