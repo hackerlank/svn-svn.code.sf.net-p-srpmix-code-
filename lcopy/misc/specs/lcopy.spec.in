@@ -22,7 +22,7 @@ Requires: monotone >= 0.48.1-1
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root
-License: GPL
+License: GPLv3
 
 Group: Development/Tools
 
