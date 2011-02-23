@@ -24,6 +24,7 @@ dist_confd_DATA = \
 	emacs,trunk.lcopy \
 	emacs-mew,trunk.lcopy \
 	emacs-w3m,trunk.lcopy \
+        ethtool,trunk.lcopy \
 	fence,trunk.lcopy \
 	fence-agents,trunk.lcopy \
 	flashcache,trunk.lcopy \
