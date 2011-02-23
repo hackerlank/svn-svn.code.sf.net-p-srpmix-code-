@@ -2,7 +2,7 @@ Summary: Script sets to operate sources
 Name: sop
 Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
-License: GPL
+License: GPLv3
 Group: Development/Tools
 Buildarch: noarch
 Source0: %{name}-%{version}.tar.bz2
