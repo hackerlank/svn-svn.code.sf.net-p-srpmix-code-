@@ -11,7 +11,7 @@ BuildRequires: hardlink cscope ctags emacs-common gettext gauche
 BuildRequires: hyperestraier mock srescure
 
 Buildroot: %{_tmppath}/%{name}-root
-License: GPL
+License: GPLv3
 
 Group: Development/Tools
 
