@@ -69,6 +69,7 @@ dist_confd_DATA = \
 	miniascape,trunk.lcopy \
 	mock,trunk.lcopy \
 	monotone,trunk.lcopy \
+	net-snmp,trunk.lcopy \
 	netbsd-kernel,trunk.lcopy \
 	nfs-utils,trunk.lcopy \
 	openais,trunk.lcopy \
