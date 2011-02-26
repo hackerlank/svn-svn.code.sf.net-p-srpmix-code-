@@ -1,3 +1,8 @@
+2011-02-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/elisp/flserver-main.el (flserver-kill-emacs): Record the contents
+	of *Messages* to /var/log/messages.
+
 2010-09-03  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/elisp/flserver-main.el (flserver): Added unwind-protect.
