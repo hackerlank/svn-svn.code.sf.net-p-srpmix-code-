@@ -159,8 +159,16 @@
   )
 
 (defun flserver-kill-emacs (n)
-    (log-format "Kill emacs(%d)" n)
-    (kill-emacs n))
+  (log-format "Kill emacs(%d)" n)
+  (unless (eq n 0)
+    (with-current-buffer "*Messages*"
+      (goto-char (point-min))
+      (while (not (eobp))
+	(log-format "<reason> %s" 
+		    (buffer-substring (line-beginning-position)
+				      (line-end-position)))
+	(forward-line 1))))
+  (kill-emacs n))
 
 ;;
 ;; Main
