@@ -41,6 +41,7 @@ dist_confd_DATA = \
 	glibc,trunk.lcopy \
 	gnash,trunk.lcopy \
 	goocanvas,trunk.lcopy \
+	grub2,trunk.lcopy \
 	gstreamer,trunk.lcopy \
 	gtk2,trunk.lcopy \
 	hachoir,trunk.lcopy \
