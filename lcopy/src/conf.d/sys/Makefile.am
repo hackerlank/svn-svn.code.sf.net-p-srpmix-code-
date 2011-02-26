@@ -17,6 +17,7 @@ dist_confd_DATA = \
 	cluster,trunk.lcopy \
 	coreutils,trunk.lcopy \
 	corosync,trunk.lcopy \
+	cups,trunk.lcopy \
 	cygwin,trunk.lcopy \
 	ddskk,trunk.lcopy \
 	device-mapper-multipath,trunk.lcopy \
