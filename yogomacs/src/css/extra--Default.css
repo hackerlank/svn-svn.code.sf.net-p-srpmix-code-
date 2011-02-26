@@ -1,0 +1,434 @@
+/* About copyright see nil */
+.antlr-default {
+}
+/* About copyright see nil */
+.antlr-keyword {
+        /* antlr-keyword */
+        color: #000000;
+        font-weight: bold;
+}
+/* About copyright see nil */
+.antlr-literal {
+        /* antlr-literal */
+        color: #8b2323;
+        font-weight: bold;
+}
+/* About copyright see nil */
+.antlr-ruledef {
+        /* antlr-ruledef */
+        color: #0000ff;
+        font-weight: bold;
+}
+/* About copyright see nil */
+.antlr-ruleref {
+        /* antlr-ruleref */
+        color: #00008b;
+}
+/* About copyright see nil */
+.antlr-tokendef {
+        /* antlr-tokendef */
+        color: #0000ff;
+        font-weight: bold;
+}
+/* About copyright see nil */
+.antlr-tokenref {
+        /* antlr-tokenref */
+        color: #8b5a00;
+}
+/* About copyright see nil */
+.bold {
+        /* bold */
+        font-weight: bold;
+}
+/* About copyright see nil */
+.bold-italic {
+        /* bold-italic */
+        font-weight: bold;
+        font-style: italic;
+}
+/* About copyright see nil */
+.button {
+        /* button */
+        text-decoration: underline;
+}
+/* About copyright see nil */
+.change-log-acknowledgement {
+        /* change-log-acknowledgement */
+        color: #b22222;
+}
+/* About copyright see nil */
+.change-log-conditionals {
+        /* change-log-conditionals */
+        color: #a0522d;
+}
+/* About copyright see nil */
+.change-log-date {
+        /* change-log-date-face */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.change-log-email {
+        /* change-log-email */
+        color: #a0522d;
+}
+/* About copyright see nil */
+.change-log-file {
+        /* change-log-file */
+        color: #0000ff;
+}
+/* About copyright see nil */
+.change-log-function {
+        /* change-log-function */
+        color: #a0522d;
+}
+/* About copyright see nil */
+.change-log-list {
+        /* change-log-list */
+        color: #a020f0;
+}
+/* About copyright see /usr/share/emacs/23.2/lisp/add-log.el */
+.change-log-name {
+        /* change-log-name */
+        color: #008b8b;
+}
+/* About copyright see nil */
+.cperl-array {
+        /* cperl-array-face */
+        color: #0000ff;
+        background-color: #eeeed1;
+        font-weight: bold;
+}
+/* About copyright see nil */
+.cperl-hash {
+        /* cperl-hash-face */
+        color: #ff0000;
+        background-color: #eeeed1;
+        font-weight: bold;
+        font-style: italic;
+}
+/* About copyright see nil */
+.cperl-nonoverridable {
+        /* cperl-nonoverridable-face */
+        color: #66cd00;
+}
+/* About copyright see nil */
+.css-property {
+        /* css-property */
+        color: #a0522d;
+}
+/* About copyright see nil */
+.css-selector {
+        /* css-selector */
+        color: #0000ff;
+}
+/* About copyright see nil */
+.italic {
+        /* italic */
+        font-style: italic;
+}
+/* About copyright see nil */
+.ld-script-location-counter {
+        /* ld-script-location-counter */
+        color: #7a378b;
+        font-weight: bold;
+}
+/* About copyright see nil */
+.makefile-shell {
+}
+/* About copyright see nil */
+.makefile-space {
+        /* makefile-space */
+        background-color: #ff69b4;
+}
+/* About copyright see nil */
+.makefile-targets {
+        /* makefile-targets */
+        color: #0000ff;
+}
+/* About copyright see nil */
+.matlab-cellbreak {
+        /* matlab-cellbreak-face */
+        color: #b22222;
+        font-weight: bold;
+        text-decoration: overline;
+}
+/* About copyright see nil */
+.nxml-attribute-colon {
+}
+/* About copyright see nil */
+.nxml-attribute-local-name {
+        /* nxml-attribute-local-name */
+        color: #a0522d;
+}
+/* About copyright see nil */
+.nxml-attribute-prefix {
+        /* nxml-attribute-prefix */
+        color: #7a378b;
+}
+/* About copyright see nil */
+.nxml-attribute-value {
+        /* nxml-attribute-value */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.nxml-attribute-value-delimiter {
+        /* nxml-attribute-value-delimiter */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.nxml-cdata-section-cdata {
+        /* nxml-cdata-section-CDATA */
+        color: #7a378b;
+}
+/* About copyright see nil */
+.nxml-cdata-section-content {
+}
+/* About copyright see nil */
+.nxml-cdata-section-delimiter {
+}
+/* About copyright see nil */
+.nxml-char-ref-delimiter {
+        /* nxml-char-ref-delimiter */
+        color: #008b8b;
+}
+/* About copyright see nil */
+.nxml-char-ref-number {
+        /* nxml-char-ref-number */
+        color: #008b8b;
+}
+/* About copyright see nil */
+.nxml-comment-content {
+        /* nxml-comment-content */
+        color: #b22222;
+}
+/* About copyright see nil */
+.nxml-comment-delimiter {
+        /* nxml-comment-delimiter */
+        color: #b22222;
+}
+/* About copyright see nil */
+.nxml-element-colon {
+}
+/* About copyright see nil */
+.nxml-element-local-name {
+        /* nxml-element-local-name */
+        color: #0000ff;
+}
+/* About copyright see nil */
+.nxml-element-prefix {
+        /* nxml-element-prefix */
+        color: #7a378b;
+}
+/* About copyright see nil */
+.nxml-entity-ref-delimiter {
+        /* nxml-entity-ref-delimiter */
+        color: #008b8b;
+}
+/* About copyright see nil */
+.nxml-entity-ref-name {
+        /* nxml-entity-ref-name */
+        color: #008b8b;
+}
+/* About copyright see nil */
+.nxml-hash {
+        /* nxml-hash */
+        color: #7a378b;
+}
+/* About copyright see nil */
+.nxml-markup-declaration-delimiter {
+}
+/* About copyright see nil */
+.nxml-namespace-attribute-colon {
+}
+/* About copyright see nil */
+.nxml-namespace-attribute-prefix {
+        /* nxml-namespace-attribute-prefix */
+        color: #a0522d;
+}
+/* About copyright see nil */
+.nxml-namespace-attribute-value {
+        /* nxml-namespace-attribute-value */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.nxml-namespace-attribute-value-delimiter {
+        /* nxml-namespace-attribute-value-delimiter */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.nxml-namespace-attribute-xmlns {
+        /* nxml-namespace-attribute-xmlns */
+        color: #7a378b;
+}
+/* About copyright see nil */
+.nxml-processing-instruction-content {
+        /* nxml-processing-instruction-content */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.nxml-processing-instruction-delimiter {
+}
+/* About copyright see nil */
+.nxml-processing-instruction-target {
+        /* nxml-processing-instruction-target */
+        color: #a020f0;
+}
+/* About copyright see nil */
+.nxml-prolog-keyword {
+        /* nxml-prolog-keyword */
+        color: #a020f0;
+}
+/* About copyright see nil */
+.nxml-prolog-literal-content {
+        /* nxml-prolog-literal-content */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.nxml-prolog-literal-delimiter {
+        /* nxml-prolog-literal-delimiter */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.nxml-tag-delimiter {
+}
+/* About copyright see nil */
+.nxml-tag-slash {
+}
+/* About copyright see nil */
+.nxml-text {
+}
+/* About copyright see nil */
+.org-code {
+        /* org-code */
+        color: #7f7f7f;
+}
+/* About copyright see nil */
+.org-footnote {
+        /* org-footnote */
+        color: #a020f0;
+        text-decoration: underline;
+}
+/* About copyright see nil */
+.org-table {
+        /* org-table */
+        color: #0000ff;
+}
+/* About copyright see nil */
+.outline-1 {
+        /* outline-1 */
+        color: #0000ff;
+}
+/* About copyright see nil */
+.outline-2 {
+        /* outline-2 */
+        color: #a0522d;
+}
+/* About copyright see nil */
+.outline-3 {
+        /* outline-3 */
+        color: #a020f0;
+}
+/* About copyright see nil */
+.outline-4 {
+        /* outline-4 */
+        color: #b22222;
+}
+/* About copyright see nil */
+.rst-level-1 {
+        /* rst-level-1-face */
+        background-color: #d9d9d9;
+}
+/* About copyright see nil */
+.rst-level-2 {
+        /* rst-level-2-face */
+        background-color: #c7c7c7;
+}
+/* About copyright see nil */
+.rst-level-3 {
+        /* rst-level-3-face */
+        background-color: #b5b5b5;
+}
+/* About copyright see nil */
+.rst-level-4 {
+        /* rst-level-4-face */
+        background-color: #a3a3a3;
+}
+/* About copyright see nil */
+.rst-level-5 {
+        /* rst-level-5-face */
+        background-color: #919191;
+}
+/* About copyright see nil */
+.rst-level-6 {
+        /* rst-level-6-face */
+        background-color: #7f7f7f;
+}
+/* About copyright see nil */
+.sgml-namespace {
+        /* sgml-namespace */
+        color: #7a378b;
+}
+/* About copyright see nil */
+.sh-escaped-newline {
+        /* sh-escaped-newline */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.sh-heredoc {
+        /* sh-heredoc */
+        color: #ffa54f;
+}
+/* About copyright see nil */
+.sh-quoted-exec {
+        /* sh-quoted-exec */
+        color: #ff00ff;
+}
+/* About copyright see nil */
+.sieve-action-commands {
+        /* sieve-action-commands */
+        color: #0000ff;
+}
+/* About copyright see nil */
+.sieve-control-commands {
+        /* sieve-control-commands */
+        color: #da70d6;
+}
+/* About copyright see nil */
+.sieve-tagged-arguments {
+        /* sieve-tagged-arguments */
+        color: #a020f0;
+}
+/* About copyright see nil */
+.sieve-test-commands {
+        /* sieve-test-commands */
+        color: #5f9ea0;
+}
+/* About copyright see nil */
+.subscript {
+}
+/* About copyright see nil */
+.superscript {
+}
+/* About copyright see nil */
+.tcl-escaped-newline {
+        /* tcl-escaped-newline */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.texinfo-heading {
+        /* texinfo-heading */
+        color: #0000ff;
+}
+/* About copyright see nil */
+.tex-math {
+        /* tex-math */
+        color: #8b2252;
+}
+/* About copyright see nil */
+.tex-verbatim {
+}
+/* About copyright see nil */
+.underline {
+        /* underline */
+        text-decoration: underline;
+}
