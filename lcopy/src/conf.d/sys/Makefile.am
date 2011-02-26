@@ -4,6 +4,7 @@ dist_confd_DATA = \
 	ConsoleKit,trunk.lcopy \
 	Kahua,trunk.lcopy \
 	anaconda,trunk.lcopy \
+	audit,trunk.lcopy \
 	autoconf,trunk.lcopy \
 	autofs,trunk.lcopy \
 	automake,trunk.lcopy \
@@ -12,8 +13,9 @@ dist_confd_DATA = \
 	biwascheme,trunk.lcopy \
 	cairo,trunk.lcopy \
 	cc-mode,trunk.lcopy \
-	cluster,trunk.lcopy \
 	cluster,stable31.lcopy \
+	cluster,trunk.lcopy \
+	coreutils,trunk.lcopy \
 	corosync,trunk.lcopy \
 	cygwin,trunk.lcopy \
 	ddskk,trunk.lcopy \
@@ -25,7 +27,7 @@ dist_confd_DATA = \
 	emacs,trunk.lcopy \
 	emacs-mew,trunk.lcopy \
 	emacs-w3m,trunk.lcopy \
-        ethtool,trunk.lcopy \
+	ethtool,trunk.lcopy \
 	fence,trunk.lcopy \
 	fence-agents,trunk.lcopy \
 	flashcache,trunk.lcopy \
@@ -47,7 +49,10 @@ dist_confd_DATA = \
 	httpclient,trunk.lcopy \
 	httpd,trunk.lcopy \
 	ietf-draft,trunk.lcopy \
+	initscripts,trunk.lcopy \
+	iproute,trunk.lcopy \
 	keepalived,trunk.lcopy \
+	kernel,dlm.lcopy \
 	kernel,kvm.lcopy \
 	kernel,rt.lcopy \
 	kernel,trunk.lcopy \
@@ -66,6 +71,7 @@ dist_confd_DATA = \
 	m4,trunk.lcopy \
 	make,trunk.lcopy \
 	man-pages,trunk.lcopy \
+	mdadm,trunk.lcopy \
 	miniascape,trunk.lcopy \
 	mock,trunk.lcopy \
 	monotone,trunk.lcopy \
@@ -76,7 +82,10 @@ dist_confd_DATA = \
 	openid4java,trunk.lcopy \
 	openldap,trunk.lcopy \
 	openssl,trunk.lcopy \
+	pam,trunk.lcopy \
 	perg,trunk.lcopy \
+	php,trunk.lcopy \
+	postgresql,trunk.lcopy \
 	prelcopy,trunk.lcopy \
 	python-virtinst,trunk.lcopy \
 	qemu,kvm.lcopy \
@@ -90,6 +99,7 @@ dist_confd_DATA = \
 	rsyslog,trunk.lcopy \
 	samba,trunk.lcopy \
 	sbuild,trunk.lcopy \
+	shadow-utils,trunk.lcopy \
 	sop,trunk.lcopy \
 	sos,trunk.lcopy \
 	spacewalk,trunk.lcopy \
@@ -99,9 +109,11 @@ dist_confd_DATA = \
 	spice,vdi_agent.lcopy \
 	spice,vdi_port.lcopy \
 	spice,vdi_slirp.lcopy \
+	squid,trunk.lcopy \
 	srpmix,trunk.lcopy \
 	stitch,trunk.lcopy \
 	strace,trunk.lcopy \
+	sysstat,trunk.lcopy \
 	systemtap,trunk.lcopy \
 	texinfo,trunk.lcopy \
 	tog-pegasus,trunk.lcopy \
