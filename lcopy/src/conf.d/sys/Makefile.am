@@ -83,6 +83,7 @@ dist_confd_DATA = \
 	openais,trunk.lcopy \
 	openid4java,trunk.lcopy \
 	openldap,trunk.lcopy \
+	openssh,trunk.lcopy \
 	openssl,trunk.lcopy \
 	pam,trunk.lcopy \
 	perg,trunk.lcopy \

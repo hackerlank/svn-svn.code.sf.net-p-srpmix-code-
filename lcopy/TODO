@@ -4,7 +4,6 @@
 
 cman
 procps-
-openssh - cvs -d :extssh:anoncvs@anoncvs.mindrot.org:/cvs checkout openssh < /dev/null >/dev/null
 net-tools-
 sendmail
 iscsi-initiator-utils
