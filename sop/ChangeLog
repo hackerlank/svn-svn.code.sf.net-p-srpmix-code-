@@ -1,3 +1,7 @@
+2011-02-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sop-garbages (report): Fix a type(rpm -qi).
+
 2011-02-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-garbages (report): Report mirror level broken

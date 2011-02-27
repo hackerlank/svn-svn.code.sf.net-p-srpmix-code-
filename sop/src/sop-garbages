@@ -142,21 +142,21 @@ function report
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-plugin-.*')
 	for e in $rpm_e; do 
-	    echo ": rpm-level && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-plugins-.*')
 	for e in $rpm_e; do 
-	    echo ": rpm-level && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-archives-.*')
 	for e in $rpm_e; do 
-	    echo ": rpm-level && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
 	e=$rpm
-	echo ": rpm-level && rpm -i $e 2>&1 > /dev/null && rpm -e $e"
+	echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
     done
 }
 
