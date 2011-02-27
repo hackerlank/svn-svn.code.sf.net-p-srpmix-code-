@@ -121,6 +121,7 @@ dist_confd_DATA = \
 	texinfo,trunk.lcopy \
 	tog-pegasus,trunk.lcopy \
 	twig,trunk.lcopy \
+	uim,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
 	virt-manager,trunk.lcopy \
 	wfo,trunk.lcopy \
