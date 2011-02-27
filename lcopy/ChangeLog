@@ -1,3 +1,9 @@
+2011-02-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/backends/cvs (cvs_checkout): For avoiding blocking,
+	run ssh -o 'StrictHostKeyChecking no' before running cvs 
+	command on a :extssh: repository.
+
 2011-02-24  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.18.

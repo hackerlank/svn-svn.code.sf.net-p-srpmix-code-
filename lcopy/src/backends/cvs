@@ -3,6 +3,9 @@
 BACKEND=cvs
 VERSION="0.0.0"
 
+cvs_pserver_spec="^:pserver:[a-zA-Z0-9]+:[a-zA-Z0-9]*@[-a-zA-Z0-9./:]+$"
+cvs_extssh_spec="^:extssh:([a-zA-Z0-9]+@[-a-zA-Z0-9./]+):[-a-zA-Z0-9./]+$"
+
 source liblcopy_backends.sh || exit 1
 
 function write_spec
@@ -24,13 +27,12 @@ function repo_check
 	return 1
     fi
 
-    local pserver_spec="^:pserver:[a-zA-Z0-9]+:[a-zA-Z0-9]*@[-a-zA-Z0-9./:]+$"
-    local extssh_spec="^:extssh:[a-zA-Z0-9]+@[-a-zA-Z0-9./:]+$"
-    if  ! ( [[ "$repo" =~ $pserver_spec ]] || [[ "$repo" =~ $extssh_spec ]] ); then
+
+    if  ! ( [[ "$repo" =~ $cvs_pserver_spec ]] || [[ "$repo" =~ $cvs_extssh_spec ]] ); then
 	echo "broken cvs command line: unrecognizable repo specification: $repo" 1>&2
 	echo "expected repo specifications: " 1>&2
-	echo "	$pserver_spec" 1>&2
-	echo "	$extssh_spec" 1>&2
+	echo "	$cvs_pserver_spec" 1>&2
+	echo "	$cvs_extssh_spec" 1>&2
 	return 1
     else
 	return 0
@@ -86,11 +88,11 @@ function cvs_help_genconf
 	prefix="$0 genconf"
     fi
 
-    echo "	" ${prefix} cvs -d:pserver:USER:PASSWD@HOST 'checkout|co' MODULE 
-    echo "	" ${prefix} cvs -d :pserver:USER:PASSWD@HOST 'checkout|co' MODULE 
+    echo "	" ${prefix} cvs -d:pserver:USER:PASSWD@HOST:PATH 'checkout|co' MODULE 
+    echo "	" ${prefix} cvs -d :pserver:USER:PASSWD@HOST:PATH 'checkout|co' MODULE 
         # 
-    echo "	" ${prefix} cvs -d:extssh:USER@HOST 'checkout|co'  MODULE 
-    echo "	" ${prefix} cvs -d :extssh:USER@HOST 'checkout|co'  MODULE 
+    echo "	" ${prefix} cvs -d:extssh:USER@HOST:PATH 'checkout|co'  MODULE 
+    echo "	" ${prefix} cvs -d :extssh:USER@HOST:PATH 'checkout|co'  MODULE 
     echo "	" '(do not use -P: -P is added automatically.)'
 }
 
@@ -197,6 +199,12 @@ function cvs_checkout
     ( 
 	cd ${output_dir}
 
+	#
+	# Don't run key checking to avoid blocking.
+	# 
+	if [[ "${CVS_REPOSITORY}" =~ $cvs_extssh_spec ]]; then
+	    ssh -o 'StrictHostKeyChecking no' "${BASH_REMATCH[1]}"
+	fi
 	common_spawn cvs -d"${CVS_REPOSITORY}" checkout -P "${CVS_MODULE}"
     )
 
