@@ -26,7 +26,7 @@ source libsrpmix.sh || {
 function print_section
 {
     echo "##"
-    echo '##' " @ " $1 ":"
+    echo '##' " @ " $1":"
     echo "##"    
 }
 
@@ -140,23 +140,25 @@ function report
 	rpm="${REPLY:1}"
 	print_entry $rpm
 
-	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-plugin-.*')
+	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-srpmix-plugin-.*')
 	for e in $rpm_e; do 
 	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
-	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-plugins-.*')
+	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-srpmix-plugins-.*')
 	for e in $rpm_e; do 
 	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
-	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-archives-.*')
+	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-srpmix-archives-.*')
 	for e in $rpm_e; do 
 	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
-	e=$rpm
-	echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
+	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-srpmix-.*')
+	for e in $rpm_e; do 
+	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
+	done
     done
 }
 

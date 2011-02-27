@@ -1,3 +1,9 @@
+2011-02-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.3.16.
+
+	* src/sop-garbages (report): Remove .*-srpmix- package.
+
 2011-02-27  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-garbages (report): Fix a type(rpm -qi).
