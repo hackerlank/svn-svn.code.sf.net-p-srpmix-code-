@@ -128,6 +128,7 @@
 				 *rfc2396-unreserved-char-set*))))
 
 (define (escape-path-component-of-url path)
-  (uri-encode-string path :noescape non-url-char-set))
+  (and path
+       (uri-encode-string path :noescape non-url-char-set)))
 
 (provide "yogomacs/dentry")
