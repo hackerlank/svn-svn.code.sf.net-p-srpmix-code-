@@ -15,7 +15,7 @@ qdiskdに-dをつけるとデバッグモード。
 
 clulog -> syslogのみ
 clulog_pid -> syslogのみ
-clulog_and_print ー> syslogとstdout
+clulog_and_print -> syslogとstdout
 
 に出る。
 
