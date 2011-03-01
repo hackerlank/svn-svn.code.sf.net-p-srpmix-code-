@@ -201,7 +201,7 @@ function write_dot_debwatch
     echo -n "DEBWATCH_WATCH='"
     for l in $@; do
 #	printf "%q\n" $l
-	echo $l
+	echo " $l"
     done
     echo -n "'"
     echo ""
