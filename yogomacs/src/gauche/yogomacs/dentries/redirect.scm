@@ -22,8 +22,9 @@
 	#\v)))
 
 (define-method url-of ((redirect <redirect-dentry>))
-  (or (ref redirect 'url)
-      (path-of redirect)))
+  (escape-path-component-of-url
+   (or (ref redirect 'url)
+       (path-of redirect))))
 
 (define-method arrowy-to-dname-of ((d <redirect-dentry>))
   (let1 show-arrowy-to (ref d 'show-arrowy-to)

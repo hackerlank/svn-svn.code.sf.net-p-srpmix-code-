@@ -11,7 +11,8 @@
    ))
 
 (define-method url-of ((d <text-dentry>))
-  (path-of d))
+  (escape-path-component-of-url
+   (path-of d)))
 
 (define-method text-of ((d <text-dentry>))
   (ref d 'text))

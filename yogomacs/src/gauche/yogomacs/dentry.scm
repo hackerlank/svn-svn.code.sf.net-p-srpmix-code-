@@ -26,9 +26,14 @@
 	  arrowy-to-url-of
 
 	  dentry-for
+	  ;;
+	  escape-path-component-of-url
 	  )
   (use yogomacs.entry)
-  (use srfi-1))
+  (use srfi-1)
+  (use rfc.uri)
+  (use srfi-14)
+  )
  
 (select-module yogomacs.dentry)
 
@@ -115,5 +120,14 @@
   (find (lambda (dentry)
 	  (equal? (dname-of dentry) dname))
 	dentries))
+
+
+(define non-url-char-set (list->char-set 
+			  (cons #\/ 
+				(char-set->list 
+				 *rfc2396-unreserved-char-set*))))
+
+(define (escape-path-component-of-url path)
+  (uri-encode-string path :noescape non-url-char-set))
 
 (provide "yogomacs/dentry")

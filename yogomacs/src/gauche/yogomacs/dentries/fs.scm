@@ -64,13 +64,15 @@
 	     (ref (ref fs-dentry 'stat) 'mtime)))
 
 (define-method url-of ((fs-dentry <fs-dentry>))
-  (ref fs-dentry 'url))
+  (escape-path-component-of-url
+   (ref fs-dentry 'url)))
 
 (define-method arrowy-to-dname-of ((fs-symlink-dentry <fs-symlink-dentry>))
   (ref fs-symlink-dentry 'symlink-to-dname))
 
 (define-method arrowy-to-url-of ((fs-symlink-dentry <fs-symlink-dentry>))
-  (ref fs-symlink-dentry 'symlink-to-url))
+  (escape-path-component-of-url
+   (ref fs-symlink-dentry 'symlink-to-url)))
 
 (define-method make-url-default ((fs-dentry <fs-dentry>))
   (uri-compose :scheme "file"

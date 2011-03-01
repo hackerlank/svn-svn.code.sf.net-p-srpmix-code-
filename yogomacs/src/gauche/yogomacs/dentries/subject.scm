@@ -10,7 +10,8 @@
    ))
 
 (define-method url-of ((d <subject-dentry>))
-  (path-of d))
+  (escape-path-component-of-url
+   (path-of d)))
 
 (define-method nlink-of ((d <subject-dentry>))
   (ref d 'nlink)

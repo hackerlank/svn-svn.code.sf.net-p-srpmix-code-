@@ -24,7 +24,7 @@
 (define (route0 rtable path params config)
   (let1 method (if (post?) "POST" "GET")
     (if (null? rtable)
-	(not-found #`"Cannot find ,|path|" path)
+	(not-found #`"Cannot find ,|path|" #`"No route for ,|path|")
 	(let1 regex (car (car rtable))
 	  (if (or (and (string? regex) (equal? regex path))
 		  (and (regexp? regex) (regex path)))

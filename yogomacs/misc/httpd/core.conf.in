@@ -1,7 +1,7 @@
     RewriteEngine on
     RewriteCond %{REQUEST_METHOD} ^POST$
-    RewriteRule .* $0 [E=YOGOMACS_PATH:$0,QSA]
+    RewriteRule .* $0 [E=YOGOMACS_PATH:$0,QSA,B]
     RewriteCond %{HTTP:Authorization}  ^(.*)
-    RewriteRule .* /cgi-bin/yogomacs-@SPEC_CONFIG@.cgi?path=$0 [E=HTTP_CGI_AUTHORIZATION:%1,PT,LAST,QSA]
-    RewriteRule .* /cgi-bin/yogomacs-@SPEC_CONFIG@.cgi?path=$0 [PT,LAST,QSA]
+    RewriteRule .* /cgi-bin/yogomacs-@SPEC_CONFIG@.cgi?path=$0 [E=HTTP_CGI_AUTHORIZATION:%1,PT,LAST,QSA,B]
+    RewriteRule .* /cgi-bin/yogomacs-@SPEC_CONFIG@.cgi?path=$0 [PT,LAST,QSA,B]
     ScriptAlias /cgi-bin @VHOST_DOCROOT@/@PACKAGE@/cgi-bin
