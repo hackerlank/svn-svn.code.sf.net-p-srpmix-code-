@@ -1,0 +1,45 @@
+Summary: A tool converting a file to html format with source-highlight
+Name: syntax
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPLv3+yamato
+Group: Development/Tools
+Buildarch: noarch
+URL: http://srpmix.org
+Source0: %{name}-%{version}.tar.bz2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+
+Requires: gauche source-highlight
+
+%description
+A tool converting a file to yogomacs suitable xhtml format with source-highlight.
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%doc
+
+%{_datadir}/outlang/yogomacs.outlang
+
+# %{_bindir}/outlang
+# %{_datadir}/gauche/site/lib/outlang/outlang.scm
+# %{_datadir}/gauche/site/lib/outlang/htmlprag.scm
+
+%changelog
+* Fri Jul 16 2010 Masatake YAMATO <yamato@redhat.com> - 
+- Initial build.
+
