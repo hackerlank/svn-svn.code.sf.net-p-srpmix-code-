@@ -43,6 +43,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/syntax/syntax-batch.vim
 
 %changelog
-* Fri Jul 16 2010 Masatake YAMATO <yamato@yamato@redhat.com> - 
+* Fri Jul 16 2010 Masatake YAMATO <yamato@redhat.com> - 
 - Initial build.
 
