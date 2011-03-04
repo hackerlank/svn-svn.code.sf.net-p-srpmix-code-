@@ -131,7 +131,7 @@ function twig_fork_generic
 	exit 1
     fi
 
-    if ! cp -r $from/{SRPMIX,STATUS,archives,plugins,pre-build,specs.spec} $dir/; then
+    if ! cp -r $from/{SRPMIX,STATUS,CRADLE,archives,plugins,pre-build,specs.spec} $dir/; then
 	echo "Cannot cp: $from/* $dir" 1>&2
 	exit 1
     fi
@@ -306,6 +306,7 @@ function twig_install_stub_patch
 
 function twig_verify_soruces
 {
+    # CRADLE is still optional.
     test -d "$1"                 -a \
 	-f "$1/SRPMIX"           -a \
 	-f "$1/STATUS"           -a \
