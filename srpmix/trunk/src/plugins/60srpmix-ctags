@@ -131,7 +131,7 @@ function run_ctags
 	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
 	| grep -v .bz2           \
 	| grep -v .gz            \
-	| ${CTAGS} -o $o -L - )
+	| ${CTAGS} -n -o $o -L - )
     es_print ctags-end --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
