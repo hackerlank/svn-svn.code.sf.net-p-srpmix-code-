@@ -1,3 +1,9 @@
+2011-03-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.2.0.
+
+	* src/sbuild (main): export the name of cradle.
+
 2010-11-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/create-comps.scm (print-packages): Set type attribute for srpmix packages
