@@ -35,6 +35,7 @@
      (,(string->regexp (string-append prefix "/specs.spec$")) ,file-dest)
      (,(string->regexp (string-append prefix "/STATUS$")) ,file-dest)
      (,(string->regexp (string-append prefix "/SRPMIX$")) ,file-dest)
+     (,(string->regexp (string-append prefix "/CRADLE$")) ,file-dest)
      (,(string->regexp (string-append prefix "/vanilla$")) ,dir-dest)
      (,(string->regexp (string-append prefix "/vanilla/.*")) ,fs-dest)
      ))

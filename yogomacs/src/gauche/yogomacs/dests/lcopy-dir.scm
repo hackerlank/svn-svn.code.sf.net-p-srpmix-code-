@@ -32,6 +32,7 @@
      (,(string->regexp (string-append prefix "/checkout.lcopy$")) ,file-dest)
      (,(string->regexp (string-append prefix "/STATUS$")) ,file-dest)
      (,(string->regexp (string-append prefix "/LCOPY$")) ,file-dest)
+     (,(string->regexp (string-append prefix "/CRADLE$")) ,file-dest)
      ;; archives -> cmdline
      ))
 
