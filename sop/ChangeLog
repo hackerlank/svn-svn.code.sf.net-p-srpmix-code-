@@ -1,3 +1,9 @@
+2011-03-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.4.0.
+
+	* src/sop-mirror (main): export the name of cradle.
+
 2011-02-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.3.16.

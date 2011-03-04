@@ -120,6 +120,9 @@ function mirror
 
 function main
 {
+    local name
+
+
     if [ "$#" = 1 ] && ( [ "$1" = "-h" ] || [ "$1" = "--help" ] ); then
 	print_usage
 	return 0
@@ -127,12 +130,15 @@ function main
 
     if test $# = 0; then
 	for d in ${SOP_CRADLES_DIR}/*; do
+	    name=$(basename $d)
+	    export SRPMIX_CRADLE_NAME="$name"
 	    mirror $d
 	done
     else
-	for mirror_name in "$@"; do
-	    local d="${SOP_CRADLES_DIR}/${mirror_name}"
+	for name in "$@"; do
+	    local d="${SOP_CRADLES_DIR}/${name}"
 	    if [ -d $d ]; then
+		export SRPMIX_CRADLE_NAME="$name"
 		mirror $d
 	    fi
 	done
