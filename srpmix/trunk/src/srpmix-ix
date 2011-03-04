@@ -90,6 +90,7 @@ function print_usage
     echo "            [--target=target|-t=target|--target target|-t target]"
     echo "            [--set-group=group|-g=group|--set-group group|-g group]"
     echo "            [--hardlink] [--ignore-error] [--keep-original] [--rearrange-spec-command=COMMAND]"
+    echo "            [--cradle-name=NAME]"
     echo "            ROOTDIR SRPM_FILES..."
     echo
     echo
@@ -100,6 +101,7 @@ function print_usage
     echo "  --freeze: freeze expanded files. "
     echo ""
     echo "environment variables:"
+    echo "SRPMIX_CRADLE_NAME=NAME"
     echo "SRPMIX_DO_HARDLINK=yes|no"
     echo "SRPMIX_IGNORE_ERROR=yes|no"
     echo "SRPMIX_MULTI_TARGETS=yes|no"
@@ -279,6 +281,9 @@ function parse_arguments
                 REARRANGE_SPEC_COMMAND=`echo "$1" | sed -e 's/--rearrange-spec-command=//'`
                 shift 1
                 ;;
+	    --cradle-name=*)
+	       SRPMIX_CRADLE_NAME=${1/--cradle-name=}
+	       ;;
             -*)
                 echo unknown option: "$1" 1>&2
                 print_usage 1>&2
@@ -817,6 +822,10 @@ function srpm_build
 
     status=$?
     echo ${status} > "${rootdir}/STATUS"
+    if [ -z "${SRPMIX_CRADLE_NAME}" ]; then
+	SRPMIX_CRADLE_NAME=unknown
+    fi
+    echo ${SRPMIX_CRADLE_NAME} > "${rootdir}/CRADLE"
     srpmix_chmod "${rootdir}/${BUILDDIR}/${build_name}"
     return $status
 }

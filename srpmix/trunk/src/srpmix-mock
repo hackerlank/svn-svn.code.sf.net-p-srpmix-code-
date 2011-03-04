@@ -23,10 +23,13 @@ function print_usage
 {
     echo "Usage: "
     echo "	srpmix-mock --help|-h"
-    echo "      srpmix-mock [--debug] --dist=DIST [--arch=ARCH] ROOTDIR SRPM"
+    echo "      srpmix-mock [--debug] --dist=DIST [--arch=ARCH] [--cradle-name=NAME] ROOTDIR SRPM"
     echo 
     echo "DIST: epel-4, epel-5..., fedora-12, fedora-13,..."
     echo "ARCH: ..."
+    echo 
+    echo "environment variables:"
+    echo "SRPMIX_CRADLE_NAME=NAME"
     echo
 }
 
@@ -47,6 +50,9 @@ function parse_arguments
 	    --debug)
 		SRPMIX_MOCK_DEBUG=yes
 		;;
+	    (--cradle-name=*)
+	        SRPMIX_CRADLE_NAME=${1/--cradle-name=}
+	        ;;
 	     *)
 		break
 		;;
@@ -155,6 +161,11 @@ function main
 
     echo "${SRPMIX_PKG_VERSION}" > ${rootdir}/SRPMIX
     echo 0 > ${rootdir}/STATUS
+
+    if [ -z "${SRPMIX_CRADLE_NAME}" ]; then
+	SRPMIX_CRADLE_NAME=unknown
+    fi
+    echo ${SRPMIX_CRADLE_NAME} > "${rootdir}/CRADLE"
     
     chmod -R og-w ${rootdir}
 

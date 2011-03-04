@@ -284,6 +284,7 @@ rm -rf \$RPM_BUILD_ROOT
 %dir /${SRPMIX_SOURCES_RDIR}/*/*/*/
 /${SRPMIX_SOURCES_RDIR}/*/*/*/SRPMIX
 /${SRPMIX_SOURCES_RDIR}/*/*/*/STATUS
+/${SRPMIX_SOURCES_RDIR}/*/*/*/CRADLE
 /${SRPMIX_SOURCES_RDIR}/*/*/*/pre-build
 /${SRPMIX_SOURCES_RDIR}/*/*/*/plugins
 # rinstalldir is need to make a broken symlink %files member

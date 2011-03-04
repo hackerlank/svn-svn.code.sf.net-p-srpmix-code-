@@ -1,9 +1,19 @@
 2011-03-05  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 3.117.0.
+
+	* src/srpmix-wrap (create_core_spec): Added CRADLE to %files.
+
+	* src/srpmix-mock (print_usage): Added CRADLE file.
+
+	* src/srpmix-ix (srpm_build): Added CRADLE file.
+
+	* src/plugins/50srpmix-file (run_file_cmd): Ignore CRADLE.
+
+	* src/plugins/50srpmix-coreutils (run_cmd): Ignore CRADLE.
+
 	* src/plugins/60srpmix-ctags (run_ctags): Added -n when
 	invoking ctags.
-
-	* configure.ac: Version 3.117.0.
 
 2010-12-20  Masatake YAMATO  <yamato@redhat.com>
 

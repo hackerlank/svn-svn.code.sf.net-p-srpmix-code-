@@ -127,6 +127,7 @@ function run_file_cmd
     (cd $d && find -L . -not -type d \
 	| grep -v ^./STATUS \
 	| grep -v ^./SRPMIX \
+	| grep -v ^./CRADLE \
 	| grep -v ^.\$ \
 	| grep -v ^./plugins \
 	| grep -v ^./archives \
