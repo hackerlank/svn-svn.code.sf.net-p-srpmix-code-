@@ -412,7 +412,7 @@ schemeインタプリタやes-lang-c-stdc99で読み出すことができます�
 各pvrディレクトリには
 @file{pre-build}, @file{archives}, @file{vanilla}, @file{plugins}, @file{STATUS}
 の5つのディレクトリ/ファイルがあります。pvrディレクトリによっては、さらに@file{SRPMIX},
-@file{LCOPY}, @file{specs.spec}があります。
+@file{LCOPY}, @file{specs.spec}, @file{CRADLE}があります。
 
 @file{pre-build}ディレクトリには、ビルドに使われたソースコードが配置さ
 れています。言いかえるとupstreamにて提供されているオリジナルのソースコー
