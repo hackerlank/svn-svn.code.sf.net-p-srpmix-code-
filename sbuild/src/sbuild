@@ -441,7 +441,7 @@ function main
 
 	cf=${cradle}/cf
 	name=$(basename ${cradle})
-	export SBUILD_CRADLE_NAME="$name"
+	export SRPMIX_CRADLE_NAME="$name"
 
 	if test -z "$CRADLE" \
 	    || test "$CRADLE" = $name; then
