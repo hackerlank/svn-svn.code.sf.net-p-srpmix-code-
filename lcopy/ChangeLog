@@ -1,5 +1,7 @@
 2011-03-06  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.2.19.
+
 	* src/lcopy-update: Create CRADLE file.
 
 	* src/lcopy-checkout: Create CRADLE file.
