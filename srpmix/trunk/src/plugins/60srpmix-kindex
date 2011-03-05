@@ -168,7 +168,7 @@ function main
 		    make O=${MY_TMPDIR}/$t TAGS
 		fi
 		
-		if ! test -f "${PLUGINDIR}/${t}.TAGS"; then
+		if ! test -f "${PLUGINDIR}/${t}.tags"; then
 		    make O=${MY_TMPDIR}/$t tags
 		fi
 
