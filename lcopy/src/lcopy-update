@@ -17,6 +17,9 @@ function print_usage
     echo ""
     echo "--no-update-p checks the value for LCOPY_UPDATE in conf file: "
     echo "	Returns 0 if the value is no."
+    echo
+    echo "environment variables:"
+    echo "SRPMIX_CRADLE_NAME=NAME"
 }
 
 function parse_arguments
@@ -134,6 +137,11 @@ function update
     status=$?
     echo $status > ${base_dir}/STATUS
 
+    if [ -z "${SRPMIX_CRADLE_NAME}" ]; then
+	SRPMIX_CRADLE_NAME=unknown
+    fi
+    echo ${SRPMIX_CRADLE_NAME} > "${base_dir}/CRADLE"
+    
     if [ "$status" -eq "1" ]; then
 	status=0
 	lcopy_srpmix_plugin "${base_dir}"
