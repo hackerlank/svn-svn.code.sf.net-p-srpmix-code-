@@ -1,0 +1,40 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
+(use outlang.outlang)
+(use gauche.parseopt)
+(use sxml.serializer)
+
+(define (show-help n)
+  (format #t "Usage: \n")
+  (format #t "	~a --help|-h\n" *program-name*)
+  (format #t "	~a [--html] FILE\n" *program-name*)
+  (exit n))
+
+(define (with-output-to-stderr thunk)
+  (with-output-to-port (current-error-port)
+    (thunk)))
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cute show-help 0))
+       (html "html" #f)
+       . rest)
+    (unless (eq? (length rest) 1)
+      (with-output-to-stderr
+       (lambda ()
+	 (print "Wrong number of argument")
+	 (show-help 1))))
+    (let* ((input-file (car rest))
+	   (shtml (outlang input-file)))
+      (when shtml
+	(if html
+	    (display (srl:sxml->xml-noindent shtml))
+	    (write shtml)))
+      (if shtml
+	  0
+	  1))))
+
+
+

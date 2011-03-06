@@ -1,6 +1,7 @@
 (define-module outlang.outlang
   (export outlang)
   (use outlang.htmlprag)
+  (use gauche.process)
   )
 (select-module outlang.outlang)
 
@@ -26,6 +27,7 @@
 	    (sys-unlink fname)
 	    (if (equal? shtml '(*TOP*))
 		#f
-		shtml))))))
+		shtml))
+	  #f))))
 
 (provide "outlang/outlang")

@@ -1,5 +1,5 @@
 Summary: A tool converting a file to html format with source-highlight
-Name: syntax
+Name: outlang
 Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
 License: GPLv3+yamato
@@ -35,9 +35,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_datadir}/outlang/yogomacs.outlang
 
-# %{_bindir}/outlang
-# %{_datadir}/gauche/site/lib/outlang/outlang.scm
-# %{_datadir}/gauche/site/lib/outlang/htmlprag.scm
+%{_bindir}/outlang
+%{_datadir}/gauche/site/lib/outlang/outlang.scm
+%{_datadir}/gauche/site/lib/outlang/htmlprag.scm
 
 %changelog
 * Fri Jul 16 2010 Masatake YAMATO <yamato@redhat.com> - 

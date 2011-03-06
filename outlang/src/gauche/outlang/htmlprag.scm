@@ -1,8 +1,8 @@
 ;; define-module/select-module/provide for gauche 
 ;; is done by Masatake YAMATO <yamato@redhat.com>
-(define-module syntax.htmlprag
+(define-module outlang.htmlprag
   (export html->shtml))
-(select-module syntax.htmlprag)
+(select-module outlang.htmlprag)
 
 ;;; @Package     HtmlPrag
 ;;; @Subtitle    Pragmatic Parsing and Emitting of HTML using SXML and SHTML
@@ -2386,7 +2386,7 @@
 ;;; considered a preview to invite comments.
 ;;;
 ;;; @end table
-(provide "syntax/htmlprag")
+(provide "outlang/htmlprag")
 ; .e.g.
 ;(select-module user)
 ;(define (main args)
