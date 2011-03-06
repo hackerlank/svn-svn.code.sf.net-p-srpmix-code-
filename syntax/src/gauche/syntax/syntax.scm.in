@@ -291,6 +291,7 @@
 		  -- ,source-file)
 		:wait #t)
       (let1 status (process-exit-status proc)
+	# TODO: check `status'
 	(let1 shtml (call-with-input-file fname html->shtml)
 	  (sys-unlink fname)
 	  (sys-unsetenv "SYNTAX_OUTPUT_FILE")
