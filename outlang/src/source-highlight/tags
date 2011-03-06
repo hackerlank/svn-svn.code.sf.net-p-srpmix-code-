@@ -4,5 +4,8 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+dog	bar.c	2;"	f
+foo	bar.c	11;"	f
+foo	hello.c	10;"	f
 foo	hello.c	4;"	f
-main	hello.c	9;"	f
+main	hello.c	16;"	f
