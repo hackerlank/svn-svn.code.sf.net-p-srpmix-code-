@@ -1,3 +1,7 @@
+/*
+  a
+  b
+ */
 int
 dog(int i)
 {
