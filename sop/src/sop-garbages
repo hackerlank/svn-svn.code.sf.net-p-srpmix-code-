@@ -155,7 +155,7 @@ function report
 	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done
 
-	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-srpmix-.*')
+	rpm_e=$(echo "$rpm_qa" | tr ' ' '\n' | grep "$rpm"'-srpmix-[0-9].*')
 	for e in $rpm_e; do 
 	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done

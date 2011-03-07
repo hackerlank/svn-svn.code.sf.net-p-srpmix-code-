@@ -1,3 +1,8 @@
+2011-03-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sop-garbages (report): Improve the regex for srpmix-3.x
+	packages.
+	
 2011-03-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.4.0.
