@@ -210,7 +210,9 @@
 				  ))))
     (values shtml point-max count-lines)))
 
-(define (outlang source-file)
+;; TODO:
+;; :embed-links #f
+(define (outlang source-file . rest)
   (let* ((proc (run-process
 		`(source-highlight 
 		  --tab=8
