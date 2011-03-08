@@ -4,17 +4,58 @@
   (use gauche.process)
   (use sxml.tree-trans)
   (use srfi-1)
-  (use srfi-13)
   (use srfi-11)
+  (use srfi-13)
+  (use srfi-19)
   ;;
   (use util.list)
   )
 (select-module outlang.outlang)
 
-(define prefix "/usr")
-(define dir "/share/outlang/")
-
 (debug-print-width #f)
+
+
+(define outlang-prefix "/usr")
+(define outlang-dir "/share/outlang/")
+;(define style-prefix "/tmp")
+(define style-prefix "/usr/share/yogomacs/css")
+
+(define (built-in-links)
+  (define (built-in-link title face)
+    `(link (|@| (rel "stylesheet")
+	    (type "text/css")
+	    (href ,#`"file://,|style-prefix|/,|face|--,|title|.css")
+	    (title ,title))))
+  (define (built-in-link0 title names)
+    (apply
+     append
+     (map
+      (lambda (face)
+	(list "	" (built-in-link title face) "\n"))
+      names)))
+  (let1 base-names #;'(default
+		      font-lock-builtin-face
+		      font-lock-comment-delimiter-face
+		      font-lock-comment-face
+		      font-lock-constant-face
+		      font-lock-doc-face
+		      font-lock-function-name-face
+		      font-lock-keyword-face
+		      font-lock-negation-char-face
+		      font-lock-regexp-grouping-backslash
+		      font-lock-regexp-grouping-construct
+		      font-lock-string-face
+		      font-lock-type-face
+		      font-lock-variable-name-face
+		      font-lock-warning-face
+		      highlight
+		      lfringe
+		      linum
+		      rfringe)
+      '(file-font-lock)
+    `(
+      ,@(built-in-link0 "Default" base-names)
+      ,@(built-in-link0 "Invert" base-names))))
 
 (define (span-length span)
   (let1 elt (caddr span)
@@ -35,11 +76,11 @@
     (if found-newline?
 	(list (cons* kar
 		     `(span (|@| 
-			     (class "rfrindge")
+			     (class "rfringe")
 			     (id ,#`"r/L:,|line|"))
 			    " ")
 		     `(span (|@|
-			     (class "lfrindge")
+			     (class "lfringe")
 			     (id ,#`"l/P:,|pos|/L:,|line|"))
 			    " ")
 		     `(span (|@|
@@ -65,24 +106,82 @@
 		  #t
 		  #f)))))
 
-;(define (trx sxml point-max count-lines) sxml)
+(define asis `((*text* . ,(lambda (tag str) str))
+	       (*default* . ,(lambda x x))))
+
 (define (trx sxml point-max count-lines)
-  (pre-post-order sxml
-		  `((pre . ,(lambda (tag . rest)
-			      (cons tag (reverse (car (fold
-						       (cute line-prefix <> <> 
-							     (+ (floor->exact (log (max count-lines 1) 10))
-								1))
-						       (list (list) 1 1 #t)
-						       rest))))))
-		    (*text* . ,(lambda (tag str) str))
-		    (*default* . ,(lambda x x))
-		    )))
+  (let1 order (+ (floor->exact (log (max count-lines 1) 10)) 1)
+    (pre-post-order sxml
+		    `((head . ,(lambda (tag . rest)
+				 (cons tag (reverse 
+					    (append (reverse (built-in-links))
+						    (cons*
+						     "\n"
+						     `(meta (|@| 
+							     (name "count-lines")
+							     (content ,#`",|count-lines|")))
+						     "	"
+						     "\n"
+						     `(meta (|@| 
+							     (name "point-max")
+							     (content ,#`",|point-max|")))
+						     "	"
+						     "\n"
+						     `(meta (|@| 
+							     (name "version")
+							     (content "0.0.0")))
+						     "	"
+						     "\n"
+						     `(meta (|@| 
+							     (name "created-time")
+							     (content ,(date->string (time-utc->date (current-time)) "~5"))))
+						     "	"
+						     (reverse rest)))))))
+		      (pre . ,(lambda (tag . rest)
+				(cons tag (reverse (car (fold
+							 (cute line-prefix <> <> order)
+							 (list (list) 1 1 #t)
+							 rest))))))
+		      ,@asis
+		      ))))
 
 (define class-map
-  `(("normal" . "default")))
+  `(("normal" . "default")
+    ("function" . "function-name")
+    ("preproc" . "preprocessor")
+    ("variable" . "variable-name")
+    ("usertype" . "type")
+    ;; regex
+    ;; specialchar
+    ;; number
+    ;; symbol
+    ;; cbracket
+    ("todo" . "warning")
+    ;; code
+    ("predef_var" . "constant")
+    ("predef_func" . "builtin")
+    ("classname" . "type")
+    ("url" . "doc")
+    ;; date
+    ;; time
+    ;; file
+    ;; ip
+    ;; name
+    ("argument" . "variable-name")
+    ("optionalargument" . "variable-name")
+    ("oldfile" . "diff-file-header")
+    ("newfile" . "diff-file-header")
+    ;; ("difflines" . "")
+    ("selector" . "function-name")
+    ("property" . "variable-name")
+    ("value" . "default")
+    ("path" . "doc")
+    ("label" . "constant")
+    ("error" . "warning")
+    ))
 
 (define (outlang-class->emacs-class val)
+  ;; #?=val
   (assoc-ref class-map val val))
 
 (define (buffer-info shtml)
@@ -93,8 +192,7 @@
 				   ((class . ,(lambda (attr val) (list attr 
 								       (outlang-class->emacs-class val))))
 				    (a . ,(lambda x x))
-				    (*text* . ,(lambda (tag str) str))
-				    (*default* . ,(lambda x x)))
+				    ,@asis)
 				   . ,(lambda (tag attrs . text)
 					(let ((attrs (reverse (cons `(id ,#`"P:,|point-max|") (reverse attrs))))
 					      (text (apply string-append text)))
@@ -108,17 +206,16 @@
 						 str))
 				    (*default* . ,(lambda x x)))
 				   . ,(lambda x x))
-				  (*text* . ,(lambda (tag str) str))
-				  (*default* . ,(lambda x x))))))
-    (values shtml point-max count-lines)
-    ))
+				  ,@asis
+				  ))))
+    (values shtml point-max count-lines)))
 
 (define (outlang source-file)
   (let* ((proc (run-process
 		`(source-highlight 
 		  --tab=8
 		  --doc
-		  ,#`"--outlang-def=,|prefix|,|dir|yogomacs.outlang"
+		  ,#`"--outlang-def=,|outlang-prefix|,|outlang-dir|yogomacs.outlang"
 		  --infer-lang 
 		  ; --line-number
 		  ,#`"--input=,|source-file|"
