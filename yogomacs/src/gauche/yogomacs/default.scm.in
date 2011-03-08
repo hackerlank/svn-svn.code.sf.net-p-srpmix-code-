@@ -27,7 +27,7 @@
 		     ))
  (login . #f)
  (realm . "Sources")
- (overlays . ((text-file "/README" "/proc/interrupts")
+ (overlays . ((text-file "/README" "/var/lib/yogomacs/README")
 	      (not-implemented "/login")
 	      (not-implemented "/commands")
 	      (not-implemented #/\/commands\/.*/)

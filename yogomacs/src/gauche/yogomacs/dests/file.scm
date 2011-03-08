@@ -9,6 +9,7 @@
   (use yogomacs.reply)
   ;;
   (use yogomacs.renderers.find-file)
+  (use yogomacs.renderers.outlang)
   (use yogomacs.renderers.syntax)
   (use yogomacs.renderers.cache)
   (use yogomacs.renderers.asis)
@@ -98,6 +99,11 @@
 	      (cute rearranges-title <> web-path)
 	      ) shtml)
       :last-modification-time last-modified-time))
+  (define (try-outlang file config)
+    (if-let1 shtml (guard (e (else #f))
+		     (outlang file config))
+	     (make-shtml-data shtml (ref (sys-stat file) 'mtime))
+	     #f))
   (define (make-asis-data asis last-modified-time)
     (make <asis-data> 
       :params params
@@ -123,21 +129,23 @@
      (retrieve-shtml real-src-file config)
      (make <empty-data>)))
    ((eq? mode 'read-only)
-    (guard-with-asis 
-     real-src-file config
-     (receive (shtml last-modified-time) 
-	 (cache real-src-file #f "shtml" #f config)
-       (if shtml
-	   (make-shtml-data shtml last-modified-time)
-	   (receive (shtml last-modified-time)
-	       (fundamental real-src-file 0 0 config)
-	     (make-shtml-data shtml last-modified-time))))))
+    (or (try-outlang real-src-file config)
+	(guard-with-asis 
+	 real-src-file config
+	 (receive (shtml last-modified-time) 
+	     (cache real-src-file #f "shtml" #f config)
+	   (if shtml
+	       (make-shtml-data shtml last-modified-time)
+	       (receive (shtml last-modified-time)
+		   (fundamental real-src-file 0 0 config)
+		 (make-shtml-data shtml last-modified-time)))))))
    ((eq? mode 'stand-alone)
-    (guard-with-asis 
-     real-src-file config
-     (receive (shtml last-modified-time) 
-	 (retrieve-shtml real-src-file config)
-       (make-shtml-data shtml last-modified-time))))
+    (or (try-outlang real-src-file config)    
+	(guard-with-asis 
+	 real-src-file config
+	 (receive (shtml last-modified-time) 
+	     (retrieve-shtml real-src-file config)
+	   (make-shtml-data shtml last-modified-time)))))
    (else
     (errorf "Unknown mode: ~s" mode))))
 

@@ -5,9 +5,10 @@ dist_module_DATA =   \
 	asis.scm				\
 	cache.scm				\
 	dired.scm				\
+	ewoc.scm				\
 	find-file.scm				\
 	fundamental.scm				\
-	ewoc.scm				\
+	outlang.scm				\
 	syntax.scm                              \
 	text.scm                                \
 	yogomacs.scm				\
