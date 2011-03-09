@@ -27,6 +27,7 @@ NAME=ctags
 
 ROOTDIR=
 CTAGS=ctags
+ARGS=
 
 BUILDDIR=
 LOGFILE=
@@ -88,6 +89,9 @@ function parse_arguments
 	    --force)
 	        FORCE=yes
 		;;
+	    --args=*)
+		ARGS="{$1/--args=}"
+		;;
 	    *)
 		break
 		;;
@@ -123,7 +127,7 @@ function run_ctags
     local d=$1
     local o=$2
     local l=$3
-
+    shift 3
 
     es_print ctags-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
@@ -131,7 +135,7 @@ function run_ctags
 	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
 	| grep -v .bz2           \
 	| grep -v .gz            \
-	| ${CTAGS} -o $o -L - )
+	| ${CTAGS} "$@" -o $o -L - )
     es_print ctags-end --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
@@ -156,7 +160,7 @@ function main
     if ( ! test -e "${PLUGINDIR}/tags" ) ||
        ( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/tags" ) || 
        ( test "$FORCE" = yes ); then
-      run_ctags "${BUILDDIR}" "${PLUGINDIR}/tags" $LOGFILE
+      run_ctags "${BUILDDIR}" "${PLUGINDIR}/tags" $LOGFILE $ARGS
     fi
 }
 

@@ -1,3 +1,10 @@
+2011-03-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-ctags (ARGS): New variable.
+	(parse_arguments): Handle --args=.
+	(run_ctags): use ARGS.
+	(main): Passing ARGS.
+
 2011-03-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 3.117.1.
