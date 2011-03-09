@@ -50,6 +50,12 @@
     :text #`"This directory tree holds version ,(version) of yogomacs, the extensible(TODO),
 customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 
+(define (NEWS-entry parent-path)
+  (make <text-dentry>
+    :parent (compose-path parent-path)
+    :dname "NEWS"
+    :text "NOTHING HERE"))
+
 (define (annotations-entry parent-path)
   (make <redirect-dentry>
     :parent (compose-path parent-path)
@@ -77,6 +83,7 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 			       root-globs)
 		`( 
 		  ,(README-entry path)
+		  ,(NEWS-entry path)
 		  ,(commands-entry path)
 		  ,(absentees-entry path)
 		  ,@(if (in-shell? params)
@@ -92,8 +99,8 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
       :data ((compose integrate-dired-face) shtml)
       :last-modification-time #f)))
 
-(define (README-dest path params config)
-  (text-dest (README-entry (parent-of path))
+(define (TEXT-dest entry path params config)
+  (text-dest (entry (parent-of path))
 	     path params config
 	     ))
 
@@ -120,7 +127,8 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 	   (list
 	    `(#/^\/login$/  ,login-dest)
 	    ))
-     (#/^\/README$/  ,README-dest)
+     (#/^\/README$/  ,(pa$ TEXT-dest README-entry))
+     (#/^\/NEWS$/  ,(pa$ TEXT-dest NEWS-entry))
      ;; 403
      ;(#/^.*$/ ,print-path)
      ))

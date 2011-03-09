@@ -15,7 +15,7 @@
  (fundamental-mode-column-threshold . 350)
 
  ;; stand-alone, read-only and cache-build
- (mode . stand-alone)
+ (mode . read-only)
  ;; These are used by domain.scm.
  (domains . ("/srv/sources"
 	     "/net/sources/srv/sources"
@@ -28,6 +28,7 @@
  (login . #f)
  (realm . "Sources")
  (overlays . ((text-file "/README" "/var/lib/yogomacs/README")
+	      (text-file "/NEWS" "/var/lib/yogomacs/NEWS")
 	      (not-implemented "/login")
 	      (not-implemented "/commands")
 	      (not-implemented #/\/commands\/.*/)
