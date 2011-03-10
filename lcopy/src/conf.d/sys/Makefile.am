@@ -55,6 +55,7 @@ dist_confd_DATA = \
 	iproute,trunk.lcopy \
 	keepalived,trunk.lcopy \
 	kernel,dlm.lcopy \
+	kernel,kbuild.lcopy \
 	kernel,kvm.lcopy \
 	kernel,rt.lcopy \
 	kernel,trunk.lcopy \
