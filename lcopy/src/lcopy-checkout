@@ -11,6 +11,7 @@ LCOPY_PACKAGE=
 LCOPY_BRANCH=
 NO_ERROR_MESSAGE_IF_EXISTING=
 JUST_PRINT_CMDLINE=
+SYNC_WITH_CONF=
 
 readonly ERROR=1
 readonly EXISTED=2
@@ -19,7 +20,7 @@ function print_usage
 {
     echo "Usage: "
     echo "$0 --help|-h"
-    echo "$0 [--output-dir=OUTPUT-DIR] [--no-error-message-if-existing] [--cradle-name=NAME] FILE.lcopy"
+    echo "$0 [--output-dir=OUTPUT-DIR] [--no-error-message-if-existing] [--cradle-name=NAME] [--sync-with-conf] FILE.lcopy"
     echo "$0 --just-print-cmdline [FILE.lcopy]"
     echo ""
     echo "(taking checkout configurations from stdin)"
@@ -47,6 +48,10 @@ function parse_arguments
 		;;
             --just-print-cmdline)
 		JUST_PRINT_CMDLINE=yes
+		NO_ERROR_MESSAGE_IF_EXISTING=yes
+		;;
+	    --sync-with-conf)
+		SYNC_WITH_CONF=yes
 		NO_ERROR_MESSAGE_IF_EXISTING=yes
 		;;
 	    (--cradle-name=*)
@@ -144,8 +149,19 @@ function transfer
 {
     local from=$1
     local to="${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}"
+    local replace=$2
+    local branch="${LCOPY_BRANCH}"
+
+    if [ "${replace}" = yes ]; then
+	mv "${to}/${branch}" "${to}/.${branch}"
+    fi
+    
     mkdir -p "${to}"
     mv "${from}" "${to}/"
+
+    if [ "${replace}" = yes ]; then
+	rm -rf "${to}/.${branch}"
+    fi
 
     return $?
 }
@@ -157,6 +173,8 @@ function main
     local base_dir
     local checkout_dir
     local status
+    local replace
+
 
     parse_arguments "$@"
     load_input $INPUT
@@ -168,7 +186,24 @@ function main
 	if [ "${NO_ERROR_MESSAGE_IF_EXISTING}" != "yes" ]; then
 	    echo "${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH} already exits" 1>&2
 	fi
-	return $EXISTED
+
+	if [ "${SYNC_WITH_CONF}" = "yes" ]; then
+	    local old_conf="${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH}/checkout.lcopy"
+	    local new_conf="${INPUT}"
+	    if [ -r "${old_conf}" ]; then
+		local old_cmdline=$(lcopy-checkout --just-prnit-cmdline "${old_conf}")
+		local new_cmdline=$(lcopy-checkout --just-prnit-cmdline "${new_conf}")
+		if [ "${old_cmdline}" = "${new_cmdline}" ]; then
+		    return $EXISTED
+		else
+		    replace=yes
+		fi
+	    else
+		return $EXISTED
+	    fi
+	else
+	    return $EXISTED
+	fi
     fi
 
     
@@ -200,7 +235,7 @@ function main
     mkdir -p ${base_dir}/plugins
     if [ "$status" = "0" ]; then
 	lcopy_srpmix_plugin "${base_dir}"
-	if transfer "${base_dir}"; then
+	if transfer "${base_dir}" "${replace}"; then
 	    status=0
 	else
 	    status=$ERROR
