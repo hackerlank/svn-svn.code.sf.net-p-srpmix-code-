@@ -38,7 +38,7 @@ for h in /home/*; do
 	    if test -r "$p"; then
 		p0=$(basename $p)
 		if ! member_p "$p0" $done; then
-		    lcopy-checkout --no-error-message-if-existing "$p"
+		    lcopy-checkout --sync-with-conf "$p"
 		    done="$p0 $done"
 		else
 		    echo "$p is duplicated: abort to mirror\n" 1>&2

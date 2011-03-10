@@ -1,8 +1,17 @@
+2011-03-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/mirror-lcopy-user: Use --sync-with-conf option
+	when invoking lcopy-checkout.
+
+	* src/mirror-lcopy-sys: Ditto.
+
+	* src/mirror-prelcopy-sys: Ditto.
+
 2011-03-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-garbages (report): Improve the regex for srpmix-3.x
 	packages.
-	
+
 2011-03-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.4.0.

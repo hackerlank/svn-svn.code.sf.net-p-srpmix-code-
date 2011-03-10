@@ -16,5 +16,5 @@ fi
 lcopy-update --root-dir=$(pwd)
 
 for c in "${LCOPY_SYS_CONF_DIR}"/*.lcopy; do
-    lcopy-checkout --no-error-message-if-existing $c 
+    lcopy-checkout --sync-with-conf $c 
 done

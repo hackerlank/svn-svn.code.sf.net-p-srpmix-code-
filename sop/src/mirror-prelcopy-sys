@@ -26,7 +26,7 @@ for c in "${PRELCOPY_SYS_CONF_DIR}"/*.prelcopy; do
     prelcopy --output-dir=$tmpdir $c 
     for f in $tmpdir/*.lcopy; do
     	if [ -f "$f" ]; then
-            lcopy-checkout --no-error-message-if-existing $f
+            lcopy-checkout --sync-with-conf $f
 	fi
     done
 done
