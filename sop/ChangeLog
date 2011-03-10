@@ -1,5 +1,7 @@
 2011-03-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.4.1.
+
 	* src/mirror-lcopy-user: Use --sync-with-conf option
 	when invoking lcopy-checkout.
 
