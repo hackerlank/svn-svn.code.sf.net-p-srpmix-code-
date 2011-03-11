@@ -86,12 +86,10 @@ function parse_arguments
 	        ;;
             --enable=*)
                 ENABLE=$(echo "$1" | sed 's/--enable=//')
-                SRPMIX_ENABLE_PLUGIN=$ENABLE
                 WRAP_OPTS="$WRAP_OPTS --enable=$ENABLE"
                 ;;
             --disable=*)
                 DISABLE=$(echo "$1" | sed 's/--disable=//')
-                SRPMIX_DISABLE_PLUGIN=$DISABLE
                 WRAP_OPTS="$WRAP_OPTS --disable=$DISABLE"
                 ;;
             --plugin-name=*)

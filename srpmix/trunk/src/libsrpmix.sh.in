@@ -256,8 +256,6 @@ function srpmix_distmap_to_json
     ${GOSH} -e "${srpmix_distmap_to_json_script}"
 }
 
-SRPMIX_ENABLE_PLUGIN=
-SRPMIX_DISABLE_PLUGIN=
 
 function srpmix_cp
 {
@@ -587,54 +585,6 @@ function srpmix_create_swrf
         mv $rpm $(dirname $rpm)/$(basename $rpm .noarch.rpm)
     done
 
-}
-
-# TODO srpmix_ prefix
-function is_enabled_plugin
-{
-    local p
-
-    for p in $SRPMIX_ENABLE_PLUGIN; do
-        if test "x$p" = "x$1"; then
-            return 0
-        fi
-    done
-
-    for p in $SRPMIX_DISABLE_PLUGIN; do
-        if test "x$p" = "x$1"; then
-            return 1
-        fi
-    done
-
-    if test "x$SRPMIX_ENABLE_PLUGIN" = "x"; then
-        return 0
-    fi
-
-    return 1
-}
-
-# TODO srpmix_ prefix
-function list_plugin_candidates
-{
-    local p
-
-    find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort -n | while read plugin
-    do
-        is_enabled_plugin $(basename $plugin) && echo $(basename $plugin) $plugin
-    done
-    for p in $SRPMIX_EXTRA_PLUGINS
-    do
-        is_enabled_plugin $(basename $p) && echo $(basename $p) $p
-    done
-}
-
-function srpmix_list_plugins
-{
-    local mapping=$1
-
-    list_plugin_candidates | sort -n | while read base plugin; do
-        echo $plugin
-    done
 }
 
 function srpmix_archives_name

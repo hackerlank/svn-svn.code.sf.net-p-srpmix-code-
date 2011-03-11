@@ -1,11 +1,12 @@
 EXTRA_DIST = test-srpmix-0-0.fc11.src.rpm test-srpmix.c test-srpmix.SPEC
 dist_check_SCRIPTS = \
-                     00distmap.sh      \
-                     00srpmix-wrap.sh  \
-                     00srpmix-ix.sh    \
-                     01srpmix-ix.sh    \
-                     00srpmix.sh       \
-                     00build-opt-rules \
+                     00distmap.sh		\
+                     00srpmix-wrap.sh		\
+                     00srpmix-ix.sh		\
+                     01srpmix-ix.sh		\
+                     00srpmix.sh		\
+                     00build-opt-rules		\
+                     00srpmix-plugin.sh		\
                      \
 		     $(NULL)
 
@@ -25,7 +26,7 @@ TESTS_ENVIRONMENT =							\
         SRPMIX_USR_DIR=`pwd`/$(TESTDIR)/${datadir}/@PACKAGE@		\
         SRPMIX_SYSCONF_DIR=`pwd`/$(TESTDIR)/${sysconfdir}/@PACKAGE@     \
 	bindir=$(bindir)                                                \
-	$(SHELL) -x
+	bash -x
 TESTS = $(dist_check_SCRIPTS)
 
 clean-local:

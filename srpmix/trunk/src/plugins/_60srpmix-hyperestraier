@@ -34,7 +34,7 @@ PLUGINDIR=
 
 SRPMIX_HYPERESTRAIER_DEBUG=
 
-FORCE=
+FORCE=no
 
 LIBSRPMIX=libsrpmix.sh
 function try_source

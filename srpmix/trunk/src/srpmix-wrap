@@ -104,10 +104,10 @@ function parse_arguments
 	        OPT_TYPE=$(echo $1 | sed 's/--type=//')
 		;;
             --enable=*)
-	        SRPMIX_ENABLE_PLUGIN=$(echo $1 | sed 's/--enable=//')
+	        ENABLE=${1/--enable=}
 		;;
             --disable=*)
-	        SRPMIX_DISABLE_PLUGIN=$(echo $1 | sed 's/--disable=//')
+	        DISABLE=${1/--disable=}
 		;;
             --plugin-name=*)
 	        OPT_PLUGIN_NAME=$(echo $1 | sed 's/--plugin-name=//')
@@ -331,16 +331,6 @@ function create_plugin_spec
         buildarch="noarch"
     fi
 
-    for plugin in `srpmix_list_plugins`; do
-	plugin=$(basename $plugin)
-	if ! [[ "$plugin" =~ ^_.* ]]; then
-	    enable_plugin="$enable_plugin,$plugin"
-	fi
-    done
-    if test "x$enable_plugin" != "x"; then
-      enable_plugin="--enable='$enable_plugin'"
-    fi
-
     cat <<EOF
 Summary: $plugins_name information for package $package
 Name: ${plugin_package_name}
@@ -374,7 +364,7 @@ srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --ign
 %build
 touch %{_builddir}/%{name}/.run-plugin
 sleep 1
-srpmix-plugin $enable_plugin \
+srpmix-plugin --enable=$ENABLE --disable=$DISABLE \
     %{_srpmix_plugin_option} \
     %{_builddir}/%{name}/$SRPMIX_VAR_DIR/$installdir
 
@@ -382,7 +372,6 @@ srpmix-plugin $enable_plugin \
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$installdir
 mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins
-echo "$enable_plugin" > \$RPM_BUILD_ROOT/$installdir/plugins/PLUGINS
 
 from=%{_builddir}/%{name}/$SRPMIX_VAR_DIR
 to=\$RPM_BUILD_ROOT

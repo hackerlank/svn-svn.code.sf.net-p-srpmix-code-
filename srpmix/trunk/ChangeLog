@@ -1,3 +1,29 @@
+2011-03-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/Makefile.am (dist_check_SCRIPTS): 00srpmix-plugin.sh.
+
+	* tests/00srpmix-plugin.sh: Added a new test case.
+
+	* src/srpmix-wrap (create_plugin_spec): Don't choose plugins here.
+
+	* src/srpmix-plugin: Enable --disable option.
+
+	* src/srpmix-build (parse_arguments): Don't set SRPMIX_ENABLE_PLUGIN
+	and SRPMIX_DISABLE_PLUGIN.
+
+	* src/libsrpmix.sh.in (SRPMIX_ENABLE_PLUGIN): Removed.
+	(SRPMIX_DISABLE_PLUGIN): Removed.
+	(is_enabled_plugin): Ditto.
+	(list_plugin_candidates): Ditto.
+	(srpmix_list_plugins): Ditto.
+
+	* src/plugins/_60srpmix-hyperestraier (FORCE): Initialize.
+
+	* src/srpmix.cf: Remove SRPMIX_EXTRA_PLUGINS.
+
+	* src/srpmix-wrap (create_plugin_spec): Don't record PLUGINS file.
+	The file has not been used.
+
 2011-03-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/*: Added --name option.
