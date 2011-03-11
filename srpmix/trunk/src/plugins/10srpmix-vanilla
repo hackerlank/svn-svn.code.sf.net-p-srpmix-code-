@@ -47,7 +47,7 @@ function print_usage
     echo "Usage: "
     echo "  $0 [--help|-h]"
     echo "  $0 --name"
-    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] ROOTDIR"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] [--name=NAME] ROOTDIR"
     echo 
 }
 
@@ -65,6 +65,9 @@ function parse_arguments
 	    --name)
 		echo $NAME
 		exit 0
+		;;
+	    --name=*)
+	        NAME=${1/--name=}
 		;;
 	    --debug)
 		set -x
