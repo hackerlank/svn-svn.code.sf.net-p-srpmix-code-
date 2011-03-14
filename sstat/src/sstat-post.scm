@@ -217,8 +217,11 @@
 	      (let ((host (cadr r))
 		    (user (caddr r)))
 		(for-each (cute hash-table-put! ht <> user)
-			    (map inet-string->address 
-				 (ref (sys-gethostbyname host) 'addresses)))
+			  (if-let1 host (sys-gethostbyname host)
+				   (map inet-string->address 
+					(ref host 'addresses))
+				   ;; Cannot resolve the target
+				   (list)))
 		))
 	    (loop (read))))))
     ht))

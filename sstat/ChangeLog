@@ -1,4 +1,10 @@
-<<<<<<< .mine
+2011-03-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.3.3.
+
+	* src/sstat-post.scm (load-mapping): Handle
+	the case when a host name cannot be resolved.
+
 2010-08-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.3.2.
