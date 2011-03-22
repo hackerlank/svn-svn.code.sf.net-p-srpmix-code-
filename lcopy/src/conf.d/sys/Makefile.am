@@ -126,6 +126,7 @@ dist_confd_DATA = \
 	uim,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
 	virt-manager,trunk.lcopy \
+	virt-v2v,trunk.lcopy \
 	wfo,trunk.lcopy \
 	wireshark,trunk.lcopy \
 	with-log,trunk.lcopy \

@@ -1,3 +1,11 @@
+2011-03-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/conf.d/sys/virt-manager,trunk.lcopy: Updated.
+
+	* src/conf.d/sys/Makefile.am (dist_confd_DATA): Added
+	virt-v2v,trunk.lcopy. 
+	Both contributed by Hajime Taira <htaira@redhat.com>.
+
 2011-03-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.20.
