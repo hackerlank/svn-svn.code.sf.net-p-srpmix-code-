@@ -191,8 +191,8 @@ function main
 	    local old_conf="${OUTPUT_DIR}/${LCOPY_PACKAGE:0:1}/${LCOPY_PACKAGE}/${LCOPY_BRANCH}/checkout.lcopy"
 	    local new_conf="${INPUT}"
 	    if [ -r "${old_conf}" ]; then
-		local old_cmdline=$(lcopy-checkout --just-prnit-cmdline "${old_conf}")
-		local new_cmdline=$(lcopy-checkout --just-prnit-cmdline "${new_conf}")
+		local old_cmdline=$(lcopy-checkout --just-print-cmdline "${old_conf}")
+		local new_cmdline=$(lcopy-checkout --just-print-cmdline "${new_conf}")
 		if [ "${old_cmdline}" = "${new_cmdline}" ]; then
 		    return $EXISTED
 		else

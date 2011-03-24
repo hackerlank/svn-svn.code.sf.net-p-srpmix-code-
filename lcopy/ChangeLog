@@ -1,3 +1,7 @@
+2011-03-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/lcopy-checkout (main): Fix a typo(--just-print-cmdline). 
+
 2011-03-22  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/conf.d/sys/virt-manager,trunk.lcopy: Updated.
