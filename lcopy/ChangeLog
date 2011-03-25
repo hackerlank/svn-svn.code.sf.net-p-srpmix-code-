@@ -1,7 +1,9 @@
 2011-03-25  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.2.21.
+
 	* src/liblcopy.sh.in (lcopy_srpmix_plugin): Don't run
-	vanilla plugin.
+	vanilla plugin. Run nctags plugin.
 
 2011-03-24  Masatake YAMATO  <yamato@redhat.com>
 
