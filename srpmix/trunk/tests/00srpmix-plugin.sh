@@ -9,6 +9,7 @@ diff <(srpmix-plugin --list | while read name arrow file; do echo $name; done) <
 coreutils
 cscope
 ctags
+doxygen
 etags
 file
 hyperestraier
