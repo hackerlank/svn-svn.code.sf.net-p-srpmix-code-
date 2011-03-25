@@ -139,9 +139,7 @@ function lcopy_srpmix_plugin
     local base_dir=$1
 
     if which srpmix-plugin > /dev/null 2>&1; then
-	# TODO: Temporary disabled
-	# srpmix-plugin --disable=vanilla  ${base_dir}
-	srpmix-plugin ${base_dir}
+	srpmix-plugin --disable=vanilla  ${base_dir}
     fi
 }
 
