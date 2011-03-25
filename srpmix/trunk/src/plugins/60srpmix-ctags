@@ -27,7 +27,7 @@ NAME=ctags
 
 ROOTDIR=
 CTAGS=ctags
-ARGS=
+CTAGS_ARGS=
 
 BUILDDIR=
 LOGFILE=
@@ -56,7 +56,7 @@ function print_usage
     echo "Usage: "
     echo "  $0 [--help|-h]"
     echo "  $0 --name"
-    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] [--name=NAME] ROOTDIR"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] [--name=NAME] [--ctags-args=...] ROOTDIR"
     echo 
 }
 
@@ -92,8 +92,8 @@ function parse_arguments
 	    --force)
 	        FORCE=yes
 		;;
-	    --args=*)
-		ARGS="{$1/--args=}"
+	    --ctags-args=*)
+		CTAGS_ARGS="${1/--ctags-args=}"
 		;;
 	    *)
 		break
@@ -163,7 +163,7 @@ function main
     if ( ! test -e "${PLUGINDIR}/tags" ) ||
        ( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/tags" ) || 
        ( test "$FORCE" = yes ); then
-      run_ctags "${BUILDDIR}" "${PLUGINDIR}/tags" $LOGFILE $ARGS
+      run_ctags "${BUILDDIR}" "${PLUGINDIR}/tags" $LOGFILE $CTAGS_ARGS
     fi
 }
 

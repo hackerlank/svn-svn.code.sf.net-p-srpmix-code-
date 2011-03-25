@@ -37,6 +37,7 @@ PLUGIN_ROOTDIR=
 
 SRPMIX_ATTACH_DEBUG=
 SRPMIX_DB_OPTS="${SRPMIX_DB_OPTS}"
+SRPMIX_PLUGIN_OPTS="${SRPMIX_PLUGIN_OPTS}"
 YUM_OPTS=
 
 
@@ -73,7 +74,7 @@ function print_usage
     echo "  SRPMIX_ROOT_USER"
     echo ""
     echo "Example:"
-    echo "	SRPMIX_ROOT_USER=yamato srpmix-package-attach --srpmix-var-dir=/srv/sources --output-dir=/tmp/z zsh 4.2.6-3.el5 hyperestraier"
+    echo "	SRPMIX_ROOT_USER=yamato srpmix-package-attach --srpmix-var-dir=/srv/sources --output-dir=/tmp zsh 4.2.6-3.el5 hyperestraier"
 }
 
 function parse_arguments
@@ -91,6 +92,7 @@ function parse_arguments
 		SRPMIX_ATTACH_DEBUG=yes
 		PS4="${PS4}[attach]"
 		SRPMIX_DB_OPTS="--debug ${SRPMIX_DB_OPTS}"
+		SRPMIX_PLUGIN_OPTS="--debug ${SRPMIX_PLUGIN_OPTS}"
 		set -x
 		;;
 	    (--pkg-name=*)
@@ -193,7 +195,7 @@ function prepare_tarball
 	if test -n "${plugin_exec}"; then
 	    local plugin_dir=${MY_TMPDIR}/WORK/${PKG_NAME}
 	    mkdir -p ${plugin_dir}
-	    $plugin_exec --plugin-dir=${plugin_dir} --log-file=/dev/stdout ${PLUGIN_ROOTDIR}
+	    $plugin_exec ${SRPMIX_PLUGIN_OPTS} --plugin-dir=${plugin_dir} --log-file=/dev/stdout ${PLUGIN_ROOTDIR}
 	    cd $(dirname ${plugin_dir})
 	    tar_target=$(basename ${plugin_dir})
 	else

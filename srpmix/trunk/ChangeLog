@@ -1,3 +1,21 @@
+2011-03-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.117.2.
+
+	* tests/00srpmix-plugin.sh (PATH): Added nctags.
+
+	* src/srpmix-package-attach (SRPMIX_PLUGIN_OPTS): New option
+	to pass parameters to a plugin.
+
+	* src/plugins/Makefile.am: Added nctags.
+
+	* src/plugins/60srpmix-ctags: Rename --args to --ctags-args.
+
+	* misc/specs/srpmix.spec.in: Added nctags.
+
+	* src/srpmix-package-attach (print_usage): Fix a typo
+	in help messages.
+
 2011-03-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* tests/Makefile.am (dist_check_SCRIPTS): 00srpmix-plugin.sh.

@@ -7,6 +7,7 @@ EXTRA_DIST = \
 	60srpmix-doxygen			\
 	60srpmix-xgettext                       \
 	\
+	_60srpmix-nctags			\
 	_60srpmix-hyperestraier                 \
 	\
 	$(NULL)
@@ -19,6 +20,7 @@ endif
 
 if SRPMIX_ENABLE_PLUGIN_ctags
 plugin_SCRIPTS += 60srpmix-ctags
+plugin_SCRIPTS += _60srpmix-nctags
 endif
 
 if SRPMIX_ENABLE_PLUGIN_cscope

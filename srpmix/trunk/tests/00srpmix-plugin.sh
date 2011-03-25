@@ -13,6 +13,7 @@ etags
 file
 hyperestraier
 kindex
+nctags
 vanilla
 xgettext
 EOF

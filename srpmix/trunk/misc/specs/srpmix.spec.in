@@ -51,6 +51,15 @@ Group: Development/Tools
 %description plugin-ctags
 SRPMix Plugin for creating ctags indexes.
 
+%package plugin-nctags
+Summary: SRPMix Plugin for creating ctags indexes with --excmd=number option.
+Requires: srpmix ctags
+Group: Development/Tools
+
+%description plugin-nctags
+SRPMix Plugin for creating ctags indexes with --excmd=number option.
+
+
 %package plugin-doxygen
 Summary: SRPMix Plugin for creating doxygen documents.
 Requires: srpmix doxygen
@@ -167,6 +176,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files plugin-ctags
 %{_datadir}/srpmix/plugins/60srpmix-ctags
+
+%files plugin-nctags
+%{_datadir}/srpmix/plugins/_60srpmix-nctags
 
 %files plugin-hyperestraier
 %{_datadir}/srpmix/plugins/_60srpmix-hyperestraier
