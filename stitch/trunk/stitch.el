@@ -814,25 +814,19 @@
 	(overlay-put o 'stitch-keywords keywords)))))
 
 (defun stitch-insert-annotation-strict (file entry)
-  (when (with-current-buffer (current-buffer)  
-	  (or buffer-file-read-only
-	      buffer-read-only
-	      (eq major-mode 'dired-mode)
-	      ;; t
-	      ))
-    (let ((region (stitch-target-get-region (stitch-klist-value entry :target)
-					    file)))
-      (when region
-	(stitch-insert-annotation0
-	 ;; (stitch-klist-value e :target)
-	 (current-buffer)
-	 region
-	 (stitch-klist-value entry :annotation)
-	 (stitch-klist-value entry :date)
-	 (stitch-klist-value entry :full-name)
-	 (stitch-klist-value entry :mailing-address)
-	 (stitch-klist-value entry :keywords)
-	 nil)))))
+  (let ((region (stitch-target-get-region (stitch-klist-value entry :target)
+					  file)))
+    (when region
+      (stitch-insert-annotation0
+       ;; (stitch-klist-value e :target)
+       (current-buffer)
+       region
+       (stitch-klist-value entry :annotation)
+       (stitch-klist-value entry :date)
+       (stitch-klist-value entry :full-name)
+       (stitch-klist-value entry :mailing-address)
+       (stitch-klist-value entry :keywords)
+       nil))))
 
 (defun stitch-insert-annotation-fuzzy (file entry)
   (setq stitch-search-region-total-total-total (1+ stitch-search-region-total-total-total))
@@ -883,19 +877,28 @@
     (let ((file (stitch-buffer-file-name (current-buffer))))
       (when file
 	(let ((entries (gethash file stitch-annotations nil)))
-	  (mapc
-	   (lambda (entry) (stitch-insert-annotation-strict file entry))
-	   (reverse (sort (copy-list entries) 'stitch-annotation-compare))))))))
+	  (when (with-current-buffer (current-buffer)  
+		  (or buffer-file-read-only
+		      buffer-read-only
+		      (eq major-mode 'dired-mode)
+		      ;;
+		      (eq major-mode 'diff-mode)
+		      ;; t
+		      ))
+	    (mapc
+	     (lambda (entry) 
+	       (stitch-insert-annotation-strict file entry))
+	     (reverse (sort (copy-list entries) 'stitch-annotation-compare)))))))))
 
 (defun stitch-similar-directory-p (a b)
-  (let* ((am (split-string a))
-	 (bm (split-string b))
+  (let* ((am (split-string a "/"))
+	 (bm (split-string b "/"))
 	 (al (length am))
 	 (bl (length bm)))
     (and (eq al bl)
 	 (> (count t (mapcar* #'equal am bm))
 	    ;; Heuristic
-	    (- al 2)))))
+	    (- al 3)))))
 
 (defun stitch-insert-annotations-fuzzy (buffer)
   (prog1
