@@ -1,15 +1,21 @@
 #include <stdio.h>
 
+int i;
+int j;
+int i;
+int j;
+
+
 int
 foo(void)
 {
-  return 0;
+  return i + j;
 }
 
 int
 foo(void)
 {
-  return 0;
+  return i + j;
 }
 
 int

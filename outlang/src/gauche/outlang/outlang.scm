@@ -83,7 +83,7 @@
 	 (kar-len (cond
 		  ((string? kar) (string-length kar))
 		  ((and (list? kar) (eq? (car kar) 'span)) (span-length kar))
-		  ((and (list? kar) (eq? (car kar) 'a)) #f)
+		  ((and (list? kar) (eq? (car kar) 'div)) #f)
 		  (else (error "Unknown element for calculating the length" kar))))
 	 (ref? (not (boolean kar-len))))
     (cond
@@ -93,13 +93,7 @@
 		pos
 		newline?
 		ref?))
-     (found-ref?
-      (list (cons kar result)
-		line
-		pos
-		newline?
-		#f))
-     (found-newline?
+     ((or found-ref? found-newline?)
       (list (cons* kar
 		       `(span (|@| 
 			       (class "rfringe")
@@ -130,6 +124,33 @@
 (define asis `((*text* . ,(lambda (tag str) str))
 	       (*default* . ,(lambda x x))))
 
+(define (group-div kar elts)
+  (let* ((result (car elts))
+	 (div  (cadr elts))
+	 (group-id   (caddr elts)))
+    (cond
+     ((and (list? kar) (not (null? (car kar))) (eq? (car kar) 'a))
+      (let1 id ((#/#A:(.*)\[/ (car (assq-ref (car (cdr kar)) 'id '(#f))) ) 1)
+	       (if (equal? id group-id)
+		   (list result
+			 (if (null? div)
+			     (list kar '(|@| (style "display:none;"))'div)
+			     (cons kar div))
+			 group-id)
+		   (list (if (null? div)
+			     result
+			     (cons (reverse div) result))
+			 (list kar '(|@| (style "display:none;")) 'div)
+			 id))))
+     ((equal? kar "\n")
+      (if (null? div)
+	  (list (cons kar result) div #f)
+	  (list result (cons kar div) group-id)))
+     ((null? div)
+      (list (cons kar result) div #f))
+     (else
+      (list (cons* kar (reverse div) result) (list) #f)))))
+      
 (define (trx sxml point-max count-lines)
   (let1 order (+ (floor->exact (log (max count-lines 1) 10)) 1)
     (pre-post-order sxml
@@ -155,14 +176,19 @@
 						     "\n"
 						     `(meta (|@| 
 							     (name "created-time")
-							     (content ,(date->string (time-utc->date (current-time)) "~5"))))
+							     (content ,(date->string 
+									(time-utc->date (current-time))
+									"~5"))))
 						     "	"
 						     (reverse rest)))))))
 		      (pre . ,(lambda (tag . rest)
-				(cons tag (reverse (car (fold
-							 (cute line-prefix <> <> order)
-							 (list (list) 1 1 #t #f)
-							 rest))))))
+				(cons tag (reverse
+					   (car
+					    (fold (cute line-prefix <> <> order)
+						  (list (list) 1 1 #t #f)
+						  (reverse (car (fold group-div
+								      (list (list) (list) #f)
+								      rest)))))))))
 		      ,@asis
 		      ))))
 
