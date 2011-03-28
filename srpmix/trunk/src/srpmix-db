@@ -10,7 +10,7 @@ SWRFPM_OPTS=
 IGNORESIZE=
 LIBSRPMIX=libsrpmix.sh
 SRPMIX_DO_HARDLINK=${SRPMIX_DO_HARDLINK:-no}
-SHRINK_SWRF=${SRPMIX_SHRINK_SWRF:-no}
+PURGE_SWRF=${SRPMIX_PURGE_SWRF:-no}
 
 function try_source
 {
@@ -26,12 +26,12 @@ function print_usage
 {
     echo "Usage: "
     echo "  srpmix-db -h|--help"
-    echo "  srpmix-db [--debug] [--hardlink] [--root=ROOT] [--quite|-q] [--shrink-swrf] [--ignoresize] -i|--install SWRF..."
+    echo "  srpmix-db [--debug] [--hardlink] [--root=ROOT] [--quite|-q] [--purge-swrf] [--ignoresize] -i|--install SWRF..."
     echo "  srpmix-db [--debug] [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
     echo "  srpmix-db [--debug] -l|--list"
     echo
     echo "environment variables:"
-    echo "SRPMIX_SHRINK_SWRF=yes|no"
+    echo "SRPMIX_PURGE_SWRF=yes|no"
 }
 
 function parse_arguments
@@ -88,8 +88,8 @@ function parse_arguments
 	        IGNORESIZE=--ignoresize
 		shift 1
 		;;
-	    --shrink-swrf)
-	       SHRINK_SWRF=yes
+	    --purge-swrf)
+	       PURGE_SWRF=yes
 	       ;;
 	    --debug)
 	        SRPMIX_DB_DEBUG=yes
@@ -182,7 +182,7 @@ function do_install
 	
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
 
-        if [ "$SHRINK_SWRF" = "yes" ]; then
+        if [ "$PURGE_SWRF" = "yes" ]; then
 	    truncate --size=0 "$package"
 	fi
 

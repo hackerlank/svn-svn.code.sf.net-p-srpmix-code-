@@ -16,6 +16,11 @@
 	* src/srpmix-package-attach (print_usage): Fix a typo
 	in help messages.
 
+2011-03-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-db: Rename SHRINK_SWRF to PURGE_SWRF.
+	Rename --shrink-swrf option to --purge-swrf.
+
 2011-03-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* tests/Makefile.am (dist_check_SCRIPTS): 00srpmix-plugin.sh.
