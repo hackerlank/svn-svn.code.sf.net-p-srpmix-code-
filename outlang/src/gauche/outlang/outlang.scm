@@ -57,54 +57,75 @@
       ,@(built-in-link0 "Default" base-names)
       ,@(built-in-link0 "Invert" base-names))))
 
+(define (a-length a)
+  (let1 elt (caddr a)
+    (cond
+     ((string? elt) (string-length elt))
+     (else
+      (error "Unknown a element for calculating the length" a)))))
+
 (define (span-length span)
   (let1 elt (caddr span)
-    (if (string? elt)
-	(string-length elt)
-	(error "Unknown span element for calculating the length" span))))
+    (cond 
+     ((string? elt) (string-length elt))
+     ((and (list? elt) (eq? (car elt) 'a)) (a-length elt))
+     (else
+      (error "Unknown span element for calculating the length" span)))))
 	
 (define (line-prefix kar kdr order)
-  (let ((result (car kdr))
-	(line   (cadr kdr))
-	(pos    (caddr kdr))
-	(found-newline? (cadddr kdr))
-	(newline? (equal? kar "\n"))
-	(kar-len (cond
+  ;; (result line pos found-newline? ref)
+  (let* ((result (car kdr))
+	 (line   (cadr kdr))
+	 (pos    (caddr kdr))
+	 (found-newline? (cadddr kdr))
+	 (found-ref? (ref kdr 4))
+	 (newline? (equal? kar "\n"))
+	 (kar-len (cond
 		  ((string? kar) (string-length kar))
-		  ((and (list? kar) (equal? (car kar) 'span)) (span-length kar))
-		  (else (error "Unknown element for calculating the length" kar)))))
-    (if found-newline?
-	(list (cons* kar
-		     `(span (|@| 
-			     (class "rfringe")
-			     (id ,#`"r/L:,|line|"))
-			    " ")
-		     `(span (|@|
-			     (class "lfringe")
-			     (id ,#`"l/P:,|pos|/L:,|line|"))
-			    " ")
-		     `(span (|@|
-			     (class "linum")
-			     (id ,#`"L:,|line|"))
-			    (a (|@|
-				(href ,#`"#L:,|line|"))
-			       ,(format #`"~,(number->string order),,d" line)))
-		     result)
-	      (if (equal? kar "\n")
-		  (+ line 1)
-		  line)
+		  ((and (list? kar) (eq? (car kar) 'span)) (span-length kar))
+		  ((and (list? kar) (eq? (car kar) 'a)) #f)
+		  (else (error "Unknown element for calculating the length" kar))))
+	 (ref? (not (boolean kar-len))))
+    (cond
+     (ref?
+      (list (cons kar result)
+		line
+		pos
+		newline?
+		ref?))
+     (found-ref?
+      (list (cons kar result)
+		line
+		pos
+		newline?
+		#f))
+     (found-newline?
+      (list (cons* kar
+		       `(span (|@| 
+			       (class "rfringe")
+			       (id ,#`"r/L:,|line|"))
+			      " ")
+		       `(span (|@|
+			       (class "lfringe")
+			       (id ,#`"l/P:,|pos|/L:,|line|"))
+			      " ")
+		       `(span (|@|
+			       (class "linum")
+			       (id ,#`"L:,|line|"))
+			      (a (|@|
+				  (href ,#`"#L:,|line|"))
+				 ,(format #`"~,(number->string order),,d" line)))
+		       result)
+		(+ line (if newline? 1 0))
+		(+ pos kar-len)
+		newline?
+		#f))
+     (else
+      (list (cons kar result)
+	      (+ line (if newline? 1 0))
 	      (+ pos kar-len)
-	      (if newline?
-		  #t
-		  #f))
-	(list (cons kar result)
-	      (if newline?
-		  (+ line 1)
-		  line)
-	      (+ pos kar-len)
-	      (if newline?
-		  #t
-		  #f)))))
+	      newline?
+	      #f)))))
 
 (define asis `((*text* . ,(lambda (tag str) str))
 	       (*default* . ,(lambda x x))))
@@ -140,7 +161,7 @@
 		      (pre . ,(lambda (tag . rest)
 				(cons tag (reverse (car (fold
 							 (cute line-prefix <> <> order)
-							 (list (list) 1 1 #t)
+							 (list (list) 1 1 #t #f)
 							 rest))))))
 		      ,@asis
 		      ))))
@@ -185,22 +206,35 @@
   (assoc-ref class-map val val))
 
 (define (buffer-info shtml)
-  (let* ((point-max 1)
+  (let* ((len-in-a #f)
+	 (point-max 1)
 	 (count-lines 1)
 	 (shtml (pre-post-order shtml
 				`((span 
 				   ((class . ,(lambda (attr val) (list attr 
 								       (outlang-class->emacs-class val))))
-				    (a . ,(lambda x x))
+				    (a . ,(lambda (tag attr val)
+					    (set! len-in-a (string-length val))
+					    (list tag attr val)
+					    ))
 				    ,@asis)
 				   . ,(lambda (tag attrs . text)
-					(let ((attrs (reverse (cons `(id ,#`"P:,|point-max|") (reverse attrs))))
-					      (text (apply string-append text)))
-					  (set! point-max (+ point-max (string-length text)))
-					  (list tag attrs text)
-					  )))
+					(let ((attrs (reverse (cons `(id ,#`"P:,|point-max|") (reverse attrs)))))
+					  (set! point-max (+ point-max
+							     (if len-in-a
+								 len-in-a
+								 (string-length 
+								  (apply string-append text)))))
+					  (set! len-in-a #f)
+					  (cons* tag attrs text))))
 				  (pre 
-				   ((*text* . ,(lambda (tag str) 
+				   ((a *preorder* . ,(lambda x 
+						       ;; Decrement for the newline of ref
+						       ;; Quite dirty
+						       (set! point-max (- point-max 1))
+						       (set! count-lines (- count-lines 1))
+						       x))
+				    (*text* . ,(lambda (tag str) 
 						 (set! point-max (+ point-max (string-length str)))
 						 (set! count-lines (+ count-lines 1))
 						 str))
@@ -213,28 +247,35 @@
 ;; TODO:
 ;; :embed-links #f
 (define (outlang source-file . rest)
-  (let* ((proc (run-process
-		`(source-highlight 
-		  --tab=8
-		  --doc
-		  ,#`"--outlang-def=,|outlang-prefix|,|outlang-dir|yogomacs.outlang"
-		  --infer-lang 
-		  ; --line-number
-		  ,#`"--input=,|source-file|"
-		  "--output=STDOUT")
-		:output :pipe))
-	 (output (process-output proc)))
-    (let1 shtml (guard (e (else #f)) (html->shtml output))
-      (let1 r (cond
-	       ((not shtml) #f)
-	       ((equal? shtml '(*TOP*)) #f)
-	       (else
-		shtml))
-	;; TODO: Nohung
-	(process-wait proc)
-	(if (eq? (process-exit-status proc) 0)
-	    (let*-values (((shtml point-max count-lines) (buffer-info shtml)))
-	      (trx shtml point-max count-lines))
-	    #f)))))
+  (let-keywords rest ((ctags #f))
+    (let* ((proc (run-process
+		  `(source-highlight 
+		    --tab=8
+		    --doc
+		    ,#`"--outlang-def=,|outlang-prefix|,|outlang-dir|yogomacs.outlang"
+		    --infer-lang 
+		    ;; --line-number
+		    ,#`"--input=,|source-file|"
+		    "--output=STDOUT"
+		    ,@(if ctags
+			  `(--gen-references=inline --ctags= ,#`"--ctags-file=,ctags")
+			  ())
+		    )
+		  :output :pipe))
+	   (output (process-output proc)))
+      (let1 shtml (guard (e (else #f)) (html->shtml output))
+	(let1 r (cond
+		 ((not shtml) #f)
+		 ((equal? shtml '(*TOP*)) #f)
+		 (else
+		  shtml))
+	  ;; TODO: Nohung
+	  (process-wait proc)
+	  (if (eq? (process-exit-status proc) 0)
+	      (let*-values (((shtml point-max count-lines) (buffer-info shtml)))
+		(trx shtml point-max count-lines))
+	      #f))))))
 
 (provide "outlang/outlang")
+;; TODO
+;; a refs -> div block
