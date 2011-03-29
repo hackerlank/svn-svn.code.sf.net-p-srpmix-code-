@@ -134,13 +134,17 @@
 	       (if (equal? id group-id)
 		   (list result
 			 (if (null? div)
-			     (list kar '(|@| (style "display:none;"))'div)
+			     (list kar '(|@| 
+					 (style "display:none")
+					 (class "references"))'div)
 			     (cons kar div))
 			 group-id)
 		   (list (if (null? div)
 			     result
 			     (cons (reverse div) result))
-			 (list kar '(|@| (style "display:none;")) 'div)
+			 (list kar '(|@| 
+				     (style "display:none")
+				     (class "references")) 'div)
 			 id))))
      ((equal? kar "\n")
       (if (null? div)
@@ -152,7 +156,8 @@
       (list (cons* kar (reverse div) result) (list) #f)))))
       
 (define (trx sxml point-max count-lines)
-  (let1 order (+ (floor->exact (log (max count-lines 1) 10)) 1)
+  (let ((order (+ (floor->exact (log (max count-lines 1) 10)) 1))
+	(drop-dot (cute regexp-replace #/(.*)\.#A(.*)/ <> "\\1#A\\2")))
     (pre-post-order sxml
 		    `((head . ,(lambda (tag . rest)
 				 (cons tag (reverse 
@@ -181,14 +186,21 @@
 									"~5"))))
 						     "	"
 						     (reverse rest)))))))
-		      (pre . ,(lambda (tag . rest)
-				(cons tag (reverse
-					   (car
-					    (fold (cute line-prefix <> <> order)
-						  (list (list) 1 1 #t #f)
-						  (reverse (car (fold group-div
-								      (list (list) (list) #f)
-								      rest)))))))))
+		      (pre
+		       ((a 
+			 ((href . ,(lambda (attr val)
+				     (list attr (drop-dot val))
+				     ))
+			 ,@asis)
+			 . ,(lambda x x)))
+		       . ,(lambda (tag . rest)
+			    (cons tag (reverse
+				       (car
+					(fold (cute line-prefix <> <> order)
+					      (list (list) 1 1 #t #f)
+					      (reverse (car (fold group-div
+								  (list (list) (list) #f)
+								  rest)))))))))
 		      ,@asis
 		      ))))
 
@@ -270,8 +282,6 @@
 				  ))))
     (values shtml point-max count-lines)))
 
-;; TODO:
-;; :embed-links #f
 (define (outlang source-file . rest)
   (let-keywords rest ((ctags #f))
     (let* ((proc (run-process
@@ -304,4 +314,5 @@
 
 (provide "outlang/outlang")
 ;; TODO
-;; a refs -> div block
+;; - rewrite STDOUT link
+;; - toggle div block

@@ -2,9 +2,11 @@
 # /usr/share/source-highlight/html_ref.outlang
 #
 anchor "<a id=\"A:$text[$linenum]\" class=\"anchor\" href=\"#A:$text[$linenum]\">$text</a>"
-postline_reference "<a id=\"R:$outfile#A:$text[$linenum]\" class=\"postline-reference\" href=\"$outfile#A:$text[$linenum]\">$outfile:$linenum</a>"
+# postline_reference "<a id=\"R:$outfile#A:$text[$linenum]\" class=\"postline-reference\" href=\"$outfile#A:$text[$linenum]\">$outfile:$linenum</a>"
+postline_reference "<a id=\"A:$text[$linenum]\" class=\"postline-reference\" href=\"$outfile#A:$text[$linenum]\">$outfile:$linenum</a>"
 postdoc_reference "<a href=\"$outfile#$linenum\">$text -> $infile:$linenum</a>"
-reference "<a id=\"I:$outfile#A:$text[$linenum]\" class=\"inline-reference\" href=\"$outfile#A:$text[$linenum]\">$text</a>"
+# reference "<a id=\"I:$outfile#A:$text[$linenum]\" class=\"inline-reference\" href=\"$outfile#A:$text[$linenum]\">$text</a>"
+reference "<a id=\"A:$text[$linenum]\" class=\"inline-reference\" href=\"$outfile#A:$text[$linenum]\">$text</a>"
 
 #
 # /usr/share/source-highlight/css_common.outlang
