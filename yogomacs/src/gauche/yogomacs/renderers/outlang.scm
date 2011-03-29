@@ -7,34 +7,40 @@
   ;;
   (use sxml.tree-trans)
   (use util.list)
+  (use srfi-1)
   )
 (select-module yogomacs.renderers.outlang)
 
 (define asis `((*text* . ,(lambda (tag str) str))
 	       (*default* . ,(lambda x x))))
 
-(define (fold-refs shtml config)
+(define (fold-refs base-dir shtml config)
   (pre-post-order shtml
-		  `((pre
-		     ((a . ,(lambda (tag attr val)
-			      (if (and (list? attr)
+		  `((a . ,(lambda (tag attr val)
+			    (when (and (list? attr)
 				       (not (null? attr))
 				       (eq? (car attr) '|@|)
-				       (equal? (car (assq-ref attr 'class '(#f))) "postline-reference"))
-				  (list tag (reverse (cons 
-						      '(style "display:none")
-						      (reverse attr))) val)
-				  (list tag attr val))))
-		      ,@asis)
-		     . ,(lambda x x))
+				       (let1 type (car (assq-ref attr 'class '(#f)))
+					 (or (equal?  type "postline-reference")
+					     (equal?  type "inline-reference"))))
+			      (let* ((cel (assq 'href attr))
+				     (val-cel (cdr cel)))
+				(set-car! val-cel (build-path base-dir "pre-build" (car val-cel)))))
+				(list tag attr val)))
 		    ,@asis)))
 
 (define (outlang src-path config)
   (if (readable? src-path)
-      (let1 shtml (apply (with-module outlang.outlang outlang)
-			 src-path (extra-args src-path config))
+      (let* ((shtml (apply (with-module outlang.outlang outlang)
+			   src-path (extra-args src-path config)))
+	     (base-dir (split-at-pre-build src-path)))
 	(if shtml
-	    (fold-refs shtml config)
+	    (if base-dir
+		(fold-refs (substring base-dir
+				      (string-length (config 'real-sources-dir))
+				      (string-length base-dir))
+			   shtml config)
+		shtml)
 	    (internal-error "Cannot handle the source file"
 			    src-path)))
       (not-found "File not found"
