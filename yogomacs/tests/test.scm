@@ -83,6 +83,7 @@ yogomacs.renderers.fundamental
 yogomacs.renderers.syntax
 yogomacs.renderers.ewoc
 yogomacs.renderers.yogomacs
+yogomacs.renderers.outlang
 yogomacs.entry
 yogomacs.shell
 yogomacs.reply
