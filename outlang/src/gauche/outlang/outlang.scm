@@ -130,7 +130,7 @@
 	 (group-id   (caddr elts)))
     (cond
      ((and (list? kar) (not (null? (car kar))) (eq? (car kar) 'a))
-      (let1 id ((#/#A:(.*)\[/ (car (assq-ref (car (cdr kar)) 'id '(#f))) ) 1)
+      (let1 id ((#/A:(.*)\[/ (car (assq-ref (car (cdr kar)) 'id '(#f))) ) 1)
 	       (if (equal? id group-id)
 		   (list result
 			 (if (null? div)
