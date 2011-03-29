@@ -48,7 +48,7 @@
 
 (define (extra-args src-path config)
   (let ((nctags (find-nctags-for src-path config)))
-    (if nctags
+    (if (and #f nctags)
 	`(:ctags ,nctags)
 	'())))
 
@@ -57,7 +57,6 @@
     (if base-dir
 	(let1 tags-file (build-path base-dir "plugins" "nctags" "tags")
 	  (if (and 
-	       ;; TODO: redundant
 	       (directory? base-dir "plugins")
 	       (directory? (build-path base-dir "plugins") "nctags")
 	       (readable? tags-file))
