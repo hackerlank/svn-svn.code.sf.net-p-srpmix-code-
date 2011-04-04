@@ -9,6 +9,7 @@ dist_module_DATA =   \
 	face-integrates.scm			\
 	line-trim.scm				\
 	range.scm		 		\
+	tag-integrates.scm			\
 	title.scm				\
         yogomacs-fragment.scm                   \
         \

@@ -19,6 +19,7 @@
   ;;
   (use yogomacs.rearranges.css-href)
   (use yogomacs.rearranges.face-integrates)
+  (use yogomacs.rearranges.tag-integrates)
   (use yogomacs.rearranges.title)
   ;;
   (use gauche.process)
@@ -96,6 +97,7 @@
       :data ((compose 
 	      fix-css-href
 	      integrate-file-face
+	      (cute tag-integrates <> real-src-file config)
 	      (cute rearranges-title <> web-path)
 	      ) shtml)
       :last-modification-time last-modified-time))
