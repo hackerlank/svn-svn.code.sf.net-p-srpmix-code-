@@ -9,7 +9,7 @@
 (define (show-help n)
   (format #t "Usage: \n")
   (format #t "	~a --help|-h\n" *program-name*)
-  (format #t "	~a [--html] [--ctags=CTAGS] FILE\n" *program-name*)
+  (format #t "	~a [--html] FILE\n" *program-name*)
   (exit n))
 
 (define (with-output-to-stderr thunk)
@@ -20,7 +20,6 @@
   (let-args (cdr args)
       ((help "h|help" => (cute show-help 0))
        (html "html" #f)
-       (ctags "ctags=s" #f)
        . rest)
     (unless (eq? (length rest) 1)
       (with-output-to-stderr
@@ -28,7 +27,7 @@
 	 (print "Wrong number of argument")
 	 (show-help 1))))
     (let* ((input-file (car rest))
-	   (shtml (outlang input-file :ctags ctags)))
+	   (shtml (outlang input-file)))
       (when shtml
 	(if html
 	    (display (srl:sxml->xml-noindent shtml))
