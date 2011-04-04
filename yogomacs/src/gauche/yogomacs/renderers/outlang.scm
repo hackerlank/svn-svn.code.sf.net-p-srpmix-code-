@@ -14,33 +14,11 @@
 (define asis `((*text* . ,(lambda (tag str) str))
 	       (*default* . ,(lambda x x))))
 
-(define (fold-refs base-dir shtml config)
-  (pre-post-order shtml
-		  `((a . ,(lambda (tag attr val)
-			    (when (and (list? attr)
-				       (not (null? attr))
-				       (eq? (car attr) '|@|)
-				       (let1 type (car (assq-ref attr 'class '(#f)))
-					 (or (equal?  type "postline-reference")
-					     (equal?  type "inline-reference"))))
-			      (let* ((cel (assq 'href attr))
-				     (val-cel (cdr cel)))
-				(set-car! val-cel (build-path base-dir "pre-build" (car val-cel)))))
-				(list tag attr val)))
-		    ,@asis)))
-
 (define (outlang src-path config)
   (if (readable? src-path)
-      (let* ((shtml (apply (with-module outlang.outlang outlang)
-			   src-path (extra-args src-path config)))
-	     (base-dir (split-at-pre-build src-path)))
+      (let1 shtml ((with-module outlang.outlang outlang) src-path)
 	(if shtml
-	    (if base-dir
-		(fold-refs (substring base-dir
-				      (string-length (config 'real-sources-dir))
-				      (string-length base-dir))
-			   shtml config)
-		shtml)
+	    shtml
 	    (internal-error "Cannot handle the source file"
 			    src-path)))
       (not-found "File not found"
