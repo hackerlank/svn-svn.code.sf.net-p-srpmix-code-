@@ -109,12 +109,12 @@
 (define asis `((*text* . ,(lambda (tag str) str))
 	       (*default* . ,(lambda x x))))
 
-(define (trx sxml point-max count-lines)
+(define (trx sxml point-max count-lines links)
   (let1 order (+ (floor->exact (log (max count-lines 1) 10)) 1)
     (pre-post-order sxml
 		    `((head . ,(lambda (tag . rest)
 				 (cons tag (reverse 
-					    (append (reverse (built-in-links))
+					    (append links
 						    (cons*
 						     "\n"
 						     `(meta (|@| 
@@ -210,10 +210,9 @@
 				  ))))
     (values shtml point-max count-lines)))
 
-
-;; TODO: Don't call (built-in-links) when this invoked from yogomacs.
 (define (outlang source-file . rest)
-  (let* ((proc (run-process
+  (let-keywords rest ((no-link #f))
+    (let* ((proc (run-process
 		  `(source-highlight 
 		    --tab=8
 		    --doc
@@ -234,7 +233,10 @@
 	  (process-wait proc)
 	  (if (eq? (process-exit-status proc) 0)
 	      (let*-values (((shtml point-max count-lines) (buffer-info shtml)))
-		(trx shtml point-max count-lines))
-	      #f)))))
+		(trx shtml point-max count-lines
+		     (if no-link
+			 (list)
+			 (reverse (built-in-links)))))
+	      #f))))))
 
 (provide "outlang/outlang")
