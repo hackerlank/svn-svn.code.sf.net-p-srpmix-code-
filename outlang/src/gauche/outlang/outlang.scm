@@ -210,6 +210,8 @@
 				  ))))
     (values shtml point-max count-lines)))
 
+
+;; TODO: Don't call (built-in-links) when this invoked from yogomacs.
 (define (outlang source-file . rest)
   (let* ((proc (run-process
 		  `(source-highlight 
