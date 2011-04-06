@@ -131,10 +131,15 @@ function twig_fork_generic
 	exit 1
     fi
 
-    if ! cp -r $from/{SRPMIX,STATUS,CRADLE,archives,plugins,pre-build,specs.spec} $dir/; then
-	echo "Cannot cp: $from/* $dir" 1>&2
-	exit 1
-    fi
+    for f in $from/{SRPMIX,STATUS,CRADLE,archives,plugins,pre-build,specs.spec}; do
+	if [ -e $f ]; then
+	    if ! cp -r $f $dir/; then
+		echo "Cannot cp: $from/* $dir" 1>&2
+		exit 1
+	    fi
+	fi
+    done
+
 
     if ! mkdir $dir/TWIG; then
 	echo "Cannot mkdir $dir/TWIG" 1>&2

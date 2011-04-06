@@ -7,5 +7,4 @@ SUBDIRS += src
 SUBDIRS += doc
 
 EXTRA_DIST = autogen.sh
-
 include $(top_srcdir)/misc/makefiles/rpm.mk
