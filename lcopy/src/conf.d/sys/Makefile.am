@@ -102,6 +102,7 @@ dist_confd_DATA = \
 	rpm,trunk.lcopy \
 	rsyslog,trunk.lcopy \
 	samba,trunk.lcopy \
+	sblim-cmpi-base,trunk.lcopy \
 	sbuild,trunk.lcopy \
 	scsi-target-utils,trunk.lcopy \
 	shadow-utils,trunk.lcopy \
