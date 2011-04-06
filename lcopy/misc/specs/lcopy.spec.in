@@ -3,7 +3,7 @@ Name: lcopy
 Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
-Requires: cvs subversion git mercurial darcs bzr debwatch
+Requires: cvs subversion git mercurial darcs bzr debwatch spawn
 Requires: monotone >= 0.48.1-1
 
 
@@ -27,7 +27,7 @@ License: GPLv3
 Group: Development/Tools
 
 %description
-Scripts to update local copies getting from vcs  repositories 
+Scripts to update local copies getting from vcs repositories 
 
 
 %prep

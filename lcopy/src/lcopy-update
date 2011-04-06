@@ -153,14 +153,15 @@ function update
 
 function main
 {
+    local ncpus=$(cat /proc/cpuinfo | grep processor | wc -l)
     parse_arguments "$@"
 
     if [ -n "$ROOT_DIR" ]; then
 	for d in "$ROOT_DIR"/[a-zA-Z0-9]/*/*; do
 	    if [ -d "$d" ] && [ -w "$d" ]; then
-		"$0" "$d"
+		echo "$0 $d; exit 0"
 	    fi
-	done
+	done | spawn -j$ncpus
     else
 	update "$BASE_DIR"
     fi

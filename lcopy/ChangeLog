@@ -1,3 +1,12 @@
+2011-04-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.3.0.
+	Check spawn.
+
+	* misc/specs/lcopy.spec.in (Requires): Added spawn.
+
+	* src/lcopy-update: Use spawn.
+
 2011-03-25  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.2.21.
