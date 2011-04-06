@@ -137,9 +137,20 @@ function lcopy_backend_dirp
 function lcopy_srpmix_plugin
 {
     local base_dir=$1
+    
+    local disable=vanilla
+    local enable=nctags
+
+    if [ -n "$LCOPY_DISABLE_PLUGINS" ]; then
+	disable="${disable},$LCOPY_DISABLE_PLUGINS"
+    fi
+
+    if [ -n "$LCOPY_ENABLE_PLUGINS" ]; then
+	enable="${enable},$LCOPY_ENABLE_PLUGINS"
+    fi
 
     if which srpmix-plugin > /dev/null 2>&1; then
-	srpmix-plugin --disable=vanilla --enable=nctags ${base_dir}
+	srpmix-plugin --disable="${disable}" --enable="${enable}" ${base_dir}
     fi
 }
 

@@ -3,6 +3,9 @@
 	* configure.ac: Version 0.3.0.
 	Check spawn.
 
+	* src/liblcopy.sh.in (lcopy_srpmix_plugin): Use
+	$LCOPY_ENABLE_PLUGINS and $LCOPY_DISABLE_PLUGINS.
+
 	* misc/specs/lcopy.spec.in (Requires): Added spawn.
 
 	* src/lcopy-update: Use spawn.
