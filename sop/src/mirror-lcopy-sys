@@ -15,6 +15,8 @@ fi
 
 lcopy-update --root-dir=$(pwd)
 
+ncpus=$(cat /proc/cpuinfo | grep processor | wc -l)
+
 for c in "${LCOPY_SYS_CONF_DIR}"/*.lcopy; do
-    lcopy-checkout --sync-with-conf $c 
-done
+    echo "lcopy-checkout --sync-with-conf $c; exit 0" 
+done | spawn -j${ncpus}
