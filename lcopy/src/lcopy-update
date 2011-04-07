@@ -142,9 +142,14 @@ function update
     fi
     echo ${SRPMIX_CRADLE_NAME} > "${base_dir}/CRADLE"
     
+    lcopy_prepare_archives "${base_dir}" "$LCOPY_ARCHIVE_POINTER"
+
     if [ "$status" -eq "1" ]; then
 	status=0
-	lcopy_srpmix_plugin "${base_dir}"
+	lcopy_srpmix_plugin          \
+	    "${base_dir}"            \
+	    "$LCOPY_DISABLE_PLUGINS" \
+	    "$LCOPY_ENABLE_PLUGINS"
     fi
 
     return $status

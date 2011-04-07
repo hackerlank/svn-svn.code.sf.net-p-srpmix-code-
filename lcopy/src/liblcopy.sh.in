@@ -134,19 +134,38 @@ function lcopy_backend_dirp
     lcopy_backend_call $vcs dirp "$@"
 }
 
+function lcopy_prepare_archives
+{
+    local base_dir=$1
+    local pointer=$2
+    
+    if [ -n "$pointer" ]; then
+	if [ -h ${base_dir}/archives ]; then
+	    rm -f ${base_dir}/archives
+	fi
+	if ! [ -e ${base_dir}/archives ]; then
+	    (cd ${base_dir}; ln -s "$pointer" ./archives)
+	fi
+    elif [ ! -e ${base_dir}/archives ]; then
+	(cd ${base_dir}; ln -s ./pre-build ./archives)
+    fi
+}
+
 function lcopy_srpmix_plugin
 {
     local base_dir=$1
+    local disable_args=$2
+    local enable_args=$3
     
     local disable=vanilla
     local enable=nctags
 
-    if [ -n "$LCOPY_DISABLE_PLUGINS" ]; then
-	disable="${disable},$LCOPY_DISABLE_PLUGINS"
+    if [ -n "$disable_args" ]; then
+	disable="${disable},${disable_args}"
     fi
 
-    if [ -n "$LCOPY_ENABLE_PLUGINS" ]; then
-	enable="${enable},$LCOPY_ENABLE_PLUGINS"
+    if [ -n "$enable_args" ]; then
+	enable="${enable},${enable_args}"
     fi
 
     if which srpmix-plugin > /dev/null 2>&1; then
