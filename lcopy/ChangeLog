@@ -1,5 +1,7 @@
 2011-04-08  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.3.1.
+
 	* src/liblcopy.sh.in (lcopy_prepare_archives): New function.
 	(lcopy_srpmix_plugin): Don't refer LCOPY_DISABLE_PLUGINS and
 	LCOPY_ENABLE_PLUGINS directly.
