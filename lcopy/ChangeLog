@@ -1,5 +1,10 @@
 2011-04-08  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/backends/svn (svn_rebirth): Use only sed. 
+	Don't use grep Suggested by Satoru SATOH <ssato@redhat.com>.
+
+2011-04-08  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: Version 0.3.1.
 
 	* src/liblcopy.sh.in (lcopy_prepare_archives): New function.

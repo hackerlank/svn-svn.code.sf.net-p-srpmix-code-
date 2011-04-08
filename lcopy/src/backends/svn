@@ -236,7 +236,7 @@ function svn_rebirth
 	return 1
     fi
 
-    local svn_url=$(echo "$svn_info" | grep 'URL: ' |  sed -e 's/URL: //')
+    local svn_url=$(echo "$svn_info" | sed -n -e 's/URL: //p')
     if [ -z "${svn_url}" ]; then
 	echo "cannot find URL line in svn info output (pwd: $(pwd)) " 1>&2
 	return 1
