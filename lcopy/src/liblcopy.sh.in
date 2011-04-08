@@ -168,6 +168,7 @@ function lcopy_srpmix_plugin
 	enable="${enable},${enable_args}"
     fi
 
+    # TODO: Check the existence of plugins specified with $enable 
     if which srpmix-plugin > /dev/null 2>&1; then
 	srpmix-plugin --disable="${disable}" --enable="${enable}" ${base_dir}
     fi
