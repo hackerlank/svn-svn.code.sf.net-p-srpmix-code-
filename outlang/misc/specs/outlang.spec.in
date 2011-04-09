@@ -2,7 +2,7 @@ Summary: A tool converting a file to html format with source-highlight
 Name: outlang
 Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
-License: GPLv3+yamato
+License: GPLv3+
 Group: Development/Tools
 Buildarch: noarch
 URL: http://srpmix.org

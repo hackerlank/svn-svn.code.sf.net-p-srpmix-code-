@@ -191,7 +191,6 @@
 				`((span 
 				   ((class . ,(lambda (attr val) (list attr 
 								       (outlang-class->emacs-class val))))
-				    (a . ,(lambda x x))
 				    ,@asis)
 				   . ,(lambda (tag attrs . text)
 					(let ((attrs (reverse (cons `(id ,#`"P:,|point-max|") (reverse attrs))))
