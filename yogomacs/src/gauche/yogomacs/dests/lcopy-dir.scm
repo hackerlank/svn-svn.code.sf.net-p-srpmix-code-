@@ -19,11 +19,29 @@
   )
 (select-module yogomacs.dests.lcopy-dir)
 
-(define (dest path params config)
-  (dir-dest path params config
-	    `((#/^plugins$/ #f #f)
-	      (#/^archives$/ #f #f)
-	      (#/^vanilla$/ #f #f))))
+(define (dest lpath params config)
+  (let* ((real-src-dir (apply make-real-src-path
+					     config
+					     (snoc lpath
+						   "archives")))
+	 (link-to (guard (e (else #f))
+			 (sys-readlink real-src-dir))))
+    (dir-dest lpath params config
+	      `((#/^plugins$/ #f #f)
+		(#/^archives$/ ,(boolean link-to)
+			       ,(if link-to (pa$ dir-make-url lpath) #f)
+			       ,(if  link-to
+				   (rxmatch-cond
+				     ((#/(.*)\/pre-build$/ link-to)
+				      (#f #f)
+				      "./pre-build")
+				     ((#/(.*)\/plugins\/(.*)/ link-to)
+				      (#f #f plugin)
+				      plugin)
+				     (else
+				      #f))
+				   #f))
+		(#/^vanilla$/ #f #f)))))
 
 (define (lcopy-dir-make-routing-table prefix)
    `((,(string->regexp (string-append prefix "$")) ,dest)
@@ -33,7 +51,9 @@
      (,(string->regexp (string-append prefix "/STATUS$")) ,file-dest)
      (,(string->regexp (string-append prefix "/LCOPY$")) ,file-dest)
      (,(string->regexp (string-append prefix "/CRADLE$")) ,file-dest)
-     ;; archives -> cmdline
+     (,(string->regexp (string-append prefix "/archives$")) ,dir-dest)
+     ;; TODO: lcopy-archives-fs-dest
+     (,(string->regexp (string-append prefix "/archives/.*")) ,fs-dest)
      ))
 
 (define lcopy-common-prefix "^/sources/[a-zA-Z0-9]/[^/]+/\^lcopy-(?:[^/]+)")

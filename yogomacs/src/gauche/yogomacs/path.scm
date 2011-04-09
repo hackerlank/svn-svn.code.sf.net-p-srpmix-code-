@@ -7,6 +7,7 @@
 	  directory-file-name
 	  url->href-list
 	  make-real-src-path
+	  snoc
 	  )
   (use file.util)
   (use util.list))
@@ -55,5 +56,8 @@
 
 (define (make-real-src-path config . tail-components)
   (apply build-path (config 'real-sources-dir) tail-components))
+
+(define (snoc rdc rac)
+  (reverse (cons rac (reverse rdc))))
 
 (provide "yogomacs/path")

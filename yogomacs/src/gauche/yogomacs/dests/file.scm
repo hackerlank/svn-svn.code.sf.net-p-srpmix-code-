@@ -43,7 +43,7 @@
 (define (file-type file)
   (if (readable? file)
       (string-split (call-with-input-process 
-			`(file --brief --mime-type ,file)
+			`(file --brief --mime-type --dereference ,file)
 		      read-line)
 		    #\/)
       (not-found "File not redable"
