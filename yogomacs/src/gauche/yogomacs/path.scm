@@ -6,6 +6,7 @@
 	  parent-of
 	  directory-file-name
 	  url->href-list
+	  make-real-src-path
 	  )
   (use file.util)
   (use util.list))
@@ -51,5 +52,8 @@
 					      #`",|elt|"))) 
 			      ,(sys-basename elt)))
 			splited-list)))))
+
+(define (make-real-src-path config . tail-components)
+  (apply build-path (config 'real-sources-dir) tail-components))
 
 (provide "yogomacs/path")

@@ -66,8 +66,7 @@
    ((path params config extra)
     (let* ((last (last path))
 	   (head (path->head path))
-	   (real-src-dir (build-path (config 'real-sources-dir)
-				     head last)))
+	   (real-src-dir (make-real-src-path config head last)))
       ;;
       (unless (to-domain? real-src-dir config)
 	(forbidden "Out of domain" real-src-dir))

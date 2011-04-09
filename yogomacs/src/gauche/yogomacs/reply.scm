@@ -37,7 +37,8 @@
    (config :init-keyword :config)
    (last-modification-time :init-keyword :last-modification-time 
 			   :init-value #f)
-   (mime-type :init-keyword :mime-type)))
+   (mime-type :init-keyword :mime-type)
+   (has-tag? :init-value #f)))
 
 
 
@@ -106,7 +107,9 @@
 		    :mime-type "text/xml")
 	  (reply-xhtml new))
 	(let1 new (make <shtml-data>
-		    :data ((compose narrow-down eof-line) (ref shtml 'data))
+		    :data ((compose narrow-down
+				    eof-line) 
+			   (ref shtml 'data))
 		    :params (ref shtml 'params)
 		    :config (ref shtml 'config)
 		    :last-modification-time (ref shtml 'last-modification-time)

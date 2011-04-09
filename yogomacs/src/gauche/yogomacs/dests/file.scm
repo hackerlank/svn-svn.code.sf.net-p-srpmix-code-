@@ -75,9 +75,8 @@
 	 (head (path->head lpath))
 	 (real-src-file (get-keyword*
 			 :real-src-file rest
-			 (build-path 
-			  (build-path (config 'real-sources-dir) head)
-			  last)))
+			 (make-real-src-path config head last)
+			 ))
 	 (file-type (file-type real-src-file)))
     (if (to-domain? real-src-file config)
 	(file-dest0 real-src-file (compose-path lpath) file-type (config 'mode) params config)

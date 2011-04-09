@@ -15,7 +15,7 @@
 (define (fs-dest path params config)
   (let* ((last (last path))
 	 (head (path->head path))
-	 (real-src-dir (build-path (config 'real-sources-dir) head)))
+	 (real-src-dir (make-real-src-path config head)))
     (if (readable? real-src-dir last)
 	(if (directory? real-src-dir last)
 	    (dir-dest path params config)
