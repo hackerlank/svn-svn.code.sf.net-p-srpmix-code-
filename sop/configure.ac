@@ -44,7 +44,7 @@ if test "x$LCOPY_UPDATE" = "x"; then
    AC_MSG_ERROR(lcopy-update not found); 
 fi
 
-AC_CHECK_PROGS([SWPAN],[spawn])
+AC_CHECK_PROGS([SPAWN],[spawn])
 if test "x$SPAWN" = "x"; then 
    AC_MSG_ERROR(spawn not found); 
 fi

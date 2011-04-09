@@ -1,3 +1,11 @@
+2011-04-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sop-garbages (print_section_begin): New function.
+	(print_section_end): New function.
+	(report): Use `print_section_begin' and `print_section_end'.
+
+	* configure.ac: Fix a typo.
+
 2011-04-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.4.2.

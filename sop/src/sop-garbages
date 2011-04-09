@@ -22,12 +22,18 @@ source libsrpmix.sh || {
     exit 1
 }
 
-
-function print_section
+function print_section_begin
 {
     echo "##"
     echo '##' " @ " $1":"
     echo "##"    
+    echo 'if [ $1 = ' $2 ' ] || [ $1 = all ]; then' 
+    echo '  :'
+}
+
+function print_section_end
+{
+    echo 'fi'
 }
 
 function print_entry
@@ -53,11 +59,12 @@ function report
     # Broken src.rpm in mirrros. rm command is enough 
     # to remove the garbages of this class.
     #
-    print_section "SRPM LEVEL GARBAGES"
+    print_section_begin "SRPM LEVEL GARBAGES" "srpm"
     cat $broken_srpms | while read; do
 	print_entry $REPLY
 	echo ": srpm-level && [ -e ${REPLY} ] && rm -f ${REPLY}"
     done
+    print_section_end
     
     #
     # FILE SYSTEM LEVEL GARBAGES
@@ -65,7 +72,7 @@ function report
     # A file with no associated swrf package file.
     # File system level garbages can be removed with rm command.
     # 
-    print_section "File system level garbages"
+    print_section_begin "File system level garbages" "fs"
     diff -ruN $swrfs $fs | grep ^+[0-9a-zA-Z] | while read; do
 	local candidate="${REPLY:1}"
 	local c
@@ -101,6 +108,7 @@ function report
 	    )
 	fi
     done
+    print_section_end
     
     #
     # SWRF LEVEL GARBAGES
@@ -117,11 +125,11 @@ function report
     # I have never got this kind of garbages. So I have not written
     # code which generates scriptlets for removing the garbages yet.
     #
-    print_section "Swrf file level garbages"
+    print_section_begin "Swrf file level garbages" "swrf"
     for c in $swrf_files; do
 	print_entry $c
     done
-
+    print_section_end
     
     #
     # RPM LEVEL GARBAGES
@@ -135,7 +143,7 @@ function report
     # garbages. As noted in SWRF LEVEL GARBAGES, the dependency must
     # be considered when removing.
     #
-    print_section "RPM level garbages"
+    print_section_begin "RPM level garbages" "rpm"
     diff -ruN $mirror $swrfs | grep ^+[0-9a-zA-Z] | while read; do
 	rpm="${REPLY:1}"
 	print_entry $rpm
@@ -160,6 +168,7 @@ function report
 	    echo ": rpm-level && rpm -qi $e 2>&1 > /dev/null && rpm -e $e"
 	done
     done
+    print_section_end
 }
 
 function parse_arguments
