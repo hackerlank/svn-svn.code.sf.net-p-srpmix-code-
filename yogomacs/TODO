@@ -1,11 +1,15 @@
 -*- outline -*-
 * prioritized task
+** css in sexp: http://common-lisp.net/gitweb?p=projects/css-sexp/css-sexp.git;a=blob;f=src/output.lisp;h=93b9cc9f7d2106bbbeed8da247c5388f09807db6;hb=HEAD
+** tag-handlers
+** mode info
+
 ** ChangeLog
 ** TODO
 ** README <done>
 ** pager
 ** broken chopped page
-** gnu source highlighting
+** gnu source highlighting <done>
 ** publish and delete yarn
 
 ** specify read-only, cache-build... at configure
