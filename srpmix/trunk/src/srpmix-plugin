@@ -191,7 +191,7 @@ function resolve_plugin
 function list_enabled_plugins
 {
     local all=$(__list_plugins | while read name plugin; do echo $name; done)
-    local current=$(for p in $all; do (! [[ "$p" =~ ^_.* ]]) && echo $p; done)
+    local current=$(for p in $all; do (! [[ $(basename $(resolve_plugin "$p")) =~ ^_.* ]]) && echo $p; done)
 
     if [ "${DISABLE_PLUGINS}" = "ALL" ]; then
 	current=

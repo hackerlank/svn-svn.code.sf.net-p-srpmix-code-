@@ -1,5 +1,10 @@
 2011-03-25  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-plugin (list_enabled_plugins): Resolve the name of plugin
+	before checking whether it is enabled or disabled.
+
+2011-03-25  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: Version 3.117.2.
 
 	* tests/00srpmix-plugin.sh (PATH): Added nctags.
