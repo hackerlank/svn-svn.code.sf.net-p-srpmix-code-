@@ -64,7 +64,8 @@ function list_source_dirs
 
 function parse_arguments
 {
-    status=
+    local status=
+    local list_plugins
 
     while [ $# -gt 0 ]; do
 	case "$1" in
@@ -81,8 +82,7 @@ function parse_arguments
                 DISABLE_PLUGINS="$arg"
 		;;
             --list|-L)
-		list_plugins
-		exit 0
+		list_plugins=yes
 		;;
 	    (--path-for=*)
 	        path_for ${1/--path-for=}
@@ -105,6 +105,11 @@ function parse_arguments
 	esac
 	shift
     done
+
+    if [ "$list_plugins" = yes ]; then
+	list_plugins
+	exit 0
+    fi
 
     ROOTDIRS="$@"
     if test "x$ROOTDIRS" = "x"; then
@@ -129,12 +134,12 @@ function path_for
 {
     local expect=$1
     local path=$(
-    __list_plugins | while read name plugin; do
-	if test "$expect" = "$name"; then
-	    echo "${plugin}"
-	    exit 0
-	fi
-    done
+	__list_plugins | while read name plugin; do
+	    if test "$expect" = "$name"; then
+		echo "${plugin}"
+		exit 0
+	    fi
+	done
     )
 
     if test -f "$path"; then
@@ -149,9 +154,15 @@ function list_plugins
 {
     local name
     local plugin
+    local status
 
     __list_plugins | sort -n | while read name plugin; do
-	echo ${name} "=>" ${plugin}
+	if member_p ${plugin} $(__list_enabled_plugins); then
+	    status=+
+	else
+	    status=-
+	fi
+	echo ${status} ${name} "=>" ${plugin}
     done
 }
 
@@ -188,7 +199,7 @@ function resolve_plugin
 }
 
 
-function list_enabled_plugins
+function __list_enabled_plugins
 {
     local all=$(__list_plugins | while read name plugin; do echo $name; done)
     local current=$(for p in $all; do (! [[ $(basename $(resolve_plugin "$p")) =~ ^_.* ]]) && echo $p; done)
@@ -230,7 +241,7 @@ function main
 	debug_opt=--debug
     fi
 
-    for plugin in $(list_enabled_plugins) DUMMY; do
+    for plugin in $(__list_enabled_plugins) DUMMY; do
 	if [ $plugin = DUMMY ]; then
 	    continue
 	fi
