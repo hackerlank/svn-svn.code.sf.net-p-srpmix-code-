@@ -1,3 +1,8 @@
+2011-04-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/twig (twig_record, twig_record_help): An alias
+	for commit command.
+
 2009-11-10  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/twig.spec.in (Requires): Added redhat-rpm-config.

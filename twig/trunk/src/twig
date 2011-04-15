@@ -27,7 +27,7 @@
 # reduce/fold
 # vfork/unshare
 
-twig_commands="home fork info diff specdiff pedigree commit build addlog help"
+twig_commands="home fork info diff specdiff pedigree commit record build addlog help"
 
 function twig_p
 {
@@ -375,6 +375,21 @@ function twig_specdiff
     fi
 
     diff -uN TWIG/from/specs.spec ./specs.spec
+}
+
+#
+#
+# twig record
+#
+#
+function twig_record_help
+{
+    echo "    " record (this subcommand is alias for \"commit\")
+}
+
+function twig_record
+{
+    twig_commit "$@"
 }
 
 #
