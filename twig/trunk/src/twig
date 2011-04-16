@@ -27,7 +27,7 @@
 # reduce/fold
 # vfork/unshare
 
-twig_commands="home fork info diff specdiff pedigree commit record build addlog help"
+twig_commands="home fork info diff specdiff pedigree commit touch record build addlog help"
 
 function twig_p
 {
@@ -406,14 +406,37 @@ function twig_commit
 {
     local name
     local size
+    local path
 
     twig_diff > \#twig.patch\#
     name=$(cat TWIG/name)
-    mv \#twig.patch\# archives/twig-${name}.patch
+    path="archives/twig-${name}.patch"
+    mv \#twig.patch\# "$path"
 
-    if test ! -s archives/twig-${name}.patch; then
+    if test ! -s "$path"; then
 	echo "Hack for \"error: File PATCH is smaller than 13 bytes\"" \
-	    > archives/twig-${name}.patch
+	    > "$path"
+    fi
+}
+
+function twig_touch_help
+{
+    echo "	" touch
+}
+
+function twig_touch
+{
+    local name
+    local path
+
+    name=$(cat TWIG/name)
+    path=archives/twig-${name}.patch
+
+    if [ -f "$path" ]; then
+	touch "$path"
+    else
+	echo "Hack for \"error: File PATCH is smaller than 13 bytes\"" \
+	    > "$path"
     fi
 }
 
@@ -573,6 +596,7 @@ function twig_warning
     echo "*** $old_file is older than ./TWIG/build_id"
     echo "*** You may forget to run \"twig commit\"."
     echo "*** To ignore the modification time use --ignore-modification-time"
+    echo "*** or 'twig touch' to update the time stamp"
     
 }
 function twig_build
