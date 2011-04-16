@@ -17,7 +17,8 @@
   (use yogomacs.dentry)
   (use file.util)
   (use rfc.uri)
-  (use srfi-19))
+  (use srfi-19)
+  (use yogomacs.util.fs))
 
 (select-module yogomacs.dentries.fs)
 
@@ -84,9 +85,7 @@
 	       :path (ref fs-dentry 'symlink-to-dname)))
 
 (define (make-symlink-to-dname-default fs-dentry)
-  (guard (e
-	  (else #f))
-    (sys-readlink (path-of fs-dentry))))
+  (readlink-safe (path-of fs-dentry)))
 
 (define (make-symlink-to-url-default fs-dentry)
   #f)

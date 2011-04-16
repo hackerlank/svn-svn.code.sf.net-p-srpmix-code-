@@ -29,6 +29,8 @@
   (use yogomacs.error)
   (use yogomacs.domain)
   (use yogomacs.access)
+  ;;
+  (use yogomacs.util.fs)
   )
 
 (select-module yogomacs.dests.dir)
@@ -103,15 +105,12 @@
 
 (define (dir-make-arrowy-to-dname e)
   (let1 entry-path (path-of e)
-    (guard (e (else #f))
-      (sys-basename (sys-readlink entry-path)))))
+    (sys-basename (readlink-safe entry-path))))
 
 (define (dir-make-arrowy-to-url get-pkg e)
   (let* ((pkg (get-pkg e))
 	 (entry-path (path-of e))
-	 (ver (guard (e
-		      (else #f))
-		(sys-basename (sys-readlink entry-path)))))
+	 (ver (sys-basename (readlink-safe entry-path))))
     (if ver
 	(build-path "/sources"
 		    (substring pkg 0 1)

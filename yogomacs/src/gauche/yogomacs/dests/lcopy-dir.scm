@@ -16,6 +16,8 @@
   (use yogomacs.dests.debug)
   (use yogomacs.storages.css)
   (use yogomacs.dests.css)
+  (use yogomacs.util.list)
+  (use yogomacs.util.fs)
   )
 (select-module yogomacs.dests.lcopy-dir)
 
@@ -24,8 +26,7 @@
 					     config
 					     (snoc lpath
 						   "archives")))
-	 (link-to (guard (e (else #f))
-			 (sys-readlink real-src-dir))))
+	 (link-to (readlink-safe real-src-dir)))
     (dir-dest lpath params config
 	      `((#/^plugins$/ #f #f)
 		(#/^archives$/ ,(boolean link-to)
@@ -53,7 +54,7 @@
      (,(string->regexp (string-append prefix "/CRADLE$")) ,file-dest)
      (,(string->regexp (string-append prefix "/archives$")) ,dir-dest)
      ;; TODO: lcopy-archives-fs-dest
-     (,(string->regexp (string-append prefix "/archives/.*")) ,fs-dest)
+     (,(string->regexp (string-append prefix "/archives/.*")) ,lcopy-archives-fs-dest)
      ))
 
 (define lcopy-common-prefix "^/sources/[a-zA-Z0-9]/[^/]+/\^lcopy-(?:[^/]+)")
@@ -68,6 +69,20 @@
 	(fs-dest path params config))
        (else
 	(fs-dest-read-only path params config))))))
+
+(define (lcopy-archives-fs-dest lpath params config)
+  (let* ((head-path (apply make-real-src-path
+			   config 
+			   (drop-after (pa$ equal? "archives") lpath)))
+	 (head-link-to (readlink-safe head-path)))
+    (cond
+     ((equal? (sys-basename head-link-to) "pre-build")
+      (lcopy-fs-dest lpath params config))
+     ((equal? (sys-basename head-link-to) "gitburst")
+      ;; TODO: passing this to gitburst routing table
+      (dir-dest lpath params config))
+     (else
+      (dir-dest lpath params config)))))
 
 (define (lcopy-dir-make-dest prefix)
   (lambda (path params config)
