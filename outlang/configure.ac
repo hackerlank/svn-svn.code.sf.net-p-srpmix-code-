@@ -1,5 +1,5 @@
 m4_define([pkg_name], [outlang])
-m4_define([pkg_version], [0.0.2])
+m4_define([pkg_version], [0.0.3])
 
 AC_INIT(pkg_name, pkg_version)
 AC_CONFIG_AUX_DIR(misc/ac-aux)

@@ -109,34 +109,56 @@
 (define asis `((*text* . ,(lambda (tag str) str))
 	       (*default* . ,(lambda x x))))
 
+(define (inputlang->major-mode inputlang)
+  (string-append
+   (let1 inputlang (sys-basename inputlang)
+     (rxmatch-if (#/(.*)\.lang$/ inputlang)
+	 (#f body)
+       body
+       inputlang)) "-mode"))
+
 (define (trx sxml point-max count-lines links)
   (let1 order (+ (floor->exact (log (max count-lines 1) 10)) 1)
     (pre-post-order sxml
-		    `((head . ,(lambda (tag . rest)
-				 (cons tag (reverse 
-					    (append links
-						    (cons*
-						     "\n"
-						     `(meta (|@| 
-							     (name "count-lines")
-							     (content ,#`",|count-lines|")))
-						     "	"
-						     "\n"
-						     `(meta (|@| 
-							     (name "point-max")
-							     (content ,#`",|point-max|")))
-						     "	"
-						     "\n"
-						     `(meta (|@| 
-							     (name "version")
-							     (content "0.0.0")))
-						     "	"
-						     "\n"
-						     `(meta (|@| 
-							     (name "created-time")
-							     (content ,(date->string (time-utc->date (current-time)) "~5"))))
-						     "	"
-						     (reverse rest)))))))
+		    `((head 
+		       ((meta . ,(lambda (tag attrs . rest)
+				   (or 
+				    (and-let* (( (list? attrs) )
+					       ( (eq? (car attrs) '|@|) )
+					       (attrs (cdr attrs))
+					       ( (equal? (car (assq-ref attrs 'name '(#f)))
+							 "INPUTLANG") )
+					       (inputlang (car (assq-ref attrs 'content '(#f)))))
+				      `(,tag (|@| 
+					      (name "major-mode")
+					      (content ,(inputlang->major-mode inputlang)))))
+				    `(,tag ,attrs . ,rest))
+				   )))
+		       . ,(lambda (tag . rest)
+			    (cons tag (reverse 
+				       (append links
+					       (cons*
+						"\n"
+						`(meta (|@| 
+							(name "count-lines")
+							(content ,#`",|count-lines|")))
+						"	"
+						"\n"
+						`(meta (|@| 
+							(name "point-max")
+							(content ,#`",|point-max|")))
+						"	"
+						"\n"
+						`(meta (|@| 
+							(name "version")
+							(content "0.0.0")))
+						"	"
+						"\n"
+						`(meta (|@| 
+							(name "created-time")
+							(content ,(date->string (time-utc->date (current-time)) "~5"))))
+						"	"
+						(reverse rest)))))))
 		      (pre . ,(lambda (tag . rest)
 				(cons tag (reverse (car (fold
 							 (cute line-prefix <> <> order)
