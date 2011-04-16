@@ -19,13 +19,15 @@
   ;;
   (use yogomacs.rearranges.css-href)
   (use yogomacs.rearranges.face-integrates)
-  (use yogomacs.rearranges.tag-integrates)
   (use yogomacs.rearranges.title)
   ;;
   (use gauche.process)
   (use yogomacs.access)
   (use yogomacs.error)
   (use yogomacs.domain)
+  ;;
+  (use yogomacs.tag)
+  (use yogomacs.tags)
   ;;
   (use sxml.sxpath)
   )
@@ -77,9 +79,16 @@
 			 :real-src-file rest
 			 (make-real-src-path config head last)
 			 ))
-	 (file-type (file-type real-src-file)))
+	 (file-type (file-type real-src-file))
+	 (has-tag? (has-tag? real-src-file params config)))
     (if (to-domain? real-src-file config)
-	(file-dest0 real-src-file (compose-path lpath) file-type (config 'mode) params config)
+	(rlet1 data (file-dest0 real-src-file 
+				(compose-path lpath)
+				file-type
+				(config 'mode)
+				params
+				config)
+	       (set! (ref data 'has-tag?) has-tag?))
 	(forbidden "Out of domain" real-src-file))))
 
 (define-macro (guard-with-asis real-src-file config . body)
@@ -96,7 +105,6 @@
       :data ((compose 
 	      fix-css-href
 	      integrate-file-face
-	      (cute tag-integrates <> real-src-file config)
 	      (cute rearranges-title <> web-path)
 	      ) shtml)
       :last-modification-time last-modified-time))

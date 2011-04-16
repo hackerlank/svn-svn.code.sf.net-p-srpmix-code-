@@ -9,6 +9,7 @@ SUBDIRS += shells
 SUBDIRS += storages
 SUBDIRS += util
 SUBDIRS += reels
+SUBDIRS += tags
 ## ---------------------
 SUBDIRS += caches
 
@@ -39,6 +40,8 @@ dist_module_DATA =   \
 	sanitize.scm				\
 	shell.scm				\
 	shells.scm				\
+	tag.scm					\
+	tags.scm				\
 	user.scm				\
 	window.scm				\
 	yarn.scm				\

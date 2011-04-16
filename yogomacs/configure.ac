@@ -159,6 +159,7 @@ AC_OUTPUT([
 	   src/gauche/yogomacs/storages/Makefile
 	   src/gauche/yogomacs/util/Makefile
 	   src/gauche/yogomacs/reels/Makefile
+	   src/gauche/yogomacs/tags/Makefile
 	   src/base/Makefile
 	   src/data/Makefile
 	   src/js/Makefile

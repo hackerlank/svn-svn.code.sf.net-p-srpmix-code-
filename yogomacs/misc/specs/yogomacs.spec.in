@@ -102,6 +102,8 @@ fi
 %{_datadir}/gauche/site/lib/yogomacs/sanitize.scm
 %{_datadir}/gauche/site/lib/yogomacs/shell.scm
 %{_datadir}/gauche/site/lib/yogomacs/shells.scm
+%{_datadir}/gauche/site/lib/yogomacs/tag.scm
+%{_datadir}/gauche/site/lib/yogomacs/tags.scm
 %{_datadir}/gauche/site/lib/yogomacs/user.scm
 %{_datadir}/gauche/site/lib/yogomacs/window.scm
 %{_datadir}/gauche/site/lib/yogomacs/yarn.scm
@@ -138,6 +140,9 @@ fi
 
 %dir %{_datadir}/gauche/site/lib/yogomacs/reels
 %{_datadir}/gauche/site/lib/yogomacs/reels/*.scm
+
+%dir %{_datadir}/gauche/site/lib/yogomacs/tags
+%{_datadir}/gauche/site/lib/yogomacs/tags/*.scm
 
 
 %dir %{_localstatedir}/lib/yogomacs

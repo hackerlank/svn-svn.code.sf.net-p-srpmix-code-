@@ -29,12 +29,14 @@ yogomacs.rearranges.eof-line
 yogomacs.rearranges.title
 yogomacs.rearranges.checkout
 yogomacs.rearranges.line-trim
+yogomacs.rearranges.tag-integrates
 yogomacs.rearranges.css-integrates
 yogomacs.commands.checkout
 yogomacs.shells.bscm
 yogomacs.shells.ysh
 yogomacs.shells.nologin
 yogomacs.domain
+yogomacs.tags
 yogomacs.dests.lcopy-dir
 yogomacs.dests.login
 yogomacs.dests.root-dir
@@ -60,6 +62,7 @@ yogomacs.dests.subjects
 yogomacs.dests.file
 yogomacs.error
 yogomacs.dentry
+yogomacs.overlay
 yogomacs.window
 yogomacs.dentries.virtual
 yogomacs.dentries.subject
@@ -78,12 +81,12 @@ yogomacs.renderers.find-file
 yogomacs.renderers.cache
 yogomacs.renderers.archive
 yogomacs.renderers.dired
+yogomacs.renderers.outlang
 yogomacs.renderers.text
 yogomacs.renderers.fundamental
 yogomacs.renderers.syntax
 yogomacs.renderers.ewoc
 yogomacs.renderers.yogomacs
-yogomacs.renderers.outlang
 yogomacs.entry
 yogomacs.shell
 yogomacs.reply
@@ -91,8 +94,11 @@ yogomacs.util.enum
 yogomacs.util.range
 yogomacs.util.compress
 yogomacs.util.lcopy
+yogomacs.util.list
+yogomacs.util.fs
 yogomacs.util.scheme2js
 yogomacs.util.ebuf
+yogomacs.overlays
 yogomacs.batch
 yogomacs.access
 yogomacs.yarn
@@ -108,14 +114,12 @@ yogomacs.config
 yogomacs.caches.shtml
 yogomacs.command
 yogomacs.user
+yogomacs.tags.nctags
+yogomacs.overlays.text-file
+yogomacs.overlays.not-implemented
 yogomacs.flserver
+yogomacs.tag
 )
-
-
-
-
-
-
 
 (test-module 'yogomacs.sanitize)
 

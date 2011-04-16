@@ -15,6 +15,7 @@
   (use yogomacs.rearranges.enum)
   (use yogomacs.rearranges.yogomacs-fragment)
   (use yogomacs.rearranges.eof-line)
+  (use yogomacs.rearranges.tag-integrates)
   (use yogomacs.shell)
   (use yogomacs.error)
   ;;
@@ -93,8 +94,8 @@
       (lambda (shtml) shtml)))
 
 (define-method  reply ((shtml <shtml-data>))
-  (let* ((narrow-down (make-narrow-down (ref shtml 'params)))
-	 (shell-name (in-shell? (ref shtml 'params))))
+  (let ((narrow-down (make-narrow-down (ref shtml 'params)))
+	(shell-name (in-shell? (ref shtml 'params))))
     (if shell-name
 	(let1 new (make <shtml-data>
 		    :data ((compose (cute yogomacs-fragment <> shell-name) 
@@ -108,7 +109,10 @@
 	  (reply-xhtml new))
 	(let1 new (make <shtml-data>
 		    :data ((compose narrow-down
-				    eof-line) 
+				    (cute tag-integrates <> (ref shtml 
+								 'has-tag?))
+				    eof-line
+				    ) 
 			   (ref shtml 'data))
 		    :params (ref shtml 'params)
 		    :config (ref shtml 'config)

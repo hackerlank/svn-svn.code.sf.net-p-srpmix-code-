@@ -25,9 +25,9 @@
 
 (define (face-integrates sxml base-name faces)
   (css-integrates sxml
-		  `("\n" "    "
+		  `("\n" "	"
 		    ,(link-face-css base-name "Default")
-		    "\n" "    "
+		    "\n" "	"
 		    ,(link-face-css base-name "Invert"))
 		  (cute href-for-faces? <> faces)))
 
