@@ -384,7 +384,7 @@ function twig_specdiff
 #
 function twig_record_help
 {
-    echo "    " record (this subcommand is alias for \"commit\")
+    :
 }
 
 function twig_record
@@ -399,7 +399,7 @@ function twig_record
 #
 function twig_commit_help
 {
-    echo "    " commit
+    echo "    " commit|record
 }
 
 function twig_commit
