@@ -215,7 +215,7 @@ function main
 		rm ${MY_TMPDIR}/$t/TAGS
 	    fi
 	    if test -f ${MY_TMPDIR}/$t/tags; then
-		sed -i -e 's|/[^\t]*/pre-build|../../pre-build|' ${MY_TMPDIR}/$t/tags \
+		sed -e 's|/[^\t]*/pre-build|../../pre-build|' ${MY_TMPDIR}/$t/tags \
 		    > ${PLUGINDIR}/${t}.tags
 		rm ${MY_TMPDIR}/$t/tags
 	    fi

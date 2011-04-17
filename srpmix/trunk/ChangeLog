@@ -1,3 +1,10 @@
+2011-04-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.117.3.
+
+	* src/plugins/60srpmix-kindex (main): Don't use 'sed -i' when
+	creating tags file.
+
 2011-04-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-plugin: Report the status of plugin when
