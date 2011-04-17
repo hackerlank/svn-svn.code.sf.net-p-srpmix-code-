@@ -8,6 +8,7 @@ dist_module_DATA =   \
 	eof-line.scm				\
 	face-integrates.scm			\
 	line-trim.scm				\
+	normalize-major-mode.scm                \
 	range.scm		 		\
 	tag-integrates.scm			\
 	title.scm				\

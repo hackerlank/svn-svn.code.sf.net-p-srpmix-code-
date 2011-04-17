@@ -29,6 +29,7 @@ dist_module_DATA =   \
 	face.scm				\
 	flserver.scm				\
 	main.scm				\
+	major-mode.scm				\
 	overlay.scm				\
 	overlays.scm				\
 	params.scm				\

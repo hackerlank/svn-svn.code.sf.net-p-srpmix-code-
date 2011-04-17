@@ -20,6 +20,7 @@
   (use yogomacs.rearranges.css-href)
   (use yogomacs.rearranges.face-integrates)
   (use yogomacs.rearranges.title)
+  (use yogomacs.rearranges.normalize-major-mode)
   ;;
   (use gauche.process)
   (use yogomacs.access)
@@ -106,6 +107,7 @@
 	      fix-css-href
 	      integrate-file-face
 	      (cute rearranges-title <> web-path)
+	      normalize-major-mode
 	      ) shtml)
       :last-modification-time last-modified-time))
   (define (try-outlang file config)
