@@ -21,6 +21,7 @@ dist_module_DATA =   \
 	sources-dir.scm				\
 	srpmix-dir.scm                          \
 	subjects.scm				\
+	tag.scm				        \
 	text.scm                                \
 	yarn.scm				\
 	ysh-dir.scm				\

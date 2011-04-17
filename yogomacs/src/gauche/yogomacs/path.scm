@@ -7,9 +7,11 @@
 	  directory-file-name
 	  url->href-list
 	  make-real-src-path
+	  real->web
 	  )
   (use file.util)
-  (use util.list))
+  (use util.list)
+  (use srfi-13))
 
 (select-module yogomacs.path)
 
@@ -55,5 +57,10 @@
 
 (define (make-real-src-path config . tail-components)
   (apply build-path (config 'real-sources-dir) tail-components))
+(define (real->web real config)
+  (let1 real-sources-dir (config 'real-sources-dir)
+  (if (string-prefix? real-sources-dir real)
+      (string-drop real (string-length real-sources-dir))
+      (error #`"Given path has not prefix(,|real-sources-dir|): " real))))
 
 (provide "yogomacs/path")

@@ -14,6 +14,7 @@
   (use yogomacs.dests.root-dir)
   (use yogomacs.dests.css)
   (use yogomacs.dests.js)
+  (use yogomacs.dests.tag)
   (use yogomacs.dests.yarn)
   (use yogomacs.dests.subjects)
   (use yogomacs.dests.debug)
@@ -32,6 +33,7 @@
   (let1 base `((#/^\/$/ ,root-dir-dest)
 	       (#/^\/web\/css\/[^\/]+\.css/ ,css-dest)
 	       (#/^\/web\/js\/[^\/]+\.js/ ,js-dest)
+	       (#/^\/web\/tag(?:\/.+)?$/ ,tag-dest)
 	       (#/^\/web\/yarn(?:\/.+)?$/ ,yarn-dest ,yarn-sink)
 	       (#/^\/web\/subjects$/ ,subjects-dest)
 	       ;;

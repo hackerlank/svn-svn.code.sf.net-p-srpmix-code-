@@ -15,7 +15,13 @@ Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs emacs-el gauche-devel font-lock 
-Requires: emacs emacs-common gauche font-lock httpd xz syntax file scheme2js yogomacs-cachedir tar outlang
+Requires: gauche httpd xz file yogomacs-cachedir tar 
+Requires: emacs emacs-common font-lock 
+Requires: scheme2js
+Requires: syntax
+Requires: outlang
+Requires: es-src-ctags
+Requires: es-src-ctags-command
 Requires: lcopy >= 0.2.7
 
 %description
