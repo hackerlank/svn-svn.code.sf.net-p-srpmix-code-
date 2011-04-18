@@ -6,7 +6,6 @@
     (let* ((elt ($ name))
 	   (data (read-from-string elt.innerHTML)))
       (elt.remove)
-      (alert data)
       data))
   (set! major-mode (read-meta "major-mode"))
   (set! has-tag? (read-meta "has-tag?"))
@@ -43,7 +42,7 @@
       (event.stop)
       (let ((symbol (symbol-at target))
 	    (url (contents-url)))
-	(require-tag url symbol major-mode)
+	(require-tag url symbol major-mode target)
 	))))
 
 (define (contents-url)
@@ -53,7 +52,7 @@
 	       (string-length shell-dir)
 	       (string-length pathname))))
 
-(define (require-tag url symbol major-mode)
+(define (require-tag url symbol major-mode target-element)
   (let1 options (alist->object `((method . "get")
 				 (parameters . ,(alist->object 
 							 `((symbol . ,symbol)
@@ -62,7 +61,8 @@
 						     )
 				 (onSuccess . ,(lambda (response)
 						 (let1 es (read-from-response response)
-						   (alert es)
+						   (stitch es :target-element target-element)
+						   ;;
 						   )
 						 ))))
     (js-new Ajax.Request

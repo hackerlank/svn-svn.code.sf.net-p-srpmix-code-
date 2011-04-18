@@ -96,17 +96,17 @@
    (else (lambda rest
 	   #f))))
 
-(define (stitch-yarn elt)
-  (let* ((elt (cdr elt))
-	 (id (kref elt :id #f)))
+(define (stitch-yarn yarn)
+  (let* ((yarn (cdr yarn))
+	 (id (kref yarn :id #f)))
     (unless (member id stitch-ids)
-      (let* ((target (kref elt :target #f))
-	     (content (kref elt :content #f))
-	     (date (kref elt :date #f))
-	     (full-name (kref elt :full-name #f))
-	     (mailing-address (kref elt :mailing-address #f))
-	     (subjects (kref elt :subjects (list)))
-	     (transited (kref elt :transited #f))
+      (let* ((target (kref yarn :target #f))
+	     (content (kref yarn :content #f))
+	     (date (kref yarn :date #f))
+	     (full-name (kref yarn :full-name #f))
+	     (mailing-address (kref yarn :mailing-address #f))
+	     (subjects (kref yarn :subjects (list)))
+	     (transited (kref yarn :transited #f))
 	     )
 	(let ((insertion-proc (stitch-make-insertion-proc (car target)))
 	      (render-proc (stitch-make-render-proc (car content)))
@@ -123,16 +123,34 @@
 	      (insertion-proc id (cadr target)
 			      shtml-frag))))))))
 
-(define (stitch-yarns yarns)
+(define (stitch-tag tag target-element)
+  (alert tag)
+  )
+
+(define (stitch data . rest)
   (cond 
-   ((eq? (car yarns) 'yarn-container)
-    (for-each
+   ((eq? (car data) 'yarn-container)
+    (apply stitch-yarns (cdr data) rest))
+   ((eq? (car data) 'tag-container)
+    (apply stitch-tags (cdr data) rest))
+   ))
+
+(define (stitch-yarns yarns . rest)
+  (for-each
      (lambda (elt)     
        (cond
 	((eq? (car elt) 'yarn)
 	 (stitch-yarn elt))))
-     (cdr yarns)
-     ))))
+     yarns))
+
+(define (stitch-tags tags . rest)
+  (let1 target-element (kref rest :target-element #f)
+    (for-each
+     (lambda (elt)
+       (cond
+	((eq? (car elt) 'tag)
+	 (stitch-tag elt target-element))))
+     tags)))
 
 
 (define (require-yarns url params)
@@ -141,7 +159,7 @@
 				       `((parameters . ,params))
 				       '())
 				 (onSuccess . ,(lambda (response)
-						 (stitch-yarns
+						 (stitch
 						  (read-from-response response))
 						 ))))
     (js-new Ajax.Request
