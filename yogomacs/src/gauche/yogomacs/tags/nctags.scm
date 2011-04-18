@@ -66,6 +66,7 @@
     (let* ((real-def-path (build-path (values-ref (split-at-pre-build 
 						   real-src-path) 
 						  0)
+				      "pre-build"
 				      file))
 	   (path-distance (path-distance real-src-path real-def-path)))
       `(nctags 
@@ -74,11 +75,14 @@
 	:short-desc ,kind
 	:desc ,(kind->desc kind major-mode)
 	:local? #t
-	:score ,(+ 50 (if scope 
-			  (if (equal? real-def-path real-src-path)
-			      10
-			      -10)
-			  0) (if major-mode 1 0))))))
+	:score ,(+ 50 
+		   (if (equal? real-def-path real-src-path)
+		       1
+		       0)
+		   (if scope 
+		       10
+		       0) 
+		   (if major-mode 1 0))))))
 
 (define kinds-list (map 
 		   (lambda (entry)

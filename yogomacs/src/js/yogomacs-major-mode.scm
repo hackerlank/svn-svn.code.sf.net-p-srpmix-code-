@@ -31,6 +31,8 @@
   (or (any (lambda (class)
 	     (target.hasClassName class))
 	   built-in-classes)
+      (equal? target.tagName "A")
+      (equal? target.tagName "a")
       (target.hasClassName "comment")))
 
 (define (symbol-at target)
@@ -51,20 +53,3 @@
     (substring pathname
 	       (string-length shell-dir)
 	       (string-length pathname))))
-
-(define (require-tag url symbol major-mode target-element)
-  (let1 options (alist->object `((method . "get")
-				 (parameters . ,(alist->object 
-							 `((symbol . ,symbol)
-							   (major-mode . (symbol->string major-mode))
-							   ))
-						     )
-				 (onSuccess . ,(lambda (response)
-						 (let1 es (read-from-response response)
-						   (stitch es :target-element target-element)
-						   ;;
-						   )
-						 ))))
-    (js-new Ajax.Request
-	    (string-append "/web/tag" url)
-	    options)))

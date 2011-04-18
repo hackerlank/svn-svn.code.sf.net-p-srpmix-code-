@@ -4,6 +4,9 @@
 (define (export var val)
   (js-field-set! *js* var val))
 
+(define (js-undefined? val)
+  (eq? val (js-field *js* "abcdefghijklmnopqrstuvwxyz")))
+
 (define (run-hook hook . args)
   (for-each (lambda (proc) (apply proc args)) hook))
 

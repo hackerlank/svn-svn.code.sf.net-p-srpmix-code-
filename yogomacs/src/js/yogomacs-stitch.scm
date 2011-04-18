@@ -20,6 +20,18 @@
 	    (elt.insert 
 	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
 	    (set! stitch-ids (cons id stitch-ids)))))))
+   ((eq? type 'tag)
+    (lambda (id posinfo shtml-frag)
+      (let1 elt (posinfo.next ".linum")
+	(if (js-undefined? elt)
+	    (let loop ((elt posinfo))
+	      (let1 next (elt.next)
+		(if (js-undefined? next)
+		    (elt.insert
+		     (alist->object `((after . ,(sxml->xhtml shtml-frag)))))
+		    (loop next))))
+	    (elt.insert
+	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))))))
    (else (lambda (posinfo shtml-frag) #f))))
 
 (define (stitch-text-render id text date full-name mailing-address subjects transited-from)
@@ -88,11 +100,35 @@
 	      (span ,(write-to-string subjects))
 	      )
 	     )))
-  
+
+(define (sttich-tag-render id
+			   handler
+			   target
+			   url
+			   short-desc
+			   desc
+			   local?
+			   score)
+  `(div (|@|
+	 (class "yarn-div")
+	 (id ,(string-append "T:" id)))
+	(span ,(symbol->string handler)) 
+	"<" 
+	(span ,(number->string score))
+	">" 
+	": "(span ,desc) 
+	"\n	"
+	(a (|@| 
+	    (href ,(if local?
+		       (string-append shell-dir url)
+		       url)))
+	   ,url)))
+
 (define (stitch-make-render-proc type)
   (cond
    ((eq? type 'draft-text) stitch-draft-text-render)
    ((eq? type 'text) stitch-text-render)
+   ((eq? type 'tag) sttich-tag-render)
    (else (lambda rest
 	   #f))))
 
@@ -110,7 +146,7 @@
 	     )
 	(let ((insertion-proc (stitch-make-insertion-proc (car target)))
 	      (render-proc (stitch-make-render-proc (car content)))
-					;(filter-proc (stitch-make-filter-proc subjects))
+	      ;;(filter-proc (stitch-make-filter-proc subjects))
 	      )
 	  (let1 shtml-frag  (render-proc id
 					 (cadr content)
@@ -124,8 +160,27 @@
 			      shtml-frag))))))))
 
 (define (stitch-tag tag target-element)
-  (alert tag)
-  )
+  (let* ((tag (cdr tag))
+	 (handler (kref tag :handler #f))
+	 (target (kref tag :target #f))
+	 (url (kref tag :url #f))
+	 (short-desc (kref tag :short-desc #f))
+	 (desc (kref tag :desc #f))
+	 (local? (kref tag :local? #f))
+	 (score (kref tag :score #f))
+	 (id (string-append (symbol->string handler) "/" target "@" url)))
+    (let ((insertion-proc (stitch-make-insertion-proc 'tag))
+	  (render-proc (stitch-make-render-proc 'tag)))
+      (let1 shtml-frag (render-proc id
+				    handler
+				    target
+				    url
+				    short-desc
+				    desc
+				    local?
+				    score)
+	(when shtml-frag
+	  (insertion-proc id ($ target-element) shtml-frag))))))
 
 (define (stitch data . rest)
   (cond 
@@ -166,6 +221,27 @@
 	    (string-append "/web/yarn" url)
 	    options)))
 
+(define (require-tag url symbol major-mode target-element)
+  (let* ((parameters (alist->object 
+		      `((symbol . ,symbol)
+			(major-mode . (symbol->string major-mode))
+			)))
+	 (options (alist->object 
+		   `((method . "get")
+		     (parameters . ,parameters)
+		     (onSuccess . ,(lambda (response)
+				     (let1 es (read-from-response response)
+				       (stitch es 
+					       :target-element target-element)
+				       )))))))
+    
+    (js-new Ajax.Request
+	    (string-append "/web/tag" url)
+	    options)))
+
+;;
+;; Submitting
+;;
 (define stitch-draft-target #f)
 (define (stitch-prepare-draft-text-box lfringe)
   (define (target-for obj)
@@ -207,17 +283,18 @@
 	 (hash     (js-field location "hash"))
 	 (url      (substring pathname
 			      (string-length shell-dir)
-			      (string-length pathname))))
+			      (string-length pathname)))
+	 (parameters (alist->object
+		      `((stitch . ,((js-field *js* "encodeURIComponent")
+				    (write-to-string
+				     `(yarn-container 
+				       (yarn :version 0 
+					     :target ,stitch-draft-target
+					     :content (text ,(<- "yarn-draft"))
+					     :subjects ("*DRAFT*"))))))))))
     (let1 options (alist->object 
 		   `((method . "post")
-		     (parameters . ,(alist->object
-				     `((stitch . ,((js-field *js* "encodeURIComponent")
-						   (write-to-string
-						    `(yarn-container 
-						      (yarn :version 0 
-							    :target ,stitch-draft-target
-							    :content (text ,(<- "yarn-draft"))
-							    :subjects ("*DRAFT*")))))))))
+		     (parameters . ,parameters)
 		     (onSuccess . ,(lambda (response)
 				     (require-yarns url #f)
 				     (stitch-delete-draft-box)
