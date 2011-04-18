@@ -9,5 +9,6 @@ dist_module_DATA =   \
 	list.scm				\
 	range.scm				\
 	scheme2js.scm				\
+	sxml.scm				\
         \
 	$(NULL)

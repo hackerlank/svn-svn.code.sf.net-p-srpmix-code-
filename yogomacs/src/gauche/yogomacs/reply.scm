@@ -99,6 +99,7 @@
     (if shell-name
 	(let1 new (make <shtml-data>
 		    :data ((compose (cute yogomacs-fragment <> shell-name) 
+				    (cut tag-integrates <> (ref shtml 'has-tag?))
 				    narrow-down
 				    eof-line)
 			   (ref shtml 'data))
@@ -109,10 +110,8 @@
 	  (reply-xhtml new))
 	(let1 new (make <shtml-data>
 		    :data ((compose narrow-down
-				    (cute tag-integrates <> (ref shtml 
-								 'has-tag?))
-				    eof-line
-				    ) 
+				    (cut tag-integrates <> (ref shtml 'has-tag?))
+				    eof-line) 
 			   (ref shtml 'data))
 		    :params (ref shtml 'params)
 		    :config (ref shtml 'config)

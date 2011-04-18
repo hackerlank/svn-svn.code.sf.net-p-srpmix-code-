@@ -11,6 +11,16 @@
       initial
       (let1 result (proc (car lst) initial)
 	(fold proc result (cdr lst)))))
+
+(define (any proc lst)
+  (let loop ((lst lst))
+    (if (null? lst)
+	#f
+	(let1 r (proc (car lst))
+	  (if r
+	      r
+	      (loop (cdr lst)))))))
+
 (define (tree->string tree)
   (cond
    ((null? tree)

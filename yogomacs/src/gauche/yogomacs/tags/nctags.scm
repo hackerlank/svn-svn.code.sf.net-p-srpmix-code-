@@ -8,7 +8,7 @@
   (use gauche.process)
   ;;
   (use es.src.ctags-command)
-  (use srfi-13)
+  (use yogomacs.major-mode)
   )
 
 (select-module yogomacs.tags.nctags)
@@ -79,9 +79,6 @@
 			      10
 			      -10)
 			  0) (if major-mode 1 0))))))
-
-(define (normalize-major-mode name)
-  (string-downcase name))
 
 (define kinds-list (map 
 		   (lambda (entry)

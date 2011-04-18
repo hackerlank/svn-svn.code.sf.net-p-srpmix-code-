@@ -6,12 +6,16 @@
   (use yogomacs.shell)
   (use yogomacs.shells.bscm)
   (use yogomacs.shells.ysh)
+  (use yogomacs.major-mode)
+  (use yogomacs.tag)
   )
 
 (select-module yogomacs.rearranges.yogomacs-fragment)
 
 (define (yogomacs-fragment shtml shell-name)
   (let* ((title ((if-car-sxpath '(// html head title *text*)) shtml))
+	 (major-mode (major-mode-from-shtml shtml))
+	 (has-tag? (has-tag?-from-shtml shtml))
 	 (frag ((if-car-sxpath '(// html body pre)) shtml))
 	 (frag (pre-post-order
 		frag 
@@ -70,6 +74,10 @@
 		  (*default* . ,(lambda x x))))))
     `(*TOP* (*PI* xml "version=\\"1.0\\" encoding=\\"UTF-8\\"")
 	    ,(cons* 'pre `(|@| (class "contents") (id "contents"))
+		    ;;
+		    `(span (|@| (id "major-mode")) ,major-mode)
+		    `(span (|@| (id "has-tag?"))   ,has-tag?)
+		    ;;
 		    (cdr frag)))))
   
 (provide "yogomacs/rearranges/yogomacs-fragment")

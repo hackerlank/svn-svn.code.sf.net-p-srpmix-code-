@@ -13,8 +13,8 @@
 					   `(meta (|@|
 						   (name "has-tag?")
 						   (content ,(if has-tag?
-								 "yes"
-								 "no"))))
+								 "#t"
+								 "#f"))))
 					   "	"
 					   "\n"
 					   (reverse rest))))))

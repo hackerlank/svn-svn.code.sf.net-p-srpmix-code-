@@ -6,24 +6,22 @@
   (use yogomacs.shells.ysh)
   (use yogomacs.auth)
   (use yogomacs.path)
-  (use yogomacs.tag)
-  (use yogomacs.tags)
   )
 (select-module yogomacs.dests.ysh-dir)
 
-(define (ysh-dir-dest path params config)
-  (if-let1 user+role (authorized? config)
-	   (let* ((params ((params "user" (car user+role)) "role" (cadr user+role)))
-		  (shtml (yogomacs (cdr path) params (shell-ref 'ysh)))
-		  (real-src-path (apply make-real-src-path config path)))
-	     (make <shtml-data>
-	       :params params
-	       :config config
-	       :data ((compose values) shtml)
-	       :last-modification-time #f
-	       ;; TODO: This should be provided by yogomacs-frgment.
-	       :has-tag? (has-tag? real-src-path params config)))
-	   (unauthorized config)))
+(define (ysh-dir-dest lpath params config)
+  (let1 lpath (cdr lpath)
+    (if-let1 user+role (authorized? config)
+	     (let* ((params ((params "user" (car user+role)) "role" (cadr user+role)))
+		    (shtml (yogomacs lpath params (shell-ref 'ysh)))
+		    (real-src-path (apply make-real-src-path config lpath)))
+	       (make <shtml-data>
+		 :params params
+		 :config config
+		 :data ((compose values) shtml)
+		 :last-modification-time #f
+		 ))
+	     (unauthorized config))))
 
 
 (provide "yogomacs/dests/ysh-dir")
