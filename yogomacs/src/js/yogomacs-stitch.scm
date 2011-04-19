@@ -31,7 +31,8 @@
 		     (alist->object `((after . ,(sxml->xhtml shtml-frag)))))
 		    (loop next))))
 	    (elt.insert
-	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))))))
+	     (alist->object `((before . ,(sxml->xhtml shtml-frag))))))
+	(set! stitch-ids (cons id stitch-ids)))))
    (else (lambda (posinfo shtml-frag) #f))))
 
 (define (stitch-text-render id text date full-name mailing-address subjects transited-from)
@@ -169,18 +170,19 @@
 	 (local? (kref tag :local? #f))
 	 (score (kref tag :score #f))
 	 (id (string-append (symbol->string handler) "/" target "@" url)))
-    (let ((insertion-proc (stitch-make-insertion-proc 'tag))
-	  (render-proc (stitch-make-render-proc 'tag)))
-      (let1 shtml-frag (render-proc id
-				    handler
-				    target
-				    url
-				    short-desc
-				    desc
-				    local?
-				    score)
-	(when shtml-frag
-	  (insertion-proc id ($ target-element) shtml-frag))))))
+    (unless (member id stitch-tag)
+      (let ((insertion-proc (stitch-make-insertion-proc 'tag))
+	    (render-proc (stitch-make-render-proc 'tag)))
+	(let1 shtml-frag (render-proc id
+				      handler
+				      target
+				      url
+				      short-desc
+				      desc
+				      local?
+				      score)
+	  (when shtml-frag
+	    (insertion-proc id ($ target-element) shtml-frag)))))))
 
 (define (stitch data . rest)
   (cond 
