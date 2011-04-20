@@ -1,3 +1,10 @@
+2011-04-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.117.4.
+
+	* src/plugins/_60srpmix-nctags (main): Passing --extra=+f+g
+	to ctags.
+
 2011-04-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 3.117.3.
