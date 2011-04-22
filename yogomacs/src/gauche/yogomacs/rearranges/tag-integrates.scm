@@ -1,7 +1,8 @@
 (define-module yogomacs.rearranges.tag-integrates
   (export tag-integrates)
   (use sxml.tree-trans)
-  (use srfi-1))
+  (use srfi-1)
+  (use yogomacs.util.sxml))
 
 (select-module yogomacs.rearranges.tag-integrates)
 
@@ -18,7 +19,6 @@
 					   "	"
 					   "\n"
 					   (reverse rest))))))
-		    (*text* . ,(lambda (tag str) str))
-		    (*default* . ,(lambda x x)))))
+		    ,@no-touch)))
 
 (provide "yogomacs/rearranges/tag-integrates")

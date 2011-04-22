@@ -1,6 +1,7 @@
 (define-module yogomacs.rearranges.title
   (export rearranges-title)
-  (use sxml.tree-trans))
+  (use sxml.tree-trans)
+  (use yogomacs.util.sxml))
 (select-module yogomacs.rearranges.title)
 
 (define (rearranges-title sxml-tree title)
@@ -9,8 +10,7 @@
 		    (link *preorder* . ,(lambda x x))
 		    (title . ,(lambda x
 			       `(title ,title)))
-		    (*text* . ,(lambda (tag str) str))
-		    (*default* . ,(lambda x x))
+		    ,@no-touch
 		    )))
 
 (provide "yogomacs/rearranges/title")

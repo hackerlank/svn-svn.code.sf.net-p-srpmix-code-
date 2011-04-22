@@ -1,10 +1,9 @@
 (define-module yogomacs.rearranges.line-trim
   (export make-line-trimmer)
-  (use srfi-1))
+  (use srfi-1)
+  (use yogomacs.util.sxml))
 
 (select-module yogomacs.rearranges.line-trim)
-
-(define (id . args) args)
 
 (define (tree-delete object tree . rest)
   (let1 elt= (if (null? rest) 
@@ -43,9 +42,8 @@
       `(
 	(body . ,(lambda (tag . all)
 		   (cons tag (tree-delete *hidden* all eq?))))
-	(pre ,rules . ,id)
-	(*text* . ,(lambda (tag str) str))
-	(*default* . ,id)
+	(pre ,rules . ,list)
+	,@no-touch
 	))))
 
 (provide "yogomacs/rearranges/line-trim")

@@ -3,6 +3,7 @@
   (use yogomacs.major-mode)
   (use sxml.tree-trans)
   (use srfi-1)
+  (use yogomacs.util.sxml)
   )
 (select-module yogomacs.rearranges.normalize-major-mode)
 
@@ -22,11 +23,9 @@
 						  ))
 					 (cons* at name content rest)
 					 )))
-			   (*text* . ,(lambda (tag str) str))
-			   (*default* . ,(lambda x x))
+			   ,@no-touch
 			   ) . ,(lambda x x))
-		    (*text* . ,(lambda (tag str) str))
-		    (*default* . ,(lambda x x))
+		    ,@no-touch
 		    )))
 
 (provide "yogomacs/rearranges/normalize-major-mode")

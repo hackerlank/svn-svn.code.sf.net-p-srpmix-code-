@@ -8,6 +8,7 @@
   (use yogomacs.shells.ysh)
   (use yogomacs.major-mode)
   (use yogomacs.tag)
+  (use yogomacs.util.sxml)
   )
 
 (select-module yogomacs.rearranges.yogomacs-fragment)
@@ -66,12 +67,11 @@
 						((#/^http:.*/ text) text)
 						((#/^ftp:.*/ text) text)
 						(else (string-append #`"/,|shell-name|" text))))))
-			      (*text* . ,(lambda (tag str) str))
-			      (*default* . ,(lambda x x))
+			      ,@no-touch
 			      ))
 			   a-text)))
-		  (*text* . ,(lambda (tag str) str))
-		  (*default* . ,(lambda x x))))))
+		  ,@no-touch
+		  ))))
     `(*TOP* (*PI* xml "version=\\"1.0\\" encoding=\\"UTF-8\\"")
 	    ,(cons* 'pre `(|@| (class "contents") (id "contents"))
 		    ;;

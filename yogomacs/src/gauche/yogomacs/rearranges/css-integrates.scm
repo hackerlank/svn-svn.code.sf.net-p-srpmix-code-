@@ -1,6 +1,7 @@
 (define-module yogomacs.rearranges.css-integrates
   (export css-integrates)
-  (use sxml.tree-trans))
+  (use sxml.tree-trans)
+  (use yogomacs.util.sxml))
 (select-module yogomacs.rearranges.css-integrates)
 
 (define (css-integrates sxml-tree integrated-links purge?)
@@ -35,8 +36,7 @@
 				    x)
 				 ,@integrated-links
 				 )))
-		    (*text* . ,(lambda (tag str) str))
-		    (*default* . ,(lambda x x))
+		    ,@no-touch
 		    )))
 
 (provide "yogomacs/rearranges/css-integrates")

@@ -1,7 +1,8 @@
 (define-module yogomacs.rearranges.eof-line
   (export eof-line)
   (use sxml.tree-trans)
-  (use srfi-1))
+  (use srfi-1)
+  (use yogomacs.util.sxml))
 
 (select-module yogomacs.rearranges.eof-line)
 
@@ -14,8 +15,7 @@
 							(eq? '@ (car attr)))
 						   rest
 						   (reverse (cons '(hr) (reverse rest)))))))
-		    (*text* . ,(lambda (tag str) str))
-		    (*default* . ,(lambda x x))
+		    ,@no-touch
 		    )))
 
 (provide "yogomacs/rearranges/eof-line")

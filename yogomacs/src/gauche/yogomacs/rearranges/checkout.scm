@@ -3,6 +3,7 @@
   (use sxml.sxpath)
   (use sxml.tree-trans)
   (use yogomacs.access)
+  (use yogomacs.util.sxml)
   )
 
 (select-module yogomacs.rearranges.checkout)
@@ -26,11 +27,9 @@
 							 config))
 				      #`"/commands/checkout,|title|")
 				     (else text)))))
-		   (*text* . ,(lambda (tag str) str))
-		   (*default* . ,(lambda x x))
+		   ,@no-touch
 		   ))
 		a-text)))
-       (*text* . ,(lambda (tag str) str))
-       (*default* . ,(lambda x x))))))
+       ,@no-touch))))
 
 (provide "yogomacs/rearranges/checkout")

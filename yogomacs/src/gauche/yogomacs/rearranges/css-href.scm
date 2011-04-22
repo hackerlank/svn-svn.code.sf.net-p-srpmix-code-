@@ -1,6 +1,7 @@
 (define-module yogomacs.rearranges.css-href
   (export rearrange-css-href)
-  (use sxml.tree-trans))
+  (use sxml.tree-trans)
+  (use yogomacs.util.sxml))
 (select-module yogomacs.rearranges.css-href)
 
 (define (rearrange-css-href sxml-tree converter)
@@ -14,11 +15,9 @@
 								`(href ,(converter str))
 								`(href ,str))
 							    ))
-						 (*text* . ,(lambda (tag str) str))
-						 (*default* . ,(lambda x x))
+						 ,@no-touch
 						 ))))
-		    (*text* . ,(lambda (tag str) str))
-		    (*default* . ,(lambda x x))
+		    ,@no-touch
 		    )))
 
 (provide "yogomacs/rearranges/css-href")
