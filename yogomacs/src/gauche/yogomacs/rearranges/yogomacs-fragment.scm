@@ -75,8 +75,8 @@
     `(*TOP* (*PI* xml "version=\\"1.0\\" encoding=\\"UTF-8\\"")
 	    ,(cons* 'pre `(|@| (class "contents") (id "contents"))
 		    ;;
-		    `(span (|@| (id "major-mode")) ,major-mode)
-		    `(span (|@| (id "has-tag?"))   ,has-tag?)
+		    `(span (|@| (id "major-mode")) ,(symbol->string major-mode))
+		    `(span (|@| (id "has-tag?"))   ,(format "~s" (boolean has-tag?)))
 		    ;;
 		    (cdr frag)))))
   

@@ -13,9 +13,8 @@
 					  (cons* 
 					   `(meta (|@|
 						   (name "has-tag?")
-						   (content ,(if has-tag?
-								 "#t"
-								 "#f"))))
+						   (content ,(format "~s" (boolean has-tag?))
+							    )))
 					   "	"
 					   "\n"
 					   (reverse rest))))))
