@@ -66,6 +66,12 @@ Please note that font sizes only work with CSS-based output types."
 		 (const :tag "Ignore absolute" absolute))
   :group 'cssize)
 
+(defcustom cssize-format 'css
+  "*The output format used in cssize.el"
+  :type '(choice (const :tag "css" css)
+		 (const :tag "es" es))
+  :group 'cssize)
+
 (defconst cssize-running-xemacs (string-match "XEmacs" emacs-version))
 
 
@@ -396,6 +402,45 @@ If no rgb.txt file is found, return nil."
 	(push (format "float: %s;" float) result)))
     (nreverse result)))
 
+(defun cssize-es-specs (fstruct)
+  (macrolet ((es-push (key value place)
+		      `(progn
+			 (push ,key ,place)
+			 (push ,value ,place))))
+    (let (result)
+      (when (cssize-fstruct-foreground fstruct)
+	(es-push :color 
+		 (cssize-fstruct-foreground fstruct)
+		 result))
+      (when (cssize-fstruct-background fstruct)
+	(es-push :background-color
+		 (cssize-fstruct-background fstruct)
+		 result))
+      (let ((size (cssize-fstruct-size fstruct)))
+	(when (and size (not (eq cssize-ignore-face-size t)))
+	  (cond ((floatp size)
+		 (es-push :font-family
+			  `(% ,(* 100 size))
+			  result))
+		((not (eq cssize-ignore-face-size 'absolute))
+		 (es-push :font-size 
+			  `(pt ,(/ size 10.0))
+			  result)))))
+      (when (cssize-fstruct-boldp fstruct)
+	(es-push :font-weight 'bold result))
+      (when (cssize-fstruct-italicp fstruct)
+	(es-push :font-style 'italic result))
+      (when (cssize-fstruct-underlinep fstruct)
+	(es-push :text-decoration 'underline result))
+      (when (cssize-fstruct-overlinep fstruct)
+	(es-push :text-decoration 'overline result))
+      (when (cssize-fstruct-strikep fstruct)
+	(es-push :text-decoration line-through result))
+      (let ((float (cssize-fstruct-float fstruct)))
+	(when float
+	  (es-push :float float result)))
+      (nreverse result))))
+
 (defun cssize-clean-up-face-name (face)
   (let ((s (with-temp-buffer 
 	     ;; Use `prin1-to-string' rather than `symbol-name'
@@ -412,8 +457,21 @@ If no rgb.txt file is found, return nil."
       (setq s (replace-match "." t t s)))
     s))
 
+(defun cssize-copyright-notice (face)
+  (cond
+   ((fboundp 'describe-simplify-lib-file-name)
+    (describe-simplify-lib-file-name (symbol-file face 'defface)))
+   (t
+    ;; Doc of `find-lisp-object-file-name' says " use 'face".
+    ;; But it doesn't work. 'defface is used here instead.
+    (let ((file (find-lisp-object-file-name face 'defface)))
+      (if (eq file 'C-source)
+	  "c source code of GNU Emacs"
+	file)))
+   ))
 (defvar cssize-default-a-css 
   "a { color: inherit; background-color: inherit; font: inherit; text-decoration: inherit; }\n")
+
 (defun cssize-face-to-css (face &optional name)
   (let* ((fstruct (cssize-face-to-fstruct face))
 	 (cleaned-up-face-name (cssize-clean-up-face-name face))
@@ -429,15 +487,7 @@ If no rgb.txt file is found, return nil."
       (t
 	 ""))
      (format "/* About copyright see %s */\n"
-	     (cond
-	      ((fboundp 'describe-simplify-lib-file-name)
-	       (describe-simplify-lib-file-name (symbol-file face 'defface)))
-	      (t
-	       (let ((file (find-lisp-object-file-name face 'face)))
-		 (if (eq file 'C-source)
-		     "c source code of GNU Emacs"
-		   file)))
-	     ))
+	     (cssize-copyright-notice face))
      ;; 
      (if name name (concat "." (cssize-fstruct-css-name fstruct)))
      (if (null specs)
@@ -448,6 +498,40 @@ If no rgb.txt file is found, return nil."
      ;;
      )))
 
+(defvar cssize-default-a-es 
+  '(css a
+	:color inherit
+	:background-color inherit
+	:font: inherit
+	:text-decoration inherit))
+(defun cssize-face-to-es (face &optional name)
+  (let* ((fstruct (cssize-face-to-fstruct face))
+	 (cleaned-up-face-name (cssize-clean-up-face-name face))
+	 (specs (cssize-es-specs fstruct)))
+    `(
+      ,@(cond
+	 ((and (eq face 'default) (not name))
+	  (cssize-face-to-es face "body"))
+	 ((and (eq face 'highlight) (not name))
+	  (cons 
+	   cssize-default-a-es 
+	   (cssize-face-to-es face '(pseudo a name))))
+	 (t
+	  (list)))
+      (css-comment ,(format "About copyright see %s"
+			    (cssize-copyright-notice face)))
+      (css ,(cond
+	     ((stringp name)
+	      (make-symbol name))
+	     ((not name)
+	      `(class ,(cssize-fstruct-css-name fstruct)))
+	     (t
+	      name))
+	   ,@(if (null specs)
+		 (list)
+	       specs)))))
+
+
 (defun cssize-file (face file)
   "Convet FACE to css and write it to FILE"
   (save-excursion
@@ -455,8 +539,22 @@ If no rgb.txt file is found, return nil."
       (with-current-buffer buffer
 	(buffer-disable-undo)
 	(erase-buffer)
-	(insert (cssize-face-to-css face))
+	(case cssize-format
+	  ((css)
+	   (insert (cssize-face-to-css face)))
+	  ((es)
+	   (mapc (lambda (es)
+		   (prin1 es (current-buffer))
+		   (newline))
+		 (cssize-face-to-es face)))
+	  (t
+	   (error "Unknown cssize format: %s" cssize-format)))
 	(save-buffer))
       (kill-buffer buffer))))
+
+(defun scssize-file (face file)
+  "Convet FACE to css and write it to FILE in es format"
+  (let ((cssize-format 'es))
+    (cssize-file face file)))
 
 (provide 'cssize)
