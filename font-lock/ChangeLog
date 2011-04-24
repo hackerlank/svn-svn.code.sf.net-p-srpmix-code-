@@ -1,5 +1,7 @@
 2011-04-24  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.0.2.
+
 	* src/elisp/flserver/*: Introduce new output format called es
 	for css.
 
