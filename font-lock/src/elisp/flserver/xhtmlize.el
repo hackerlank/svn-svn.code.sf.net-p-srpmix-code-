@@ -896,7 +896,7 @@ it's called with the same value of KEY.  All other times, the cached
   (insert "    <link rel=\"stylesheet\" type=\"text/css\""
 	  (format " href=\"%s/%s\""
 		  xhtmlize-external-css-base-url
-		  (xhtmlize-css-make-file-name face title)
+		  (xhtmlize-css-make-file-name face title "css")
 		  )
 	  (format " title=\"%s\"" title)
 	  "/>"
@@ -920,11 +920,13 @@ it's called with the same value of KEY.  All other times, the cached
 	(setq wrote-css-p t)))
     wrote-css-p))
 
-(defun xhtmlize-css-make-file-name (face title)
-  (concat (cssize-clean-up-face-name face) "--" title "." "css"))
+(defun xhtmlize-css-make-file-name (face title suffix)
+  (concat (cssize-clean-up-face-name face) "--" title "." 
+	  suffix))
 
 (defun xhtmlize-css-cached-on-disk-p (face dir title)
-  (let ((file (xhtmlize-css-make-file-name face title)))
+  (let ((file (xhtmlize-css-make-file-name face title
+					   (cssize-suffix))))
     (let ((path (concat (file-name-as-directory dir) file)))
       (file-readable-p path))))
 
@@ -936,7 +938,8 @@ it's called with the same value of KEY.  All other times, the cached
   (xhtmlize-css-make-cache-on-disk0 face dir title))
 
 (defun xhtmlize-css-make-cache-on-disk0 (face dir title)
-  (let ((file (xhtmlize-css-make-file-name face title)))
+  (let ((file (xhtmlize-css-make-file-name face title
+					   (cssize-suffix))))
     (let ((path (concat (file-name-as-directory dir) file)))
       (cssize-file face path))))
 
