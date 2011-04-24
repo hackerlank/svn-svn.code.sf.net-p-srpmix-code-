@@ -1,4 +1,4 @@
-;;; cssize.el -- Convert face to CSS.
+;; cssize.el -- Convert face to CSS.
 ;;
 ;; Copyright (C) 2009,2010 Masatake YAMATO
 ;; Copyright (C) 1997,1998,1999,2000,2001,2002,2003,2005,2006 Hrvoje Niksic
@@ -402,6 +402,18 @@ If no rgb.txt file is found, return nil."
 	(push (format "float: %s;" float) result)))
     (nreverse result)))
 
+(defun cssize-es-convert-color-format (color-str)
+  (flet ((make-rgb-component (idx str) 
+			     (car (read-from-string (concat "#x" 
+							    (match-string idx 
+									  str))))))
+    (if (string-match "^#\\([[:xdigit:]]\\{2\\}\\)\\([[:xdigit:]]\\{2\\}\\)\\([[:xdigit:]]\\{2\\}\\)$"
+		      color-str)
+	`(rgb ,(make-rgb-component 1 color-str)
+	      ,(make-rgb-component 2 color-str)
+	      ,(make-rgb-component 3 color-str))
+      color-str)))
+
 (defun cssize-es-specs (fstruct)
   (macrolet ((es-push (key value place)
 		      `(progn
@@ -410,11 +422,13 @@ If no rgb.txt file is found, return nil."
     (let (result)
       (when (cssize-fstruct-foreground fstruct)
 	(es-push :color 
-		 (cssize-fstruct-foreground fstruct)
+		 (cssize-es-convert-color-format
+		  (cssize-fstruct-foreground fstruct))
 		 result))
       (when (cssize-fstruct-background fstruct)
 	(es-push :background-color
-		 (cssize-fstruct-background fstruct)
+		 (cssize-es-convert-color-format
+		  (cssize-fstruct-background fstruct))
 		 result))
       (let ((size (cssize-fstruct-size fstruct)))
 	(when (and size (not (eq cssize-ignore-face-size t)))
@@ -435,7 +449,7 @@ If no rgb.txt file is found, return nil."
       (when (cssize-fstruct-overlinep fstruct)
 	(es-push :text-decoration 'overline result))
       (when (cssize-fstruct-strikep fstruct)
-	(es-push :text-decoration line-through result))
+	(es-push :text-decoration 'line-through result))
       (let ((float (cssize-fstruct-float fstruct)))
 	(when float
 	  (es-push :float float result)))
@@ -524,7 +538,8 @@ If no rgb.txt file is found, return nil."
 	     ((stringp name)
 	      (make-symbol name))
 	     ((not name)
-	      `(class ,(cssize-fstruct-css-name fstruct)))
+	      `(class ,(make-symbol
+			(cssize-fstruct-css-name fstruct))))
 	     (t
 	      name))
 	   ,@(if (null specs)

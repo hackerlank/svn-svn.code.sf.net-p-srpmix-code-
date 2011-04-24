@@ -170,7 +170,8 @@
 							  (type "text/css")
 							  (href ,(format "%s/%s"
 									 xhtmlize-external-css-base-url
-									 (xhtmlize-css-make-file-name face title)))
+									 (xhtmlize-css-make-file-name face
+												      title)))
 							  (title ,title)))
 					"\n"))))
 	    (oset engine wrote-css-p t))))

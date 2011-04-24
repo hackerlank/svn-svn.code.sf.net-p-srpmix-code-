@@ -174,13 +174,20 @@
 
 (defun flserver-kill-emacs (n)
   (log-format "Kill emacs(%d)" n)
-  (unless (eq n 0)
+  (unless (and nil (eq n 0))
     (mapc
-     (lambda (s) (log-format "<reason> %s" s) )
+     (lambda (s) (log-format "<reason:Messages> %s" s) )
      (split-string
       (with-current-buffer "*Messages*"
 	(buffer-string))
-      "\n")))
+      "\n"))
+    (mapc
+     (lambda (s) (log-format "<reason:Server> %s" s) )
+     (split-string
+      (with-current-buffer server-buffer
+	(buffer-string))
+      "\n"))
+    )
   (kill-emacs n))
 
 ;;

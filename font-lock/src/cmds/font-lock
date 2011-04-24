@@ -73,7 +73,7 @@
 
 (define-command cssize (emacsclient socket-name verbose timeout args)
   "FACE CSS-DIR [REQUIRES...]" #t
-  (unless (eq? (length args) 2)
+  (unless (>= (length args) 2)
     (with-output-to-port (current-error-port)
       (lambda () 
 	(print "Wrong number of arguments")
@@ -90,7 +90,7 @@
 
 (define-command scssize (emacsclient socket-name verbose timeout args)
   "FACE CSS-DIR [REQUIRES...]" #t
-  (unless (eq? (length args) 2)
+  (unless (>= (length args) 2)
     (with-output-to-port (current-error-port)
       (lambda () 
 	(print "Wrong number of arguments")

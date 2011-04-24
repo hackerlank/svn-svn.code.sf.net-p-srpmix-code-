@@ -37,6 +37,8 @@
 (require 'assoc)
 (require 'eieio)
 (require 'log)				;TODO
+(require 'dired)
+(require 'lazy-lock)
 
 (eval-when-compile
   (defvar font-lock-auto-fontify)
@@ -261,7 +263,7 @@ output.")
 (defvar xhtmlize-file-hook nil
   "Hook run by `xhtmlize-file' after htmlizing a file, but before saving it.")
 
-(defvar xhtmlize-buffer-places)
+(defvar xhtmlize-buffer-places nil)
 
 ;;; Some cross-Emacs compatibility.
 
@@ -896,7 +898,7 @@ it's called with the same value of KEY.  All other times, the cached
   (insert "    <link rel=\"stylesheet\" type=\"text/css\""
 	  (format " href=\"%s/%s\""
 		  xhtmlize-external-css-base-url
-		  (xhtmlize-css-make-file-name face title "css")
+		  (xhtmlize-css-make-file-name face title)
 		  )
 	  (format " title=\"%s\"" title)
 	  "/>"
@@ -920,9 +922,9 @@ it's called with the same value of KEY.  All other times, the cached
 	(setq wrote-css-p t)))
     wrote-css-p))
 
-(defun xhtmlize-css-make-file-name (face title suffix)
+(defun xhtmlize-css-make-file-name (face title &optional suffix)
   (concat (cssize-clean-up-face-name face) "--" title "." 
-	  suffix))
+	  (or suffix "css")))
 
 (defun xhtmlize-css-cached-on-disk-p (face dir title)
   (let ((file (xhtmlize-css-make-file-name face title

@@ -3,6 +3,7 @@
 	  flclient-xhtmlize
 	  flclient-shtmlize
 	  flclient-cssize
+	  flclient-scssize
 	  flclient-shutdown)
   (use gauche.process)
   (use srfi-1)
