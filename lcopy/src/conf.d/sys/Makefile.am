@@ -17,6 +17,7 @@ dist_confd_DATA = \
 	cluster,trunk.lcopy \
 	coreutils,trunk.lcopy \
 	corosync,trunk.lcopy \
+	ctags,trunk.lcopy \
 	cups,trunk.lcopy \
 	cygwin,trunk.lcopy \
 	ddskk,trunk.lcopy \
@@ -111,6 +112,7 @@ dist_confd_DATA = \
 	shadow-utils,trunk.lcopy \
 	sop,trunk.lcopy \
 	sos,trunk.lcopy \
+	source-highlight,trunk.lcopy \
 	spacewalk,trunk.lcopy \
 	spice,qxl.lcopy \
 	spice,trunk.lcopy \
