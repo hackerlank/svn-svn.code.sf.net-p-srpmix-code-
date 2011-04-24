@@ -935,7 +935,12 @@ it's called with the same value of KEY.  All other times, the cached
     (xhtmlize-css-make-cache-on-disk0 face dir title)))
 
 (defun xhtmlize-cssize (face dir title)
-  (xhtmlize-css-make-cache-on-disk0 face dir title))
+  (let ((cssize-format 'css))
+    (xhtmlize-css-make-cache-on-disk0 face dir title)))
+
+(defun xhtmlize-scssize (face dir title)
+  (let ((cssize-format 'es))
+    (xhtmlize-css-make-cache-on-disk0 face dir title)))
 
 (defun xhtmlize-css-make-cache-on-disk0 (face dir title)
   (let ((file (xhtmlize-css-make-file-name face title

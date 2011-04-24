@@ -1,3 +1,8 @@
+2011-04-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/elisp/flserver/*: Introduce new output format called es
+	for css.
+
 2011-02-27  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/elisp/flserver-main.el (flserver-kill-emacs): Record the contents

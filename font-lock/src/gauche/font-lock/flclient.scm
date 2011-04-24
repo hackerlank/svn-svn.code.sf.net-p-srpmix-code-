@@ -46,6 +46,9 @@
 (define (flclient-cssize face css-dir requires . rest)
   (flclient-do rest 10 `(flserver 'cssize ',face ,css-dir ',requires)))
 
+(define (flclient-scssize face css-dir requires . rest)
+  (flclient-do rest 10 `(flserver 'scssize ',face ,css-dir ',requires)))
+
 (define (flclient-shutdown . rest)
   (flclient-do rest 60 `(flserver 'shutdown)))
 

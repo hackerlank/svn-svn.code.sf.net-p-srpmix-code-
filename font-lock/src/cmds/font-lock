@@ -88,6 +88,23 @@
 				  :timeout timeout)
       (exit status))))
 
+(define-command scssize (emacsclient socket-name verbose timeout args)
+  "FACE CSS-DIR [REQUIRES...]" #t
+  (unless (eq? (length args) 2)
+    (with-output-to-port (current-error-port)
+      (lambda () 
+	(print "Wrong number of arguments")
+	(show-help 1))))
+  (let ((face (string->symbol (ref args 0)))
+	(css-dir (ref args 1))
+	(requires (map string->symbol (list-tail args 2))))
+    (let1 status (flclient-scssize face css-dir requires 
+				   :emacsclient emacsclient
+				   :socket-name socket-name
+				   :verbose verbose
+				   :timeout timeout)
+      (exit status))))
+
 (define (convert-common proc emacsclient socket-name verbose timeout args)
   (unless (eq? (length args) 3)
     (with-output-to-port (current-error-port)

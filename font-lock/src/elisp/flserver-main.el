@@ -93,6 +93,8 @@
 	      (apply #'flserver-shtmlize args))
 	     ((eq action 'cssize)
 	      (apply #'flserver-cssize args))
+	     ((eq action 'scssize)
+	      (apply #'flserver-scssize args))
 	     ((eq action 'shutdown)
 	      (apply #'flserver-shutdown args))
 	     )
@@ -134,6 +136,18 @@
    (set-foreground-color "white")
    (set-background-color "black")
    (xhtmlize-cssize face css-dir "Invert")))
+
+(defun flserver-scssize (face css-dir requires)
+  (with-log-string
+   "scssize" (format "face: %s, css-dir: %s, requires %s"
+		     face css-dir requires)
+   (mapc #'require requires)
+   (set-foreground-color "black")
+   (set-background-color "white")
+   (xhtmlize-scssize face css-dir "Default")
+   (set-foreground-color "white")
+   (set-background-color "black")
+   (xhtmlize-scssize face css-dir "Invert")))
 
 (defun flserver-shutdown ()
   (log-string "lazy shutdown")
