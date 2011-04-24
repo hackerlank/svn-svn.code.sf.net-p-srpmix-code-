@@ -531,7 +531,6 @@ If no rgb.txt file is found, return nil."
 		 (list)
 	       specs)))))
 
-
 (defun cssize-file (face file)
   "Convet FACE to css and write it to FILE"
   (save-excursion
@@ -556,5 +555,14 @@ If no rgb.txt file is found, return nil."
   "Convet FACE to css and write it to FILE in es format"
   (let ((cssize-format 'es))
     (cssize-file face file)))
+
+(defun cssize-suffix ()
+  (case cssize-format
+    ((css)
+     "css")
+    ((es)
+     "es")
+    (t
+     (error "Unknown cssize format: %s" cssize-format))))
 
 (provide 'cssize)
