@@ -2,6 +2,8 @@
 ;; Repl
 ;;
 (define shell-dir #f)
+(define (message str)
+  (-> str "minibuffer"))
 (define (repl eval output-prefix)
   (let1 str (<- "minibuffer")
     (let1 result (with-error-handler 

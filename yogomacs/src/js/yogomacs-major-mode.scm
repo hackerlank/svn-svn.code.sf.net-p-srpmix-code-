@@ -28,7 +28,7 @@
     (let* ((Event (js-field *js* "Event"))
 	   (window (js-field *js* "window")))
       (Event.observe window "click" find-tag)
-
+      (Event.observe window "mousemove" notify-tag)
       )))
 
 (define built-in-classes '(
@@ -51,8 +51,14 @@
 	(equal? target.tagName "A")
 	(equal? target.tagName "a")
 	(target.hasClassName "comment")
-	(not (js-undefined? (elt.up "yarn-div")))
-	)))
+	(let loop ((elt elt))
+	  (cond
+	   ((js-undefined? elt)
+	    #f)
+	   ((elt.hasClassName "yarn-div")
+	    #t)
+	   (else
+	    (loop (elt.up 0))))))))
 
 (define (symbol-at target offset-rate)
   (let1 str target.innerHTML
@@ -84,7 +90,11 @@
 	    #f
 	    result)))))
 
+;(define (line-number-at target) 0)
+(define old-symbol-html #f)
 (define (find-tag event)
+  (when old-symbol-html
+    (old-symbol-html.removeClassName "highlight"))
   (let1 target event.target
     (let* ((point-px event.pageX)
 	   (elt ($ target))
@@ -101,6 +111,24 @@
 	      (require-tag url symbol major-mode target)
 	      (alert "No symbol under point")
 	  ))))))
+
+(define (notify-tag event)
+  (when old-symbol-html
+    (old-symbol-html.removeClassName "highlight"))
+  (let1 target event.target
+    (let* ((point-px event.pageX)
+	   (elt ($ target))
+	   (offset-px (let1 o (elt.viewportOffset)
+			o.left))
+	   (width-px (elt.getWidth))
+	   (offset-rate (/ (* 1.0 (- point-px offset-px))
+			   width-px)))
+      (unless (wrong-tag-target? target)
+	(let ((symbol (symbol-at target offset-rate)))
+	  (set! old-symbol-html elt)
+	  (old-symbol-html.addClassName "highlight")
+	  ;;(-> symbol "minibuffer")
+	  )))))
 
 (define (contents-url)
   (let* ((location (js-field *js* "location"))
