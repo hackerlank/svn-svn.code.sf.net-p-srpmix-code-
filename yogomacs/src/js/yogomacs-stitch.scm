@@ -142,7 +142,7 @@
 	">" 
 	" "
 	(span "[x]")
-	"\n	"
+	"\n"
 	(a (|@| 
 	    (href ,(if local?
 		       (string-append shell-dir url)

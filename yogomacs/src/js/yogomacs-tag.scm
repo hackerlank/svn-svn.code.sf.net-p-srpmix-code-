@@ -62,3 +62,81 @@
     (js-new Ajax.Request
 	    (string-append "/web/tag" url)
 	    options)))
+
+(define has-tag? #f)
+(define (setup-tag . any)
+  (set! has-tag? (read-meta "has-tag?"))
+  (when has-tag?
+    (let* ((Event (js-field *js* "Event"))
+	   (window (js-field *js* "window")))
+      (Event.observe window "click" find-tag)
+      (Event.observe window "mousemove" notify-tag)
+      )))
+
+(define built-in-classes '(
+			   "header-line"
+			   "header-line-user"
+			   "header-line-role"
+			   "header-line-control"
+			   "buffer"
+			   "contents"
+			   "linum"
+			   "lfringe"
+			   "rfringe"
+			   ))
+
+(define (tag-wrong-target? target)
+  (let1 elt ($ target)
+    (or (any (lambda (class)
+	       (target.hasClassName class))
+	     built-in-classes)
+	(equal? target.tagName "A")
+	(equal? target.tagName "a")
+	(target.hasClassName "comment")
+	(let loop ((elt elt))
+	  (cond
+	   ((js-undefined? elt)
+	    #f)
+	   ((elt.hasClassName "yarn-div")
+	    #t)
+	   (else
+	    (loop (elt.up 0))))))))
+
+;(define (line-number-at target) 0)
+(define tag-old-symbol-element #f)
+(define (find-tag event)
+  (when tag-old-symbol-element
+    (tag-old-symbol-element.removeClassName "highlight"))
+  (let1 target event.target
+    (let* ((point-px event.pageX)
+	   (elt ($ target))
+	   (offset-px (let1 o (elt.viewportOffset)
+			o.left))
+	   (width-px (elt.getWidth))
+	   (offset-rate (/ (* 1.0 (- point-px offset-px))
+			   width-px)))
+      (unless (tag-wrong-target? target)
+	(event.stop)
+	(let ((symbol ((major-mode-of 'symbol-at) target offset-rate))
+	      (url (contents-url)))
+	  (if symbol
+	      (require-tag url symbol major-mode target)
+	      (alert "No symbol under point")
+	  ))))))
+
+(define (notify-tag event)
+  (when tag-old-symbol-element
+    (tag-old-symbol-element.removeClassName "highlight"))
+  (let1 target event.target
+    (let* ((point-px event.pageX)
+	   (elt ($ target))
+	   (offset-px (let1 o (elt.viewportOffset)
+			o.left))
+	   (width-px (elt.getWidth))
+	   (offset-rate (/ (* 1.0 (- point-px offset-px))
+			   width-px)))
+      (unless (tag-wrong-target? target)
+	(let ((symbol ((major-mode-of 'symbol-at) target offset-rate)))
+	  (set! tag-old-symbol-element elt)
+	  (tag-old-symbol-element.addClassName "highlight")
+	  )))))

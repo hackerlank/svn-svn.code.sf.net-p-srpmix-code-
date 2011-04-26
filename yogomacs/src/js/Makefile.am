@@ -48,6 +48,7 @@ scheme2js_input = \
 	yogomacs-fringe.scm      \
 	yogomacs-header-line.scm \
 	yogomacs-major-mode.scm  \
+	fundamental-modes.scm    \
 	yogomacs-hook-setup.scm  \
 	\
 	$(NULL)

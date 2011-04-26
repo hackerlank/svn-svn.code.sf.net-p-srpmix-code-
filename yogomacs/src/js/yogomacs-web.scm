@@ -42,3 +42,15 @@
 (define (sxml->xhtml sxml)
   (tree->string (sxml->xhtml0 sxml)))
 
+(define (read-meta name)
+    (let* ((elt ($ name))
+	   (data (read-from-string elt.innerHTML)))
+      (elt.remove)
+      data))
+
+(define (contents-url)
+  (let* ((location (js-field *js* "location"))
+	 (pathname (js-field location "pathname")))
+    (substring pathname
+	       (string-length shell-dir)
+	       (string-length pathname))))

@@ -2,6 +2,7 @@
 (add-hook find-file-pre-hook header-line-prepare)
 (add-hook find-file-post-hook (lambda any (jump-lazy (js-field (js-field *js* "location") "hash"))))
 (add-hook find-file-post-hook setup-major-mode)
+(add-hook find-file-post-hook setup-tag)
 (add-hook find-file-post-hook require-yarn)
 (add-hook draft-box-abort-hook stitch-delete-draft-box)
 (add-hook draft-box-submit-hook stitch-submit)
