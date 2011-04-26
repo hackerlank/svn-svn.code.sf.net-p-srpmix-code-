@@ -43,6 +43,8 @@ scheme2js_input = \
 	yogomacs-builtin.scm     \
 	yogomacs-repl.scm        \
 	yogomacs-stitch.scm      \
+	yogomacs-yarn.scm        \
+	yogomacs-tag.scm         \
 	yogomacs-fringe.scm      \
 	yogomacs-header-line.scm \
 	yogomacs-major-mode.scm  \

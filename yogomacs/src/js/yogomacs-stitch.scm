@@ -2,39 +2,58 @@
 ;; Stitch
 ;;
 (define stitch-ids (list))
-(define (stitch-make-insertion-proc type)
-  (cond
-   ((eq? type 'file) 
-    (lambda (id posinfo shtml-frag) 
-      (let1 dom-id (string-append "L:" (number->string posinfo))
-	(let1 elt ($ dom-id)
-	  (when elt
-	    (elt.insert 
-	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
-	    (set! stitch-ids (cons id stitch-ids)))))))
-   ((eq? type 'directory) 
-    (lambda (id posinfo shtml-frag) 
-      (let1 dom-id (string-append "N:" posinfo)
-	(let1 elt ($ dom-id)
-	  (when elt
-	    (elt.insert 
-	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
-	    (set! stitch-ids (cons id stitch-ids)))))))
-   ((eq? type 'tag)
-    (lambda (id posinfo shtml-frag)
-      (let1 elt (posinfo.next ".linum")
-	(if (js-undefined? elt)
-	    (let loop ((elt posinfo))
-	      (let1 next (elt.next)
-		(if (js-undefined? next)
-		    (elt.insert
-		     (alist->object `((after . ,(sxml->xhtml shtml-frag)))))
-		    (loop next))))
-	    (elt.insert
-	     (alist->object `((before . ,(sxml->xhtml shtml-frag))))))
-	(set! stitch-ids (cons id stitch-ids)))))
-   (else (lambda (posinfo shtml-frag) #f))))
 
+;;
+;; Stitchers
+;;
+(define (stitch-file-stitching-proc id posinfo shtml-frag)
+  (let1 dom-id (string-append "L:" (number->string posinfo))
+    (let1 elt ($ dom-id)
+      (if elt
+	  (begin
+	    (elt.insert 
+	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
+	    id)
+	  #f))))
+
+(define (stitch-directory-stitching-proc id posinfo shtml-frag)
+  (let1 dom-id (string-append "N:" posinfo)
+    (let1 elt ($ dom-id)
+      (if elt
+	  (begin
+	    (elt.insert 
+	     (alist->object `((before . ,(sxml->xhtml shtml-frag)))))
+	    id)
+	  #f))))
+
+(define (stitch-tag-stitching-proc id posinfo shtml-frag)
+  (let1 elt (posinfo.next ".linum")
+    (if (js-undefined? elt)
+	(let loop ((elt posinfo))
+	  (let1 next (elt.next)
+	    (if (js-undefined? next)
+		(elt.insert
+		 (alist->object `((after . ,(sxml->xhtml shtml-frag)))))
+		(loop next))))
+	(elt.insert
+	 (alist->object `((before . ,(sxml->xhtml shtml-frag))))))
+    id))
+
+(define (stitch-choose-stitching-proc type)
+  (let1 proc
+      (cond
+       ((eq? type 'file) stitch-file-stitching-proc)
+       ((eq? type 'directory) stitch-directory-stitching-proc)
+       ((eq? type 'tag) stitch-tag-stitching-proc)
+       (else (lambda (id posinfo shtml-frag) #f)))
+    (lambda (id posinfo shtml-frag)
+      (let1 id (proc id posinfo shtml-frag)
+	(when id
+	  (set! stitch-ids (cons id stitch-ids)))))))
+
+;;
+;; Renderer
+;;
 (define (stitch-text-render id text date full-name mailing-address subjects transited-from)
   `(div (|@|
 	 (class "yarn-div")
@@ -94,9 +113,9 @@
 	      (class "yarn-footer"))
 	     (div
 	      "["
-	      (a (|@| (href "#") (onclick "run_draft_box_abort_hook();")) "Abort")
+	      (a (|@| (href "#") (onclick "run_draft_box_abort_hook();")) "abort")
 	      "]["
-	      (a (|@| (href "#") (onclick "run_draft_box_submit_hook('text');")) "Submit")
+	      (a (|@| (href "#") (onclick "run_draft_box_submit_hook('text');")) "submit")
 	      "]"
 	      (span ,(write-to-string subjects))
 	      )
@@ -113,19 +132,26 @@
   `(div (|@|
 	 (class "yarn-div")
 	 (id ,(string-append "T:" id)))
+	(span (|@| (class "doc")) ,desc) 
+	": " 
+	(span (|@| (class "keyword")) ,target)
+	", "
 	(span ,(symbol->string handler)) 
 	"<" 
 	(span ,(number->string score))
 	">" 
-	": "(span ,desc) 
+	" "
+	(span "[x]")
 	"\n	"
 	(a (|@| 
 	    (href ,(if local?
 		       (string-append shell-dir url)
 		       url)))
-	   ,url)))
+	   ,url)
+	"\n"
+	))
 
-(define (stitch-make-render-proc type)
+(define (stitch-choose-render-proc type)
   (cond
    ((eq? type 'draft-text) stitch-draft-text-render)
    ((eq? type 'text) stitch-text-render)
@@ -133,113 +159,16 @@
    (else (lambda rest
 	   #f))))
 
-(define (stitch-yarn yarn)
-  (let* ((yarn (cdr yarn))
-	 (id (kref yarn :id #f)))
-    (unless (member id stitch-ids)
-      (let* ((target (kref yarn :target #f))
-	     (content (kref yarn :content #f))
-	     (date (kref yarn :date #f))
-	     (full-name (kref yarn :full-name #f))
-	     (mailing-address (kref yarn :mailing-address #f))
-	     (subjects (kref yarn :subjects (list)))
-	     (transited (kref yarn :transited #f))
-	     )
-	(let ((insertion-proc (stitch-make-insertion-proc (car target)))
-	      (render-proc (stitch-make-render-proc (car content)))
-	      ;;(filter-proc (stitch-make-filter-proc subjects))
-	      )
-	  (let1 shtml-frag  (render-proc id
-					 (cadr content)
-					 date
-					 full-name
-					 mailing-address
-					 subjects
-					 transited)
-	    (when shtml-frag
-	      (insertion-proc id (cadr target)
-			      shtml-frag))))))))
-
-(define (stitch-tag tag target-element)
-  (let* ((tag (cdr tag))
-	 (handler (kref tag :handler #f))
-	 (target (kref tag :target #f))
-	 (url (kref tag :url #f))
-	 (short-desc (kref tag :short-desc #f))
-	 (desc (kref tag :desc #f))
-	 (local? (kref tag :local? #f))
-	 (score (kref tag :score #f))
-	 (id (string-append (symbol->string handler) "/" target "@" url)))
-    (unless (member id stitch-tag)
-      (let ((insertion-proc (stitch-make-insertion-proc 'tag))
-	    (render-proc (stitch-make-render-proc 'tag)))
-	(let1 shtml-frag (render-proc id
-				      handler
-				      target
-				      url
-				      short-desc
-				      desc
-				      local?
-				      score)
-	  (when shtml-frag
-	    (insertion-proc id ($ target-element) shtml-frag)))))))
+(define stitch-proc-table (make-hashtable))
+(define-macro (define-stitch key proc)
+  `(hashtable-put! stitch-proc-table  (quote ,key) ,proc))
 
 (define (stitch data . rest)
-  (cond 
-   ((eq? (car data) 'yarn-container)
-    (apply stitch-yarns (cdr data) rest))
-   ((eq? (car data) 'tag-container)
-    (apply stitch-tags (cdr data) rest))
-   ))
-
-(define (stitch-yarns yarns . rest)
-  (for-each
-     (lambda (elt)     
-       (cond
-	((eq? (car elt) 'yarn)
-	 (stitch-yarn elt))))
-     yarns))
-
-(define (stitch-tags tags . rest)
-  (let1 target-element (kref rest :target-element #f)
-    (for-each
-     (lambda (elt)
-       (cond
-	((eq? (car elt) 'tag)
-	 (stitch-tag elt target-element))))
-     tags)))
-
-
-(define (require-yarns url params)
-  (let1 options (alist->object `((method . "get")
-				 ,@(if params
-				       `((parameters . ,params))
-				       '())
-				 (onSuccess . ,(lambda (response)
-						 (stitch
-						  (read-from-response response))
-						 ))))
-    (js-new Ajax.Request
-	    (string-append "/web/yarn" url)
-	    options)))
-
-(define (require-tag url symbol major-mode target-element)
-  (let* ((parameters (alist->object 
-		      `((symbol . ,symbol)
-			(major-mode . (symbol->string major-mode))
-			)))
-	 (options (alist->object 
-		   `((method . "get")
-		     (parameters . ,parameters)
-		     (onSuccess . ,(lambda (response)
-				     (let1 es (read-from-response response)
-				       (stitch es 
-					       :target-element target-element)
-				       )))))))
-    
-    (js-new Ajax.Request
-	    (string-append "/web/tag" url)
-	    options)))
+  (let1 proc (hashtable-get stitch-proc-table (car data))
+    (if proc
+	(apply proc (cdr data) rest)
+	;; TODO: What I should do???
+	#f)))
 
 ;;
 ;; Submitting
@@ -267,7 +196,7 @@
 	  (let1 prev (lfringe.previous)
 	    (prev.insert
 	     (alist->object 
-	      `((before . ,(sxml->xhtml ((stitch-make-render-proc 'draft-text)
+	      `((before . ,(sxml->xhtml ((stitch-choose-render-proc 'draft-text)
 					 '("*DRAFT*")
 					 ))))))
 	    (set! stitch-draft-target target))
@@ -298,7 +227,7 @@
 		   `((method . "post")
 		     (parameters . ,parameters)
 		     (onSuccess . ,(lambda (response)
-				     (require-yarns url #f)
+				     (require-yarn url #f)
 				     (stitch-delete-draft-box)
 				     ))))
       (js-new Ajax.Request

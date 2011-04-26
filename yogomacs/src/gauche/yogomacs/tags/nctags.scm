@@ -49,7 +49,7 @@
 	   (list)))
 
 ;; <= (nctags :target symbol :url "..." :short-desc "..." :desc "..." :local?  ... :score ...)
-;; => (ctags :name ... :file ... :line ... :scope ... :kind ...)
+;; => (ctags :name ... :file ... :line ... :scope ... :kind ... :extra (...))
 ;; (ctags :version "0" :name "A11_MARK" :file "linux-2.6/arch/sh/kernel/cpu/sh4a/pinmux-sh7757.c" :line 506 :scope #t :kind e :extra ())
 ;; (nctags :url "/sources/k/kernel/^lcopy-trunk/pre-build/linux-2.6/arch/sh/kernel/cpu/sh4a/pinmux-sh7757.c#L:506"
 ;;         :short-desc "enumerators, file local"
@@ -62,7 +62,9 @@
       ((file 'file)
        (line 'line)
        (scope 'scope)
-       (kind 'kind) . #f)
+       (kind 'kind)
+       (extra 'extra)
+       . #f)
     (let* ((real-def-path (build-path (values-ref (split-at-pre-build 
 						   real-src-path) 
 						  0)
@@ -73,30 +75,32 @@
 	:target ,symbol
 	:url ,#`",(real->web real-def-path config)#L:,|line|"
 	:short-desc ,kind
-	:desc ,(kind->desc kind major-mode)
+	:desc ,(make-desc kind major-mode extra)
 	:local? #t
-	:score ,(+ 50 
-		   (if (equal? real-def-path real-src-path)
-		       1
-		       0)
-		   (if scope 
-		       10
-		       0) 
-		   (if major-mode 1 0))))))
+	:score ,(let1 same-file? (equal? real-def-path real-src-path)
+		  (+ 50 
+		     (if (equal? real-def-path real-src-path)
+			 1
+			 0)
+		     (if (and (equal? real-def-path real-src-path) scope )
+			 10
+			 0) 
+		     (if major-mode 1 0)))))))
 
 (define kinds-list (map 
 		   (lambda (entry)
 		     (cons #`",(normalize-major-mode (car entry))-mode"
-			   (cdr entry))
-		     )
+			   (cdr entry)))
 		   (cdr (es<-ctags-command 'kinds))))
 
-(define (kind->desc kind major-mode)
+(define (make-desc kind major-mode extra)
   (let1 kinds (assoc-ref kinds-list 
 			 (or major-mode "c-mode")
 			 (list))
-    (car (assq-ref kinds kind '(#f)))))
-
+    (let1 desc (car (assq-ref kinds kind '(#f)))
+      (if desc
+	  (string-append desc (write-to-string extra))
+	  desc))))
 
 (define (ctags-for-symbol nctags symbol)
   (let* ((proc (run-process
