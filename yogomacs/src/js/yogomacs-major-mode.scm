@@ -28,6 +28,7 @@
     (let* ((Event (js-field *js* "Event"))
 	   (window (js-field *js* "window")))
       (Event.observe window "click" find-tag)
+
       )))
 
 (define built-in-classes '(
@@ -43,12 +44,15 @@
 			   ))
 
 (define (wrong-tag-target? target)
-  (or (any (lambda (class)
-	     (target.hasClassName class))
-	   built-in-classes)
-      (equal? target.tagName "A")
-      (equal? target.tagName "a")
-      (target.hasClassName "comment")))
+  (let1 elt ($ target)
+    (or (any (lambda (class)
+	       (target.hasClassName class))
+	     built-in-classes)
+	(equal? target.tagName "A")
+	(equal? target.tagName "a")
+	(target.hasClassName "comment")
+	(not (js-undefined? (elt.up "yarn-div")))
+	)))
 
 (define (symbol-at target offset-rate)
   (let1 str target.innerHTML
