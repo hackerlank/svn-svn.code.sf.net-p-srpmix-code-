@@ -63,7 +63,7 @@
 	    (string-append "/web/tag" url)
 	    options)))
 
-(define (tag-initialize . any)
+(define (tag-init . any)
   (let1 has-tag? (read-meta "has-tag?")
     (when has-tag?
       (let* ((Event (js-field *js* "Event"))

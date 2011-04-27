@@ -1,5 +1,5 @@
 (define major-mode #f)
-(define (major-mode-initialize . any)
+(define (major-mode-init . any)
   (set! major-mode (read-meta "major-mode")))
 
 (define major-mode-table (make-hashtable))

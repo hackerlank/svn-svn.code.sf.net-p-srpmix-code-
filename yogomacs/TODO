@@ -1,5 +1,25 @@
 -*- outline -*-
 * prioritized task
+
+** yuicompressor
+** js versioning
+** css versioning
+** css in sexp
+*** smaller class name 
+*** Sending only Default css
+** js cleanup
+*** Name space
+*** More utilities
+*** Drop biwascheme with real ysh
+** Minimize process launching
+** Remove unused classes from html
+** login as guest user automatically
+** logout
+** Revise lazy-jump
+** sregex?
+
+
+* old
 ** css in sexp: http://common-lisp.net/gitweb?p=projects/css-sexp/css-sexp.git;a=blob;f=src/output.lisp;h=93b9cc9f7d2106bbbeed8da247c5388f09807db6;hb=HEAD
 ** tag-handlers
 ** mode info
@@ -7,8 +27,8 @@
 ** ChangeLog
 ** TODO
 ** README <done>
-** pager
-** broken chopped page
+** pager <done>
+** broken chopped page: optimizations are needed.
 ** gnu source highlighting <done>
 ** publish and delete yarn
 

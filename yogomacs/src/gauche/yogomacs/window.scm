@@ -24,7 +24,7 @@
 	      (list)
 	      css-list))
 
-;; js-list:  ((js-file . file)  (js-exps . inlin)...)
+;; js-list:  ((js-file . file)  (js-exps . inline)...)
 (define (expand-js-list js-list)
   (fold-right (lambda (js result)
 		(cons*
