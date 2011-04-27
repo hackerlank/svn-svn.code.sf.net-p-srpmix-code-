@@ -1,7 +1,7 @@
-(define (build-menu-item name callback)
+(define (menu-build-item name callback)
   (alist->object `((name . ,name) (callback . ,callback))))
 
-(define (build-menu items)
+(define (menu-build items)
   (let ((template (js-new Array (length items))))
     (let loop ((i 0)
 	       (items items))
@@ -15,8 +15,8 @@
 			    (menuItems . ,template)))))))
 
 (define-macro (define-menu selector . items)
-  `(let1 f (build-menu (map (lambda (item)
-			      (build-menu-item (car item) (cadr item)))
+  `(let1 f (menu-build (map (lambda (item)
+			      (menu-build-item (car item) (cadr item)))
 			    (list ,@items)))
      (add-hook find-file-post-hook
 	       (lambda args
