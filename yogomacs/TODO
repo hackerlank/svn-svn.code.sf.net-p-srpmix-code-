@@ -10,7 +10,7 @@
 ** js cleanup
 *** Name space
 *** More utilities
-*** Drop biwascheme with real ysh
+*** Replace biwascheme with real ysh
 ** Minimize process launching
 ** Remove unused classes from html
 ** login as guest user automatically
