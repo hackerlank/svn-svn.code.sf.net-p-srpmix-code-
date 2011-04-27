@@ -28,9 +28,8 @@
 	    #f
 	    result)))))
 
-(define-major-mode fundamental-mode
+(define-major-mode fundamental
   :indicator "Fundamental"
   :separators '(#\space #\tab)
   :symbol-at  fundamental-symbol-at
   )
-

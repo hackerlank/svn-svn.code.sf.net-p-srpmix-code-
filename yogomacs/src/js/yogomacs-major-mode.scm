@@ -1,17 +1,18 @@
 (define major-mode #f)
-(define (setup-major-mode . any)
-  (set! major-mode (read-meta "major-mode"))
-  )
+(define (major-mode-initialize . any)
+  (set! major-mode (read-meta "major-mode")))
 
 (define major-mode-table (make-hashtable))
 (define (make-major-mode-record major-mode 
 				. rest)
   (cons major-mode rest))
-				
+
 (define-macro (define-major-mode major-mode . rest)
-  `(hashtable-put! major-mode-table (quote ,major-mode) 
-		   (make-major-mode-record (quote ,major-mode)
-					   ,rest)))
+  (let ((major-mode (string->symbol (string-append (symbol->string major-mode) "-mode"))))
+    `(hashtable-put! major-mode-table (quote ,major-mode)
+		     (make-major-mode-record (quote ,major-mode)
+					     (list . ,rest))))) 
+
 (define (major-mode-of symbol)
   (define (major-mode-of0 symbol major-mode)
     (let1 key (string->keyword (symbol->string symbol))

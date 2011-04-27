@@ -63,15 +63,14 @@
 	    (string-append "/web/tag" url)
 	    options)))
 
-(define has-tag? #f)
-(define (setup-tag . any)
-  (set! has-tag? (read-meta "has-tag?"))
-  (when has-tag?
-    (let* ((Event (js-field *js* "Event"))
-	   (window (js-field *js* "window")))
-      (Event.observe window "click" find-tag)
-      (Event.observe window "mousemove" notify-tag)
-      )))
+(define (tag-initialize . any)
+  (let1 has-tag? (read-meta "has-tag?")
+    (when has-tag?
+      (let* ((Event (js-field *js* "Event"))
+	     (window (js-field *js* "window")))
+	(Event.observe window "click" tag-find)
+	(Event.observe window "mousemove" tag-highlight)
+	))))
 
 (define built-in-classes '(
 			   "header-line"
@@ -104,7 +103,7 @@
 
 ;(define (line-number-at target) 0)
 (define tag-old-symbol-element #f)
-(define (find-tag event)
+(define (tag-find event)
   (when tag-old-symbol-element
     (tag-old-symbol-element.removeClassName "highlight"))
   (let1 target event.target
@@ -124,7 +123,7 @@
 	      (alert "No symbol under point")
 	  ))))))
 
-(define (notify-tag event)
+(define (tag-highlight event)
   (when tag-old-symbol-element
     (tag-old-symbol-element.removeClassName "highlight"))
   (let1 target event.target
