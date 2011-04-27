@@ -17,7 +17,8 @@
 ** logout
 ** Revise lazy-jump
 ** sregex?
-
+** kernel arch detector
+** spectag
 
 * old
 ** css in sexp: http://common-lisp.net/gitweb?p=projects/css-sexp/css-sexp.git;a=blob;f=src/output.lisp;h=93b9cc9f7d2106bbbeed8da247c5388f09807db6;hb=HEAD
