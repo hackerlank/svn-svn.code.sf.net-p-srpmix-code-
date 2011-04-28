@@ -11,28 +11,11 @@
 
 (select-module yogomacs.renderers.yogomacs)
 
-(define (insert-user-info params)
-  (let1 user (params "user")
-	(let ((user-name (if user (ref user 'name) #f))
-	      (user-real-name (if user (ref user 'real-name) #f)))
-	  (list 
-	   `(define (user-name) ,user-name)
-	   `(define (user-real-name) ,user-real-name)))))
-
-(define (insert-role-info params)
-  (let1 role (params "role")
-    (let1 role-name (or role  #f)
-      (list
-       `(define (role-name) ,role-name)))))
-
 (define (extra-scripts url current-params next-params shell)
-  
   `((add-hook find-file-pre-hook (pa$ load-lazy ,url ,next-params))
     (add-hook find-file-pre-hook ,(ref shell 'initializer))
     (add-hook toggle-full-screen-hook toggle-full-screen)
     (add-hook read-from-minibuffer-hook ,(ref shell 'interpreter))
-    ,@(insert-user-info current-params)
-    ,@(insert-role-info current-params)
     ))
 
 (define (yogomacs path params shell)

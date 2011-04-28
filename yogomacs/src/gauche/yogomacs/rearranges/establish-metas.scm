@@ -21,12 +21,21 @@
   (boolean (any (cute <> user-agent) 
 		smart-phone-user-agents)))
 
-(define (establish-metas sxml)
+(define (role-name params)
+  (let1 role (params "role")
+    (let1 role-name (or role  #f)
+      role-name)))
+
+(define (establish-metas sxml params)
   (let ((user-agent (assoc-ref (sys-environ->alist) 
 			       "HTTP_USER_AGENT"
-			       "")))
+			       ""))
+	(user (params "user")))
     (install-meta sxml
 		  :user-agent user-agent
-		  :smart-phone? (smart-phone? user-agent))))
+		  :smart-phone? (smart-phone? user-agent)
+		  :user-name (if user (ref user 'name) #f)
+		  :user-real-name (if user (ref user 'real-name) #f)
+		  :role-name (role-name params))))
 
 (provide "yogomacs/rearranges/establish-metas")
