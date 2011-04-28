@@ -87,9 +87,11 @@ yogomacs-@VERSION@-@RPM_RELEASE@.js: @SCHEME2JS_RUNTIME_DIR@/runtime.js $(yogoma
 	     "Converted from proto.menu.js" >> $@
 	echo >> $@
 
+	echo >> $@
 	cat yogomacs.copyright >> $@
-	perl yjsmin.pl yogomacs_runtime.js \
-	     "Converted from yogomacs_runtime.js" >> $@
+#	perl yjsmin.pl yogomacs_runtime.js \
+#	     "Converted from yogomacs_runtime.js" >> $@
+	cat yogomacs_runtime.js >> $@
 	echo >> $@
 
 

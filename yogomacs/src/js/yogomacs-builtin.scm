@@ -51,11 +51,11 @@
 		    data))
 		(loop (cdr metas)))))))
    (else
-    (let1 elt ($ name)
-      (let* ((data (read-from-string elt.innerHTML)))
-	(hashtable-put! meta-variables name data)
-	(elt.remove)
-	data)))))
+    (let* ((elt ($ name))
+	   (data (read-from-string elt.innerHTML)))
+      (hashtable-put! meta-variables name data)
+      (elt.remove)
+      data))))
 
 (define (contents-url)
   (let* ((location (js-field *js* "location"))
