@@ -44,7 +44,7 @@ EXTRA_DIST = yjsmin.pl \
 
 scheme2js_input = \
 	yogomacs-macs.scm        \
-	yogomacs-util.scm        \
+	yogomacs-scm.scm         \
 	yogomacs-html.scm        \
 	yogomacs-js.scm	         \
 	yogomacs-hook-def.scm    \
