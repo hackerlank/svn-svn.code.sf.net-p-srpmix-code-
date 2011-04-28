@@ -44,22 +44,25 @@ EXTRA_DIST = yjsmin.pl \
 
 scheme2js_input = \
 	yogomacs-macs.scm        \
-	yogomacs-scm.scm         \
-	yogomacs-html.scm        \
-	yogomacs-js.scm	         \
-	yogomacs-hook-def.scm    \
-	yogomacs-menu.scm	 \
-	yogomacs-full-screen.scm \
-	yogomacs-builtin.scm     \
+	utils.scm		 \
+	dom.scm			 \
+	sxml.scm		 \
+	js.scm	                 \
+	\
+	decls.scm		 \
+	\
 	yogomacs-repl.scm        \
-	yogomacs-stitch.scm      \
-	yogomacs-yarn.scm        \
-	yogomacs-tag.scm         \
-	yogomacs-fringe.scm      \
-	yogomacs-header-line.scm \
-	yogomacs-major-mode.scm  \
+	\
+	stitch.scm               \
+	yarn.scm                 \
+	tag.scm                  \
+	\
+	window.scm		 \
+	\
+	major-mode.scm           \
 	fundamental-mode.scm     \
-	yogomacs-hook-setup.scm  \
+	\
+	main.scm		 \
 	\
 	$(NULL)
 

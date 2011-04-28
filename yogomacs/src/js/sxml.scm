@@ -1,16 +1,3 @@
-(define ($ elt)
-  ((js-field *js* "$") elt))
-(define ($$ elt)
-  ((js-field *js* "$$") elt))
-(define (<- elt)
-  ((js-field *js* "$F") elt))
-(define (-> val elt)
-  (let1 field ($ elt)
-    (field.setValue val)))
-
-(define (html-escape-string str)
-  (str.escapeHTML))
-
 (define (sxml->xhtml0 sxml)
   (cond
    ((string? sxml) (html-escape-string sxml))
