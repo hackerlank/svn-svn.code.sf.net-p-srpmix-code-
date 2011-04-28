@@ -4,13 +4,6 @@ dist_jscache_DATA = \
 	proto.menu.js	    \
 	yogomacs_builtin.js \
 	\
-	scriptaculous.js    \
-	builder.js          \
-        effects.js          \
-        dragdrop.js         \
-        controls.js         \
-        slider.js           \
-	\
 	$(NULL)
 
 scheme2js_runtime = \
