@@ -6,31 +6,10 @@
   (use yogomacs.path)
   (use yogomacs.shell)
   (use yogomacs.window)
+  (use yogomacs.config)
   )
 
 (select-module yogomacs.renderers.yogomacs)
-
-(define smart-phone-user-agents '(
-				  ;; doesn't have real keyboard.
-				  #/HTCX06HT/
-				  #/HTC Magic/
-				  #/GT-P1000/
-				  #/iPhone OS 4/
-				  ;; has real keyboard....
-				  #/Android Dev Phone 1/
-				  #/IS01 Build\/S8040/
-				  ))
-(define (insert-user-agent-action)
-  (let1 user-agent (assoc-ref (sys-environ->alist) "HTTP_USER_AGENT" "")
-    (cons `(define (user-agent) ,user-agent)
-	  (cond
-	   ((any (cute <> user-agent) smart-phone-user-agents)
-	    (list
-	     '(add-hook find-file-pre-hook enter-full-screen)
-	     '(define (smart-phone?) #t)))
-	   (else
-	    (list
-	     '(define (smart-phone?) #f)))))))
 
 (define (insert-user-info params)
   (let1 user (params "user")
@@ -52,7 +31,6 @@
     (add-hook find-file-pre-hook ,(ref shell 'initializer))
     (add-hook toggle-full-screen-hook toggle-full-screen)
     (add-hook read-from-minibuffer-hook ,(ref shell 'interpreter))
-    ,@(insert-user-agent-action)
     ,@(insert-user-info current-params)
     ,@(insert-role-info current-params)
     ))
@@ -62,10 +40,7 @@
 	     '(("yogomacs--Default.css" . "Default")
 	       ("yogomacs--Invert.css" . "Invert"))
 	     `(
-	       ("prototype.js" . file)
-	       ("proto.menu.js" . file)
-	       ("scheme2js_runtime.js" . file)
-	       ("yogomacs_builtin.js" . file)
+	       (,#`"yogomacs-,(version)-,(release).js" . file)
 	       )))
 
 (define (yogomacs0 path params shell css-list js-list)

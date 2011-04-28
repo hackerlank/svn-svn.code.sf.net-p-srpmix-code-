@@ -15,6 +15,7 @@ Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildRequires: emacs emacs-el gauche-devel font-lock 
+BuildRequires: perl-JavaScript-Minifier
 Requires: gauche httpd xz file yogomacs-cachedir tar 
 Requires: emacs emacs-common font-lock 
 Requires: scheme2js
@@ -48,7 +49,7 @@ httpd configuration for @PACKAGE@(@CONFIG configuration)
 %setup -q
 
 %build
-%configure @ARGS_FOR_CONFIGURE_IN_SPEC@
+%configure @ARGS_FOR_CONFIGURE_IN_SPEC@ --with-rpm-release=@RPM_RELEASE@
 make  %{?_smp_mflags}
 
 

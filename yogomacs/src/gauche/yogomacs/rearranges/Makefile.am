@@ -6,6 +6,7 @@ dist_module_DATA =   \
 	css-integrates.scm			\
 	enum.scm				\
 	eof-line.scm				\
+	establish-metas.scm			\
 	face-integrates.scm			\
 	line-trim.scm				\
 	normalize-major-mode.scm                \

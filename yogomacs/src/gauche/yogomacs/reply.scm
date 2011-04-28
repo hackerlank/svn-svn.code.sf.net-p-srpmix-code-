@@ -16,6 +16,7 @@
   (use yogomacs.rearranges.yogomacs-fragment)
   (use yogomacs.rearranges.eof-line)
   (use yogomacs.rearranges.tag-integrates)
+  (use yogomacs.rearranges.establish-metas)
   (use yogomacs.shell)
   (use yogomacs.error)
   ;;
@@ -110,6 +111,7 @@
 	  (reply-xhtml new))
 	(let1 new (make <shtml-data>
 		    :data ((compose narrow-down
+				    establish-metas
 				    (cut tag-integrates <> (ref shtml 'has-tag?))
 				    eof-line) 
 			   (ref shtml 'data))

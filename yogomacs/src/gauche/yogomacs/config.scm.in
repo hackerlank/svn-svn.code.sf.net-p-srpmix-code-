@@ -2,7 +2,8 @@
 (define-module yogomacs.config
   (export load-config
 	  config->proc
-	  version)
+	  version
+	  release)
   (use www.cgi)
   (use yogomacs.access)
   (use file.util)
@@ -49,5 +50,6 @@
 			config)))))
 
 (define (version) "@VERSION@")
+(define (release) "@RPM_RELEASE@")
 
 (provide "yogomacs/config")

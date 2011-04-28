@@ -1,23 +1,11 @@
 (define-module yogomacs.rearranges.tag-integrates
   (export tag-integrates)
-  (use sxml.tree-trans)
-  (use srfi-1)
-  (use yogomacs.util.sxml))
+  (use yogomacs.util.sxml)
+  )
 
 (select-module yogomacs.rearranges.tag-integrates)
 
 (define (tag-integrates sxml has-tag?)
-  (pre-post-order sxml
-		  `((head . ,(lambda (tag . rest)
-			       (cons tag (reverse 
-					  (cons* 
-					   `(meta (|@|
-						   (name "has-tag?")
-						   (content ,(format "~s" (boolean has-tag?))
-							    )))
-					   "	"
-					   "\n"
-					   (reverse rest))))))
-		    ,@no-touch)))
+  (install-meta sxml :has-tag? (boolean has-tag?)))
 
 (provide "yogomacs/rearranges/tag-integrates")

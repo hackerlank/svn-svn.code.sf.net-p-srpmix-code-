@@ -1,17 +1,27 @@
 -*- outline -*-
 * prioritized task
 
-** yuicompressor
-** js versioning
+** gzip
+
+** Minimize process launching
+
+** js minify <done>
+** js versioning <done>
+
+
+** css minify
 ** css versioning
+
 ** css in sexp
 *** smaller class name 
 *** Sending only Default css
+
 ** js cleanup
 *** Name space
 *** More utilities
-*** Replace biwascheme with real ysh
-** Minimize process launching
+
+** shell
+
 ** Remove unused classes from html
 ** login as guest user automatically
 ** logout

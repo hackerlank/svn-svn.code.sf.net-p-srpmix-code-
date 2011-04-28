@@ -1,6 +1,13 @@
 (define major-mode #f)
+(define smart-phone? #t)
+(define user-agent #t)
+
 (define (major-mode-init . any)
-  (set! major-mode (read-meta "major-mode")))
+  (set! major-mode (read-meta "major-mode"))
+  (set! smart-phone? (read-meta "smart-phone?"))
+  (set! user-agent (read-meta "user-agent"))
+  (when smart-phone?
+    (enter-full-screen)))
 
 (define major-mode-table (make-hashtable))
 (define (make-major-mode-record major-mode 

@@ -1,8 +1,17 @@
 jscachedir=$(pkgdatadir)/js
-dist_jscache_DATA = \
+
+yogomacs_input = \
 	prototype.js        \
-	proto.menu.js	    \
-	yogomacs_builtin.js \
+	proto.menu.js       \
+	yogomacs_runtime.js \
+	\
+	$(NULL)
+
+dist_jscache_DATA = \
+	\
+	$(yogomacs_input) \
+	\
+	yogomacs-@VERSION@-@RPM_RELEASE@.js
 	\
 	$(NULL)
 
@@ -20,8 +29,18 @@ install-data-hook:
         done
 
 
-EXTRA_DIST =
+copyright_input = \
+	     scheme2js.copyright  \
+	     prototype.copyright  \
+	     proto.menu.copyright \
+	     yogomacs.copyright   \
+	     \
+	     $(NULL)
 
+EXTRA_DIST = yjsmin.pl \
+	     $(copyright_input) \
+	     \
+	     $(NULL)
 
 scheme2js_input = \
 	yogomacs-macs.scm        \
@@ -45,11 +64,34 @@ scheme2js_input = \
 	$(NULL)
 
 EXTRA_DIST += $(scheme2js_input)
-yogomacs_builtin.scm: $(scheme2js_input)
+yogomacs_runtime.scm: $(scheme2js_input)
 	cat $^ > $@ 
-yogomacs_builtin.js: yogomacs_builtin.scm
+yogomacs_runtime.js: yogomacs_runtime.scm
 	@SCHEME2JS@ -g -o $@ $<
-	rm $<
+
+yogomacs-@VERSION@-@RPM_RELEASE@.js: @SCHEME2JS_RUNTIME_DIR@/runtime.js $(yogomacs_input)
+	echo > $@
+
+	cat scheme2js.copyright >> $@
+	perl yjsmin.pl @SCHEME2JS_RUNTIME_DIR@/runtime.js \
+	     "Converted from runtime.js of scheme2js" >> $@
+	echo >> $@
+
+	cat prototype.copyright >> $@
+	perl yjsmin.pl prototype.js \
+	     "Converted from prototype.js" >> $@
+	echo >> $@
+
+	cat proto.menu.copyright >> $@
+	perl yjsmin.pl proto.menu.js \
+	     "Converted from proto.menu.js" >> $@
+	echo >> $@
+
+	cat yogomacs.copyright >> $@
+	perl yjsmin.pl yogomacs_runtime.js \
+	     "Converted from yogomacs_runtime.js" >> $@
+	echo >> $@
+
 
 macrodir=$(pkgdatadir)/scheme2js
 dist_macro_DATA = yogomacs-macs.scm

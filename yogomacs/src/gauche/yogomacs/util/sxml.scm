@@ -1,8 +1,11 @@
 (define-module yogomacs.util.sxml
   (export get-meta-from-shtml
-	  no-touch)
+	  no-touch
+	  install-meta)
   (use util.list)
   (use sxml.sxpath)
+  (use sxml.tree-trans)
+  (use srfi-1)
   )
 
 (select-module yogomacs.util.sxml)
@@ -18,5 +21,18 @@
 
 (define no-touch `((*text* . ,(lambda (tag str) str))
 		   (*default* . ,(lambda x x))))
+
+(define (install-meta sxml . rest)
+  (let1 metas (append-map (lambda (elt)
+			    `((meta (|@|
+				     (name ,(keyword->string (car elt)))
+				     (content ,(format "~s" (cadr elt)))))
+			      "	"
+			      "\n"))
+			  (slices rest 2))
+    (pre-post-order sxml
+		    `((head . ,(lambda (tag . rest)
+				 (cons tag (append metas rest))))
+		      ,@no-touch))))
 
 (provide "yogomacs/util/sxml")
