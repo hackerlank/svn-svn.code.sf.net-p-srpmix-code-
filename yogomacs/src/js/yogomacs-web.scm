@@ -56,8 +56,6 @@
 		(let1 data (read-from-string (js-field (car metas) "content"))
 		  (begin
 		    (hashtable-put! meta-variables name data)
-		    (alert name)
-		    (alert data)
 		    data))
 		(loop (cdr metas)))))))
    (else
