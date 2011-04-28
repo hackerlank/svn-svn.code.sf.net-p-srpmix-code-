@@ -1,5 +1,5 @@
 ;;
-;; scheme level utilities
+;; scheme level utilities, no common prefix
 ;;
 (define (pa$ proc . args)
   (lambda rest (apply proc (append args rest))))

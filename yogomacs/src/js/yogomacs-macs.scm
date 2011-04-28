@@ -1,6 +1,14 @@
+;;
+;; Common scheme macros, no prefix. 
+;;
 (define-macro (let1 name val . body)
   `(let ((,name ,val))
-     ,@body))				;???
+     ,@body))
+(define-macro (if-let1 name condition t f)
+  `(let1 ,name ,condition
+     (if ,name
+	 ,t
+	 ,f)))
 
 (define-macro (add-hook hook proc)
   `(set! ,hook (cons ,proc ,hook)))
