@@ -57,7 +57,7 @@ EXTRA_DIST += $(scheme2js_input)
 yogomacs_builtin.scm: $(scheme2js_input)
 	cat $^ > $@ 
 yogomacs_builtin.js: yogomacs_builtin.scm
-	@SCHEME2JS@ -o $@ $<
+	@SCHEME2JS@ -g -o $@ $<
 	rm $<
 
 macrodir=$(pkgdatadir)/scheme2js

@@ -11,14 +11,14 @@
   (let ((major-mode (string->symbol (string-append (symbol->string major-mode) "-mode"))))
     `(hashtable-put! major-mode-table (quote ,major-mode)
 		     (make-major-mode-record (quote ,major-mode)
-					     (list . ,rest))))) 
+					     ,@rest)))) 
 
 (define (major-mode-of symbol)
   (define (major-mode-of0 symbol major-mode)
     (let1 key (string->keyword (symbol->string symbol))
       (let1 record (hashtable-get major-mode-table major-mode)
 	(if record
-	    (let1 val (kref record key #f)
+	    (let1 val (kref (cdr record) key #f)
 	      (if val 
 		  val
 		  #f))
