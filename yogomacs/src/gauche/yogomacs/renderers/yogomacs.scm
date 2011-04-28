@@ -21,7 +21,8 @@
 (define (yogomacs path params shell)
   (yogomacs0 path params shell
 	     '(("yogomacs--Default.css" . "Default")
-	       ("yogomacs--Invert.css" . "Invert"))
+	       ;("yogomacs--Invert.css" . "Invert")
+	       )
 	     `(
 	       (,#`"yogomacs-,(version)-,(release).js" . file)
 	       )))

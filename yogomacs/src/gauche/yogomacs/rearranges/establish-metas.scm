@@ -26,7 +26,7 @@
     (let1 role-name (or role  #f)
       role-name)))
 
-(define (establish-metas sxml params)
+(define (establish-metas sxml params config)
   (let ((user-agent (assoc-ref (sys-environ->alist) 
 			       "HTTP_USER_AGENT"
 			       ""))

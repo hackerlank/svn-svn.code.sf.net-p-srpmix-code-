@@ -28,8 +28,9 @@
   (css-integrates sxml
 		  `("\n" "	"
 		    ,(link-face-css base-name "Default")
-		    "\n" "	"
-		    ,(link-face-css base-name "Invert"))
+		    ;;"\n" "	"
+		    ;;,(link-face-css base-name "Invert")
+		    )
 		  (cute href-for-faces? <> faces)))
 
 (provide "yogomacs/rearranges/face-integrates")
