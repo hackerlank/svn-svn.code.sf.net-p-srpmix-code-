@@ -1,6 +1,5 @@
 jscachedir=$(pkgdatadir)/js
 dist_jscache_DATA = \
-	biwascheme.js       \
 	prototype.js        \
 	proto.menu.js	    \
 	yogomacs_builtin.js \
@@ -36,7 +35,6 @@ scheme2js_input = \
 	yogomacs-util.scm        \
 	yogomacs-web.scm         \
 	yogomacs-js.scm	         \
-	yogomacs-bscm.scm        \
 	yogomacs-hook-def.scm    \
 	yogomacs-menu.scm	 \
 	yogomacs-full-screen.scm \
