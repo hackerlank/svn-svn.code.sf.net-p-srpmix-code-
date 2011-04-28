@@ -44,14 +44,13 @@ EXTRA_DIST = yjsmin.pl \
 
 scheme2js_input = \
 	yogomacs-macs.scm        \
+	\
 	utils.scm		 \
 	dom.scm			 \
 	sxml.scm		 \
 	js.scm	                 \
 	\
 	decls.scm		 \
-	\
-	yogomacs-repl.scm        \
 	\
 	stitch.scm               \
 	yarn.scm                 \
@@ -61,6 +60,8 @@ scheme2js_input = \
 	\
 	major-mode.scm           \
 	fundamental-mode.scm     \
+	\
+	repl.scm                 \
 	\
 	main.scm		 \
 	\
@@ -73,6 +74,8 @@ yogomacs_runtime.js: yogomacs_runtime.scm
 	@SCHEME2JS@ -g -o $@ $<
 
 yogomacs-@VERSION@-@RPM_RELEASE@.js: @SCHEME2JS_RUNTIME_DIR@/runtime.js $(yogomacs_input)
+	rm yogomacs-[0-9]*.js
+
 	echo > $@
 
 	cat scheme2js.copyright >> $@
