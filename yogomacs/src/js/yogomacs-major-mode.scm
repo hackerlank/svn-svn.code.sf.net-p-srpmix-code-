@@ -6,6 +6,8 @@
   (set! major-mode (read-meta "major-mode"))
   (set! smart-phone? (read-meta "smart-phone?"))
   (set! user-agent (read-meta "user-agent"))
+  (set! role-name (read-meta "role-name"))
+  (set! user-name (read-meta "user-name"))
   (when smart-phone?
     (enter-full-screen)))
 

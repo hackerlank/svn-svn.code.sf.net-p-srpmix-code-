@@ -14,7 +14,6 @@
 (define (extra-scripts url current-params next-params shell)
   `((add-hook find-file-pre-hook (pa$ load-lazy ,url ,next-params))
     (add-hook find-file-pre-hook ,(ref shell 'initializer))
-    (add-hook toggle-full-screen-hook toggle-full-screen)
     (add-hook read-from-minibuffer-hook ,(ref shell 'interpreter))
     ))
 

@@ -42,11 +42,30 @@
 (define (sxml->xhtml sxml)
   (tree->string (sxml->xhtml0 sxml)))
 
+(define meta-variables (make-hashtable))
 (define (read-meta name)
-    (let* ((elt ($ name))
-	   (data (read-from-string elt.innerHTML)))
-      (elt.remove)
-      data))
+  (cond
+   ((hashtable-contains? meta-variables name)
+    (hashtable-get meta-variables name))
+   ((null? ($ name))
+    (let1 metas (vector->list ($$ "meta"))
+      (let loop ((metas metas))
+	(if (null? metas)
+	    #f
+	    (if (equal? (js-field (car metas) "name") name)
+		(let1 data (read-from-string (js-field (car metas) "content"))
+		  (begin
+		    (hashtable-put! meta-variables name data)
+		    (alert name)
+		    (alert data)
+		    data))
+		(loop (cdr metas)))))))
+   (else
+    (let1 elt ($ name)
+      (let* ((data (read-from-string elt.innerHTML)))
+	(hashtable-put! meta-variables name data)
+	(elt.remove)
+	data)))))
 
 (define (contents-url)
   (let* ((location (js-field *js* "location"))

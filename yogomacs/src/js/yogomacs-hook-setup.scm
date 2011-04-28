@@ -6,3 +6,4 @@
 (add-hook find-file-post-hook require-yarn)
 (add-hook draft-box-abort-hook stitch-delete-draft-box)
 (add-hook draft-box-submit-hook stitch-submit)
+(add-hook toggle-full-screen-hook toggle-full-screen)
