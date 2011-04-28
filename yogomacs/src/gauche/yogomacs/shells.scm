@@ -2,7 +2,6 @@
   (extend yogomacs.shell)
 
   (use yogomacs.shells.ysh)
-  (use yogomacs.shells.bscm)
   (use yogomacs.shells.nologin)
   )
 

@@ -26,7 +26,6 @@
   ;;
   (use yogomacs.dests.text)
   (use yogomacs.dests.ysh-dir)
-  (use yogomacs.dests.bscm-dir)
   (use yogomacs.dests.debug)
   ;;
   (use yogomacs.reply)
@@ -112,7 +111,6 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 (define (routing-table path params)
    `((#/^\/$/ ,dest)
      (#/^\/annotations(?:\/.+)?$/ ,annotations-dir-dest)
-     (#/^\/bscm(?:\/.+)?$/   ,bscm-dir-dest)
      (#/^\/commands(?:\/.+)?$/   ,root-commands-dir-dest)
      (#/^\/dists(?:\/.+)?$/   ,dists-dir-dest)
      (#/^\/packages(?:\/.+)?$/   ,packages-dir-dest)

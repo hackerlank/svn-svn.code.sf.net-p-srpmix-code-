@@ -4,7 +4,6 @@
   (use sxml.sxpath)
   (use sxml.tree-trans)
   (use yogomacs.shell)
-  (use yogomacs.shells.bscm)
   (use yogomacs.shells.ysh)
   (use yogomacs.major-mode)
   (use yogomacs.tag)

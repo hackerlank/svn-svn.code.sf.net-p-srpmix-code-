@@ -32,7 +32,6 @@ yogomacs.rearranges.line-trim
 yogomacs.rearranges.tag-integrates
 yogomacs.rearranges.css-integrates
 yogomacs.commands.checkout
-yogomacs.shells.bscm
 yogomacs.shells.ysh
 yogomacs.shells.nologin
 yogomacs.domain
@@ -57,7 +56,6 @@ yogomacs.dests.dir
 yogomacs.dests.root-commands-dir
 yogomacs.dests.debug
 yogomacs.dests.print-alist
-yogomacs.dests.bscm-dir
 yogomacs.dests.subjects
 yogomacs.dests.file
 yogomacs.error

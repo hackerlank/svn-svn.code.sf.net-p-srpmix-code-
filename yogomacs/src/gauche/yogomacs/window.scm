@@ -5,7 +5,6 @@
   (use yogomacs.util.scheme2js)
   (use yogomacs.shell)
   (use yogomacs.shells.ysh)
-  (use yogomacs.shells.bscm)
   (use yogomacs.path)
   (use srfi-1))
 (select-module yogomacs.window)

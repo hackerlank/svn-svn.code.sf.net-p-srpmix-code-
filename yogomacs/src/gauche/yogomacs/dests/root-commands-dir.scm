@@ -44,7 +44,6 @@
 (define (routing-table path params)
   `((#/^\/commands$/ ,dest)
     (#/^\/commands\/ysh$/ ,(pa$ dest-for (shell-ref 'ysh)))
-    (#/^\/commands\/bscm$/ ,(pa$ dest-for (shell-ref 'bscm)))
     (#/^\/commands\/checkout\/.*/ ,checkout-dest)
     ,@(if (in-shell? params)
 	  (list)
