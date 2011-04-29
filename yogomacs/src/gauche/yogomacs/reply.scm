@@ -15,12 +15,14 @@
   (use yogomacs.rearranges.enum)
   (use yogomacs.rearranges.yogomacs-fragment)
   (use yogomacs.rearranges.eof-line)
+  (use yogomacs.rearranges.inject-environment)
   (use yogomacs.rearranges.tag-integrates)
   (use yogomacs.rearranges.establish-metas)
   (use yogomacs.shell)
   (use yogomacs.error)
   ;;
   (use text.html-lite)
+  (use srfi-1)
   )
 
 (select-module yogomacs.reply)
@@ -40,7 +42,8 @@
    (last-modification-time :init-keyword :last-modification-time 
 			   :init-value #f)
    (mime-type :init-keyword :mime-type)
-   (has-tag? :init-value #f :init-keyword :has-tag?)))
+   (has-tag? :init-value #f 
+	     :init-keyword :has-tag?)))
 
 
 
@@ -64,8 +67,11 @@
 			 (list))))
   (display (ref asis 'data)))
 
+
 (define-class <shtml-data> (<data>)
-  ((mime-type :init-value "text/html")))
+  ((mime-type :init-value "text/html")
+   (client-enviroment :init-value '(has-tag?))
+   ))
 
 (define-method  reply-xhtml ((shtml <shtml-data>))
   (write-tree
@@ -98,20 +104,24 @@
   1)
 
 (define-method  reply ((shtml <shtml-data>))
+  (define (make-client-environment shtml)
+    (append-map (lambda (k)
+		  (list (make-keyword (symbol->string k))
+			(ref shtml k)))
+		(ref shtml 'client-enviroment)))
   (let* ((params (ref shtml 'params))
 	 (config (ref shtml 'config))
 	 (narrow-down (make-narrow-down params))
 	 (shell-name (in-shell? params))
-	 (has-tag? (ref shtml 'has-tag?))
 	 (conv (apply compose
 		      (if shell-name 
 			  ;; TODO intergrate tag-integrates into establish-metas.
-			  (list narrow-down
-				(cute yogomacs-fragment <> shell-name) 
-				(cut tag-integrates <> has-tag?)
+			  (list (cute yogomacs-fragment <> shell-name) 
+				(cute inject-environment <> (make-client-environment shtml))
+				narrow-down
 				eof-line)
 			  (list (cut establish-metas <> params config)
-				(cut tag-integrates <> has-tag?)
+				(cute inject-environment <> (make-client-environment shtml))
 				narrow-down
 				eof-line))))
 	 (mime-type (if shell-name 

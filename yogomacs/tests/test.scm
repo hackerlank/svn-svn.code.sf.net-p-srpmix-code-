@@ -29,7 +29,6 @@ yogomacs.rearranges.eof-line
 yogomacs.rearranges.title
 yogomacs.rearranges.checkout
 yogomacs.rearranges.line-trim
-yogomacs.rearranges.tag-integrates
 yogomacs.rearranges.css-integrates
 yogomacs.commands.checkout
 yogomacs.shells.ysh
