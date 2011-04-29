@@ -51,7 +51,7 @@
 		    data))
 		(loop (cdr metas)))))))
    (else
-    (let* ((elt ($ name))
+    (let* ((elt ($ (string-append "E:" name)))
 	   (data (read-from-string elt.innerHTML)))
       (hashtable-put! meta-variables name data)
       (elt.remove)

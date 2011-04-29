@@ -146,20 +146,18 @@
 	 (config (ref shtml 'config))
 	 (narrow-down (make-narrow-down params))
 	 (shell-name (in-shell? params))
-	 (conv (apply compose
-		      (if shell-name 
-			  (list (cute yogomacs-fragment <> shell-name) 
-				(cute inject-environment <> (make-client-environment shtml))
-				narrow-down
-				eof-line)
-			  (list (cute inject-environment <> (make-client-environment shtml))
-				narrow-down
-				eof-line))))
+	 (rearrange (compose
+		     (if shell-name
+			 (cute yogomacs-fragment <> shell-name) 
+			 values)
+		     (cute inject-environment <> (make-client-environment shtml))
+		     narrow-down
+		     eof-line))
 	 (mime-type (if shell-name 
 			"text/xml"
 			(ref shtml 'mime-type))))
     (reply-xhtml (make <shtml-data>
-		   :data (conv (ref shtml 'data))
+		   :data (rearrange (ref shtml 'data))
 		   :params params
 		   :config config
 		   :last-modification-time (ref shtml 'last-modification-time)
