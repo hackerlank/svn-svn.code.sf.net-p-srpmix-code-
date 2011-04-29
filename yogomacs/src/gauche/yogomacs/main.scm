@@ -79,6 +79,6 @@
 		   path
 		   params
 		   config))
-	  (cgi-header :status "500 Internal server Error")))))
+	  (cgi-header :status "500 Internal Server Error")))))
 
 (provide "yogomacs/main")

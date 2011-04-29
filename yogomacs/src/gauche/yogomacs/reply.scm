@@ -97,31 +97,29 @@
 (define-method  reply ((shtml <shtml-data>))
   (let* ((params (ref shtml 'params))
 	 (config (ref shtml 'config))
-	 (narrow-down (make-narrow-down (ref shtml 'params)))
-	 (shell-name (in-shell? (ref shtml 'params))))
-    (if shell-name
-	(let1 new (make <shtml-data>
-		    :data ((compose (cute yogomacs-fragment <> shell-name) 
-				    (cut tag-integrates <> (ref shtml 'has-tag?))
-				    narrow-down
-				    eof-line)
-			   (ref shtml 'data))
-		    :params params
-		    :config config
-		    :last-modification-time (ref shtml 'last-modification-time)
-		    :mime-type "text/xml")
-	  (reply-xhtml new))
-	(let1 new (make <shtml-data>
-		    :data ((compose narrow-down
-				    (cut establish-metas <> params config)
-				    (cut tag-integrates <> (ref shtml 'has-tag?))
-				    eof-line) 
-			   (ref shtml 'data))
-		    :params params
-		    :config config
-		    :last-modification-time (ref shtml 'last-modification-time)
-		    :mime-type (ref shtml 'mime-type))
-	  (reply-xhtml new)))))
+	 (narrow-down (make-narrow-down params))
+	 (shell-name (in-shell? params))
+	 (has-tag? (ref shtml 'has-tag?))
+	 (conv (apply compose
+		      (if shell-name 
+			  ;; TODO intergrate tag-integrates into establish-metas.
+			  (list (cute yogomacs-fragment <> shell-name) 
+				(cut tag-integrates <> has-tag?)
+				narrow-down
+				eof-line)
+			  (list narrow-down
+				(cut establish-metas <> params config)
+				(cut tag-integrates <> has-tag?)
+				eof-line))))
+	 (mime-type (if shell-name 
+			"text/xml"
+			(ref shtml 'mime-type))))
+    (reply-xhtml (make <shtml-data>
+		   :data (conv (ref shtml 'data))
+		   :params params
+		   :config config
+		   :last-modification-time (ref shtml 'last-modification-time)
+		   :mime-type mime-type))))
 
 (define-class <checkout-data> (<data>)
   ((filename :init-keyword :filename)

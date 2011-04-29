@@ -83,13 +83,13 @@
 	 (file-type (file-type real-src-file))
 	 (has-tag? (has-tag? real-src-file params config)))
     (if (to-domain? real-src-file config)
-	(rlet1 data (file-dest0 real-src-file 
+	(file-dest0 real-src-file 
 				(compose-path lpath)
 				file-type
 				(config 'mode)
+				has-tag?
 				params
 				config)
-	       (set! (ref data 'has-tag?) has-tag?))
 	(forbidden "Out of domain" real-src-file))))
 
 (define-macro (guard-with-asis real-src-file config . body)
@@ -98,7 +98,7 @@
 		     (make-asis-data asis last-modified-time))))
      ,@body))
 
-(define (file-dest0 real-src-file web-path file-type mode params config)
+(define (file-dest0 real-src-file web-path file-type mode has-tag? params config)
   (define (make-shtml-data shtml last-modified-time)
     (make <shtml-data>
       :params params
@@ -109,6 +109,7 @@
 	      (cute rearranges-title <> web-path)
 	      normalize-major-mode
 	      ) shtml)
+      :has-tag? has-tag?
       :last-modification-time last-modified-time))
   (define (try-outlang file config)
     (if-let1 shtml (guard (e (else #f))
@@ -121,7 +122,8 @@
       :config config
       :data asis
       :last-modification-time last-modified-time
-      :mime-type (apply format "~a/~a" file-type)))
+      :mime-type (apply format "~a/~a" file-type)
+      :has-tag? has-tag?))
   (cond
    ((and (equal? (car file-type) "application")
 	 (equal? (cadr file-type) "x-empty"))
@@ -130,7 +132,7 @@
       (make-shtml-data shtml last-modified-time)))
    ((not (equal? (car file-type) "text"))
     (if (eq? mode 'cache-build)
-	(make <empty-data>)
+	(make <empty-data> :has-tag? has-tag?)
 	(receive (asis last-modified-time)
 	    (asis real-src-file config)
 	  (make-asis-data asis last-modified-time)
@@ -138,7 +140,7 @@
    ((eq? mode 'cache-build)
     (unwind-protect
      (retrieve-shtml real-src-file config)
-     (make <empty-data>)))
+     (make <empty-data> :has-tag? has-tag?)))
    ((eq? mode 'read-only)
     (or (try-outlang real-src-file config)
 	(guard-with-asis 
