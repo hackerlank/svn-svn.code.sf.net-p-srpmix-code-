@@ -16,13 +16,12 @@
   (use yogomacs.rearranges.yogomacs-fragment)
   (use yogomacs.rearranges.eof-line)
   (use yogomacs.rearranges.inject-environment)
-  (use yogomacs.rearranges.tag-integrates)
-  (use yogomacs.rearranges.establish-metas)
   (use yogomacs.shell)
   (use yogomacs.error)
   ;;
   (use text.html-lite)
   (use srfi-1)
+  (use util.list)
   )
 
 (select-module yogomacs.reply)
@@ -70,20 +69,50 @@
 
 (define-class <shtml-data> (<data>)
   ((mime-type :init-value "text/html")
-   (client-enviroment :init-value '((slot has-tag? ,boolean)
-				   ))
+   (client-enviroment :init-value `((slot :has-tag? has-tag? ,boolean)
+				    (params :role-name "role" ,values)
+				    (env :user-agent "HTTP_USER_AGENT" ,values)
+				    (env :smart-phone? "HTTP_USER_AGENT"
+					 ,(lambda (user-agent)
+					    (boolean (any (cute <> user-agent) 
+							  '(
+							    ;; doesn't have real keyboard.
+							    #/HTCX06HT/
+							    #/HTC Magic/
+							    #/GT-P1000/
+							    #/iPhone OS 4/
+							    ;; has real keyboard....
+							    #/Android Dev Phone 1/
+							    #/IS01 Build\/S8040/
+							    )))))
+				    (params :user-name "user" ,(lambda (val)
+								 (if val
+								     (ref val 'name)
+								     #f)))
+				    (params :user-real-name "user" ,(lambda (val)
+								      (if val
+									  (ref val 'real-name)
+									  #f)))
+				    )
+		      :allocation :class)
    ))
-(define (make-client-environment shtml)
-    (append-map (lambda (k)
-		  (case (car k)
-		    ('slot 
-		     (list (make-keyword (symbol->string (cadr k)))
-			   (caddr (ref shtml (cadr k)))))
-		    (else
-		     (list))
-		    ))
-		(ref shtml 'client-enviroment)))
 
+
+(define (make-client-environment shtml)
+  (define (type-handler-for type)
+    (case type
+      ('slot ref)
+      ('params (lambda (shtml key) ((ref shtml 'params) key)))
+      ('env (lambda (shtml key) (assoc-ref (sys-environ->alist) key)))
+      ))
+  (append-map (apply$
+	       (lambda (type client-var slot-name value-converter)
+		 (list client-var
+		       (value-converter
+			((type-handler-for type)
+			 shtml
+			 slot-name)))))
+	      (ref shtml 'client-enviroment)))
 
 (define-method  reply-xhtml ((shtml <shtml-data>))
   (write-tree
@@ -112,9 +141,6 @@
 	(cute rearrange-enum <> enum))
       (lambda (shtml) shtml)))
 
-(define (buffer-local-variables shtml params config)
-  1)
-
 (define-method  reply ((shtml <shtml-data>))
   (let* ((params (ref shtml 'params))
 	 (config (ref shtml 'config))
@@ -126,8 +152,7 @@
 				(cute inject-environment <> (make-client-environment shtml))
 				narrow-down
 				eof-line)
-			  (list (cut establish-metas <> params config)
-				(cute inject-environment <> (make-client-environment shtml))
+			  (list (cute inject-environment <> (make-client-environment shtml))
 				narrow-down
 				eof-line))))
 	 (mime-type (if shell-name 

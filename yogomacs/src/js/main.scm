@@ -25,7 +25,7 @@
   (let1 options (alist->object `((method . "get")
 				 (parameters . ,params)
 				 (onFailure . ,(lambda ()
-						 (alert "Eerror in load-lazy")))
+						 (alert "Error in load-lazy")))
 				 (onComplete . ,(pa$ run-hook find-file-post-hook url params))))
     (js-new Ajax.Updater "buffer" url options)))
 

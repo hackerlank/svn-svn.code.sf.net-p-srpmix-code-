@@ -6,7 +6,6 @@ dist_module_DATA =   \
 	css-integrates.scm			\
 	enum.scm				\
 	eof-line.scm				\
-	establish-metas.scm			\
 	face-integrates.scm			\
 	inject-environment.scm			\
 	line-trim.scm				\
