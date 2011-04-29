@@ -12,13 +12,11 @@
 (define (ysh-dir-dest lpath params config)
   (let1 lpath (cdr lpath)
     (if-let1 user+role (authorized? config)
-	     (let* ((params ((params "user" (car user+role)) "role" (cadr user+role)))
-		    (shtml (yogomacs lpath params (shell-ref 'ysh)))
-		    (real-src-path (apply make-real-src-path config lpath)))
+	     (let1 params ((params "user" (car user+role)) "role" (cadr user+role))
 	       (make <shtml-data>
 		 :params params
 		 :config config
-		 :data ((compose values) shtml)
+		 :data (yogomacs lpath params (shell-ref 'ysh))
 		 :last-modification-time #f
 		 ))
 	     (unauthorized config))))

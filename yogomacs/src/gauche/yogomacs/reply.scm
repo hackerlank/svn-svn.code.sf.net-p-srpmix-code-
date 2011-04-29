@@ -40,7 +40,7 @@
    (last-modification-time :init-keyword :last-modification-time 
 			   :init-value #f)
    (mime-type :init-keyword :mime-type)
-   (has-tag? :init-value #f)))
+   (has-tag? :init-value #f :init-keyword :has-tag?)))
 
 
 
@@ -94,6 +94,9 @@
 	(cute rearrange-enum <> enum))
       (lambda (shtml) shtml)))
 
+(define (buffer-local-variables shtml params config)
+  1)
+
 (define-method  reply ((shtml <shtml-data>))
   (let* ((params (ref shtml 'params))
 	 (config (ref shtml 'config))
@@ -103,13 +106,13 @@
 	 (conv (apply compose
 		      (if shell-name 
 			  ;; TODO intergrate tag-integrates into establish-metas.
-			  (list (cute yogomacs-fragment <> shell-name) 
+			  (list narrow-down
+				(cute yogomacs-fragment <> shell-name) 
+				(cut tag-integrates <> has-tag?)
+				eof-line)
+			  (list (cut establish-metas <> params config)
 				(cut tag-integrates <> has-tag?)
 				narrow-down
-				eof-line)
-			  (list narrow-down
-				(cut establish-metas <> params config)
-				(cut tag-integrates <> has-tag?)
 				eof-line))))
 	 (mime-type (if shell-name 
 			"text/xml"
