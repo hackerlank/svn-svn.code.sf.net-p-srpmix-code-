@@ -70,8 +70,20 @@
 
 (define-class <shtml-data> (<data>)
   ((mime-type :init-value "text/html")
-   (client-enviroment :init-value '(has-tag?))
+   (client-enviroment :init-value '((slot has-tag? ,boolean)
+				   ))
    ))
+(define (make-client-environment shtml)
+    (append-map (lambda (k)
+		  (case (car k)
+		    ('slot 
+		     (list (make-keyword (symbol->string (cadr k)))
+			   (caddr (ref shtml (cadr k)))))
+		    (else
+		     (list))
+		    ))
+		(ref shtml 'client-enviroment)))
+
 
 (define-method  reply-xhtml ((shtml <shtml-data>))
   (write-tree
@@ -104,18 +116,12 @@
   1)
 
 (define-method  reply ((shtml <shtml-data>))
-  (define (make-client-environment shtml)
-    (append-map (lambda (k)
-		  (list (make-keyword (symbol->string k))
-			(ref shtml k)))
-		(ref shtml 'client-enviroment)))
   (let* ((params (ref shtml 'params))
 	 (config (ref shtml 'config))
 	 (narrow-down (make-narrow-down params))
 	 (shell-name (in-shell? params))
 	 (conv (apply compose
 		      (if shell-name 
-			  ;; TODO intergrate tag-integrates into establish-metas.
 			  (list (cute yogomacs-fragment <> shell-name) 
 				(cute inject-environment <> (make-client-environment shtml))
 				narrow-down
