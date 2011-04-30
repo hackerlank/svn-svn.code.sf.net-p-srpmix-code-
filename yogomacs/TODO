@@ -3,6 +3,7 @@
 
 ** gzip <done>
 
+** don't cache the contents
 ** Minimize process launching
 
 ** js minify <done>

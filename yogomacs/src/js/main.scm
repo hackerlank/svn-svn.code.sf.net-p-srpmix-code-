@@ -36,26 +36,29 @@
 
 (define meta-variables (make-hashtable))
 (define (read-meta name)
-  (cond
-   ((hashtable-contains? meta-variables name)
-    (hashtable-get meta-variables name))
-   ((null? ($ name))
-    (let1 metas (vector->list ($$ "meta"))
-      (let loop ((metas metas))
-	(if (null? metas)
-	    #f
-	    (if (equal? (js-field (car metas) "name") name)
-		(let1 data (read-from-string (js-field (car metas) "content"))
-		  (begin
-		    (hashtable-put! meta-variables name data)
-		    data))
-		(loop (cdr metas)))))))
-   (else
-    (let* ((elt ($ (string-append "E:" name)))
-	   (data (read-from-string elt.innerHTML)))
-      (hashtable-put! meta-variables name data)
-      (elt.remove)
-      data))))
+  (let1 id ($ (string-append "E:" name))
+    (let1 o (cond
+	     ((hashtable-contains? meta-variables name)
+	      (hashtable-get meta-variables name))
+	     ((not (null? id))
+	      (let* ((elt id)
+		     (data (read-from-string elt.innerHTML)))
+		(hashtable-put! meta-variables name data)
+		(elt.remove)
+		data)
+	      )
+	     (else
+	      (let1 metas (vector->list ($$ "meta"))
+		(let loop ((metas metas))
+		  (if (null? metas)
+		      #f
+		      (if (equal? (js-field (car metas) "name") name)
+			  (let1 data (read-from-string (js-field (car metas) "content"))
+			    (begin
+			      (hashtable-put! meta-variables name data)
+			      data))
+			  (loop (cdr metas))))))))
+      o)))
 
 (define (contents-url)
   (let* ((location (js-field *js* "location"))
