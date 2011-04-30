@@ -18,7 +18,7 @@
 	(params (vector-ref hook 1))
 	(procs (vector-ref hook 2)))
     (if (eq? (length params) (length args))
-	(for-each (lambda (proc) (apply proc args)) procs)
+	(for-each (lambda (proc) (apply proc args)) (reverse procs))
 	(alert (string-append "Given args doesn't match parameters: " 
 			      hook-name
 			      ", given: " (number->string (length args))

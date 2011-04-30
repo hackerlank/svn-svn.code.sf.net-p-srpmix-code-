@@ -6,7 +6,6 @@
 	  shell-ref
 	  all-shells
 	  url-of
-	  dest-for
 	  entry-for)
   (use util.list)
   (use www.cgi)
@@ -15,7 +14,7 @@
 (select-module yogomacs.shell)
 
 (define (in-shell? params)
-  (params "yogomacs"))
+  (params "shell"))
 
 (define-class <shell> ()
   ((name :init-keyword :name)
@@ -29,10 +28,7 @@
   (if-let1 url (ref shell 'url)
 	   url
 	   (string-append "/" (ref shell 'name))))
-(define-method dest-for ((shell <shell>) path params config)
-  (list
-   (cgi-header :status "302 Moved Temporarily"
-	       :location (url-of shell))))
+
 (define-method entry-for ((shell <shell>) parent-path)
   (make <redirect-dentry>
     :parent "/commands" :dname (ref shell 'name) :url (url-of shell)))

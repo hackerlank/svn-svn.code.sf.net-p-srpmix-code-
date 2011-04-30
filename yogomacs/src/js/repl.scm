@@ -14,6 +14,24 @@
     (elt.focus)
     (elt.select)))
 
+(define (repl-init)
+  (let1 shell (read-meta "shell")
+    (cond
+     ((eq? shell 'ysh)
+      (ysh-initializer))
+     (else
+      ;; ???
+      (nologin-initializer)))))
+
+(define (repl-read)
+  (let1 shell (read-meta "shell")
+    (cond
+     ((eq? shell 'ysh)
+      (ysh-interpret))
+     (else
+      ;; ???
+      (nologin-interpret)))))
+
 (define ysh #f)
 (define ysh-dir "/ysh")
 

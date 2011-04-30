@@ -10,16 +10,20 @@
 (select-module yogomacs.dests.ysh-dir)
 
 (define (ysh-dir-dest lpath params config)
-  (let1 lpath (cdr lpath)
-    (if-let1 user+role (authorized? config)
-	     (let1 params ((params "user" (car user+role)) "role" (cadr user+role))
-	       (make <shtml-data>
-		 :params params
-		 :config config
-		 :data (yogomacs lpath params (shell-ref 'ysh))
-		 :last-modification-time #f
-		 ))
-	     (unauthorized config))))
+  (if-let1 user+role (authorized? config)
+	   (let ((params ((params "user" (car user+role)) "role" (cadr user+role)))
+		 (next-path (compose-path (cdr lpath))))
+	     (make <lazy-data>
+	       :params params
+	       :config config
+	       :data (yogomacs next-path params (shell-ref 'ysh))
+	       :last-modification-time #f
+	       :shell 'ysh
+	       :next-path next-path
+	       :next-range (params "range")
+	       :next-enum (params "enum")
+	       ))
+	   (unauthorized config)))
 
 
 (provide "yogomacs/dests/ysh-dir")

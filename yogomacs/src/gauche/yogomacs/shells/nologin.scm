@@ -7,7 +7,6 @@
 		     :name "nologin"
 		     :prompt " <nologin"
 		     :url "/"
-		     :interpreter 'nologin-interpret
-		     :initializer 'nologin-initializer))
+		     ))
 
 (provide "yogomacs/shells/nologin")

@@ -27,7 +27,7 @@
 		(slices kv-list 2)))
   (pre-post-order shtml
 		  `((pre . ,(lambda (tag . rest)
-			      (or #?=(and-let* (( (list? rest) )
+			      (or (and-let* (( (list? rest) )
 					     ( (not (null? rest)) ))
 				    (cons tag (extend kv-list rest)))
 				  (cons tag rest))

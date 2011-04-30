@@ -11,33 +11,24 @@
 
 (select-module yogomacs.renderers.yogomacs)
 
-(define (extra-scripts url current-params next-params shell)
-  `((add-hook find-file-pre-hook (pa$ load-lazy ,url ,next-params))
-    (add-hook find-file-pre-hook ,(ref shell 'initializer))
-    (add-hook read-from-minibuffer-hook ,(ref shell 'interpreter))
+(define (extra-scripts)
+  `(
+    ;;(add-hook find-file-pre-hook (pa$ load-lazy ,url ,next-params))
     ))
 
 (define (yogomacs path params shell)
-  (yogomacs0 path params shell
+  (yogomacs0 path shell
 	     '(("yogomacs--Default.css" . "Default")
-	       ;("yogomacs--Invert.css" . "Invert")
+	       ;;("yogomacs--Invert.css" . "Invert")
 	       )
 	     `(
 	       (,#`"yogomacs-,(version)-,(release).js" . file)
 	       )))
 
-(define (yogomacs0 path params shell css-list js-list)
+(define (yogomacs0 url shell css-list js-list)
   (let* ((shell-name (ref shell 'name))
-	 (title (compose-path path))
-	 (url title)
-	 (next-params #`"yogomacs=,|shell-name|")
-	 (next-params (or (and-let* ((range (params "range")))
-			    (format "range=~a&~a"  (html-escape-string range) next-params))
-			  next-params))
-	 (next-params (or (and-let* ((enum (params "enum")))
-			    (format "enum=~a&~a"  (html-escape-string enum) next-params))
-			  next-params))
-	 (js-list (reverse (cons `(,(extra-scripts url params next-params shell) . inline)
+	 (title url)
+	 (js-list (reverse (cons `(,(extra-scripts) . inline)
 				 (reverse
 				  js-list))))
 	 (prompt (ref shell 'prompt))

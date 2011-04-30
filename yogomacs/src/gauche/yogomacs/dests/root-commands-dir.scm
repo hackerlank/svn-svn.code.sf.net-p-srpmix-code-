@@ -11,6 +11,7 @@
   (use yogomacs.dests.dir)
   (use yogomacs.reply)
   (use yogomacs.route)
+  (use yogomacs.shell)
   (use yogomacs.shells)
   (use yogomacs.commands.checkout)
   (use yogomacs.dests.login)
@@ -41,9 +42,13 @@
       :data ((compose integrate-dired-face) shtml)
       :last-modification-time #f)))
 
+(define (shell-redirect-dest shell lpath params config)
+  (make <redirect-data>
+    :location (url-of (shell-ref shell))))
+  
 (define (routing-table path params)
   `((#/^\/commands$/ ,dest)
-    (#/^\/commands\/ysh$/ ,(pa$ dest-for (shell-ref 'ysh)))
+    (#/^\/commands\/ysh$/ ,(pa$ shell-redirect-dest 'ysh))
     (#/^\/commands\/checkout\/.*/ ,checkout-dest)
     ,@(if (in-shell? params)
 	  (list)

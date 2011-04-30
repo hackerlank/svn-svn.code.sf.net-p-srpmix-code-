@@ -1,5 +1,6 @@
 (define-module yogomacs.dests.login
   (export login-dest)
+  (use yogomacs.reply)
   (use yogomacs.auth)
   (use yogomacs.shells)
   )
@@ -8,9 +9,8 @@
 (define (login-dest lpath params config)
   (if-let1 user+role (authorized? config)
 	   (let1 params ((params "user" (car user+role)) "role" (cadr user+role))
-	     (dest-for (shell-ref (ref (params "user") 'shell)) lpath params config)
-	     )
+	     (make <redirect-data> 
+	       :location (url-of (shell-ref (ref (params "user") 'shell)))))
 	   (unauthorized config)))
-
 
 (provide "yogomacs/dests/login")

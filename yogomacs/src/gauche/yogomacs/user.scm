@@ -20,7 +20,8 @@
       (make <user>
 	:name user 
 	:real-name "Masatake YAMATO"
-	:shell 'ysh)
+	:shell 'ysh
+	)
       (make-guest)))
 
 

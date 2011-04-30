@@ -38,7 +38,7 @@
   (if-let1 nctags (find-nctags-for real-src-path config)
 	   (cond 
 	    ((params "symbol") => (lambda (symbol)
-				    (map (cute conv
+				    (map (cut conv
 					       <> 
 					       real-src-path
 					       symbol 
@@ -87,14 +87,21 @@
 			 0) 
 		     (if major-mode 1 0)))))))
 
-(define kinds-list (map 
-		   (lambda (entry)
-		     (cons #`",(normalize-major-mode (car entry))-mode"
-			   (cdr entry)))
-		   (cdr (es<-ctags-command 'kinds))))
+(define kinds-list
+  (let1 val #f
+    (lambda ()
+      (if val
+	  val
+	  (begin
+	    (set! val
+		  (map (lambda (entry)
+			 (cons #`",(normalize-major-mode (car entry))-mode"
+			       (cdr entry)))
+		       (cdr (es<-ctags-command 'kinds))))
+	    val)))))
 
 (define (make-desc kind major-mode extra)
-  (let1 kinds (assoc-ref kinds-list 
+  (let1 kinds (assoc-ref (kinds-list)
 			 (or major-mode "c-mode")
 			 (list))
     (let1 desc (car (assq-ref kinds kind '(#f)))

@@ -21,13 +21,25 @@
       ;; Not portable
       (elt.scrollIntoView))))
 
-(define (load-lazy url params)
-  (let1 options (alist->object `((method . "get")
-				 (parameters . ,params)
-				 (onFailure . ,(lambda ()
-						 (alert "Error in load-lazy")))
-				 (onComplete . ,(pa$ run-hook find-file-post-hook url params))))
-    (js-new Ajax.Updater "buffer" url options)))
+(define (load-lazy)
+  (define (load-lazy0 url params)
+    (let1 options (alist->object `((method . "get")
+				   (parameters . ,params)
+				   (onFailure . ,(lambda ()
+						   (alert "Error in load-lazy")))
+				   (onComplete . ,(pa$ run-hook find-file-post-hook url params))))
+      (js-new Ajax.Updater "buffer" url options)))
+  (define (build-param meta-key param-name)
+    (if-let1 v (read-meta meta-key)
+	     `((,param-name . ,v))
+	     `()))
+  (let ((url (read-meta "next-path"))
+	(params (alist->object
+		 (append
+		  (build-param "next-range" 'range)
+		  (build-param "next-enum"  'enum)
+		  (build-param "shell" 'shell)))))
+  (load-lazy0 url params)))
 
 (define (focus) 
   (let1 elt ($ "minibuffer") 
@@ -67,12 +79,18 @@
 	       (string-length shell-dir)
 	       (string-length pathname))))
 
-(add-hook find-file-pre-hook focus)
+(add-hook find-file-pre-hook load-lazy)
 (add-hook find-file-pre-hook header-line-init)
+(add-hook find-file-pre-hook repl-init)
+(add-hook find-file-pre-hook focus)
+
+(add-hook read-from-minibuffer-hook repl-read)
+
 (add-hook find-file-post-hook (lambda any (jump-lazy (js-field (js-field *js* "location") "hash"))))
+(add-hook find-file-post-hook require-yarn)
 (add-hook find-file-post-hook major-mode-init)
 (add-hook find-file-post-hook tag-init)
-(add-hook find-file-post-hook require-yarn)
+
 (add-hook draft-box-abort-hook stitch-delete-draft-box)
 (add-hook draft-box-submit-hook stitch-submit)
 (add-hook toggle-full-screen-hook toggle-full-screen)

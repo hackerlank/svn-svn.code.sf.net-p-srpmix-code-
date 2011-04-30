@@ -4,6 +4,8 @@
 	  <shtml-data>
 	  <empty-data>
 	  <checkout-data>
+	  <redirect-data>
+	  <lazy-data>
 	  )
   (use www.cgi)
   (use sxml.serializer)
@@ -43,17 +45,27 @@
 			   :init-value #f)
    (mime-type :init-keyword :mime-type)
    (has-tag? :init-value #f 
-	     :init-keyword :has-tag?)))
+	     :init-keyword :has-tag?
+	     :client `(has-tag? ,boolean)
+	     )))
 
 
 
 (define-class <empty-data> ()
   ())
-(define-method reply ((empty <empty-data>))
-  (write-tree (cgi-header :status "204 No Content")))
 
 (define-class <asis-data> (<data>)
   ())
+
+(define-class <redirect-data> (<data>)
+  ((location :init-keyword :location)))
+
+(define-method reply ((empty <empty-data>))
+  (write-tree (cgi-header :status "204 No Content")))
+
+(define-method reply ((redirect <redirect-data>))
+  (write-tree (cgi-header :status "302 Moved Temporarily"
+			  :location (ref redirect 'location))))
 
 ;; Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
 (define (rfc822 t)
@@ -68,24 +80,26 @@
   (display (ref asis 'data)))
 
 
+(define smart-phones '(
+		       ;; doesn't have real keyboard.
+		       #/HTCX06HT/
+		       #/HTC Magic/
+		       #/GT-P1000/
+		       #/iPhone OS 4/
+		       ;; has real keyboard....
+		       #/Android Dev Phone 1/
+		       #/IS01 Build\/S8040/
+		       ))
+
 (define-class <shtml-data> (<data>)
   ((mime-type :init-value "text/html")
-   (client-enviroment :init-value `((slot :has-tag? has-tag? ,boolean)
-				    (params :role-name "role" ,values)
+   (client-enviroment :init-value `((params :role-name "role" ,values)
 				    (env :user-agent "HTTP_USER_AGENT" ,values)
 				    (env :smart-phone? "HTTP_USER_AGENT"
 					 ,(lambda (user-agent)
-					    (boolean (any (cute <> user-agent) 
-							  '(
-							    ;; doesn't have real keyboard.
-							    #/HTCX06HT/
-							    #/HTC Magic/
-							    #/GT-P1000/
-							    #/iPhone OS 4/
-							    ;; has real keyboard....
-							    #/Android Dev Phone 1/
-							    #/IS01 Build\/S8040/
-							    )))))
+					    (and user-agent
+						 (boolean (any (cute <> user-agent) 
+							       smart-phones)))))
 				    (params :user-name "user" ,(lambda (val)
 								 (if val
 								     (ref val 'name)
@@ -96,9 +110,39 @@
 									  #f)))
 				    (meta :major-mode "major-mode" ,values)
 				    )
-		      :allocation :class)))
+		      :allocation :class
+		      )))
 
-(define (make-client-environment shtml)
+(define-class <lazy-data> (<shtml-data>)
+  ((shell :init-keyword :shell 
+	  :client #t)
+   (next-path :init-keyword :next-path
+	      :client #t)
+   (next-range :init-keyword :next-range
+	       :init-value #f
+	       :client #t)
+   (next-enum :init-keyword :next-enum
+	       :init-value #f 
+	       :client #t)
+   ))
+
+
+(define-method make-client-environment ((shtml <shtml-data>))
+  (define (gather-client-slots shtml)
+    (fold (lambda (slot kdr) 
+	    (if-let1 client? (slot-definition-option slot :client #f)
+		     (cons (list 'slot
+				 (make-keyword (symbol->string (if (eq? client? #t)
+								   (car slot)
+								   (car client?))))
+				 (car slot)
+				 (if (eq? client? #t)
+				     values
+				     (cadr client?)))
+			   kdr)
+		     kdr))
+	  (list)
+	  (class-slots (class-of shtml))))
   (define (type-handler-for type)
     (case type
       ('slot ref)
@@ -113,7 +157,8 @@
 			((type-handler-for type)
 			 shtml
 			 slot-name)))))
-	      (ref shtml 'client-enviroment)))
+	      (append (gather-client-slots shtml)
+		      (ref shtml 'client-enviroment))))
 
 (define-method  reply-xhtml ((shtml <shtml-data>))
   (write-tree

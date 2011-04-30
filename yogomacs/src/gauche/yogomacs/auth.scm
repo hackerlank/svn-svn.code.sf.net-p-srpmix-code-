@@ -28,7 +28,6 @@
 	     )
     (list u role-name)))
 
-
 (define (unauthorized config)
   (let1 realm (or (config 'realm) "Sources")
     (list

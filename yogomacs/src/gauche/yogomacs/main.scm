@@ -67,7 +67,7 @@
 					    "/"))
 			 ("range"    . #f)
 			 ("enum"     . #f)
-			 ("yogomacs" . #f)))
+			 ("shell" .    #f)))
 
 (define (yogomacs params config)
   params

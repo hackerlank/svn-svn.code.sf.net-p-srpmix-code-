@@ -35,13 +35,16 @@
 		   ('defer
 		     `(*COMMENT* ,(js-route$ (car js)))
 		     )
-		   (else
-		    `(script (|@| (type "text/javascript") )
-			     (*COMMENT*
-			      ,(string-append "\n"
-					      (scm->js (car js))
-					      "// "
-					      )))))
+		   ('inline
+		    (if (not (null? (car js)))
+			`(script (|@| (type "text/javascript") )
+				 (*COMMENT*
+				  ,(string-append "\n"
+						  (scm->js (car js))
+						  "// "
+						  )))
+			""))
+		   (else (error "unknown js-list directive: " (cdr js) )))
 		 "\n"
 		 "    "
 		 result))
