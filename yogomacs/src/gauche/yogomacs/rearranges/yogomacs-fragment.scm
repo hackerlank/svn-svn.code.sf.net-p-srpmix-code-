@@ -7,6 +7,7 @@
   (use yogomacs.shells.ysh)
   (use yogomacs.tag)
   (use yogomacs.util.sxml)
+  (use srfi-13)
   )
 
 (select-module yogomacs.rearranges.yogomacs-fragment)
