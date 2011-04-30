@@ -3,8 +3,7 @@
 	  define-tag-handler
 	  tag-handlers
 	  <tag-handler>
-	  collect-tags-by-path
-	  has-tag?-from-shtml)
+	  collect-tags-by-path)
   (use util.list)
   (use srfi-1)
   (use sxml.sxpath)
@@ -63,8 +62,5 @@
    (lambda (entry)
      (pred (car entry) (cdr entry)))
    (hash-table->alist ht)))
-
-(define (has-tag?-from-shtml shtml)
-  (get-meta-from-shtml shtml "has-tag?"))
 
 (provide "yogomacs/tag")

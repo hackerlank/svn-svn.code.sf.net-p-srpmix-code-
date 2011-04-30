@@ -5,7 +5,6 @@
   (use sxml.tree-trans)
   (use yogomacs.shell)
   (use yogomacs.shells.ysh)
-  (use yogomacs.major-mode)
   (use yogomacs.tag)
   (use yogomacs.util.sxml)
   )
@@ -14,8 +13,6 @@
 
 (define (yogomacs-fragment shtml shell-name)
   (let* ((title ((if-car-sxpath '(// html head title *text*)) shtml))
-	 (major-mode (major-mode-from-shtml shtml))
-	 (has-tag? (has-tag?-from-shtml shtml))
 	 (frag ((if-car-sxpath '(// html body pre)) shtml))
 	 (frag (pre-post-order
 		frag 
@@ -73,10 +70,6 @@
 		  ))))
     `(*TOP* (*PI* xml "version=\\"1.0\\" encoding=\\"UTF-8\\"")
 	    ,(cons* 'pre `(|@| (class "contents") (id "contents"))
-		    ;;
-		    `(span (|@| (id "E:major-mode")) ,(symbol->string major-mode))
-		    `(span (|@| (id "E:has-tag?"))   ,(format "~s" (boolean has-tag?)))
-		    ;;
 		    (cdr frag)))))
   
 (provide "yogomacs/rearranges/yogomacs-fragment")

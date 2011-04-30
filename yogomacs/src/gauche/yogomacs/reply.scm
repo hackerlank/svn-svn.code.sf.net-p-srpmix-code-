@@ -22,6 +22,7 @@
   (use text.html-lite)
   (use srfi-1)
   (use util.list)
+  (use yogomacs.util.sxml)
   )
 
 (select-module yogomacs.reply)
@@ -93,10 +94,9 @@
 								      (if val
 									  (ref val 'real-name)
 									  #f)))
+				    (meta :major-mode "major-mode" ,values)
 				    )
-		      :allocation :class)
-   ))
-
+		      :allocation :class)))
 
 (define (make-client-environment shtml)
   (define (type-handler-for type)
@@ -104,6 +104,7 @@
       ('slot ref)
       ('params (lambda (shtml key) ((ref shtml 'params) key)))
       ('env (lambda (shtml key) (assoc-ref (sys-environ->alist) key)))
+      ('meta (lambda (shtml key) (get-meta-from-shtml (ref shtml 'data) key #f)))
       ))
   (append-map (apply$
 	       (lambda (type client-var slot-name value-converter)
@@ -150,7 +151,7 @@
 		     (if shell-name
 			 (cute yogomacs-fragment <> shell-name) 
 			 values)
-		     (cute inject-environment <> (make-client-environment shtml))
+		     (cute inject-environment <> shell-name (make-client-environment shtml))
 		     narrow-down
 		     eof-line))
 	 (mime-type (if shell-name 

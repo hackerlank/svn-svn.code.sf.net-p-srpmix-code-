@@ -10,14 +10,15 @@
 
 (select-module yogomacs.util.sxml)
 
-(define (get-meta-from-shtml shtml var-name)
-  (read-from-string ((sxpath `(// html head meta |@| ,(lambda (node root vars)
-							(any (lambda (elt)
-							       (and-let* ((attrs (cdr elt))
-									  (name (car (assq-ref attrs 'name '(#f))))
-									  ( (equal? name var-name) )
-									  (content (car (assq-ref attrs 'content '(#f)))))
-								 content)) node)))) shtml)))
+(define (get-meta-from-shtml shtml var-name default)
+  (read-from-string (or ((sxpath `(// html head meta |@| ,(lambda (node root vars)
+							    (any (lambda (elt)
+								   (and-let* ((attrs (cdr elt))
+									      (name (car (assq-ref attrs 'name '(#f))))
+									      ( (equal? name var-name) )
+									      (content (car (assq-ref attrs 'content '(#f)))))
+								     content)) node)))) shtml)
+			(write-to-string default))))
 
 (define no-touch `((*text* . ,(lambda (tag str) str))
 		   (*default* . ,(lambda x x))))
@@ -26,7 +27,7 @@
   (let1 metas (append-map (lambda (elt)
 			    `((meta (|@|
 				     (name ,(keyword->string (car elt)))
-				     (content ,(format "~s" (cadr elt)))))
+				     (content ,(write-to-string (cadr elt)))))
 			      "	"
 			      "\n"))
 			  (slices rest 2))
