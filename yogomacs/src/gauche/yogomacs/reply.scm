@@ -37,6 +37,7 @@
 (define-method  reply ((text-tree <list>))
   (write-tree text-tree))
 
+;; TODO: :in-cookie ...
 (define-class <data> ()
   ((data :init-keyword :data)
    (params :init-keyword :params)
@@ -46,7 +47,7 @@
    (mime-type :init-keyword :mime-type)
    (has-tag? :init-value #f 
 	     :init-keyword :has-tag?
-	     :client `(has-tag? ,boolean)
+	     :in-client `(has-tag? ,boolean)
 	     )))
 
 
@@ -115,22 +116,22 @@
 
 (define-class <lazy-data> (<shtml-data>)
   ((shell :init-keyword :shell 
-	  :client #t)
+	  :in-client #t)
    (next-path :init-keyword :next-path
-	      :client #t)
+	      :in-client #t)
    (next-range :init-keyword :next-range
 	       :init-value #f
-	       :client #t)
+	       :in-client #t)
    (next-enum :init-keyword :next-enum
-	       :init-value #f 
-	       :client #t)
+	      :init-value #f 
+	      :in-client #t)
    ))
 
 
 (define-method make-client-environment ((shtml <shtml-data>))
   (define (gather-client-slots shtml)
     (fold (lambda (slot kdr) 
-	    (if-let1 client? (slot-definition-option slot :client #f)
+	    (if-let1 client? (slot-definition-option slot :in-client #f)
 		     (cons (list 'slot
 				 (make-keyword (symbol->string (if (eq? client? #t)
 								   (car slot)

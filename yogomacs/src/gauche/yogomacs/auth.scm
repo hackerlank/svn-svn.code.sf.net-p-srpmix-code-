@@ -1,6 +1,7 @@
 (define-module yogomacs.auth
   (export authorized?
-	  unauthorized)
+	  unauthorized
+	  maybe-login)
   (use rfc.base64)
   (use www.cgi)
   (use yogomacs.user)
@@ -9,9 +10,16 @@
 
 (select-module yogomacs.auth)
 
+(define (login? params config)
+  #f)
+
+(define (maybe-login params config)
+  (if (login? params config)
+      (authorized? config)
+      (list (make-guest) default-role-name)))
+
 (define (authorized? config)
-  (and-let* (( (config 'login) )
-	     (auth-string (cgi-get-metavariable "HTTP_CGI_AUTHORIZATION"))
+  (and-let* ((auth-string (cgi-get-metavariable "HTTP_CGI_AUTHORIZATION"))
 	     (m (#/ *Basic (.*)$/ auth-string))
 	     (base64-encoded (m 1))
 	     (base64-decoded (string-split 

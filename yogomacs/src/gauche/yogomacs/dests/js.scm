@@ -22,6 +22,8 @@
 	    port->string)))
    (let1 last (last path)
      (cond
+      ;; TODO: If LAST is available in JS-CACHE-DIR, 
+      ;;       don't set "DONT-CACHE" attribute to the reply.
       ((readable? (js-cache-dir config) last) => answer)
       ((and (#/yogomacs-[0-9.]+-[0-9.]+\.js/ last)
 	    (readable? (js-cache-dir config) 

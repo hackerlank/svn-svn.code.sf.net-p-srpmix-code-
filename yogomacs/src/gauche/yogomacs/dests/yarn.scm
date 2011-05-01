@@ -25,7 +25,7 @@
    (build-path yarn-route elt))
 
 (define (yarn-dest path params config)
-  (if-let1 user+role (authorized? config)
+  (if-let1 user+role (maybe-login config)
 	   (let1 params ((params "user" (car user+role)) "role" (cadr user+role))
 	     (list (cgi-header :content-type "text/x-es")
 		   (with-output-to-string

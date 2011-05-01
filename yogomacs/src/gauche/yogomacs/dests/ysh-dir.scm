@@ -10,7 +10,7 @@
 (select-module yogomacs.dests.ysh-dir)
 
 (define (ysh-dir-dest lpath params config)
-  (if-let1 user+role (authorized? config)
+  (if-let1 user+role (maybe-login params config)
 	   (let ((params ((params "user" (car user+role)) "role" (cadr user+role)))
 		 (next-path (compose-path (cdr lpath))))
 	     (make <lazy-data>

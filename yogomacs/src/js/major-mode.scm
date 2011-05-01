@@ -9,7 +9,10 @@
   (set! role-name (read-meta "role-name"))
   (set! user-name (read-meta "user-name"))
   (when smart-phone?
-    (enter-full-screen)))
+    (enter-full-screen))
+  ;; TODO
+  (enter-full-screen)
+  )
 
 (define major-mode-table (make-hashtable))
 (define (make-major-mode-record major-mode 
