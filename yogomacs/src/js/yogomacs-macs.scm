@@ -10,7 +10,7 @@
 	 ,t
 	 ,f)))
 
-(define-macro (add-hook hook proc)
+(define-macro (add-hook! hook proc)
   `(vector-set! ,hook 2 (cons ,proc (vector-ref ,hook 2))))
 
 (define-macro (define-hook name params)

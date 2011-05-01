@@ -2,10 +2,10 @@
   `(let1 f (menu-build (map (lambda (item)
 			      (menu-build-item (car item) (cadr item)))
 			    (list ,@items)))
-     (add-hook find-file-post-hook
-	       (lambda args
-		 (f
-		  (string-append "." (symbol->string ',selector)))))))
+     (add-hook! find-file-post-hook
+		(lambda args
+		  (f
+		   (string-append "." (symbol->string ',selector)))))))
 
 (define (menu-build-item name callback)
   (alist->object `((name . ,name) (callback . ,callback))))
