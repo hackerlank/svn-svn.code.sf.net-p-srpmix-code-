@@ -54,6 +54,7 @@
 	  (list)
 	  (list
 	   `(#/^\/commands\/login$/ ,login-dest)
+	   `(#/^\/commands\/guest$/ ,guest-dest)
 	   ))))
 
 (define (root-commands-dir-dest path params config)

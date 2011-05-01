@@ -69,6 +69,12 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
     :url "commands/login"
     :dname "login"
     :show-arrowy-to #t))
+(define (guest-entry parent-path)
+  (make <redirect-dentry>
+    :parent (compose-path parent-path)
+    :url "commands/guest"
+    :dname "guest"
+    :show-arrowy-to #t))
 (define (absentees-entry parent-lpath)
   (make <redirect-dentry>
     :parent (compose-path parent-lpath)
@@ -87,7 +93,9 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 		  ,(absentees-entry path)
 		  ,@(if (in-shell? params)
 			`(,(annotations-entry path))
-			`(,(login-entry path))
+			`(,(login-entry path)
+			  ,(guest-entry path)
+			  )
 			)
 		 ))
 	       css-route)
@@ -107,6 +115,10 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
   (list
    (cgi-header :status "302 Moved Temporarily"
 	       :location (url-of (login-entry (parent-of path))))))
+(define (guest-dest path params config)
+  (list
+   (cgi-header :status "302 Moved Temporarily"
+	       :location (url-of (guest-entry (parent-of path))))))
 
 (define (routing-table path params)
    `((#/^\/$/ ,dest)
@@ -120,10 +132,11 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 
      ;;
      ,@(if (in-shell? params)
-	   (list
+	   `(
 	    )
-	   (list
-	    `(#/^\/login$/  ,login-dest)
+	   `(
+	     (,#/^\/login$/  ,login-dest)
+	     (,#/^\/guest$/  ,guest-dest)
 	    ))
      (#/^\/README$/  ,(pa$ TEXT-dest README-entry))
      (#/^\/NEWS$/  ,(pa$ TEXT-dest NEWS-entry))

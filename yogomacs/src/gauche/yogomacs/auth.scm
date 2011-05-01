@@ -16,7 +16,7 @@
 (define (maybe-login params config)
   (if (login? params config)
       (authorized? config)
-      (list (make-guest) default-role-name)))
+      (list (make-guest) (default-role-name config))))
 
 (define (authorized? config)
   (and-let* ((auth-string (cgi-get-metavariable "HTTP_CGI_AUTHORIZATION"))

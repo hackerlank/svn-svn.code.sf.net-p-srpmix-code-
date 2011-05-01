@@ -61,7 +61,9 @@
   (let1 config (install-constants (load-config #f))
     (cgi-main (cute yogomacs <> config)
 	      :output-proc reply
-	      :on-error    (pa$ error-handler config))))
+	      :on-error    (pa$ error-handler config)
+	      :merge-cookies #t
+	      )))
 
 (define default-params `(("path"     . ,(or (cgi-get-metavariable "YOGOMACS_PATH") 
 					    "/"))
