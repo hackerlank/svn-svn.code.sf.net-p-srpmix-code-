@@ -29,16 +29,17 @@
 						   (alert "Error in load-lazy")))
 				   (onComplete . ,(pa$ run-hook find-file-post-hook url params))))
       (js-new Ajax.Updater "buffer" url options)))
-  (define (build-param meta-key param-name)
+  (define (build-param meta-key param-name conv)
     (if-let1 v (read-meta meta-key)
-	     `((,param-name . ,v))
+	     `((,param-name . ,(conv v)))
 	     `()))
+  (define id (lambda (id) id))
   (let ((url (read-meta "next-path"))
 	(params (alist->object
 		 (append
-		  (build-param "next-range" 'range)
-		  (build-param "next-enum"  'enum)
-		  (build-param "shell" 'shell)))))
+		  (build-param "next-range" 'range id)
+		  (build-param "next-enum"  'enum id)
+		  (build-param "shell" 'shell symbol->string)))))
   (load-lazy0 url params)))
 
 (define (focus) 

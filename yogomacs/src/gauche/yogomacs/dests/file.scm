@@ -31,6 +31,7 @@
   (use yogomacs.tags)
   ;;
   (use sxml.sxpath)
+  (use yogomacs.config)
   )
 (select-module yogomacs.dests.file)
 
@@ -40,7 +41,7 @@
 					 (sys-basename css-href)))))
 
 (define integrate-file-face
-   (cute face-integrates <> "file-font-lock" find-file-faces))
+   (cute face-integrates <> #`"file-font-lock-,(version)-,(release)" find-file-faces))
 
 
 (define (file-type file)

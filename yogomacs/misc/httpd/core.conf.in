@@ -7,4 +7,5 @@
     ScriptAlias /cgi-bin @VHOST_DOCROOT@/@PACKAGE@/cgi-bin
     ExpiresActive On
     ExpiresByType text/javascript "access plus 10 years"
+    ExpiresByType text/css "access plus 10 years"
     AddOutputFilterByType DEFLATE text/html text/css text/javascript text/x-es

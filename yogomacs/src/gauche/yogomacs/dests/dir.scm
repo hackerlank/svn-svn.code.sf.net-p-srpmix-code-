@@ -31,12 +31,13 @@
   (use yogomacs.access)
   ;;
   (use yogomacs.util.fs)
+  (use yogomacs.config)
   )
 
 (select-module yogomacs.dests.dir)
 
 (define integrate-dired-face
-   (cute face-integrates <> "dired-font-lock" dired-faces))
+   (cute face-integrates <> #`"dired-font-lock-,(version)-,(release)" dired-faces))
 
 (define (prepare-dired-faces config)
   (for-each
