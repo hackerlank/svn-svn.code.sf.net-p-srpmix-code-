@@ -84,6 +84,16 @@
 	       (string-length shell-dir)
 	       (string-length pathname))))
 
+(define (reload)
+  (let1 location (js-field *js* "location")
+    (location.reload)))
+
+(define (toggle-login)
+  (let1 login? (read-meta "login")
+    (message "~a..." (if login? "logout" "login"))
+    (cookie-set! "login" (not login?))
+    (reload)))
+
 (add-hook! find-file-pre-hook load-lazy)
 (add-hook! find-file-pre-hook header-line-init)
 (add-hook! find-file-pre-hook repl-init)
@@ -91,11 +101,13 @@
 
 (add-hook! read-from-minibuffer-hook repl-read)
 
-(add-hook! find-file-post-hook (lambda any (jump-lazy (js-field (js-field *js* "location") "hash"))))
 (add-hook! find-file-post-hook require-yarn)
 (add-hook! find-file-post-hook major-mode-init)
+(add-hook! find-file-post-hook (lambda any (jump-lazy (js-field (js-field *js* "location") "hash"))))
 (add-hook! find-file-post-hook tag-init)
+
 
 (add-hook! draft-box-abort-hook stitch-delete-draft-box)
 (add-hook! draft-box-submit-hook stitch-submit)
-(add-hook! toggle-full-screen-hook toggle-full-screen)
+(add-hook! toggle-full-screen-clicked toggle-full-screen-mode)
+(add-hook! toggle-login-clicked toggle-login)

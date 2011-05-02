@@ -1,6 +1,7 @@
 (define-hook find-file-pre-hook ())
 (define-hook find-file-post-hook (url params response json))
-(define-hook toggle-full-screen-hook ())
+(define-hook toggle-full-screen-clicked ())
 (define-hook read-from-minibuffer-hook ())
 (define-hook draft-box-abort-hook ())
 (define-hook draft-box-submit-hook (class))
+(define-hook toggle-login-clicked ())

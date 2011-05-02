@@ -118,8 +118,8 @@ div.menu a {
 }
 .menu.desktop a.disabled {
 	opacity: 0.25;
-	filter: alpha(opacity=25);
-	zoom: 1;
+        /* filter: alpha(opacity=25); */
+	/* zoom: 1; */
 }
 .menu.desktop li.separator {
 	border-bottom: 1px solid #fff;

@@ -3,6 +3,7 @@ jscachedir=$(pkgdatadir)/js
 yogomacs_input = \
 	prototype.js        \
 	proto.menu.js       \
+	cookie.js           \
 	yogomacs_runtime.js \
 	\
 	$(NULL)
@@ -33,6 +34,7 @@ copyright_input = \
 	     scheme2js.copyright  \
 	     prototype.copyright  \
 	     proto.menu.copyright \
+	     cookie.copyright     \
 	     yogomacs.copyright   \
 	     \
 	     $(NULL)
@@ -91,6 +93,11 @@ yogomacs-@VERSION@-@RPM_RELEASE@.js: @SCHEME2JS_RUNTIME_DIR@/runtime.js $(yogoma
 	cat proto.menu.copyright >> $@
 	perl yjsmin.pl proto.menu.js \
 	     "Converted from proto.menu.js" >> $@
+	echo >> $@
+
+	cat cookie.copyright >> $@
+	perl yjsmin.pl cookie.js \
+	     "Converted from cookie.js" >> $@
 	echo >> $@
 
 	echo >> $@

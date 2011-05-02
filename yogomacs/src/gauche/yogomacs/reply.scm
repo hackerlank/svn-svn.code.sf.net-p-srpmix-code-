@@ -94,25 +94,25 @@
 
 (define-class <shtml-data> (<data>)
   ((mime-type :init-value "text/html")
-   (client-enviroment :init-value `((params :role-name "role" ,values)
-				    (env :user-agent "HTTP_USER_AGENT" ,values)
-				    (env :smart-phone? "HTTP_USER_AGENT"
-					 ,(lambda (user-agent)
-					    (and user-agent
-						 (boolean (any (cute <> user-agent) 
-							       smart-phones)))))
-				    (params :user-name "user" ,(lambda (val)
-								 (if val
-								     (ref val 'name)
-								     #f)))
-				    (params :user-real-name "user" ,(lambda (val)
-								      (if val
-									  (ref val 'real-name)
-									  #f)))
-				    (meta :major-mode "major-mode" ,values)
-				    )
-		      :allocation :class
-		      )))
+   ;;
+   (role         :in-client `(params :role-name "role" ,values))
+   (user-agent   :in-client `(env "HTTP_USER_AGENT" ,values))
+   (smart-phone? :in-client `(env "HTTP_USER_AGENT"
+				  ,(lambda (user-agent)
+				     (and user-agent
+					  (boolean (any (cute <> user-agent) 
+							smart-phones))))))
+   (user-name     :in-client `(params "user" ,(lambda (val)
+						(if val
+						    (ref val 'name)
+						    #f))))
+   (major-mode    :in-client `(meta "major-mode" ,values))))
+
+;; TODO Put this to yogomacs.util....
+(define (read-if-string val)
+  (if (string? val)
+      (read-from-string val)
+      val))
 
 (define-class <lazy-data> (<shtml-data>)
   ((shell :init-keyword :shell 
@@ -125,22 +125,36 @@
    (next-enum :init-keyword :next-enum
 	      :init-value #f 
 	      :in-client #t)
+   (full-screen-mode :in-client `(params "full-screen-mode" ,read-if-string))
+   (login :in-client `(params "login" ,read-if-string))
    ))
 
 
 (define-method make-client-environment ((shtml <shtml-data>))
+  (define (symbol->keyword symbol)
+    (make-keyword (symbol->string symbol)))
   (define (gather-client-slots shtml)
     (fold (lambda (slot kdr) 
 	    (if-let1 client? (slot-definition-option slot :in-client #f)
-		     (cons (list 'slot
-				 (make-keyword (symbol->string (if (eq? client? #t)
-								   (car slot)
-								   (car client?))))
-				 (car slot)
-				 (if (eq? client? #t)
-				     values
-				     (cadr client?)))
-			   kdr)
+		     (case (or (eq? client? #t)
+			       (length client?))
+		       ((#t 2)
+			(cons (list 'slot
+				    (symbol->keyword (if (eq? client? #t)
+							 (car slot)
+							 (car client?)))
+				    (car slot)
+				    (if (eq? client? #t)
+					values
+					(cadr client?)))
+			      kdr))
+		       ((3)
+			(cons (cons* (car client?)
+				     (symbol->keyword (car slot))
+				     (cdr client?))
+			      kdr))
+		       (else
+			(cons client? kdr)))
 		     kdr))
 	  (list)
 	  (class-slots (class-of shtml))))
@@ -158,8 +172,7 @@
 			((type-handler-for type)
 			 shtml
 			 slot-name)))))
-	      (append (gather-client-slots shtml)
-		      (ref shtml 'client-enviroment))))
+	      (gather-client-slots shtml)))
 
 (define-method  reply-xhtml ((shtml <shtml-data>))
   (write-tree

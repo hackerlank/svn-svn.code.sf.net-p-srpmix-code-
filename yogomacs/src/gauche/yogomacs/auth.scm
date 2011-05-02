@@ -10,8 +10,14 @@
 
 (select-module yogomacs.auth)
 
+;; TODO Put this to yogomacs.util....
+(define (read-if-string val)
+  (if (string? val)
+      (read-from-string val)
+      val))
+
 (define (login? params config)
-  #f)
+  (read-if-string (params "login")))
 
 (define (maybe-login params config)
   (if (login? params config)

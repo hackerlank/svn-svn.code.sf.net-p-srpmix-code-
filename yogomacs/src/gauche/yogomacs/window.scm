@@ -107,7 +107,10 @@
 		(body (|@| (onload "run_find_file_pre_hook();"))
 		      "\n" "    "
 		      (pre (|@| (class "header-line") (id "header-line"))
-			   (span (|@| (id "header-line-user")) 
+			   (a (|@| 
+			       (id "header-line-user")
+			       (href "#")
+			       (onclick "run_toggle_login_clicked();"))
 				 ""
 				 )
 			   ","
@@ -129,7 +132,7 @@
 			      `(a (|@| 
 				      (id ,id)
 				      (href "#")
-				      (onclick "run_toggle_full_screen_hook();")) ">"))
+				      (onclick "run_toggle_full_screen_clicked();")) ">"))
 			   ) "\n"
 		      ;;
 		      (pre (|@| (class "buffer") (id "buffer")) ,#`"Loading...,|url|\n") "\n"

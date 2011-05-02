@@ -42,3 +42,9 @@
 (define (read-from-response response)
   (read-from-string response.responseText))
 
+;; http://livepipe.net/extra/cookie
+;; string key;
+;; lisp_val val;
+(define (cookie-set! key val)
+  (Cookie.set key
+	      (write-to-string val)))

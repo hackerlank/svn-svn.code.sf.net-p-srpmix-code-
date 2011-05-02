@@ -40,49 +40,51 @@
     (hl.update (read-meta "user-name")))
   )
   
-(define full-screen #f)
-(define (full-screen?)  full-screen)
-(define extra-elements '("header-line"
-			 "modeline"
-			 "modeline-control"
-			 "minibuffer-shell"
-			 ;"minibuffer"
-			 "minibuffer-prompt-shell"
-			 ;"minibuffer-prompt"
-			 ))
-(define (toggle-full-screen)
-  (if full-screen
-      (leave-full-screen)
-      (enter-full-screen)))
-
-(define (enter-full-screen)
-  (set! full-screen #t)
-  (for-each (lambda (id)
-	      (let1 elt ($ id)
-		(elt.update (sxml->xhtml "<"))))
-	    '("toggle-full-screen"))
-  (for-each (lambda (id)
-	      (let1 elt ($ id)
-		(elt.hide)))
-	    extra-elements)
-  (let1 elt ($ "buffer")
-    (elt.setStyle (alist->object '((top . "0.0em")
-				   (bottom . "0.0em")
-				   (position . "static")
-				   (z-index . "-1"))))))
-
-(define (leave-full-screen)
-  (set! full-screen #f)
-  (for-each (lambda (id)
-	      (let1 elt ($ id)
-		(elt.update (sxml->xhtml ">"))))
-	    '("toggle-full-screen"))
-  (for-each (lambda (id)
-	      (let1 elt ($ id)
-		(elt.show)))
-	    extra-elements)
-  (let1 elt ($ "buffer")
-    (elt.setStyle (alist->object '((top . "1.2em")
-				   (bottom . "2.2em")
-				   (position . "fixed")
-				   (z-index . "0"))))))
+;;
+;; Full screen mode
+;;
+(define full-screen-mode-var "full-screen-mode")
+(define full-screen-mode #f)
+(define (full-screen-mode?)  full-screen-mode)
+(define full-screen-extra-elements '("header-line"
+				     "modeline"
+				     "modeline-control"
+				     "minibuffer-shell"
+					;"minibuffer"
+				     "minibuffer-prompt-shell"
+					;"minibuffer-prompt"
+				     ))
+(define toggle-full-screen-id "toggle-full-screen")
+(define (toggle-full-screen-mode . new-status)
+  (define (toggle-full-screen-mode0 
+	   new-status
+	   indicator
+	   top
+	   bottom
+	   position
+	   z-index)
+    (set! full-screen-mode new-status)
+    (cookie-set! full-screen-mode-var full-screen-mode)
+    (for-each (lambda (id)
+		(let1 elt ($ id)
+		  (elt.update (sxml->xhtml indicator))))
+	      `(,toggle-full-screen-id))
+    (for-each (lambda (id)
+		(let1 elt ($ id)
+		  (if new-status
+		      (elt.show)
+		      (elt.hide))))
+	      full-screen-extra-elements)
+    (let1 elt ($ "buffer")
+      (elt.setStyle (alist->object `((top . ,top)
+				     (bottom . ,bottom)
+				     (position . ,position)
+				     (z-index . ,z-index))))))
+  (let ((on-params '(#t ">" "1.2em" "2.2em" "fixed" "0"))
+	(off-params '(#f  "<" "0.0em" "0.0em" "static" "-1")))
+    (let1 p (if (if (null? new-status) 
+		    (not full-screen-mode)
+		    (car new-status))
+		on-params 
+		off-params)
+      (apply toggle-full-screen-mode0 p))))
