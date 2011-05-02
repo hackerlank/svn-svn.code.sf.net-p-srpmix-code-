@@ -21,6 +21,7 @@
 				   (onFailure . ,(lambda ()
 						   (message "Error in load-lazy")
 						   (alert "Error in load-lazy")))
+				   ;; TODO: onSuccess?
 				   (onComplete . ,(lambda (response json)
 						    (message)
 						    (run-hook find-file-post-hook url params response json)))))

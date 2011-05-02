@@ -49,19 +49,19 @@
 ;;
 ;; Highlight
 ;;
-(define (highlight-choose-elt target)
+(define (highlight-choose-element target)
   (cond
    ((string? target) ($ target))
    ((not target) #f)
    (else target)))
 (define (highlight target)
-  (if-let1 elt (highlight-choose-elt target)
+  (if-let1 elt (highlight-choose-element target)
 	   (elt.addClassName "highlight")
 	   #f))
 (export "yhl" highlight)
 
 (define (unhighlight target)
-  (if-let1 elt (highlight-choose-elt target)
+  (if-let1 elt (highlight-choose-element target)
 	   (elt.removeClassName "highlight")
 	   #f))
 (export "yuhl" unhighlight)

@@ -45,20 +45,30 @@
 (define-stitch tag-container stitch-tags)
 
 (define (tag-require url symbol major-mode target-element)
-  (let* ((parameters (alist->object 
+  (let* ((elt ($ target-element))
+	 (parameters (alist->object 
 		      `((symbol . ,symbol)
 			(major-mode . (symbol->string major-mode))
 			)))
 	 (options (alist->object 
 		   `((method . "get")
 		     (parameters . ,parameters)
-		     (onSuccess . ,(lambda (response)
+		     (onFailure . ,(lambda (response json)
+				     (unhighlight elt)
+				     ))
+		     (onSuccess . ,(lambda (response json)
 				     (let1 es (read-from-response response)
 				       (stitch es 
 					       :target-element target-element
 					       :symbol symbol)
-				       )))))))
-    
+				       )
+				     (unhighlight elt)
+				     (set! tag-protected-symbol-elements 
+					   (delete elt
+						   tag-protected-symbol-elements))
+				     ))
+		     ))))
+    (highlight elt)
     (js-new Ajax.Request
 	    (string-append "/web/tag" url)
 	    options)))
@@ -109,8 +119,11 @@
 	    (loop (elt.up 0))))))))
 
 (define tag-old-symbol-element #f)
+(define tag-protected-symbol-elements (list))
 (define (tag-find event)
-  (unhighlight tag-old-symbol-element)
+  (unless (member tag-old-symbol-element
+		  tag-protected-symbol-elements)
+    (unhighlight tag-old-symbol-element))
   (let1 target event.target
     (let* ((point-px event.pageX)
 	   (elt ($ target))
@@ -125,23 +138,21 @@
 	  (let1 url (contents-url)
 	    (event.stop)
 	    (if symbol
-		(tag-require url symbol major-mode target)
+		(begin
+		  (set! tag-protected-symbol-elements 
+			(cons elt tag-protected-symbol-elements))
+		  (tag-require url symbol major-mode target))
 		(alert "No symbol under point")
 		)))))))
 
 (define (tag-highlight event)
-  (unhighlight tag-old-symbol-element)
+  (unless (member tag-old-symbol-element
+		  tag-protected-symbol-elements)
+    (unhighlight tag-old-symbol-element))
   (let1 target event.target
-    (let* ((point-px event.pageX)
-	   (elt ($ target))
-	   (offset-px (let1 o (elt.viewportOffset)
-			o.left))
-	   (width-px (elt.getWidth))
-	   (offset-rate (/ (* 1.0 (- point-px offset-px))
-			   width-px)))
+    (let1 elt ($ target)
       (unless (tag-wrong-target? target)
-	(let ((symbol ((major-mode-of 'symbol-at) target offset-rate)))
-	  ;; elt
-	  (set! tag-old-symbol-element elt)
-	  (highlight tag-old-symbol-element)
-	  )))))
+	(set! tag-old-symbol-element elt)
+	  (unless (member tag-old-symbol-element
+				 tag-protected-symbol-elements)
+	    (highlight tag-old-symbol-element))))))
