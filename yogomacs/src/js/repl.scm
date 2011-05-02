@@ -2,8 +2,18 @@
 ;; Repl
 ;;
 (define shell-dir #f)
+
+(define *message* #f)
+(define (current-message) *message*)
 (define (message . args)
-  (-> (apply format args) "minibuffer"))
+  (if (null? args)
+      (begin
+	(set! *message* #f)
+	(-> "" "minibuffer"))
+      (let1 msg (apply format args)
+	(set! *message* msg)
+	(->  msg "minibuffer"))))
+
 (define (repl eval output-prefix)
   (let1 str (<- "minibuffer")
     (let1 result (with-error-handler 

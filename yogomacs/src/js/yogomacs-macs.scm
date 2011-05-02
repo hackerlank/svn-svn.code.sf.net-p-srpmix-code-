@@ -28,3 +28,19 @@
 (define-macro (with-error-handler handler f)
    `(with-handler ,handler
 		  (,f)))
+
+
+(define-macro (define-values symbols . body)
+  (let ((parameters (map (lambda (sym) (gensym)) symbols)))
+    `(begin
+       ,@(map (lambda (sym)
+		`(define ,sym #f))
+	      symbols)
+       (call-with-values (lambda () 
+			   ,@body)
+	 (lambda ,parameters
+	   ,@(map (lambda (sym param)
+		    `(set! ,sym ,param)
+		    )
+		  symbols
+		  parameters))))))

@@ -1,3 +1,6 @@
+;;
+;; Menu
+;;
 (define-macro (define-menu selector . items)
   `(let1 f (menu-build (map (lambda (item)
 			      (menu-build-item (car item) (cadr item)))
@@ -33,6 +36,9 @@
   )
 
 
+;;
+;; Header line
+;; 
 (define (header-line-init)
   (let1 hl ($ "header-line-role")
     (hl.update (read-meta "role-name")))
@@ -40,6 +46,26 @@
     (hl.update (read-meta "user-name")))
   )
   
+;;
+;; Highlight
+;;
+(define (highlight-choose-elt target)
+  (cond
+   ((string? target) ($ target))
+   ((not target) #f)
+   (else target)))
+(define (highlight target)
+  (if-let1 elt (highlight-choose-elt target)
+	   (elt.addClassName "highlight")
+	   #f))
+(export "yhl" highlight)
+
+(define (unhighlight target)
+  (if-let1 elt (highlight-choose-elt target)
+	   (elt.removeClassName "highlight")
+	   #f))
+(export "yuhl" unhighlight)
+
 ;;
 ;; Full screen mode
 ;;
@@ -88,3 +114,5 @@
 		on-params 
 		off-params)
       (apply toggle-full-screen-mode0 p))))
+
+;;(define (line-number-at target) 0)

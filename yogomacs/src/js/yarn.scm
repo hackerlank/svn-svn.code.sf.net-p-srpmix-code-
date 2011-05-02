@@ -35,7 +35,7 @@
 
 (define-stitch yarn-container stitch-yarns)
 
-(define (require-yarn url params)
+(define (yarn-require url params)
   (let1 options (alist->object `((method . "get")
 				 ,@(if params
 				       `((parameters . ,params))

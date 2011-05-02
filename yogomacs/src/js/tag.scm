@@ -44,7 +44,7 @@
 
 (define-stitch tag-container stitch-tags)
 
-(define (require-tag url symbol major-mode target-element)
+(define (tag-require url symbol major-mode target-element)
   (let* ((parameters (alist->object 
 		      `((symbol . ,symbol)
 			(major-mode . (symbol->string major-mode))
@@ -72,19 +72,26 @@
 	(Event.observe window "mousemove" tag-highlight)
 	))))
 
-(define built-in-classes '(
-			   "header-line"
-			   "header-line-user"
-			   "header-line-role"
-			   "header-line-control"
-			   "buffer"
-			   "contents"
-			   "linum"
-			   "lfringe"
-			   "rfringe"
-			   ))
-
 (define (tag-wrong-target? target)
+  (define built-in-classes '(
+			     "header-line"
+			     "header-line-user"
+			     "header-line-role"
+			     "header-line-control"
+			     ;;
+			     "modeline"
+			     "modeline-control"
+			     "minibuffer-shell"
+			     "minibuffer"
+			     "minibuffer-prompt-shell"
+			     "minibuffer-prompt"
+			     ;;
+			     "buffer"
+			     "contents"
+			     "linum"
+			     "lfringe"
+			     "rfringe"
+			     ))
   (let1 elt ($ target)
     (or (any (lambda (class)
 	       (target.hasClassName class))
@@ -101,31 +108,9 @@
 	   (else
 	    (loop (elt.up 0))))))))
 
-;(define (line-number-at target) 0)
 (define tag-old-symbol-element #f)
 (define (tag-find event)
-  (when tag-old-symbol-element
-    (tag-old-symbol-element.removeClassName "highlight"))
-  (let1 target event.target
-    (let* ((point-px event.pageX)
-	   (elt ($ target))
-	   (offset-px (let1 o (elt.viewportOffset)
-			o.left))
-	   (width-px (elt.getWidth))
-	   (offset-rate (/ (* 1.0 (- point-px offset-px))
-			   width-px)))
-      (unless (tag-wrong-target? target)
-	(event.stop)
-	(let ((symbol ((major-mode-of 'symbol-at) target offset-rate))
-	      (url (contents-url)))
-	  (if symbol
-	      (require-tag url symbol major-mode target)
-	      (alert "No symbol under point")
-	  ))))))
-
-(define (tag-highlight event)
-  (when tag-old-symbol-element
-    (tag-old-symbol-element.removeClassName "highlight"))
+  (unhighlight tag-old-symbol-element)
   (let1 target event.target
     (let* ((point-px event.pageX)
 	   (elt ($ target))
@@ -136,6 +121,27 @@
 			   width-px)))
       (unless (tag-wrong-target? target)
 	(let ((symbol ((major-mode-of 'symbol-at) target offset-rate)))
+	  ;; event, url symbol, *major-mode*, target
+	  (let1 url (contents-url)
+	    (event.stop)
+	    (if symbol
+		(tag-require url symbol major-mode target)
+		(alert "No symbol under point")
+		)))))))
+
+(define (tag-highlight event)
+  (unhighlight tag-old-symbol-element)
+  (let1 target event.target
+    (let* ((point-px event.pageX)
+	   (elt ($ target))
+	   (offset-px (let1 o (elt.viewportOffset)
+			o.left))
+	   (width-px (elt.getWidth))
+	   (offset-rate (/ (* 1.0 (- point-px offset-px))
+			   width-px)))
+      (unless (tag-wrong-target? target)
+	(let ((symbol ((major-mode-of 'symbol-at) target offset-rate)))
+	  ;; elt
 	  (set! tag-old-symbol-element elt)
-	  (tag-old-symbol-element.addClassName "highlight")
+	  (highlight tag-old-symbol-element)
 	  )))))

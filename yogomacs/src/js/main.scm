@@ -3,23 +3,16 @@
 ;    (js-field-set! elt "className" class-name)
 ;    (elt.addClassName original-class-name)))
 
-(define (highlight id)
-  (let1 elt ($ id)
-    (elt.addClassName "highlight")))
-(export "yhl" highlight)
-(define (unhighlight id)
-  (let1 elt ($ id)
-    (elt.removeClassName "highlight")))
-(export "yuhl" unhighlight)
-
-(define (jump-lazy hash)
-  (when (and (string? hash)
-	     (< 0 (string-length hash))
-	     (eq? (string-ref hash 0) #\#))
-    (let* ((id (substring hash 1 (string-length hash)))
-	   (elt ($ id)))
-      ;; Not portable
-      (elt.scrollIntoView))))
+(define (jump-lazy . any)
+  (define (jump-lazy0 hash)
+    (when (and (string? hash)
+	       (< 0 (string-length hash))
+	       (eq? (string-ref hash 0) #\#))
+      (let* ((id (substring hash 1 (string-length hash)))
+	     (elt ($ id)))
+	;; Not portable
+	(elt.scrollIntoView))))
+  (jump-lazy0 (js-field (js-field *js* "location") "hash")))
 
 (define (load-lazy)
   (define (load-lazy0 url params)
@@ -29,7 +22,7 @@
 						   (message "Error in load-lazy")
 						   (alert "Error in load-lazy")))
 				   (onComplete . ,(lambda (response json)
-						    (message "")
+						    (message)
 						    (run-hook find-file-post-hook url params response json)))))
       (js-new Ajax.Updater "buffer" url options)))
   (define (build-param meta-key param-name conv)
@@ -101,9 +94,9 @@
 
 (add-hook! read-from-minibuffer-hook repl-read)
 
-(add-hook! find-file-post-hook require-yarn)
+(add-hook! find-file-post-hook yarn-require)
 (add-hook! find-file-post-hook major-mode-init)
-(add-hook! find-file-post-hook (lambda any (jump-lazy (js-field (js-field *js* "location") "hash"))))
+(add-hook! find-file-post-hook jump-lazy)
 (add-hook! find-file-post-hook tag-init)
 
 
