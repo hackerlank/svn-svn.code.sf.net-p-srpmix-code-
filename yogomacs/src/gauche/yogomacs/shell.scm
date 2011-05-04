@@ -18,7 +18,6 @@
 
 (define-class <shell> ()
   ((name :init-keyword :name)
-   (prompt :init-keyword :prompt)
    (url :init-value #f :init-keyword :url)
    (interpreter :init-keyword :interpreter)
    (initializer :init-keyword :initializer)

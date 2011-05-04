@@ -3,8 +3,6 @@
   (use yogomacs.dests.js)		;wrong?
   (use yogomacs.dests.css)		;wrong?
   (use yogomacs.util.scheme2js)
-  (use yogomacs.shell)
-  (use yogomacs.shells.ysh)
   (use yogomacs.path)
   (use srfi-1))
 (select-module yogomacs.window)
@@ -76,16 +74,7 @@
 (define (make-url-list url shell)
   (url->href-list url shell))
 
-;; (define (expand-shell-list shell prompt)
-;;   (map 
-;;    (lambda (s)
-;;      (if (and (equal? shell (ref s 'name))
-;; 	      (equal? prompt (ref s 'prompt)))
-;; 	 `(option (|@| (selected "selected")) ,prompt)
-;; 	 `(option ,(ref s 'prompt))))
-;;    (all-shells)))
-
-(define (window title url css-list js-list shell prompt)
+(define (window title url css-list js-list shell)
   `(*TOP* (*PI* xml "version=\"1.0\" encoding=\"UTF-8\"") "\n" 
 	  (*DECL* DOCTYPE 
 		  html
@@ -162,18 +151,7 @@
 			   (span (|@| 
 				  (id "minibuffer-prompt")
 				  (class "minibuffer-prompt")) 
-				 ,prompt))
-		      #;(form (|@| 
-			     (id "minibuffer-prompt-shell")
-			     (class "minibuffer-prompt-shell")) 
-			    (select (|@| 
-				     (type "select") 
-				     (id "minibuffer-prompt")
-				     (size "1")
-				     (class "minibuffer-prompt")
-				     
-				     )
-				    ,@(expand-shell-list shell prompt)))
+				 ""))
 		      "\n" "    "
 		      ,@(expand-deferred-js-list js-list)
 		      ) 

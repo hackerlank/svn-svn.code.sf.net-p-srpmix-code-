@@ -30,9 +30,7 @@
 	 (title url)
 	 (js-list (reverse (cons `(,(extra-scripts) . inline)
 				 (reverse
-				  js-list))))
-	 (prompt (ref shell 'prompt))
-	 )
-    (window title url css-list js-list shell-name prompt)))
+				  js-list)))))
+    (window title url css-list js-list shell-name)))
 
 (provide "yogomacs/renderers/yogomacs")

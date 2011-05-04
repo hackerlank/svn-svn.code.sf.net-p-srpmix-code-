@@ -3,10 +3,6 @@
   )
 (select-module yogomacs.shells.nologin)
 
-(define-shell nologin (make <shell> 
-		     :name "nologin"
-		     :prompt " <nologin"
-		     :url "/"
-		     ))
+(define-shell nologin (make <shell> :name "nologin" :url "/"))
 
 (provide "yogomacs/shells/nologin")

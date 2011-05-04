@@ -3,9 +3,6 @@
   )
 (select-module yogomacs.shells.ysh)
 
-(define-shell ysh (make <shell> 
-		    :name "ysh"
-		    :prompt " <ysh"
-		    ))
+(define-shell ysh (make <shell> :name "ysh"))
 
 (provide "yogomacs/shells/ysh")

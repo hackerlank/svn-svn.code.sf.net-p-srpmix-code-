@@ -1,6 +1,12 @@
 -*- outline -*-
 * prioritized task
 
+** split spans when highlighting
+** perview
+** hide tag
+** src-highlight cache
+
+
 ** gzip <done>
 
 ** don't cache the contents <done>
