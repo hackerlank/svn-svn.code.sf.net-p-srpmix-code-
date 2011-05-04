@@ -25,7 +25,8 @@
       (list (make-guest) (default-role-name config))))
 
 (define (authorized? config)
-  (and-let* ((auth-string (cgi-get-metavariable "HTTP_CGI_AUTHORIZATION"))
+  (and-let* (;( (config "login") )
+	     (auth-string (cgi-get-metavariable "HTTP_CGI_AUTHORIZATION"))
 	     (m (#/ *Basic (.*)$/ auth-string))
 	     (base64-encoded (m 1))
 	     (base64-decoded (string-split 
