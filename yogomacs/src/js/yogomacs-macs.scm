@@ -9,6 +9,10 @@
      (if ,name
 	 ,t
 	 ,f)))
+(define-macro (when-let1 name condition . t)
+  `(let1 ,name ,condition
+     (when ,name
+       ,@t)))
 
 (define-macro (add-hook! hook proc)
   `(vector-set! ,hook 2 (cons ,proc (vector-ref ,hook 2))))

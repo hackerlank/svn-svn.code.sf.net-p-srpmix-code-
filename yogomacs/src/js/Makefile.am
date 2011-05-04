@@ -60,8 +60,13 @@ scheme2js_input = \
 	\
 	window.scm		 \
 	\
+	minor-mode.scm		 \
+	full-screen-mode.scm	 \
+	\
 	major-mode.scm           \
 	fundamental-mode.scm     \
+	c-mode.scm		 \
+	c++-mode.scm		 \
 	\
 	repl.scm                 \
 	\
@@ -71,7 +76,11 @@ scheme2js_input = \
 
 EXTRA_DIST += $(scheme2js_input)
 yogomacs_runtime.scm: $(scheme2js_input)
-	cat $^ > $@ 
+	for x in $^; do \
+	  cat $$x;      \
+	  echo;         \
+	done > $@ 
+
 yogomacs_runtime.js: yogomacs_runtime.scm
 	@SCHEME2JS@ -g -o $@ $<
 

@@ -93,15 +93,18 @@
 (add-hook! find-file-pre-hook repl-init)
 (add-hook! find-file-pre-hook focus)
 
-(add-hook! read-from-minibuffer-hook repl-read)
-
 (add-hook! find-file-post-hook yarn-require)
 (add-hook! find-file-post-hook major-mode-init)
 (add-hook! find-file-post-hook jump-lazy)
 (add-hook! find-file-post-hook tag-init)
 
 
+(add-hook! read-from-minibuffer-hook repl-read)
+
 (add-hook! draft-box-abort-hook stitch-delete-draft-box)
 (add-hook! draft-box-submit-hook stitch-submit)
+
 (add-hook! toggle-full-screen-clicked toggle-full-screen-mode)
 (add-hook! toggle-login-clicked toggle-login)
+
+(add-hook! major-mode-init-hook minor-modes-init)

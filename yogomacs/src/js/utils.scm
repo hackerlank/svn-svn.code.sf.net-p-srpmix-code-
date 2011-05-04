@@ -21,6 +21,15 @@
 	      r
 	      (loop (cdr lst)))))))
 
+(define (every proc lst)
+  (let loop ((lst lst))
+    (if (null? lst)
+	#t
+	(let1 r (proc (car lst))
+	  (if r
+	      (loop (cdr lst))
+	      r)))))
+
 (define (tree->string tree)
   (cond
    ((null? tree)
@@ -44,6 +53,8 @@
   (string->symbol 
    (string-append ":" 
 		  (keyword->string key))))
+(define (symbol->keyword sym)
+  (string->keyword (symbol->string sym)))
 
 ;;(define-method ref ((list <list>) (keyword <keyword>))
 ;;  (get-keyword ...)

@@ -5,3 +5,4 @@
 (define-hook draft-box-abort-hook ())
 (define-hook draft-box-submit-hook (class))
 (define-hook toggle-login-clicked ())
+(define-hook major-mode-init-hook (major-mode))

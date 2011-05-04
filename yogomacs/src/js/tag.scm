@@ -102,6 +102,15 @@
 			     "lfringe"
 			     "rfringe"
 			     ))
+  (define (is-part-of elt class)
+    (let loop ((elt elt))
+      (cond
+       ((js-undefined? elt)
+	#f)
+       ((elt.hasClassName class)
+	#t)
+       (else
+	(loop (elt.up 0))))))
   (let1 elt ($ target)
     (or (any (lambda (class)
 	       (target.hasClassName class))
@@ -109,14 +118,15 @@
 	(equal? target.tagName "A")
 	(equal? target.tagName "a")
 	(target.hasClassName "comment")
-	(let loop ((elt elt))
-	  (cond
-	   ((js-undefined? elt)
-	    #f)
-	   ((elt.hasClassName "yarn-div")
-	    #t)
-	   (else
-	    (loop (elt.up 0))))))))
+	;; (target.hasClassName "string")
+	;; TODO: mode own class
+	(is-part-of elt "yarn-div")
+	(not (is-part-of elt "buffer"))
+	(let1 str target.innerHTML
+	  (every (lambda (c)
+		   (memq c (major-mode-of 'separators)))
+		 (string->list str)
+		 )))))
 
 (define tag-old-symbol-element #f)
 (define tag-protected-symbol-elements (list))
