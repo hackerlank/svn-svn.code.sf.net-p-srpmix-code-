@@ -10,7 +10,8 @@
   (set! user-name (read-meta "user-name"))
   (when-let1 proc (major-mode-of 'init)
     (proc major-mode))
-  (run-hook major-mode-init-hook major-mode))
+  (run-hook major-mode-init-hook major-mode)
+  )
 
 (define major-mode-table (make-hashtable))
 (define (make-major-mode-record major-mode 

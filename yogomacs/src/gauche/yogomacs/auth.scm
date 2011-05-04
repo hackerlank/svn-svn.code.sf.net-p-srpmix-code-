@@ -17,7 +17,7 @@
       val))
 
 (define (login? params config)
-  (read-if-string (params "login")))
+  (read-if-string (params "login-mode")))
 
 (define (maybe-login params config)
   (if (login? params config)

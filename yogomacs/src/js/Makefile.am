@@ -62,11 +62,13 @@ scheme2js_input = \
 	\
 	minor-mode.scm		 \
 	full-screen-mode.scm	 \
+	login-mode.scm		 \
 	\
 	major-mode.scm           \
 	fundamental-mode.scm     \
 	c-mode.scm		 \
 	c++-mode.scm		 \
+	makefile-mode.scm	 \
 	\
 	repl.scm                 \
 	\

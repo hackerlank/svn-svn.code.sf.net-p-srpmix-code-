@@ -3,23 +3,23 @@
 
 ** gzip <done>
 
-** don't cache the contents
-** Minimize process launching
+** don't cache the contents <done>
+** Minimize process launching <done>
 
 ** js minify <done>
 ** js versioning <done>
 
 
 ** css minify
-** css versioning
+** css versioning <done>
 
 ** css in sexp
 *** smaller class name 
-*** Sending only Default css
+*** Sending only Default css <...>
 
 ** js cleanup
-*** Name space
-*** More utilities
+*** Name space <done>
+*** More utilities <done>
 
 ** shell
 

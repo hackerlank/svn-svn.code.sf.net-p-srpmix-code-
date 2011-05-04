@@ -126,7 +126,7 @@
 	      :init-value #f 
 	      :in-client #t)
    (full-screen-mode :in-client `(params "full-screen-mode" ,read-if-string))
-   (login :in-client `(params "login" ,read-if-string))
+   (login-mode :in-client `(params "login-mode" ,read-if-string))
    ))
 
 

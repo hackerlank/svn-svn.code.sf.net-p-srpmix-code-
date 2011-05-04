@@ -48,3 +48,9 @@
 		    )
 		  symbols
 		  parameters))))))
+
+(define-macro (debug exp)
+  (let ((v (gensym)))
+    `(let1 ,v ,exp
+       (alert (list ',exp '=> ,v))
+       ,v)))

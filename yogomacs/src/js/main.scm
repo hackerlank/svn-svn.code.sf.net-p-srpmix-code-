@@ -82,12 +82,6 @@
   (let1 location (js-field *js* "location")
     (location.reload)))
 
-(define (toggle-login)
-  (let1 login? (read-meta "login")
-    (message "~a..." (if login? "logout" "login"))
-    (cookie-set! "login" (not login?))
-    (reload)))
-
 (add-hook! find-file-pre-hook load-lazy)
 (add-hook! find-file-pre-hook header-line-init)
 (add-hook! find-file-pre-hook repl-init)
@@ -105,6 +99,6 @@
 (add-hook! draft-box-submit-hook stitch-submit)
 
 (add-hook! toggle-full-screen-clicked toggle-full-screen-mode)
-(add-hook! toggle-login-clicked toggle-login)
+(add-hook! toggle-login-clicked toggle-login-mode)
 
 (add-hook! major-mode-init-hook minor-modes-init)
