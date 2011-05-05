@@ -105,4 +105,5 @@
 @include(dired-font-lock,Default)
 @include(file-font-lock,Default)
 @include(yarn,Default)
+@include(tag,Default)
 @include(proto.menu,Common)

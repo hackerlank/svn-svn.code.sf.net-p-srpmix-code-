@@ -51,6 +51,8 @@
 
 (define-macro (debug exp)
   (let ((v (gensym)))
-    `(let1 ,v ,exp
-       (alert (list ',exp '=> ,v))
-       ,v)))
+    `(begin
+       (alert (list "debug: " ',exp))
+       (let1 ,v ,exp
+	 (alert (list ',exp '=> ,v))
+	 ,v))))

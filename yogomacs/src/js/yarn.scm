@@ -1,7 +1,7 @@
 (define (stitch-yarn yarn)
   (let* ((yarn (cdr yarn))
 	 (id (kref yarn :id #f)))
-    (unless (member id stitch-ids)
+    (unless (stitched? id)
       (let* ((target (kref yarn :target #f))
 	     (content (kref yarn :content #f))
 	     (date (kref yarn :date #f))

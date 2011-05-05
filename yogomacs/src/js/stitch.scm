@@ -39,6 +39,8 @@
 	 (alist->object `((before . ,(sxml->xhtml shtml-frag))))))
     id))
 
+(define (stitched? id)
+  (member id stitch-ids))
 (define (stitch-choose-stitching-proc type)
   (let1 proc
       (cond
@@ -130,25 +132,20 @@
 			   local?
 			   score)
   `(div (|@|
-	 (class "yarn-div")
-	 (id ,(string-append "T:" id)))
-	(span (|@| (class "doc")) ,desc) 
-	": " 
-	(span (|@| (class "keyword")) ,target)
-	", "
-	(span ,(symbol->string handler)) 
-	"<" 
-	(span ,(number->string score))
-	">" 
-	" "
-	(span "[x]")
-	"\n"
-	(a (|@| 
+	 (class "tag-div")
+	 (id ,(string-append "t:" id)))
+	(div
+	 (span (|@| (class "tag-handler-span"))
+	       (span (|@| (class "tag-handler")) ,(symbol->string handler)) 
+	       "/" 
+	       (span (|@| (class "tag-score")) ,(number->string score)))
+	 (span (|@| (class "tag-desc")) ,desc))
+	(div
+	 (a (|@| 
 	    (href ,(if local?
 		       (string-append *shell-dir* url)
 		       url)))
-	   ,url)
-	"\n"
+	   ,url))
 	))
 
 (define (stitch-choose-render-proc type)

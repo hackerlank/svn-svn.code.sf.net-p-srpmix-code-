@@ -12,6 +12,20 @@
       (let1 result (proc (car lst) initial)
 	(fold proc result (cdr lst)))))
 
+(define (fold2 proc initial lst)
+  (if (null? lst)
+      initial
+      (let1 result (proc (car lst) (cdr lst) initial)
+	(fold2 proc result (cdr lst)))))
+
+(define (intersperse item lst)
+  (fold2 (lambda (kar kdr result)
+	   (if (null? kdr)
+	       (reverse (cons kar result))
+	       (cons* item kar result)))
+	 (list)
+	 lst))
+
 (define (any proc lst)
   (let loop ((lst lst))
     (if (null? lst)

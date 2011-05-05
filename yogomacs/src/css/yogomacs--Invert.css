@@ -104,4 +104,5 @@
 @include(dired-font-lock,Invert)
 @include(file-font-lock,Invert)
 @include(yarn,Invert)
+@include(tag,Invert)
 @include(proto.menu,Common)

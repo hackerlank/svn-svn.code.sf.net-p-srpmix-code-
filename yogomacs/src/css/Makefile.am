@@ -9,6 +9,8 @@ css_static= \
 	yogomacs--Invert.css			\
 	yarn--Default.css			\
 	yarn--Invert.css                        \
+	tag--Default.css			\
+	tag--Invert.css                        \
 	\
 	$(NULL)
 

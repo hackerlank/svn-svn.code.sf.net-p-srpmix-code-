@@ -1,4 +1,4 @@
-(define (stitch-tag tag target-element)
+(define (tag-render tag target-element)
   (let* ((tag (cdr tag))
 	 (handler (kref tag :handler #f))
 	 (target (kref tag :target #f))
@@ -8,39 +8,42 @@
 	 (local? (kref tag :local? #f))
 	 (score (kref tag :score #f))
 	 (id (string-append (symbol->string handler) "/" target "@" url)))
-    (unless (member id stitch-ids)
-      (let ((stitching-proc (stitch-choose-stitching-proc 'tag))
-	    (render-proc (stitch-choose-render-proc 'tag)))
-	(let1 shtml-frag (render-proc id
-				      handler
-				      target
-				      url
-				      short-desc
-				      desc
-				      local?
-				      score)
-	  (when shtml-frag
-	    (stitching-proc id ($ target-element) shtml-frag)))))))
+    (let1 render-proc (stitch-choose-render-proc 'tag)
+	  (render-proc id
+		       handler
+		       target
+		       url
+		       short-desc
+		       desc
+		       local?
+		       score))))
 
 (define (stitch-tags tags . rest)
-  (let ((target-element (kref rest :target-element #f))
-	(symbol (kref rest :symbol "unknown")))
-    (if (null? tags)
-	(stitch-tag `(tag :handler null
+  (let* ((target-element (kref rest :target-element #f))
+	 (symbol (kref rest :symbol "unknown"))
+	 (id (string-append "T:" symbol))
+	 (tags (if (null? tags)
+		   `((tag :handler null
 			  :target ,symbol
 			  :url ""
 			  :short-desc _
 			  :desc "no tag"
 			  :local? #f
-			  :score 0) 
-		    target-element)
-	(for-each
-	 (lambda (elt)
-	   (cond
-	    ((eq? (car elt) 'tag)
-	     (stitch-tag elt target-element))
-	    ))
-	 tags))))
+			  :score 0))
+		   tags)))
+    (unless (stitched? id)
+      (let ((rendered-tags (fold (lambda (elt result) 
+				   (let1 r (tag-render elt target-element)
+				     (if r (cons r result) result)))
+				 (list)
+				 tags))
+	    (stitching-proc (stitch-choose-stitching-proc 'tag))
+	    )
+	(stitching-proc id ($ target-element) 
+			`(div (|@| (class "tags-div") (id ,id))
+			      (div (|@| (class "tag-symbol-target"))  ,symbol)
+			      ,@(reverse rendered-tags)))
+	))))
 
 (define-stitch tag-container stitch-tags)
 
@@ -121,6 +124,7 @@
 	;; (target.hasClassName "string")
 	;; TODO: mode own class
 	(is-part-of elt "yarn-div")
+	(is-part-of elt "tags-div")
 	(not (is-part-of elt "buffer"))
 	(let1 str target.innerHTML
 	  (every (lambda (c)
