@@ -1,8 +1,6 @@
 ;;
 ;; Repl
 ;;
-(define shell-dir #f)
-
 (define *message* #f)
 (define (current-message) *message*)
 (define (message . args)
@@ -14,46 +12,39 @@
 	(set! *message* msg)
 	(->  msg "minibuffer"))))
 
-(define (repl eval output-prefix)
-  (let1 str (<- "minibuffer")
-    (let1 result (with-error-handler 
-		   write-to-string
-		   (pa$ eval str))
-      (-> (string-append output-prefix result) "minibuffer")))
-  (let1 elt ($ "minibuffer")
-    (elt.focus)
-    (elt.select)))
+(define *shell-dir* #f)
+(define *shell* #f)
+(define *shell-eval* #f)
 
 (define (repl-init)
   (let1 shell (read-meta "shell")
     (cond
      ((eq? shell 'ysh)
-      (ysh-initializer))
+      (ysh-init))
      (else
-      ;; ???
-      (nologin-initializer)))))
+      (nologin-init)))))
 
-(define (repl-read)
-  (let1 shell (read-meta "shell")
-    (cond
-     ((eq? shell 'ysh)
-      (ysh-interpret))
-     (else
-      ;; ???
-      (nologin-interpret)))))
+(define (repl-eval)
+  (let1 in (<- "minibuffer")
+    (let1 out (with-error-handler
+		write-to-string
+		(pa$ *shell-eval* in))
+      (-> out "minibuffer")))
+  (let1 elt ($ "minibuffer")
+    (elt.focus)
+    (elt.select)))
 
-(define ysh #f)
-(define ysh-dir "/ysh")
-
-(define (ysh-initializer)
-  (set! shell-dir ysh-dir))
+(define (ysh-init)
+  (set! *shell-dir* "/ysh")
+  (set! *shell* 'ysh)
+  (set! *shell-eval* ysh-eval)
+  )
 (define (ysh-eval str)
-  "Not implemented")
+  "; Not implemented")
 
-(define (ysh-interpret)
-  (repl ysh-eval "# "))
-
-(define (nologin-initializer)
-  (set! shell-dir ""))
-(define (nologin-interpret)
+(define (nologin-init)
+  (set! *shell-dir* "")
+  (set! *shell 'nologin)
+  (set! *shell-eval* nologin-eval))
+(define (nologin-eval)
   #f)

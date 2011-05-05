@@ -84,8 +84,8 @@
 				     "yarn-text"
 				     )))
 		    ,(if transited-from
-			 `(a (|@| (href ,(if shell-dir
-					     (string-append shell-dir
+			 `(a (|@| (href ,(if *shell-dir*
+					     (string-append *shell-dir*
 							    (car transited-from))
 					     (car transited-from))))
 			     ,text)
@@ -145,7 +145,7 @@
 	"\n"
 	(a (|@| 
 	    (href ,(if local?
-		       (string-append shell-dir url)
+		       (string-append *shell-dir* url)
 		       url)))
 	   ,url)
 	"\n"
@@ -209,25 +209,20 @@
     (elt.remove)))
 
 (define (stitch-submit type)
-  (let* ((location (js-field *js* "location"))
-	 (pathname (js-field location "pathname"))
-	 (hash     (js-field location "hash"))
-	 (url      (substring pathname
-			      (string-length shell-dir)
-			      (string-length pathname)))
+  (let* ((hash     (js-field (js-field *js* "location") "hash"))
+	 (url      (contents-url))
+	 (yarn     `(yarn :version 0 
+			  :target ,stitch-draft-target
+			  :content (text ,(<- "yarn-draft"))
+			  :subjects ("*DRAFT*")))
+	 (yarn-str (write-to-string `(yarn-container ,yarn)))
 	 (parameters (alist->object
-		      `((stitch . ,((js-field *js* "encodeURIComponent")
-				    (write-to-string
-				     `(yarn-container 
-				       (yarn :version 0 
-					     :target ,stitch-draft-target
-					     :content (text ,(<- "yarn-draft"))
-					     :subjects ("*DRAFT*"))))))))))
+		      `((stitch . ,((js-field *js* "encodeURIComponent") yarn-str))))))
     (let1 options (alist->object 
 		   `((method . "post")
 		     (parameters . ,parameters)
 		     (onSuccess . ,(lambda (response)
-				     (require-yarn url #f)
+				     (yarn-require url #f)
 				     (stitch-delete-draft-box)
 				     ))))
       (js-new Ajax.Request

@@ -75,7 +75,7 @@
   (let* ((location (js-field *js* "location"))
 	 (pathname (js-field location "pathname")))
     (substring pathname
-	       (string-length shell-dir)
+	       (string-length *shell-dir*)
 	       (string-length pathname))))
 
 (define (reload)
@@ -93,7 +93,7 @@
 (add-hook! find-file-post-hook tag-init)
 
 
-(add-hook! read-from-minibuffer-hook repl-read)
+(add-hook! read-from-minibuffer-hook repl-eval)
 
 (add-hook! draft-box-abort-hook stitch-delete-draft-box)
 (add-hook! draft-box-submit-hook stitch-submit)
