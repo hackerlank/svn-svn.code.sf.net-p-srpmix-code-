@@ -66,4 +66,16 @@
 	   #f))
 (export "yuhl" unhighlight)
 
-;;(define (line-number-at target) 0)
+;;
+;; Positioning
+;;
+(define (line-number-at target) 
+  (let1 elt ($ target)
+    (let1 linum (elt.previous ".linum")
+      (if (js-undefined? linum)
+	  #f
+	  (let1 id (linum.identify)
+	    (if (string-prefix? "L:" id)
+		(let1 id (substring id 2 (string-length id))
+		  (string->number id))
+		#f))))))

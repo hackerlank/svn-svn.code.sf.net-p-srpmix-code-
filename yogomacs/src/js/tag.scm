@@ -18,10 +18,13 @@
 		       local?
 		       score))))
 
+(define (tag-id-for symbol line)
+  (string-append "T:" symbol "@" (write-to-string line)))
 (define (stitch-tags tags . rest)
   (let* ((target-element (kref rest :target-element #f))
 	 (symbol (kref rest :symbol "unknown"))
-	 (id (string-append "T:" symbol))
+	 (line (kref rest :line #f))
+	 (id (tag-id-for symbol line))
 	 (tags (if (null? tags)
 		   `((tag :handler null
 			  :target ,symbol
@@ -41,7 +44,12 @@
 	    )
 	(stitching-proc id ($ target-element) 
 			`(div (|@| (class "tags-div") (id ,id))
-			      (div (|@| (class "tag-symbol-target"))  ,symbol)
+			      (div (|@| (class "tag-symbol-target"))  
+				   (a (|@| 
+					(href "#") 
+					;; TODO
+					(onclick ,(string-append "$('" id "').hide();" )))
+				       ,symbol))
 			      ,@(reverse rendered-tags)))
 	))))
 
@@ -49,9 +57,11 @@
 
 (define (tag-require url symbol major-mode target-element)
   (let* ((elt ($ target-element))
+	 (line (line-number-at target-element))
 	 (parameters (alist->object 
 		      `((symbol . ,symbol)
-			(major-mode . (symbol->string major-mode))
+			(line . ,(write-to-string line))
+			(major-mode . ,(symbol->string major-mode))
 			)))
 	 (options (alist->object 
 		   `((method . "get")
@@ -63,7 +73,8 @@
 				     (let1 es (read-from-response response)
 				       (stitch es 
 					       :target-element target-element
-					       :symbol symbol)
+					       :symbol symbol
+					       :line line)
 				       )
 				     (unhighlight elt)
 				     (set! tag-protected-symbol-elements 
@@ -152,10 +163,16 @@
 	  (let1 url (contents-url)
 	    (event.stop)
 	    (if symbol
-		(begin
-		  (set! tag-protected-symbol-elements 
-			(cons elt tag-protected-symbol-elements))
-		  (tag-require url symbol major-mode target))
+		(let* ((line (line-number-at target))
+		       (id (tag-id-for symbol line)))
+		  (cond
+		   ((stitched? id)
+		    (let1 tag-elt ($ id)
+		      (tag-elt.toggle)))
+		   (else
+		    (set! tag-protected-symbol-elements 
+			  (cons elt tag-protected-symbol-elements))
+		    (tag-require url symbol major-mode target))))
 		(alert "No symbol under point")
 		)))))))
 
@@ -170,3 +187,5 @@
 	  (unless (member tag-old-symbol-element
 				 tag-protected-symbol-elements)
 	    (highlight tag-old-symbol-element))))))
+
+
