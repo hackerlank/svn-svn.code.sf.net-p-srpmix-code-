@@ -48,3 +48,7 @@
 (define (cookie-set! key val)
   (Cookie.set key
 	      (write-to-string val)))
+
+(define (js-escape-string str)
+  ;; TODO
+  str)

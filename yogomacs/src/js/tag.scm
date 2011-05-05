@@ -47,8 +47,9 @@
 			      (div (|@| (class "tag-symbol-target"))  
 				   (a (|@| 
 					(href "#") 
-					;; TODO
-					(onclick ,(string-append "$('" id "').hide();" )))
+					(onclick ,(string-append "$('" 
+								 (js-escape-string id)
+								 "').hide();" )))
 				       ,symbol))
 			      ,@(reverse rendered-tags)))
 	))))
@@ -56,6 +57,7 @@
 (define-stitch tag-container stitch-tags)
 
 (define (tag-require url symbol major-mode target-element)
+  
   (let* ((elt ($ target-element))
 	 (line (line-number-at target-element))
 	 (parameters (alist->object 
@@ -146,35 +148,40 @@
 (define tag-old-symbol-element #f)
 (define tag-protected-symbol-elements (list))
 (define (tag-find event)
-  (unless (member tag-old-symbol-element
-		  tag-protected-symbol-elements)
-    (unhighlight tag-old-symbol-element))
-  (let1 target event.target
+  (define (event->offset-rate event)
     (let* ((point-px event.pageX)
-	   (elt ($ target))
+	   (elt ($ event.target))
 	   (offset-px (let1 o (elt.viewportOffset)
 			o.left))
 	   (width-px (elt.getWidth))
 	   (offset-rate (/ (* 1.0 (- point-px offset-px))
 			   width-px)))
-      (unless (tag-wrong-target? target)
-	(let ((symbol ((major-mode-of 'symbol-at) target offset-rate)))
-	  ;; event, url symbol, *major-mode*, target
-	  (let1 url (contents-url)
-	    (event.stop)
-	    (if symbol
-		(let* ((line (line-number-at target))
-		       (id (tag-id-for symbol line)))
-		  (cond
-		   ((stitched? id)
-		    (let1 tag-elt ($ id)
-		      (tag-elt.toggle)))
-		   (else
-		    (set! tag-protected-symbol-elements 
-			  (cons elt tag-protected-symbol-elements))
-		    (tag-require url symbol major-mode target))))
-		(alert "No symbol under point")
-		)))))))
+      offset-rate))
+  
+  (unless (member tag-old-symbol-element
+		  tag-protected-symbol-elements)
+    (unhighlight tag-old-symbol-element))
+  (let ((target event.target)
+	(url (contents-url)))
+    (unless (tag-wrong-target? target)
+      (receive (symbol start end)
+	  ((major-mode-of 'symbol-at) target (event->offset-rate event))
+	;; event, url symbol, *major-mode*, target
+	(event.stop)
+	(let* ((line (line-number-at target))
+	       (id (tag-id-for symbol line)))
+	  (if symbol
+	      (cond
+	       ((stitched? id)
+		(let1 tag-elt ($ id)
+		  (tag-elt.toggle)))
+	       (else
+		(set! tag-protected-symbol-elements
+		      (cons ($ event.target) 
+			    tag-protected-symbol-elements))
+		(tag-require url symbol major-mode target)))
+	      (alert "No symbol under point"))))
+      )))
 
 (define (tag-highlight event)
   (unless (member tag-old-symbol-element

@@ -56,3 +56,7 @@
        (let1 ,v ,exp
 	 (alert (list ',exp '=> ,v))
 	 ,v))))
+
+(define-macro (receive formals expression . body)
+  `(call-with-values (lambda () ,expression)
+     (lambda ,formals ,@body)))

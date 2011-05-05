@@ -25,8 +25,11 @@
 			       (loop (cdr after) (cons (car after) result)))))))
       (let1 result (string-append before-filtered after-filtered)
 	(if (equal? result "")
-	    #f
-	    result)))))
+	    (values #f #f #f)
+	    (values result
+		    (- split-pos before-filtered)
+		    (+ split-pos after-filtered))
+	    )))))
 
 (define-major-mode fundamental
   :indicator "Fundamental"
