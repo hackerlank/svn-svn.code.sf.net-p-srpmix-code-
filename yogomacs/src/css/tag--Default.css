@@ -39,6 +39,7 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
 }
 
 .tag-symbol-target {
+    background-color: #dddddd !important;
     text-align: center;
 }
 

@@ -151,8 +151,54 @@
 
 (define tag-old-symbol-element #f)
 (define tag-protected-symbol-elements (list))
+
+(define (tag-split-target! target start end)
+  (define (derive-element target start end)
+    (let1 elt (let ((class (let1 elt ($ target) (elt.readAttribute "class")))
+		    (id (string-append "P:" (+ (point-at target) start))))
+		(js-new Element "span"
+			(alist->object `((class . ,class)
+					 (id . ,id)))))
+      (elt.update (substring target.innerHTML start end))
+      elt))
+  (let* ((str target.innerHTML)
+	 (len (string-length str)))
+    (let1 elements (if (eq? start 0)
+		       (if (eq? end len)
+			   (list 
+			    (list target #t 0 len))
+			   (list
+			    (list (derive-element target 0 end) #t 0 end)
+			    (list (derive-element target end len) #f end len))
+			   )
+		       (if (eq? end len)
+			   (list
+			    (list (derive-element target 0 start) #f 0 start)
+			    (list (derive-element target start len) #t start len))
+			   (list
+			    (list (derive-element target 0 start) #f 0 start)
+			    (list (derive-element target start end) #t start end)
+			    (list (derive-element target end len) #f end len)
+			    )))
+      (if (and (not (null? elements))
+	       (eq? (car (car elements)) target))
+	  target
+	  (let loop ((elements (reverse (cons #f (reverse elements))))
+		     (result #f))
+	    (if (car elements)
+		(let ((elt (car (car elements)))
+		      (symbol-at? (car (cdr (car elements)))))
+		  (target.insert (alist->object `((before . ,elt))))
+		  (loop (cdr elements) (if symbol-at?
+					   elt
+					   result))
+		  )
+		(begin (target.remove)
+		       result)))))))
+
+
 (define (tag-find event)
-  (define (event->offset-rate event)
+  (define (tag-event->offset-rate event)
     (let* ((point-px event.pageX)
 	   (elt ($ event.target))
 	   (offset-px (let1 o (elt.viewportOffset)
@@ -161,7 +207,6 @@
 	   (offset-rate (/ (* 1.0 (- point-px offset-px))
 			   width-px)))
       offset-rate))
-  
   (unless (member tag-old-symbol-element
 		  tag-protected-symbol-elements)
     (unhighlight tag-old-symbol-element))
@@ -169,10 +214,10 @@
 	(url (contents-url)))
     (unless (tag-wrong-target? target)
       (receive (symbol start end)
-	  ((major-mode-of 'symbol-at) target (event->offset-rate event))
-	;; event, url symbol, *major-mode*, target
+	  ((major-mode-of 'symbol-at) target (tag-event->offset-rate event))
 	(event.stop)
-	(let* ((line (line-number-at target))
+	(let* ((target (tag-split-target! target start end))
+	       (line (line-number-at target))
 	       (id (tag-id-for symbol line)))
 	  (if symbol
 	      (cond

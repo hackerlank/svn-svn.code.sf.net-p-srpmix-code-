@@ -35,6 +35,7 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
 
 .tag-desc {
     /* font-lock-doc-face */
+    background-color: #dddddd !important;
     color: #ffa07a;
 }
 

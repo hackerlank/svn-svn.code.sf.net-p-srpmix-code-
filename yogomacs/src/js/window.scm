@@ -76,6 +76,14 @@
 	  #f
 	  (let1 id (linum.identify)
 	    (if (string-prefix? "L:" id)
-		(let1 id (substring id 2 (string-length id))
+		(let1 id (substring-after id 2)
 		  (string->number id))
 		#f))))))
+
+(define (point-at target)
+  (let1 elt ($ target)
+    (let1 id (elt.identify)
+      (if (string-prefix? "P:" id)
+	  (let1 id (substring-after id 2)
+	    (string->number id))
+	  #f))))

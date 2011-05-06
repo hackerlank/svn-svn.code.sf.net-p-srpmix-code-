@@ -8,7 +8,7 @@
     (when (and (string? hash)
 	       (< 0 (string-length hash))
 	       (eq? (string-ref hash 0) #\#))
-      (let* ((id (substring hash 1 (string-length hash)))
+      (let* ((id (substring-after hash 1))
 	     (elt ($ id)))
 	;; Not portable
 	(elt.scrollIntoView))))
@@ -74,9 +74,8 @@
 (define (contents-url)
   (let* ((location (js-field *js* "location"))
 	 (pathname (js-field location "pathname")))
-    (substring pathname
-	       (string-length *shell-dir*)
-	       (string-length pathname))))
+    (substring-after pathname
+		     (string-length *shell-dir*))))
 
 (define (reload)
   (let1 location (js-field *js* "location")

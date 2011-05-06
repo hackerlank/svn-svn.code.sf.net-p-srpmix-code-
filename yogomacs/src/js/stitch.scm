@@ -178,10 +178,10 @@
 	(cond
 	 ((and (eq? (string-ref id  0) #\N)
 	       (eq? (string-ref id  1) #\:))
-	  `(directory . ,(substring id 2 (string-length id))))
+	  `(directory . ,(substring-after id 2)))
 	 ((and (eq? (string-ref id  0) #\L)
 	       (eq? (string-ref id  1) #\:))
-	  `(file . ,(substring id 2 (string-length id))))
+	  `(file . ,(substring-after id 2)))
 	 (else
 	  #f)))))
   (cond

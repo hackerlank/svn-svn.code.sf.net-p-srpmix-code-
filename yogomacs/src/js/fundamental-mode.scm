@@ -3,8 +3,8 @@
     (let* ((separators (major-mode-of 'separators))
 	   (split-pos (inexact->exact (ceiling (* offset-rate 
 						  (string-length str)))))
-	   (before (substring str 0 split-pos))
-	   (after (substring str split-pos (string-length str)))
+	   (before (substring-before str split-pos))
+	   (after (substring-after str split-pos))
 	   (before-filtered (let loop ((before (reverse (string->list before)))
 				       (result (list)))
 			      (cond
@@ -27,8 +27,8 @@
 	(if (equal? result "")
 	    (values #f #f #f)
 	    (values result
-		    (- split-pos before-filtered)
-		    (+ split-pos after-filtered))
+		    (- split-pos (string-length before-filtered))
+		    (+ split-pos (string-length after-filtered)))
 	    )))))
 
 (define-major-mode fundamental

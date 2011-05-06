@@ -81,3 +81,8 @@
 	      (car klist)))
     (cadr klist))
    (else (kref (cddr klist) key default))))
+
+(define (substring-after str pos)
+  (substring str pos (string-length str)))
+(define (substring-before str pos)
+  (substring str 0 pos))
