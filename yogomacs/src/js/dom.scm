@@ -18,5 +18,6 @@
        ((not str) (list))
        ((js-undefined? str) (list))
        (else
-	(string-split str " 	"))))))
+	(map string->symbol 
+	     (string-split str " 	")))))))
     

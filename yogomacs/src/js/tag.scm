@@ -7,7 +7,7 @@
 	 (desc (kref tag :desc #f))
 	 (local? (kref tag :local? #f))
 	 (score (kref tag :score #f))
-	 (id (string-append (symbol->string handler) "/" target "@" url)))
+	 (id (string-append (symbol->string handler) "/" (write-to-string target) "@" url)))
     (let1 render-proc (stitch-choose-render-proc 'tag)
 	  (render-proc id
 		       handler
@@ -28,7 +28,7 @@
 	 (id (tag-id-for symbol line))
 	 (tags (if (null? tags)
 		   `((tag :handler null
-			  :target ,symbol
+			  :target (symbol ,symbol)
 			  :url ""
 			  :short-desc _
 			  :desc "no tag"
@@ -47,7 +47,9 @@
 			`(div (|@| (class "tags-div") (id ,id))
 			      (div (|@| (class ,(string-append "tag-symbol-target"
 							       " "
-							       (apply string-append (intersperse " " classes)
+							       (apply string-append (intersperse 
+										     " " 
+										     (map symbol->string classes))
 							       ))))
 				   (a (|@| 
 					(href "#") 
@@ -60,13 +62,14 @@
 
 (define-stitch tag-container stitch-tags)
 
-(define (tag-require url symbol classes line major-mode target-element)
-  
+(define (tag-require url main-key symbol classes line major-mode target-element)
   (let* ((elt ($ target-element))
 	 (parameters (alist->object 
-		      `((symbol . ,symbol)
+		      `((main-key . ,(write-to-string main-key))
+			(symbol . ,symbol)
 			(line . ,(write-to-string line))
 			(major-mode . ,(symbol->string major-mode))
+			(classes . ,(write-to-string classes))
 			)))
 	 (options (alist->object 
 		   `((method . "get")
@@ -98,8 +101,8 @@
     (when has-tag?
       (let* ((Event (js-field *js* "Event"))
 	     (window (js-field *js* "window")))
-	(Event.observe window "click" tag-find)
-	(Event.observe window "mousemove" tag-highlight)
+	(Event.observe window "click" tag-symbol-find)
+	(Event.observe window "mousemove" tag-symbol-highlight)
 	))))
 
 (define (tag-wrong-target? target)
@@ -197,7 +200,7 @@
 		  ($ result))))))))
 
 
-(define (tag-find event)
+(define (tag-symbol-find event)
   (define (tag-event->offset-rate event)
     (let* ((point-px event.pageX)
 	   (elt ($ event.target))
@@ -229,6 +232,7 @@
 		      (cons ($ event.target) 
 			    tag-protected-symbol-elements))
 		(tag-require url 
+			     'symbol
 			     symbol
 			     (classes-of target)
 			     (line-number-at target)
@@ -236,7 +240,7 @@
 			     target)))
 	      (alert "No symbol under point")))))))
 
-(define (tag-highlight event)
+(define (tag-symbol-highlight event)
   (unless (member tag-old-symbol-element
 		  tag-protected-symbol-elements)
     (unhighlight tag-old-symbol-element))

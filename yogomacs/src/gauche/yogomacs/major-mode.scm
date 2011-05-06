@@ -3,8 +3,6 @@
 	  )
   (use srfi-13)
   (use util.list)
-  (use sxml.sxpath)
-  (use yogomacs.util.sxml)
   )
 
 (select-module yogomacs.major-mode)

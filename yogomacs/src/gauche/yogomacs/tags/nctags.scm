@@ -72,7 +72,7 @@
 				      file))
 	   (path-distance (path-distance real-src-path real-def-path)))
       `(nctags 
-	:target ,symbol
+	:target (symbol ,symbol)
 	:url ,#`",(real->web real-def-path config)#L:,|line|"
 	:short-desc ,kind
 	:desc ,(make-desc kind major-mode extra)
@@ -101,13 +101,15 @@
 	    val)))))
 
 (define (make-desc kind major-mode extra)
-  (let1 kinds (assoc-ref (kinds-list)
-			 (or major-mode "c-mode")
-			 (list))
-    (let1 desc (car (assq-ref kinds kind '(#f)))
-      (if desc
-	  (string-append desc (write-to-string extra))
-	  desc))))
+  (let1 major-mode (or major-mode "c-mode")
+    (let1 kinds (assoc-ref (kinds-list)
+			   major-mode
+			   (list))
+      (let1 desc (car (assq-ref kinds kind '(#f)))
+	(cond
+	 (desc (string-append desc (write-to-string extra)))
+	 ((equal? major-mode "c-mode") desc)
+	 (else (make-desc kind #f extra)))))))
 
 (define (ctags-for-symbol nctags symbol)
   (let* ((proc (run-process
