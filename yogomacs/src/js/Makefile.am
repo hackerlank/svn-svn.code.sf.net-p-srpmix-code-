@@ -87,7 +87,7 @@ yogomacs_runtime.js: yogomacs_runtime.scm
 	@SCHEME2JS@ -g -o $@ $<
 
 yogomacs-@VERSION@-@RPM_RELEASE@.js: @SCHEME2JS_RUNTIME_DIR@/runtime.js $(yogomacs_input)
-	rm yogomacs-[0-9]*.js
+	rm -f yogomacs-[0-9]*.js
 
 	echo > $@
 
