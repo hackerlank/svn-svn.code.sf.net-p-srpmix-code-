@@ -35,7 +35,7 @@
 			  :local? #f
 			  :score 0))
 		   tags)))
-    (unless (stitched? id)
+    (unless (stitched? (debug id))
       (let ((rendered-tags (fold (lambda (elt result) 
 				   (let1 r (tag-render elt target-element)
 				     (if r (cons r result) result)))
