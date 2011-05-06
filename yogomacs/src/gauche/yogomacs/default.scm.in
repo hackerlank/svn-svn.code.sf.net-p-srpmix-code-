@@ -26,9 +26,8 @@
 		      #/\/packages\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+/
 		     ))
  (realm . "Sources")
- (overlays . ((text-file "/README" "/var/lib/yogomacs/README")
-	      (text-file "/NEWS" "/var/lib/yogomacs/NEWS")
-	      ;(not-implemented "/login")
+ (overlays . ((text-file "/README" "/etc/yogomacs/README")
+	      (text-file "/NEWS" "/etc/yogomacs/NEWS")
 	      ;(not-implemented "/commands")
 	      ;(not-implemented #/\/commands\/.*/)
 	      )))
