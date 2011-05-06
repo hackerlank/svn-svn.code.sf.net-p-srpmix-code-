@@ -630,6 +630,13 @@ function twig_build
     mkdir -p twig/srpms
     mkdir -p twig/build
     mkdir -p twig/buildroot
+
+    local spec="specs-${BUILD_ID}.spec"
+
+    rm -f specs-*.spec
+    echo "%define twig_$(cat TWIG/name)_buildid ${BUILD_ID}" > "${spec}"
+    cat specs.spec >> "${spec}"
+
     rpmbuild --define "_rpmdir `pwd`/twig/rpms"				\
 	     --define "_srcrpmdir `pwd`/twig/srpms"			\
 	     --define "_builddir `pwd`/twig/build"			\
@@ -638,7 +645,7 @@ function twig_build
              --define "twig_$(cat TWIG/name)_buildid ${BUILD_ID}"	\
              --define "_default_patch_fuzz 2"				\
 	     ${TARGET_OPT}                                              \
-	     $BUILD_STAGE specs.spec
+	     $BUILD_STAGE "${spec}"
     status=$?
 
     if [ $status = "0" -a "$BUILD_ID_SET_VIA_CMDLINE" = "no" ]; then

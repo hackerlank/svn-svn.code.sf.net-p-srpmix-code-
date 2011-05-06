@@ -1,5 +1,12 @@
 2011-05-06  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.0.3.
+
+	* src/twig (twig_build): Expand buildid inline
+	in spec file.
+
+2011-05-06  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: version 0.0.2.
 
 	* src/twig (twig_commit_help): Fix a typo.
