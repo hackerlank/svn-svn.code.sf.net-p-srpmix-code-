@@ -421,7 +421,7 @@ function twig_commit
 
 function twig_touch_help
 {
-    echo "	" touch
+    echo "    " touch
 }
 
 function twig_touch
