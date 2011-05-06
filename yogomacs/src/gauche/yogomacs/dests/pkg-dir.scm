@@ -23,14 +23,16 @@
 				   head
 				   last
 				   (dname-of e)))))
-    `((,#/\^lcopy-[^\/]+/ 
+    `((#/\^lcopy-[^\/]+/ 
 		  #t
 		  ,(lambda (fs-dentry) 
 		     (lcopy-path "/" fs-dentry))
 		  ,(lambda (fs-dentry)
 		     (lcopy-dir->checkout-cmdline 
 		      (lcopy-path (config 'real-sources-dir)
-				  fs-dentry)))))))
+				  fs-dentry))))
+      (#/\^plugins$/ #f #f)
+      )))
 
 (define (dest path params config)
   (dir-dest path params config
