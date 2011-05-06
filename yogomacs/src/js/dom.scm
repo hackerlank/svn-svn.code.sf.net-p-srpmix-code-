@@ -10,3 +10,13 @@
 
 (define (html-escape-string str)
   (str.escapeHTML))
+
+(define (classes-of target)
+  (let1 elt ($ target)
+    (let1 str (elt.readAttribute "class")
+      (cond
+       ((not str) (list))
+       ((js-undefined? str) (list))
+       (else
+	(string-split str " 	"))))))
+    

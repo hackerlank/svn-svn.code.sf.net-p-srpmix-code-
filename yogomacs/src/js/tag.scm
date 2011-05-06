@@ -24,6 +24,7 @@
   (let* ((target-element (kref rest :target-element #f))
 	 (symbol (kref rest :symbol "unknown"))
 	 (line (kref rest :line #f))
+	 (classes (kref rest :classes (list)))
 	 (id (tag-id-for symbol line))
 	 (tags (if (null? tags)
 		   `((tag :handler null
@@ -44,7 +45,10 @@
 	    )
 	(stitching-proc id ($ target-element) 
 			`(div (|@| (class "tags-div") (id ,id))
-			      (div (|@| (class "tag-symbol-target"))  
+			      (div (|@| (class ,(string-append "tag-symbol-target"
+							       " "
+							       (apply string-append (intersperse " " classes)
+							       ))))
 				   (a (|@| 
 					(href "#") 
 					(onclick ,(string-append "$('" 
@@ -56,10 +60,9 @@
 
 (define-stitch tag-container stitch-tags)
 
-(define (tag-require url symbol major-mode target-element)
+(define (tag-require url symbol classes line major-mode target-element)
   
   (let* ((elt ($ target-element))
-	 (line (line-number-at target-element))
 	 (parameters (alist->object 
 		      `((symbol . ,symbol)
 			(line . ,(write-to-string line))
@@ -76,7 +79,8 @@
 				       (stitch es 
 					       :target-element target-element
 					       :symbol symbol
-					       :line line)
+					       :line line
+					       :classes classes)
 				       )
 				     (unhighlight elt)
 				     (set! tag-protected-symbol-elements 
@@ -179,9 +183,13 @@
 		(set! tag-protected-symbol-elements
 		      (cons ($ event.target) 
 			    tag-protected-symbol-elements))
-		(tag-require url symbol major-mode target)))
-	      (alert "No symbol under point"))))
-      )))
+		(tag-require url 
+			     symbol
+			     (classes-of target)
+			     (line-number-at target)
+			     major-mode
+			     target)))
+	      (alert "No symbol under point")))))))
 
 (define (tag-highlight event)
   (unless (member tag-old-symbol-element

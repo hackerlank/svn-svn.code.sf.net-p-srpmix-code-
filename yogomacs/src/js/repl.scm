@@ -34,11 +34,16 @@
     (elt.focus)
     (elt.select)))
 
+(define (repl-set-prompt! sxml)
+  (let1 prompt ($ "minibuffer-prompt")
+    (prompt.update (sxml->xhtml sxml))))
+
 (define (ysh-init)
   (set! *shell-dir* "/ysh")
   (set! *shell* 'ysh)
   (set! *shell-eval* ysh-eval)
-  )
+  (repl-set-prompt! "M-x"))
+
 (define (ysh-eval str)
   "; Not implemented")
 
