@@ -1,11 +1,14 @@
 -*- outline -*-
 * prioritized task
 
-** split spans when highlighting
+** split spans when highlighting <done>
 ** perview
 ** hide tag <done>
-** src-highlight cache
-
+** rearrange file renders
+*** src-highlight cache
+*** fundamental for mobile
+*** standalone mode detection
+** tag accessed
 
 ** gzip <done>
 
@@ -30,8 +33,9 @@
 ** shell
 
 ** Remove unused classes from html
-** login as guest user automatically
-** logout
+** login as guest user automatically <done>
+*** /guest
+** logout <done?>
 ** Revise lazy-jump
 ** sregex?
 ** kernel arch detector
