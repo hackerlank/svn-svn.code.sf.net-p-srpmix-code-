@@ -139,7 +139,9 @@
 	       (span (|@| (class "tag-handler")) ,(symbol->string handler)) 
 	       "/" 
 	       (span (|@| (class "tag-score")) ,(number->string score)))
-	 (span (|@| (class "tag-desc")) ,desc))
+	 (span (|@| (class "tag-desc")) ,(if desc
+					     desc
+					     (symbol->string short-desc))))
 	(div
 	 (a (|@| 
 	    (href ,(if local?

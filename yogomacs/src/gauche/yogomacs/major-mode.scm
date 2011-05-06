@@ -16,6 +16,7 @@
 		 ("spec-mode" . "rpm-spec-mode")
 		 ("yacc-mode" . "bison-mode")
 		 ("lex-mode"  . "flex-mode")
+		 ("make-mode" . "makefile-mode")
 		 )
 	       major-mode
 	       major-mode)))

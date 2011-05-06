@@ -35,7 +35,7 @@
 			  :local? #f
 			  :score 0))
 		   tags)))
-    (unless (stitched? (debug id))
+    (unless (stitched? id)
       (let ((rendered-tags (fold (lambda (elt result) 
 				   (let1 r (tag-render elt target-element)
 				     (if r (cons r result) result)))
@@ -43,7 +43,7 @@
 				 tags))
 	    (stitching-proc (stitch-choose-stitching-proc 'tag))
 	    )
-	(stitching-proc id ($ target-element) 
+	(stitching-proc id ($ target-element)
 			`(div (|@| (class "tags-div") (id ,id))
 			      (div (|@| (class ,(string-append "tag-symbol-target"
 							       " "
@@ -160,25 +160,25 @@
 			(alist->object `((class . ,class)
 					 (id . ,id)))))
       (elt.update (substring target.innerHTML start end))
-      elt))
+      (cons elt (elt.identify))))
   (let* ((str target.innerHTML)
 	 (len (string-length str)))
     (let1 elements (if (eq? start 0)
 		       (if (eq? end len)
 			   (list 
-			    (list target #t 0 len))
+			    (cons target #t))
 			   (list
-			    (list (derive-element target 0 end) #t 0 end)
-			    (list (derive-element target end len) #f end len))
+			    (cons (derive-element target 0 end) #t)
+			    (cons (derive-element target end len) #f))
 			   )
 		       (if (eq? end len)
 			   (list
-			    (list (derive-element target 0 start) #f 0 start)
-			    (list (derive-element target start len) #t start len))
+			    (cons (derive-element target 0 start) #f)
+			    (cons (derive-element target start len) #t))
 			   (list
-			    (list (derive-element target 0 start) #f 0 start)
-			    (list (derive-element target start end) #t start end)
-			    (list (derive-element target end len) #f end len)
+			    (cons (derive-element target 0 start) #f)
+			    (cons (derive-element target start end) #t)
+			    (cons (derive-element target end len) #f)
 			    )))
       (if (and (not (null? elements))
 	       (eq? (car (car elements)) target))
@@ -187,14 +187,14 @@
 		     (result #f))
 	    (if (car elements)
 		(let ((elt (car (car elements)))
-		      (symbol-at? (car (cdr (car elements)))))
-		  (target.insert (alist->object `((before . ,elt))))
+		      (symbol-at? (cdr (car elements))))
+		  (target.insert (alist->object `((before . ,(car elt)))))
 		  (loop (cdr elements) (if symbol-at?
-					   elt
-					   result))
-		  )
-		(begin (target.remove)
-		       result)))))))
+					   (cdr elt)
+					   result)))
+		(begin 
+		  (target.remove)
+		  ($ result))))))))
 
 
 (define (tag-find event)

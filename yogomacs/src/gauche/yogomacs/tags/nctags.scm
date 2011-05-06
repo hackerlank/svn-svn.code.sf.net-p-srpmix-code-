@@ -95,8 +95,8 @@
 	  (begin
 	    (set! val
 		  (map (lambda (entry)
-			 (cons #`",(normalize-major-mode (car entry))-mode"
-			       (cdr entry)))
+			 (let1 mode (normalize-major-mode (string-append (car entry) "-mode"))
+			   (cons mode (cdr entry))))
 		       (cdr (es<-ctags-command 'kinds))))
 	    val)))))
 
