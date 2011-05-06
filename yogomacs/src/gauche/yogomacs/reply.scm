@@ -25,6 +25,8 @@
   (use srfi-1)
   (use util.list)
   (use yogomacs.util.sxml)
+  ;;
+  (use yogomacs.config)
   )
 
 (select-module yogomacs.reply)
@@ -95,6 +97,8 @@
 (define-class <shtml-data> (<data>)
   ((mime-type :init-value "text/html")
    ;;
+   (yogomacs-version :in-client `(config version ,values))
+   (yogomacs-release :in-client `(config release ,values))
    (role         :in-client `(params :role-name "role" ,values))
    (user-agent   :in-client `(env "HTTP_USER_AGENT" ,values))
    (smart-phone? :in-client `(env "HTTP_USER_AGENT"
@@ -164,6 +168,7 @@
       ('params (lambda (shtml key) ((ref shtml 'params) key)))
       ('env (lambda (shtml key) (assoc-ref (sys-environ->alist) key)))
       ('meta (lambda (shtml key) (get-meta-from-shtml (ref shtml 'data) key #f)))
+      ('config (lambda (shtml key) ((ref shtml 'config) key)))
       ))
   (append-map (apply$
 	       (lambda (type client-var slot-name value-converter)

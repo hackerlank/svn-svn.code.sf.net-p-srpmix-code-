@@ -129,8 +129,7 @@
 		      (pre (|@| (class "modeline") (id "modeline"))  ,@(make-url-list url shell))
 		      (pre (|@| 
 			    (class "modeline-control") 
-			    (id "modeline-control")
-			    ) 
+			    (id "modeline-control")) 
 			   (a (|@| (href ,#`"file:///srv/sources,|url|")) "@")
 			   )
 		      "\n"

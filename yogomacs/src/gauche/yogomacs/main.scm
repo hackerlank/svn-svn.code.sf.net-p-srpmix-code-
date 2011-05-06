@@ -18,6 +18,8 @@
   (use yogomacs.dests.yarn)
   (use yogomacs.dests.subjects)
   (use yogomacs.dests.debug)
+  ;;
+  (use srfi-1)
   )
 (select-module yogomacs.main)
 
@@ -51,7 +53,9 @@
 (define (install-constants config)
   ;; config could be #f.
   (if config
-      (cons `(version . "version") config)
+      (cons* `(version . ,(version))
+	     `(release . ,(release))
+	     config)
       config))
 
 (define (yogomacs-cgi)
