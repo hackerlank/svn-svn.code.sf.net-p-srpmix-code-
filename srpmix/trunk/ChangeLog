@@ -1,6 +1,6 @@
 2011-05-07  Masatake YAMATO  <yamato@redhat.com>
 
-	* configure.ac: version 3.117.6.
+	* configure.ac: version 3.118.0.
 
 	* src/plugins/_60srpmix-nctags (main): Added --fiedls option.
 
