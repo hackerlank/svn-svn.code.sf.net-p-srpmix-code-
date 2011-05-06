@@ -399,7 +399,7 @@ function twig_record
 #
 function twig_commit_help
 {
-    echo "    " commit|record
+    echo "    " "commit|record"
 }
 
 function twig_commit
