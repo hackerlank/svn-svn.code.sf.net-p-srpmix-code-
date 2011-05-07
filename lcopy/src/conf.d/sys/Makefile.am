@@ -108,6 +108,7 @@ dist_confd_DATA = \
 	sblim-sfcb,trunk.lcopy \
 	sblim-wbemcli,trunk.lcopy \
 	sbuild,trunk.lcopy \
+	scheme2js,released.lcopy \
 	scsi-target-utils,trunk.lcopy \
 	shadow-utils,trunk.lcopy \
 	sop,trunk.lcopy \
