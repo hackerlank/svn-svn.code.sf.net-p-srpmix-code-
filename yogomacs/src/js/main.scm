@@ -11,8 +11,12 @@
       (let* ((id (substring-after hash 1))
 	     (elt ($ id)))
 	;; Not portable
-	(elt.scrollIntoView))))
-  (jump-lazy0 (js-field (js-field *js* "location") "hash")))
+	(elt.scrollIntoView)
+	(when (string-prefix? "L:" id)
+	  (lfringe-set-maker! (string->number (substring-after id 2)) #\>))
+	)))
+  (let1 hash (js-field (js-field *js* "location") "hash")
+    (jump-lazy0 hash)))
 
 (define (load-lazy)
   (define (load-lazy0 url params)

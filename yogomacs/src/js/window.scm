@@ -28,6 +28,31 @@
 
 
 
+;;
+;; Fringe
+;;
+(define (lfringe-set-maker! line-number-of-dentry c)
+  (cond 
+   ((number? line-number-of-dentry)
+    (let1 index (- line-number-of-dentry 1)
+      (let* ((lfringes ($$ ".lfringe"))
+	     (n-lfringes (vector-length lfringes)))    
+	(if (and (<= 0 index)
+		 (< index n-lfringes))
+	    (let1 lfringe (vector-ref lfringes index)
+	      (lfringe.update (char->string c)))
+	    (alert "lfringe-set-maker!: line out of range: "
+		   (number->string line-number-of-dentry))))))
+   ((string? line-number-of-dentry)
+    (let1 dentry (string-append "N:" line-number-of-dentry)
+      (let1 lfringe ($ (string-append "l" "/" dentry))
+	(if (null? lfringe)
+	    (alert "lfringe-set-maker!: dentry not found: " line-number-of-dentry)
+	    (lfringe.update (char->string c))))))
+   (else
+    (alert (string-append "lfringe-set-maker!: unknown type given: "
+			  (write-to-string line-number-of-dentry))))))
+
 (define (lfringe-prepare-draft-text-box e)
   (stitch-prepare-draft-text-box (e.findElement ".lfringe")))
 
