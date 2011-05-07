@@ -35,8 +35,12 @@
 		(elt.insert
 		 (alist->object `((after . ,(sxml->xhtml shtml-frag)))))
 		(loop next))))
-	(elt.insert
-	 (alist->object `((before . ,(sxml->xhtml shtml-frag))))))
+	(let loop ((elt elt))
+	  (let1 prev (elt.previous)
+	    (if (prev.hasClassName "tags-div")
+		(loop prev)
+		(elt.insert
+		 (alist->object `((before . ,(sxml->xhtml shtml-frag)))))))))
     id))
 
 (define (stitched? id)
