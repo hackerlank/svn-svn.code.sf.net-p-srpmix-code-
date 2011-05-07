@@ -86,6 +86,7 @@
 					       :classes classes)
 				       )
 				     (unhighlight elt)
+				     (underline elt)
 				     (set! tag-protected-symbol-elements 
 					   (delete elt
 						   tag-protected-symbol-elements))

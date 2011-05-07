@@ -147,6 +147,11 @@ a:hover {
         background-color: #556b2f !important;
 }
 
+.underline {
+        /* underline */
+        text-decoration: underline;
+}
+
 .lfringe {
         /* lfringe */
         background-color: #1a1a1a;

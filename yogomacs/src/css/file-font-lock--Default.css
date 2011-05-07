@@ -148,6 +148,11 @@ a:hover {
         background-color: #b4eeb4 !important;
 }
 
+.underline {
+        /* underline */
+        text-decoration: underline;
+}
+
 .lfringe {
         /* lfringe */
         background-color: #f2f2f2;

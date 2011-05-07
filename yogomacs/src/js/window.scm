@@ -66,6 +66,11 @@
 	   #f))
 (export "yuhl" unhighlight)
 
+(define (underline target)
+  (if-let1 elt (highlight-choose-element target)
+	   (elt.addClassName "underline")
+	   #f))
+
 ;;
 ;; Positioning
 ;;
