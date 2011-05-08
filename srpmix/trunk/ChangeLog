@@ -1,3 +1,8 @@
+2011-05-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-plugin (list_plugins): Don't call __list_enabled_plugins
+	in loop.
+
 2011-05-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-ix (verify_rootdir): Refer only the first line 
