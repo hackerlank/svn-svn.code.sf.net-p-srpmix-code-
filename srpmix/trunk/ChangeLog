@@ -1,8 +1,15 @@
+2011-05-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.118.1.
+
+	* src/srpmix-wrap (create_core_spec): Fix a typo.
+	`test' is missed in if condition.
+
 2011-05-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 3.118.0.
 
-	* src/plugins/_60srpmix-nctags (main): Added --fiedls option.
+	* src/plugins/_60srpmix-nctags (main): Added --fields option.
 
 2011-05-06  Masatake YAMATO  <yamato@redhat.com>
 
