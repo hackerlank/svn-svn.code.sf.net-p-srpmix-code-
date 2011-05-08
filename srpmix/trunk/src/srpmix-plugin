@@ -122,11 +122,10 @@ function __list_plugins
     local p
     local n
 
-
     find $SRPMIX_PLUGIN_DIR -perm +0100 -type f | sort -n | while read plugin; do
-	n=$($plugin --name)
-
-	echo ${n}  $plugin
+		n=$($plugin --name)
+		
+		echo ${n}  $plugin
     done
 }
 
@@ -155,9 +154,11 @@ function list_plugins
     local name
     local plugin
     local status
+    local list
 
+    list=$(__list_enabled_plugins)
     __list_plugins | sort -n | while read name plugin; do
-	if member_p ${plugin} $(__list_enabled_plugins); then
+	if member_p ${plugin} ${list}; then
 	    status=+
 	else
 	    status=-
