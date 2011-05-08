@@ -160,6 +160,12 @@ function main
     cp $MY_TMPDIR/srpmix/SPECS/*spec ${rootdir}/
 
     echo "${SRPMIX_PKG_VERSION}" > ${rootdir}/SRPMIX
+    echo "#; metadata" >> ${rootdir}/SRPMIX
+    echo "srpmix-version: ${SRPMIX_PKG_VERSION}" >> ${rootdir}/SRPMIX
+    echo "srpmix-expander: srpmix-mock" >> ${rootdir}/SRPMIX
+    echo "#; qip" >> ${rootdir}/SRPMIX
+    rpm -qip $srpm >> ${rootdir}/SRPMIX
+
     echo 0 > ${rootdir}/STATUS
 
     if [ -z "${SRPMIX_CRADLE_NAME}" ]; then

@@ -1,5 +1,15 @@
 2011-05-08  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-ix (verify_rootdir): Refer only the first line 
+	of SRPMIX file.
+	(create_rootdir): Record the name of expander into SRPMIX file.
+	(srpm_deploy): Record the -qip of target srpm file into SRPMIX file.
+
+	* src/srpmix-mock (main): Record the name of expander into SRPMIX file.
+	Record the -qip of target srpm file into SRPMIX file.
+
+2011-05-08  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: version 3.118.1.
 
 	* src/srpmix-wrap (create_core_spec): Fix a typo.

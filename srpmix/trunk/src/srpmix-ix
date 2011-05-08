@@ -371,6 +371,11 @@ function create_rootdir
         IS_ROOTDIR_CREATED=yes
 
         echo "${SRPMIX_PKG_VERSION}" > "${rootdir}/${PROFILE}"
+	echo "#; metadata" >> "${rootdir}/${PROFILE}"
+	echo "srpmix-version: ${SRPMIX_PKG_VERSION}" >> "${rootdir}/${PROFILE}"
+	echo "srpmix-expander: srpmix-ix" >> "${rootdir}/${PROFILE}"
+	# Will do rpm -qip after deploying
+
         if test "x$FREEZE" = "xyes"; then
           chmod go-w "${rootdir}/${PROFILE}"
         fi
@@ -420,11 +425,11 @@ function verify_rootdir
 
     if test -d "${rootdir}"; then
         if test -f "${rootdir}/${PROFILE}"; then
-            if test `cat "${rootdir}/${PROFILE}"` = ${SRPMIX_PKG_VERSION}; then
-                verbose use-rootdir "\"${rootdir}\"" `cat "${rootdir}/${PROFILE}"`
+            if test `head -1 "${rootdir}/${PROFILE}"` = ${SRPMIX_PKG_VERSION}; then
+                verbose use-rootdir "\"${rootdir}\"" `head -1 "${rootdir}/${PROFILE}"`
             else
                 echo "directory version mismatch" 1>&2
-                echo "expected: ${SRPMIX_PKG_VERSION}, existing: `cat ${rootdir}/${PROFILE}`" 1>&2
+                echo "expected: ${SRPMIX_PKG_VERSION}, existing: `head -1 ${rootdir}/${PROFILE}`" 1>&2
                 abort
             fi
         else
@@ -635,6 +640,9 @@ function srpm_deploy
         return 1
     fi
 
+    echo "#; qip" >> "${rootdir}/${PROFILE}"
+    rpm -qip "$srpm_file" >> "${rootdir}/${PROFILE}"
+    
     srpm_save_spec "${rootdir}" "${spec_file}" "${xspec_file}"
 
     if test ${CREATE_ROOTDIR} = yes; then
