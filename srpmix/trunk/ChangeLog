@@ -1,11 +1,14 @@
 2011-05-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-db (do_install): Copy swrf file to /tmp when rpm -Uvh
+	is failed.
+
 	* src/srpmix-plugin (list_plugins): Don't call __list_enabled_plugins
 	in loop.
 
 2011-05-08  Masatake YAMATO  <yamato@redhat.com>
 
-	* src/srpmix-ix (verify_rootdir): Refer only the first line 
+	* src/srpmix-ix (verify_rootdir): Refer only the first line
 	of SRPMIX file.
 	(create_rootdir): Record the name of expander into SRPMIX file.
 	(srpm_deploy): Record the -qip of target srpm file into SRPMIX file.

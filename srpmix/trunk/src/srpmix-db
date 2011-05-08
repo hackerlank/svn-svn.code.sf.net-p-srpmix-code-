@@ -146,7 +146,7 @@ function do_install
     local count
     local max
     local pkgdir
-    
+    local status
 
     if test "x${SRPMIX_DO_HARDLINK}" = xyes; then
 	srpmix_verify_commands ${HARDLINK}
@@ -179,6 +179,22 @@ function do_install
 	    --prefix "$SRPMIX_VAR_DIR" \
 	    $IGNORESIZE \
 	    "$package"
+	status=$?
+	#
+	# About some of plugins packages for kernel
+	# rpm crashes frequently on F13.
+	#
+	# Capture it here for debugging
+	#
+	if [ $status != 0 ]; then
+	    cp "$package" /tmp
+	    echo $SWRFPM -Uv${SWRFPM_OPTS} \
+	    --nodeps \
+	    --dbpath "$SRPMIX_VAR_DIR"/"$db" \
+	    --prefix "$SRPMIX_VAR_DIR" \
+	    $IGNORESIZE \
+	    "$package" > /tmp/crush-with-"$package"
+	fi
 	
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
 
