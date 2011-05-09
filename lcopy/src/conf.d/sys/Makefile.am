@@ -26,6 +26,7 @@ dist_confd_DATA = \
 	dlm,trunk.lcopy \
 	dovecot,2_1.lcopy \
 	e2fsprogs,trunk.lcopy \
+	eclipse-sequoyah,trunk.lcopy \
 	emacs,trunk.lcopy \
 	emacs-mew,trunk.lcopy \
 	emacs-w3m,trunk.lcopy \
