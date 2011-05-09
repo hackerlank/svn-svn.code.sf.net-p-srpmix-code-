@@ -5,7 +5,7 @@
 (use srfi-1)
 
 (define jboss-svn-page2 "http://anonsvn.jboss.org/repos/svn-page2.html")
-(define inaccessible-projects '("teiiddesigner" "installer"))
+(define inaccessible-projects '("teiiddesigner" "installer" "repository.jboss.org"))
 (define (svn-page2-top droppers)
   (let1 sxml (call-with-input-process
 		 `(wget -q -O - ,jboss-svn-page2)
@@ -43,8 +43,9 @@
      (let ((project (car top))
 	   (url (cdr top)))
        (let1 dirs (svn-page2-project-dump url)
-	 (format #t "~a -> ~a\n" project url)
-	 (for-each 
+	 #;(format #t "~a -> ~a\n" project url)
+	 (format #t "time svn checkout ~a ~a\n" url project)
+	 #;(for-each 
 	  (lambda (dir)
 	    (when (#/\/$/ dir)
 	      (format #t "	~a -> ~a/~a\n" dir url dir)))

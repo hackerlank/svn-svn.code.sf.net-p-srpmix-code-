@@ -93,3 +93,19 @@ rl_forward_word (count, key)") :which-func ("rl_end_of_line"))) :annotation-list
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-89.EL/pre-build/kernel-2.6.9/linux-2.6.9/configs/kernel-2.6.9-x86_64.config" :point 117 :coding-system undecided-unix :line 6 :surround ("#
 " "" "CONFIG_X86_64=y
 CONFIG_64BIT=y") :which-func ("CONFIG_X86_64"))) :annotation-list ((annotation :type text :data "THIS IS AN EXAMPLE ANNOTATION.")) :date "Thu Aug 12 09:53:13 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (example))
+
+(stitch-annotation :version 0 :target-list ((target :type directory :directory "/srv/sources/" :item ".")) :annotation-list ((annotation :type text :data "THIS IS SOURCES.")) :date "Sun Dec 12 09:10:18 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (*DRAFT*))
+
+(stitch-annotation :version 0 :target-list ((target :type directory :directory "/srv/sources/sources/" :item ".")) :annotation-list ((annotation :type text :data "XFF")) :date "Sun Dec 12 12:09:01 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (*DRAFT*))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/dists/rhel5su4/packages/k/kernel/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/fs/nfs/read.c" :point 18494 :coding-system undecided-unix :line 724 :surround ("	 */
+" "" "	ret = nfs_readpages_from_fscache(desc.ctx, inode, mapping,
+					 pages, &nr_pages);") :which-func ("nfs_readpages"))) :annotation-list ((annotation :type text :data "nfs_file_read <ここでgetattrしてサーバ側で変更があれば、キャッシュをinvalidとする処理がある？>
+-> generic_file_aio_read
+--> <page cache layer> ... nfs_readpages
+---> nfs_readpages_from_fscache|read_cache_pages")) :date "Thu Dec 30 01:30:25 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (*DRAFT* nfs-atime))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/dists/rhel5su4/packages/k/kernel/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/fs/nfs/inode.c" :point 19252 :coding-system undecided-unix :line 725 :surround ("			nfs_sync_mapping(mapping);
+" "" "		invalidate_inode_pages3(mapping);
+") :which-func ("nfs_revalidate_mapping"))) :annotation-list ((annotation :type text :data "ここでページキャッシュから追い出している。")) :date "Mon Jan  3 17:14:30 2011" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (nfs-atime))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/dists/rhel5su4/packages/k/kernel/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/mm/filemap.c" :point 31149 :coding-system undecided-unix :line 1100 :surround ("	if (filp)
+" "" "		file_accessed(filp);
+}") :which-func ("do_generic_mapping_read"))) :annotation-list ((annotation :type text :data "ここでタイムスタンプ(atime)を更新")) :date "Mon Jan  3 18:16:11 2011" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (nfs-atime))
