@@ -47,6 +47,13 @@
 (define (ysh-eval str)
   "; Not implemented")
 
+;(define-macro (define-reader name params)...)
+;(define-macro (define-command name 
+;		((params <type>)
+;		 )
+;		...))
+
+
 (define (nologin-init)
   (set! *shell-dir* "")
   (set! *shell 'nologin)
