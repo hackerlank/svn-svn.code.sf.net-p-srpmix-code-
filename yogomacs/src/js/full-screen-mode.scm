@@ -5,9 +5,9 @@
 				     "modeline"
 				     "modeline-control"
 				     "minibuffer-shell"
-					;"minibuffer"
+				     ;;"minibuffer"
 				     "minibuffer-prompt-shell"
-					;"minibuffer-prompt"
+				     ;;"minibuffer-prompt"
 				     ))
 (define full-screen-id "toggle-full-screen")
 
