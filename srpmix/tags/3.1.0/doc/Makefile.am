@@ -1,1 +1,0 @@
-EXTRA_DIST=srpmix-japanese.rst
