@@ -253,13 +253,14 @@ EOF
 fi
 
 cat <<EOF
-srpmix-plugin --enable=%{_srpmix_core_plugins} \
-    %{_srpmix_plugin_option}                   \
+srpmix-plugin --disable=ALL --enable=%{_srpmix_core_plugins} \
+    %{_srpmix_plugin_option}                                 \
     %{_builddir}/%{name}
 
 %install
 rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$installdir
+mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins
 
 from=%{_builddir}/%{name}
 to=\$RPM_BUILD_ROOT/$installdir

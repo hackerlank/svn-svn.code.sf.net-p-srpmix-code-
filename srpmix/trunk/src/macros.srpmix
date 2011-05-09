@@ -4,7 +4,8 @@
 %_srpmix_plugin_debug_option     %{nil}
 %_srpmix_plugin_option           %{_srpmix_plugin_debug_option}
 
-%_srpmix_core_plugins            50srpmix-coreutils,50srpmix-file,60srpmix-etags
+%_srpmix_core_plugins            coreutils,file,etags
+# %_srpmix_core_plugins            ${nil}
 
 %_srpmix_db_debug_option         %{nil}
 %_srpmix_db_option               %{_srpmix_db_debug_option}

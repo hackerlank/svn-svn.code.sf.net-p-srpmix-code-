@@ -134,9 +134,11 @@ function run_file_cmd
 	| grep -v ^.\$ \
 	| grep -v ^./plugins \
 	| grep -v ^./archives \
+	| grep -v ^./vanilla \
 	| grep -v ^./srpmix-LOG \
 	| grep -v ^./srpmix-SPECS \
 	| grep -v ^./SPECS \
+	| grep -v ^./specs.spec \
 	| xargs -d '\n' -n 1 $cmd >> $o )
     es_print "$cmd-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
 }

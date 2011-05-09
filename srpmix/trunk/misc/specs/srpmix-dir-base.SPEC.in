@@ -3,7 +3,7 @@ Summary: Base directories for source code archives deployed by srpmix
 Name: srpmix-dir-base
 Version: #PACKAGE_VERSION#
 Release: #RPM_RELEASE#
-License: GPL
+License: GPLv3
 Group: Development/Tools
 URL: http://srpmix.org
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root

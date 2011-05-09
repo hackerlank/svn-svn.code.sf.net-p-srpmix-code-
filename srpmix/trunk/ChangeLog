@@ -1,5 +1,21 @@
 2011-05-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 3.119.0. 
+
+	* src/srpmix-wrap (create_core_spec): make plugins dir.
+
+	* src/plugins/50srpmix-coreutils (LIBSRPMIX): Ignore vanilla and specs.spec.
+
+	* src/plugins/50srpmix-file (LIBSRPMIX): Ditto.
+
+	* src/macros.srpmix (_srpmix_core_plugins): Use plugin names, not
+	plugin files.
+
+	* misc/specs/srpmix-dir-base.SPEC.in (License): Set GPLv3 explicitly.
+
+	* src/srpmix-wrap (create_core_spec): Disable ALL plugins first then
+	enable necessary ones.
+
 	* src/srpmix-db (do_install): Copy swrf file to /tmp when rpm -Uvh
 	is failed.
 
