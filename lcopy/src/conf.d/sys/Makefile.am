@@ -43,6 +43,7 @@ dist_confd_DATA = \
 	glibc,ports.lcopy \
 	glibc,trunk.lcopy \
 	gnash,trunk.lcopy \
+	gonzui,trunk.lcopy \
 	goocanvas,trunk.lcopy \
 	grub2,trunk.lcopy \
 	gstreamer,trunk.lcopy \
