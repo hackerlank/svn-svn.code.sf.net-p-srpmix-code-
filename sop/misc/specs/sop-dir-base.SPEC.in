@@ -1,0 +1,44 @@
+# -*- rpm-spec -*-
+Summary: Sources top level directories including attic
+Name: sop-dir-base
+Version: @PACKAGE_VERSION@
+Release: @RPM_RELEASE@
+License: GPLv3
+Group: Development/Tools
+URL: http://srpmix.org
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildArchitectures: noarch
+
+%description
+Sources top level directories including attic.
+
+%prep
+rm -rf $RPM_BUILD_ROOT
+
+%build
+
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT/srv
+
+mkdir -p $RPM_BUILD_ROOT/srv/sources
+mkdir -p $RPM_BUILD_ROOT/srv/dists
+mkdir -p $RPM_BUILD_ROOT/srv/packages
+mkdir -p $RPM_BUILD_ROOT/srv/plugins
+mkdir -p $RPM_BUILD_ROOT/srv/attic
+mkdir -p $RPM_BUILD_ROOT/srv/attic/cradles
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root,-)
+/srv/sources
+/srv/dists
+/srv/packages
+/srv/plugins
+/srv/attic
+/srv/attic/cradles
+
+%changelog
+* Mon May 09 2011 Masatake YAMATO <yamato@redhat.com>
+- Initial build.
