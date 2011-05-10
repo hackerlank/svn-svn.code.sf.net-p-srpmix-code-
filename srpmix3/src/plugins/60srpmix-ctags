@@ -96,7 +96,7 @@ function parse_arguments
 		;;
 	    --ctags-args=*)
 		CTAGS_ARGS="${1/--ctags-args=}"
-		CTAGS_ARGS=$(tr ',' ' ' <<<"$CTAGS_ARGS"
+		CTAGS_ARGS=$(tr ',' ' ' <<<"$CTAGS_ARGS")
 		;;
             --ignore-kindex)
 	        IGNORE_KINDEX=1
