@@ -37,14 +37,15 @@
 (define (nctags-tag-for name real-src-path params config)
   (if-let1 nctags (find-nctags-for real-src-path config)
 	   (cond 
-	    ((params "symbol") => (lambda (symbol)
-				    (map (cut conv
-					       <> 
-					       real-src-path
-					       symbol 
-					       (params "major-mode")
-					       config)
-					 (ctags-for-symbol nctags symbol))))
+	    ((and (equal? (params "main-key") "symbol")
+		  (params "symbol")) => (lambda (symbol)
+					  (map (cut conv
+						    <> 
+						    real-src-path
+						    symbol 
+						    (params "major-mode")
+						    config)
+					       (ctags-for-symbol nctags symbol))))
 	    (else (list)))
 	   (list)))
 
@@ -57,7 +58,12 @@
 ;;         :local? #t
 ;;         :score 51)
 ;; 
-(define (conv es real-src-path symbol major-mode config)
+(define (extra->major-mode extra)
+  (if-let1 lang (get-keyword :language extra #f)
+	   (normalize-major-mode (string-append lang "-mode"))
+	   #f))
+
+(define (conv es real-src-path symbol major-mode-in-request config)
   (let-keywords (cdr es)
       ((file 'file)
        (line 'line)
@@ -75,17 +81,45 @@
 	:target (symbol ,symbol)
 	:url ,#`",(real->web real-def-path config)#L:,|line|"
 	:short-desc ,kind
-	:desc ,(make-desc kind major-mode extra)
+	:desc ,(make-desc kind major-mode-in-request extra)
 	:local? #t
-	:score ,(let1 same-file? (equal? real-def-path real-src-path)
-		  (+ 50 
-		     (if (equal? real-def-path real-src-path)
-			 1
-			 0)
-		     (if (and (equal? real-def-path real-src-path) scope )
-			 10
-			 0) 
-		     (if major-mode 1 0)))))))
+	:score ,(make-score real-src-path
+			    real-def-path
+			    scope
+			    major-mode-in-request
+			    extra)))))
+
+(define (make-desc kind major-mode-in-request extra)
+  (define (desc-of kind major-mode)
+    (if major-mode
+	(let1 kinds (assoc-ref (kinds-list)
+			       major-mode
+			       (list))
+	  (let1 desc (car (assq-ref kinds kind '(#f)))
+	    desc))
+	#f))
+  (string-append (or (any (pa$ desc-of kind) (list (extra->major-mode extra)
+						   major-mode-in-request
+						   "c-mode"))
+			  "???")
+		 (write-to-string extra)))
+
+(define (make-score real-src-path
+		    real-def-path
+		    scope
+		    major-mode-in-request
+		    extra)
+  (let1 same-file? (equal? real-def-path real-src-path)
+    (+ 50 
+       (if (equal? real-def-path real-src-path)
+	   1
+	   0)
+       (if (and (equal? real-def-path real-src-path) scope )
+	   3
+	   0) 
+       (if (equal? (extra->major-mode extra) 
+		   major-mode-in-request)
+	   1 0))))
 
 (define kinds-list
   (let1 val #f
@@ -99,17 +133,6 @@
 			   (cons mode (cdr entry))))
 		       (cdr (es<-ctags-command 'kinds))))
 	    val)))))
-
-(define (make-desc kind major-mode extra)
-  (let1 major-mode (or major-mode "c-mode")
-    (let1 kinds (assoc-ref (kinds-list)
-			   major-mode
-			   (list))
-      (let1 desc (car (assq-ref kinds kind '(#f)))
-	(cond
-	 (desc (string-append desc (write-to-string extra)))
-	 ((equal? major-mode "c-mode") desc)
-	 (else (make-desc kind #f extra)))))))
 
 (define (ctags-for-symbol nctags symbol)
   (let* ((proc (run-process
