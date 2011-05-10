@@ -20,11 +20,14 @@
 	   (body (if attrs
 		     (cddr sxml)
 		     (cdr sxml))))
-      (if (null? body)
-	  (list "<" tag (if attrs (sxml->xhtml0 attrs) "") "/>")
+      ;; (if (null? body)...
+      ;; " " before / is needed.
+      ;; (list "<" tag (if attrs (sxml->xhtml0 attrs) "") " />")
+	  (list "<" tag (if attrs (sxml->xhtml0 attrs) "") ">"
+		)
 	  (list "<" tag (if attrs (sxml->xhtml0 attrs) "") ">"
 		(map sxml->xhtml0 body)
-		"</" tag ">"))))))
+		"</" tag ">")))))
 
 (define (sxml->xhtml sxml)
   (tree->string (sxml->xhtml0 sxml)))

@@ -1,5 +1,19 @@
-(define (tag-render tag target-element)
+(define (tag-id-for tag)
   (let* ((tag (cdr tag))
+	 (handler (kref tag :handler #f))
+	 (target (kref tag :target #f))
+	 (url (kref tag :url #f)))
+    (html-escape-string
+     (string-append (symbol->string handler) "/" (if (and target
+							  (list? target)
+							  (not (null? target)))
+						     (cadr target)
+						     (write-to-string target))
+						     "@" url))))
+
+(define (tag-render tag target-element)
+  (let* ((id (tag-id-for tag))
+	 (tag (cdr tag))
 	 (handler (kref tag :handler #f))
 	 (target (kref tag :target #f))
 	 (url (kref tag :url #f))
@@ -7,7 +21,7 @@
 	 (desc (kref tag :desc #f))
 	 (local? (kref tag :local? #f))
 	 (score (kref tag :score #f))
-	 (id (string-append (symbol->string handler) "/" (write-to-string target) "@" url)))
+	 (preview-url (kref tag :preview-url #f)))
     (let1 render-proc (stitch-choose-render-proc 'tag)
 	  (render-proc id
 		       handler
@@ -16,16 +30,17 @@
 		       short-desc
 		       desc
 		       local?
-		       score))))
+		       score
+		       preview-url))))
 
-(define (tag-id-for symbol line)
+(define (tags-id-for symbol line)
   (string-append "T:" symbol "@" (write-to-string line)))
 (define (stitch-tags tags . rest)
   (let* ((target-element (kref rest :target-element #f))
 	 (symbol (kref rest :symbol "unknown"))
 	 (line (kref rest :line #f))
 	 (classes (kref rest :classes (list)))
-	 (id (tag-id-for symbol line))
+	 (id (tags-id-for symbol line))
 	 (tags (if (null? tags)
 		   `((tag :handler null
 			  :target (symbol ,symbol)
@@ -58,6 +73,20 @@
 								 "').hide();" )))
 				       ,symbol))
 			      ,@(reverse rendered-tags)))
+	(for-each (lambda (tag)
+		    (let* ((tag0 tag)
+			   (tag (cdr tag))
+			   (preview-url (kref tag :preview-url #f))
+			   (preview-params (kref tag :preview-params '()))
+			   )
+		      (when preview-url
+			(let1 id (tag-id-for tag0)
+			  (load-lazy preview-url preview-params 
+				     (string-append "v:" id)
+				     #f)
+			  )))
+		    )
+		  tags)
 	))))
 
 (define-stitch tag-container stitch-tags)
@@ -222,7 +251,7 @@
 	(event.stop)
 	(let* ((target (tag-split-target! target start end))
 	       (line (line-number-at target))
-	       (id (tag-id-for symbol line)))
+	       (id (tags-id-for symbol line)))
 	  (if symbol
 	      (cond
 	       ((stitched? id)

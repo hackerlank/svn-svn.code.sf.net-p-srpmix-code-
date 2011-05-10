@@ -153,6 +153,11 @@ a:hover {
         text-decoration: underline;
 }
 
+.overline {
+        /* overline */
+        text-decoration: overline;
+}
+
 .lfringe {
         /* lfringe */
         background-color: #f2f2f2;

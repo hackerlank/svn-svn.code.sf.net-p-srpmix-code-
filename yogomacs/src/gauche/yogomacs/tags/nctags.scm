@@ -43,7 +43,7 @@
 						    <> 
 						    real-src-path
 						    symbol 
-						    (params "major-mode")
+						    params
 						    config)
 					       (ctags-for-symbol nctags symbol))))
 	    (else (list)))
@@ -63,7 +63,7 @@
 	   (normalize-major-mode (string-append lang "-mode"))
 	   #f))
 
-(define (conv es real-src-path symbol major-mode-in-request config)
+(define (conv es real-src-path symbol params config)
   (let-keywords (cdr es)
       ((file 'file)
        (line 'line)
@@ -76,10 +76,21 @@
 						  0)
 				      "pre-build"
 				      file))
-	   (path-distance (path-distance real-src-path real-def-path)))
+	   (path-distance (path-distance real-src-path real-def-path))
+	   (major-mode-in-request (params "major-mode"))
+	   ;; in-shell?
+	   (shell (params "shell")))
       `(nctags 
 	:target (symbol ,symbol)
 	:url ,#`",(real->web real-def-path config)#L:,|line|"
+	:preview-url ,#`",(real->web real-def-path config)"
+	:preview-params ,(let* ((len 4)
+				(start (if (< line 2) line (- line 1)))
+				(end (if (< line 2) (+ line len) (+ line len -1))))
+			   `((range . ,#`",|start|-,|end|")
+			     ;; TODO
+			     (shell . ,(or shell #t))
+			     ))
 	:short-desc ,kind
 	:desc ,(make-desc kind major-mode-in-request extra)
 	:local? #t

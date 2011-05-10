@@ -18,31 +18,33 @@
   (let1 hash (js-field (js-field *js* "location") "hash")
     (jump-lazy0 hash)))
 
-(define (load-lazy)
-  (define (load-lazy0 url params)
+(define (load-lazy url params to hook)
+  (let1 parameters (alist->object params)
     (let1 options (alist->object `((method . "get")
-				   (parameters . ,params)
+				   (parameters . ,parameters)
 				   (onFailure . ,(lambda ()
 						   (message "Error in load-lazy")
 						   (alert "Error in load-lazy")))
 				   ;; TODO: onSuccess?
 				   (onComplete . ,(lambda (response json)
 						    (message)
-						    (run-hook find-file-post-hook url params response json)))))
-      (js-new Ajax.Updater "buffer" url options)))
+						    (when hook
+						      (run-hook hook url parameters response json))))))
+      (js-new Ajax.Updater to url options))))
+
+(define (load-buffer-lazy)
   (define (build-param meta-key param-name conv)
     (if-let1 v (read-meta meta-key)
 	     `((,param-name . ,(conv v)))
 	     `()))
   (define id (lambda (id) id))
   (let ((url (read-meta "next-path"))
-	(params (alist->object
-		 (append
+	(params (append
 		  (build-param "next-range" 'range id)
 		  (build-param "next-enum"  'enum id)
-		  (build-param "shell" 'shell symbol->string)))))
+		  (build-param "shell" 'shell symbol->string))))
     (message "Loading...~a" url)
-    (load-lazy0 url params)))
+    (load-lazy url params "buffer" find-file-post-hook)))
 
 (define (focus) 
   (let1 elt ($ "minibuffer") 
@@ -85,7 +87,7 @@
   (let1 location (js-field *js* "location")
     (location.reload)))
 
-(add-hook! find-file-pre-hook load-lazy)
+(add-hook! find-file-pre-hook load-buffer-lazy)
 (add-hook! find-file-pre-hook header-line-init)
 (add-hook! find-file-pre-hook repl-init)
 (add-hook! find-file-pre-hook focus)

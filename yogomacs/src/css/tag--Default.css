@@ -55,3 +55,11 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>. */
 .tag-handler-span {
     float: right;
 }
+
+.tag-preview {
+    color: #000000;
+    background-color: #ffffff;   
+    border: solid;
+    border-width: 1px;
+    border-color: #000000;;
+}

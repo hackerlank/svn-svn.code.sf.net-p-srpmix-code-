@@ -134,7 +134,8 @@
 			   short-desc
 			   desc
 			   local?
-			   score)
+			   score
+			   preview?)
   `(div (|@|
 	 (class "tag-div")
 	 (id ,(string-append "t:" id)))
@@ -148,11 +149,15 @@
 					     (symbol->string short-desc))))
 	(div
 	 (a (|@| 
-	    (href ,(if local?
-		       (string-append *shell-dir* url)
-		       url)))
-	   ,url))
-	))
+		 (href ,(if local?
+			    (string-append *shell-dir* url)
+			    url)))
+		,url))
+	,@(if preview?
+	      `((div (|@| 
+		     (class "tag-preview")
+		     (id ,(string-append "v:" id)))))
+	      `())))
 
 (define (stitch-choose-render-proc type)
   (cond

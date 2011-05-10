@@ -54,7 +54,7 @@
     `(begin
        (alert (list "debug: " ',exp))
        (let1 ,v ,exp
-	 (alert (list ',exp '=> ,v))
+	 (alert (list ',exp '=> (with-output-to-string (lambda () (write ,v)))))
 	 ,v))))
 
 (define-macro (receive formals expression . body)
