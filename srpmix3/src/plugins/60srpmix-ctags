@@ -29,6 +29,8 @@ ROOTDIR=
 CTAGS=ctags
 CTAGS_ARGS=
 
+IGNORE_KINDEX=
+
 BUILDDIR=
 LOGFILE=
 PLUGINDIR=
@@ -94,7 +96,11 @@ function parse_arguments
 		;;
 	    --ctags-args=*)
 		CTAGS_ARGS="${1/--ctags-args=}"
+		CTAGS_ARGS=$(tr ',' ' ' <<<"$CTAGS_ARGS"
 		;;
+            --ignore-kindex)
+	        IGNORE_KINDEX=1
+	        ;;
 	    *)
 		break
 		;;
@@ -147,19 +153,21 @@ function main
     parse_arguments "$@"
     srpmix_verify_commands "${CTAGS}"
 
-    if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\|kernel%{\?variant}\)$' \
-	$SPEC > /dev/null 2>&1 \
-	&& test $(basename $SPEC) != "kernel-2.4.spec"; then
-	for x in ${BUILDDIR}/*/linux*/Makefile; do
-	    if test -f $x; then
-		if grep '\(^tags:\)\|\(tags \)' $x > /dev/null 2>&1; then
+    if [ -z "$IGNORE_KINDEX" ]; then
+	if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\|kernel%{\?variant}\)$' \
+	    $SPEC > /dev/null 2>&1 \
+	    && test $(basename $SPEC) != "kernel-2.4.spec"; then
+	    for x in ${BUILDDIR}/*/linux*/Makefile; do
+		if test -f $x; then
+		    if grep '\(^tags:\)\|\(tags \)' $x > /dev/null 2>&1; then
 	        # srpmix-kindex will make indexes.
-		    return 0
+			return 0
+		    fi
 		fi
-	    fi
-	done
+	    done
+	fi
     fi
-
+    
     if ( ! test -e "${PLUGINDIR}/tags" ) ||
        ( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/tags" ) || 
        ( test "$FORCE" = yes ); then

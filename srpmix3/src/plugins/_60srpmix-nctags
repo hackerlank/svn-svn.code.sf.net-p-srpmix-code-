@@ -82,7 +82,7 @@ function main
 	return 0
     fi
 
-    ctags_args="--name=$NAME --ctags-args=--excmd=number --fields=+afiklmnsSzt --extra=+f+q"
+    ctags_args="--name=$NAME --ignore-kindex --ctags-args=--excmd=number,--fields=+afiklmnsSzt,--extra=+f+q"
     for a in "$@"; do
 	case $a in
 	    (--name=*)
