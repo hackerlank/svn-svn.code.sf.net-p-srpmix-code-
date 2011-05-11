@@ -1,5 +1,11 @@
 2011-05-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/cradle-confs/lcopy.user (DIST_MAPPING): Set lcopy.
+
+	* src/cradle-confs/lcopy.sys (DIST_MAPPING): Set lcopy.
+
+2011-05-11  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: Version 0.4.3.
 
 	* src/Makefile.am (dist_pkgdata_SCRIPTS): Added dist-map
