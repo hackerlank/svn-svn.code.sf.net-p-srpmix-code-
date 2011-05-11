@@ -52,7 +52,7 @@
 ;		((params <type>)
 ;		 )
 ;		...))
-
+;(define-macro (define-reporter ...))
 
 (define (nologin-init)
   (set! *shell-dir* "")

@@ -52,6 +52,8 @@ scheme2js_input = \
 	sxml.scm		 \
 	js.scm	                 \
 	\
+	hook.scm		 \
+	\
 	decls.scm		 \
 	\
 	stitch.scm               \
