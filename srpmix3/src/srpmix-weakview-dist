@@ -186,6 +186,8 @@ EOF
 	echo "cat > \$builddistdir/dist-mapping.es <<\"EOF\""
 	echo ';; -*- scheme -*-'
 	cat  "$DISTMAP"
+	# Next line is needed to handle the case that the file "$DISTMAP" is not ended with newline.
+	echo
 	echo "EOF"
 	echo
 	echo

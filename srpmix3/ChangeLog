@@ -1,17 +1,22 @@
+2011-05-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Insert newline after
+	doing cat the original dist mapping.
+
 2011-05-10  Masatake YAMATO  <yamato@redhat.com>
 
-	* configure.ac: Version 3.119.1. 
-	
+	* configure.ac: Version 3.119.1.
+
 	* src/plugins/60srpmix-ctags (IGNORE_KINDEX): New option.
 	(parse_arguments): Split the args passed to ctags with ",".
 
-	* src/plugins/_60srpmix-nctags (main): Use "," as separator 
+	* src/plugins/_60srpmix-nctags (main): Use "," as separator
 	for arguments passed to ctags plugin. Passing --ignore-kindex to ctags
 	plugin.
 
 2011-05-09  Masatake YAMATO  <yamato@redhat.com>
 
-	* configure.ac: Version 3.119.0. 
+	* configure.ac: Version 3.119.0.
 
 	* src/srpmix-wrap (create_core_spec): make plugins dir.
 
