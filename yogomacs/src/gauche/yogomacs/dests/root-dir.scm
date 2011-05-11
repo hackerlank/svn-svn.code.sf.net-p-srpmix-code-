@@ -12,7 +12,7 @@
   (use yogomacs.dentries.redirect)
   (use yogomacs.renderers.dired)
   (use yogomacs.path)
-  (use yogomacs.shell)
+  (use yogomacs.shell)			; Needed?
   ;;
   (use yogomacs.dests.css)
   (use yogomacs.dests.dir)
@@ -91,7 +91,7 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
 		  ,(NEWS-entry path)
 		  ,(commands-entry path)
 		  ,(absentees-entry path)
-		  ,@(if (in-shell? params)
+		  ,@(if (params "shell")
 			`(,(annotations-entry path))
 			`(,(login-entry path)
 			  ,(guest-entry path)
@@ -131,7 +131,7 @@ customizable(TODO), self-documenting(TODO) real-time display source viewer.\n"))
      (#/^\/ysh(?:\/.+)?$/   ,ysh-dir-dest)
 
      ;;
-     ,@(if (in-shell? params)
+     ,@(if (params "shell")
 	   `(
 	    )
 	   `(

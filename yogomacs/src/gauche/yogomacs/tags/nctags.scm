@@ -77,9 +77,7 @@
 				      "pre-build"
 				      file))
 	   (path-distance (path-distance real-src-path real-def-path))
-	   (major-mode-in-request (params "major-mode"))
-	   ;; in-shell?
-	   (shell (params "shell")))
+	   (major-mode-in-request (params "major-mode")))
       `(nctags 
 	:target (symbol ,symbol)
 	:url ,#`",(real->web real-def-path config)#L:,|line|"
@@ -89,7 +87,7 @@
 				(end (if (< line 2) (+ line len) (+ line len -1))))
 			   `((range . ,#`",|start|-,|end|")
 			     ;; TODO
-			     (shell . ,(or shell #t))
+			     (shell . "preview")
 			     ))
 	:short-desc ,kind
 	:desc ,(make-desc kind major-mode-in-request extra)

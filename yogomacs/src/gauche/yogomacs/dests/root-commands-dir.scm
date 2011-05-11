@@ -20,7 +20,7 @@
 (select-module yogomacs.dests.root-commands-dir)
 
 (define (dest lpath params config)
-  (let* ((yogomacs (in-shell? params))
+  (let* ((yogomacs (params "shell"))
 	 (shtml (dired
 		 (compose-path lpath)
 		 (cons* 
@@ -50,7 +50,7 @@
   `((#/^\/commands$/ ,dest)
     (#/^\/commands\/ysh$/ ,(pa$ shell-redirect-dest 'ysh))
     (#/^\/commands\/checkout\/.*/ ,checkout-dest)
-    ,@(if (in-shell? params)
+    ,@(if (params "shell")
 	  (list)
 	  (list
 	   `(#/^\/commands\/login$/ ,login-dest)

@@ -1,6 +1,5 @@
 (define-module yogomacs.shell
-  (export in-shell?
-	  <shell>
+  (export <shell>
 	  define-shell
 	  define-shell0
 	  shell-ref
@@ -12,9 +11,6 @@
   (use yogomacs.dentries.redirect))
 
 (select-module yogomacs.shell)
-
-(define (in-shell? params)
-  (params "shell"))
 
 (define-class <shell> ()
   ((name :init-keyword :name)
