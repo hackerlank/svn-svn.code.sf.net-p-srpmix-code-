@@ -52,15 +52,15 @@ function mirror
     fi
 
 
-    local handler="${PKGDATADIR}/mirror-${METHOD}"
+    local mirror_handler="${PKGDATADIR}/mirror-${METHOD}"
     local ndir="${SOP_CRADLES_DIR}/${name}"
     local odir="${ndir}/mirror"
     local ldir="${ndir}/log"
     local date=$(date --rfc-3339=date)
 
 
-    if ! test -x "${handler}"; then
-	echo "No mirror handler for method: $method in $PKGDATADIR" 1>&2
+    if ! test -x "${mirror_handler}"; then
+	echo "No mirror handler for method: $METHOD in $PKGDATADIR" 1>&2
 	return 1
     fi
 
@@ -75,9 +75,9 @@ function mirror
 
     cd ${odir}
 
-    local log=${ldir}/mirror-${date}.log
+    local mirror_log=${ldir}/mirror-${date}.log
 
-    "${handler}" ${cf} "${log}"
+    "${mirror_handler}" ${cf} "${mirror_log}"
 
     if [ -z "$BUILDERS" ]; then
 	return
@@ -100,22 +100,32 @@ function mirror
 	mv -f ${ndir}/.mirror-pkgs ${ndir}/mirror-pkgs
     fi
 
+
+
     local dmap_dir=${ndir}/dist-mapping
-    local mirror_dir=${odir}
-    local dist_name
+    local dist_map_log=${ldir}/dist-map-${date}.log
+    local dist_map_method
+
+
     mkdir -p "${dmap_dir}"
+
     if [ "${DIST_MAPPING}" = yes ]; then
-	dist_name=${name}
-	find "${mirror_dir}" -name '*.src.rpm' \
-	    | srpmix-wrap --just-print \
-	    > "${dmap_dir}/.${dist_name}.es"
-	mv -f "${dmap_dir}/.${dist_name}.es" "${dmap_dir}/${dist_name}.es"
+	dist_map_method=srpms
     elif [ "${DIST_MAPPING}" = no ]; then
-	:
+	dist_map_method=nop
+    elif [ -z "${DIST_MAPPING}" ]; then
+	dist_map_method=nop
     else
-	:
+	dist_map_method=${DIST_MAPPING}
     fi
 
+    local dist_map_handler="${PKGDATADIR}/dist-map-${dist_map_method}"
+	
+    if ! [ -x "${dist_map_handler}" ]; then
+	echo "No dist map handler for method: ${dist_map_method} in ${PKGDATADIR}" 1>&2
+	return 1
+    fi
+    ${dist_map_handler} ${cf} "${dist_map_log}"
 }
 
 function main

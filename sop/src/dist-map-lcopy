@@ -1,0 +1,46 @@
+#!/bin/bash
+
+cf=$1
+log=$2
+
+source $cf
+touch ${log}
+
+ndir=$(dirname $cf)
+name_base=$(tr "." "-" <<<$(basename $ndir))
+mirror_dir=${ndir}/mirror
+dmap_dir=${ndir}/dist-mapping
+
+function emit
+{
+    local branch=$1
+    local output=${name_base}-${branch}.es
+
+    rm -f ${dmap_dir}/.${output}
+
+    for d in ${mirror_dir}/*/*/${branch}; do
+	if ! [ -d $d ]; then
+	    break;
+	fi
+	local package=$(basename $(dirname $d))
+	emit1 $branch $package >> ${dmap_dir}/.${output}
+	#emit1 $branch $package >> /dev/stdout
+    done
+    
+    if [ -e ${dmap_dir}/.${output} ]; then
+	mv ${dmap_dir}/.${output}  ${dmap_dir}/${output} 
+    fi
+}
+
+
+function emit1
+{
+    local branch=$1
+    local package=$2
+    echo \
+	"(srpmix-wrap name :target-srpm \"${package}-^lcopy-${branch}\" :package \"${package}\" :version \"^lcopy\" :release \"${branch}\" :wrapped-name \"${package}-^lcopy-${branch}-srpmix\")" 
+}
+
+
+emit trunk
+emit released

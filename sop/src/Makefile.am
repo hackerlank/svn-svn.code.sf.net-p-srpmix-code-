@@ -17,6 +17,11 @@ dist_pkgdata_SCRIPTS= \
 	mirror-alias      \
 	mirror-nop        \
 	\
+	\
+	dist-map-nop      \
+	dist-map-srpms    \
+	dist-map-lcopy    \
+	\
 	$(NULL)
 
 dist_bin_SCRIPTS =				\

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cf=$1
+log=$2
+
+source $cf
+touch ${log}
+
+ndir=$(dirname $cf)
+dist_name=$(basename $ndir)
+mirror_dir=${ndir}/mirror
+dmap_dir=${ndir}/dist-mapping
+
+find "${mirror_dir}" -name '*.src.rpm' \
+    | srpmix-wrap --just-print         \
+    > "${dmap_dir}/.${dist_name}.es"
+mv -f "${dmap_dir}/.${dist_name}.es" "${dmap_dir}/${dist_name}.es"

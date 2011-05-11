@@ -1,3 +1,13 @@
+2011-05-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.4.3.
+
+	* src/Makefile.am (dist_pkgdata_SCRIPTS): Added dist-map
+	backends, nop, srpms, and lcopy.
+
+	* src/sop-mirror (mirror): Fix a typo in error message.
+	Separate dist-map backends.
+
 2011-04-09  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-garbages (print_section_begin): New function.
