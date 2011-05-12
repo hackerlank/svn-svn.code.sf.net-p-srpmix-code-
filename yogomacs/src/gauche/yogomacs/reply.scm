@@ -210,7 +210,7 @@
   (let* ((params (ref shtml 'params))
 	 (config (ref shtml 'config))
 	 (narrow-down (make-narrow-down params))
-	 (shell-name (in-shell? params))
+	 (shell-name (params "shell"))
 	 (rearrange (compose
 		     (if shell-name
 			 (cute yogomacs-fragment <> shell-name) 
