@@ -95,7 +95,7 @@
 		       ))
 
 (define-class <shtml-data> (<data>)
-  ((mime-type :init-value "text/html")
+  ((mime-type :init-value "application/xhtml+xml")
    ;;
    (yogomacs-version :in-client `(config version ,values))
    (yogomacs-release :in-client `(config release ,values))
@@ -211,10 +211,11 @@
 	 (config (ref shtml 'config))
 	 (narrow-down (make-narrow-down params))
 	 (shell-name (params "shell"))
+	 (adapt-to-shell (if shell-name
+			     (cute yogomacs-fragment <> shell-name) 
+			     values))
 	 (rearrange (compose
-		     (if shell-name
-			 (cute yogomacs-fragment <> shell-name) 
-			 values)
+		     adapt-to-shell
 		     (cute inject-environment <> shell-name (make-client-environment shtml))
 		     narrow-down
 		     eof-line))
