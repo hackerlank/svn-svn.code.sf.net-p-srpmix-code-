@@ -69,7 +69,8 @@ function report
     #
     # FILE SYSTEM LEVEL GARBAGES
     # --------------------------
-    # A file with no associated swrf package file.
+    # 1. A file with no associated swrf package file.
+    # 2. Swrf db with no associated swrf package file <TODO>.
     # File system level garbages can be removed with rm command.
     # 
     print_section_begin "File system level garbages" "fs"
