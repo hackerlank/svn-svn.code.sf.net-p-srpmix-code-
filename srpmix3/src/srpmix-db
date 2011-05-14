@@ -185,6 +185,9 @@ function do_install
 	    $IGNORESIZE \
 	    "$package"
 	status=$?
+	if [ $status = 0 ]; then
+	    rm -f ${SRPMIX_VAR_DIR}/${db}/__db*
+	fi
 	#
 	# About some of plugins packages for kernel
 	# rpm crashes frequently on F13.
