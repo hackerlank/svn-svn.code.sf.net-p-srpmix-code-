@@ -92,6 +92,7 @@ dist_confd_DATA = \
 	pam,trunk.lcopy \
 	perg,trunk.lcopy \
 	php,trunk.lcopy \
+	portage,trunk.lcopy \
 	postgresql,trunk.lcopy \
 	prelcopy,trunk.lcopy \
 	python-virtinst,trunk.lcopy \
