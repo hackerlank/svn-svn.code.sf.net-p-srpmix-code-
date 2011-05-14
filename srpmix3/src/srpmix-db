@@ -165,6 +165,11 @@ function do_install
 	fi
 
 	#
+	# Dirty but for minimizing the maintenance cost.
+	#
+	rm -f ${SRPMIX_VAR_DIR}/${db}/__db*
+	
+	#
 	# Till fedora 10 --prefix did't work but 
 	# --relocate /="$SRPMIX_VAR_DIR" worked fine.
 	# But in feodra 11 --relocate /="$SRPMIX_VAR_DIR" doesn't
@@ -186,14 +191,14 @@ function do_install
 	#
 	# Capture it here for debugging
 	#
-	if [ $status != 0 ]; then
+	if [ "$SRPMIX_DB_DEBUG" = yes -a $status != 0 ]; then
 	    cp "$package" /tmp
 	    echo $SWRFPM -Uv${SWRFPM_OPTS} \
 	    --nodeps \
 	    --dbpath "$SRPMIX_VAR_DIR"/"$db" \
 	    --prefix "$SRPMIX_VAR_DIR" \
 	    $IGNORESIZE \
-	    "$package" > /tmp/crush-with-"$package"
+	    "$package" > /tmp/crush-with-$(basename "$package")
 	fi
 	
 	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))

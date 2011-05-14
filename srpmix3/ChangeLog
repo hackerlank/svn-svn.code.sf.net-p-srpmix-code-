@@ -1,3 +1,11 @@
+2011-05-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.119.2.
+	
+	* src/srpmix-db (do_install): Remove __db file before
+	install. Copy the package only if installing it with swrfpm
+	is failed and srpmix-db runs in debug mode.
+
 2011-05-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-weakview-dist (create_dist_weakview): Insert newline after
