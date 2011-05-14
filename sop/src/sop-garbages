@@ -69,8 +69,7 @@ function report
     #
     # FILE SYSTEM LEVEL GARBAGES
     # --------------------------
-    # 1. A file with no associated swrf package file.
-    # 2. Swrf db with no associated swrf package file <TODO>.
+    # A file with no associated swrf package file.
     # File system level garbages can be removed with rm command.
     # 
     print_section_begin "File system level garbages" "fs"
@@ -89,6 +88,7 @@ function report
 	    local e
 	    
 	    print_entry "$candidate"
+	    # TODO: -srpmix-plugin-...
 	    for v in "-srpmix" "-srpmix-archives" "-srpmix-plugins"; do
 		e="${SRPMIX_DB_DIR}/${candidate:0:1}/${candidate}${v}"
 		if [ -e ${e} ]; then
@@ -114,8 +114,8 @@ function report
     #
     # SWRF LEVEL GARBAGES
     # -------------------
-    # A swrf package file installed as part of rpm package.  However,
-    # a swrf file enumerated in this level has no associated
+    # A swrf package file installed as part of rpm package, however,
+    # a swrf file enumerated in this level has no 
     # associated rpm package in (system global) rpmdb.
     #
     # Manual handling may be needed to remove this level garbages.
