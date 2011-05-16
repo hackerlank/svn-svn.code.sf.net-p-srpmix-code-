@@ -279,7 +279,6 @@ function create_weakview
 {
     local cf=$1
     local name=$2
-    local today
     local dist_pattern
     local pkg_pattern
     
@@ -310,6 +309,8 @@ function create_weakview
 	    local body0=$(basename $f .es)
 	    local body=$(echo $body0 | tr . -)
 	    local alias=
+	    local release=
+
 	    dist_pattern=${output}/srpmix-weakview-dist-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*.noarch.rpm
 	    pkg_pattern=${output}/srpmix-weakview-packages-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]*.noarch.rpm
 
@@ -322,17 +323,20 @@ function create_weakview
 		    alias=${body}
 		fi
 		body=${body}-${DATE}
+	    elif [ "${GC}" != yes ]; then
+		# If no GC, embed the DATE to the release number of the packages.
+		release=${DATE}
 	    fi
 	
 	    if ( ! test -f ${output}/srpmix-weakview-dist-${body}*.noarch.rpm ) || \
 		test $f -nt ${output}/srpmix-weakview-dist-${body}*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-dist-${body}*.noarch.rpm
-		create_weakview_dist $f ${body} ${repo} ${alias}
+		create_weakview_dist $f ${body} ${repo} "${alias}" "${release}"
 	    fi
 	    if ( ! test -f ${output}/srpmix-weakview-packages-${body}*.noarch.rpm ) || \
 		test $f -nt ${output}/srpmix-weakview-packages-${body}*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-packages-${body}*.noarch.rpm
-		create_weakview_packages $f ${body} ${repo} ${alias}
+		create_weakview_packages $f ${body} ${repo} "${alias}" "${release}"
 	    fi
 	fi
     done
@@ -371,7 +375,7 @@ function create_repofile
 {
     local cf=$1
     local name=$2
-    local protocols=file
+    local protocols="file ftp"
 
     for p in $protocols; do
 	local repo_name_body=$(echo $name | tr . -)
@@ -396,18 +400,38 @@ gpgcheck=0
 EOF
 }
 
+function create_ftp_repofile
+{
+    local repo_name=$1
+    local name=$2
+    local p=file
+
+    cat  <<EOF
+[${repo_name}]
+name=Srpmix packages for $name (via $p)
+baseurl=ftp://${SOP_FTP_CRADLES_DIR}/${name}/repo
+enable=1
+gpgcheck=0
+EOF
+}
+
 function create_weakview_dist
 {
     local es_file=$1
     local name=$2
     local output=$3
     local alias=$4
+    local release=$5
 
     if [ -n "${alias}" ]; then
 	alias="--alias=$alias"
     fi
 
-    cat $es_file | srpmix-weakview-dist --name=${name} --output-dir=$output --make-rpm $alias
+    if [ -n "${release}" ]; then
+	release="--release=$release"
+    fi
+
+    cat $es_file | srpmix-weakview-dist --name=${name} --output-dir=$output --make-rpm $alias $release
 }
 
 function create_weakview_packages
@@ -416,12 +440,17 @@ function create_weakview_packages
     local name=$2
     local output=$3
     local alias=$4
+    local release=$5
 
     if [ -n "${alias}" ]; then
 	alias="--alias=$alias"
     fi
-    
-    cat $es_file | srpmix-weakview-packages --name=${name} --output-dir=$output --make-rpm $alias
+
+    if [ -n "${release}" ]; then
+	release="--release=$release"
+    fi
+	
+    cat $es_file | srpmix-weakview-packages --name=${name} --output-dir=$output --make-rpm $alias $release
 }
 
 function main

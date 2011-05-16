@@ -1,3 +1,17 @@
+2011-05-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.2.1.
+
+	* src/sbuild (create_weakview_packages): Passing --release
+	to srpmix-weakview-dist.
+	(create_weakview_dist): Passing --release
+	to srpmix-weakview-dist.
+	(create_weakview): Remove unused variable today.
+	Passing DATE as the release number to create_weakview_packages and
+	create_weakview_dist.
+
+	(create_ftp_repofile): New function.
+
 2011-03-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.2.0.
