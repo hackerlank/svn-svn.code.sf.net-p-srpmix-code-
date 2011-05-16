@@ -1,3 +1,9 @@
+2011-05-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.4.4.
+
+	* src/sop.cf (SOP_FTP_CRADLES_DIR): New parameter.
+
 2011-05-14  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-garbages (OUTPUT_DIR): Added a TODO item.
