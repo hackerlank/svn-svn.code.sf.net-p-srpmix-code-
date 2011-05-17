@@ -1,3 +1,10 @@
+2011-05-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.2.2.
+
+	* src/sbuild (create_weakview_packages, create_weakview_dist):
+	Wrap extra arguments with double quotes.
+
 2011-05-16  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.2.1.
