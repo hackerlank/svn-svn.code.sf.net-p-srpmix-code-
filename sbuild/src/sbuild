@@ -431,7 +431,7 @@ function create_weakview_dist
 	release="--release=$release"
     fi
 
-    cat $es_file | srpmix-weakview-dist --name=${name} --output-dir=$output --make-rpm "$alias" "$release"
+    cat $es_file | srpmix-weakview-dist --name=${name} --output-dir=$output --make-rpm $alias $release
 }
 
 function create_weakview_packages
@@ -450,7 +450,7 @@ function create_weakview_packages
 	release="--release=$release"
     fi
 	
-    cat $es_file | srpmix-weakview-packages --name=${name} --output-dir=$output --make-rpm "$alias" "$release"
+    cat $es_file | srpmix-weakview-packages --name=${name} --output-dir=$output --make-rpm $alias $release
 }
 
 function main

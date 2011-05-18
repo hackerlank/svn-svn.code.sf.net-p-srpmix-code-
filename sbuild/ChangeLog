@@ -1,3 +1,11 @@
+2011-05-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.2.3.
+
+	* src/sbuild (create_weakview_packages, create_weakview_dist):
+	Revert the last changes. Don't  wrap extra arguments with double
+	quotes.
+
 2011-05-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.2.2.
