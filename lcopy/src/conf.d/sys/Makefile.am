@@ -37,7 +37,7 @@ dist_confd_DATA = \
 	gauche,trunk.lcopy \
 	gauche-mode,trunk.lcopy \
 	gcc,trunk.lcopy \
-	gdb,turnk.lcopy \
+	gdb,trunk.lcopy \
 	gfs2-utils,trunk.lcopy \
 	glib2,trunk.lcopy \
 	glibc,ports.lcopy \
