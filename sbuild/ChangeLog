@@ -1,3 +1,9 @@
+2011-05-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.2.4.
+
+	* src/sbuild (create_ftp_repofile): Set hostname in ftp url.
+
 2011-05-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.2.3.

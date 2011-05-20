@@ -405,11 +405,22 @@ function create_ftp_repofile
     local repo_name=$1
     local name=$2
     local p=file
+    local host_and_port
+    local hostname_says=$(hostname)
+
+    
+    if [ -n "${SOP_FTP_HOST_AND_PORT}" ]; then
+	host_and_port="${SOP_FTP_HOST_AND_PORT}"
+    elif [ -n "${hostname_says}" ]; then
+	host_and_port="${hostname_says}"
+    else
+	host_and_port=localhost
+    fi
 
     cat  <<EOF
 [${repo_name}]
 name=Srpmix packages for $name (via $p)
-baseurl=ftp://${SOP_FTP_CRADLES_DIR}/${name}/repo
+baseurl=ftp://${host_and_port}/${SOP_FTP_CRADLES_DIR}/${name}/repo
 enable=1
 gpgcheck=0
 EOF
