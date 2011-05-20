@@ -1,3 +1,7 @@
+2011-05-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sop.cf (SOP_FTP_HOST_AND_PORT): Added new parameter.
+
 2011-05-16  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.4.4.
