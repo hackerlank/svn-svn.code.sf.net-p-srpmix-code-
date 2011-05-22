@@ -1,3 +1,8 @@
+2011-05-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA):
+	Added rhel5su6.
+
 2011-05-21  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.4.5.
