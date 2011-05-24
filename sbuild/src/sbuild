@@ -389,11 +389,10 @@ function create_file_repofile
 {
     local repo_name=$1
     local name=$2
-    local p=file
-
+  
     cat  <<EOF
 [${repo_name}]
-name=Srpmix packages for $name (via $p)
+name=Srpmix packages for $name (via file)
 baseurl=file://${SOP_CRADLES_DIR}/${name}/repo
 enable=0
 gpgcheck=0
@@ -404,7 +403,6 @@ function create_ftp_repofile
 {
     local repo_name=$1
     local name=$2
-    local p=file
     local host_and_port
     local hostname_says=$(hostname)
 
@@ -419,7 +417,7 @@ function create_ftp_repofile
 
     cat  <<EOF
 [${repo_name}]
-name=Srpmix packages for $name (via $p)
+name=Srpmix packages for $name (via ftp)
 baseurl=ftp://${host_and_port}/${SOP_FTP_CRADLES_DIR}/${name}/repo
 enable=1
 gpgcheck=0

@@ -1,3 +1,7 @@
+2011-05-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sbuild (name): Fix a typo.
+
 2011-05-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.2.4.
