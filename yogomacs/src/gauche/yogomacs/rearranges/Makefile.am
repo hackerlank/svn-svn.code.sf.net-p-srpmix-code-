@@ -10,6 +10,7 @@ dist_module_DATA =   \
 	inject-environment.scm			\
 	line-trim.scm				\
 	normalize-major-mode.scm                \
+	pagehr.scm				\
 	range.scm		 		\
 	title.scm				\
         yogomacs-fragment.scm                   \

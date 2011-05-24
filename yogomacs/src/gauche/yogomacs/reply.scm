@@ -18,6 +18,7 @@
   (use yogomacs.rearranges.yogomacs-fragment)
   (use yogomacs.rearranges.eof-line)
   (use yogomacs.rearranges.inject-environment)
+  (use yogomacs.rearranges.pagehr)
   (use yogomacs.shell)
   (use yogomacs.error)
   ;;
@@ -215,6 +216,7 @@
 			     (cute yogomacs-fragment <> shell-name) 
 			     values))
 	 (rearrange (compose
+		     pagehr
 		     adapt-to-shell
 		     (cute inject-environment <> shell-name (make-client-environment shtml))
 		     narrow-down

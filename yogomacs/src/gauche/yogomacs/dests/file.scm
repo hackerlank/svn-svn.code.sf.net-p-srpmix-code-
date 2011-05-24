@@ -85,12 +85,12 @@
 	 (has-tag? (has-tag? real-src-file params config)))
     (if (to-domain? real-src-file config)
 	(file-dest0 real-src-file 
-				(compose-path lpath)
-				file-type
-				(config 'mode)
-				has-tag?
-				params
-				config)
+		    (compose-path lpath)
+		    file-type
+		    (config 'mode)
+		    has-tag?
+		    params
+		    config)
 	(forbidden "Out of domain" real-src-file))))
 
 (define-macro (guard-with-asis real-src-file config . body)
