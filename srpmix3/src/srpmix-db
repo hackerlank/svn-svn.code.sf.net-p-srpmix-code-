@@ -27,7 +27,8 @@ function print_usage
     echo "Usage: "
     echo "  srpmix-db -h|--help"
     echo "  srpmix-db [--debug] [--hardlink] [--root=ROOT] [--quite|-q] [--purge-swrf] [--ignoresize] -i|--install SWRF..."
-    echo "  srpmix-db [--debug] [--root=ROOT] [--quite|-q] -e|--erase|-e SWRF..."
+    echo "  srpmix-db [--debug] [--root=ROOT] [--quite|-q] -e|--erase SWRF..."
+    echo "  srpmix-db [--debug] [--root=ROOT] -V|--verify SWRF"
     echo "  srpmix-db [--debug] -l|--list"
     echo
     echo "environment variables:"
@@ -80,6 +81,16 @@ function parse_arguments
 		fi
 		shift 1
 		;;
+	    -V|--verify)
+	        if [ -z "$COMMAND" ]; then
+		    COMMAND=verify
+		else
+		    echo "COMMAND $COMMAND is already set" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		shift 1
+		;;
 	    --hardlink)
 	        SRPMIX_DO_HARDLINK=yes
 		shift 1
@@ -112,6 +123,14 @@ function parse_arguments
 	RPM_PACKAGES="$@"
     elif test x"$COMMAND" = xerase; then
 	RPM_PACKAGES="$@"
+    elif [ "$COMMAND" = "verify" ]; then
+	if [ $# = 1 ]; then
+	    RPM_PACKAGES="$@"
+	else
+	    echo "Specify only one package" 1>&2
+	    print_usage 1>&2
+	    exit 1
+	fi
     elif test x"$COMMAND" = xlist; then
 	:
     else
@@ -264,10 +283,25 @@ function do_erase
     done
 }
 
+function do_verify
+{
+    local db
+    local max
+    
+    RPM_PACKAGES=$(echo "$RPM_PACKAGES" | tr ' ' '\n')
+    
+    echo "$RPM_PACKAGES" | while read package; do
+	db=$(srpmix_db $package)
+	$SWRFPM --nodeps -V -dbpath "$SRPMIX_VAR_DIR"/"$db" "$package"
+	return $?
+    done
+}
+
 function main
 {
     parse_arguments "$@"
     do_$COMMAND
+    return $?
 }
 
 main "$@"
