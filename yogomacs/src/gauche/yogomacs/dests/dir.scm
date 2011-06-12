@@ -57,7 +57,7 @@
 		(make <redirect-dentry>
 		  :parent (ref dentry 'parent)
 		  :dname "."
-		  :url #`"/commands/checkout,(path-of dentry)"
+		  :url #`"/commands/checkout,(real->web (path-of dentry) config)"
 		  :show-arrowy-to "commands/checkout")
 		)
 	       (else
