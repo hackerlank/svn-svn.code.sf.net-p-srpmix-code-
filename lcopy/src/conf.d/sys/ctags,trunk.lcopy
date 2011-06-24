@@ -7,3 +7,5 @@ LCOPY_PACKAGE="ctags"
 LCOPY_BRANCH="trunk"
 LCOPY_UPDATE="yes"
 LCOPY_GENERATED_BY="manual"
+LCOPY_DISABLE_PLUGINS="ctags,nctags"
+

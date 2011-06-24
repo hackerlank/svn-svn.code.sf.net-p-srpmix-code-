@@ -1,4 +1,9 @@
-2011-04-08  Masatake YAMATO  <yamato@redhat.com>
+2011-06-24  Masatake YAMATO  <yamato@redhat.com> 
+
+	* src/conf.d/sys/ctags,trunk.lcopy (LCOPY_DISABLE_PLUGINS): Disable
+	ctags and nctags plugins to avoid running ctags on ctags. 
+
+2011-04-08  Masatake YAMATO  <yamato@redhat.com> 
 
 	* src/backends/svn (svn_rebirth): Use only sed. 
 	Don't use grep Suggested by Satoru SATOH <ssato@redhat.com>.
