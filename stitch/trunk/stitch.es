@@ -1,5 +1,4 @@
 ;; -*- scheme -*-
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/corosync/^lcopy-trunk/pre-build/trunk/exec/totemsrp.c" :point 60432 :coding-system undecided-unix :line 2152 :which-func ("totemsrp_mcast"))) :annotation-list ((annotation :type text :data "ここでキューに入れる。トークンが回ってきて送信許可を得たときに送信できる(orf_token_mcast)。")) :date "Mon Nov 16 01:18:35 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/corosync/^lcopy-trunk/pre-build/trunk/exec/totemsrp.c" :point 7871 :coding-system undecided-unix :line 276 :surround ("
 " "" "struct message_item {
 	struct mcast *mcast;") :which-func ("message_item"))) :annotation-list ((annotation :type text :data "message_itemとsort_queue_itemは同じ構造を持つ。")) :date "Mon Nov 16 01:46:22 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
@@ -9,21 +8,6 @@
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/attic/cradles/lcopy.sys/mirror/c/corosync/trunk/pre-build/trunk/exec/totemudp.c" :point 49674 :coding-system undecided-unix :line 1875 :surround ("
 " "" "int totemudp_mcast_noflush_send (
 	void *udp_context,") :which-func ("totemudp_mcast_noflush_send"))) :annotation-list ((annotation :type text :data "threadsがonの場合キューに入るが、そうでなければ、totemudp_mcast_flush_sendと同じ。")) :date "Mon Nov 16 02:18:29 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/corosync/^lcopy-trunk/pre-build/trunk/exec/totemsrp.c" :point 94805 :coding-system undecided-unix :line 3409 :surround ("	case MEMB_STATE_OPERATIONAL:
-" "" "		messages_free (instance, token->aru);
-	case MEMB_STATE_GATHER:") :which-func ("message_handler_orf_token"))) :annotation-list ((annotation :type text :data "fall through?")) :date "Mon Nov 16 02:29:42 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/corosync/^lcopy-trunk/pre-build/trunk/exec/totemsrp.c" :point 99934 :coding-system undecided-unix :line 3569 :surround ("
-" "" "			totemrrp_send_flush (instance->totemrrp_context);
-			token_send (instance, token, forward_token);") :which-func ("if"))) :annotation-list ((annotation :type text :data "threadを使っている場合、ワークキューが空になるのを待つ。")) :date "Mon Nov 16 02:31:46 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/corosync/^lcopy-trunk/pre-build/trunk/exec/totemsrp.c" :point 99987 :coding-system undecided-unix :line 3570 :surround ("			totemrrp_send_flush (instance->totemrrp_context);
-" "" "			token_send (instance, token, forward_token);
-") :which-func ("if"))) :annotation-list ((annotation :type text :data "次の人にトークンを渡す。")) :date "Mon Nov 16 02:32:23 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/corosync/^lcopy-trunk/pre-build/trunk/exec/totemsrp.c" :point 75711 :coding-system undecided-unix :line 2752 :surround ("
-" "" "static void memb_state_commit_token_target_set (
-	struct totemsrp_instance *instance)") :which-func ("memb_state_commit_token_target_set"))) :annotation-list ((annotation :type text :data "トークンを受けとる人一覧をセットしている？")) :date "Mon Nov 16 02:35:32 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/corosync/^lcopy-trunk/pre-build/trunk/exec/totemsrp.c" :point 75914 :coding-system undecided-unix :line 2760 :surround ("
-" "" "	for (i = 0; i < instance->totem_config->interface_count; i++) {
-		totemrrp_token_target_set (") :which-func ("memb_state_commit_token_target_set"))) :annotation-list ((annotation :type text :data "interfaceでループ")) :date "Mon Nov 16 02:48:13 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/attic/cradles/lcopy.sys/mirror/c/corosync/trunk/pre-build/trunk/exec/totemrrp.c" :point 14495 :coding-system undecided-unix :line 580 :surround ("{
 " "" "	totemnet_token_target_set (instance->net_handles[0], token_target);
 }") :which-func ("none_token_target_set"))) :annotation-list ((annotation :type text :data "interfaceを引数に渡しているが、使っていない。single ring?")) :date "Mon Nov 16 02:48:57 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
