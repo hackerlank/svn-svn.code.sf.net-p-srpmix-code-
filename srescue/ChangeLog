@@ -1,3 +1,7 @@
+2011-06-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srescure.spec.in (BuildRequires): Added mock.
+
 2010-09-24  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/mock/plugins/source_rescue.py (SourceRescue.prebuild): Make the result
