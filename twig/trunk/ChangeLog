@@ -1,3 +1,10 @@
+2011-06-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.0.4.
+
+	* src/twig (twig_commands): Handle "Source:" line
+	in spec file.
+
 2011-05-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/twig (twig_verify_soruces): Check only the first

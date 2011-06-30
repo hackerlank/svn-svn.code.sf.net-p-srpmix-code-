@@ -229,7 +229,7 @@ function twig_hack_patch_decl
 	return 0
     fi
 
-    source_decl=$(grep -E -n -e "^Source[0-9]+:" "${spec}" | tail -1)
+    source_decl=$(grep -E -n -e "^Source[0-9]*:" "${spec}" | tail -1)
     if [ -n "${source_decl}" ]; then
 	source_line=$(echo $source_decl | sed -e 's/:Source.*//')
 
@@ -240,7 +240,6 @@ function twig_hack_patch_decl
 	return 0
     fi
 	
-    
     echo "Cannot find the line to put the patch-decl" 1>&2
     exit 1
 }
