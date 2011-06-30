@@ -1,3 +1,7 @@
+2011-06-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/create-comps.scm (print-category): Fix a typo.
+
 2011-05-24  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sbuild (name): Fix a typo.

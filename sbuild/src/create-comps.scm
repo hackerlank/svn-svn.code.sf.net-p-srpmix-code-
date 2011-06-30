@@ -45,7 +45,7 @@
 	       "  <description>Repackaged source code with canonical directory layout</description>"
 	       "  <display_order>99</display_order>"
 	       "  <grouplist>"
-	       ,@(map (cute format "   <groupid>srpmix-groupd-~a</groupid>" <>)
+	       ,@(map (cute format "   <groupid>srpmix-group-~a</groupid>" <>)
 		      all-groups)
 	       "  </grouplist>"
 	       " </category>")))
