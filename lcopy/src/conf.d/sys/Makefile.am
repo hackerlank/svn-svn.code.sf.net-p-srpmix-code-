@@ -3,6 +3,7 @@ dist_confd_DATA = \
 	\
 	ConsoleKit,trunk.lcopy \
 	Kahua,trunk.lcopy \
+	NetworkManager,trunk.lcopy \
 	anaconda,trunk.lcopy \
 	audit,trunk.lcopy \
 	autoconf,trunk.lcopy \
