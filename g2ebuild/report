@@ -6,7 +6,7 @@
 # Distributed under the terms of the GNU General Public License v2
 #
 
-L_SUPPORTED_VCS=cvs
+L_SUPPORTED_VCS="cvs subversion"
 L_VCS=
 
 function print_usage
@@ -27,15 +27,15 @@ function run_in_sandbox
 
     cp $ebuild_file $ltmpdir/ebuild
     if [ -f $cmd ]; then
-	cp -r $cmd $ltmpdir/$cmd
+	cp -ar $cmd $ltmpdir/cmd
     else
-	cp -r $(which $cmd) $ltmpdir/$cmd
+	cp -ar $(which $cmd) $ltmpdir/cmd
     fi
 
     cd $ltmpdir
     
     export PATH=
-    /bin/bash -r $0
+    /bin/bash -r cmd
     return $?
 }
 
@@ -68,7 +68,7 @@ function inherit
 function l-report
 {
     case $L_VCS in
-	cvs)
+	cvs|subversion)
 	    l-report-$L_VCS
 	    return $?
 	    ;;
@@ -86,6 +86,12 @@ function l-report-cvs
     printf "ECVS_PASS=%q\n" "$ECVS_PASS"
     printf "ECVS_AUTH=%q\n" "$ECVS_AUTH"
     printf "ECVS_BRANCH=$q\n" "$ECVS_BRANCH"
+    return 0
+}
+
+function l-report-subversion
+{
+    printf "ESVN_REPO_URI=%q\n" "$ESVN_REPO_URI"
     return 0
 }
 
@@ -111,6 +117,7 @@ function main
 	run_in_sandbox $0 $1
 	exit $?
     else
+	export PV=9999
 	source ebuild
 	l-report
 	exit $?
