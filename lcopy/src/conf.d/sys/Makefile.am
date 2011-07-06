@@ -39,6 +39,7 @@ dist_confd_DATA = \
 	gauche-mode,trunk.lcopy \
 	gcc,trunk.lcopy \
 	gdb,trunk.lcopy \
+	gentoo-x86,trunk.lcopy \
 	gfs2-utils,trunk.lcopy \
 	glib2,trunk.lcopy \
 	glibc,ports.lcopy \
