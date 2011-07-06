@@ -1,0 +1,120 @@
+#!/bin/bash
+
+#
+# Derived from eclass of gentoo.
+# Copyright 1999-2010 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+#
+
+L_SUPPORTED_VCS=cvs
+L_VCS=
+
+function print_usage
+{
+    echo "Usage: "
+    echo "	$0 EBUILD-FILE"
+}
+
+function run_in_sandbox
+{
+    local cmd=$1
+    local ebuild_file=$2
+    
+    local ltmpdir=`mktemp -d`
+    if [ $? != 0 ]; then
+	exit 2
+    fi
+
+    cp $ebuild_file $ltmpdir/ebuild
+    if [ -f $cmd ]; then
+	cp -r $cmd $ltmpdir/$cmd
+    else
+	cp -r $(which $cmd) $ltmpdir/$cmd
+    fi
+
+    cd $ltmpdir
+    
+    export PATH=
+    /bin/bash -r $0
+    return $?
+}
+
+function member
+{
+    local elt=$1
+    local tmp
+    shift
+
+    for tmp in "$@"; do
+	if [ "$tmp" = "$elt" ]; then
+	    return 0
+	fi
+    done
+
+    return 1
+}
+
+function inherit
+{
+    local tmp
+    for tmp in "$@"; do
+	if member $tmp ${L_SUPPORTED_VCS}; then
+	    L_VCS=$tmp
+	    break
+	fi
+    done
+}
+
+function l-report
+{
+    case $L_VCS in
+	cvs)
+	    l-report-$L_VCS
+	    return $?
+	    ;;
+	*)
+	    echo :
+	    return 1
+    esac
+}
+
+function l-report-cvs
+{
+    printf "ECVS_SERVER=%q\n" "$ECVS_SERVER"
+    printf "ECVS_MODULE=%q\n" "$ECVS_MODULE"
+    printf "ECVS_USER=%q\n" "$ECVS_USER"
+    printf "ECVS_PASS=%q\n" "$ECVS_PASS"
+    printf "ECVS_AUTH=%q\n" "$ECVS_AUTH"
+    printf "ECVS_BRANCH=$q\n" "$ECVS_BRANCH"
+    return 0
+}
+
+function main
+{
+    if [ -n "$PATH" ]; then
+	
+	while [ $# -gt 0 ]; do
+	    case "$1" in
+		*)
+		    break
+		    ;;
+	    esac
+	    shift
+	done
+
+	if [ $# != 1 ]; then
+	    echo "too few argument" 1>&2
+	    print_usage 1>&2
+	    exit 2
+	fi
+	
+	run_in_sandbox $0 $1
+	exit $?
+    else
+	source ebuild
+	l-report
+	exit $?
+    fi
+}
+
+main "$@"
