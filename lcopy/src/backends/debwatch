@@ -13,7 +13,7 @@ function write_spec
     common_write_spec 
     echo "DEBWATCH_WATCH_SPEC=$watch_spec"
     echo "DEBWATCH_PACKAGE=${dpkg}"
-    echo -n "DEBWATCH_WATCH='"
+    echo -n "DEBWATCH_WATCH=\""
         case "$watch_spec" in
 	    ftp://*)
 		:
@@ -25,7 +25,7 @@ function write_spec
 		cat
 		;;
 	esac
-    echo -n "'"
+    echo -n "\""
     echo ""
 }
 

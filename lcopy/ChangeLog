@@ -1,3 +1,16 @@
+2011-07-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/conf.d/sys/bind,released.lcopy (DEBWATCH_WATCH): Wrap
+	double quotes.
+
+	* src/conf.d/sys/scheme2js,released.lcopy (DEBWATCH_WATCH): Wrap
+	double quotes.
+
+	* src/conf.d/sys/sysstat,trunk.lcopy (DEBWATCH_WATCH): Ditto.
+
+	* src/backends/debwatch (write_spec): Use
+	double quotes to print DEBWATCH_WATCH.
+
 2011-07-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Added misc/m4 to AC_CONFIG_MACRO_DIR.
