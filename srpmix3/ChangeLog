@@ -1,3 +1,12 @@
+2011-07-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in: Introduce dir-base subpackage.
+
+	* misc/specs/Makefile.am: Merge srpmix-dir-base.SPEC
+	into srpmix.spec.
+
+	* configure.ac: Version 3.119.5.
+
 2011-06-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 3.119.4.

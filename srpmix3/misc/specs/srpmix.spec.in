@@ -9,6 +9,7 @@ Requires: srpmix-dir-base >= %{version}
 Buildarch: noarch
 BuildRequires: hardlink cscope ctags emacs-common gettext gauche
 BuildRequires: hyperestraier mock srescure
+BuildRequires: libgcj rubygems xz rpm-build rpm
 
 Buildroot: %{_tmppath}/%{name}-root
 License: GPLv3
@@ -17,6 +18,12 @@ Group: Development/Tools
 
 %description
 Scripts to expand src.rpm.
+
+%package dir-base
+Summary: Base directories for source code archives deployed by srpmix
+Group: Development/Tools
+%description dir-base
+Base directories for source code archives deployed by srpmix.
 
 %package plugin-vanilla
 Summary: SRPMix Plugin for creating vanilla tree.
@@ -111,6 +118,34 @@ cs="${cs} `seq 0 9`"
 srpmixdir=/usr/share/srpmix
 mkdir -p ${RPM_BUILD_ROOT}${srpmixdir}/swrfs
 for c in ${cs}; do mkdir -p ${RPM_BUILD_ROOT}${srpmixdir}/swrfs/${c}; done
+
+
+
+# TODO: Use libsrpmix.
+rootdir=%{_sharedstatedir}/srpmix
+mkdir -p $RPM_BUILD_ROOT${rootdir}
+
+sourcesdir=${rootdir}/sources
+mkdir -p $RPM_BUILD_ROOT${sourcesdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${sourcesdir}/${c}; done
+
+
+wvdistsdir=${rootdir}/dists
+mkdir -p $RPM_BUILD_ROOT${wvdistsdir}
+mkdir -p $RPM_BUILD_ROOT${wvdistsdir}/.alternatives
+
+wvpkgsdir=${rootdir}/packages
+mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}/${c}; done
+# for each common directories
+
+pluginsdir=${rootdir}/plugins
+mkdir -p $RPM_BUILD_ROOT${pluginsdir}
+
+dbdir=${rootdir}/db
+mkdir -p $RPM_BUILD_ROOT${dbdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${dbdir}/${c}; done
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -214,9 +249,18 @@ rm -rf $RPM_BUILD_ROOT
 #  srpmix-plugin --enable=10srpmix-ctags
 #fi
 
+%files dir-base
+%defattr(-,root,root,-)
+%{_sharedstatedir}/srpmix
+
+
+
 %pre
 /usr/sbin/useradd -c "Srpmix" srpmix -G mock 2> /dev/null || :
 
 %changelog
+* Thu Jun 30 2011 Masatake YAMATO <yamato@redhat.com> - #PACKAGE_VERSION#-#RPM_RELEASE#
+- Merge srpmix-dir-base.SPEC in.
+
 * Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0
 - First RPM build.
