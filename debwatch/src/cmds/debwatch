@@ -199,10 +199,7 @@ function write_dot_debwatch
     echo "DEBWATCH_PACKAGE=$dpkg"  
     echo "DEBWATCH_UPSTREAM_VERSION=$ver"
     echo -n "DEBWATCH_WATCH='"
-    for l in $@; do
-#	printf "%q\n" $l
-	echo " $l"
-    done
+    echo "$*"
     echo -n "'"
     echo ""
 }
@@ -267,9 +264,7 @@ function debwatch_checkout
     mkdir -p $dpkg
 
     if [ -n "$watch_spec" ] && ( [[ "$watch_spec" =~ ^file:///.* ]] || [ "$watch_spec" = "-" ] ); then
-	local -a WATCH_FILE
-	mapfile WATCH_FILE < $watch
-	write_dot_debwatch "$watch_spec" $dpkg $nver "${WATCH_FILE[@]}" > $dpkg/.debwatch
+	write_dot_debwatch "$watch_spec" $dpkg $nver "$(cat $watch)" > $dpkg/.debwatch
     else
 	write_dot_debwatch "$watch_spec" $dpkg $nver > $dpkg/.debwatch
     fi
@@ -365,9 +360,7 @@ function debwatch_update
     if [ -z "${DEBWATCH_WATCH}" ]; then
 	write_dot_debwatch "${DEBWATCH_WATCH_SPEC}" $dpkg $nver > ./._debwatch
     else
-	local -a WATCH_FILE
-	mapfile WATCH_FILE < $watch
-	write_dot_debwatch "${DEBWATCH_WATCH_SPEC}" $dpkg $nver "${WATCH_FILE[@]}" > ./._debwatch
+	write_dot_debwatch "${DEBWATCH_WATCH_SPEC}" $dpkg $nver "$(cat $watch)" > ./._debwatch
     fi
 	
 
