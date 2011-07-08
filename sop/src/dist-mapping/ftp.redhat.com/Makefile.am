@@ -20,6 +20,8 @@ rhel6b1.es \
 rhel6b2.es \
 rhel6u0.es \
 rhel6u1.es \
+rhel6u0-all.es \
+rhel6u1-all.es \
 \
 ds7.es   \
 ds8u0.es \
