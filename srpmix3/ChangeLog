@@ -1,3 +1,9 @@
+2011-07-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.120.1.
+
+	* src/srpmix-weakview-alias: New file.
+
 2011-07-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in: Introduce dir-base subpackage.
