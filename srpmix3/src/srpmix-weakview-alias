@@ -1,0 +1,234 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-weakview-alias: 
+#
+# Copyright (C) 2011 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+NAME=
+ALIAS=
+OUTPUTDIR=
+MY_TMPDIR=
+DUMP_SPEC=
+
+# TODO: --srpm
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-weakview-alias [--help|-h]"
+    echo "  srpmix-weakview-alias --name=NAME [--dump-spec] [--alias=ALIAS]"
+    echo "  srpmix-weakview-alias --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE] [--make-rpm] [--alias=ALIAS]"
+    echo 
+
+    echo "NOTE: --alias is not used now."
+}
+
+function cleanup
+{
+    if test -d "$MY_TMPDIR"; then
+        rm -rf $MY_TMPDIR || true
+    fi
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name=*)
+                NAME=$(echo $1 | sed 's/--name=//')
+		;;
+	    --output-dir=*)
+	        OUTPUTDIR=$(echo $1 | sed 's/--output-dir=//')
+		;;
+	    --make-rpm)
+	        MAKE_RPM=yes
+		;;
+            --release=*)
+	        SRPMIX_PKG_RELEASE=$(echo $1 | sed 's/--release=//')
+		;;
+	    --dump-spec)
+	        DUMP_SPEC=1
+		;;
+	    (--alias=*)
+	    	ALIAS=$(echo $1 | sed 's/--alias=//')
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test "x$NAME" = "x"; then
+	print_usage 1>&2
+	srpmix_abort "No name for the weakview"
+    fi
+
+    if test "x$1" != "x"; then
+	print_usage 1>&2
+	srpmix_abort "Too many arguments"
+    fi
+
+    if test "x$OUTPUTDIR" = "x"; then
+	OUTPUTDIR=.
+    fi
+    if test ! -d "${OUTPUTDIR}"; then
+	srpmix_abort "No such directory: ${OUTPUTDIR}"
+    fi
+}
+
+function create_alias_weakview
+{
+    local name=$1
+    local priority
+
+    local spec=$MY_TMPDIR/SPECS/srpmix-weakview-alias-$name.spec
+    if test "x${DUMP_SPEC}" != "x"; then
+	spec="/dev/stdout"
+	if test ! -w "${spec}"; then
+	    # ???
+	    spec="/dev/tty"
+	fi
+    fi
+
+    local linkin_mark="^"
+    local link="${linkin_mark}alias-${name}"
+	
+    local rootdir=${SRPMIX_VAR_DIR}
+    local sourcesdir=${SRPMIX_VAR_DIR}/sources
+    local distmap=`mktemp`
+
+    cat > "$distmap"
+	
+    cat > $spec <<EOF
+Summary: Srpmix weakview for $name distribution
+Name: srpmix-weakview-alias-$name
+Version: $SRPMIX_PKG_VERSION
+Release: $SRPMIX_PKG_RELEASE%{?dist}
+Autoreq: 0
+BuildRequires: srpmix
+Buildarch: noarch
+Requires: srpmix-dir-base
+
+EOF
+    cat "$distmap" | srpmix_distmap_to_pvr | while read package version release; do
+	echo "Requires: srpmix-dir-pkg-$package" >> $spec
+    done
+
+    cat >> $spec <<EOF
+Buildroot: %{_tmppath}/%{name}-root
+Group: System/Daemon
+License: Unknown
+
+%define __os_install_post true
+
+%description
+Srpmix weakview for $name distribution.
+
+%prep
+
+%build
+
+%install
+rm -rf \$RPM_BUILD_ROOT
+EOF
+    cat "$distmap" | srpmix_distmap_to_pvr | while read package version release; do
+	local hash=$(srpmix_srchash $package)
+	cat >> $spec <<EOF
+mkdir -p \${RPM_BUILD_ROOT}${sourcesdir}/${hash}/${package}
+ln -s ./${version}-${release} \${RPM_BUILD_ROOT}${sourcesdir}/${hash}/${package}/${link} 
+EOF
+    done
+
+
+    cat >> $spec <<EOF
+
+%files
+%defattr(-,root,root)
+EOF
+    cat "$distmap" | srpmix_distmap_to_pvr | while read package version release; do
+	local hash=$(srpmix_srchash $package)
+	echo "${sourcesdir}/${hash}/${package}/${link}" >> $spec
+    done
+
+    cat >> $spec <<EOF
+
+%changelog
+
+EOF
+    if test "x${DUMP_SPEC}" != "x"; then
+	return
+    fi
+
+    local build_flag=-bs
+    if test "${MAKE_RPM}" = yes; then
+	build_flag=-ba
+    fi
+    $RPMBUILD --nodeps --quiet --define "_topdir $MY_TMPDIR" ${build_flag} $spec > /dev/null
+#    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-alias-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*
+    mkdir -p $OUTPUTDIR/weakview
+
+    local file=$MY_TMPDIR/SRPMS/srpmix-weakview-alias-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm
+    if test "${MAKE_RPM}" = yes; then
+	find $MY_TMPDIR
+	file=$MY_TMPDIR/RPMS/noarch/srpmix-weakview-alias-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.noarch.rpm
+    fi
+    mv ${file} "${OUTPUTDIR}"/weakview
+
+}
+
+
+function main
+{
+    srpmix_verify_commands "${RPMBUILD}" "${GOSH}"
+    parse_arguments "$@"
+
+    if test "x${DUMP_SPEC}" = "x"; then
+	MY_TMPDIR=`mktemp -d`
+	trap cleanup 0
+	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+    fi
+
+    create_alias_weakview $NAME $ALIAS
+}
+
+RUN=
+if test "x${DUMP_SPEC}" = "x"; then
+    RUN=es_time
+fi
+${RUN} main "$@"
+
+exit $?
