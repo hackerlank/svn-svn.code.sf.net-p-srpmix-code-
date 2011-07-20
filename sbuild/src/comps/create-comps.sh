@@ -19,6 +19,7 @@ echo "  <uservisible>true</uservisible>"
 echo '  <packagelist>'
 echo "   <packagereq type=\"mandatory\">srpmix-weakview-dist-$DIST</packagereq>"
 echo "   <packagereq type=\"mandatory\">srpmix-weakview-packages-$DIST</packagereq>"
+echo "   <packagereq type=\"mandatory\">srpmix-weakview-alias-$DIST</packagereq>"
 
 cat $1 | while read line
 do

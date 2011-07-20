@@ -281,7 +281,8 @@ function create_weakview
     local name=$2
     local dist_pattern
     local pkg_pattern
-    
+    local alias_pattern
+
     source $cf
 
 
@@ -313,6 +314,7 @@ function create_weakview
 
 	    dist_pattern=${output}/srpmix-weakview-dist-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-*.noarch.rpm
 	    pkg_pattern=${output}/srpmix-weakview-packages-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-*.noarch.rpm
+	    alias_pattern=${output}/srpmix-weakview-alias-${body}-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-*.noarch.rpm
 
 	    if test ${GC} = yes && test "$body0" = "${name}" ; then
 		rm -f ${dist_pattern}
@@ -337,6 +339,11 @@ function create_weakview
 		test $f -nt ${output}/srpmix-weakview-packages-${body}-*.noarch.rpm; then
 		rm -f ${output}/srpmix-weakview-packages-${body}-*.noarch.rpm
 		create_weakview_packages $f ${body} ${repo} "${alias}" "${release}"
+	    fi
+	    if ( ! test -f ${output}/srpmix-weakview-alias-${body}-*.noarch.rpm ) || \
+		test $f -nt ${output}/srpmix-weakview-alias-${body}-*.noarch.rpm; then
+		rm -f ${output}/srpmix-weakview-alias-${body}-*.noarch.rpm
+		create_weakview_alias $f ${body} ${repo} "${alias}" "${release}"
 	    fi
 	fi
     done
@@ -460,6 +467,25 @@ function create_weakview_packages
     fi
 	
     cat $es_file | srpmix-weakview-packages --name=${name} --output-dir=$output --make-rpm $alias $release
+}
+
+function create_weakview_alias
+{
+    local es_file=$1
+    local name=$2
+    local output=$3
+    local alias=$4
+    local release=$5
+
+    if [ -n "${alias}" ]; then
+	alias="--alias=$alias"
+    fi
+
+    if [ -n "${release}" ]; then
+	release="--release=$release"
+    fi
+	
+    cat $es_file | srpmix-weakview-alias --name=${name} --output-dir=$output --make-rpm $alias $release
 }
 
 function main

@@ -36,6 +36,7 @@
 		 "  <packagelist>"
 		 ,(format "   <packagereq type=\"mandatory\">srpmix-weakview-dist-~a</packagereq>" name)
 		 ,(format "   <packagereq type=\"mandatory\">srpmix-weakview-packages-~a</packagereq>" name)
+		 ,(format "   <packagereq type=\"mandatory\">srpmix-weakview-alias-~a</packagereq>" name)
 		 )))
 
 (define (print-category all-groups)

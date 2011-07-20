@@ -1,3 +1,14 @@
+2011-07-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.2.6.
+
+	* src/sbuild (create_weakview_alias): New function.
+	(create_weakview): Call create_weakview_alias.
+
+	* src/gc-repo-srpmix-version.scm (main): Added alias weakview.
+
+	* src/create-comps.scm (print-group): Added alias weakview.
+
 2011-07-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.2.5.
