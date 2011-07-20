@@ -99,12 +99,14 @@ function run_gc
     local weakview=${MY_TMPDIR}/${mirror_name}-weakview.lines
     local dist=${MY_TMPDIR}/${mirror_name}-dist.lines
     local packages=${MY_TMPDIR}/${mirror_name}-packages.lines
+    local alias=${MY_TMPDIR}/${mirror_name}-alias.lines
 
 
     rpm -qa --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE}\n" > ${all}
     grep weakview < ${all} > ${weakview}
     grep -e dist     < ${weakview} | grep -e ${mirror_name} | LANG=C sort -n -r > ${dist}
     grep -e packages < ${weakview} | grep -e ${mirror_name} | LANG=C sort -n -r > ${packages}
+    grep -e alias    < ${weakview} | grep -e ${mirror_name} | LANG=C sort -n -r > ${alias}
 
     local count=$(wc -l < ${dist})
     if test 0 = ${count} || test 1 = ${count}; then
@@ -165,6 +167,10 @@ function run_gc
     done
 
     tail -n +2 ${packages} | tr ' ' '-' | while read n; do
+	rpm -e "$n"
+    done
+
+    tail -n +2 ${alias} | tr ' ' '-' | while read n; do
 	rpm -e "$n"
     done
 }
