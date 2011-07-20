@@ -6,6 +6,8 @@
 
 	* misc/specs/srpmix.spec.in (%files): Added srpmix-weakview-alias.
 
+	* src/Makefile.am (dist_bin_SCRIPTS): Ditto.
+
 2011-07-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in: Introduce dir-base subpackage.
