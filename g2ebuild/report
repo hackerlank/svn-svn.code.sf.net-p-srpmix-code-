@@ -5,8 +5,22 @@
 # Copyright 1999-2010 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 #
+function NOTIFY
+{
+    echo "Unknown command" $@
+}
 
-L_SUPPORTED_VCS="cvs subversion"
+export command_not_found_handle=NOTIFY
+
+declare -A L_SUPPORTED_VCS=(
+    [cvs]=cvs
+    [subversion]=svn
+    [bzr]=bzr
+    [darcs]=darcs
+    [mercurial]=hg
+    [git]=git
+    [git-2]=git
+)
 L_VCS=
 
 function print_usage
@@ -19,8 +33,10 @@ function run_in_sandbox
 {
     local cmd=$1
     local ebuild_file=$2
-    
+    local s
+
     local ltmpdir=`mktemp -d`
+    trap "/bin/rm -rf $ltmpdir" 0
     if [ $? != 0 ]; then
 	exit 2
     fi
@@ -35,63 +51,73 @@ function run_in_sandbox
     cd $ltmpdir
     
     export PATH=
-    /bin/bash -r cmd
-    return $?
-}
-
-function member
-{
-    local elt=$1
-    local tmp
-    shift
-
-    for tmp in "$@"; do
-	if [ "$tmp" = "$elt" ]; then
-	    return 0
-	fi
-    done
-
-    return 1
+    /bin/bash -r $cmd
+    return $s
 }
 
 function inherit
 {
     local tmp
-    for tmp in "$@"; do
-	if member $tmp ${L_SUPPORTED_VCS}; then
+
+    for tmp in $@; do
+	if [ -n "${L_SUPPORTED_VCS[${tmp}]}" ]; then
 	    L_VCS=$tmp
 	    break
 	fi
     done
 }
+    
+L_CVS_VARS="
+    SERVER 
+    MODULE
+    USER
+    PASS
+    AUTH
+    BRANCH
+"
+L_SVN_VARS="
+    REPO_URI
+    USER
+    PASSWORD
+"
+
+L_BZR_VARS="
+    REPO_URI
+    BRANCH
+"
+
+L_DARCS_VARS="
+    REPOSITORY
+"
+
+L_HG_VARS="
+    REPO_URI
+"
+
+L_GIT_VARS="
+    REPO_URI
+    HAS_SUBMODULES
+    MASTER
+    BRANCH
+"
 
 function l-report
 {
-    case $L_VCS in
-	cvs|subversion)
-	    l-report-$L_VCS
-	    return $?
-	    ;;
-	*)
-	    echo :
-	    return 1
-    esac
-}
+    local vcs=${L_SUPPORTED_VCS["$1"]}
+    local p=E${vcs^^*}
+    local a=L_${vcs^^*}_VARS
+    local v
 
-function l-report-cvs
-{
-    printf "ECVS_SERVER=%q\n" "$ECVS_SERVER"
-    printf "ECVS_MODULE=%q\n" "$ECVS_MODULE"
-    printf "ECVS_USER=%q\n" "$ECVS_USER"
-    printf "ECVS_PASS=%q\n" "$ECVS_PASS"
-    printf "ECVS_AUTH=%q\n" "$ECVS_AUTH"
-    printf "ECVS_BRANCH=$q\n" "$ECVS_BRANCH"
-    return 0
-}
+    if [ -z "$vcs" ]; then
+	return 1
+    fi
+    
 
-function l-report-subversion
-{
-    printf "ESVN_REPO_URI=%q\n" "$ESVN_REPO_URI"
+    echo LVCS=$vcs
+    for v in ${!a}; do
+	eval "printf \"${p}_${v}=%q\\n\" \$${p}_$v"
+    done
+    
     return 0
 }
 
@@ -117,9 +143,24 @@ function main
 	run_in_sandbox $0 $1
 	exit $?
     else
+	export PV=1
+	source ebuild
+	if [ -n "$PLEVEL" ]; then
+	    return 1
+	fi
+
 	export PV=9999
 	source ebuild
-	l-report
+
+	export PV=99999999
+	source ebuild
+	
+	
+	if [ -z "$L_VCS" ]; then
+	    return 1
+	fi
+
+	l-report $L_VCS
 	exit $?
     fi
 }
