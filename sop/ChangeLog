@@ -1,3 +1,7 @@
+2011-07-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sop-update (run_yum): Added --skip-broken to yum cmdline.
+
 2011-07-26  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA):

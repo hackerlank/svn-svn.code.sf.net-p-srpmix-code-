@@ -52,7 +52,7 @@ function run_yum
 	done
 	
     fi
-    yum --nogpgcheck -y -c ${repo_file} --disablerepo='*' $enablerepos ${action} '*srpmix*'
+    yum --skip-broken --nogpgcheck -y -c ${repo_file} --disablerepo='*' $enablerepos ${action} '*srpmix*'
 
     return $?
 }
