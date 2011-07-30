@@ -1,5 +1,10 @@
 2011-07-30  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix (WGET_OPTS): Do set -e only if the script is run
+	by non root user.
+
+2011-07-30  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-weakview-alias (create_alias_weakview): Use -f
 	optoin when making symbolic links.
 

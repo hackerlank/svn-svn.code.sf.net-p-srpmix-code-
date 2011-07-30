@@ -26,9 +26,6 @@ SRPMIX_DIR_PKG_OPTS=
 YUM_OPTS=
 WGET_OPTS=
 
-set -e
-
-
 function print_usage
 {
     echo "Usage: "
@@ -284,6 +281,9 @@ function main
 	echo "*** Using $MY_TMPDIR as temporary directory"
     fi
 
+    if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+	set -e
+    fi
     core_build
     dir_pkg_build
     plugin_build
