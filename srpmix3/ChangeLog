@@ -1,3 +1,8 @@
+2011-07-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-alias (create_alias_weakview): Use -f
+	optoin when making symbolic links.
+
 2011-07-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 3.120.1.

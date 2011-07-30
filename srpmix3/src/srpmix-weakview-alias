@@ -169,7 +169,7 @@ EOF
 	local hash=$(srpmix_srchash $package)
 	cat >> $spec <<EOF
 mkdir -p \${RPM_BUILD_ROOT}${sourcesdir}/${hash}/${package}
-ln -s ./${version}-${release} \${RPM_BUILD_ROOT}${sourcesdir}/${hash}/${package}/${link} 
+ln -f -s ./${version}-${release} \${RPM_BUILD_ROOT}${sourcesdir}/${hash}/${package}/${link} 
 EOF
     done
 
