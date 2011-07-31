@@ -158,7 +158,11 @@ function lcopy_srpmix_plugin
     local enable_args=$3
     
     local disable=vanilla
-    local enable=nctags
+    local enable=
+
+    if ! [[ "$disable_args" =~ nctags ]]; then
+	enable=nctags
+    fi
 
     if [ -n "$disable_args" ]; then
 	disable="${disable},${disable_args}"
