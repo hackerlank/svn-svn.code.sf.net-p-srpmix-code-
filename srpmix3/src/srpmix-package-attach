@@ -225,7 +225,7 @@ Version: ${PKG_VERSION}
 Release: ${PKG_RELEASE}%{?dist}.swrf
 Source0: ${PKG_NAME}.tar
 Autoreq: 0
-
+Autoprov: 0
 Buildarch: noarch
 Buildroot: %{_tmppath}/%{name}-root
 BuildRequires: tar

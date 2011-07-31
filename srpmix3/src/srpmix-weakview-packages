@@ -135,6 +135,7 @@ Name: srpmix-weakview-packages-$name
 Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}
 Autoreq: 0
+Autoprov: 0
 BuildRequires: srpmix
 Buildarch: noarch
 Requires: srpmix-dir-base

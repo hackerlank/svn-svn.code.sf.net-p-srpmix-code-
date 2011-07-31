@@ -182,6 +182,7 @@ Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}
 Source: `basename $target_swrf`
 Autoreq: 0
+Autoprov: 0
 Requires: srpmix
 Requires: $req_pkg
 BuildRequires: rsync

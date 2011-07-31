@@ -207,6 +207,7 @@ Version: $SRPMIX_PKG_VERSION
 Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
 Source0: $(basename $target_srpm)
 Autoreq: 0
+Autoprov: 0
 BuildRequires: $BUILD_REQUIRES
 Buildarch: $buildarch
 
@@ -342,6 +343,7 @@ Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
 Source0: $(basename $target_swrf)
 Source1: $(srpmix_archives_name $(basename $target_swrf))
 Autoreq: 0
+Autoprov: 0
 BuildRequires: $BUILD_REQUIRES
 Buildarch: $arch
 
