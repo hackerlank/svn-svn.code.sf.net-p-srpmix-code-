@@ -1,5 +1,7 @@
 2011-08-01  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 3.120.2.
+
 	* src/srpmix (main): Record status after 
 	core_build is done.
 
