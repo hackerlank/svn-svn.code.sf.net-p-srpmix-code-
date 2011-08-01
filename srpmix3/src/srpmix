@@ -231,6 +231,7 @@ function core_build
     local xopt
     mapfile -t xopt < <(opt_rules $TARGET_SRPM)
     srpmix-build "${xopt[@]}" $SRPMIX_BUILD_OPTS --srpm=$TARGET_SRPM
+    return $?
 }
 
 function dir_pkg_build
@@ -285,6 +286,8 @@ function main
 	set -e
     fi
     core_build
+    status=$?
+
     dir_pkg_build
     plugin_build
 
@@ -311,7 +314,6 @@ function main
             mv $p "${OUTPUT_DIR}/${p0}/"
         done
     fi
-    status=$?
 
     # Notify again
     if test -n "$SRPMIX_DEBUG"; then

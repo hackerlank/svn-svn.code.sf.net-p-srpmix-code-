@@ -1,5 +1,8 @@
 2011-08-01  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix (main): Record status after 
+	core_build is done.
+
 	* src/*: Set Autoprov to 0 in all generated spec
 	files. This can prevent rpmbuild inspecting files
 	in a package.
