@@ -1,3 +1,7 @@
+2011-08-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sbuild (create_weakview): Remove old aliases.
+
 2011-07-20  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.2.6.
