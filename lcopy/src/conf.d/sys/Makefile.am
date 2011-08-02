@@ -5,6 +5,7 @@ dist_confd_DATA = \
 	Kahua,trunk.lcopy \
 	NetworkManager,trunk.lcopy \
 	anaconda,trunk.lcopy \
+	asakusafw,trunk.lcopy \
 	audit,trunk.lcopy \
 	autoconf,trunk.lcopy \
 	autofs,trunk.lcopy \
@@ -136,6 +137,7 @@ dist_confd_DATA = \
 	tog-pegasus,trunk.lcopy \
 	twig,trunk.lcopy \
 	uim,trunk.lcopy \
+	util-linux,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
 	virt-manager,trunk.lcopy \
 	virt-v2v,trunk.lcopy \
@@ -148,6 +150,8 @@ dist_confd_DATA = \
 	xtrace,trunk.lcopy \
 	ymacs,trunk.lcopy \
 	yogomacs,trunk.lcopy \
+	yum,trunk.lcopy \
+	yum-utils,trunk.lcopy \
 	zsh,trunk.lcopy \
 	\
 	$(NULL)
