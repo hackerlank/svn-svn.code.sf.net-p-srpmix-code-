@@ -10,7 +10,6 @@
   ;;
   (use yogomacs.dentry)
   (use yogomacs.dentries.fs)
-  (use yogomacs.path)
   ;;
   )
 (select-module yogomacs.dests.packages-dir)
