@@ -1,0 +1,182 @@
+#!/bin/bash
+#
+########################################################################
+#
+# g2ebuild prelcopy class
+#
+# Copyright (C) 2011 Masatake YAMATO
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+########################################################################
+
+G2EBUILD_ROOT_DATA_DIR=
+declare -A G2EBUILD_NAME_MAP
+
+function print_help
+{
+    echo "Usage: "
+    echo "$0 PRELCOPY-FILE"
+    exit $1
+}
+
+function main
+{
+    local conf
+    local k
+    local v
+    local p
+    local f
+
+    if [ $# != 1 ]; then
+	print_help 1 1>&2
+    fi
+
+    if ! source $1; then
+	return $?
+    fi
+    conf="$1"
+
+    if [ -z "$G2EBUILD_ROOT_DATA_DIR" ]; then
+       	echo "No value for G2EBUILD_ROOT_DATA_DIR" 1>&2
+	return 1
+    fi
+
+    if ! [ -d "$G2EBUILD_ROOT_DATA_DIR" ]; then
+        echo "No such directory: $G2EBUILD_ROOT_DATA_DIR" 1>&2
+	return 1
+    fi 
+
+    if ! which g2ebuild-vcs-report > /dev/null 2>&1; then
+	echo "Cannot find g2ebuild-vcs-report" 1>&2
+	return 1
+    fi
+
+    find "$G2EBUILD_ROOT_DATA_DIR" -name '*9999.ebuild' | while read ebuild; do
+	k=$(basename $ebuild .ebuild)
+	v=$(g2ebuild-vcs-report $ebuild 2>/dev/null)
+	if [ $? = 0 ]; then
+	    p="${G2EBUILD_NAME_MAP[$k]}"
+	    if [ -n "$p" ]; then
+		(
+		    eval "$v"
+		    f="emit_${LVCS}"
+		    if type "$f" > /dev/null 2>&1; then
+			"$f" "$p" $(basename $conf)
+		    fi
+		)
+
+	    fi
+	fi
+    done
+
+    return $?
+}
+
+function emit_darcs
+{
+    local p=$1
+    local conf=$2
+
+    cat <<EOF
+(prelcopy :package "$p"
+          :branch  "trunk"
+          :command-line "dracs get ${EDARCS_REPOSITORY}"
+          :update #t
+          :generated-by "${0##*/}+$conf")
+EOF
+}
+
+function emit_bzr
+{
+    local p=$1
+    local conf=$2
+
+    cat <<EOF
+(prelcopy :package "$p"
+          :branch  "trunk"
+          :command-line "bzr branch ${EBZR_REPO_URI}"
+          :update #t
+          :generated-by "${0##*/}+$conf")
+EOF
+}
+
+function emit_cvs
+{
+    local p=$1
+    local conf=$2
+
+    if [ -z "${ECVS_AUTH}" ]; then
+    cat <<EOF
+(prelcopy :package "$p"
+          :branch  "trunk"
+          :command-line "cvs -d:pserver:${ECVS_USER}:${ECVS_PASS}@${ECVS_SERVER} checkout ${ECVS_MODULE}"
+          :update #t
+          :generated-by "${0##*/}+$conf")
+EOF
+    elif [ "${ECVS_AUTH}" = "ext" ]; then
+	# ???
+    cat <<EOF
+(prelcopy :package "$p"
+          :branch  "trunk"
+          :command-line "cvs -d:extssh:${ECVS_USER}@${ECVS_SERVER} checkout ${ECVS_MODULE}"
+          :update #t
+          :generated-by "${0##*/}+$conf")
+EOF
+    fi
+
+
+}
+function emit_hg
+{
+    local p=$1
+    local conf=$2
+
+    cat <<EOF
+(prelcopy :package "$p"
+          :branch  "trunk"
+          :command-line "hg clone ${EHG_REPO_URI}"
+          :update #t
+          :generated-by "${0##*/}+$conf")
+EOF
+}
+function emit_svn
+{
+    local p=$1
+    local conf=$2
+
+    cat <<EOF
+(prelcopy :package "$p"
+          :branch  "trunk"
+          :command-line "svn checkout ${ESVN_REPO_URI}"
+          :update #t
+          :generated-by "${0##*/}+$conf")
+EOF
+}
+
+function emit_git
+{
+    local p=$1
+    local conf=$2
+
+    cat <<EOF
+(prelcopy :package "$p"
+          :branch  "trunk"
+          :command-line "git clone ${EGIT_REPO_URI}"
+          :update #t
+          :generated-by "${0##*/}+$conf")
+EOF
+}
+
+main "$@"

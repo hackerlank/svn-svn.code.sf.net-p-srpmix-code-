@@ -5,7 +5,9 @@
 (use srfi-1)
 
 (define jboss-svn-page2 "http://anonsvn.jboss.org/repos/svn-page2.html")
-(define inaccessible-projects '("teiiddesigner" "installer" "repository.jboss.org"))
+(define inaccessible-projects '("teiiddesigner" 
+				"installer"
+				"repository.jboss.org"))
 (define (svn-page2-top droppers)
   (let1 sxml (call-with-input-process
 		 `(wget -q -O - ,jboss-svn-page2)

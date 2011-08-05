@@ -1,0 +1,10 @@
+# -*- sh -*-
+PRELCOPY_CLASS=g2ebuild
+
+G2EBUILD_ROOT_DATA_DIR=/srv/sources/sources/g/gentoo-x86/^lcopy-trunk/pre-build/gentoo-x86
+G2EBUILD_NAME_MAP=(
+	["kexec-tools-9999"]="kexec-tools"
+	["smartmontools-9999"]="smartmontools"
+	["mercurial-9999"]="mercurial"
+	["skk-jisyo-9999"]="skkdic"
+)

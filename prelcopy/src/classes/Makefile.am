@@ -1,5 +1,6 @@
 classesdir = $(libexecdir)/prelcopy/classes
 dist_classes_SCRIPTS = \
-	svnweb	\
+	svnweb	 \
+        g2ebuild \
 	\
 	$(NULL)
