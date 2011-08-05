@@ -1,0 +1,11 @@
+;; -*- scheme -*-
+(ypack-version "0.0.0")
+(ypack-require "mock")
+(ypack-name  "mock-o0g3-plugin")
+(ypack-dir "/usr/share/mock-O0g3-plugin")
+(ypack-entry "O0g3.py"  "/usr/lib/python2.7/site-packages/mock/plugins/O0g3.py")
+(ypack-dummy "/usr/lib/python2.7/site-packages/mock/plugins/O0g3.pyc")
+(ypack-dummy "/usr/lib/python2.7/site-packages/mock/plugins/O0g3.pyo")
+(ypack-entry "gcc-O0g3" "/usr/share/mock-O0g3-plugin/gcc-O0g3")
+
+
