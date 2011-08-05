@@ -63,6 +63,7 @@ dist_confd_DATA = \
 	kernel,dlm.lcopy \
 	kernel,kbuild.lcopy \
 	kernel,kvm.lcopy \
+	kernel,net-next.lcopy \
 	kernel,rt.lcopy \
 	kernel,trunk.lcopy \
 	kernel,xen-3_2.lcopy \
