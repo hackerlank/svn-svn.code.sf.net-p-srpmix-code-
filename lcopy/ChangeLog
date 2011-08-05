@@ -1,3 +1,8 @@
+2011-08-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/backends/debwatch (debwatch_help_genconf): Fix
+	help document.
+
 2011-07-31  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/liblcopy.sh.in (lcopy_srpmix_plugin): Don't

@@ -122,7 +122,7 @@ function debwatch_help_genconf
     fi
 
     echo "	" ${prefix} debwatch 'checkout' [WATCH-SPEC] DPKG
-    echo "      About see \"debwatch --help\""
+    echo "	About debwatch command see \"debwatch --help\""
 }
 
 function debwatch_genconf
