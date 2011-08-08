@@ -1,0 +1,84 @@
+#!/bin/bash
+dist=$1
+srpm=$2
+output=${3:-/tmp}
+
+function print_usage
+{
+    echo "$0 DIST SRPM [OUTPUT]"	
+}
+if [ -z "${srpm}" ]; then
+    print_usage 1>&2
+    exit 1
+fi
+
+if ! [ -f $srpm ]; then
+    echo "Cannot find $srpm" 1>&2
+    exit 1
+fi
+
+if ! mkdir -p $output/srv/sources; then
+    eixt 1
+fi
+
+pkg_name=$(rpm --nosignature -qp --queryformat="%{NAME}\n" $srpm )
+pkg_char=${pkg_name:0:1}
+pkg_version=$(rpm --nosignature -qp --queryformat="%{VERSION}\n" $srpm )
+pkg_release=$(rpm --nosignature -qp --queryformat="%{RELEASE}\n" $srpm )
+
+pkg_dir=/srv/sources/sources/${pkg_char}/${pkg_name}/${pkg_version}-${pkg_release}
+pkg_prebuild_dir=${pkg_dir}/pre-build
+for x in ${pkg_prebuild_dir}/*; do
+    if [ $x = "${pkg_prebuild_dir}"'/*' ]; then
+	echo "Cannot resolve prefixd" 1>&2
+	exit 1
+    fi
+    pkg_prefixd=${x:$(( ${#pkg_prebuild_dir} + 1))}
+    break
+done
+O0g3_dir=$output${pkg_dir}/plugins/O0g3
+
+if ! mkdir -p ${O0g3_dir}; then
+    eixt 1
+fi
+
+mock --no-cleanup-after      \
+     --resultdir=${O0g3_dir} \
+     --enable-plugin=O0g3    \
+     --root ${dist}          \
+     --rebuild ${srpm}       
+
+cd ${O0g3_dir}
+rm -f *.src.rpm
+mkdir -p root
+
+es2dot="gosh ~/var/droite/es-src-objdump-dcall/2dot.scm"
+for p in *.rpm; do
+    rpm2cpio $p 2>/dev/null | (cd root; cpio -dim 2>/dev/null)
+    find root -type f | while read f; do
+	if ! ( file $f | grep ELF > /dev/null 2>&1 ); then
+	    rm $f
+	fi
+    done
+done
+
+for d in root/*; do
+    if [ $d = 'root/*' ]; then
+	break
+    fi
+    if [ -z "$(find $d -type f)" ]; then
+	rm -rf "${d}"
+    fi
+done
+
+find root -type f | while read f; do
+    echo -n $f.es...
+    gosh ~/var/droite/es-src-objdump-dcall/driver.scm $f > ${f}.es
+    echo $?
+    echo -n $f.dot...
+    ${es2dot} sources ${pkg_name} ${pkg_version}-${pkg_release} ${pkg_prefixd} < ${f}.es > ${f}.dot
+    echo $?
+    echo -n $f.svg...
+    neato -Gstart=0 -Gsplines=true -Nfontsize=26 -Nfontsize=30  -Elen=15 -Tsvg ${f}.dot > ${f}.svg
+    echo $?
+done
