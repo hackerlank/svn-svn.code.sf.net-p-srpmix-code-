@@ -1,5 +1,5 @@
 ;; -*- scheme -*-
-(ypack-version "0.0.0")
+(ypack-version "0.0.1")
 (ypack-require "mock")
 (ypack-name  "mock-o0g3-plugin")
 (ypack-dir "/usr/share/mock-O0g3-plugin")
@@ -7,5 +7,6 @@
 (ypack-dummy "/usr/lib/python2.7/site-packages/mock/plugins/O0g3.pyc")
 (ypack-dummy "/usr/lib/python2.7/site-packages/mock/plugins/O0g3.pyo")
 (ypack-entry "gcc-O0g3" "/usr/share/mock-O0g3-plugin/gcc-O0g3")
+(ypack-entry "cc-O0g3" "/usr/share/mock-O0g3-plugin/cc-O0g3")
 
 

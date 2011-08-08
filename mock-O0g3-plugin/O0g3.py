@@ -28,7 +28,10 @@ class O0g3(object):
     def __init__(self, root, opts):
         self.root = root
         self.opts = opts
-        self.gcc_O0g3="/usr/share/mock-O0g3-plugin/gcc-O0g3"
+        self.O0g3s = {
+            "gcc": "/usr/share/mock-O0g3-plugin/gcc-O0g3",
+            "cc": "/usr/share/mock-O0g3-plugin/cc-O0g3",
+        }
         self.suffix="O0g3"
         
         # See http://www.redhat.com/archives/rpm-list/2003-February/msg00174.html
@@ -40,13 +43,17 @@ class O0g3(object):
 
     decorate(traceLog())
     def prebuild(self):
-        getLog().info("Modify the spec file")
         self.modifySpec()
+        self.replace("gcc")
+        self.replace("cc")
 
-        getLog().info("Replace gcc")
-        self.replaceGcc()
+    decorate(traceLog())
+    def postbuild(self):
+        self.revert("gcc")
+        self.revert("cc")
         
     def modifySpec(self):
+        getLog().info("Modify the spec file")
         root = self.root
         specs = glob.glob(root.makeChrootPath(root.builddir, "SPECS", "*.spec"))
         spec = specs[0]
@@ -64,44 +71,43 @@ class O0g3(object):
             uid=root.chrootuid,
             gid=root.chrootgid,
             )
-        
-    def replaceGcc(self):
+
+    def makeOriginalPath(self, cmd):
+        return self.root.makeChrootPath("/usr/bin" + "/" + cmd)
+    def makeBackupPath(self, cmd):
+        return self.root.makeChrootPath("/usr/bin" + "/" + "_" + cmd)
+
+    def replace(self, cmd):
+        getLog().info("Replace " + cmd)
         root = self.root
-        f = open(root.makeChrootPath("/usr/bin/gcc"), mode='r')
+        original = self.makeOriginalPath(cmd)
+        backup = self.makeBackupPath(cmd)
+        f = open(original, mode='r')
         l = f.readline() 
         f.close()
         if l != "#!/bin/bash":
             try:
                 root.uidManager.becomeUser(0, 0)
-                mock.util.do(
-                    ["/bin/cp", 
-                     root.makeChrootPath("/usr/bin/gcc"), 
-                     root.makeChrootPath("/usr/bin/_gcc")],
+                mock.util.do(["/bin/cp", original, backup],
                     shell=False)
                 mock.util.do(
                     ["/bin/cp", 
-                     self.gcc_O0g3,
-                     root.makeChrootPath("/usr/bin/gcc")],
+                     self.O0g3s[cmd],
+                     original],
                     shell=False)
             finally:
                 root.uidManager.restorePrivs()
-    def revertGcc(self):
+    def revert(self, cmd):
+        getLog().info("Revert " + cmd)
         root = self.root
-        if os.path.exists(root.makeChrootPath("/usr/bin/_gcc")):
-
+        original = self.makeOriginalPath(cmd)
+        backup = self.makeBackupPath(cmd)
+        if os.path.exists(backup):
             try:
                 root.uidManager.becomeUser(0, 0)
-                mock.util.do(
-                    ["/bin/mv", 
-                     root.makeChrootPath("/usr/bin/_gcc"), 
-                     root.makeChrootPath("/usr/bin/gcc")],
-                    shell=False)
+                mock.util.do(["/bin/mv", backup, original],
+                             shell=False)
             finally:
                 root.uidManager.restorePrivs()
-        
-    decorate(traceLog())
-    def postbuild(self):
-        getLog().info("Revert gcc")
-        self.revertGcc()
 
 # mock --no-cleanup-after --resultdir=/tmp --enable-plugin=O0g3 -r epel-5-x86_64 --rebuild /srv/sources/attic/cradles/ftp.redhat.com/mirror/linux/enterprise/5Server/en/os/SRPMS/device-mapper-multipath-0.4.7-46.el5.src.rpm 
