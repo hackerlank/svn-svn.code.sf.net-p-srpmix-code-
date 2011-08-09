@@ -137,6 +137,7 @@ dist_confd_DATA = \
 	texinfo,trunk.lcopy \
 	tog-pegasus,trunk.lcopy \
 	twig,trunk.lcopy \
+	udev,trunk.lcopy \
 	uim,trunk.lcopy \
 	util-linux,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
