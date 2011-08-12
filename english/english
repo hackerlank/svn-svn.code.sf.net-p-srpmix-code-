@@ -1,0 +1,4 @@
+#!/bin/bash
+for x in /srv/sources/sources/*/*/*/pre-build/*/{ChangeLog,README}; do 
+    grep -F -nH "$*" $x; 
+done
