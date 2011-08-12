@@ -378,6 +378,10 @@ rm -rf \$RPM_BUILD_ROOT
 mkdir -p \$RPM_BUILD_ROOT/$installdir
 mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins
 
+# If no plugin is enabled, the plugins dir becomes empty; 
+# and globing in %files fails. Put dummy to avoid it.
+mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins/dummy
+
 from=%{_builddir}/%{name}/$SRPMIX_VAR_DIR
 to=\$RPM_BUILD_ROOT
 transfer_cmd=
