@@ -31,6 +31,8 @@ class O0g3(object):
         self.O0g3s = {
             "gcc": "/usr/share/mock-O0g3-plugin/gcc-O0g3",
             "cc": "/usr/share/mock-O0g3-plugin/cc-O0g3",
+            "g++": "/usr/share/mock-O0g3-plugin/g++-O0g3",
+            "c++": "/usr/share/mock-O0g3-plugin/c++-O0g3",
         }
         self.suffix="O0g3"
         
@@ -44,14 +46,14 @@ class O0g3(object):
     decorate(traceLog())
     def prebuild(self):
         self.modifySpec()
-        self.replace("gcc")
-        self.replace("cc")
+        for k in self.O0g3s:
+            self.replace(k)
 
     decorate(traceLog())
     def postbuild(self):
-        self.revert("gcc")
-        self.revert("cc")
-        
+        for k in self.O0g3s:
+            self.revert(k)
+
     def modifySpec(self):
         getLog().info("Modify the spec file")
         root = self.root
@@ -88,8 +90,10 @@ class O0g3(object):
         if l != "#!/bin/bash":
             try:
                 root.uidManager.becomeUser(0, 0)
-                mock.util.do(["/bin/cp", original, backup],
+                getLog().info("mv " + original + " " + backup)
+                mock.util.do(["/bin/mv", original, backup],
                     shell=False)
+                getLog().info("cp " + self.O0g3s[cmd] + " " + original)
                 mock.util.do(
                     ["/bin/cp", 
                      self.O0g3s[cmd],
@@ -105,6 +109,7 @@ class O0g3(object):
         if os.path.exists(backup):
             try:
                 root.uidManager.becomeUser(0, 0)
+                getLog().info("mv " + backup + " " + original)
                 mock.util.do(["/bin/mv", backup, original],
                              shell=False)
             finally:

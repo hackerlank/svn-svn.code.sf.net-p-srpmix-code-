@@ -1,0 +1,23 @@
+#!/bin/bash
+
+GPP=/usr/bin/_g++
+declare -a rep
+
+O0=-O0
+g3=-g3
+
+for x in "$@"; do
+    if [[ "$x" =  "-O0" ]]; then
+	O0=
+	rep[${#rep[@]}]="$x"
+    elif [[ "$x" =~ -O.* ]]; then
+	:
+    elif [ "$x" = "-g3" ]; then
+	g3=
+	rep[${#rep[@]}]="$x"
+    else
+	rep[${#rep[@]}]="$x"
+    fi
+done
+
+${GPP} ${O0} ${g3} "${rep[@]}"
