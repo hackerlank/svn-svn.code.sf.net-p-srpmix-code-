@@ -5,6 +5,27 @@ function print_usage
     echo "$0 DIST SRPM [OUTPUT]"	
 }
 
+function pid_trace
+{
+    local i
+    local v=
+
+    i=$$
+    while true; do
+	v=(`sed -n -e 's/^\(Pid\|PPid\):	\(.*\)$/\2/p' /proc/$i/status 2> /dev/null`)
+	if [[ $? != 0 ]]; then
+	    break
+	fi
+	
+	printf "%s%6d %s\n" "$c" "${v[0]}" "$(cat /proc/$i/cmdline | tr '\0' ' ')"
+
+	i=${v[1]}
+	if [[ $i = 0 ]]; then
+	    break
+	fi
+    done
+}
+
 function main
 {
     local dist=$1
@@ -54,6 +75,8 @@ function main
 	return 1
     fi
 
+    pid_trace > ${O0g3_dir}/LOCK
+
     mock \
         --no-cleanup-after      \
 	--resultdir=${O0g3_dir} \
@@ -79,8 +102,11 @@ function main
 	    fi
 	done
 	find root -type d -empty -delete
+
+	rm ${O0g3_dir}/LOCK
 	return 0
     else
+	rm ${O0g3_dir}/LOCK
 	return 1
     fi
 }
