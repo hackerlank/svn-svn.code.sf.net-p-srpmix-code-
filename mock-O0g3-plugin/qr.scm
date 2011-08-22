@@ -1,3 +1,7 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
 (use srfi-1)
 (use srfi-13)
 (use util.match)
