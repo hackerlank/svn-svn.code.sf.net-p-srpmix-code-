@@ -1,0 +1,4 @@
+(ypack-name "g2ebuild")
+(ypack-version "0.0.0")
+(ypack-require "bash")
+(ypack-entry "g2ebuild-vcs-report" "/usr/bin/g2ebuild-vcs-report")
