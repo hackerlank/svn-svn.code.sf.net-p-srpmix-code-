@@ -107,9 +107,9 @@
 	   (list)))
 
 (define (writeln es)
-  (write es)
-  (newline)
-  ;(print es)
+  ;(write es)
+  ;(newline)
+  (print es)
   )
 (define (writeln* ess)
   (for-each
