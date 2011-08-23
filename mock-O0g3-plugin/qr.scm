@@ -108,7 +108,9 @@
 
 (define (writeln es)
   (write es)
-  (newline))
+  (newline)
+  ;(print es)
+  )
 (define (writeln* ess)
   (for-each
    writeln
@@ -119,7 +121,12 @@
 (define (backward-reachable? from to ftable)
   (list #f))
 
-(define (callers* name rtable depth)
+(define (decorate name table interactive?)
+  (if interactive?
+      #`",(if (variable? name table) '= '|| ),|name|,(if (variable? name table) '|| '() )"
+      name))
+
+(define (callers* name rtable interactive? depth)
   (hash-table-map
    (let loop ((current-callers (map
 				(cute ref <> 1)
@@ -132,19 +139,27 @@
        (for-each
 	(lambda (caller)
 	  (unless (member caller path)
-	    ;; ...TODO
-	    (hash-table-push! total-callers caller 
-			      (cons caller path))
-	    (loop (map
-		   (cute ref <> 1)
-		   (find-callers caller rtable))
-		  total-callers
-		  (cons caller path)
-		  (if (integer? depth) (- depth 1) depth)
-		  )))
+	    (let* ((xpath (cons caller path))
+		   (v (hash-table-get total-callers caller #f)))
+	      (unless (and v (member xpath v)) ; necessary
+                (hash-table-push! total-callers caller 
+				  xpath)
+		(loop (map
+		       (cute ref <> 1)
+		       (find-callers caller rtable))
+		      total-callers
+		      xpath
+		      (if (integer? depth) (- depth 1) depth)
+		    )))))
 	current-callers))
      total-callers)
-   cons))
+   (lambda (a b)
+     (cons (decorate a rtable interactive?)
+	   (map
+	    (lambda (x)
+	      (map (cute decorate <> rtable interactive?) x))
+	    b))
+     )))
 
 (define (callees* name ftable interactive? depth)
   (hash-table-map
@@ -161,56 +176,54 @@
 	  (unless (member callee path)
 	    (let* ((xpath (cons callee path))
 		   (v (hash-table-get total-callees callee #f)))
-	      (unless (and v (member xpath v))
+	      (unless (and v (member xpath v)) 
 		(hash-table-push! total-callees callee 
-				  (cons callee path))
+				  xpath)
 		(loop (map
 		       (cute ref <> 1)
 		       (find-callees callee ftable))
 		      total-callees
-		      (cons callee path)
+		      xpath
 		      (if (integer? depth) (- depth 1) depth))))))
 	current-callees))
      total-callees)
    (lambda (a b)
-     (cons (if interactive?
-	       (if interactive?
-		   `(,(if (variable?-forward a ftable) 'v 'f) ,a)
-		   a)
-	       a)
+     (cons (decorate a ftable interactive?) 
 	   (map
 	    (lambda (x)
-	      ;#`",|a|<,(if (variable?-forward a ftable) 'v 'f )>"
-	      (map (lambda (a)
-		     (if interactive?
-			 `(,(if (variable?-forward a ftable) 'v 'f) ,a)
-			 a))
+	      (map (cute decorate <> ftable interactive?)
 		   x))
 	    (map reverse b))))))
 
-(define (reachable? from to rtable depth)
-  (or (let1 callers-from (callers* from rtable depth)
-	    (if-let1 found (assoc-ref  callers-from to #f)
-		     (map
-		      (lambda (f)
-			f)
-		      found)
-		     #f))
-      (let1 callers-to (callers* to rtable depth)
-	    (if-let1 found (assoc-ref  callers-to from #f)
-		     (map
-		      (lambda (f)
-			f)
-		      found)
-		     #f))
-      (list #f)))
+(define (reachable? from to rtable interactive? depth)
+  (delete-duplicates 
+   (or (let1 callers-from (callers* from rtable #f depth)
+	     (if-let1 found (assoc-ref  callers-from to #f)
+		      (map
+		       (lambda (f)
+			 (map (cute decorate <> rtable interactive?)
+			      f))
+		       found)
+		      #f))
+       (let1 callers-to (callers* to rtable #f depth)
+	     (if-let1 found (assoc-ref  callers-to from #f)
+		      (map
+		       (lambda (f)
+			 (map (cute decorate <> rtable interactive?)
+			      f))
+		       found)
+		      #f))
+       (list #f))))
 
-(define (transit from to ftable rtable depth)
+(define (transit from to ftable rtable interactive? depth)
+  (define (decorate* tree)
+    (map (lambda (t) (map (cute decorate <> rtable interactive?) t)) 
+	 tree))
   (delete-duplicates
-   (let1 r (reachable? from to rtable depth)
+   (let1 r (reachable? from to rtable #f depth)
 	 (if (equal? r (list #f))
-	     (let1 commons (append (let* ((callers-from (callers* from rtable depth))
-					  (callers-to (callers* to rtable depth))
+	     (let1 commons (append (let* ((callers-from (callers* from rtable #f depth))
+					  (callers-to (callers* to rtable #f depth))
 					  (common-callers (lset-intersection equal? 
 									     (map car callers-from)
 									     (map car callers-to))))
@@ -219,10 +232,12 @@
 					 (map
 					  (lambda (common-caller)
 					    `(common-caller ,common-caller
-							    :from ,(delete-duplicates 
-								    (assoc-ref callers-from common-caller))
-							    :to ,(delete-duplicates
-								  (assoc-ref callers-to common-caller)))
+							    :from ,(decorate*
+								    (delete-duplicates 
+								     (assoc-ref callers-from common-caller)))
+							    :to ,(decorate*
+								  (delete-duplicates
+								   (assoc-ref callers-to common-caller))))
 					    )
 					  common-callers)))
 				   (let* ((callees-from (callees* from ftable #f depth))
@@ -235,10 +250,12 @@
 					 (map
 					  (lambda (common-callee)
 					    `(common-callee ,common-callee
-							    :from ,(delete-duplicates
-								    (assoc-ref callees-from common-callee))
-							    :to ,(delete-duplicates
-								  (assoc-ref callees-to common-callee)))
+							    :from ,(decorate*
+								    (delete-duplicates
+								     (assoc-ref callees-from common-callee)))
+							    :to ,(decorate* 
+								  (delete-duplicates
+								   (assoc-ref callees-to common-callee))))
 					    )
 					  common-callees))))
 		   (if (null? commons)
@@ -246,8 +263,8 @@
 		       commons))
 	     r))))
 
-(define (variable?-forward name ftable)
-  (let1 entry (ref ftable name #f)
+(define (variable? name table)
+  (let1 entry (ref table name #f)
     (if entry
 	(cadr (memq :variable? (car entry)))
 	#f)))
@@ -256,20 +273,24 @@
   (match es
    ((? string? name) (ref ftable name (list #f)))
    ((? symbol? name) (ref ftable (x->string name) (list #f)))
-   (('callers (? string? name)) (find-callers name rtable))
-   (('callees (? string? name)) (find-callees name ftable))
    (('dump-table) (rtable-dump rtable))
-   (('callers* (? string? name)) (callers* name rtable #t))
-   (('callers* (? string? name) ':depth depth) 
-    (callers* name rtable depth))
-   (('callees* (? string? name)) (callees* name ftable #t #t))
-   (('callees* (? string? name) ':depth depth) 
+   ;;
+   (('< (? string? name)) (callers* name rtable #t 1))
+   (('callers (? string? name)) (callers* name rtable #t 1))
+   (('< (? string? name) depth) (callers* name rtable #t depth))
+   (('callers (? string? name) ':depth depth) 
+    (callers* name rtable #t depth))
+   ;;
+   (('> (? string? name)) (callees* name ftable #t 1))
+   (('callees (? string? name)) (callees* name ftable #t 1))
+   (('> (? string? name) depth) (callees* name ftable #t depth))
+   (('callees (? string? name) ':depth depth) 
     (callees* name ftable #t depth))
-   (('reachable? from to) (delete-duplicates (reachable? from to rtable #t)))
-   (('reachable? from to ':depth depth) 
-    (delete-duplicates (reachable? from to rtable depth)))
-   (('transit from to) (transit from to ftable rtable #t))
-   (('transit from to ':depth depth) (transit from to ftable rtable depth))
+   ;;
+   (('reachable? from to) (reachable? from to rtable #t 1))
+   (('reachable? from to ':depth depth) (reachable? from to rtable #t depth))
+   (('transit from to) (transit from to ftable rtable #t #t))
+   (('transit from to ':depth depth) (transit from to ftable rtable #t depth))
    (else
     (print #`";; unknown command: ,(car es)")
     (list #f)
