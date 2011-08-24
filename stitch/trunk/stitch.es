@@ -80,7 +80,6 @@ CONFIG_64BIT=y") :which-func ("CONFIG_X86_64"))) :annotation-list ((annotation :
 
 (stitch-annotation :version 0 :target-list ((target :type directory :directory "/srv/sources/" :item ".")) :annotation-list ((annotation :type text :data "THIS IS SOURCES.")) :date "Sun Dec 12 09:10:18 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (*DRAFT*))
 
-(stitch-annotation :version 0 :target-list ((target :type directory :directory "/srv/sources/sources/" :item ".")) :annotation-list ((annotation :type text :data "XFF")) :date "Sun Dec 12 12:09:01 2010" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (*DRAFT*))
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/dists/rhel5su4/packages/k/kernel/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/fs/nfs/read.c" :point 18494 :coding-system undecided-unix :line 724 :surround ("	 */
 " "" "	ret = nfs_readpages_from_fscache(desc.ctx, inode, mapping,
 					 pages, &nr_pages);") :which-func ("nfs_readpages"))) :annotation-list ((annotation :type text :data "nfs_file_read <ここでgetattrしてサーバ側で変更があれば、キャッシュをinvalidとする処理がある？>
@@ -93,3 +92,11 @@ CONFIG_64BIT=y") :which-func ("CONFIG_X86_64"))) :annotation-list ((annotation :
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/dists/rhel5su4/packages/k/kernel/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/mm/filemap.c" :point 31149 :coding-system undecided-unix :line 1100 :surround ("	if (filp)
 " "" "		file_accessed(filp);
 }") :which-func ("do_generic_mapping_read"))) :annotation-list ((annotation :type text :data "ここでタイムスタンプ(atime)を更新")) :date "Mon Jan  3 18:16:11 2011" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (nfs-atime))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/jet/srpmix/sources/c/corosync/1.3.1-1.fc14/pre-build/corosync-1.3.1/exec/totemconfig.c" :point 2705 :coding-system undecided-unix :line 74 :surround ("#define JOIN_TIMEOUT				50
+" "" "#define MERGE_TIMEOUT				200
+#define DOWNCHECK_TIMEOUT			1000"))) :annotation-list ((annotation :type text :data "0.2秒tokenが更新されていなくて、GATHERでもCOMMITでもRECOVERYでもなければ、
+merge送信(gatherのことか)")) :date "Fri May 27 03:27:55 2011" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/jet/srpmix/sources/c/cluster/3.1.1-1.fc14/pre-build/cluster-3.1.1/cman/daemon/ais.c" :point 10821 :coding-system undecided-unix :line 343 :surround ("		log_printf(LOGSYS_LEVEL_DEBUG, \"ais: last memb_count = %d, current = %\"PRIuFAST32\"\\n\", last_memb_count, member_list_entries);
+" "" "		send_transition_msg(last_memb_count, first_trans);
+		last_memb_count = member_list_entries;") :which-func ("cman_confchg_fn"))) :annotation-list ((annotation :type text :data "この先、quorumの再計算でクラスターメッセージを送信する。
+そのメッセージの先でfencingか？")) :date "Thu Jun  9 03:45:39 2011" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-cluster))
