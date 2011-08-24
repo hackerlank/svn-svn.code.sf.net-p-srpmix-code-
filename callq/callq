@@ -302,6 +302,17 @@
 (define (info name ftable)
   (ref ftable name (list #f)))
 
+(define (kref es k)
+  (cadr (or (memq k es)
+	    (list k #f))))
+
+(define (fline name ftable)
+  (and-let* ((e (car (ref ftable name (list #f))))
+	     (e (cdddr e))
+	     (file (kref e :file))
+	     (line (kref e :line)))
+    `(,#`",|file|:,|line|")))
+
 (define (search name ftable)
   (hash-table-fold ftable (lambda (k v kdr)
 			    (if (string-scan k name)
@@ -317,7 +328,7 @@
       (('load-file (? string? file)) (load-file file))
       (('select-file (? string? file)) (select-file file))
       (('list-files) (list-files))
-      (('? (? string? name)) (info name ftable))
+      (('? (? string? name)) (fline name ftable))
       (('search (? string? name)) (search name ftable))
       (('dump-table) (rtable-dump rtable))
       ;;
