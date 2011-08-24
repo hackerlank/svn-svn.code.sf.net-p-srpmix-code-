@@ -19,6 +19,7 @@
    #/^call_gmon_start$/
    #/^__do_global_dtors_aux$/
    #/^frame_dummy$/
+   #/^_start$/
    ))
 
 (define (load-entries file)
@@ -269,28 +270,39 @@
 	(cadr (memq :variable? (car entry)))
 	#f)))
 
+(define (info name ftable)
+  (ref ftable name (list #f)))
+
+(define (search name ftable)
+  (hash-table-fold ftable (lambda (k v kdr)
+			    (if (string-scan k name)
+				(cons k kdr)
+				kdr))
+		   (list)))
+
 (define (qr-eval es env ftable rtable)
   (match es
-   ((? string? name) (ref ftable name (list #f)))
-   ((? symbol? name) (ref ftable (x->string name) (list #f)))
+   (('info (? string? name)) (info name ftable))
+   (('? (? string? name)) (info name ftable))
+   (('search (? string? name)) (search name ftable))
    (('dump-table) (rtable-dump rtable))
    ;;
    (('< (? string? name)) (callers* name rtable #t 1))
    (('callers (? string? name)) (callers* name rtable #t 1))
    (('< (? string? name) depth) (callers* name rtable #t depth))
-   (('callers (? string? name) ':depth depth) 
+   (('callers (? string? name) depth) 
     (callers* name rtable #t depth))
    ;;
    (('> (? string? name)) (callees* name ftable #t 1))
    (('callees (? string? name)) (callees* name ftable #t 1))
    (('> (? string? name) depth) (callees* name ftable #t depth))
-   (('callees (? string? name) ':depth depth) 
+   (('callees (? string? name) depth) 
     (callees* name ftable #t depth))
    ;;
    (('reachable? from to) (reachable? from to rtable #t 1))
-   (('reachable? from to ':depth depth) (reachable? from to rtable #t depth))
+   (('reachable? from to  depth) (reachable? from to rtable #t depth))
    (('transit from to) (transit from to ftable rtable #t #t))
-   (('transit from to ':depth depth) (transit from to ftable rtable #t depth))
+   (('transit from to  depth) (transit from to ftable rtable #t depth))
    (else
     (print #`";; unknown command: ,(car es)")
     (list #f)
@@ -315,5 +327,5 @@
 				   (lambda () 
 				     (with-output-to-port (current-error-port)
 				       (lambda ()
-					 (display "ree? ")
+					 (display #`"[,(sys-basename file)]? ")
 					 (flush))))))))
