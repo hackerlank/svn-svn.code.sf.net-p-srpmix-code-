@@ -1,0 +1,18 @@
+#!/bin/bash
+if [[ ${1:0:1} = "/" ]]; then
+    input=$(readlink --canonicalize $1)
+else
+    input=$(readlink --canonicalize $(pwd)/$1)
+fi
+output=~/.callq/${input}.es
+mkdir -p $(dirname ${output})
+
+if [ ! -r ${output} ]; then
+    es-src-objdump-dcall $input                \
+	| es-filter-objcopy-data $input        \
+	| es-filter-readelf-rela $input        \
+	| es-filter-libdwarves-fileline $input \
+	> ${output}
+fi
+echo ${output}
+exit 0
