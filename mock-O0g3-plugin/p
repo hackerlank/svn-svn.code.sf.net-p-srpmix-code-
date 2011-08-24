@@ -1,7 +1,0 @@
-#!/bin/bash
-target=$1
-es-src-objdump-dcall $target                \
-    | es-filter-objcopy-data $target        \
-    | es-filter-readelf-rela $target        \
-    | es-filter-libdwarves-fileline $target 
-
