@@ -370,12 +370,14 @@
 		kdr))
 	       (list)))
 
-(define (entry-points ftable)
-  (hash-table-fold ftable (lambda (k v kdr)
-			    (if (any (cute kref <> :entry-point) v)
-				(cons k kdr)
-				kdr))
-		   (list)))
+(define (entry-points ftable interactive?)
+  (map
+   (cute decorate <> ftable interactive?)
+   (hash-table-fold ftable (lambda (k v kdr)
+			     (if (any (cute kref <> :entry-point) v)
+				 (cons k kdr)
+				 kdr))
+		    (list))))
 
 (define handlers (list))
 
@@ -420,7 +422,7 @@
 (define-command ('reachable? from to  depth) (reachable? from to (current-rtable) #t depth))
 (define-command ('transit from to) (transit from to (current-ftable) (current-rtable) #t #t))
 (define-command ('transit from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
-(define-command ('entry-points) (entry-points (current-ftable)))
+(define-command ('entry-points) (entry-points (current-ftable) #t))
 
 (define (rtable-dump table)
   (apply append (hash-table-map table (lambda (k v)
