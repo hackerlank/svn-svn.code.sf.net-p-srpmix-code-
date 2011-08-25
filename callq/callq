@@ -39,7 +39,7 @@
 				(ref v 2)
 				v)))))
 
-(define (select-file name)
+(define (switch-file name)
   (let1 table (ref tables name #f)
     (cond
      ((table? table)
@@ -58,7 +58,7 @@
 	  (load-entries (read-line input))
 	(set! (ref tables (sys-basename file))
 	      (list ftable rtable file))
-	(select-file (sys-basename file))
+	(switch-file (sys-basename file))
 	(for-each
 	 (lambda (s) 
 	   (unless (ref tables s #f)
@@ -326,12 +326,32 @@
 	    (list k #f))))
 
 (define (fline name ftable)
-  (or (and-let* ((e (car (ref ftable name (list #f))))
-	     (e (cdddr e))
-	     (file (kref e :file))
-	     (line (kref e :line)))
-	`(,#`",|file|:,|line|")))
-  (list #f))
+  (or (and-let* ((e (ref ftable name (list #f)))
+		 (e (car e))
+		 (e (cdddr e))
+		 (file (kref e :file))
+		 (line (kref e :line)))
+	(let1 m (#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/
+				 (caddr (ref tables (current-file))))
+	  `((,#`"/srv/sources,(m 1)/pre-build/,|file|" ,#`",|line|"))))
+      (list #f)))
+
+(define (emacs name ftable)
+  (list 
+   (if-let1 f (car (fline name ftable))
+	   (begin (run-process `(emacsclient --no-wait ,#`"+,(cadr f)" ,(car f)))
+		  #t)
+	   #f)))
+
+(define (web name ftable)
+  (list 
+   (if-let1 f (car (fline name ftable))
+	    (let ((b (regexp-replace #/^\/srv\/sources/ (car f) "http://sources/ysh"))
+		  (l (cadr f)))
+	      (run-process `(firefox ,(format "~a#L:~a" b l)))
+	      #t)
+	    #f)))
+
 
 (define (search name ftable)
   (hash-table-fold ftable (lambda (k v kdr)
@@ -418,14 +438,28 @@
 (define-command ('help) (map car handlers))
 (define-command ('source (? string? file)) (source file))
 (define-command ('load (? string? file)) (load-file file))
-(define-command ('select (? string? file)) (select-file file))
-(define-command ('list-files) (list-files))
-(define-command ('list-loadable (? string? name)) (list-loadable name))
+(define-command ('switch (? string? file)) (switch-file file))
+(define-command ('files) (list-files))
+(define-command ('candidate (? string? name)) (list-loadable name))
 
 (define-command ('desc (? string? name)) (desc name (current-ftable)))
-(define-command ('? (? string? name)) (fline name (current-ftable)))
+(define-command ('?? (? string? name)) (desc name (current-ftable)))
+
+(define-command ('fline (? string? name)) (fline name (current-ftable)))
+(define-command (': (? string? name)) (fline name (current-ftable)))
+
+(define-command ('emacs (? string? name)) (emacs name (current-ftable)))
+(define-command ('j (? string? name)) (emacs name (current-ftable)))
+
+(define-command ('web (? string? name)) (emacs name (current-ftable)))
+(define-command ('u (? string? name)) (web name (current-ftable)))
+
 (define-command ('search (? string? name)) (search name (current-ftable)))
-(define-command ('dump-table) (rtable-dump (current-rtable)))
+(define-command ('* (? string? name)) (search name (current-ftable)))
+
+(define-command ('dump) (rtable-dump (current-rtable)))
+
+
 (define-command ('< (? string? name)) (callers* name (current-rtable) #t 1))
 (define-command ('callers (? string? name)) (callers* name (current-rtable) #t 1))
 (define-command ('< (? string? name) depth) (callers* name (current-rtable) #t depth))
@@ -436,10 +470,18 @@
 (define-command ('> (? string? name) depth) (callees* name (current-ftable) #t depth))
 (define-command ('callees (? string? name) depth) (callees* name (current-ftable) #t depth))
 
+
 (define-command ('reachable? from to) (reachable? from to (current-rtable) #t 1))
 (define-command ('reachable? from to  depth) (reachable? from to (current-rtable) #t depth))
+(define-command ('<> from to) (reachable? from to (current-rtable) #t 1))
+(define-command ('<> from to  depth) (reachable? from to (current-rtable) #t depth))
+
 (define-command ('transit from to) (transit from to (current-ftable) (current-rtable) #t #t))
 (define-command ('transit from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
+(define-command ('<*> from to) (transit from to (current-ftable) (current-rtable) #t #t))
+(define-command ('<*> from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
+
+(define-command ('$) (entry-points (current-ftable) #t))
 (define-command ('entry-points) (entry-points (current-ftable) #t))
 
 (define (rtable-dump table)
