@@ -28,6 +28,7 @@
 (define current-file (make-parameter #f))
 (define current-ftable #f)
 (define current-rtable #f)
+(define (table? t) (list? t))
 
 (define (list-files)
   (hash-table-map tables
@@ -35,21 +36,30 @@
 		    (list k (ref v 2)))))
 
 (define (select-file name)
-  (let1 table (ref tables name)
-    (current-file name)
-    (set! current-ftable (ref table 0))
-    (set! current-rtable (ref table 1))
-    (list #t)))
+  (let1 table (ref tables name #f)
+    (cond
+     ((table? table)
+      (current-file name)
+      (set! current-ftable (ref table 0))
+      (set! current-rtable (ref table 1))
+      (list #t))
+     (eles
+      (error "Not loaded yet: " name)))))
+	
 
 (define (load-file file)
   (call-with-input-process `(callp ,file)
     (lambda (input)
-      (receive (ftable rtable)
+      (receive (ftable rtable so)
 	  (load-entries (read-line input))
 	(set! (ref tables (sys-basename file))
 	      (list ftable rtable file))
 	(select-file (sys-basename file))
-	))))
+	(for-each
+	 (lambda (s) 
+	   (unless (ref tables s #f)
+		   (set! (ref tables s) 'required)))
+	 so)))))
       
 (define (load-entries file)
   (define (acceptable? entry)
@@ -67,26 +77,30 @@
       (set! (cadr (memq :connections es)) connections)))
   (with-input-from-file file
     (lambda ()
-      (let ((rtable (make-hash-table 'equal?))
-	    (ftable (make-hash-table 'equal?)))
-	(let loop ((es (read)))
+      (let loop ((es (read))
+		 (ftable (make-hash-table 'equal?))
+		 (rtable (make-hash-table 'equal?))
+		 (so (list)))
 	  (if (eof-object? es)
-	      (values ftable rtable)
-	      (if (and (eq? (car es) 'objdump-dcall)
-		       (eq? (cadr es) 'entry))
-		  (begin 
-		    (wash! es)
-		    (for-each
-		     (lambda (entry)
-		       (hash-table-push! rtable entry es))
-		     (delete-duplicates
-		      (map
-		       (cute ref <> 2)
-		       (cadr (memq :connections es)))))
-		    (when (acceptable? (ref es 3))
-		      (hash-table-push! ftable (ref es 3) es))
-		    (loop (read)))
-		  (loop (read)))))))))
+	      (values ftable rtable so)
+	      (cond
+	       ((and (eq? (car es) 'objdump-dcall)
+		     (eq? (cadr es) 'entry))
+		(wash! es)
+		  (for-each
+		   (lambda (entry)
+		     (hash-table-push! rtable entry es))
+		   (delete-duplicates
+		    (map
+		     (cute ref <> 2)
+		     (cadr (memq :connections es)))))
+		  (when (acceptable? (ref es 3))
+			(hash-table-push! ftable (ref es 3) es))
+		  (loop (read) ftable rtable so))
+	       ((eq? (car es) 'readelf-so)
+		(loop (read) ftable rtable (append (cdr es) so)))
+	       (else
+		(loop (read) ftable rtable so))))))))
 
 (define (find-callers sym table)
   (define (build kar l)
@@ -299,7 +313,7 @@
 	(cadr (memq :variable? (car entry)))
 	#f)))
 
-(define (info name ftable)
+(define (desc name ftable)
   (ref ftable name (list #f)))
 
 (define (kref es k)
@@ -320,14 +334,25 @@
 				kdr))
 		   (list)))
 
+(define (list-loadable name)
+  ;; c/p/vr
+  (glob-fold "/srv/debugs/sources/*/*/*/plugins/O0g3/root/**"
+	     (lambda (entry kdr)
+	       (if (equal? (sys-basename entry) name)
+		   (cons (list entry #f) kdr)
+		   kdr))
+	     (list)))
+
 (define (qr-eval es env)
   (let ((ftable current-ftable)
 	(rtable current-rtable))
     (match es
-      (('info (? string? name)) (info name ftable))
       (('load-file (? string? file)) (load-file file))
       (('select-file (? string? file)) (select-file file))
       (('list-files) (list-files))
+      (('list-loadable (? string? name)) (list-loadable name))
+      ;;
+      (('desc (? string? name)) (desc name ftable))
       (('? (? string? name)) (fline name ftable))
       (('search (? string? name)) (search name ftable))
       (('dump-table) (rtable-dump rtable))
