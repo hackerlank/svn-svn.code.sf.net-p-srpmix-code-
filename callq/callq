@@ -9,6 +9,7 @@
 (use gauche.process)
 (use gauche.parameter)
 (use file.util)
+(use gauche.parseopt)
 
 (debug-print-width #f)
 (define blacklist 
@@ -379,6 +380,22 @@
 				 kdr))
 		    (list))))
 
+
+(define (source file)
+  (for-each
+   (lambda (es)
+     (display ";; context: ")
+     (write (current-file))
+     (newline)
+     (display ";; expression: ")
+     (write es)
+     (newline)
+     (writeln* (callq-eval es #f))
+     (newline)
+     )
+   (file->sexp-list file))
+  (list))
+
 (define handlers (list))
 
 (define-macro (define-command pattern action)
@@ -388,7 +405,7 @@
 			     (,pattern ,action)
 			    (else 'next)))
 		   handlers)))
-(define (qr-eval es env)
+(define (callq-eval es env)
   (let loop ((handlers handlers))
     (if (null? handlers)
 	(begin (print #`";; unknown command: ,(car es)")
@@ -399,8 +416,9 @@
 	      r)))))
 
 (define-command ('help) (map car handlers))
-(define-command ('load-file (? string? file)) (load-file file))
-(define-command ('select-file (? string? file)) (select-file file))
+(define-command ('source (? string? file)) (source file))
+(define-command ('load (? string? file)) (load-file file))
+(define-command ('select (? string? file)) (select-file file))
 (define-command ('list-files) (list-files))
 (define-command ('list-loadable (? string? name)) (list-loadable name))
 
@@ -433,16 +451,28 @@
 					))))
 
 ;; timeout, plugin output routine, plugin input
+(define (print-usage name status)
+  (print "Usage: ")
+  (print #`"	,|name| -h|--help")
+  (print #`"	,|name| [--batch] [-s|--script|--source SCRIPT]... [-l|--load BINARY]...")
+  (exit status))
+
 (define (main args)
-  (let* ((file (if (null? (cdr args)) #f (cadr args))))
-    (when file
-      (load-file file))
+  (let-args (cdr args)
+      ((help   "h|help" => (pa$ print-usage (car args) 0))
+       (script "s|script|source=s" => (pa$ source))
+       (load   "l|load=s" => (pa$ load-file))
+       (batch  "b|batch")
+       . rest)
+    (when batch
+      (exit 0))
+    (for-each load-file rest)
     (read-eval-print-loop read
-			  (cute qr-eval <> <>)
+			  (cute callq-eval <> <>)
 			  writeln*
 			  (lambda () 
 			    (with-output-to-port (current-error-port)
 			      (lambda ()
-				(display #`"[,(current-file)]? ")
+				(display (if batch "" #`"[,(current-file)]? "))
 				(flush)))))
     (newline)))
