@@ -5,16 +5,16 @@ else
     input=$(readlink --canonicalize $(pwd)/$1)
 fi
 
-output=~/.callq/${input}.es
+output=~/.callq${input}.es
 mkdir -p $(dirname ${output})
 
-if [ ! -e ${output} ] || [ ${input} -nt ${output} ]; then
-    es-src-readelf-so $input
+if [[ ! -e ${output} ]] || [[ ${input} -nt ${output} ]]; then
+    es-src-readelf-so $input > ${output} 
     es-src-objdump-dcall $input                \
 	| es-filter-objcopy-data $input        \
 	| es-filter-readelf-rela $input        \
 	| es-filter-libdwarves-fileline $input \
-	
-fi > ${output} 
+	>> ${output} 
+fi
 echo ${output}
 exit 0

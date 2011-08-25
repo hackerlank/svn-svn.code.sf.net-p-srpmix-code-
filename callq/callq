@@ -8,6 +8,7 @@
 (use util.list)
 (use gauche.process)
 (use gauche.parameter)
+(use file.util)
 
 (debug-print-width #f)
 (define blacklist 
@@ -26,24 +27,26 @@
 
 (define tables (make-hash-table 'equal?))
 (define current-file (make-parameter #f))
-(define current-ftable #f)
-(define current-rtable #f)
+(define current-ftable (make-parameter #f))
+(define current-rtable (make-parameter #f))
 (define (table? t) (list? t))
 
 (define (list-files)
   (hash-table-map tables
 		  (lambda (k v)
-		    (list k (ref v 2)))))
+		    (list k (if (table? v)
+				(ref v 2)
+				v)))))
 
 (define (select-file name)
   (let1 table (ref tables name #f)
     (cond
      ((table? table)
       (current-file name)
-      (set! current-ftable (ref table 0))
-      (set! current-rtable (ref table 1))
+      (current-ftable (ref table 0))
+      (current-rtable (ref table 1))
       (list #t))
-     (eles
+     (else
       (error "Not loaded yet: " name)))))
 	
 
@@ -58,9 +61,10 @@
 	(for-each
 	 (lambda (s) 
 	   (unless (ref tables s #f)
-		   (set! (ref tables s) 'required)))
-	 so)))))
-      
+		   (set! (ref tables s) 'UNSOLVED)))
+	 so))
+      (list))))
+
 (define (load-entries file)
   (define (acceptable? entry)
     (not (any (lambda (r) (r entry)) blacklist)))
@@ -321,11 +325,12 @@
 	    (list k #f))))
 
 (define (fline name ftable)
-  (and-let* ((e (car (ref ftable name (list #f))))
+  (or (and-let* ((e (car (ref ftable name (list #f))))
 	     (e (cdddr e))
 	     (file (kref e :file))
 	     (line (kref e :line)))
-    `(,#`",|file|:,|line|")))
+	`(,#`",|file|:,|line|")))
+  (list #f))
 
 (define (search name ftable)
   (hash-table-fold ftable (lambda (k v kdr)
@@ -334,49 +339,80 @@
 				kdr))
 		   (list)))
 
+(define (path->dists path)
+  (rxmatch-if (#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+)(\/[^\/]+).*/ path)
+      (#f head rv)
+    (fold
+     (lambda (entry kdr)
+       (let1 r (sys-readlink entry)
+	 (if (equal? r #`".,|rv|")
+	     (cons ((#/^\^alias-(.*)/ (sys-basename entry)) 1) kdr)
+	     kdr)))
+     (list)
+     (glob #`"/srv/sources,|head|/^alias-*"))
+    #f))
+
 (define (list-loadable name)
   ;; c/p/vr
-  (glob-fold "/srv/debugs/sources/*/*/*/plugins/O0g3/root/**"
+  (glob-fold "/srv/debugs/sources/*/*/*/plugins/O0g3/root"
 	     (lambda (entry kdr)
-	       (if (equal? (sys-basename entry) name)
-		   (cons (list entry #f) kdr)
-		   kdr))
-	     (list)))
+	       (append 
+		;; Handle goache's bug. May be fixed in F15.
+		(directory-fold entry
+				(lambda (path seed)
+				  (if (equal? (sys-basename path) name)
+				      (cons (list path 
+						  (map string->symbol (path->dists path))
+						  ) seed)
+				      seed))
+				(list)
+				)
+		kdr))
+	       (list)))
 
+(define handlers (list))
+
+(define-macro (define-command pattern action)
+  `(set! handlers (cons
+		   (cons ',pattern
+			 (match-lambda 
+			     (,pattern ,action)
+			    (else 'next)))
+		   handlers)))
 (define (qr-eval es env)
-  (let ((ftable current-ftable)
-	(rtable current-rtable))
-    (match es
-      (('load-file (? string? file)) (load-file file))
-      (('select-file (? string? file)) (select-file file))
-      (('list-files) (list-files))
-      (('list-loadable (? string? name)) (list-loadable name))
-      ;;
-      (('desc (? string? name)) (desc name ftable))
-      (('? (? string? name)) (fline name ftable))
-      (('search (? string? name)) (search name ftable))
-      (('dump-table) (rtable-dump rtable))
-      ;;
-      (('< (? string? name)) (callers* name rtable #t 1))
-      (('callers (? string? name)) (callers* name rtable #t 1))
-      (('< (? string? name) depth) (callers* name rtable #t depth))
-      (('callers (? string? name) depth) 
-       (callers* name rtable #t depth))
-      ;;
-      (('> (? string? name)) (callees* name ftable #t 1))
-      (('callees (? string? name)) (callees* name ftable #t 1))
-      (('> (? string? name) depth) (callees* name ftable #t depth))
-      (('callees (? string? name) depth) 
-       (callees* name ftable #t depth))
-      ;;
-      (('reachable? from to) (reachable? from to rtable #t 1))
-      (('reachable? from to  depth) (reachable? from to rtable #t depth))
-      (('transit from to) (transit from to ftable rtable #t #t))
-      (('transit from to  depth) (transit from to ftable rtable #t depth))
-      (else
-       (print #`";; unknown command: ,(car es)")
-       (list #f)
-       ))))
+  (let loop ((handlers handlers))
+    (if (null? handlers)
+	(begin (print #`";; unknown command: ,(car es)")
+	       (list #f))
+	(let1 r ((cdr (car handlers)) es)
+	  (if (eq? r 'next)
+	      (loop (cdr handlers))
+	      r)))))
+
+(define-command ('help) (map car handlers))
+(define-command ('load-file (? string? file)) (load-file file))
+(define-command ('select-file (? string? file)) (select-file file))
+(define-command ('list-files) (list-files))
+(define-command ('list-loadable (? string? name)) (list-loadable name))
+
+(define-command ('desc (? string? name)) (desc name (current-ftable)))
+(define-command ('? (? string? name)) (fline name (current-ftable)))
+(define-command ('search (? string? name)) (search name (current-ftable)))
+(define-command ('dump-table) (rtable-dump (current-rtable)))
+(define-command ('< (? string? name)) (callers* name (current-rtable) #t 1))
+(define-command ('callers (? string? name)) (callers* name (current-rtable) #t 1))
+(define-command ('< (? string? name) depth) (callers* name (current-rtable) #t depth))
+(define-command ('callers (? string? name) depth) (callers* name (current-rtable) #t depth))
+
+(define-command ('> (? string? name)) (callees* name (current-ftable) #t 1))
+(define-command ('callees (? string? name)) (callees* name (current-ftable) #t 1))
+(define-command ('> (? string? name) depth) (callees* name (current-ftable) #t depth))
+(define-command ('callees (? string? name) depth) (callees* name (current-ftable) #t depth))
+
+(define-command ('reachable? from to) (reachable? from to (current-rtable) #t 1))
+(define-command ('reachable? from to  depth) (reachable? from to (current-rtable) #t depth))
+(define-command ('transit from to) (transit from to (current-ftable) (current-rtable) #t #t))
+(define-command ('transit from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
 
 (define (rtable-dump table)
   (apply append (hash-table-map table (lambda (k v)
@@ -398,4 +434,5 @@
 			    (with-output-to-port (current-error-port)
 			      (lambda ()
 				(display #`"[,(current-file)]? ")
-				(flush)))))))
+				(flush)))))
+    (newline)))
