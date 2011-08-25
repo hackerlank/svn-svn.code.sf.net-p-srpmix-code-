@@ -10,6 +10,7 @@
 (use gauche.parameter)
 (use file.util)
 (use gauche.parseopt)
+(use gauche.sequence)
 
 (debug-print-width #f)
 (define blacklist 
@@ -336,6 +337,22 @@
 	  `((,#`"/srv/sources,(m 1)/pre-build/,|file|" ,#`",|line|"))))
       (list #f)))
 
+(define (review name ftable)
+  (define (print/prefix prefix l)
+    (display prefix)
+    (print l))
+  (if-let1 f (car (fline name ftable))
+	   (let* ((range 3)
+		  (lines (file->string-list (car f)))
+		  (l (- (string->number (cadr f)) range))
+		  (l (if (< l 0) 0 l)))
+	     (for-each-with-index
+	      (lambda (index line)
+		(print/prefix #`";,(+ l index):	" line))
+	      (take (drop lines l) range))
+	     ())
+	   ()))
+
 (define (emacs name ftable)
   (list 
    (if-let1 f (car (fline name ftable))
@@ -447,6 +464,9 @@
 
 (define-command ('fline (? string? name)) (fline name (current-ftable)))
 (define-command (': (? string? name)) (fline name (current-ftable)))
+
+(define-command ('review (? string? name)) (review name (current-ftable)))
+(define-command ('l (? string? name)) (review name (current-ftable)))
 
 (define-command ('emacs (? string? name)) (emacs name (current-ftable)))
 (define-command ('j (? string? name)) (emacs name (current-ftable)))
