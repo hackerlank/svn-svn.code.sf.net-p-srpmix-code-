@@ -76,11 +76,14 @@ function main
     fi
 
     mock \
-        --no-cleanup-after      \
+	--root ${dist} \
+	--clean
+    mock \
+	--no-cleanup-after      \
 	--resultdir=${O0g3_dir} \
 	--enable-plugin=O0g3    \
 	--root ${dist}          \
-       --rebuild ${srpm}       
+	--rebuild ${srpm}       
     status=$?
 
     cd ${O0g3_dir}
