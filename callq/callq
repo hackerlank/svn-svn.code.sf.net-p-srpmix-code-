@@ -13,6 +13,12 @@
 (use gauche.sequence)
 
 (debug-print-width #f)
+
+(define (kref es k)
+  (cadr (or (memq k es)
+	    (list k #f))))
+
+
 (define blacklist 
   (list
    #/^__dso_handle.*/			;???
@@ -115,21 +121,22 @@
 	   (if (cadr (memq :variable? l))
 	       'v
 	       'f))
-	   ,(ref l 3)
-	   :file ,(cadr (memq :file l)) 
-	   :line ,(cadr (memq :line l))
-	   ))
+      ,(ref l 3)
+      :file ,(cadr (memq :file l)) 
+      :line ,(cadr (memq :line l))
+      ))
   (cond
    ((ref table sym #f) => (cute map (cute build #f <>) <>))
    (else
-    (let1 sym-len (string-length sym)
-	  (hash-table-fold table (lambda (k v kdr)
-				   (if (and (string-prefix? sym k)
-					    (memq (string-ref k sym-len)
-						  '(#\@ #\.)))
-				       (append (map (cute build 'x <>) v) kdr)
-				       kdr))
-			   (list))))))
+    (hash-table-fold 
+     table 
+     (lambda (k v kdr)
+       (if (and (string-prefix? sym k)
+		(memq (string-ref k (string-length sym))
+		      '(#\@ #\.)))
+	   (append (map (cute build 'x <>) v) kdr)
+	   kdr))
+     (list)))))
 
 (define (find-callees sym table)
   (if-let1 ess (ref table sym #f)
@@ -322,9 +329,10 @@
 (define (desc name ftable)
   (ref ftable name (list #f)))
 
-(define (kref es k)
-  (cadr (or (memq k es)
-	    (list k #f))))
+(define (fline0 table file line)
+  (let1 m (#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/
+			   (caddr (ref tables (current-file))))
+    `(,#`"/srv/sources,(m 1)/pre-build/,|file|" ,#`",|line|")))
 
 (define (fline name ftable)
   (or (and-let* ((e (ref ftable name (list #f)))
@@ -332,42 +340,69 @@
 		 (e (cdddr e))
 		 (file (kref e :file))
 		 (line (kref e :line)))
-	(let1 m (#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/
-				 (caddr (ref tables (current-file))))
-	  `((,#`"/srv/sources,(m 1)/pre-build/,|file|" ,#`",|line|"))))
+	(list (fline0 ftable file line)))
       (list #f)))
+(define (fline-call caller callee ftable)
+  (or (and-let* ((e (ref ftable caller (list #f)))
+		 (e (car e))
+		 (conn (kref e :connections))
+		 (ee (any (lambda (ee) 
+			     (let1 ee-name (ref ee 2)
+			       (if (or (equal? ee-name callee)
+				       (equal? (car (string-split ee-name #/@|\./))
+					       (car (string-split callee #/@|\./))))
+				   ee
+				   #f)))
+			   conn))
+		 (e (cdddr e))
+		 (file (kref e :file))
+		 (line (or (kref ee :line)
+			   (kref e :line)
+			   ))
+		 (rel (car ee)))
+	;; rel
+	(list (fline0 ftable file line)))
+      (list)))
 
-(define (review name ftable)
+(define (preview generator viewer)
+  (list 
+   (if-let1 f (let1 r (generator) (if (null? r) #f (car r)))
+	    (if (null? f)
+		#f
+		(viewer  (car f) (cadr f)))
+	    #f)))
+(define (firefox0 file line)
+  (let ((b (regexp-replace #/^\/srv\/sources/ file "http://sources/ysh"))
+	(l line))
+    (run-process `(firefox ,(format "~a#L:~a" b l)))))
+(define (emacs0 file line)
+  (run-process `(emacsclient --no-wait ,#`"+,line" ,file)))
+(define (inline0 file line)
   (define (print/prefix prefix l)
     (display prefix)
     (print l))
-  (if-let1 f (car (fline name ftable))
-	   (let* ((range 3)
-		  (lines (file->string-list (car f)))
-		  (l (- (string->number (cadr f)) range))
-		  (l (if (< l 0) 0 l)))
-	     (for-each-with-index
-	      (lambda (index line)
-		(print/prefix #`";,(+ l index):	" line))
-	      (take (drop lines l) range))
-	     ())
-	   ()))
+  (let* ((range 3)
+	 (lines (file->string-list file))
+	 (l (- (string->number line) range))
+	 (l (if (< l 0) 0 l)))
+    (for-each-with-index
+     (lambda (index line)
+       (print/prefix #`";,(+ l index):	" line))
+     (take (drop lines l) range))
+    (list)))
 
+(define (inline name ftable)
+  (preview (pa$ fline name ftable) inline0))
+(define (inline-call caller callee ftable)
+  (preview (pa$ fline-call caller callee ftable) inline0))
 (define (emacs name ftable)
-  (list 
-   (if-let1 f (car (fline name ftable))
-	   (begin (run-process `(emacsclient --no-wait ,#`"+,(cadr f)" ,(car f)))
-		  #t)
-	   #f)))
-
+  (preview (pa$ fline name ftable) emacs0))
+(define (emacs-call caller callee ftable)
+  (preview (pa$ fline-call caller callee ftable) emacs0))
 (define (web name ftable)
-  (list 
-   (if-let1 f (car (fline name ftable))
-	    (let ((b (regexp-replace #/^\/srv\/sources/ (car f) "http://sources/ysh"))
-		  (l (cadr f)))
-	      (run-process `(firefox ,(format "~a#L:~a" b l)))
-	      #t)
-	    #f)))
+  (preview (pa$ fline name ftable) firefox0))
+(define (web-call caller callee ftable)
+  (preview (pa$ fline-call caller callee ftable) firefox0))
 
 
 (define (search name ftable)
@@ -435,74 +470,119 @@
 
 (define handlers (list))
 
-(define-macro (define-command pattern action)
+(define-macro (defcmd name pattern action)
   `(set! handlers (cons
-		   (cons ',pattern
-			 (match-lambda 
-			     (,pattern ,action)
-			    (else 'next)))
+		   (list ',name :pattern ',pattern
+			 :handler (match-lambda 
+				      (,pattern ,action)
+				    (else 'next)))
 		   handlers)))
+
+;; (handler es)
+;; => next
+;; => (...)
 (define (callq-eval es env)
   (let loop ((handlers handlers))
     (if (null? handlers)
 	(begin (print #`";; unknown command: ,(car es)")
 	       (list #f))
-	(let1 r ((cdr (car handlers)) es)
+	(let1 r ((kref (car handlers) :handler) es)
 	  (if (eq? r 'next)
 	      (loop (cdr handlers))
 	      r)))))
 
-(define-command ('help) (map car handlers))
-(define-command ('source (? string? file)) (source file))
-(define-command ('load (? string? file)) (load-file file))
-(define-command ('switch (? string? file)) (switch-file file))
-(define-command ('files) (list-files))
-(define-command ('candidate (? string? name)) (list-loadable name))
+(define (help cmd)
+  (define (help-all)
+    (map 
+     (lambda (h) 
+       `(,(car h) => ,(kref h :pattern))) 
+     handlers))
+  (if cmd
+      (filter (lambda (e) (eq? (car e) cmd)) (help-all))
+      (help-all)))
 
-(define-command ('desc (? string? name)) (desc name (current-ftable)))
-(define-command ('?? (? string? name)) (desc name (current-ftable)))
+(defcmd help ('help) (help #f))
+(defcmd help ('help (? symbol? s)) (help s))
+(defcmd source ('source (? string? file)) (source file))
+(defcmd load ('load (? string? file)) (load-file file))
+(defcmd switch ('switch (? string? file)) (switch-file file))
+(defcmd files ('files) (list-files))
+(defcmd candidate ('candidate (? string? name)) (list-loadable name))
 
-(define-command ('fline (? string? name)) (fline name (current-ftable)))
-(define-command (': (? string? name)) (fline name (current-ftable)))
+(defcmd desc ('desc (? string? name)) (desc name (current-ftable)))
+(defcmd desc ('? (? string? name)) (desc name (current-ftable)))
 
-(define-command ('review (? string? name)) (review name (current-ftable)))
-(define-command ('l (? string? name)) (review name (current-ftable)))
-
-(define-command ('emacs (? string? name)) (emacs name (current-ftable)))
-(define-command ('j (? string? name)) (emacs name (current-ftable)))
-
-(define-command ('web (? string? name)) (emacs name (current-ftable)))
-(define-command ('u (? string? name)) (web name (current-ftable)))
-
-(define-command ('search (? string? name)) (search name (current-ftable)))
-(define-command ('* (? string? name)) (search name (current-ftable)))
-
-(define-command ('dump) (rtable-dump (current-rtable)))
-
-
-(define-command ('< (? string? name)) (callers* name (current-rtable) #t 1))
-(define-command ('callers (? string? name)) (callers* name (current-rtable) #t 1))
-(define-command ('< (? string? name) depth) (callers* name (current-rtable) #t depth))
-(define-command ('callers (? string? name) depth) (callers* name (current-rtable) #t depth))
-
-(define-command ('> (? string? name)) (callees* name (current-ftable) #t 1))
-(define-command ('callees (? string? name)) (callees* name (current-ftable) #t 1))
-(define-command ('> (? string? name) depth) (callees* name (current-ftable) #t depth))
-(define-command ('callees (? string? name) depth) (callees* name (current-ftable) #t depth))
+(defcmd fline ('fline (? string? name)) (fline name (current-ftable)))
+(defcmd fline (': (? string? name)) (fline name (current-ftable)))
+(defcmd fline 
+  ('fline (? string? caller) (? string? callee)) 
+  (fline-call caller 
+	      callee
+	      (current-ftable)))
+(defcmd fline 
+  (': (? string? caller) (? string? callee)) 
+  (fline-call caller 
+	      callee
+	      (current-ftable)))
 
 
-(define-command ('reachable? from to) (reachable? from to (current-rtable) #t 1))
-(define-command ('reachable? from to  depth) (reachable? from to (current-rtable) #t depth))
-(define-command ('<> from to) (reachable? from to (current-rtable) #t 1))
-(define-command ('<> from to  depth) (reachable? from to (current-rtable) #t depth))
+(defcmd inline ('inline (? string? name)) (inline name (current-ftable)))
+(defcmd inline ('l (? string? name)) (inline name (current-ftable)))
+(defcmd inline
+  ('inline (? string? caller) (? string? callee)) 
+  (inline-call caller callee (current-ftable)))
+(defcmd inline
+  ('l (? string? caller) (? string? callee))
+  (inline-call caller callee (current-ftable)))
 
-(define-command ('transit from to) (transit from to (current-ftable) (current-rtable) #t #t))
-(define-command ('transit from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
-(define-command ('<*> from to) (transit from to (current-ftable) (current-rtable) #t #t))
-(define-command ('<*> from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
+(defcmd emacs ('emacs (? string? name)) (emacs name (current-ftable)))
+(defcmd emacs ('j (? string? name)) (emacs name (current-ftable)))
+(defcmd emacs 
+  ('emacs (? string? caller) (? string? callee))
+  (emacs-call caller callee (current-ftable)))
+(defcmd emacs
+  ('j (? string? caller) (? string? callee))
+  (emacs-call caller callee (current-ftable)))
 
-(define-command ('$) (entry-points (current-ftable) #t))
-(define-command ('entry-points) (entry-points (current-ftable) #t))
+(defcmd web ('web (? string? name)) (web name (current-ftable)))
+(defcmd web ('u (? string? name)) (web name (current-ftable)))
+(defcmd web 
+  ('web (? string? caller) (? string? callee)) 
+  (web caller callee (current-ftable)))
+(defcmd web 
+  ('u (? string? caller) (? string? callee)) 
+  (web caller callee (current-ftable)))
+
+(defcmd search ('search (? string? name)) (search name (current-ftable)))
+(defcmd search ('* (? string? name)) (search name (current-ftable)))
+
+(defcmd dump ('dump) (rtable-dump (current-rtable)))
+
+
+(defcmd callers ('< (? string? name)) (callers* name (current-rtable) #t 1))
+(defcmd callers ('callers (? string? name)) (callers* name (current-rtable) #t 1))
+(defcmd callers ('< (? string? name) depth) (callers* name (current-rtable) #t depth))
+(defcmd callers ('callers (? string? name) depth) (callers* name (current-rtable) #t depth))
+
+(defcmd callees ('> (? string? name)) (callees* name (current-ftable) #t 1))
+(defcmd callees ('callees (? string? name)) (callees* name (current-ftable) #t 1))
+(defcmd callees ('> (? string? name) depth) (callees* name (current-ftable) #t depth))
+(defcmd callees ('callees (? string? name) depth) (callees* name (current-ftable) #t depth))
+
+
+(defcmd reachable? ('reachable? from to) (reachable? from to (current-rtable) #t 1))
+(defcmd reachable? ('reachable? from to  depth) (reachable? from to (current-rtable) #t depth))
+(defcmd reachable? ('<> from to) (reachable? from to (current-rtable) #t 1))
+(defcmd reachable? ('<> from to  depth) (reachable? from to (current-rtable) #t depth))
+
+(defcmd transit ('transit from to) (transit from to (current-ftable) (current-rtable) #t #t))
+(defcmd transit ('transit from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
+(defcmd transit ('<*> from to) (transit from to (current-ftable) (current-rtable) #t #t))
+(defcmd transit ('<*> from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
+
+(defcmd entry-points ('entry-points) (entry-points (current-ftable) #t))
+(defcmd entry-points ('$) (entry-points (current-ftable) #t))
+
 
 (define (rtable-dump table)
   (apply append (hash-table-map table (lambda (k v)
