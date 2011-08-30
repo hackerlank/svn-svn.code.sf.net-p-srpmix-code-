@@ -15,6 +15,7 @@ if [[ ! -e ${output} ]] || [[ ${input} -nt ${output} ]]; then
 	| es-filter-readelf-rela $input        \
 	| es-filter-libdwarves-fileline $input \
 	>> ${output} 
+    es-src-libdwarves $input >> ${output} 
 fi
 echo ${output}
 exit 0

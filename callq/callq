@@ -33,10 +33,14 @@
    #/^_start$/
    ))
 
+(define id-root (make-hash-table 'equal?))
+
 (define tables (make-hash-table 'equal?))
 (define current-file (make-parameter #f))
+(define current-path (make-parameter #f))
 (define current-ftable (make-parameter #f))
 (define current-rtable (make-parameter #f))
+(define current-dtable (make-parameter #f))
 (define (table? t) (list? t))
 
 (define (list-files)
@@ -53,6 +57,8 @@
       (current-file name)
       (current-ftable (ref table 0))
       (current-rtable (ref table 1))
+      (current-dtable (ref table 2))
+      (current-path (ref table 3))
       (list #t))
      (else
       (error "Not loaded yet: " name)))))
@@ -61,10 +67,10 @@
 (define (load-file file)
   (call-with-input-process `(callp ,file)
     (lambda (input)
-      (receive (ftable rtable so)
+      (receive (ftable rtable dtable so)
 	  (load-entries (read-line input))
 	(set! (ref tables (sys-basename file))
-	      (list ftable rtable file))
+	      (list ftable rtable dtable file))
 	(switch-file (sys-basename file))
 	(for-each
 	 (lambda (s) 
@@ -92,9 +98,10 @@
       (let loop ((es (read))
 		 (ftable (make-hash-table 'equal?))
 		 (rtable (make-hash-table 'equal?))
+		 (dtable (make-hash-table 'equal?))
 		 (so (list)))
 	  (if (eof-object? es)
-	      (values ftable rtable so)
+	      (values ftable rtable dtable so)
 	      (cond
 	       ((and (eq? (car es) 'objdump-dcall)
 		     (eq? (cadr es) 'entry))
@@ -108,11 +115,27 @@
 		     (cadr (memq :connections es)))))
 		  (when (acceptable? (ref es 3))
 			(hash-table-push! ftable (ref es 3) es))
-		  (loop (read) ftable rtable so))
+		  (loop (read) ftable rtable dtable so))
 	       ((eq? (car es) 'readelf-so)
-		(loop (read) ftable rtable (append (cdr es) so)))
+		(loop (read) ftable rtable dtable (append (cdr es) so)))
+	       ;;
+	       ((eq? (car es) 'libdwarves)
+		(case (cadr es)
+		  ('compile_unit
+		   (loop (read) ftable rtable dtable so))
+		  (else
+		   (set! (ref dtable (kref es :id)) (list es))
+		   (if-let1 name (kref es :name)
+			    (begin
+			      (unless (ref dtable name #f)
+				(set! (ref dtable name) (list)))
+			      (unless (member es (ref dtable name))
+				(push! (ref dtable name) es))))
+		   (loop (read) ftable rtable dtable so)
+		   )))
+	       ;;
 	       (else
-		(loop (read) ftable rtable so))))))))
+		(loop (read) ftable rtable dtable so))))))))
 
 (define (find-callers sym table)
   (define (build kar l)
@@ -182,6 +205,9 @@
   (if interactive?
       #`",(if (variable? name table) '= '|| ),|name|,(if (variable? name table) '|| '() )"
       name))
+(define (undecorate name)
+  (regexp-replace #/^=/ (regexp-replace #/\(\)$/ name "") ""))
+
 
 (define (callers* name rtable interactive? depth)
   (hash-table-map
@@ -331,7 +357,7 @@
 
 (define (fline0 table file line)
   (let1 m (#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/
-			   (caddr (ref tables (current-file))))
+			   (current-path))
     `(,#`"/srv/sources,(m 1)/pre-build/,|file|" ,#`",|line|")))
 
 (define (fline name ftable)
@@ -377,11 +403,11 @@
     (run-process `(firefox ,(format "~a#L:~a" b l)))))
 (define (emacs0 file line)
   (run-process `(emacsclient --no-wait ,#`"+,line" ,file)))
-(define (inline0 file line)
+(define (inline0 file line range)
   (define (print/prefix prefix l)
     (display prefix)
     (print l))
-  (let* ((range 3)
+  (let* ((range range)
 	 (lines (file->string-list file))
 	 (l (- (string->number line) range))
 	 (l (if (< l 0) 0 l)))
@@ -391,10 +417,10 @@
      (take (drop lines l) range))
     (list)))
 
-(define (inline name ftable)
-  (preview (pa$ fline name ftable) inline0))
-(define (inline-call caller callee ftable)
-  (preview (pa$ fline-call caller callee ftable) inline0))
+(define (inline name ftable range)
+  (preview (pa$ fline name ftable) (cute inline0 <> <> range)))
+(define (inline-call caller callee ftable range)
+  (preview (pa$ fline-call caller callee ftable) (cute inline0 <> <> range)))
 (define (emacs name ftable)
   (preview (pa$ fline name ftable) emacs0))
 (define (emacs-call caller callee ftable)
@@ -405,9 +431,16 @@
   (preview (pa$ fline-call caller callee ftable) firefox0))
 
 
-(define (search name ftable)
+(define-method search ((name <string>) ftable)
   (hash-table-fold ftable (lambda (k v kdr)
 			    (if (string-scan k name)
+				(cons k kdr)
+				kdr))
+		   (list)))
+
+(define-method search ((regexp <regexp>) ftable)
+  (hash-table-fold ftable (lambda (k v kdr)
+			    (if (regexp k)
 				(cons k kdr)
 				kdr))
 		   (list)))
@@ -443,15 +476,41 @@
 		kdr))
 	       (list)))
 
-(define (entry-points ftable interactive?)
-  (map
-   (cute decorate <> ftable interactive?)
-   (hash-table-fold ftable (lambda (k v kdr)
-			     (if (any (cute kref <> :entry-point) v)
-				 (cons k kdr)
-				 kdr))
-		    (list))))
-
+(define (entry-points name ftable interactive?)
+  (if name
+      (hash-table-fold ftable (lambda (k v kdr)
+				(let1 file (any (lambda (x)
+						  (and (kref x :entry-point)
+						       (kref x :file))
+						  ) v)
+				  (cond
+				   ((not file) kdr)
+				   ((or (equal? file name)
+					(equal? (sys-basename name) (sys-basename file)))
+				    (cons k kdr))
+				   (else
+				    kdr))))
+			(list))
+      (map
+       (cute decorate <> ftable interactive?)
+       (hash-table-fold ftable (lambda (k v kdr)
+				 (if (any (cute kref <> :entry-point) v)
+				     (cons k kdr)
+				     kdr))
+			(list)))
+      ))
+(define (list-source-files ftable)
+  (sort (hash-table-fold ftable (lambda (k v kdr)
+				  (let1 file (any (cute kref <> :file) v)
+				    (cond
+				     ((not file) kdr)
+				     ((not (any (lambda (e) (equal? file (cdr e))) kdr))
+				      (cons (cons (sys-basename file) file) kdr))
+				     (else
+				      kdr))))
+			 (list))
+	(lambda (a b) (string< (sys-basename (car a))
+			       (sys-basename (car b))))))
 
 (define (source file)
   (for-each
@@ -470,12 +529,15 @@
 
 (define handlers (list))
 
-(define-macro (defcmd name pattern action)
+(define-macro (define-command name pattern action . help)
   `(set! handlers (cons
-		   (list ',name :pattern ',pattern
+		   (list ',name 
+			 :pattern ',pattern
 			 :handler (match-lambda 
 				      (,pattern ,action)
-				    (else 'next)))
+				    (else 'next))
+			 :help ,(if (null? help) #f (car help))
+			 )
 		   handlers)))
 
 ;; (handler es)
@@ -495,94 +557,142 @@
   (define (help-all)
     (map 
      (lambda (h) 
-       `(,(car h) => ,(kref h :pattern))) 
+       `(,(car h) => ,(kref h :pattern) :help ,(kref h :help))) 
      handlers))
   (if cmd
-      (filter (lambda (e) (eq? (car e) cmd)) (help-all))
+      (let1 l (filter (lambda (e) (eq? (car e) cmd)) (help-all))
+	(let1 e (filter (lambda (e) (and (eq? (car e) cmd)
+					 (kref e :help)
+					 ))
+			handlers)
+	  (if (null? e)
+	      l
+	      (cons (kref e :help) l))))
       (help-all)))
 
-(defcmd help ('help) (help #f))
-(defcmd help ('help (? symbol? s)) (help s))
-(defcmd source ('source (? string? file)) (source file))
-(defcmd load ('load (? string? file)) (load-file file))
-(defcmd switch ('switch (? string? file)) (switch-file file))
-(defcmd files ('files) (list-files))
-(defcmd candidate ('candidate (? string? name)) (list-loadable name))
+(define-command help ('help) (help #f) "List all commands")
+(define-command help ('help (? symbol? s)) (help s) "Show syntax of commands")
+(define-command source ('source (? string? file)) (source file))
+(define-command load ('load (? string? file)) (load-file file))
+(define-command switch ('switch (? string? file)) (switch-file file))
+(define-command files ('files) (list-files))
+(define-command source-files ('source-files) (list-source-files (current-ftable)))
+(define-command candidate ('candidate (? string? name)) (list-loadable name))
 
-(defcmd desc ('desc (? string? name)) (desc name (current-ftable)))
-(defcmd desc ('? (? string? name)) (desc name (current-ftable)))
+(define-command desc ('desc (? string? name)) (desc (undecorate name) (current-ftable)))
+(define-command desc ('? (? string? name)) (desc (undecorate name) (current-ftable)))
 
-(defcmd fline ('fline (? string? name)) (fline name (current-ftable)))
-(defcmd fline (': (? string? name)) (fline name (current-ftable)))
-(defcmd fline 
+(define-command fline ('fline (? string? name)) (fline (undecorate name) (current-ftable)))
+(define-command fline (': (? string? name)) (fline (undecorate name) (current-ftable)))
+(define-command fline 
   ('fline (? string? caller) (? string? callee)) 
-  (fline-call caller 
-	      callee
+  (fline-call (undecorate caller)
+	      (undecorate callee)
 	      (current-ftable)))
-(defcmd fline 
+(define-command fline 
   (': (? string? caller) (? string? callee)) 
-  (fline-call caller 
-	      callee
+  (fline-call (undecorate caller)
+	      (undecorate callee)
 	      (current-ftable)))
 
 
-(defcmd inline ('inline (? string? name)) (inline name (current-ftable)))
-(defcmd inline ('l (? string? name)) (inline name (current-ftable)))
-(defcmd inline
+(define-command inline ('inline (? string? name))
+  (inline (undecorate name) (current-ftable) 3))
+(define-command inline ('l (? string? name) 3) 
+  (inline (undecorate name) (current-ftable) 3))
+(define-command inline ('inline (? string? name) (? integer? range))
+  (inline (undecorate name) (current-ftable) range))
+(define-command inline ('l (? string? name) (? integer? range)) 
+  (inline (undecorate name) (current-ftable) range))
+
+(define-command inline
   ('inline (? string? caller) (? string? callee)) 
-  (inline-call caller callee (current-ftable)))
-(defcmd inline
+  (inline-call (undecorate caller) (undecorate callee) (current-ftable) 3))
+(define-command inline
   ('l (? string? caller) (? string? callee))
-  (inline-call caller callee (current-ftable)))
+  (inline-call (undecorate caller) (undecorate callee) (current-ftable) 3))
+(define-command inline
+  ('inline (? string? caller) (? string? callee) (? integer? range)) 
+  (inline-call caller (undecorate callee) (current-ftable) range))
+(define-command inline
+  ('l (? string? caller) (? string? callee) (? integer? range))
+  (inline-call (undecorate caller) (undecorate callee) (current-ftable) range))
 
-(defcmd emacs ('emacs (? string? name)) (emacs name (current-ftable)))
-(defcmd emacs ('j (? string? name)) (emacs name (current-ftable)))
-(defcmd emacs 
+
+(define-command emacs ('emacs (? string? name)) (emacs (undecorate name) (current-ftable)))
+(define-command emacs ('j (? string? name)) (emacs (undecorate name) (current-ftable)))
+(define-command emacs 
   ('emacs (? string? caller) (? string? callee))
-  (emacs-call caller callee (current-ftable)))
-(defcmd emacs
+  (emacs-call (undecorate caller) (undecorate callee) (current-ftable)))
+(define-command emacs
   ('j (? string? caller) (? string? callee))
-  (emacs-call caller callee (current-ftable)))
+  (emacs-call (undecorate caller) (undecorate callee) (current-ftable)))
 
-(defcmd web ('web (? string? name)) (web name (current-ftable)))
-(defcmd web ('u (? string? name)) (web name (current-ftable)))
-(defcmd web 
+(define-command web ('web (? string? name)) (web (undecorate name) (current-ftable)))
+(define-command web ('u (? string? name)) (web (undecorate name) (current-ftable)))
+(define-command web 
   ('web (? string? caller) (? string? callee)) 
-  (web caller callee (current-ftable)))
-(defcmd web 
+  (web-call (undecorate caller) (undecorate callee) (current-ftable)))
+(define-command web 
   ('u (? string? caller) (? string? callee)) 
-  (web caller callee (current-ftable)))
+  (web-call (undecorate caller) (undecorate callee) (current-ftable)))
 
-(defcmd search ('search (? string? name)) (search name (current-ftable)))
-(defcmd search ('* (? string? name)) (search name (current-ftable)))
+(define-command search ('search (? string? name)) (search (undecorate name) (current-ftable)))
+(define-command search ('* (? regexp? name)) (search name (current-ftable)))
+(define-command search ('* (? string? name)) (search (undecorate name) (current-ftable)))
+(define-command search ('* (? regexp? name)) (search name (current-ftable)))
 
-(defcmd dump ('dump) (rtable-dump (current-rtable)))
-
-
-(defcmd callers ('< (? string? name)) (callers* name (current-rtable) #t 1))
-(defcmd callers ('callers (? string? name)) (callers* name (current-rtable) #t 1))
-(defcmd callers ('< (? string? name) depth) (callers* name (current-rtable) #t depth))
-(defcmd callers ('callers (? string? name) depth) (callers* name (current-rtable) #t depth))
-
-(defcmd callees ('> (? string? name)) (callees* name (current-ftable) #t 1))
-(defcmd callees ('callees (? string? name)) (callees* name (current-ftable) #t 1))
-(defcmd callees ('> (? string? name) depth) (callees* name (current-ftable) #t depth))
-(defcmd callees ('callees (? string? name) depth) (callees* name (current-ftable) #t depth))
+(define-command dump ('dump) (rtable-dump (current-rtable)))
 
 
-(defcmd reachable? ('reachable? from to) (reachable? from to (current-rtable) #t 1))
-(defcmd reachable? ('reachable? from to  depth) (reachable? from to (current-rtable) #t depth))
-(defcmd reachable? ('<> from to) (reachable? from to (current-rtable) #t 1))
-(defcmd reachable? ('<> from to  depth) (reachable? from to (current-rtable) #t depth))
+(define-command callers ('< (? string? name)) (callers* (undecorate name) (current-rtable) #t 1))
+(define-command callers ('callers (? string? name)) (callers* (undecorate name) (current-rtable) #t 1))
+(define-command callers ('< (? string? name) depth) (callers* (undecorate name) (current-rtable) #t depth))
+(define-command callers ('callers (? string? name) depth) (callers* (undecorate name) (current-rtable) #t depth))
 
-(defcmd transit ('transit from to) (transit from to (current-ftable) (current-rtable) #t #t))
-(defcmd transit ('transit from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
-(defcmd transit ('<*> from to) (transit from to (current-ftable) (current-rtable) #t #t))
-(defcmd transit ('<*> from to  depth) (transit from to (current-ftable) (current-rtable) #t depth))
+(define-command callees ('> (? string? name)) (callees* (undecorate name) (current-ftable) #t 1))
+(define-command callees ('callees (? string? name)) (callees* (undecorate name) (current-ftable) #t 1))
+(define-command callees ('> (? string? name) depth) (callees* (undecorate name) (current-ftable) #t depth))
+(define-command callees ('callees (? string? name) depth) (callees* (undecorate name) (current-ftable) #t depth))
 
-(defcmd entry-points ('entry-points) (entry-points (current-ftable) #t))
-(defcmd entry-points ('$) (entry-points (current-ftable) #t))
 
+(define-command reachable? ('reachable? from to) (reachable? (undecorate from)
+						     (undecorate to)
+						     (current-rtable) #t 1))
+(define-command reachable? ('reachable? from to  depth) (reachable? (undecorate from)
+							    (undecorate to)
+							    (current-rtable) #t depth))
+(define-command reachable? ('<> from to) (reachable? (undecorate from)
+					     (undecorate to)
+					     (current-rtable) #t 1))
+(define-command reachable? ('<> from to  depth) (reachable? (undecorate from)
+						    (undecorate to)
+						    (current-rtable) #t depth))
+
+(define-command transit ('transit from to) 
+  (transit (undecorate from) 
+	   (undecorate to)
+	   (current-ftable) (current-rtable) #t #t))
+(define-command transit ('transit from to  depth) 
+  (transit (undecorate from) 
+	   (undecorate to)
+	   (current-ftable) (current-rtable) #t depth))
+(define-command transit ('<*> from to) (transit (undecorate from)
+					(undecorate to)
+					(current-ftable) (current-rtable) #t #t))
+(define-command transit ('<*> from to  depth) (transit (undecorate from)
+					       (undecorate to)
+					       (current-ftable) (current-rtable) #t depth))
+
+(define-command entry-points ('entry-points) (entry-points #f (current-ftable) #t))
+(define-command entry-points ('$) (entry-points #f (current-ftable) #t))
+(define-command externs ('externs (? string? name)) (entry-points name (current-ftable) #t))
+(define-command externs ('$ (? string? name)) (entry-points name (current-ftable) #t))
+
+(define (dwarf id dtable interactive?)
+  (ref dtable id #f))
+(define-command dwarf ('dwarf id) (dwarf id (current-dtable) #t))
+(define-command dwarf ('d id) (dwarf id (current-dtable) #t))
 
 (define (rtable-dump table)
   (apply append (hash-table-map table (lambda (k v)

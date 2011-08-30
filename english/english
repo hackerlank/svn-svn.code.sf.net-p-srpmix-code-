@@ -1,4 +1,5 @@
 #!/bin/bash
-for x in /srv/sources/sources/*/*/*/pre-build/*/{ChangeLog,README}; do 
+         
+for x in /srv/sources/dists/^kojipkgs-fedoraproject-org/packages/*/*/pre-build/*/{ChangeLog,README,NEWS}; do 
     grep -F -nH "$*" $x; 
 done
