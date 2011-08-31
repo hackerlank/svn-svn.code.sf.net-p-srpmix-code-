@@ -706,7 +706,7 @@
 	   (handler (assq-ref print-handlers name #f)))
       (if handler
 	  (handler interactive? (car es) (cdr es))
-	  (writeln (cdr es)))))
+	  (write es))))
    (else
     (write es))))
 
