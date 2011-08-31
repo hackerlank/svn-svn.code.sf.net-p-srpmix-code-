@@ -469,7 +469,9 @@
 
 (define (entry-points name ftable interactive?)
   (if name
-      (hash-table-fold ftable (lambda (k v kdr)
+      (map
+       (cute decorate <> ftable interactive?)
+       (hash-table-fold ftable (lambda (k v kdr)
 				(let1 file (any (lambda (x)
 						  (and (kref x :entry-point)
 						       (kref x :file))
@@ -481,7 +483,7 @@
 				    (cons k kdr))
 				   (else
 				    kdr))))
-			(list))
+			(list)))
       (map
        (cute decorate <> ftable interactive?)
        (hash-table-fold ftable (lambda (k v kdr)
