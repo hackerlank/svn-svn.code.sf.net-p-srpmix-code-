@@ -1,21 +1,93 @@
 #!/bin/bash
-if [[ ${1:0:1} = "/" ]]; then
-    input=$(readlink --canonicalize $1)
-else
-    input=$(readlink --canonicalize $(pwd)/$1)
-fi
 
-output=~/.callq${input}.es
-mkdir -p $(dirname ${output})
+function print_usage
+{
+    echo "$0 --help|-h"
+    echo "$0 [--debug] [--output OUTPUT.es] INPUT.elf"
+}
 
-if [[ ! -e ${output} ]] || [[ ${input} -nt ${output} ]]; then
-    es-src-readelf-so $input > ${output} 
-    es-src-objdump-dcall $input                \
-	| es-filter-objcopy-data $input        \
-	| es-filter-readelf-rela $input        \
-	| es-filter-libdwarves-fileline $input \
-	>> ${output} 
-    es-src-libdwarves $input >> ${output} 
-fi
-echo ${output}
-exit 0
+function run
+{
+    local debug_output=$1
+    local cmd=$2
+    local input=$3
+
+    if [[ -n "$debug_output" ]]; then
+	"${cmd}" "${input}" | tee "${debug_output}:${cmd}"
+    else
+	"${cmd}" "${input}"
+    fi
+}
+function main
+{
+    local input
+    local output
+    local debug
+    
+    while [[ $# -gt 0 ]]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		return 0
+		;;
+	    --debug)
+		debug=1
+		shift
+		;;
+	    --output)
+		shift
+		output=$1
+		shift
+		;;
+	    --output=*)
+                output=${1/--output=}
+		shift
+                ;;
+	    *)
+	        break
+	    ;;
+	esac
+    done
+
+    if [[ $# != 1 ]]; then
+	print_usage 1>&2
+	return 1
+    fi
+    
+    if [[ ${1:0:1} = "/" ]]; then
+	input=$(readlink --canonicalize $1)
+    else
+	input=$(readlink --canonicalize $(pwd)/$1)
+    fi
+    if [[ ! -r "${input}" ]]; then
+	echo "Cannot read ${input}" 2>&1
+	return 1
+    fi
+
+    if [[ -z "${output}" ]]; then
+	sha1sum=$(sha1sum < "${input}" | cut -f 1 -d ' ')
+	output=~/.callq"${input},${sha1sum}".es
+	mkdir -p $(dirname "${output}")
+    fi
+	
+    if [[ -n "$debug" ]]; then
+	debug="${output}"
+    fi
+
+    if [[ ! -e "${output}" ]] || [[ -n "$debug" ]]; then
+	run "$debug" es-src-readelf-so "${input}" > "${output}"
+	run "$debug" es-src-objdump-dcall "${input}"                \
+	    | run "$debug" es-filter-objcopy-data "${input}"   \
+	    | run "$debug" es-filter-readelf-rela "${input}"        \
+	    | run "$debug" es-filter-libdwarves-fileline "${input}" \
+	    >> "${output}"
+	if [[ -n "$debug" ]]; then
+	    run "$debug" es-src-libdwarves "${input}" > /dev/null
+	fi
+    fi
+    echo "${output}"
+    return 0
+}
+
+main "$@"
+exit $?
