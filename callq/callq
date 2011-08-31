@@ -186,16 +186,6 @@
 	    ess)
 	   (list)))
 
-(define (writeln es)
-  (write es)
-  (newline)
-  ;(print es)
-  )
-(define (writeln* ess)
-  (for-each
-   writeln
-   ess))
-
 (define (forward-reachable? from to ftable)
   (list #f))
 (define (backward-reachable? from to ftable)
@@ -305,42 +295,43 @@
   (delete-duplicates
    (let1 r (reachable? from to rtable #f depth)
 	 (if (equal? r (list #f))
-	     (let1 commons (append (let* ((callers-from (callers* from rtable #f depth))
-					  (callers-to (callers* to rtable #f depth))
-					  (common-callers (lset-intersection equal? 
-									     (map car callers-from)
-									     (map car callers-to))))
-				     (if (null? common-callers)
-					 (list)
-					 (map
-					  (lambda (common-caller)
-					    `(common-caller ,common-caller
-							    :from ,(decorate*
-								    (delete-duplicates 
-								     (assoc-ref callers-from common-caller)))
-							    :to ,(decorate*
-								  (delete-duplicates
-								   (assoc-ref callers-to common-caller))))
-					    )
-					  common-callers)))
-				   (let* ((callees-from (callees* from ftable #f depth))
-					  (callees-to (callees* to ftable #f depth))
-					  (common-callees (lset-intersection equal? 
-									     (map car callees-from)
-									     (map car callees-to))))
-				     (if (null? common-callees)
-					 (list)
-					 (map
-					  (lambda (common-callee)
-					    `(common-callee ,common-callee
-							    :from ,(decorate*
-								    (delete-duplicates
-								     (assoc-ref callees-from common-callee)))
-							    :to ,(decorate* 
-								  (delete-duplicates
-								   (assoc-ref callees-to common-callee))))
-					    )
-					  common-callees))))
+	     (let1 commons (append 
+			    (let* ((callers-from (callers* from rtable #f depth))
+				   (callers-to (callers* to rtable #f depth))
+				   (common-callers (lset-intersection equal? 
+								      (map car callers-from)
+								      (map car callers-to))))
+			      (if (null? common-callers)
+				  (list)
+				  (map
+				   (lambda (common-caller)
+				     `(common-caller ,common-caller
+						     :from ,(decorate*
+							     (delete-duplicates 
+							      (assoc-ref callers-from common-caller)))
+						     :to ,(decorate*
+							   (delete-duplicates
+							    (assoc-ref callers-to common-caller))))
+				     )
+				   common-callers)))
+			    (let* ((callees-from (callees* from ftable #f depth))
+				   (callees-to (callees* to ftable #f depth))
+				   (common-callees (lset-intersection equal? 
+								      (map car callees-from)
+								      (map car callees-to))))
+			      (if (null? common-callees)
+				  (list)
+				  (map
+				   (lambda (common-callee)
+				     `(common-callee ,common-callee
+						     :from ,(decorate*
+							     (delete-duplicates
+							      (assoc-ref callees-from common-callee)))
+						     :to ,(decorate* 
+							   (delete-duplicates
+							    (assoc-ref callees-to common-callee))))
+				     )
+				   common-callees))))
 		   (if (null? commons)
 		       (list #f)
 		       commons))
@@ -527,10 +518,20 @@
    (file->sexp-list file))
   (list))
 
-(define handlers (list))
+(define (dwarf id dtable interactive?)
+  (ref dtable id #f))
+(define (rtable-dump table)
+  (apply append (hash-table-map table (lambda (k v)
+					(map
+					 (lambda (v0) 
+					   `(=> ,k ,(ref v0 3)))
+					 (delete-duplicates v))
+					))))
+
+(define command-handlers (list))
 
 (define-macro (define-command name pattern action . help)
-  `(set! handlers (cons
+  `(set! command-handlers (cons
 		   (list ',name 
 			 :pattern ',pattern
 			 :handler (match-lambda 
@@ -538,36 +539,29 @@
 				    (else 'next))
 			 :help ,(if (null? help) #f (car help))
 			 )
-		   handlers)))
+		   command-handlers)))
 
 ;; (handler es)
 ;; => next
 ;; => (...)
 (define (callq-eval es env)
-  (let loop ((handlers handlers))
-    (if (null? handlers)
+  (let loop ((command-handlers command-handlers))
+    (if (null? command-handlers)
 	(begin (print #`";; unknown command: ,(car es)")
 	       (list #f))
-	(let1 r ((kref (car handlers) :handler) es)
+	(let1 r ((kref (car command-handlers) :handler) es)
 	  (if (eq? r 'next)
-	      (loop (cdr handlers))
+	      (loop (cdr command-handlers))
 	      r)))))
 
 (define (help cmd)
   (define (help-all)
     (map 
      (lambda (h) 
-       `(,(car h) => ,(kref h :pattern) :help ,(kref h :help))) 
-     handlers))
+       `(help ,(car h) :pattern ,(kref h :pattern) :help ,(kref h :help)))
+     command-handlers))
   (if cmd
-      (let1 l (filter (lambda (e) (eq? (car e) cmd)) (help-all))
-	(let1 e (filter (lambda (e) (and (eq? (car e) cmd)
-					 (kref e :help)
-					 ))
-			handlers)
-	  (if (null? e)
-	      l
-	      (cons (kref e :help) l))))
+      (filter (lambda (e) (eq? (cadr e) cmd)) (help-all))
       (help-all)))
 
 (define-command help ('help) (help #f) "List all commands")
@@ -689,18 +683,65 @@
 (define-command externs ('externs (? string? name)) (entry-points name (current-ftable) #t))
 (define-command externs ('$ (? string? name)) (entry-points name (current-ftable) #t))
 
-(define (dwarf id dtable interactive?)
-  (ref dtable id #f))
+
 (define-command dwarf ('dwarf id) (dwarf id (current-dtable) #t))
 (define-command dwarf ('d id) (dwarf id (current-dtable) #t))
 
-(define (rtable-dump table)
-  (apply append (hash-table-map table (lambda (k v)
-					(map
-					 (lambda (v0) 
-					   `(=> ,k ,(ref v0 3)))
-					 (delete-duplicates v))
-					))))
+
+(define print-handlers (list))
+(define-macro (define-printer name printer)
+  `(set! print-handlers (cons
+			 (cons ',name ,printer)
+			 print-handlers)))
+
+(define (callq-print0 interactive? es)
+  (cond
+   ((null? es)
+    es					; do noething
+    )
+   ((list? es)
+    (let* ((name (car es))
+	   (handler (assq-ref print-handlers name #f)))
+      (if handler
+	  (handler interactive? (car es) (cdr es))
+	  (writeln (cdr es)))))
+   (else
+    (write es))))
+
+(define (callq-print interactive? es . rest)
+  (with-output-to-port (current-output-port)
+      (lambda ()
+	(cond
+	 ((not es) 
+	  es				; do nothing
+	  )
+	 ((integer? es) 
+	  (exit es))
+	 ((list? es)
+	  (for-each (lambda (es0) 
+		      (callq-print0 interactive? es0)
+		      (newline))
+		    es))
+	 (else
+	  (write es)
+	  (newline)
+	  )))))
+
+(define (writeln es)
+  (write es)
+  (newline)
+  ;;(print es)
+  )
+(define (writeln* ess)
+  (for-each
+   writeln
+   ess))
+
+
+(define-printer help 
+  (lambda (interactive? kar kdr)
+    (format #t #`",(kref kdr :pattern); ,(kref kdr :help)")
+    ))
 
 ;; timeout, plugin output routine, plugin input
 (define (print-usage name status)
@@ -720,8 +761,8 @@
       (exit 0))
     (for-each load-file rest)
     (read-eval-print-loop read
-			  (cute callq-eval <> <>)
-			  writeln*
+			  callq-eval
+			  (pa$ callq-print (not batch))
 			  (lambda () 
 			    (with-output-to-port (current-error-port)
 			      (lambda ()
