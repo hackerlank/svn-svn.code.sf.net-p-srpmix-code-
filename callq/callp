@@ -13,9 +13,9 @@ function run
     local input=$3
 
     if [[ -n "$debug_output" ]]; then
-	"${cmd}" "${input}" | tee "${debug_output}:${cmd}"
+	${cmd} "${input}" | tee "${debug_output}:${cmd}"
     else
-	"${cmd}" "${input}"
+	${cmd} "${input}"
     fi
 }
 function main
@@ -75,6 +75,7 @@ function main
     fi
 
     if [[ ! -e "${output}" ]] || [[ -n "$debug" ]]; then
+	run "$debug" "objdump -D -l" "${input}" > /dev/null
 	run "$debug" es-src-readelf-so "${input}" > "${output}"
 	run "$debug" es-src-objdump-dcall "${input}"                \
 	    | run "$debug" es-filter-objcopy-data "${input}"   \
