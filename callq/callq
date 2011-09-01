@@ -763,6 +763,8 @@
     ))
 
 
+(define callq-read read)
+
 ;; timeout, plugin output routine, plugin input
 (define (print-usage name status)
   (print "Usage: ")
@@ -772,7 +774,7 @@
   (exit status))
 
 (define (repl batch)
-  (read-eval-print-loop read
+  (read-eval-print-loop callq-read
 			callq-eval
 			(pa$ callq-print (not batch))
 			(lambda () 
