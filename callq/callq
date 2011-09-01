@@ -31,13 +31,23 @@
 (define (ref-objpath table)
   (ref table 3))
 
-(define (list-objfiles)
-  (hash-table-map objfiles
-		  (lambda (k v)
-		    `(objfile 
-		      ,k ,(if (table? v)
-				(ref-objpath v)
-				v)))))
+(define (list-objfiles . args)
+  (if (kref args :loaded-only)
+      (hash-table-fold objfiles
+		       (lambda (k v kdr)
+			 (if (table? v)
+			     (cons
+			      `(objfile 
+				,k ,(ref-objpath v))
+			      kdr)
+			     kdr))
+		       (list))
+      (hash-table-map objfiles
+		      (lambda (k v)
+			`(objfile 
+			  ,k ,(if (table? v)
+				  (ref-objpath v)
+				  v))))))
 
 (define current-file (make-parameter #f))
 (define current-path (make-parameter #f))
@@ -172,8 +182,12 @@
 	   kdr))
      (list)))))
 
+(define (drop-plt sym)
+  (car (string-split sym #\@)))
+
 (define (find-callees sym table)
-  (if-let1 ess (ref table sym #f)
+  (if-let1 ess (or (ref table sym #f)
+		   (ref table (drop-plt sym) #f))
 	   (append-map
 	    (lambda (es)
 	      (let1 connections (cadr (memq :connections es))
@@ -363,15 +377,22 @@
     `(,#`"/srv/sources,(m 1)/pre-build/,|file|" ,#`",|line|")))
 
 (define (file-line name ftable)
-  (or (and-let* ((e (ref ftable name (list #f)))
+  (or (and-let* ((e (or (ref ftable name #f)
+			(ref ftable (drop-plt name) #f)
+			(list #f))
+		    )
 		 (e (car e))
 		 (e (cdddr e))
 		 (file (kref e :file))
 		 (line (kref e :line)))
 	(list (file-line0 ftable file line)))
       (list #f)))
+
 (define (file-line-call caller callee ftable)
-  (or (and-let* ((e (ref ftable caller (list #f)))
+  (or (and-let* ((e (or (ref ftable caller #f)
+			(ref ftable (drop-plt caller) #f)
+			(list #f)
+			))
 		 (e (car e))
 		 (conn (kref e :connections))
 		 (ee (any (lambda (ee) 
@@ -584,7 +605,10 @@
 (define-command source ('source (? string? file)) (source file))
 (define-command load ('load (? string? file)) (load-objfile file))
 (define-command switch ('switch (? string? file)) (switch-objfile file))
-(define-command list-objfiles ('list-objfiles) (list-objfiles))
+(define-command list-objfiles ('list-objfiles) 
+  (list-objfiles :loaded-only #f))
+(define-command list-objfiles ('list-objfiles :loaded-only loaded-only) 
+  (list-objfiles :loaded-only loaded-only))
 (define-command source-files ('source-files) (list-source-files (current-ftable)))
 (define-command candidate ('candidate (? string? name)) (list-loadable name))
 
