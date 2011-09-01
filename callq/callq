@@ -18,40 +18,35 @@
   (cadr (or (memq k es)
 	    (list k #f))))
 
+(define objfiles (make-hash-table 'equal?))
+(define (table? t) (list? t))
+(define (make-table ftable rtable dtable objpath)
+  (list ftable rtable dtable objpath))
+(define (ref-ftable table)
+  (ref table 0))
+(define (ref-rtable table)
+  (ref table 1))
+(define (ref-dtable table)
+  (ref table 2))
+(define (ref-objpath table)
+  (ref table 3))
 
-(define blacklist 
-  (list
-   #/^__dso_handle.*/			;???
-   #/^__FUNCTION__\..*/
-   #/^__PRETTY_FUNCTION__\..*/
-   #/^__libc_csu_init$/
-   #/^__do_global_ctors_aux$/
-   #/^_start$/
-   #/^call_gmon_start$/
-   #/^__do_global_dtors_aux$/
-   #/^frame_dummy$/
-   #/^_start$/
-   ))
+(define (list-objfiles)
+  (hash-table-map objfiles
+		  (lambda (k v)
+		    `(objfile 
+		      ,k ,(if (table? v)
+				(ref-objpath v)
+				v)))))
 
-(define id-root (make-hash-table 'equal?))
-
-(define tables (make-hash-table 'equal?))
 (define current-file (make-parameter #f))
 (define current-path (make-parameter #f))
 (define current-ftable (make-parameter #f))
 (define current-rtable (make-parameter #f))
 (define current-dtable (make-parameter #f))
-(define (table? t) (list? t))
 
-(define (list-files)
-  (hash-table-map tables
-		  (lambda (k v)
-		    (list k (if (table? v)
-				(ref v 2)
-				v)))))
-
-(define (switch-file name)
-  (let1 table (ref tables name #f)
+(define (switch-objfile name)
+  (let1 table (ref objfiles name #f)
     (cond
      ((table? table)
       (current-file name)
@@ -64,24 +59,40 @@
       (error "Not loaded yet: " name)))))
 	
 
-(define (load-file file)
+(define (load-objfile file)
   (call-with-input-process `(callp ,file)
     (lambda (input)
       (receive (ftable rtable dtable so)
 	  (load-entries (read-line input))
-	(set! (ref tables (sys-basename file))
-	      (list ftable rtable dtable file))
-	(switch-file (sys-basename file))
+	(set! (ref objfiles (sys-basename file))
+	      (make-table ftable rtable dtable file))
+	(switch-objfile (sys-basename file))
 	(for-each
 	 (lambda (s) 
-	   (unless (ref tables s #f)
-		   (set! (ref tables s) 'UNSOLVED)))
+	   (unless (ref objfiles s #f)
+		   (set! (ref objfiles s) 'UNSOLVED)))
 	 so))
       (list))))
 
+
+(define (in-blacklist? name)
+  (any (lambda (r) (r name))
+       (list
+	#/^__dso_handle.*/			;???
+	#/^__FUNCTION__\..*/
+	#/^__PRETTY_FUNCTION__\..*/
+	#/^__libc_csu_init$/
+	#/^__do_global_ctors_aux$/
+	#/^_start$/
+	#/^call_gmon_start$/
+	#/^__do_global_dtors_aux$/
+	#/^frame_dummy$/
+	#/^_start$/
+	)))
+
 (define (load-entries file)
   (define (acceptable? entry)
-    (not (any (lambda (r) (r entry)) blacklist)))
+    (not (in-blacklist? entry)))
   (define (wash! es)
     (let1 connections (fold-right 
 		       (lambda (entry0 kdr)
@@ -346,20 +357,20 @@
 (define (desc name ftable)
   (ref ftable name (list #f)))
 
-(define (fline0 table file line)
+(define (file-line0 table file line)
   (let1 m (#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/
 			   (current-path))
     `(,#`"/srv/sources,(m 1)/pre-build/,|file|" ,#`",|line|")))
 
-(define (fline name ftable)
+(define (file-line name ftable)
   (or (and-let* ((e (ref ftable name (list #f)))
 		 (e (car e))
 		 (e (cdddr e))
 		 (file (kref e :file))
 		 (line (kref e :line)))
-	(list (fline0 ftable file line)))
+	(list (file-line0 ftable file line)))
       (list #f)))
-(define (fline-call caller callee ftable)
+(define (file-line-call caller callee ftable)
   (or (and-let* ((e (ref ftable caller (list #f)))
 		 (e (car e))
 		 (conn (kref e :connections))
@@ -378,7 +389,7 @@
 			   ))
 		 (rel (car ee)))
 	;; rel
-	(list (fline0 ftable file line)))
+	(list (file-line0 ftable file line)))
       (list)))
 
 (define (preview generator viewer)
@@ -409,17 +420,17 @@
     (list)))
 
 (define (inline name ftable range)
-  (preview (pa$ fline name ftable) (cute inline0 <> <> range)))
+  (preview (pa$ file-line name ftable) (cute inline0 <> <> range)))
 (define (inline-call caller callee ftable range)
-  (preview (pa$ fline-call caller callee ftable) (cute inline0 <> <> range)))
+  (preview (pa$ file-line-call caller callee ftable) (cute inline0 <> <> range)))
 (define (emacs name ftable)
-  (preview (pa$ fline name ftable) emacs0))
+  (preview (pa$ file-line name ftable) emacs0))
 (define (emacs-call caller callee ftable)
-  (preview (pa$ fline-call caller callee ftable) emacs0))
+  (preview (pa$ file-line-call caller callee ftable) emacs0))
 (define (web name ftable)
-  (preview (pa$ fline name ftable) firefox0))
+  (preview (pa$ file-line name ftable) firefox0))
 (define (web-call caller callee ftable)
-  (preview (pa$ fline-call caller callee ftable) firefox0))
+  (preview (pa$ file-line-call caller callee ftable) firefox0))
 
 
 (define-method search ((name <string>) ftable)
@@ -564,30 +575,32 @@
      command-handlers))
   (if cmd
       (filter (lambda (e) (eq? (cadr e) cmd)) (help-all))
-      (help-all)))
+      (sort (delete-duplicates (map cadr (help-all))) 
+	    (lambda (a b) (string<? (symbol->string a) (symbol->string b))))
+      ))
 
 (define-command help ('help) (help #f) "List all commands")
 (define-command help ('help (? symbol? s)) (help s) "Show syntax of commands")
 (define-command source ('source (? string? file)) (source file))
-(define-command load ('load (? string? file)) (load-file file))
-(define-command switch ('switch (? string? file)) (switch-file file))
-(define-command files ('files) (list-files))
+(define-command load ('load (? string? file)) (load-objfile file))
+(define-command switch ('switch (? string? file)) (switch-objfile file))
+(define-command list-objfiles ('list-objfiles) (list-objfiles))
 (define-command source-files ('source-files) (list-source-files (current-ftable)))
 (define-command candidate ('candidate (? string? name)) (list-loadable name))
 
 (define-command desc ('desc (? string? name)) (desc (undecorate name) (current-ftable)))
 (define-command desc ('? (? string? name)) (desc (undecorate name) (current-ftable)))
 
-(define-command fline ('fline (? string? name)) (fline (undecorate name) (current-ftable)))
-(define-command fline (': (? string? name)) (fline (undecorate name) (current-ftable)))
-(define-command fline 
-  ('fline (? string? caller) (? string? callee)) 
-  (fline-call (undecorate caller)
+(define-command file-line ('file-line (? string? name)) (file-line (undecorate name) (current-ftable)))
+(define-command file-line (': (? string? name)) (file-line (undecorate name) (current-ftable)))
+(define-command file-line 
+  ('file-line (? string? caller) (? string? callee)) 
+  (file-line-call (undecorate caller)
 	      (undecorate callee)
 	      (current-ftable)))
-(define-command fline 
+(define-command file-line 
   (': (? string? caller) (? string? callee)) 
-  (fline-call (undecorate caller)
+  (file-line-call (undecorate caller)
 	      (undecorate callee)
 	      (current-ftable)))
 
@@ -744,30 +757,38 @@
   (lambda (interactive? kar kdr)
     (format #t #`",(kref kdr :pattern); ,(kref kdr :help)")
     ))
+(define-printer objfile
+  (lambda (interactive? kar kdr)
+    (format #t #`"	,(car kdr) => ,(cadr kdr)")
+    ))
+
 
 ;; timeout, plugin output routine, plugin input
 (define (print-usage name status)
   (print "Usage: ")
   (print #`"	,|name| -h|--help")
-  (print #`"	,|name| [--batch] [-s|--script|--source SCRIPT]... [-l|--load BINARY]...")
+  (print #`"	,|name| [--batch] [-s|--script|--source SCRIPT]...")
+  (print #`"	,|name| [-s|--script|--source SCRIPT]... [-l|--load BINARY]...")
   (exit status))
 
+(define (repl batch)
+  (read-eval-print-loop read
+			callq-eval
+			(pa$ callq-print (not batch))
+			(lambda () 
+			  (with-output-to-port (current-error-port)
+			    (lambda ()
+			      (display (if batch "" #`"[,(current-file)]? "))
+			      (flush))))))
 (define (main args)
   (let-args (cdr args)
       ((help   "h|help" => (pa$ print-usage (car args) 0))
        (script "s|script|source=s" => (pa$ source))
-       (load   "l|load=s" => (pa$ load-file))
+       (load   "l|load=s" => (pa$ load-objfile))
        (batch  "b|batch")
        . rest)
     (when batch
       (exit 0))
-    (for-each load-file rest)
-    (read-eval-print-loop read
-			  callq-eval
-			  (pa$ callq-print (not batch))
-			  (lambda () 
-			    (with-output-to-port (current-error-port)
-			      (lambda ()
-				(display (if batch "" #`"[,(current-file)]? "))
-				(flush)))))
+    (for-each load-objfile rest)
+    (repl batch)
     (newline)))
