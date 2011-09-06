@@ -634,7 +634,7 @@
 
 (define-command inline ('inline (? string? name))
   (inline (undecorate name) (current-ftable) 3))
-(define-command inline ('l (? string? name) 3) 
+(define-command inline ('l (? string? name)) 
   (inline (undecorate name) (current-ftable) 3))
 (define-command inline ('inline (? string? name) (? integer? range))
   (inline (undecorate name) (current-ftable) range))
