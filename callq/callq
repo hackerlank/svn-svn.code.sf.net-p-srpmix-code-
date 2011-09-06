@@ -19,9 +19,11 @@
 	    (list k #f))))
 
 (define objfiles (make-hash-table 'equal?))
-(define (table? t) (list? t))
+(define (table? t) (and (list? t)
+			(not (null? t))
+			(eq? (car t) 'table)))
 (define (make-table ftable rtable dtable objpath)
-  (list ftable rtable dtable objpath))
+  (list 'table ftable rtable dtable objpath))
 (define (ref-ftable table)
   (ref table 0))
 (define (ref-rtable table)
@@ -69,20 +71,42 @@
       (error "Not loaded yet: " name)))))
 	
 
+(define (load-objfile0 file)
+	(let* ((m (#/\/srv\/debugs\/dists\/([^\/]+)/ file))
+	       (d (if m (m 1) #f))
+	       (inventory (if d 
+			      (file->list 
+			       read
+			       #`"/srv/debugs/dists/,|d|/plugins/O0g3/INVENTORY.es")
+			      #f)))
+	  (call-with-input-process `(callp ,file)
+	    (lambda (input)
+	      (receive (ftable rtable dtable so)
+		  (load-entries (read-line input))
+		(set! (ref objfiles (sys-basename file))
+		      (make-table ftable rtable dtable file))
+		(switch-objfile (sys-basename file))
+		(for-each
+		 (lambda (s) 
+		   (unless (ref objfiles s #f)
+		     (set! (ref objfiles s) 
+			   (or (and-let* ((l (assoc-ref inventory s #f)))
+				 `(LOADABLE ,#`"/srv/debugs/dists/,|d|/plugins/O0g3/root,l"))
+			       'UNSOLVED))))
+		 so))
+	      (list)))))
+
 (define (load-objfile file)
-  (call-with-input-process `(callp ,file)
-    (lambda (input)
-      (receive (ftable rtable dtable so)
-	  (load-entries (read-line input))
-	(set! (ref objfiles (sys-basename file))
-	      (make-table ftable rtable dtable file))
-	(switch-objfile (sys-basename file))
-	(for-each
-	 (lambda (s) 
-	   (unless (ref objfiles s #f)
-		   (set! (ref objfiles s) 'UNSOLVED)))
-	 so))
-      (list))))
+  (if (equal? (sys-basename file) file)
+      (load-objfile0 (let1 l (ref objfiles file #f)
+		       (if (and (list? l)
+				(not (null? l))
+				(eq? (car l) 'LOADABLE))
+			   (cadr l)
+			   file)))
+		     
+      (load-objfile0 file)
+      ))
 
 
 (define (in-blacklist? name)
@@ -468,37 +492,6 @@
 				kdr))
 		   (list)))
 
-(define (path->dists path)
-  (rxmatch-if (#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+)(\/[^\/]+).*/ path)
-      (#f head rv)
-    (fold
-     (lambda (entry kdr)
-       (let1 r (sys-readlink entry)
-	 (if (equal? r #`".,|rv|")
-	     (cons ((#/^\^alias-(.*)/ (sys-basename entry)) 1) kdr)
-	     kdr)))
-     (list)
-     (glob #`"/srv/sources,|head|/^alias-*"))
-    #f))
-
-(define (list-loadable name)
-  ;; c/p/vr
-  (glob-fold "/srv/debugs/sources/*/*/*/plugins/O0g3/root"
-	     (lambda (entry kdr)
-	       (append 
-		;; Handle goache's bug. May be fixed in F15.
-		(directory-fold entry
-				(lambda (path seed)
-				  (if (equal? (sys-basename path) name)
-				      (cons (list path 
-						  (map string->symbol (path->dists path))
-						  ) seed)
-				      seed))
-				(list)
-				)
-		kdr))
-	       (list)))
-
 (define (entry-points name ftable interactive?)
   (if name
       (map
@@ -610,7 +603,6 @@
 (define-command list-objfiles ('list-objfiles :loaded-only loaded-only) 
   (list-objfiles :loaded-only loaded-only))
 (define-command source-files ('source-files) (list-source-files (current-ftable)))
-(define-command candidate ('candidate (? string? name)) (list-loadable name))
 
 (define-command desc ('desc (? string? name)) (desc (undecorate name) (current-ftable)))
 (define-command desc ('? (? string? name)) (desc (undecorate name) (current-ftable)))
@@ -783,9 +775,9 @@
     ))
 (define-printer objfile
   (lambda (interactive? kar kdr)
-    (format #t #`"	,(car kdr) => ,(cadr kdr)")
-    ))
-
+    (if (list? (cadr kdr))
+	(format #t #`"	,(car kdr) => ,(caadr kdr)")
+	(format #t #`"	,(car kdr) => ,(cadr kdr)"))))
 
 (define callq-read read)
 
