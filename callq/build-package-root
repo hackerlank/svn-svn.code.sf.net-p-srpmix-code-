@@ -1,0 +1,56 @@
+#!/bin/bash
+dists="
+rhel5su0
+rhel5su1
+rhel5su2
+rhel5su3
+rhel5su4
+rhel5su5
+rhel5su6
+rhel5su7
+rhel6u0
+rhel6u0+optional
+rhel6u1
+rhel6u1+optional
+"
+
+target=debugs
+for d in $dists; do
+    T00=/srv/${target}/dists/$d/plugins/O0g3
+    T0="${T00}/root"
+
+    for p in /srv/sources/dists/$d/packages/*/*; do
+	P=$(basename $p)
+	C=${P:0:1}
+	V=$(basename $(readlink $p))
+	S0=/srv/debugs/sources/$C/$P/$V/plugins/O0g3
+	L=${S0}LOCK
+	S=${S0}/root
+	
+	if [[ -e $L ]]; then
+	    continue
+	fi
+	
+	if [[ -d $S ]]; then
+	    for e in $(cd $S; find ); do
+		e=${e:2}
+		T="${T0}/$e"
+		if [[ -e "${T}" ]]; then
+		    continue
+		elif [[ -d $S/$e ]]; then
+		    mkdir -p "$T"
+		elif [[ -L $S/$e ]] || 
+		    ( [[ -f $S/$e ]] && ( file $S/$e | grep ELF > /dev/null 2>&1 ) ); then
+		    ln -s $S/$e "$T"
+		fi
+	    done
+	fi
+    done
+    find "${T0}" -type d -empty -delete
+    ( cd "${T0}"; find . -type l | while read; do
+	echo "(" \"$(basename ${REPLY:1})\" " . " \"${REPLY:1}\" ")" 
+    done ) | sort > "${T00}"/INVENTORY.es
+done
+
+
+
