@@ -25,13 +25,13 @@
 (define (make-table ftable rtable dtable objpath)
   (list 'table ftable rtable dtable objpath))
 (define (ref-ftable table)
-  (ref table 0))
-(define (ref-rtable table)
   (ref table 1))
-(define (ref-dtable table)
+(define (ref-rtable table)
   (ref table 2))
-(define (ref-objpath table)
+(define (ref-dtable table)
   (ref table 3))
+(define (ref-objpath table)
+  (ref table 4))
 
 (define (list-objfiles . args)
   (if (kref args :loaded-only)
@@ -62,10 +62,10 @@
     (cond
      ((table? table)
       (current-file name)
-      (current-ftable (ref table 0))
-      (current-rtable (ref table 1))
-      (current-dtable (ref table 2))
-      (current-path (ref table 3))
+      (current-ftable (ref-ftable table))
+      (current-rtable (ref-rtable table))
+      (current-dtable (ref-dtable table))
+      (current-path (ref-objpath table))
       (list #t))
      (else
       (error "Not loaded yet: " name)))))
@@ -396,9 +396,20 @@
   (ref ftable name (list #f)))
 
 (define (file-line0 table file line)
-  (let1 m (#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/
-			   (current-path))
-    `(,#`"/srv/sources,(m 1)/pre-build/,|file|" ,#`",|line|")))
+  (define (file-line00 current-path table file line)
+    (rxmatch-cond
+      ((#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/ 
+			current-path)
+       (#f m)
+       `(,#`"/srv/sources,|m|/pre-build/,|file|" ,#`",|line|"))
+      ((#/^\/srv\/debugs\/dists\/([^\/]+)\/plugins\/O0g3\/root\/.*/ 
+				 current-path)
+       (#f d)
+       (file-line00 (sys-readlink current-path) table file line)
+       )))
+  (file-line00 (current-path) table file line))
+    
+
 
 (define (file-line name ftable)
   (or (and-let* ((e (or (ref ftable name #f)
