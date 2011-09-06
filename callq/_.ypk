@@ -1,0 +1,13 @@
+(ypack-name "callq")
+(ypack-version "0.0.0")
+(ypack-require "es-src-readelf-so")
+(ypack-require "es-src-objdump-dcall")
+(ypack-require "es-filter-objcopy-data")
+(ypack-require "es-filter-readelf-rela")
+(ypack-require "es-filter-libdwarves-fileline")
+(ypack-require "es-src-libdwarves")
+(ypack-require "gauche")
+(ypack-require "coreutils")
+
+(ypack-entry "callq" "/usr/bin/callq")
+(ypack-entry "callp" "/usr/bin/callp")
