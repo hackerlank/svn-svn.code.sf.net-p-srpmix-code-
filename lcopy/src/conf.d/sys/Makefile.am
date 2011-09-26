@@ -141,6 +141,7 @@ dist_confd_DATA = \
 	uim,trunk.lcopy \
 	util-linux,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
+	vim,trunk.lcopy \
 	virt-manager,trunk.lcopy \
 	virt-v2v,trunk.lcopy \
 	wfo,trunk.lcopy \
