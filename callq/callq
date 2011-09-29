@@ -90,7 +90,7 @@
 		 (lambda (s) 
 		   (unless (ref objfiles s #f)
 		     (set! (ref objfiles s) 
-			   (or (and-let* ((l (assoc-ref inventory s #f)))
+			   (or (and-let* (inventory (l (assoc-ref inventory s #f)))
 				 `(LOADABLE ,#`"/srv/debugs/dists/,|d|/plugins/O0g3/root,l"))
 			       'UNSOLVED))))
 		 so))
