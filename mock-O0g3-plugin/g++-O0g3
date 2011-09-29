@@ -12,7 +12,9 @@ for x in "$@"; do
 	rep[${#rep[@]}]="$x"
     elif [[ "$x" =~ -O.* ]]; then
 	:
-    elif [ "$x" = "-g3" ]; then
+    elif [[ "$x" = "-s" ]]; then
+	:
+    elif [[ "$x" = "-g3" ]]; then
 	g3=
 	rep[${#rep[@]}]="$x"
     else
