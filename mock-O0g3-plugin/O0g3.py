@@ -33,6 +33,7 @@ class O0g3(object):
             "cc": "/usr/share/mock-O0g3-plugin/cc-O0g3",
             "g++": "/usr/share/mock-O0g3-plugin/g++-O0g3",
             "c++": "/usr/share/mock-O0g3-plugin/c++-O0g3",
+            "strip": "/usr/share/mock-O0g3-plugin/strip-O0g3",
         }
         self.suffix="O0g3"
         
