@@ -56,6 +56,7 @@
 (define current-ftable (make-parameter #f))
 (define current-rtable (make-parameter #f))
 (define current-dtable (make-parameter #f))
+(define quiet (make-parameter #f))
 
 (define (switch-objfile name)
   (let1 table (ref objfiles name #f)
@@ -544,14 +545,14 @@
 (define (source file)
   (for-each
    (lambda (es)
-     (display ";; context: ")
-     (write (current-file))
-     (newline)
-     (display ";; expression: ")
-     (write es)
-     (newline)
+     (unless (quiet)
+       (display ";; context: ")
+       (write (current-file))
+       (newline)
+       (display ";; expression: ")
+       (write es)
+       (newline))
      (writeln* (callq-eval es #f))
-     (newline)
      )
    (file->sexp-list file))
   (list))
@@ -729,6 +730,9 @@
 (define-command dwarf ('dwarf id) (dwarf id (current-dtable) #t))
 (define-command dwarf ('d id) (dwarf id (current-dtable) #t))
 
+(define (set-quiet s) (quiet s) '())
+(define-command quiet ('quiet) (set-quiet #t))
+(define-command print  ('print str) `((message ,str)))
 
 (define print-handlers (list))
 (define-macro (define-printer name printer)
@@ -752,32 +756,25 @@
 
 (define (callq-print interactive? es . rest)
   (with-output-to-port (current-output-port)
-      (lambda ()
-	(cond
-	 ((not es) 
-	  es				; do nothing
-	  )
-	 ((integer? es) 
-	  (exit es))
-	 ((list? es)
-	  (for-each (lambda (es0) 
-		      (callq-print0 interactive? es0)
-		      (newline))
-		    es))
-	 (else
-	  (write es)
-	  (newline)
-	  )))))
+    (lambda ()
+      (cond
+       ((not es) 
+	es				; do nothing
+	)
+       ((integer? es) 
+	(exit es))
+       ((list? es)
+	(for-each (lambda (es0) 
+		    (callq-print0 interactive? es0)
+		    (newline))
+		  es))
+       (else
+	(write es)
+	(newline)
+	)))))
 
-(define (writeln es)
-  (write es)
-  (newline)
-  ;;(print es)
-  )
 (define (writeln* ess)
-  (for-each
-   writeln
-   ess))
+  (callq-print #f ess))
 
 
 (define-printer help 
@@ -789,6 +786,10 @@
     (if (list? (cadr kdr))
 	(format #t #`"	,(car kdr) => ,(caadr kdr)")
 	(format #t #`"	,(car kdr) => ,(cadr kdr)"))))
+
+(define-printer message
+  (lambda (interactive? kar kdr)
+    (print (car kdr))))
 
 (define callq-read read)
 
