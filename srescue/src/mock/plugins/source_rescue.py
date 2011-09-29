@@ -35,7 +35,7 @@ class SourceRescue(object):
         
         if not self.shelterdir:
             raise RuntimeError, "Neither \"shelterdir\" config parameter nor \"resultdir\" config parameter given"
-        if os.path.exists(self.shelterdir + "/" + "srpmix"):
+        if os.path.exists(self.shelterdir):
             raise RuntimeError, "%s already exists"%self.shelterdir
 
         root.addHook("prebuild",  self.prebuild)
