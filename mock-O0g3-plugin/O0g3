@@ -79,6 +79,9 @@ function main
 	--root ${dist} \
 	--clean
     mock \
+	--root ${dist} \
+	--init
+    mock \
 	--no-cleanup-after      \
 	--resultdir=${O0g3_dir} \
 	--enable-plugin=O0g3    \
