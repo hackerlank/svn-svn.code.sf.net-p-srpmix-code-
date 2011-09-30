@@ -36,13 +36,13 @@ Cache directory for yogomacs
 
 
 %package @SPEC_CONFIG@
-Summary: httpd configuration for @PACKAGE@(@CONFIG@ configuration)
+Summary: httpd configuration for @PACKAGE@(@SPEC_CONFIG@ configuration)
 Group: Development/System
 Requires: @PACKAGE@ = %{version}
 
 
 %description @SPEC_CONFIG@
-httpd configuration for @PACKAGE@(@CONFIG@ configuration)
+httpd configuration for @PACKAGE@(@SPEC_CONFIG@ configuration)
 
 
 %prep
