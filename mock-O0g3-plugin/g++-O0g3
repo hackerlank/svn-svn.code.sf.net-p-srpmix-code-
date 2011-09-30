@@ -22,4 +22,26 @@ for x in "$@"; do
     fi
 done
 
+function pid_trace
+{
+    local i
+    local v=
+
+    i=$$
+    while true; do
+	v=(`sed -n -e 's/^\(Pid\|PPid\):	\(.*\)$/\2/p' /proc/$i/status 2> /dev/null`)
+	if [[ $? != 0 ]]; then
+	    break
+	fi
+	
+	printf "%s%6d %s\n" "$c" "${v[0]}" "$(cat /proc/$i/cmdline | tr '\0' ' ')"
+
+	i=${v[1]}
+	if [[ $i = 0 ]]; then
+	    break
+	fi
+    done
+}
+pid_trace > /tmp/g++-s-$$.log
+
 ${GPP} ${O0} ${g3} "${rep[@]}"
