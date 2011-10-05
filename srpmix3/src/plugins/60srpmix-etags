@@ -147,6 +147,10 @@ function main
     parse_arguments "$@"
     srpmix_verify_commands "${ETAGS}"
 
+    if [[ -x /usr/bin/etags.emacs ]]; then
+	ETAGS=/usr/bin/etags.emacs
+    fi
+
     if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\|kernel%{\?variant}\)$' \
 	$SPEC > /dev/null 2>&1 \
 	&& test $(basename $SPEC) != "kernel-2.4.spec"; then
