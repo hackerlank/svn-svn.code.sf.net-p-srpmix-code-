@@ -25,12 +25,15 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>		/* for valloc */
 #include <unistd.h>
 #include <getopt.h>
 #include <string.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#define __USE_GNU
 #include <fcntl.h>
 
 #include <sys/ioctl.h>
@@ -305,6 +308,28 @@ process_quorum_header(char* buf)
 }
 
 int
+procsss_memb_mask(const char* prefix, memb_mask_t mask)
+{
+  int x;
+
+  printf("%s: \n", prefix);
+  for (x = 0; x < (sizeof(memb_mask_t)); x++)
+    {
+      int i;
+      uint8_t u = mask[x];
+      printf("{%d: %02x, ", x, u);
+      for (i = 0; i < 8; i++) 
+	{
+	  printf("[%d]=%d%s", i, (u & 0x1)? 1: 0, i == 7? "": ", ");
+	  u >>= 1;
+	}
+      printf("}, \n");
+    }
+  printf("\n");
+  return 0;
+}
+
+int
 process_status_block(char *buf, int i)
 {
   status_block_t *ps;
@@ -348,38 +373,9 @@ process_status_block(char *buf, int i)
   printf("Seq: %u\n", ps->ps_seq);
   printf("Arg: %u\n", ps->ps_arg);
 
+  procsss_memb_mask("Mask", ps->ps_mask);
+  procsss_memb_mask("Master mask", ps->ps_master_mask);
 
-  int x;
-  printf("Mask: \n");
-  for (x = (sizeof(memb_mask_t)-1); x >= 0; x--)
-    {
-      printf("<%d>	%02x\n", x, ps->ps_mask[x]);
-
-      int i;
-      uint8_t u = ps->ps_mask[x];
-      for (i = 0; i < 8; i++) 
-	{
-	  printf("<<%d>> %d \n", i, (u & 0x1)? 1: 0);
-	  u >>= 1;
-	}
-    }
-  printf("\n");
-
-  printf("Master mask: \n");
-  for (x = (sizeof(memb_mask_t)-1); x >= 0; x--)
-    {
-      printf("<%d>	%02x\n", x, ps->ps_master_mask[x]);
-      
-      int i;
-      uint8_t u = ps->ps_master_mask[x];
-      for (i = 0; i < 8; i++) 
-	{
-	  printf("<<%d>> %d \n", i, (u & 0x1)? 1: 0);
-	  u >>= 1;
-	}
-    }
-  printf("\n");
-  
   return 0;
 }
 
@@ -388,7 +384,7 @@ process_qdisk(int fd, int blkssz)
 {
   int r;
   int blkssz0 = blkssz;
-  char* buf = alloca(blkssz);
+  char* buf = valloc(blkssz);
   int i;
 
  retry0:  
@@ -477,7 +473,7 @@ main(int argc, char** argv)
 
 
   dev = argv[1];
-  fd  = open(dev, O_RDONLY);
+  fd  = open(dev, O_RDONLY | O_DIRECT);
   if (fd < 0) 
     {
       perror(dev);
