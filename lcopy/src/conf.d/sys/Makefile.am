@@ -45,6 +45,7 @@ dist_confd_DATA = \
 	glib2,trunk.lcopy \
 	glibc,ports.lcopy \
 	glibc,trunk.lcopy \
+	glucsterfs,trunk.lcopy \
 	gnash,trunk.lcopy \
 	gonzui,trunk.lcopy \
 	goocanvas,trunk.lcopy \
