@@ -42,6 +42,10 @@
   (newline)
   (format #t "	  cat /var/log/messages0 /var/log/messages1 /var/log/messages2 ... | gosh ~s sort \n" prog)
   (newline)
+  (format #t "  * coloring the lines\n")
+  (newline)
+  (format #t "	  gosh ~s rainbow < /var/log/messages\n" prog)
+  (newline)
   (format #t "  * help\n")
   (newline)
   (format #t "	  gosh ~s help|-h|--help\n" prog)
@@ -68,8 +72,8 @@
 (define var-log-message-signal-line-regex
   #/^([A-Z][a-z][a-z] [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) (exiting on signal [0-9]+)$/)
 
-(define (emit-log-line date host cmd pid msg)
-  (format #t
+(define (emit-log-line stream date host cmd pid msg)
+  (format stream
 	  "~a ~a ~a ~a~a ~a\n"
 	  date
 	  host
@@ -114,7 +118,7 @@
 		   #?=l
 		   #f))
 	  (when d
-	    (apply emit-log-line d)))
+	    (apply emit-log-line #t d)))
 	(loop (read-line-safe))))))
 
 (define (do-sort args)
@@ -122,9 +126,9 @@
 	 (string->date+year$ (cute string->date+year <> year)))
     (for-each
      (lambda (elt)
-       (apply emit-log-line  (cons (format-date 
-				    (time-utc->date (car elt)))
-				   (cdr elt))))
+       (apply emit-log-line  #t (cons (format-date 
+				       (time-utc->date (car elt)))
+				      (cdr elt))))
      (stable-sort!
       (delete #f 
 	      (map (lambda (l)
@@ -165,6 +169,98 @@
 		(string<? (cadr a) (cadr b)))
 	    (time<? (car a) (car b))))))))
 
+(define rainbow-base '((0/6 255   0   0)
+		       (1/6 255 128   0)
+		       (2/6 255 255   0)
+		       (3/6   0 255   0)
+		       (4/6   0 255 255)
+		       (5/6   0   0 255)
+		       (6/6 255   0 255)))
+(define (rainbow i color-map fg)
+  (apply string-append 
+	 (map (cute format "~2'0x" <>)
+	      (receive (low high)
+		  (let loop ((rb color-map)
+			     (c  #f)
+			     (over #t))
+		    (let* ((r (car rb))
+			   (b (car r)))
+		      (cond
+		       ((eqv? b i) (values r r))
+		       ((<  b i)   (loop (cdr rb) r over))
+		       (over       (values c r))
+		       (else       (loop (cdr rb) r #f)))))
+		(let* ((base (car low))
+		       (i    (- i base))
+		       (e (- (car high) base))
+		       (bcolor (cdr low))
+		       (ecolor (cdr high)))
+		  (if (eqv? i 0)
+		      bcolor
+		      (let1 ratio (/ i e)
+			(define (calc i)
+			  (let1 r 
+			      (x->integer
+			       (+ (* (- (ref ecolor i) (ref bcolor i)) ratio) (ref bcolor i)))
+			    ((if fg values (pa$ - 255)) r)))
+			(map calc '(0 1 2)))))))))
+
+(define (do-rainbow args)
+  (let* ((year (date->string (time-utc->date (current-time)) "~y"))
+	 (string->date+year$ (cute string->date+year <> year))
+	 (rearrange-date$ (lambda (date) (date->time-utc (string->date+year$ date)))))
+    (let1 l (let loop ((l (read-line-safe))
+		       (L (list)))
+	      (if (eof-object? l)
+		  L
+		  (let1 d (rxmatch-cond
+			    ((var-log-message-line-regex l)
+			     (#f date host cmd pid msg)
+			     (list (rearrange-date$ date) 
+				   host 
+				   cmd
+				   pid
+				   msg))
+			    ((var-log-message-repeated-line-regex l)
+			     (#f date host msg)
+			     (list (rearrange-date$ date) 
+				   host 
+				   #f
+				   #f
+				   msg))
+			    ((var-log-message-signal-line-regex l)
+			     (#f date host msg)
+			     (list (rearrange-date$ date) 
+				   host 
+				   #f
+				   #f
+				   msg))
+			    (else
+			     #?=l
+			     #f))
+		    (loop (read-line-safe) (if d (cons d L) L)))))
+      (let* ((be (car l))
+	     (l  (reverse l))
+	     (bb (car l))
+	     (start (time-second (car bb)))
+	     (range (- (time-second (car be)) start)))
+	
+	(print "<html><body>")
+	(for-each
+	 (lambda (entry)
+	   (let* ((i (/ (- (time-second (car entry)) start) range))
+		  (fg (rainbow i rainbow-base #t))
+		  (bg (rainbow i rainbow-base #f))
+		  (line (apply emit-log-line #f (date->string (time-utc->date (car entry))) (cdr entry))))
+	     ;; TOOD: html escaping
+	     (format #t "<pre style=\"~a;~a\">~a</pre>\n"
+		     #`"color:#,|fg|"
+		     "";#`"background-color:#,|bg|"
+		     line)
+	     ))
+	 l)
+	(print "</body></html>")
+	))))
 
 ;;
 ;; read-line/nl is taken from gauche/mime.scm.
@@ -225,5 +321,7 @@
      (do-adjust (cons (car args) (cddr args))))
     ('sort
      (do-sort (cons (car args) (cddr args))))
+    ('rainbow
+     (do-rainbow (cons (car args) (cddr args))))
      ))
 
