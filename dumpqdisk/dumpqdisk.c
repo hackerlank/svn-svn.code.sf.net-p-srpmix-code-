@@ -1,6 +1,7 @@
+/* 69632 byte */
 /**
    Copyright Red Hat, Inc. 2006
-   Copyright Masatake YAMATO 2009
+   Copyright Masatake YAMATO 2009 2011
 
    This program is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by the
@@ -42,6 +43,7 @@
 
 #include <alloca.h>
 #include <linux/swab.h>
+#include <ctype.h>
 
 /*
   Copyright Red Hat, Inc. 2002-2003
@@ -293,12 +295,22 @@ process_quorum_header(char* buf)
   printf("time of last update: %lu\n", qh->qh_timestamp);
   printf("Hostname who put this here...: ");
   for (i = 0; i < 128; i++)
-    printf("%c", qh->qh_updatehost[i]);
+    {
+      if (isprint(qh->qh_updatehost[i]))
+	printf("%c", qh->qh_updatehost[i]);
+      else
+	printf("<%d>", qh->qh_updatehost[i]);
+    }
   printf("\n");
 
   printf("Cluster name; CMAN only(support 16 chars): ");
   for (i = 0; i < 120; i++)
-    printf("%c", qh->qh_cluster[i]);
+    {
+      if (isprint(qh->qh_cluster[i]))
+	printf("%c", qh->qh_cluster[i]);
+      else
+	printf("<%d>", qh->qh_cluster[i]);
+    }
   printf("\n");
 
   printf("Known block size @ creation: %u\n", qh->qh_blksz);
@@ -307,12 +319,47 @@ process_quorum_header(char* buf)
   return 0;
 }
 
-int
-procsss_memb_mask(const char* prefix, memb_mask_t mask)
-{
-  int x;
 
-  printf("%s: \n", prefix);
+/**
+ * Check the status of a bit in a bitmap / bitmask.
+ *
+ * @param mask		Bitmask to check.
+ * @param bitidx	Bit to to check.
+ * @param masklen	Bitmask length (in uint8_t units).
+ * @return		-1 if the index exceeds the number of bits in the
+ *			bitmap, 0 if not set, or 1 if set.
+ */
+int
+is_bit_set(uint8_t *mask, uint32_t bitidx, uint32_t masklen)
+{
+	uint32_t idx;
+	uint32_t bit;
+
+	/* Index into array */
+	idx = bitidx >> 3;
+	bit = 1 << (bitidx & 0x7);
+
+	if (idx >= masklen)
+		return -1;
+
+	return !!(mask[idx]&bit);
+}
+
+int
+procsss_memb_mask(int index, const char* prefix, memb_mask_t mask)
+{
+  int i, b;
+
+  printf("<%d> %s: \n{", index, prefix);
+#define MAX_NODES_DISK		16	
+  for (i = 0; i < MAX_NODES_DISK; i++)
+    {
+      b = is_bit_set(mask, i, sizeof(mask));
+      printf("[%d]=%d%s", i+1, b, ((i == (MAX_NODES_DISK - 1))? "": ", "));
+    }
+  printf("}\n");
+#if 0
+  printf("<%d> %s: \n", index, prefix);
   for (x = 0; x < (sizeof(memb_mask_t)); x++)
     {
       int i;
@@ -326,6 +373,7 @@ procsss_memb_mask(const char* prefix, memb_mask_t mask)
       printf("}, \n");
     }
   printf("\n");
+#endif
   return 0;
 }
 
@@ -339,42 +387,42 @@ process_status_block(char *buf, int i)
   
 
   printf("STATUS BLOCK[%d]\n", i);
-  printf("Status block magic: 0x%08x\n", ps->ps_magic);
-  printf("Last writer: %u\n", ps->ps_updatenode);
-  printf("Time of last update: %lu\n", ps->ps_timestamp);
-  printf("Nodeid: %u\n", ps->ps_nodeid);
-  printf("Padding<0>: %u\n", ps->pad0);
-  printf("State: %u(%s)\n", ps->ps_state,
+  printf("<%d>Status block magic: 0x%08x\n", i, ps->ps_magic);
+  printf("<%d> Last writer: %u\n", i, ps->ps_updatenode);
+  printf("<%d> Time of last update: %lu\n", i, ps->ps_timestamp);
+  printf("<%d> Nodeid: %u\n", i, ps->ps_nodeid);
+  printf("<%d> Padding(0): %u\n", i, ps->pad0);
+  printf("<%d> State: %u(%s)\n", i, ps->ps_state,
 	 (ps->ps_state == S_NONE)?   "S_NONE":
 	 (ps->ps_state == S_EVICT)?  "S_EVICT":
 	 (ps->ps_state == S_INIT)?   "S_INIT":
 	 (ps->ps_state == S_RUN)?    "S_RUN":
 	 (ps->ps_state == S_MASTER)? "S_MASTER": 
 	                             "UNKOWN");
-  printf("Padding<1>: %u\n", ps->pad1[0]);
-  printf("Score: %u\n",      ps->ps_score);
-  printf("Score max: %u\n",      ps->ps_scoremax);
+  printf("<%d> Padding(1): %u\n", i, ps->pad1[0]);
+  printf("<%d> Score: %u\n",      i, ps->ps_score);
+  printf("<%d> Score max: %u\n",  i, ps->ps_scoremax);
 
-  printf("Average cycle speed(sec): %u\n",      ps->ps_ca_sec);
-  printf("Average cycle speed(usec): %u\n",      ps->ps_ca_usec);
+  printf("<%d> Average cycle speed(sec): %u\n", i, ps->ps_ca_sec);
+  printf("<%d> Average cycle speed(usec): %u\n", i, ps->ps_ca_usec);
 
-  printf("Last cycle speed(sec): %u\n",      ps->ps_lc_sec);
-  printf("Last cycle speed(usec): %u\n",      ps->ps_lc_usec);
+  printf("<%d> Last cycle speed(sec): %u\n", i, ps->ps_lc_sec);
+  printf("<%d> Last cycle speed(usec): %u\n", i, ps->ps_lc_usec);
 
-  printf("Incarnation: %lu\n",  ps->ps_incarnation);
+  printf("<%d> Incarnation: %lu\n",  i, ps->ps_incarnation);
 
-  printf("Msg: %u(%s)\n", ps->ps_msg,
+  printf("<%d> Msg: %u(%s)\n", i, ps->ps_msg,
 	 (ps->ps_msg == M_NONE) ? "M_NONE" :
 	 (ps->ps_msg == M_BID)  ? "M_BID"  :
 	 (ps->ps_msg == M_ACK)  ? "M_ACK"  :
 	 (ps->ps_msg == M_NACK) ? "M_NACK" :
 	 (ps->ps_msg == M_MASK) ? "M_MASK" : 
 	                          "UNKOWN"  );
-  printf("Seq: %u\n", ps->ps_seq);
-  printf("Arg: %u\n", ps->ps_arg);
+  printf("<%d> Seq: %u\n", i, ps->ps_seq);
+  printf("<%d> Arg: %u\n", i, ps->ps_arg);
 
-  procsss_memb_mask("Mask", ps->ps_mask);
-  procsss_memb_mask("Master mask", ps->ps_master_mask);
+  procsss_memb_mask(i, "Mask", ps->ps_mask);
+  procsss_memb_mask(i, "Master mask", ps->ps_master_mask);
 
   return 0;
 }
