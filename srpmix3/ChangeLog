@@ -1,3 +1,12 @@
+2011-10-21  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/50srpmix-coreutils (run_cmd): Don'n 
+	follow symlinks in find.
+
+	* src/plugins/_60srpmix-hyperestraier (list_files): Ditto.
+
+	* src/plugins/50srpmix-file (run_file_cmd): Ditto.
+
 2011-10-06  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-etags (main): Use etags.emacs

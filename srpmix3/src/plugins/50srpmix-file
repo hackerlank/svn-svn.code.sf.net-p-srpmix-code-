@@ -127,7 +127,7 @@ function run_file_cmd
 
     es_print "$cmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
-    (cd $d && find -L . -not -type d \
+    (cd $d && find . -not -type d \
 	| grep -v ^./STATUS \
 	| grep -v ^./SRPMIX \
 	| grep -v ^./CRADLE \
