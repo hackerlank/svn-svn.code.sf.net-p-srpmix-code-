@@ -6,6 +6,7 @@ dist_confd_DATA = \
 	NetworkManager,trunk.lcopy \
 	anaconda,trunk.lcopy \
 	asakusafw,trunk.lcopy \
+	attr,trunk.lcopy \
 	audit,trunk.lcopy \
 	autoconf,trunk.lcopy \
 	autofs,trunk.lcopy \
