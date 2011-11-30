@@ -135,6 +135,7 @@ dist_confd_DATA = \
 	stitch,trunk.lcopy \
 	strace,trunk.lcopy \
 	sysstat,trunk.lcopy \
+	systemd,trunk.lcopy \
 	systemtap,trunk.lcopy \
 	texinfo,trunk.lcopy \
 	tog-pegasus,trunk.lcopy \
