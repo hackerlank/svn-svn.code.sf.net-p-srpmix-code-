@@ -95,6 +95,7 @@ dist_confd_DATA = \
 	openldap,trunk.lcopy \
 	openssh,trunk.lcopy \
 	openssl,trunk.lcopy \
+	ovirt-engine,trunk.lcopy \
 	pam,trunk.lcopy \
 	perg,trunk.lcopy \
 	php,trunk.lcopy \
