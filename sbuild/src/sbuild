@@ -403,7 +403,7 @@ function create_file_repofile
 [${repo_name}]
 name=Srpmix packages for $name (via file)
 baseurl=file://${SOP_CRADLES_DIR}/${name}/repo
-enable=0
+enabled=0
 gpgcheck=0
 EOF
 }
@@ -428,7 +428,7 @@ function create_ftp_repofile
 [${repo_name}]
 name=Srpmix packages for $name (via ftp)
 baseurl=ftp://${host_and_port}/${SOP_FTP_CRADLES_DIR}/${name}/repo
-enable=1
+enabled=1
 gpgcheck=0
 EOF
 }

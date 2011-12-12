@@ -1,5 +1,12 @@
 2011-12-12  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.2.7.
+
+	* src/sbuild (create_ftp_repofile,create_file_repofile): 
+	Fix a typo s/enable/enabled/.
+
+2011-12-12  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/sbuild-createrepo.mk (repodata/primary.xml.gz, COMPS)
 	(COMPS_OPT): Check the modification time of comps.xml.
 
