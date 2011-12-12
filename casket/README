@@ -19,6 +19,7 @@ ln -s /etc/mock/site-defaults.cfg .
 
 # mock -v --configdir=/home/yamato/var/srpmix/casket --root=casket-14-x86_64 install srpmix
 # mock -v --configdir=/home/yamato/var/srpmix/casket --root=casket-14-x86_64 install srpmix-dir-base
+# ############################################################################################################
 # mock -v --configdir=/home/yamato/var/srpmix/casket --root=casket-14-x86_64 groupinstall srpmix-group-rhel6u1
 # ...
 
