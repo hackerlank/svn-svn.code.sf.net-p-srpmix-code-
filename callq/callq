@@ -67,7 +67,7 @@
       (current-rtable (ref-rtable table))
       (current-dtable (ref-dtable table))
       (current-path (ref-objpath table))
-      (list #t))
+      (list))
      (else
       (error "Not loaded yet: " name)))))
 	
@@ -109,6 +109,17 @@
       (load-objfile0 file)
       ))
 
+(define (load-objfile-all)
+  (map load-objfile
+       (hash-table-fold objfiles
+			(lambda (k l kdr)
+			  (if (and (list? l)
+				   (not (null? l))
+				   (eq? (car l) 'LOADABLE))
+			      (cons (cadr l) kdr)
+			      kdr))
+			(list))))
+			
 
 (define (in-blacklist? name)
   (any (lambda (r) (r name))
@@ -609,6 +620,7 @@
 (define-command help ('help (? symbol? s)) (help s) "Show syntax of commands")
 (define-command source ('source (? string? file)) (source file))
 (define-command load ('load (? string? file)) (load-objfile file))
+(define-command load ('load 'all) (load-objfile-all))
 (define-command switch ('switch (? string? file)) (switch-objfile file))
 (define-command list-objfiles ('list-objfiles) 
   (list-objfiles :loaded-only #f))
@@ -675,7 +687,7 @@
   (web-call (undecorate caller) (undecorate callee) (current-ftable)))
 
 (define-command search ('search (? string? name)) (search (undecorate name) (current-ftable)))
-(define-command search ('* (? regexp? name)) (search name (current-ftable)))
+(define-command search ('search (? regexp? name)) (search name (current-ftable)))
 (define-command search ('* (? string? name)) (search (undecorate name) (current-ftable)))
 (define-command search ('* (? regexp? name)) (search name (current-ftable)))
 
@@ -789,7 +801,7 @@
 
 (define-printer message
   (lambda (interactive? kar kdr)
-    (print (car kdr))))
+    (display (car kdr))))
 
 (define callq-read read)
 
