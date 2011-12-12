@@ -1,3 +1,8 @@
+2011-12-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sbuild-createrepo.mk (repodata/primary.xml.gz, COMPS)
+	(COMPS_OPT): Check the modification time of comps.xml.
+
 2011-08-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sbuild (create_weakview): Remove old aliases.
