@@ -6,22 +6,6 @@ declare -a rep
 O0=-O0
 g3=-g3
 
-for x in "$@"; do
-    if [[ "$x" =  "-O0" ]]; then
-	O0=
-	rep[${#rep[@]}]="$x"
-    elif [[ "$x" =~ -O.* ]]; then
-	:
-    elif [[ "$x" = "-s" ]]; then
-	:
-    elif [[ "$x" = "-g3" ]]; then
-	g3=
-	rep[${#rep[@]}]="$x"
-    else
-	rep[${#rep[@]}]="$x"
-    fi
-done
-
 function pid_trace
 {
     local i
@@ -42,6 +26,21 @@ function pid_trace
 	fi
     done
 }
-pid_trace > /tmp/cc-s-$$.log
+
+for x in "$@"; do
+    if [[ "$x" =  "-O0" ]]; then
+	O0=
+	rep[${#rep[@]}]="$x"
+    elif [[ "$x" =~ -O.* ]]; then
+	:
+    elif [[ "$x" = "-s" ]]; then
+	pid_trace > /tmp/cc-s-$$.log
+    elif [[ "$x" = "-g3" ]]; then
+	g3=
+	rep[${#rep[@]}]="$x"
+    else
+	rep[${#rep[@]}]="$x"
+    fi
+done
 
 ${CC} ${O0} ${g3} "${rep[@]}"

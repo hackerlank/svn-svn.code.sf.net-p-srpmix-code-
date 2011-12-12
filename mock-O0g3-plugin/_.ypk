@@ -1,5 +1,5 @@
 ;; -*- scheme -*-
-(ypack-version "0.0.4")
+(ypack-version "0.0.5")
 (ypack-require "mock")
 (ypack-require "bash")
 (ypack-require "rpm")
