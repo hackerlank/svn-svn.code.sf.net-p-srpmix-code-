@@ -1,0 +1,9 @@
+;; -*- scheme -*-
+(ypack-version "0.0.0")
+(ypack-name "scasket") 
+(ypack-require "mock")
+(ypack-require "coreutils")
+(ypack-require "sed")
+(ypack-dir "/var/lib/casket" :gid "mock" :uid "root" :mode "u+rwx,g+rwxs,o+rx")
+(ypack-dir "/var/cache/casket" :gid "mock" :uid "root" :mode "u+rwx,g+rwxs,o+rx")
+(ypack-entry "scasket" "/usr/bin/scasket")

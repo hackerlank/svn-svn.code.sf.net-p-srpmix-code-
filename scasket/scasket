@@ -1,0 +1,331 @@
+#!/bin/bash
+__LAYOUT=0.0.0
+
+METHOD=file
+CASKET_NAME=
+SRPMIX_TOOLS_REPO_FILE=
+METHOD=file
+COMPRESSOR=gzip
+PROCESSORS=$(($(nproc) - 1))
+PKG_GROUPS=
+CASKET_ES=
+NO_INIT=
+COPY_OUT=
+
+
+__ARCH=$(arch)
+__RELEASE=$(sed -e 's/^Fedora release \([0-9]*\) .*/\1/g' < /etc/redhat-release )
+__DATE=$(LANG=C date +%Y%m%d)
+__CONFIG_NAME=
+__OUTPUT_NAME=
+__REQUIRES="srpmix srpmix-dir-base squashfs-tools yum"
+__DEBUG=
+
+function print_usage
+{
+	echo "Usage: "
+	echo "	$0 --help|-h"
+	echo "	$0 [--no-init] [--compressor=C] [--processors=N] [--copy-out=DIR] \\"
+	echo "     [--method=METHOD] [--caseket-es=CASKET-ES] \\"
+	echo "     [--fc-release=N] [--debug] [--srpmix-tools-repo-file=REPO_FILE] CASKET_NAME PKG_GROUPS..."
+	echo ""
+	echo "Parameters:"
+	echo "	     C: gzip(default), lzma, or lzo"
+	echo "  METHOD: file(default), ftp"
+	echo ""
+	echo "Example:"
+	echo "	$0 'dists-rhelN-latest' rhel4u8 rhel5su7 rhel6u{2}{,+optional}"
+}
+
+function member
+{
+    local i=$1 j
+    shift
+
+    for j in "$@"; do
+	if [[ "$j" = "$i" ]]; then
+	    return 0
+	fi
+    done
+    return 1
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    (--help|-h)
+		print_usage
+		exit 0
+		;;
+	    (--debug)
+		__DEBUG=1
+		;;
+	    (--fc-release=*)
+	        __RELEASE=${1/--fc-release=}
+	        ;;
+	    (--processors=*)
+	        PROCESSORS=${1/--processors=}
+		if ! [[ "${PROCESSORS}" =~ ^([-a-zA-Z0-9_]+)$ ]]; then
+		    echo "COMPRESSOR must be positive integer" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		;;
+	    (--compressor=*)
+	        COMPRESSOR=${1/--compressor=}
+		if [[ -z "${COMPRESSOR}" ]]; then
+		    echo "No COMPRESSOR given" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		if ! member "${COMPRESSOR}" gzip lzma lzo; then
+		    echo "Unknown COMPRESSOR given" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		;;
+	    (--no-init)
+		NO_INIT=yes
+		;;
+	    (--copy-out=*)
+	        COPY_OUT=${1/--copy-out=}
+		if [[ -z "${COPY_OUT}" ]]; then
+		    echo "No COPY_OUT given" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		if ! [[ -d "${COPY_OUT}" ]]; then
+		    echo "No such directory: ${COPY_OUT}" 1>&2
+		    exit 1
+		fi
+		;;
+	    (--method=*)
+	        METHOD=${1/--method=}
+		if [[ -z "${METHOD}" ]]; then
+		    echo "No METHOD given" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		if [[ "$METHOD" != file ]] && [[ "$METHOD" != ftp ]]; then
+		    echo "Unknown method: $METHOD" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		;;
+	    (--casket-es=*)
+	        CASKET_ES=${1/--casket-es=}
+		if [[ -z "${CASKET_ES}" ]]; then
+		    echo "No CASKET_ES given" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		if ! [[ -r "${CASKET_ES}" ]]; then
+		    echo "Cannot read ${CASKET_ES}" 1>&2
+		    print_usage 1>&12
+		    exit 1
+		fi
+		;;
+	    (--srpmix-tools-repo-file=*)
+	        SRPMIX_TOOLS_REPO_FILE=${1/--srpmix-tools-repo-file=}
+	        ;;
+	    (*)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if [[ -z "${SRPMIX_TOOLS_REPO_FILE}" ]]; then
+	echo "No SRPMIX_TOOLS_REPO_FILE given" 1>&2
+	print_usage 1>&2
+	exit 1
+    fi
+    if ! [[ -r "${SRPMIX_TOOLS_REPO_FILE}" ]]; then
+	echo "Cannot read ${SRPMIX_TOOLS_REPO_FILE}" 1>&2
+	print_usage 1>&12
+	exit 1
+    fi
+		
+    if [[ "${PROCESSORS}" = 0 ]]; then
+	PROCESSORS=1
+    fi
+    
+    CASKET_NAME=$1
+    shift
+    if [[ -z "${CASKET_NAME}" ]]; then
+	echo "CASKET_NAME: Too few argument" 1>&2
+	print_usage 1>&2
+	exit 1
+    fi
+    __OUTPUT_NAME="${CASKET_NAME}-${__LAYOUT}-${__DATE}.${COMPRESSOR}.sqfs"
+
+    if [[ $# = 0 ]]; then
+	echo "No PKG_GROUPS given" 1>&2
+	print_usage 1&2
+	exit 1
+    fi
+    PKG_GROUPS="$@"
+ }
+
+function make_sourecs_repo
+{
+    local method=$1
+
+    if [[ "$method" = file ]]; then
+	cat /srv/sources/attic/cradles/*/file.repo
+    elif [[ "$method" = ftp ]]; then
+	cat /srv/sources/attic/cradles/*/ftp.repo
+    else
+	: TODO
+    fi | sed -e 's/^enabled=0$/enabled=1/g'
+}
+
+function make_config
+{
+    {
+	sed  -e "/^#SOURCES_REPO#\$/r $1" \
+	    -e "/^#SOURCES_REPO#\$/d" <<'EOF'
+config_opts['basedir'] = '/var/lib/casket'
+config_opts['cache_topdir'] = '/var/cache/casket'
+
+config_opts['root'] = '@CASKET_NAME@-@RELEASE@-@ARCH@'
+config_opts['target_arch'] = '@ARCH@'
+config_opts['legal_host_arches'] = ('@ARCH@')
+config_opts['chroot_setup_cmd'] = 'groupinstall buildsys-build'
+config_opts['dist'] = 'fc@RELEASE@'  # only useful for --resultdir variable subst
+
+config_opts['yum.conf'] = """
+[main]
+cachedir=/var/cache/yum
+debuglevel=1
+reposdir=/dev/null
+logfile=/var/log/yum.log
+retries=20
+obsoletes=1
+gpgcheck=0
+assumeyes=1
+syslog_ident=mock
+syslog_device=
+
+[fedora]
+name=fedora
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=fedora-@RELEASE@&arch=@ARCH@
+failovermethod=priority
+
+[updates-released]
+name=updates
+mirrorlist=http://mirrors.fedoraproject.org/mirrorlist?repo=updates-released-f@RELEASE@&arch=@ARCH@
+failovermethod=priority
+
+[local]
+name=local
+baseurl=http://kojipkgs.fedoraproject.org/repos/dist-f@RELEASE@-build/latest/@ARCH@/
+cost=2000
+enabled=0
+
+#SRPMIX_TOOLS_REPO#
+
+
+#SOURCES_REPO#
+
+"""
+
+EOF
+    } \
+	    | sed -e "s/@ARCH@/$__ARCH/g"			\
+	-e "s/@RELEASE@/$__RELEASE/g"			        \
+	-e "s/@CASKET_NAME@/$CASKET_NAME/g"			\
+	-e "/^#SRPMIX_TOOLS_REPO#\$/r $SRPMIX_TOOLS_REPO_FILE"	\
+	-e "/^#SRPMIX_TOOLS_REPO#\$/d"				
+}
+
+function main
+{
+    local my_tmpdir r g
+    local mksqashfs_options mksqashfs_contents
+    local g
+
+    parse_arguments "$@"
+
+    my_tmpdir=`mktemp -d`
+    if [[ -z "${__DEBUG}" ]]; then
+	trap "chmod -R u+w $my_tmpdir; /bin/rm -rf $my_tmpdir" 0    
+    else
+	echo "TMPDIR: ${my_tmpdir}" 1>&2
+    fi
+
+
+    ln -sf /etc/mock/logging.ini "${my_tmpdir}"
+    ln -sf /etc/mock/site-defaults.cfg "${my_tmpdir}"
+    make_sourecs_repo ${METHOD} > "${my_tmpdir}"/sources.repo
+    __CONFIG_NAME=${CASKET_NAME}-${__RELEASE}-${__ARCH}
+    make_config "${my_tmpdir}"/sources.repo > "${my_tmpdir}"/${__CONFIG_NAME}.cfg
+    if [[ -z "${CASKET_ES}" ]]; then
+	cat <<EOF
+;; -*- scheme -*-
+(layout "${__LAYOUT}")
+(date   "${__DATE}")
+(contents 
+EOF
+for g in ${PKG_GROUPS}; do
+    echo -n "\"$g\" "
+done
+cat <<EOF
+)
+(changelog)
+EOF
+    else
+	cat "${CASKET_ES}" 
+    fi > "${my_tmpdir}"/CASKET.es
+
+    if [[ -z "${NO_INIT}" ]]; then
+	if ! mock -v --configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" --init; then
+	    echo "Failed in mock --init" 1>&2
+	    exit 1
+	fi
+    fi
+    
+    for r in ${__REQUIRES}; do
+	if ! mock -v --configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" --install "$r"; then
+	    echo "Failed in mock install $r" 1>&2
+	    exit 1
+	fi
+    done
+
+    for g in $PKG_GROUPS; do
+	if ! mock -v --configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" --install "@srpmix-group-$g"; then
+	    echo "Failed in mock install $g" 1>&2
+	    exit 1
+	fi
+    done
+
+    if ! mock -v --configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" --update; then
+	echo "Failed in mock update" 1>&2
+	exit 1
+    fi
+
+    if ! mock -v --configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" \
+	--copyin "${my_tmpdir}/CASKET.es" /CASKET.es; then
+	echo "No such file CASKET.es" 1>&2
+	exit 1
+    fi
+
+    mksqashfs_options="-processors ${PROCESSORS} -comp ${COMPRESSOR}"
+    mksqashfs_contents="/var/lib/srpmix/sources /var/lib/srpmix/dists /var/lib/srpmix/packages /var/lib/srpmix/plugins /CASKET.es"
+
+    if ! mock -v  \
+	--configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" \
+	--chroot "/sbin/mksquashfs ${mksqashfs_contents} /${__OUTPUT_NAME} ${mksqashfs_options}"; then
+	echo "Failed in mksquashfs" 1>&2
+	exit 1
+    fi
+
+    if [[ -n "${COPY_OUT}" ]]; then 
+	mock -v \
+	    --configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" \
+	    --copyout "/${__OUTPUT_NAME}" "${COPY_OUT}"
+    fi
+}
+
+main "$@"
