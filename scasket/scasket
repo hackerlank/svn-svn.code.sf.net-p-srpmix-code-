@@ -178,7 +178,7 @@ function make_sourecs_repo
 	cat /srv/sources/attic/cradles/*/ftp.repo
     else
 	: TODO
-    fi | sed -e 's/^enabled=0$/enabled=1/g'
+    fi
 }
 
 function make_config
@@ -237,7 +237,8 @@ EOF
 	-e "s/@RELEASE@/$__RELEASE/g"			        \
 	-e "s/@CASKET_NAME@/$CASKET_NAME/g"			\
 	-e "/^#SRPMIX_TOOLS_REPO#\$/r $SRPMIX_TOOLS_REPO_FILE"	\
-	-e "/^#SRPMIX_TOOLS_REPO#\$/d"				
+	-e "/^#SRPMIX_TOOLS_REPO#\$/d"				\
+	| sed -e 's/^enabled=0$/enabled=1/g'
 }
 
 function main
