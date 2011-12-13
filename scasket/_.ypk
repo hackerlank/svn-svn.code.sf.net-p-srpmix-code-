@@ -1,5 +1,5 @@
 ;; -*- scheme -*-
-(ypack-version "0.0.0")
+(ypack-version "0.0.1")
 (ypack-name "scasket") 
 (ypack-require "mock")
 (ypack-require "coreutils")
