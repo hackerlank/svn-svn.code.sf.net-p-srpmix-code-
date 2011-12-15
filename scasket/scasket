@@ -129,6 +129,11 @@ function parse_arguments
 	    (--srpmix-tools-repo-file=*)
 	        SRPMIX_TOOLS_REPO_FILE=${1/--srpmix-tools-repo-file=}
 	        ;;
+	    (--*|-*)
+		echo "Unknown option: $1" 1>&2
+		print_usage 1>&12
+		exit 1
+		;;
 	    (*)
 		break
 		;;
