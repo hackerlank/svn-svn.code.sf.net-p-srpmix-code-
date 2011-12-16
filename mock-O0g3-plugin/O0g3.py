@@ -5,9 +5,9 @@
 # python library imports
 
 # our imports
-from mock.trace_decorator import decorate, traceLog, getLog
+from mockbuild.trace_decorator import decorate, traceLog, getLog
 
-import mock.util
+import mockbuild.util
 import shutil
 import os
 import os.path
@@ -92,10 +92,10 @@ class O0g3(object):
             try:
                 root.uidManager.becomeUser(0, 0)
                 getLog().info("mv " + original + " " + backup)
-                mock.util.do(["/bin/mv", original, backup],
+                mockbuild.util.do(["/bin/mv", original, backup],
                     shell=False)
                 getLog().info("cp " + self.O0g3s[cmd] + " " + original)
-                mock.util.do(
+                mockbuild.util.do(
                     ["/bin/cp", 
                      self.O0g3s[cmd],
                      original],
@@ -111,7 +111,7 @@ class O0g3(object):
             try:
                 root.uidManager.becomeUser(0, 0)
                 getLog().info("mv " + backup + " " + original)
-                mock.util.do(["/bin/mv", backup, original],
+                mockbuild.util.do(["/bin/mv", backup, original],
                              shell=False)
             finally:
                 root.uidManager.restorePrivs()
