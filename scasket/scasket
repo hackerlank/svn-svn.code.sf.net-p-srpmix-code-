@@ -7,6 +7,7 @@ SRPMIX_TOOLS_REPO_FILE=
 METHOD=file
 COMPRESSOR=gzip
 PROCESSORS=$(($(nproc) - 1))
+PKGS=
 PKG_GROUPS=
 CASKET_ES=
 NO_INIT=
@@ -27,7 +28,8 @@ function print_usage
 	echo "	$0 --help|-h"
 	echo "	$0 [--no-init] [--compressor=C] [--processors=N] [--copy-out=DIR] \\"
 	echo "     [--method=METHOD] [--caseket-es=CASKET-ES] \\"
-	echo "     [--fc-release=N] [--debug] [--srpmix-tools-repo-file=REPO_FILE] CASKET_NAME PKG_GROUPS..."
+	echo "     [--fc-release=N] [--debug] [--srpmix-tools-repo-file=REPO_FILE] \\"
+	echo "     CASKET_NAME @PKG_GROUP|PKG..."
 	echo ""
 	echo "Parameters:"
 	echo "	     C: gzip(default), lzma, or lzo"
@@ -52,6 +54,7 @@ function member
 
 function parse_arguments
 {
+    local p
     while [ $# -gt 0 ]; do
 	case "$1" in
 	    (--help|-h)
@@ -166,11 +169,19 @@ function parse_arguments
     __OUTPUT_NAME="${CASKET_NAME}-${__LAYOUT}-${__DATE}.${COMPRESSOR}.sqfs"
 
     if [[ $# = 0 ]]; then
-	echo "No PKG_GROUPS given" 1>&2
+	echo "No PKG_GROUPS/PKGS given" 1>&2
 	print_usage 1&2
 	exit 1
     fi
-    PKG_GROUPS="$@"
+
+
+    for p in "$@"; do
+	if [[ "${p:0:1}" = "@" ]]; then
+	    PKG_GROUPS="${PKG_GROUPS} $p"
+	else
+	    PKGS="${PKGS} $p"
+	fi
+    done
  }
 
 function make_sourecs_repo
@@ -248,9 +259,8 @@ EOF
 
 function main
 {
-    local my_tmpdir r g
+    local my_tmpdir r g p
     local mksqashfs_options mksqashfs_contents
-    local g
 
     parse_arguments "$@"
 
@@ -277,6 +287,10 @@ EOF
 for g in ${PKG_GROUPS}; do
     echo -n "\"$g\" "
 done
+for p in ${PKGS}; do
+    echo -n "\"$p\" "
+done
+
 cat <<EOF
 )
 (changelog)
@@ -301,6 +315,13 @@ EOF
 
     for g in $PKG_GROUPS; do
 	if ! mock -v --configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" --install "@srpmix-group-$g"; then
+	    echo "Failed in mock install $g" 1>&2
+	    exit 1
+	fi
+    done
+
+    for p in $PKGS; do
+	if ! mock -v --configdir="${my_tmpdir}" --root="${__CONFIG_NAME}" --install "$p"; then
 	    echo "Failed in mock install $g" 1>&2
 	    exit 1
 	fi
