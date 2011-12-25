@@ -1898,17 +1898,19 @@
 (defun stitch-list-annotation-about-current-file ()
   (interactive)
   (let* ((target-file (stitch-buffer-file-name))
-	 (target-file-non-directory (file-name-nondirectory target-file)))
-    (stitch-list-annotation-with-filter
-     (format "*List Annotations: %s*" (buffer-name))
-     (lambda (k e) (or (string= 
-			k 
-			target-file)
-		       (string= 
-			(file-name-nondirectory k)
-			target-file-non-directory)))
-     t
-     t)))
+	 (target-file-non-directory (and target-file 
+					 (file-name-nondirectory target-file))))
+    (when target-file
+      (stitch-list-annotation-with-filter
+       (format "*List Annotations: %s*" (buffer-name))
+       (lambda (k e) (or (string= 
+			  k 
+			  target-file)
+			 (string= 
+			  (file-name-nondirectory k)
+			  target-file-non-directory)))
+       t
+       t))))
 
 (defun stitch-list-annotation-about-keyword (keywords buffer-or-name need-erasing)
   (let ((and-set nil))

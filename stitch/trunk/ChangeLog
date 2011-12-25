@@ -1,0 +1,6 @@
+2011-12-26  Masatake YAMATO  <yamato@redhat.com>
+
+	* stitch.el (stitch-list-annotation-about-current-file): Handle the case
+	when `stitch-buffer-file-name' returns nil.
+
+
