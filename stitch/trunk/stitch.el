@@ -1996,11 +1996,21 @@
 				    'stitch-home   (stitch-klist-value e :annotation-home)))
 		      ))
 	     ;;
+	     (insert (propertize 
+		      (stitch-list-show-context k (stitch-klist-value e :target))
+		      'stitch-file   k
+		      'stitch-target (stitch-klist-value e :target)
+		      'stitch-home   (stitch-klist-value e :annotation-home)
+		      ))
+	     (insert "\n")
+	     ;;
 	     (insert (propertize (stitch-annotation-list-format
 				  (stitch-klist-value e :annotation))
 				 'stitch-file   k
 				 'stitch-target (stitch-klist-value e :target)
-				 'stitch-home   (stitch-klist-value e :annotation-home)))
+				 'stitch-home   (stitch-klist-value e :annotation-home)
+				 'face 'stitch-annotation-base
+				 ))
 	     (insert "\n")
 	     (insert "\n")
 	     ))
@@ -2014,6 +2024,24 @@
 	(goto-char (point-min))))
     (pop-to-buffer b)))
 
+;(defun stitch-list-help-echo (window buf pos) 
+;  (with-current-buffer buf
+;    (let ((file   (get-text-property pos 'stitch-file))
+;	  (target (get-text-property pos 'stitch-target)))
+;      (stitch-list-show-context file target)
+;      )))
+
+(defun stitch-list-show-context (file target)
+  (let ((p (stitch-target-get-point target file))
+	(b (find-file-noselect file)))
+    (with-current-buffer (find-file-noselect file)
+      (save-excursion
+	(goto-char p)
+	(buffer-substring
+	 (line-beginning-position)
+	 (progn (forward-line 3)
+		(line-end-position)))))))
+
 (defun stitch-list-jump-to-target-with-mouse (event)
   (interactive "e")
   (save-excursion
@@ -2026,10 +2054,16 @@
   (interactive)
   (let ((file   (get-text-property (point) 'stitch-file))
 	(target (get-text-property (point) 'stitch-target)))
-    (when stitch-list-annotation-window-config
-      (set-window-configuration stitch-list-annotation-window-config))
-    (stitch-target-jump target file)
-    ))
+    (let ((c  (current-window-configuration)))
+      (stitch-list-revert-window-config)
+      (stitch-target-jump target file)
+      (set (make-variable-buffer-local
+	    'stitch-list-annotation-window-config) c))))
+
+(defun stitch-list-revert-window-config ()
+  (interactive)
+  (when stitch-list-annotation-window-config
+    (set-window-configuration stitch-list-annotation-window-config)))
 
 (defun stitch-home-jump (home)
   (when (find-file (car home))
@@ -2211,6 +2245,7 @@
 (define-key ctl-x-map    "Al"  'stitch-list-annotation-about-current-file)
 (define-key ctl-x-map    "Ag"  'stitch-reload-annotations)
 (define-key ctl-x-map    "At"  'stitch-toggle-annotation)
+(define-key ctl-x-map    "A*"  'stitch-list-revert-window-config)
 
 ;;
 (defvar stitch-menu (make-sparse-keymap "Stitch"))

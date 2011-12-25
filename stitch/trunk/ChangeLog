@@ -2,5 +2,6 @@
 
 	* stitch.el (stitch-list-annotation-about-current-file): Handle the case
 	when `stitch-buffer-file-name' returns nil.
-
+	(stitch-list-annotation-with-filter): Show the contexts inline where the annotations
+	are.
 
