@@ -30,5 +30,7 @@ ds7.es   \
 ds8u0.es \
 ds8u1.es \
 \
+rhui2u0.es \
+\
 $(NULL)
 
