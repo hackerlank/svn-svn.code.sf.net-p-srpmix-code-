@@ -1,7 +1,4 @@
 ;; -*- scheme -*-
-(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/corosync/^lcopy-trunk/pre-build/trunk/exec/totemsrp.c" :point 7871 :coding-system undecided-unix :line 276 :surround ("
-" "" "struct message_item {
-	struct mcast *mcast;") :which-func ("message_item"))) :annotation-list ((annotation :type text :data "message_itemとsort_queue_itemは同じ構造を持つ。")) :date "Mon Nov 16 01:46:22 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/attic/cradles/lcopy.sys/mirror/c/corosync/trunk/pre-build/trunk/exec/totemconfig.c" :point 8802 :coding-system undecided-unix :line 297 :surround ("
 " "" "	strcpy (totem_config->rrp_mode, \"none\");
 ") :which-func ("totem_config_read"))) :annotation-list ((annotation :type text :data "active,passive,noneからデフォルトはnone。")) :date "Mon Nov 16 02:16:02 2009" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-corosync))

@@ -149,6 +149,14 @@
   "Base face used to highlight anntations in source code."
   :group 'stitch)
 
+(defface stitch-keyword
+  '((((background light)) 
+     (:foreground "red"))
+    (((background dark)) 
+     (:foreground "red")))
+  "Base face used to highlight keywords"
+  :group 'stitch)
+
 (defface stitch-annotation-fuzzy
   '((((background light)) 
      (:background "gray70" :italic t))
@@ -224,6 +232,15 @@
 ;;
 ;; Utils
 ;;
+(defmacro stitch-define-mouse-command (cmd)
+  `(defun ,(intern (concat (symbol-name cmd) "-with-mouse")) (event)
+     (interactive "e")
+     (save-excursion
+       (set-buffer (window-buffer (posn-window (event-end event))))
+       (save-excursion
+	 (goto-char (posn-point (event-end event)))
+	 (,cmd)))))
+
 (defun stitch-annotation-toggle-show-header ()
   (interactive)
   (setq stitch-annotation-inline-show-header
@@ -1198,15 +1215,35 @@
       (erase-buffer)
       (maphash
        (lambda (k v)
-	 (insert (format "%s --- %s...\n" 
-			 k 
-			 (stitch-klist-value (car (reverse v))
-					     :subject)
-			 ))
-	 )
+	 (let ((subject (stitch-klist-value (car (reverse v))
+					    :subject)))
+	   (insert (format "%s --- %s%s\n" 
+			   (propertize (symbol-name k) 
+				       'face 'stitch-keyword
+				       'mouse-face 'highlight
+				       'stitch-keyword k)
+			   (propertize  (car (split-string subject "\n"))
+					'face 'stitch-annotation-base
+					'help-echo subject
+					)
+			   (if (< 1 (length v))
+			       "..."
+			     "")
+			   ))
+	   ))
        stitch-keywords))
+    (local-set-key [return]  'stitch-list-keyword-jump)
+    (local-set-key [mouse-2] 'stitch-list-keyword-jump-with-mouse)
     (setq buffer-read-only t)
     (pop-to-buffer b)))
+
+(defun stitch-list-keyword-jump ()
+  (interactive)
+  (let ((k (get-text-property (line-beginning-position) 'stitch-keyword)))
+    (when k
+      (stitch-report-about-keyword (list k)))))
+(stitch-define-mouse-command stitch-list-keyword-jump)
+
 
 (defvar stitch-toggle-annotation 1)
 (defun stitch-toggle-annotation (arg)
@@ -1953,12 +1990,9 @@
 					 (if (eq (length keywords) 1) nil t))))
 					     
 
-(defun stitch-list-annotation (all-filter)
-  (interactive "P")
-  (let* ((keywords (unless all-filter
-		       (stitch-read-keywords "List annotations for" t)
-		       ))
-	 (bname (if keywords
+(defun stitch-list-annotation (keywords)
+  (interactive (list (stitch-read-keywords "List annotations for" t)))
+  (let* ((bname (if keywords
 		    (format "*List Annotations/%S*" keywords)
 		  "*List ALL Annotations*"
 		  )))
@@ -2065,14 +2099,6 @@
 	 (progn (forward-line 3)
 		(line-end-position)))))))
 
-(defun stitch-list-jump-to-target-with-mouse (event)
-  (interactive "e")
-  (save-excursion
-    (set-buffer (window-buffer (posn-window (event-end event))))
-    (save-excursion
-      (goto-char (posn-point (event-end event)))
-      (stitch-list-jump-to-target))))
-
 (defun stitch-list-jump-to-target ()
   (interactive)
   (let ((file   (get-text-property (point) 'stitch-file))
@@ -2082,6 +2108,7 @@
       (stitch-target-jump target file)
       (set (make-variable-buffer-local
 	    'stitch-list-annotation-window-config) c))))
+(stitch-define-mouse-command stitch-list-jump-to-target)
 
 (defun stitch-list-revert-window-config ()
   (interactive)
