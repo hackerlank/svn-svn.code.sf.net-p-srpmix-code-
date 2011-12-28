@@ -196,7 +196,10 @@
   :group 'stitch)
 
 (defface stitch-annotation-summary-title
-  '((t (:background "gray20")))
+  '((((background light)) 
+     (:background "gray85"))
+    (((background dark)) 
+     (:background "gray15")))
   "Face used to highlight the header of annotation editing buffer."
   :group 'stitch)
 
