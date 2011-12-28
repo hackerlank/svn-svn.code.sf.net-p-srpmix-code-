@@ -144,6 +144,7 @@ dist_confd_DATA = \
 	twig,trunk.lcopy \
 	udev,trunk.lcopy \
 	uim,trunk.lcopy \
+	unetstack,trunk.lcopy \
 	util-linux,trunk.lcopy \
 	util-linux-ng,trunk.lcopy \
 	vim,trunk.lcopy \
