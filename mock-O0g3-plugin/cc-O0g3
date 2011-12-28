@@ -3,6 +3,7 @@
 CC=/usr/bin/_cc
 declare -a rep
 
+D="-D__OPTIMIZE__=1 -U__NO_INLINE__"
 O0=-O0
 g3=-g3
 
@@ -38,9 +39,12 @@ for x in "$@"; do
     elif [[ "$x" = "-g3" ]]; then
 	g3=
 	rep[${#rep[@]}]="$x"
+    elif [[ "$x" = "-D__OPTIMIZE__" ]]; then
+	D=
+	rep[${#rep[@]}]="$x"
     else
 	rep[${#rep[@]}]="$x"
     fi
 done
 
-${CC} ${O0} ${g3} "${rep[@]}"
+${CC} ${O0} ${g3} "${rep[@]}" ${D} 
