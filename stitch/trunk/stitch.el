@@ -123,21 +123,11 @@
 ;;                 :full-name STRING
 ;;                 :mailing-address STRING)
 ;;
-;; (define-keyword SYMBOL
-;;                 :version 0
-;;                 :subject STRING
-;;                 [:parent KEYWORD]
-;;                 :date DATE
-;;                 :full-name STRING
-;;                 :mailing-address STRING)
-;;
-;;
 ;; TODO
 ;;
 ;; - Tooltips
 ;; - Lazy rendering
 ;; - Edit annotatoins.
-;; - Delete tmp files.
 ;; - Hub annotation by register
 ;;
 
@@ -218,7 +208,7 @@
   :group 'stitch)
 
 (defcustom stitch-annotation-external-files ()
-  "files and directories where your readonly annotations are stored to"
+  "files and directories where your read only annotations are stored to"
   :type '(repeat (choice file directory))
   :group 'stitch)
 
@@ -1197,6 +1187,27 @@
 (defun stitch-lookup-keyword (keyword)
   (reverse (gethash keyword stitch-keywords nil)))
 
+;; + Write about keyword in (stitch-list-annotation-about-keyword)
+;; :overwrite ...()
+;; bookmark
+(defun stitch-list-keywords ()
+  (interactive)
+  (let ((b (get-buffer-create "*List Annotation Keywords*")))
+    (set-buffer b)
+    (let ((buffer-read-only  nil))
+      (erase-buffer)
+      (maphash
+       (lambda (k v)
+	 (insert (format "%s --- %s...\n" 
+			 k 
+			 (stitch-klist-value (car (reverse v))
+					     :subject)
+			 ))
+	 )
+       stitch-keywords))
+    (setq buffer-read-only t)
+    (pop-to-buffer b)))
+
 (defvar stitch-toggle-annotation 1)
 (defun stitch-toggle-annotation (arg)
   (interactive "P")
@@ -1675,6 +1686,18 @@
   (if (stringp cmd)
       (format "%s -T png %s > %s" cmd dotfile pngfile)
     (funcall cmd dotfile pngfile)))
+
+(defvar stitch-temp-files nil)
+(defun stitch-delete-temp-files ()
+  (mapc
+   (lambda (file)
+     (when (file-exists-p file
+			  (delete-file file))))
+   stitch-temp-files)
+  (setq stitch-temp-files nil))
+(add-hook 'kill-emacs-hook
+	  'stitch-delete-temp-files)
+
 (defun stitch-graphviz-create-image (code cmd)
   (save-excursion
     (let* ((dotfile (make-temp-file "s-a" nil ".dot"))
@@ -1688,7 +1711,7 @@
       ;;
       (let ((i (create-image pngfile)))
 	(delete-file dotfile)
-;;	(delete-file pngfile)
+	(push pngfile stitch-temp-files)
 	i)))))
 
 ;;
@@ -1913,7 +1936,7 @@
        t))))
 
 (defun stitch-list-annotation-about-keyword (keywords buffer-or-name need-erasing)
-  (let ((and-set nil))
+  (let ((or-set nil))
     (fset 'or-set (lambda (s1 s2)
 		     (if (car s1)
 			 (or (member (car s1) s2)
@@ -2275,6 +2298,8 @@
 (define-key-after stitch-menu [separator-2] '("--"))
 (define-key-after stitch-menu [make-meta-memo]
   '(menu-item "Make Memorandum for Memorandum..." stitch-annotate-meta))
+(define-key-after stitch-menu [list]
+  '(menu-item "List keywords..." stitch-list-keywords))
 (define-key-after stitch-menu [report]
   '(menu-item "Report about keyword..." stitch-report-about-keyword))
 
