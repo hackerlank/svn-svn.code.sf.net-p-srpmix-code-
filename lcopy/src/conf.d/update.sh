@@ -6,9 +6,8 @@ lcopies=${dir}/*.lcopy
 
 {
 cat <<EOF
-confddir = \$(sysconfdir)/lcopy/conf.d/$class
-dist_confd_DATA = \\
-	\\
+cons = \\
+       \\
 EOF
 
 for x in $lcopies; do
@@ -18,4 +17,4 @@ done
 echo '	\'
 echo '	$(NULL)'
 
-} > Makefile.am
+} > confs.mk

@@ -1,7 +1,3 @@
 confddir = $(sysconfdir)/lcopy/conf.d/android
-dist_confd_DATA = \
-	\
-	apv,trunk.lcopy        \
-	connectbot,trunk.lcopy \
-	\
-	$(NULL)
+include $(srcdir)/confs.mk
+dist_confd_DATA = $(confs)

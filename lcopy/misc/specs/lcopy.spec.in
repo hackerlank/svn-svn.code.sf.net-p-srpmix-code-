@@ -29,7 +29,6 @@ Group: Development/Tools
 %description
 Scripts to update local copies getting from vcs repositories 
 
-
 %prep
 %setup -q
 
@@ -54,8 +53,35 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lcopy-ping
 %{_bindir}/liblcopy.sh
 %{_bindir}/liblcopy_backends.sh
-%{_libexecdir}/lcopy/*
-%{_sysconfdir}/lcopy
+%dir %{_libexecdir}/lcopy
+%dir %{_libexecdir}/lcopy/backends
+%{_libexecdir}/lcopy/backends/*
+%dir %{_sysconfdir}/lcopy
+%dir %{_sysconfdir}/lcopy/conf.d
+
+%package conf-sys
+Summary: lcopy conf files for generic software
+Group: Development/Tools
+Requires: lcopy
+%description conf-sys
+lcopy conf files for generic software.
+
+%files conf-sys
+%dir %{_sysconfdir}/lcopy/conf.d/sys
+# %{_sysconfdir}/lcopy/conf.d/sys/*
+
+%package conf-android
+Summary: lcopy conf files for Android related software
+Group: Development/Tools
+Requires: lcopy
+%description conf-android
+lcopy conf files for Android related software
+
+%files conf-android
+%dir %{_sysconfdir}/lcopy/conf.d/android
+# %{_sysconfdir}/lcopy/conf.d/android/*
+
+@CONFPACKGES@
 
 %changelog
 

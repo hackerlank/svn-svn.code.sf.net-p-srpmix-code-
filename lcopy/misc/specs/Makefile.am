@@ -1,1 +1,1 @@
-EXTRA_DIST=lcopy.spec
+EXTRA_DIST=lcopy.spec make-sub-spec

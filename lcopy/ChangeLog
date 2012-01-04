@@ -1,3 +1,22 @@
+2012-01-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/conf.d/update.sh (lcopies): update confs.mk
+	instead of Makefile.am directly.
+
+	* src/conf.d/android/confs.mk: New file.
+
+	* src/conf.d/android/Makefile.am (confddir): Include confs.mk
+
+	* src/conf.d/sys/confs.mk: New file.
+
+	* src/conf.d/sys/Makefile.am (confddir): Include confs.mk
+
+	* misc/specs/make-sub-spec: New file.
+
+	* misc/specs/Makefile.am (EXTRA_DIST): Added make-sub-spec.
+
+	* configure.ac: Generate confpackges.files.
+
 2011-11-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.3.2.
@@ -5,7 +24,7 @@
 	* src/conf.d/sys/util-linux,trunk.lcopy (GIT_REPOSITORY): Updated.
 
 	* src/conf.d/sys/util-linux-ng,trunk.lcopy (GIT_REPOSITORY): Ditto.
-	
+
 2011-08-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/backends/debwatch (debwatch_help_genconf): Fix

@@ -2,8 +2,8 @@ AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I misc/m4
 
 SUBDIRS  = .
-SUBDIRS += misc
 SUBDIRS += src
+SUBDIRS += misc
 
 EXTRA_DIST = autogen.sh
 
