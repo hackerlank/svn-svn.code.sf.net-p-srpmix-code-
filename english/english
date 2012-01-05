@@ -1,5 +1,5 @@
 #!/bin/bash
-         
-for x in /srv/sources/dists/^kojipkgs-fedoraproject-org/packages/*/*/pre-build/*/{ChangeLog,README,NEWS}; do 
+D=rhel6u1+optional
+for x in /srv/sources/dists/$D/*/*/*/pre-build/*/{ChangeLog,README,NEWS}; do 
     grep -F -nH "$*" $x; 
 done
