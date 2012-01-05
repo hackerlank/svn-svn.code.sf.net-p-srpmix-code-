@@ -1,5 +1,12 @@
 2012-01-05  Masatake YAMATO  <yamato@redhat.com>
 
+	* misc/specs/lcopy.spec.in: make sub packages for
+	each backends.
+
+	* misc/specs/make-sub-spec: Specify backend as requirement.
+
+2012-01-05  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/conf.d/update.sh (lcopies): update confs.mk
 	instead of Makefile.am directly.
 

@@ -72,9 +72,11 @@ AC_RPM_RELEASE
 AC_SUBST_FILE([CONFPACKGES])
 CONFPACKGES=$srcdir/misc/specs/confpackges.files
 echo > ${CONFPACKGES}
-chmod u+x $srcdir/misc/specs/make-files
-$srcdir/misc/specs/make-sub-spec $srcdir/src/conf.d/sys/confs.mk sys         >> ${CONFPACKGES}
-$srcdir/misc/specs/make-sub-spec $srcdir/src/conf.d/android/confs.mk android >> ${CONFPACKGES}
+chmod u+x $srcdir/misc/specs/make-sub-spec
+$srcdir/misc/specs/make-sub-spec \
+       $srcdir/src/conf.d/sys/confs.mk sys $srcdir/src/conf.d/sys >> ${CONFPACKGES}
+$srcdir/misc/specs/make-sub-spec \
+       $srcdir/src/conf.d/android/confs.mk android $srcdir/src/conf.d/android >> ${CONFPACKGES}
 
 AC_OUTPUT([
            Makefile
