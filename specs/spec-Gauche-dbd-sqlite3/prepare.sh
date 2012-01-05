@@ -1,5 +1,6 @@
 PACKAGE=Gauche-dbd-sqlite3
 VERSION=0.1.3
+# REPO=git://github.com/mhayashi1120/Gauche-dbd-sqlite3.git
 URL=http://autogol.ath.cx/dbd-sqlite3
 
 sudo yum -y install gauche-devel sqlite-devel
