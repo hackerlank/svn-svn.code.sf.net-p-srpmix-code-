@@ -1133,6 +1133,7 @@
 	    (full-name (stitch-klist-value r :full-name))
 	    (mailing-list (stitch-klist-value r :mailing-address))
 	    (keywords (stitch-klist-value r :keywords)))
+	
 	(mapc
 	 (lambda (target)
 	   (mapc
@@ -1145,6 +1146,16 @@
 					      (list file-name start end)))
 	      annotation-list))
 	 target-list)
+	(mapc
+	 (lambda (k)
+	   (stitch-register-keyword k
+				    nil
+				    date
+				    full-name
+				    mailing-list
+				    nil
+				    t))
+	 keywords)
 	))
      ((eq (car r) 'define-keyword)
       (stitch-register-keyword (cadr r)
@@ -1152,7 +1163,8 @@
 				(stitch-klist-value r :date)
 				(stitch-klist-value r :full-name)
 				(stitch-klist-value r :mailing-address)
-				(stitch-klist-value r :keywords)))
+				(stitch-klist-value r :keywords)
+				nil))
      ((eq (car r) 'material)
       ;; (material FILE :keywords (KEYWORDS...))
       )
@@ -1195,14 +1207,19 @@
 	 (reverse file-list)
        (cons file file-list)))))
 
-(defun stitch-register-keyword (keyword subject date full-name mailing-address parent-keywords)
+(defun stitch-register-keyword (keyword subject date full-name mailing-address parent-keywords
+					stub)
   (let ((entry (gethash keyword stitch-keywords ())))
-    (puthash keyword (cons (list :subject subject
-				 :date date
-				 :full-name full-name
-				 :mailing-address mailing-address
-				 :keywords parent-keywords) entry)
-	     stitch-keywords)))
+    (when (and (not stub) entry (stitch-klist-value (car entry) :stub))
+      (setq entry (cdr entry)))
+    (unless (and entry stub)
+      (puthash keyword (cons (list :stub stub
+				   :subject subject
+				   :date date
+				   :full-name full-name
+				   :mailing-address mailing-address
+				   :keywords parent-keywords) entry)
+	       stitch-keywords))))
 
 (defun stitch-lookup-keyword (keyword)
   (reverse (gethash keyword stitch-keywords nil)))
@@ -1214,27 +1231,35 @@
   (interactive)
   (let ((b (get-buffer-create "*List Annotation Keywords*")))
     (set-buffer b)
-    (let ((buffer-read-only  nil))
+    (let* ((buffer-read-only  nil)
+	   (l (let ((l0 nil))
+		(maphash (lambda (k v) (setq l0 (cons (symbol-name k) l0))) stitch-keywords)
+		(mapcar 'intern-soft (sort l0 'string<)))))
       (erase-buffer)
-      (maphash
-       (lambda (k v)
-	 (let ((subject (stitch-klist-value (car (reverse v))
-					    :subject)))
+      (mapc
+       (lambda (k)
+	 (let* ((v (gethash k stitch-keywords))
+		(subject (stitch-klist-value (car (reverse v))
+					    :subject))
+		(stub (stitch-klist-value (car (reverse v))
+					    :stub)))
 	   (insert (format "%s --- %s%s\n" 
 			   (propertize (symbol-name k) 
 				       'face 'stitch-keyword
 				       'mouse-face 'highlight
 				       'stitch-keyword k)
+			   (if stub
+			       ""
 			   (propertize  (car (split-string subject "\n"))
 					'face 'stitch-annotation-base
 					'help-echo subject
-					)
+					))
 			   (if (< 1 (length v))
 			       "..."
 			     "")
 			   ))
 	   ))
-       stitch-keywords))
+       l))
     (local-set-key [return]  'stitch-list-keyword-jump)
     (local-set-key [mouse-2] 'stitch-list-keyword-jump-with-mouse)
     (setq buffer-read-only t)
@@ -2251,7 +2276,7 @@
 		      nil)))
 	   (let ((p (point)))
 	     (insert "\n")
-	     (insert (stitch-klist-value e :subject))
+	     (insert (or (stitch-klist-value e :subject) "<stub>"))
 	     (insert "\n")
 	     (insert "\n")
 	     (put-text-property p (point) 'face 'stitch-annotation-summary-title)
