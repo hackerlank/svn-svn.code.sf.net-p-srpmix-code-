@@ -1731,8 +1731,8 @@
 (defun stitch-delete-temp-files ()
   (mapc
    (lambda (file)
-     (when (file-exists-p file
-			  (delete-file file))))
+     (when (file-exists-p file)
+       (delete-file file)))
    stitch-temp-files)
   (setq stitch-temp-files nil))
 (add-hook 'kill-emacs-hook
