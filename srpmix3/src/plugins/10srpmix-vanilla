@@ -4,7 +4,7 @@
 #
 # srpmix-vanilla: Expand compressed and/or archived files in SOURCES to VANILLA
 #
-# Copyright (C) 2007-2009 Masatake YAMATO
+# Copyright (C) 2007-2009, 2012 Masatake YAMATO
 #
 # Author: Masatake YAMATO <yamato@redhat.com>
 #
@@ -112,108 +112,114 @@ function parse_arguments
     fi
 }
 
+function vanilla
+{
+    local expanded=1
+    local f=$1
+    local report_to=${2:-/dev/null}
+    local r
+
+    case "$f" in
+	*.tar.bz2|*.tbz|*.tbz2)
+	    tar jxvfm $f 2>&1 > ${report_to}
+	    echo tar $?
+	    ;;
+	*.tar.gz|*.tgz|*.tar.Z)
+	    tar zxvfm $f 2>&1 > ${report_to}
+	    echo gunzip+tar $?
+	    ;;
+	    # TODO: Is -X needed to update the file modification time?
+	*.zip)
+	    unzip -o $f 2>&1 > ${report_to}
+	    echo unzip $?
+	    ;;
+  	*.jar)
+	    "${FASTJAR}" xf $f 2>&1 > ${report_to}
+	    echo jar $?
+	    ;;
+#	    *.shar.gz)
+#               # shar.gz => GZIP=--best gunzip -c srpmix-3.104.0.shar.gz | unshar
+#		;;
+  	*.gz|*.Z)
+	    local suffix
+	    case "$f" in
+		*.gz)
+		    suffix=.gz
+		    ;;
+		*.Z)
+		    suffix=.Z
+		    ;;
+	    esac
+	    # --force is needed to decompress a file specified by a soft link.
+	    cat $f | gunzip --force - > $(basename $f $suffix) 2>${report_to}
+	    echo gunzip $?
+	    ;;
+  	*.bz2)
+	    # --force is needed to decompress a file specified by a soft link.
+	    bunzip2 --keep --stdout --force $f > $(basename $f .bz2) 2>${report_to}
+	    echo bz $?
+	    ;;
+	*.tar.lzma)
+	    unlzma --force --stdout $f > $(basename $f .lzma) && tar xfm $(basename $f .lzma)
+	    r=$?
+	    rm $(basename $f .lzma)
+	    echo unlzma+tar $r
+	    ;;
+	*.lzma)
+	    # --force is needed to decompress a file specified by a soft link.
+	    unlzma --force --stdout $f > $(basename $f .lzma)
+	    echo unlzma $?
+	    ;;
+	*.gem)
+	    gem unpack $f
+	    echo gem $?
+	    ;;
+	*.tar.xz)
+	    unxz --force --stdout $f > $(basename $f .xz) && tar xfm $(basename $f .xz)
+	    r=$?
+	    rm $(basename $f .xz)
+	    echo unxz+tar $r
+	    ;;
+	*.xz)
+	    # --force is needed to decompress a file specified by a soft link.
+	    unxz --force --stdout $f > $(basename $f .xz)
+	    echo unxz $?
+	    ;;
+	*)
+	    expanded=
+	    ;;
+    esac
+
+    if [[ -n "${expanded}" ]]; then
+	return 0
+    else
+	return 1
+    fi
+}
+
 function run_vanilla
 {
     local d=$1
     local o=$2
     local l=$3
     local report_to=/dev/null
+    
+    local cmd
+    local r
 
     es_print vanilla-start --timestamp=\"`LANG=C date`\" --input=\"$d\" --output=\"$o\" | tee -a $l
-
     count=0
     for f in `find ${d} -type f`; do
-	case "$f" in
-	    *.tar.bz2|*.tbz|*.tbz2)
-                count=`expr $count + 1`
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; tar jxvfm $f 2>&1 > ${report_to};
-		    es_print vanilla-expand --command=\"tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-	    *.tar.gz|*.tgz|*.tar.Z)
-                count=`expr $count + 1`
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; tar zxvfm $f 2>&1 > ${report_to};
-		    es_print vanilla-expand --command=\"tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-	    # TODO: Is -X needed to update the file modification time?
-	    *.zip)
-	        count=`expr $count + 1`
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; unzip -o $f 2>&1 > ${report_to};
-		    es_print vanilla-expand --command=\"unzip\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-  	    *.jar)
-	        count=`expr $count + 1`
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; "${FASTJAR}" xf $f 2>&1 > ${report_to};
-		    es_print vanilla-expand --command=\"jar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-#	    *.shar.gz)
-#               # shar.gz => GZIP=--best gunzip -c srpmix-3.104.0.shar.gz | unshar
-#		;;
-  	    *.gz|*.Z)
-	        count=`expr $count + 1`
-		local suffix
-		case "$f" in
-		    *.gz)
-			suffix=.gz
-			;;
-		    *.Z)
-			suffix=.Z
-			;;
-		esac
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		# --force is needed to decompress a file specified by a soft link.
-		(cd "$o"; cat $f | gunzip --force - > $(basename $f $suffix) 2>${report_to};
-		    es_print vanilla-expand --command=\"gunzip\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-  	    *.bz2)
-	        count=`expr $count + 1`
-		# --force is needed to decompress a file specified by a soft link.
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; bunzip2 --keep --stdout --force $f > $(basename $f .bz2) 2>${report_to};
-		    es_print vanilla-expand --command=\"bunzip2\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-	    *.tar.lzma)
-		count=`expr $count + 1`
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; unlzma --force --stdout $f > $(basename $f .lzma) &&
-		    tar xfm $(basename $f .lzma); 
-		    rm $(basename $f .lzma);
-		    es_print vanilla-expand --command=\"lzma+tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-	    *.lzma)
-	        count=`expr $count + 1`
-		# --force is needed to decompress a file specified by a soft link.
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; unlzma --force --stdout $f > $(basename $f .lzma)  &&
-		    es_print vanilla-expand --command=\"lzma\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-	    *.gem)
-		count=`expr $count + 1`
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; gem unpack $f &&
-		    es_print vanilla-expand --command=\"gem\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-	    *.tar.xz)
-		count=`expr $count + 1`
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; unxz --force --stdout $f > $(basename $f .xz) &&
-		    tar xfm $(basename $f .xz); 
-		    rm $(basename $f .xz);
-		    es_print vanilla-expand --command=\"xz+tar\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-	    *.xz)
-		count=`expr $count + 1`
-		# --force is needed to decompress a file specified by a soft link.
-		ln -s ../../archives/$(basename $f) "$o/`basename $f`"
-		(cd "$o"; unxz --force --stdout $f > $(basename $f .xz)  &&
-		    es_print vanilla-expand --command=\"xz\" --input=\"$f\" --status=\"$?\" | tee -a $l)
-		;;
-	esac
+	cmd=$(cd $o; vanilla "$f" "${report_to}")
+	r=$?
+	if [[ "$r" = 0 ]]; then
+	    es_print vanilla-expand --command=\"$(cut -f 1 -d ' ' <<<"$cmd")\" --input=\"$f\" --status=\"$(cut -f 2 -d ' ' <<<"$cmd")\" | tee -a "$l"
+	    ln -s ../../archives/$(basename $f) "$o/`basename $f`"
+	    count=`expr $count + 1`
+	fi  
     done
     es_print vanilla-end --count=${count} --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+
     return 0
 }
 
