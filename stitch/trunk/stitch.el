@@ -1,7 +1,7 @@
 ;;; stitch.el --- your source, my annotation
 
-;; Copyright (C) 2007, 2008, 2009 Red Hat, Inc.
-;; Copyright (C) 2007, 2008, 2009, 2010 Masatake YAMATO
+;; Copyright (C) 2007, 2008, 2009, 2010, 2011, 2012 Red Hat, Inc.
+;; Copyright (C) 2007, 2008, 2009, 2010, 2011, 2012 Masatake YAMATO
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -359,6 +359,7 @@
 	(equal (stitch-klist-value e1 :full-name)
 	       (stitch-get-user-full-name))))))))
 
+(defvar stitch-ids (make-hash-table :test 'equal))
 (defvar stitch-annotations (make-hash-table :test 'equal))
 (defvar stitch-annotations-fuzzy (make-hash-table :test 'equal))
 (defvar stitch-keywords    (make-hash-table :test 'eq))
@@ -651,34 +652,39 @@
 
 (defun stitch-register-annotation (target annotation date full-name mailing-address keywords
 					  annotation-home)
-  (mapcar
-   (lambda (file)
-     (let ((entry (list :registered-as file
-			:target target
-			:annotation annotation
-			:date date
-			:full-name full-name
-			:mailing-address mailing-address
-			:keywords keywords
-			:annotation-home annotation-home)))
-       (puthash file 
-		(cons entry (gethash file stitch-annotations ()))
-		stitch-annotations)
-       (cond
-	;; TODO: This should be method invocation: fuzzy-insertable-p
-	((stitch-klist-value target :surround)
-	 (let ((base-name (file-name-nondirectory file)))
-	   (puthash base-name
-		    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
-		    stitch-annotations-fuzzy)))
-	((eq (stitch-klist-value target :type) 'directory)
-	 (let ((base-name (file-name-nondirectory (directory-file-name file))))
-	   (puthash base-name
-		    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
-		    stitch-annotations-fuzzy)
-	 )))
-       entry))
-   (stitch-target-get-files target)))
+  (let* ((id (sha1 (prin1-to-string `(,annotation ,date ,full-name ,mailing-address))))
+	 (entries (mapcar
+		   (lambda (file)
+		     (let ((entry (list :registered-as file
+					:target target
+					:annotation annotation
+					:date date
+					:full-name full-name
+					:mailing-address mailing-address
+					:keywords keywords
+					:annotation-home annotation-home
+					:id id
+					:overwritten nil)))
+		       (puthash file 
+				(cons entry (gethash file stitch-annotations ()))
+				stitch-annotations)
+		       (cond
+			;; TODO: This should be method invocation: fuzzy-insertable-p
+			((stitch-klist-value target :surround)
+			 (let ((base-name (file-name-nondirectory file)))
+			   (puthash base-name
+				    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
+				    stitch-annotations-fuzzy)))
+			((eq (stitch-klist-value target :type) 'directory)
+			 (let ((base-name (file-name-nondirectory (directory-file-name file))))
+			   (puthash base-name
+				    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
+				    stitch-annotations-fuzzy)
+			   )))
+		       entry))
+		   (stitch-target-get-files target))))
+    (puthash id entries stitch-ids)
+    entries))
 
 (defun stitch-count-record ()
   (let ((i 0))
@@ -1263,6 +1269,8 @@
     (local-set-key [return]  'stitch-list-keyword-jump)
     (local-set-key [mouse-2] 'stitch-list-keyword-jump-with-mouse)
     (setq buffer-read-only t)
+    (goto-char (point-min))
+    (hl-line-mode 1)
     (pop-to-buffer b)))
 
 (defun stitch-list-keyword-jump ()
@@ -2073,7 +2081,9 @@
 				     (if show-keyword
 					 (format "Keywords: %S\n"
 						 (stitch-klist-value e :keywords))
-				       ""))
+				       "")
+				     (format "ID: %s\n" (stitch-klist-value e :id))
+				     )
 				    'face 'stitch-annotation-base
 				    'mouse-face 'highlight
 				    'stitch-file   k
@@ -2082,7 +2092,7 @@
 		      ))
 	     ;;
 	     (insert (propertize 
-		      (stitch-list-show-context k (stitch-klist-value e :target))
+		      (stitch-list-show-context k (stitch-klist-value e :target) 3)
 		      'stitch-file   k
 		      'stitch-target (stitch-klist-value e :target)
 		      'stitch-home   (stitch-klist-value e :annotation-home)
@@ -2115,16 +2125,14 @@
 ;	  (target (get-text-property pos 'stitch-target)))
 ;      (stitch-list-show-context file target)
 ;      )))
-
-(defun stitch-list-show-context (file target)
-  (let ((p (stitch-target-get-point target file))
-	(b (find-file-noselect file)))
-    (with-current-buffer (find-file-noselect file)
+(defun stitch-list-show-context (file target lines)
+  (let ((p (stitch-target-get-point target file)))
+    (stitch-with-current-file file
       (save-excursion
 	(goto-char p)
 	(buffer-substring
 	 (line-beginning-position)
-	 (progn (forward-line 3)
+	 (progn (forward-line lines)
 		(line-end-position)))))))
 
 (defun stitch-list-jump-to-target ()
@@ -2311,10 +2319,11 @@
 (define-key ctl-x-map    "AA"  'stitch-annotate)
 (define-key ctl-x-map    "A "  'stitch-draw-marker)
 
+(define-key ctl-x-map    "AK" 'stitch-list-keywords)
 (define-key ctl-x-map    "AL"  'stitch-list-annotation)
 (define-key ctl-x-map    "AB"  'stitch-list-files-annotate-with-keyword)
 (define-key ctl-x-map    "AF"  'stitch-find-annotation-file)
-(define-key ctl-x-map    "AK"  'stitch-report-about-keyword)
+(define-key ctl-x-map    "Ak"  'stitch-report-about-keyword)
 (define-key ctl-x-map    "AO"  'stitch-annotate-meta)
 (define-key ctl-x-map    "AT"  'stitch-annotation-toggle-show-header)
 ;;
@@ -2327,7 +2336,7 @@
 
 ;;
 (defvar stitch-menu (make-sparse-keymap "Stitch"))
-(define-key-after global-map [menu-bar stitch] (cons "Stitch"stitch-menu))
+(define-key-after global-map [menu-bar stitch] (cons "Stitch" stitch-menu))
 (define-key-after stitch-menu [make-text-memo]
   '(menu-item "Make Text Memorandum..." stitch-annotate-text))
 (define-key-after stitch-menu [make-generic-memo]
