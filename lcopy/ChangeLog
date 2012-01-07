@@ -1,3 +1,7 @@
+2012-01-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/backends/wgetx (ftp_spec): Don't expect tar archive.
+
 2012-01-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/lcopy.spec.in: make sub packages for

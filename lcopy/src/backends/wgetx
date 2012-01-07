@@ -5,9 +5,9 @@ VERSION="0.0.0"
 
 source liblcopy_backends.sh || exit 1
 
-file_spec="^file:///.*\.tar\..*$"
-http_spec="^http://.*\.tar\..*$"
-ftp_spec="^ftp://.*\.tar\..*$"
+file_spec="^file:///.*$"
+http_spec="^http://.*$"
+ftp_spec="^ftp://.*$"
 
 
 function write_spec
