@@ -232,8 +232,9 @@ function main
     
     mkdir -p ${base_dir}/plugins
     if [ "$status" = "0" ]; then
-	lcopy_srpmix_plugin          \
-	    "${base_dir}"            \
+	lcopy_run_hook          \
+	    checkout            \
+	    "${base_dir}"       \
 	    "$LCOPY_DISABLE_PLUGINS" \
 	    "$LCOPY_ENABLE_PLUGINS"
 	if transfer "${base_dir}" "${replace}"; then

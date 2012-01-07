@@ -56,9 +56,9 @@ if test x$_DEBWATCH_ = x; then
   AC_MSG_ERROR([Cannot find debwatch])
 fi			
 
-AC_PATH_PROG([_SRPMIX_PLUGIN_], [srpmix-plugin])
-if test x$_SRPMIX_PLUGIN_ = x; then
-  AC_MSG_ERROR([Cannot find srpmix-plugin])
+AC_PATH_PROG([_VANILLAX_], [vanillax])
+if test x$_VANILLAX_ = x; then
+  AC_MSG_ERROR([Cannot find vanillax])
 fi			
 
 AC_PATH_PROG([_SPAWN_], [spawn])

@@ -1,8 +1,8 @@
 - existence checking
-- eclass http://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-x86/eclass/
-- ebuild backend http://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-x86/net-dns/bind/bind-9.7.1_p2-r1.ebuild?revision=1.2&view=markup
-
-
+- ping
+- plugin rerunning
+-  Don't invoke srpmix-plugin directly
+   hook mechanisms are needed.
 
 cman
 procps-

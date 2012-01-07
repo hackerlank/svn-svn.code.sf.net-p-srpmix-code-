@@ -1,5 +1,14 @@
 2012-01-07  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/liblcopy.sh.in (lcopy_run_hook): Renamed from
+	lcopy_srpmix_plugin. Added new argument ACTION.
+
+	* misc/specs/lcopy.spec.in (envelop): New package.
+
+	* src/backends/wgetx (ftp_spec): use vanillax.
+
+2012-01-07  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/backends/wgetx (ftp_spec): Don't expect tar archive.
 
 2012-01-05  Masatake YAMATO  <yamato@redhat.com>

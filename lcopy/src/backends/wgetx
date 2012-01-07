@@ -5,7 +5,7 @@ VERSION="0.0.0"
 
 source liblcopy_backends.sh || exit 1
 
-file_spec="^file:///.*$"
+file_spec="^file:///.$"
 http_spec="^http://.*$"
 ftp_spec="^ftp://.*$"
 
@@ -130,10 +130,8 @@ function wgetx_checkout
 
     local pre_build=${output_dir}
     local archives=$(mkdir -p ${output_dir}/../archives; cd ${output_dir}/../archives ; pwd)
-    local rootdir=$(cd ${output_dir}/..; pwd)
-    local vanilla=$(srpmix-plugin --path-for=vanilla)
-    if ! [ -x "$vanilla" ]; then
-	echo "cannot find vanilla srpmix plugin" 1>&2
+    if ! which vanillax > /dev/null 2>&1; then
+	echo "cannot find vanillax command" 1>&2
 	return 1
     fi
 
@@ -160,14 +158,13 @@ function wgetx_checkout
 	fi
     fi
 
+    local a
     local r
-    
-    ${vanilla} --plugin-dir="${pre_build}" ${rootdir}
-    r=$?
-
-    if [ $r = 0 ]; then
-	rm ${pre_build}/$(basename $repo)
-    fi
+    for a in ${archives}/*; do
+	vanillax $a ${pre_build}
+	r=$?
+	break
+    done
 
     echo $repo > ${pre_build}/.wgetx
     return $r

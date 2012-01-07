@@ -151,11 +151,12 @@ function lcopy_prepare_archives
     fi
 }
 
-function lcopy_srpmix_plugin
+function lcopy_run_hook
 {
-    local base_dir=$1
-    local disable_args=$2
-    local enable_args=$3
+    local action=$1
+    local base_dir=$2
+    local disable_args=$3
+    local enable_args=$4
     
     local disable=vanilla
     local enable=
@@ -170,6 +171,11 @@ function lcopy_srpmix_plugin
 
     if [ -n "$enable_args" ]; then
 	enable="${enable},${enable_args}"
+    fi
+
+    if [[ "$action" = "noupdate" ]]; then
+	# TODO: run only new plugins
+	return
     fi
 
     # TODO: Check the existence of plugins specified with $enable 

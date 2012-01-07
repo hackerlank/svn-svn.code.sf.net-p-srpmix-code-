@@ -4,16 +4,6 @@ Version: @PACKAGE_VERSION@
 Release: @RPM_RELEASE@
 Source: lcopy-@PACKAGE_VERSION@.tar.bz2
 Requires: spawn
-
-# Requires: srpmix
-# ----------------------------------------------------
-# See lcopy_srpmix_plugin in lcopy/src/liblcopy.sh
-# Use srpmix-plugin command if it is available.
-# lcopy-envelop uses srpmix heavily. The command is
-# invoked as sbuild backend.
-##
-# TODO: Put lcopy-envelop to a sub package of lcopy.
-# ----------------------------------------------------
 Buildarch: noarch
 
 Buildroot: %{_tmppath}/%{name}-root
@@ -43,7 +33,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/lcopy-genconf
 %{_bindir}/lcopy-checkout
 %{_bindir}/lcopy-update
-%{_bindir}/lcopy-envelop
 %{_bindir}/lcopy-rebirth
 %{_bindir}/lcopy-ping
 %{_bindir}/liblcopy.sh
@@ -52,6 +41,16 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libexecdir}/lcopy/backends
 %dir %{_sysconfdir}/lcopy
 %dir %{_sysconfdir}/lcopy/conf.d
+
+%package envelop
+Summary: A tool enveloping a symlink to given lcopy dir into swrf/rpm
+Group: Development/Tools
+Requires: lcopy
+Requires: srpmix
+%description envelop
+A tool enveloping a symlink to given lcopy dir into swrf/rpm
+%files
+%{_bindir}/lcopy-envelop
 
 # 
 # Backends
@@ -151,8 +150,7 @@ Summary: lcopy wget backend
 Group: Development/Tools
 Requires: lcopy
 Requires: wget
-# FIXME: wgetx uses vanilla srpmix-plugin.
-Requires: srpmix
+Requires: vanillax
 %description backend-wgetx
 lcopy wget backend
 %files backend-wgetx

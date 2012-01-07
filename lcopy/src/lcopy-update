@@ -95,6 +95,7 @@ function update
     local base_dir=$1
     local lcopy_file=${base_dir}/checkout.lcopy
     local update_dir=${base_dir}/pre-build
+    local hook_action=noupdate
     local status
 
 
@@ -146,12 +147,15 @@ function update
 
     if [ "$status" -eq "1" ]; then
 	status=0
-	lcopy_srpmix_plugin          \
-	    "${base_dir}"            \
-	    "$LCOPY_DISABLE_PLUGINS" \
-	    "$LCOPY_ENABLE_PLUGINS"
+	hook_action=update
     fi
 
+    lcopy_run_hook               \
+	${hook_action}           \
+	"${base_dir}"            \
+	"$LCOPY_DISABLE_PLUGINS" \
+	"$LCOPY_ENABLE_PLUGINS"
+    
     return $status
 }
 
