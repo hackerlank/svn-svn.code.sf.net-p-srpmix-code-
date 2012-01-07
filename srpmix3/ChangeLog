@@ -1,3 +1,11 @@
+2012-01-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (parse_arguments): Added option --run-plugin.
+
+	* src/libsrpmix.sh.in (srpmix_root_user_p): New function.
+
+	* src/srpmix (parse_arguments): Use srpmix_root_user_p.
+
 2012-01-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-plugin (__list_plugins): when running find, use -xtype

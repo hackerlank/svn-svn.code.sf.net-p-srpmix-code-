@@ -33,15 +33,18 @@ SRPMIX_HELPER_DIR=${SRPMIX_HELPER_DIR:-"${SRPMIX_USR_DIR}/helpers"}
 SRPMIX_SYSCONF_DIR=${SRPMIX_SYSCONF_DIR:-"@sysconfdir@/srpmix"}
 SRPMIX_BUILD_OPT_RULES_DIR=${SRPMIX_BUILD_OPT_RULES_DIR:-"${SRPMIX_SYSCONF_DIR}/build-opt-rules.d"}
 
-if [ "`whoami`" = "root" ]; then
-SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"@localstatedir@/lib/@PACKAGE@"}
-SRPMIX_OUTPUT_FORMAT=rpm
-elif [ "`whoami`" = "$SRPMIX_ROOT_USER" ]; then
-SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"@localstatedir@/lib/@PACKAGE@"}
-SRPMIX_OUTPUT_FORMAT=rpm
+function srpmix_root_user_p
+{
+    [[ "`whoami`" = "root" ]] || [[ "`whoami`" = "$SRPMIX_ROOT_USER" ]]
+    return $?
+}
+
+if srpmix_root_user_p; then
+    SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"@localstatedir@/lib/@PACKAGE@"}
+    SRPMIX_OUTPUT_FORMAT=rpm
 else
-SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"$HOME/srpmix"}
-SRPMIX_OUTPUT_FORMAT=swrf
+    SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"$HOME/srpmix"}
+    SRPMIX_OUTPUT_FORMAT=swrf
 fi
 
 SRPMIX_SOURCES_DIR=

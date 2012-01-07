@@ -26,6 +26,8 @@ SRPMIX_DIR_PKG_OPTS=
 YUM_OPTS=
 WGET_OPTS=
 
+RUN_PLUGINS=
+
 function print_usage
 {
     echo "Usage: "
@@ -40,6 +42,7 @@ function print_usage
     echo "         [--keep-original]"
     echo "         [--yum=YUM_OPTIONS]"
     echo "         [--wget=WGET_OPTIONS]"
+    echo "         [--run-plugins]"
     echo "          --name=PACKAGE|--srpm=SRPM"
     echo ""
     echo "  srpmix --help"
@@ -126,6 +129,9 @@ function parse_arguments
 	    --wget=*)
 	        WGET_OPTS=$(echo $1 | sed 's/--wget=//')
 		;;
+	    --run-plugins)
+	        RUN_PLUGINS=1
+		;;
 	    --*)
 	        print_usage 1>&2
 		srpmix_abort "Unknow option: $1"
@@ -143,7 +149,7 @@ function parse_arguments
     fi
 
     if test -z "${OUTPUT_DIR}" && test "x${SRPMIX_OUTPUT_FORMAT}" = "xrpm"; then
-	if test "`whoami`" != "root"; then
+	if ! srpmix_root_user_p; then
 	    srpmix_abort "You must be root to run this program"
 	fi
     fi
@@ -289,7 +295,9 @@ function main
     status=$?
 
     dir_pkg_build
-    plugin_build
+    if [[ -n "${RUN_PLUGINS}" ]]; then
+	plugin_build
+    fi
 
     local outputs
     case "$SRPMIX_OUTPUT_FORMAT" in
