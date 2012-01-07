@@ -49,7 +49,7 @@ Requires: lcopy
 Requires: srpmix
 %description envelop
 A tool enveloping a symlink to given lcopy dir into swrf/rpm
-%files
+%files envelop
 %{_bindir}/lcopy-envelop
 
 # 
