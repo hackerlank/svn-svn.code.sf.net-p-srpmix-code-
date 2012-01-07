@@ -1,0 +1,36 @@
+;; -*- scheme -*-
+;; weakview-dists are expected
+(use file.util)
+
+;; gosh enemerate-all-packages /srv/sources
+(define (main args)
+  (letrec ((dir (cadr args))
+	   (kget (lambda (kl ky)
+		   (cond ((null? kl) #f)
+			 ((eq? (car kl) ky) (cadr kl))
+			 (else (kget (cdr kl) ky))))))
+    (map 
+     print
+     (sort
+      (fold (lambda (k kons)
+	      (if (member k kons)
+		  kons
+		  (cons k kons)))
+	    (list)
+	    (apply append
+		   (map (lambda (d)
+			  (let1 f (string-append d "/dist-mapping.es")
+				(when (file-exists? f)
+				      (call-with-input-file f
+					(lambda (i)
+					  (let loop ((r (read i))
+						     (g (list)))
+					    (if (eof-object? r)
+						g
+						(loop (read i) 
+						      (cons (kget r :package)
+							    g)
+						      ))))))))
+			(directory-list (string-append dir "/dists") 
+					:children? #t 
+					:add-path? #t))))))))

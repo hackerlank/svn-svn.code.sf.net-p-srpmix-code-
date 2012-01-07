@@ -1,0 +1,142 @@
+#!/bin/bash
+
+PKG_NAME=
+OUTPUT_DIR=
+SRPMIX_DIR_PKG_DEBUG=
+
+
+
+MY_TMPDIR=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+set -e
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-dir-pkg [--debug] PKG_NAME OUTPUT-DIR"
+    echo "  srpmix-dir-pkg --help"
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+            --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --debug)
+		SRPMIX_DIR_PKG_DEBUG=yes
+		PS4="$PS4[dir-pkg]"
+		set -x
+		;;
+	    --*|-*)
+		print_usage 1>&2
+		srpmix_abort "Unknow option: $1"
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+    
+    if test "$#" != "2"; then
+	print_usage 1>&2
+	srpmix_abort "wrong number of arguments"
+    fi
+    
+    PKG_NAME=$1
+    OUTPUT_DIR=$2/dir-pkg/$(srpmix_srchash $PKG_NAME)
+    if ! mkdir -p ${OUTPUT_DIR}; then
+	echo "failed to craete mkdir: ${OUTPUT_DIR}" 1>&2
+	exit 1
+    fi
+}
+
+
+function main
+{
+    local dir_pkg_name
+    local tmp_spec
+    local hash
+
+
+    MY_TMPDIR=`mktemp -d`
+    trap "/bin/rm -rf $MY_TMPDIR" 0    
+    install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+    
+    parse_arguments "$@"
+    if test -n "$SRPMIX_DIR_PKG_DEBUG"; then
+	trap 0
+	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-dir-pkg"
+    fi
+
+    dir_pkg_name=$(srpmix_dirpkg_name $PKG_NAME)
+    tmp_spec=${MY_TMPDIR}/${dir_pkg_name}.spec
+    hash=$(srpmix_srchash $PKG_NAME)
+    local sources_hashdir=${SRPMIX_SOURCES_DIR}/$hash
+    local db_hashdir=${SRPMIX_DB_DIR}/$hash
+
+    cat > ${tmp_spec} <<EOF
+# -*- rpm-spec -*-
+Summary: Package common directory for source code archives deployed by srpmix
+Name: $dir_pkg_name
+Version: $SRPMIX_PKG_VERSION
+Release: $SRPMIX_PKG_RELEASE%{?dist}
+License: GPL
+Group: Development/Tools
+URL: http://srpmix.org
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildArchitectures: noarch
+
+%description
+Package common directory for source code archives deployed by srpmix
+
+%prep
+rm -rf \$RPM_BUILD_ROOT
+
+%build
+
+%install
+# TODO: Use libsrpmix.
+
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT${sources_hashdir}/$PKG_NAME
+mkdir -p \$RPM_BUILD_ROOT${sources_hashdir}/$PKG_NAME/^plugins
+mkdir -p \$RPM_BUILD_ROOT${db_hashdir}/$PKG_NAME
+
+%clean
+rm -rf \$RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%dir ${sources_hashdir}/$PKG_NAME
+%dir ${sources_hashdir}/$PKG_NAME/^plugins
+%dir ${db_hashdir}/$PKG_NAME
+
+%changelog
+* Fri Jul 17 2009 Masatake YAMATO <yamato@redhat.com>
+- Initial build.
+
+EOF
+
+    rpmbuild --verbose --define "_topdir $MY_TMPDIR" -ba "$tmp_spec"
+    mv $MY_TMPDIR/RPMS/noarch/*.rpm $OUTPUT_DIR
+    return 0
+}
+
+{ main "$@" ; } < /dev/null
+exit $?

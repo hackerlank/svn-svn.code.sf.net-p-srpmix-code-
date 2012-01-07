@@ -1,0 +1,233 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-kindex: Do make tags and make TAGS if the target is kernel
+#
+# Copyright (C) 2007 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+NAME=kindex
+
+
+ROOTDIR=
+
+
+BUILDDIR=
+LOGFILE=
+PLUGINDIR=
+SPEC=
+
+
+TARGETS="i686 x86_64 ia64 ppc64"
+#TARGETS="i686 x86_64"
+
+SRPMIX_KINDEX_DEBUG=
+
+FORCE=
+
+MY_TMPDIR=${TMPDIR}/tmp/srpmix-plugins-$(basename $0).$$
+mkdir -p $MY_TMPDIR
+trap "/bin/rm -rf $MY_TMPDIR" 0
+
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  $0 [--help|-h]"
+    echo "  $0 --name"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] [--name=NAME] ROOTDIR"
+    echo 
+}
+
+function parse_arguments
+{
+    status=
+
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name)
+		echo $NAME
+		exit 0
+		;;
+	    --name=*)
+                NAME=${1/--name=}
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[${NAME}]"
+		SRPMIX_KINDEX_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test $# -ne 1; then
+	echo "wrong number of argument" 1>&2
+	print_usage 1>&2
+	srpmix_abort
+    fi
+
+    ROOTDIR=$(cd $1;pwd)
+    shift
+
+    verify_directory ${ROOTDIR}
+
+    SPEC=${ROOTDIR}/*.spec
+    BUILDDIR=${ROOTDIR}/pre-build
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
+
+    if ! test -d "${BUILDDIR}"; then
+	exit 0
+    fi
+}
+
+function verify_directory
+{
+    if test ! -d ${1}; then
+	echo "*** ABORT...cannot find ${1}" '(' `pwd` ')'; 1>&2
+	exit 1
+    fi
+}
+
+function main
+{
+    parse_arguments "$@"
+    srpmix_verify_commands make etags ctags cscope
+
+
+    if ! test -f $SPEC; then
+	# something wrong
+	return 0
+    fi
+
+    if ! grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\|kernel%{\?variant}\)$' \
+	$SPEC > /dev/null 2>&1; then
+	return 0
+    fi
+
+    if grep '^%define kversion 2\.4' \
+	$SPEC > /dev/null 2>&1; then
+	return 0
+    fi
+
+    perarch_kernel=
+# TODO: xen    
+    if test -d "${BUILDDIR}"; then
+	for t in $TARGETS; do
+	    if test -d ${BUILDDIR}/kernel-*/linux-*.${t}; then
+		perarch_kernel=1
+		mkdir -p ${MY_TMPDIR}/$t
+		cd ${BUILDDIR}/kernel-*/linux-*.${t}
+		
+
+  
+		if ! test -f "${PLUGINDIR}/${t}.TAGS"; then
+		    make O=${MY_TMPDIR}/$t TAGS
+		fi
+		
+		if ! test -f "${PLUGINDIR}/${t}.tags"; then
+		    make O=${MY_TMPDIR}/$t tags
+		fi
+
+		if ! test -f "${PLUGINDIR}/${t}.cscope.out"; then
+		    make O=${MY_TMPDIR}/$t cscope
+		fi
+	    fi
+	done
+
+	if test "x${perarch_kernel}" = x; then
+	    for x in ${BUILDDIR}/kernel-*/linux*/Makefile; do
+		if test -f $x; then
+		    if grep '\(^TAGS:\)\|\( TAGS \)' $x > /dev/null 2>&1; then
+			mkdir -p ${MY_TMPDIR}/generic
+			cd $(dirname $x)
+
+			if ! test -f "${PLUGINDIR}/generic.TAGS"; then
+			    make O=${MY_TMPDIR}/generic TAGS
+			fi
+
+			if ! test -f "${PLUGINDIR}/generic.tags"; then
+			    make O=${MY_TMPDIR}/generic tags
+			fi
+
+			
+			if ! test -f "${PLUGINDIR}/generic.cscope.out"; then
+			    make O=${MY_TMPDIR}/generic cscope
+			fi			
+		    fi
+		fi
+	    done
+	fi
+
+
+	mkdir -p "${PLUGINDIR}"
+	for t in generic $TARGETS; do
+	    if test -f ${MY_TMPDIR}/$t/TAGS; then
+		# Convert the absolute path to relative
+		sed -e 's|^/.*/pre-build|../../pre-build|' ${MY_TMPDIR}/$t/TAGS \
+		    > ${PLUGINDIR}/${t}.TAGS
+		rm ${MY_TMPDIR}/$t/TAGS
+	    fi
+	    if test -f ${MY_TMPDIR}/$t/tags; then
+		sed -e 's|/[^\t]*/pre-build|../../pre-build|' ${MY_TMPDIR}/$t/tags \
+		    > ${PLUGINDIR}/${t}.tags
+		rm ${MY_TMPDIR}/$t/tags
+	    fi
+	    for x in ${MY_TMPDIR}/$t/*; do
+		if test -f $x; then
+		    mv $x ${PLUGINDIR}/${t}.$(basename $x)
+		fi
+	    done
+	done
+    fi
+}
+
+es_time main "$@"
+exit $?
+

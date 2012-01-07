@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+
+if test "x$1" = "x"; then
+  echo "Usage: $0 <package>" 1>&2
+  exit 1
+fi
+
+if test "`whoami`" != "root"; then
+  echo "You must be root to run this program" 1>&2
+  exit 1
+fi
+
+TMPDIR=`mktemp -d`
+trap "/bin/rm -rf $TMPDIR" 0
+
+cd $TMPDIR
+yumdownloader --source $1
+RPMS=$(/bin/ls *.src.rpm)
+for RPM in $RPMS
+do
+  PVR=$(rpm -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $RPM)
+  srpmix-wrap $PVR.src.rpm
+  mkdir -p RPMS SRPMS
+  rpmbuild --define "_rpmdir `pwd`/RPMS" \
+	--define "_srcrpmdir `pwd`/SRPMS" \
+	--define "_builddir `pwd`/BUILD" \
+	 --rebuild -ba $PVR-srpmix-*.src.rpm || exit 1
+done
+find RPMS -name '*.rpm' | xargs yum localinstall -y --nogpgcheck
+

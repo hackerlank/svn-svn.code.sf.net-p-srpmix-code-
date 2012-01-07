@@ -1,0 +1,285 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-weakview-dist: Make distribution weak view
+#
+# Copyright (C) 2008 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+NAME=
+ALIAS=
+OUTPUTDIR=
+MY_TMPDIR=
+DUMP_SPEC=
+
+# TODO: --srpm
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-weakview-dist [--help|-h]"
+    echo "  srpmix-weakview-dist --name=NAME [--dump-spec] [--alias=ALIAS]"
+    echo "  srpmix-weakview-dist --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE] [--make-rpm] [--alias=ALIAS]"
+    echo 
+}
+
+function cleanup
+{
+    if test -d "$MY_TMPDIR"; then
+        rm -rf $MY_TMPDIR || true
+    fi
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name=*)
+                NAME=$(echo $1 | sed 's/--name=//')
+		;;
+	    --output-dir=*)
+	        OUTPUTDIR=$(echo $1 | sed 's/--output-dir=//')
+		;;
+	    --make-rpm)
+	        MAKE_RPM=yes
+		;;
+            --release=*)
+	        SRPMIX_PKG_RELEASE=$(echo $1 | sed 's/--release=//')
+		;;
+	    --dump-spec)
+	        DUMP_SPEC=1
+		;;
+	    (--alias=*)
+	    	ALIAS=$(echo $1 | sed 's/--alias=//')
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test "x$NAME" = "x"; then
+	print_usage 1>&2
+	srpmix_abort "No name for the weakview"
+    fi
+
+    if test "x$1" != "x"; then
+	print_usage 1>&2
+	srpmix_abort "Too many arguments"
+    fi
+
+    if test "x$OUTPUTDIR" = "x"; then
+	OUTPUTDIR=.
+    fi
+    if test ! -d "${OUTPUTDIR}"; then
+	srpmix_abort "No such directory: ${OUTPUTDIR}"
+    fi
+}
+
+function create_dist_weakview
+{
+    local name=$1
+    local alias=$2
+    local priority
+
+    local spec=$MY_TMPDIR/SPECS/srpmix-weakview-dist-$name.spec
+    if test "x${DUMP_SPEC}" != "x"; then
+	spec="/dev/stdout"
+	if test ! -w "${spec}"; then
+	    # ???
+	    spec="/dev/tty"
+	fi
+    fi
+	
+    local rootdir=${SRPMIX_VAR_DIR}
+    local distdir=${rootdir}/dists
+    local builddistdir_body="srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE/$distdir/$name"
+
+    if [ -n "$alias" ]; then
+	priority=${name/${alias}-}
+    fi
+
+    cat > $spec <<EOF
+Summary: Srpmix weakview for $name distribution
+Name: srpmix-weakview-dist-$name
+Version: $SRPMIX_PKG_VERSION
+Release: $SRPMIX_PKG_RELEASE%{?dist}
+Autoreq: 0
+Autoprov: 0
+BuildRequires: srpmix
+Buildarch: noarch
+Requires: srpmix-dir-base
+EOF
+    if [ -n "$alias" ]; then
+	cat >> $spec <<EOF
+Requires(post):   %{_sbindir}/alternatives
+Requires(postun): %{_sbindir}/alternatives
+EOF
+    fi
+
+    cat >> $spec <<EOF
+Buildroot: %{_tmppath}/%{name}-root
+Group: System/Daemon
+License: Unknown
+
+%define __os_install_post true
+
+%description
+Srpmix weakview for $name distribution.
+
+%prep
+builddistdir=%{_builddir}/$builddistdir_body
+rm -rf \$builddistdir
+
+%build
+builddistdir=%{_builddir}/$builddistdir_body
+
+mkdir -p \$builddistdir/plugins
+
+EOF
+
+# in %build
+    DISTMAP=`mktemp`
+    tee "$DISTMAP" | srpmix_distmap_to_pvr | while read package version release; do
+  # Make link relative
+	seed=$(srpmix_srcdir $package $version $release)
+	d="../../../..${seed/$rootdir/}"
+	p=$(srpmix_srchash "$package")
+	echo "mkdir -p \$builddistdir/packages/$p"
+	echo "ln -sf $d \$builddistdir/packages/$p/$package"
+    done >> $spec
+
+    {
+	echo
+	echo
+	echo "cat > \$builddistdir/dist-mapping.es <<\"EOF\""
+	echo ';; -*- scheme -*-'
+	cat  "$DISTMAP"
+	# Next line is needed to handle the case that the file "$DISTMAP" is not ended with newline.
+	echo
+	echo "EOF"
+	echo
+	echo
+    } >> $spec
+    rm "$DISTMAP"
+
+    cat >> $spec <<EOF
+%install
+builddistdir=%{_builddir}/$builddistdir_body
+
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$distdir/$name
+
+rsync -va \$builddistdir \$RPM_BUILD_ROOT/$distdir
+
+EOF
+
+
+    if [ -n "$alias" ]; then
+# alternatives --altdir /var/lib/srpmix/dists/.alternatives 
+#              --install /var/lib/srpmix/dists/kojipkgs-fedoraproject-org kojipkgs-fedoraproject-org 
+#               /srv/sources/dists/kojipkgs-fedoraproject-org-20100527 20100527
+# alternatives --altdir /var/lib/srpmix/dists/.alternatives 
+#              --remove kojipkgs-fedoraproject-org /srv/sources/dists/kojipkgs-fedoraproject-org-20100527
+#
+#
+# TODO: /srv/sources/dists should not be emended here.
+#
+	cat >> $spec <<EOF
+%post
+alternatives \\
+	--altdir /srv/sources/dists/.alternatives \\
+	--install $distdir/"^$alias" "^$alias" /srv/sources/dists/$name $priority
+
+%postun
+if [ \$1 -eq 0 ]; then
+	alternatives --altdir /srv/sources/dists/.alternatives \\
+		     --remove "^$alias" /srv/sources/dists/$name
+fi
+
+EOF
+    fi
+
+    cat >> $spec <<EOF
+%files
+%defattr(-,root,root)
+$SRPMIX_VAR_DIR/dists/*
+
+%changelog
+
+EOF
+    if test "x${DUMP_SPEC}" != "x"; then
+	return
+    fi
+
+    local build_flag=-bs
+    if test "${MAKE_RPM}" = yes; then
+	build_flag=-ba
+    fi
+    $RPMBUILD --nodeps --quiet --define "_topdir $MY_TMPDIR" ${build_flag} $spec > /dev/null
+#    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*
+    mkdir -p $OUTPUTDIR/weakview
+
+    local file=$MY_TMPDIR/SRPMS/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm
+    if test "${MAKE_RPM}" = yes; then
+	find $MY_TMPDIR
+	file=$MY_TMPDIR/RPMS/noarch/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.noarch.rpm
+    fi
+    mv ${file} "${OUTPUTDIR}"/weakview
+
+}
+
+
+function main
+{
+    srpmix_verify_commands "${RPMBUILD}" "${GOSH}"
+    parse_arguments "$@"
+
+    if test "x${DUMP_SPEC}" = "x"; then
+	MY_TMPDIR=`mktemp -d`
+	trap cleanup 0
+	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+    fi
+
+    create_dist_weakview $NAME $ALIAS
+}
+
+RUN=
+if test "x${DUMP_SPEC}" = "x"; then
+    RUN=es_time
+fi
+${RUN} main "$@"
+
+exit $?

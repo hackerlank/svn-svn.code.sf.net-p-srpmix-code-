@@ -1,0 +1,290 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-envelop: Envelop swrf package
+#
+# Copyright (C) 2008 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
+OUTPUTDIR=
+MY_TMPDIR=
+DUMP_SPEC=
+SRPMIX_ENVEOP_DEBUG=
+PKGNAME=
+
+function print_usage
+{
+	echo "Usage: "
+	echo "  srpmix-envelop [--help|-h]"
+	echo "  srpmix-envelop [--dump-spec] SWRF..."
+	echo "  srpmix-envelop [--debug] [--output-dir=OUTPUTDIR] [--release=RELEASE] [--package-name=NAME] [SWRF...]"
+	echo ""
+	echo "  If SWRF is not given, standard input is"
+	echo "  used for the list of source pacakges."
+	echo "  --package-name=NAME is required when "
+        echo "  enveloping core package."
+	echo
+}
+
+function cleanup
+{
+    if test -d "$MY_TMPDIR"; then
+	rm -rf $MY_TMPDIR || true
+    fi
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --output-dir=*)
+	        OUTPUTDIR=$(echo $1 | sed 's/--output-dir=//')
+		;;
+            --release=*)
+	        SRPMIX_PKG_RELEASE=$(echo $1 | sed 's/--release=//')
+		;;
+	    --dump-spec)
+	        DUMP_SPEC=1
+		;;
+            --debug)
+	        SRPMIX_ENVEOP_DEBUG=yes
+		PS4="${PS4}[envelop]"
+		set -x
+		;;
+	    --package-name=*)
+	        PKGNAME=$(echo $1 | sed 's/--package-name=//')
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test "x$1" = "x"; then
+        while read tmp; do
+	  swrfs="${swrfs} ${tmp}"
+	done
+    else
+	swrfs=$@	
+    fi
+
+    if test "x$OUTPUTDIR" = "x"; then
+	OUTPUTDIR=.
+    fi
+    if test ! -d "${OUTPUTDIR}"; then
+	srpmix_abort "No such directory: ${OUTPUTDIR}"
+    fi
+}
+
+function envelop_swrf
+{
+    target_swrf=$1
+    spec=
+    enveloped_name=
+    es_name=
+    req_pkg=
+
+    pvrd=$($SWRFPM -qp --nosignature --queryformat \
+	"%{NAME} %{VERSION} %{RELEASE} %{Description}" \
+	$target_swrf | tr "\n" " ")
+    package=$(echo "$pvrd" | cut -d' ' -f1)
+    description=$(echo "$pvrd" | cut -d' ' -f4-)
+    if test "x$package" = "x"; then
+        echo "warning: failed to parse $target_swrf: ignored" 1>&2
+        return
+    fi
+    
+    enveloped_name=$(srpmix_build_enveloped_name "$package")
+    es_name=$(es_print srpmix-envelop name\
+	--target-swrf="\"$(basename $target_swrf)\"" \
+	--enveloped-name="\"${enveloped_name}\"")
+
+    filename="${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm"
+    n_filenames=$(find ${OUTPUTDIR} -name "${filename}" \
+	| grep -v 'swrf\.src\.rpm' \
+	| wc -l)
+    
+    license=$($SWRFPM -qp --nosignature --queryformat "%{License}" $target_swrf)
+
+    if test "x${DUMP_SPEC}" = "x"; then
+	spec="$MY_TMPDIR/SPECS/${enveloped_name}.spec"
+    else
+	spec="/dev/stdout"
+	if test ! -w "${spec}"; then
+	    # ???
+	    spec="/dev/tty"
+	fi
+    fi
+
+
+    case ${enveloped_name} in
+	*-srpmix-plugins)
+	    summary=$($SWRFPM -qp --nosignature --queryformat "%{Summary}" $target_swrf)
+	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-plugins/\1-srpmix/')
+	    ;;
+	*-srpmix-plugin-*)
+	    summary=$($SWRFPM -qp --nosignature --queryformat "%{Summary}" $target_swrf)
+	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-plugin-.*/\1-srpmix/')
+	    ;;
+	*-srpmix-archives)
+	    summary=$($SWRFPM -qp --nosignature --queryformat "%{Summary}" $target_swrf)
+	    req_pkg=$(echo ${enveloped_name} | sed -e 's/\(.*\)-srpmix-archives/\1-srpmix/')
+	    ;;
+	*)
+	    if test "x$PKGNAME" = x; then
+		srpmix_abort "No --package-name is given"
+	    fi
+	    summary="Source code for $package with canonical directory layout"
+	    req_pkg=$(srpmix_dirpkg_name $PKGNAME)
+	    ;;
+    esac
+
+# About %pre, %post and %preun, See
+# http://www.vinelinux.org/manuals/making-rpm-9.html
+    cat > "$spec" <<EOF
+Summary: $summary
+Name: ${enveloped_name}
+Version: $SRPMIX_PKG_VERSION
+Release: $SRPMIX_PKG_RELEASE%{?dist}
+Source: `basename $target_swrf`
+Autoreq: 0
+Autoprov: 0
+Requires: srpmix
+Requires: $req_pkg
+BuildRequires: rsync
+Buildarch: noarch
+
+Buildroot: %{_tmppath}/%{name}-root
+Group: Development/Tools
+License: $license
+
+%define __os_install_post true
+
+%description
+$description
+
+%prep
+
+%build
+
+%install
+rm -rf \$RPM_BUILD_ROOT
+
+from=\$RPM_SOURCE_DIR/`basename $target_swrf`
+to=\$RPM_BUILD_ROOT$(srpmix_swrfdir $target_swrf)
+mkdir -p \$to
+
+if test \$(stat --format="%D" \$from) = \$(stat --format="%D" \$to); then
+   transfer_cmd="cp -a -l"
+else
+   transfer_cmd="rsync -a"
+fi
+\$transfer_cmd \$from \$to/$(basename $target_swrf)
+
+
+%clean
+rm -rf \$RPM_BUILD_ROOT
+
+%pre
+if [ \$1 = 2 ]; then
+# Install stage of rpm -U
+  srpmix-db %{_srpmix_db_option} --erase ${enveloped_name}
+fi
+
+%post
+srpmix-db %{_srpmix_db_option} --install $(srpmix_swrfdir $target_swrf)/$(basename $target_swrf)
+
+
+%preun
+if [ \$1 = 0 ]; then
+# rpm -e
+  srpmix-db %{_srpmix_db_option} --erase ${enveloped_name}
+fi
+
+%files
+%defattr(-,root,root)
+$(srpmix_swrfdir $target_swrf)/*
+
+%changelog
+* Sat Jun  2 2007 SRPMIX ENVELOP <consulting-jp@redhat.com> $package
+- Automatically generated.
+
+EOF
+
+    if test "x${DUMP_SPEC}" != "x"; then
+	printf "# "
+	echo "$es_name"
+	return
+    fi
+
+    cp $target_swrf $MY_TMPDIR/SOURCES/
+    $RPMBUILD --quiet --define "_topdir $MY_TMPDIR" -bs "$spec" > /dev/null
+    mv $MY_TMPDIR/SRPMS/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm "${OUTPUTDIR}"
+    rm $MY_TMPDIR/SOURCES/`basename $target_swrf`
+    echo "$es_name"
+
+    es_print srpmix-envelop done \
+	--file="\"$(ls ${OUTPUTDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm)\""
+}
+
+function main
+{
+    srpmix_verify_commands "${RPMBUILD}"
+    parse_arguments "$@"
+
+    if test "x${DUMP_SPEC}" = "x"; then
+	MY_TMPDIR=`mktemp -d`
+	trap cleanup 0
+	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+    fi
+
+    for swrf in $swrfs; do
+        if test -f "$swrf"; then
+	    envelop_swrf "$swrf"
+        else
+            srpmix_abort "No such file: $swrf"
+        fi
+    done
+}
+
+RUN=
+if test "x${DUMP_SPEC}" = "x"; then
+    RUN=es_time
+fi
+${RUN} main "$@"
+
+exit $?

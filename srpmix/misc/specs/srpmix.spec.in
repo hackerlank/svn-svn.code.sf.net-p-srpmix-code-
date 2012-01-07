@@ -1,0 +1,267 @@
+Summary: Scripts to install and expand src.rpm
+Name: srpmix
+Version: #PACKAGE_VERSION#
+Release: #RPM_RELEASE#
+Source: srpmix-#PACKAGE_VERSION#.tar.bz2
+Requires: hardlink cpio rpm coreutils emacs-common file gauche
+Requires: srpmix-dir-base >= %{version}
+# Requires: gettext gettext-devel autoconf* automake* libtool jcommon
+Buildarch: noarch
+BuildRequires: hardlink cscope ctags emacs-common gettext gauche
+BuildRequires: hyperestraier mock srescure
+BuildRequires: vanillax rpm-build rpm
+
+Buildroot: %{_tmppath}/%{name}-root
+License: GPLv3
+
+Group: Development/Tools
+
+%description
+Scripts to expand src.rpm.
+
+%package dir-base
+Summary: Base directories for source code archives deployed by srpmix
+Group: Development/Tools
+%description dir-base
+Base directories for source code archives deployed by srpmix.
+
+%package plugin-vanilla
+Summary: SRPMix Plugin for creating vanilla tree.
+Requires: srpmix libgcj lzma rubygems xz
+Group: Development/Tools
+
+%description plugin-vanilla
+SRPMix Plugin for creating vanilla tree.
+
+%package plugin-cscope
+Summary: SRPMix Plugin for creating cscope indexes.
+Requires: srpmix cscope
+Group: Development/Tools
+
+%description plugin-cscope
+SRPMix Plugin for creating cscope indexes.
+
+
+%package plugin-kindex
+Summary: SRPMix Plugin for running make tags, make TAGS and make cscope of kernel
+Requires: srpmix emacs-common ctags cscope
+Group: Development/Tools
+
+%description plugin-kindex
+SRPMix Plugin for running make tags and make TAGS of kernel
+
+%package plugin-ctags
+Summary: SRPMix Plugin for creating ctags indexes.
+Requires: srpmix ctags
+Group: Development/Tools
+
+%description plugin-ctags
+SRPMix Plugin for creating ctags indexes.
+
+%package plugin-nctags
+Summary: SRPMix Plugin for creating ctags indexes with --excmd=number option.
+Requires: srpmix ctags
+Group: Development/Tools
+
+%description plugin-nctags
+SRPMix Plugin for creating ctags indexes with --excmd=number option.
+
+
+%package plugin-doxygen
+Summary: SRPMix Plugin for creating doxygen documents.
+Requires: srpmix doxygen
+Group: Development/Tools
+
+%description plugin-doxygen
+SRPMix Plugin for creating doxygen documents.
+
+%package plugin-hyperestraier
+Summary: SRPMix Plugin for creating hyperestraier index.
+Requires: srpmix hyperestraier
+Group: Development/Tools
+
+%description plugin-hyperestraier
+SRPMix Plugin for creating hyperestraier index.
+
+%package plugin-xgettext
+Summary: SRPMix Plugin for creating xgettext indexes.
+Requires: srpmix gettext
+Group: Development/Tools
+
+%description plugin-xgettext
+SRPMix Plugin for creating xgettext indexes.
+
+
+
+%prep
+%setup -q
+
+%build
+%configure                               \
+	--enable-plugin-etags            \
+	--enable-plugin-ctags            \
+	--enable-plugin-cscope           \
+	--enable-plugin-xgettext         \
+        --enable-plugin-doxygen=no
+
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+cs=
+cs="${cs} a b c d e f g h i j k l m n o p q r s t u v w x y z"
+cs="${cs} A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+cs="${cs} `seq 0 9`"
+
+srpmixdir=/usr/share/srpmix
+mkdir -p ${RPM_BUILD_ROOT}${srpmixdir}/swrfs
+for c in ${cs}; do mkdir -p ${RPM_BUILD_ROOT}${srpmixdir}/swrfs/${c}; done
+
+
+
+# TODO: Use libsrpmix.
+rootdir=%{_sharedstatedir}/srpmix
+mkdir -p $RPM_BUILD_ROOT${rootdir}
+
+sourcesdir=${rootdir}/sources
+mkdir -p $RPM_BUILD_ROOT${sourcesdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${sourcesdir}/${c}; done
+
+
+wvdistsdir=${rootdir}/dists
+mkdir -p $RPM_BUILD_ROOT${wvdistsdir}
+mkdir -p $RPM_BUILD_ROOT${wvdistsdir}/.alternatives
+
+wvpkgsdir=${rootdir}/packages
+mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}/${c}; done
+# for each common directories
+
+pluginsdir=${rootdir}/plugins
+mkdir -p $RPM_BUILD_ROOT${pluginsdir}
+
+dbdir=${rootdir}/db
+mkdir -p $RPM_BUILD_ROOT${dbdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${dbdir}/${c}; done
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%{_bindir}/srpmix
+%{_bindir}/srpmix-build
+%{_bindir}/srpmix-ix
+%{_bindir}/srpmix-mock
+%{_bindir}/libsrpmix.sh
+
+%{_bindir}/srpmix-wrap
+
+%{_bindir}/srpmix-db
+
+%{_bindir}/srpmix-envelop
+
+%{_bindir}/srpmix-dir-pkg
+
+%{_bindir}/srpmix-weakview-dist
+%{_bindir}/srpmix-weakview-packages
+%{_bindir}/srpmix-weakview-alias
+%{_bindir}/srpmix-plugin
+%{_bindir}/srpmix-package-attach
+%{_bindir}/srpmix-weakview-dist-attach
+%{_bindir}/srpmix-rootdir-attach
+
+%dir %{_datadir}/srpmix
+%dir %{_datadir}/srpmix/plugins
+%{_datadir}/srpmix/plugins/50srpmix-coreutils
+%{_datadir}/srpmix/plugins/50srpmix-file
+%{_datadir}/srpmix/plugins/60srpmix-etags
+
+%dir %{_datadir}/srpmix/weakview-dist-plugins
+
+
+%{_datadir}/srpmix/utils
+
+%{_datadir}/srpmix/helpers
+
+%dir %{_sysconfdir}/srpmix
+%config(noreplace) %{_sysconfdir}/srpmix/srpmix.cf
+
+# TODO: config
+%{_sysconfdir}/rpm/macros.srpmix
+
+%dir %{_sysconfdir}/srpmix/build-opt-rules.d
+%config(noreplace) %{_sysconfdir}/srpmix/build-opt-rules.d/99default.scm
+%config(noreplace) %{_sysconfdir}/srpmix/build-opt-rules.d/98mock.scm
+
+%{_sysconfdir}/cron.daily/srpmix.daily
+
+%{_datadir}/srpmix/swrfs
+
+%files plugin-cscope
+%{_datadir}/srpmix/plugins/60srpmix-cscope
+
+%files plugin-vanilla
+%{_datadir}/srpmix/plugins/10srpmix-vanilla
+
+%files plugin-kindex
+%{_datadir}/srpmix/plugins/60srpmix-kindex
+
+%files plugin-ctags
+%{_datadir}/srpmix/plugins/60srpmix-ctags
+
+%files plugin-nctags
+%{_datadir}/srpmix/plugins/_60srpmix-nctags
+
+%files plugin-hyperestraier
+%{_datadir}/srpmix/plugins/_60srpmix-hyperestraier
+%{_datadir}/srpmix/weakview-dist-plugins/hyperestraier
+
+%files plugin-xgettext
+%{_datadir}/srpmix/plugins/60srpmix-xgettext
+
+# Temporary disabled
+#%files plugin-doxygen
+#%{_datadir}/srpmix/plugins/60srpmix-doxygen
+
+##
+## TODO requires background execution to enable these post
+##
+#%post plugin-cscope
+#if [ "$1" = 1 ] ; then
+#  srpmix-plugin --enable=60srpmix-cscope
+#fi
+
+#%post plugin-vanilla
+#if [ "$1" = 1 ] ; then
+#  srpmix-plugin --enable=5srpmix-vanilla
+#fi
+
+#%post plugin-kindex
+#if [ "$1" = 1 ] ; then
+#  srpmix-plugin --enable=11srpmix-kindex
+#fi
+
+#%post plugin-ctags
+#if [ "$1" = 1 ] ; then
+#  srpmix-plugin --enable=10srpmix-ctags
+#fi
+
+%files dir-base
+%defattr(-,root,root,-)
+%{_sharedstatedir}/srpmix
+
+
+
+%pre
+/usr/sbin/useradd -c "Srpmix" srpmix -G mock 2> /dev/null || :
+
+%changelog
+* Thu Jun 30 2011 Masatake YAMATO <yamato@redhat.com> - #PACKAGE_VERSION#-#RPM_RELEASE#
+- Merge srpmix-dir-base.SPEC in.
+
+* Sat Jun  2 2007 Masatake YAMATO <yamato@redhat.com> 3.0-0
+- First RPM build.

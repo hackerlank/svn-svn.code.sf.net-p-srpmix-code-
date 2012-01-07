@@ -1,0 +1,190 @@
+#!/bin/bash
+
+SPEC_FILE=
+
+KEEP_ORIGINAL=
+SOURCEDIR=
+BUILDDIR=
+EXTRA_COMMAND=cat
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo ";;; ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
+function use_old_autoconf_p
+{
+    local spec_file=$1
+    local lines=$(grep -e '^autoconf ' ${spec_file})
+    
+    if echo $lines | grep -e '-l '; then
+	return 0
+    else
+	return 1
+    fi
+}
+
+function spec_file_hack
+{
+    local spec_file=$1
+    
+    #
+    # rhel5su2 kernel needs this.
+    #
+    local no_hack__p_xen='\.p\.xen$'
+    local dont_keep_original="-e /^%patch/s/-b \+\([^ ]\+\)//"
+
+
+    use_old_autoconf="-e s/a/a/"
+    if use_old_autoconf_p "$spec_file" > /dev/null 2>&1; then
+	use_old_autoconf="-e s/^autoconf/autoconf-2.13/"
+    fi
+
+    if patch_on_backup_p "$spec_file" > /dev/null 2>&1 ; then
+#	message turn-on --keep-original=auto
+	KEEP_ORIGINAL=yes
+    fi
+
+    if test "x${KEEP_ORIGINAL}" = xyes; then
+	dont_keep_original="-e s/a/a/"
+    fi
+
+    cat - "${spec_file}"                           \
+    | sed					   \
+	\
+	\
+        -e /'^%patch.* '"$no_hack__p_xen"/b        \
+	\
+	\
+        "$dont_keep_original"                      \
+	\
+	\
+	-e "s+\.\./\.\./SOURCES/+../../${SOURCEDIR}/+" \
+	-e "s+\.\./\.\./BUILD/+../../${BUILDDIR}/+"    \
+	\
+	-e "s/Source29: kernel-%{kversion}-ppc64-debug.config/Source290: kernel-%{kversion}-ppc64-debug.config/" \
+        -e "s/Source46: kernel-%{kversion}-s390.config/Source460: kernel-%{kversion}-s390.config/" \
+	\
+	\
+	-e '/^%patch \+-P.*/b'                     \
+	\
+	\
+	-e 's/^Patch:/Patch0:/'                    \
+	-e 's/^patch:/patch0:/'                    \
+        -e 's/^%patch /%patch0 /'                  \
+        -e 's/^%patch$/%patch0/'                   \
+        \
+	-e 's/^Copyright:/License:/'		   \
+	-e 's/^Serial:.*//'			   \
+	\
+	"${use_old_autoconf}"                      \
+	\
+	${NULL} 
+}
+
+##
+## KEEP_ORIGINAL guessing
+## ----------------------
+##
+## TEST: ~/rpmbuild/SRPMIX/images/f10/perl-CGI-SpeedyCGI-2.22-4.fc10.src.rpm
+##       ~/rpmbuild/SRPMIX/images/f10/easytag-2.1-5.fc9.src.rpm
+##
+
+# patch_on_backup_p
+# -----------------
+# INPUT:
+# $1: path to patch file 
+# 
+# OUTPUT:
+# return: 0 if the patch may be applied on backup files.
+# stdout: backup suffixes
+
+# TODO
+# touch -r 
+# e.g.
+# touch -c -r ./hdf/src/hdfi.h.ppc ./hdf/src/hdfi.h
+
+function patch_on_backup_p
+{
+    local spec_file=$1
+    local f
+
+    if grep -e '^touch.* -r ' $spec_file > /dev/null 2>&1; then
+#	message patch-on-backup --reason=touch
+# TODO	
+# print $backup	
+	return 0
+	
+    fi
+    
+    cat $spec_file | grep -e '^---' | sed -e 's/--- \([^ \t]*\).*$/\1/' | while read f; do
+	local lines=$(basename $f | tr '.' '\n')
+	local c=$(echo "$lines" | wc -l)
+	local backup=$(echo "$lines" | tail -1)
+
+	if [ "$c" -gt  2 ]; then
+#	    message patch-on-backup --reason=touch
+	    echo $backup
+	    return 0
+	fi
+   done
+
+   return 1
+}
+
+
+function print_usage
+{
+    :
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --keep-original=*)
+                KEEP_ORIGINAL="$(echo $1 | sed 's/--keep-original=//')"
+	        ;;
+            --sourcedir=*)
+                SOURCEDIR=$(echo $1 | sed 's/--sourcedir=//')
+	        ;;
+            --builddir=*)
+	        BUILDDIR=$(echo $1 | sed 's/--builddir=//')
+	        ;;
+            --extra-command=*)
+	        EXTRA_COMMAND=$(echo $1 | sed 's/--extra-command=//')
+		;;
+	    *)
+	        break
+	        ;;
+	 esac
+	 shift
+    done
+
+    SPEC_FILE=$1
+}
+
+function main
+{
+    parse_arguments "$@"
+    
+    spec_file_hack "${SPEC_FILE}"		\
+	|					\
+	SPEC_FILE="${SPEC_FILE}"		\
+	PATH="${SRPMIX_HELPER_DIR}:${PATH}"	\
+	eval "${EXTRA_COMMAND}"
+}
+
+es_time main "$@"
+exit $?

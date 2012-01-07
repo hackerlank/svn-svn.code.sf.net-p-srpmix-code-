@@ -1,0 +1,302 @@
+#!/bin/bash
+
+TARGET_SRPM=
+TARGET_SWRF=
+TARGET_PKGNAME=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+MY_TMPDIR=
+WRAP_OPTS=""
+RELEASE=
+OUTPUT_DIR=.
+OUTPUT_FORMAT=rpm
+SRPMIX_BUILD_DEBUG=""
+OPT_TYPE=core
+
+set -e
+
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-build [--output-dir=DIR]"
+    echo "               [--output-format=<rpm|swrf>]"
+    echo "               [--release=RELEASE]"
+    echo "               [--build-requires=BUILD_REQUIRES]"
+    echo "               [--debug]"
+    echo "               [--ignore-error]"
+    echo "               [--target=ARCH]"
+    echo "               [--multi-targets]"
+    echo "               [--keep-original]"
+    echo "               [--enable=<plugins>]"
+    echo "               [--disable=<plugins>]"
+    echo "               [--type=<core|plugin>]"
+    echo "               [--plugin-name=<name>]"
+    echo "               [--rearrange-spec-command=COMMAND]"
+    echo "               [--mock=DIST]"
+    echo "               --srpm=SRPM|--swrf=SWRF"
+    echo
+    echo "ARCH: i386(not for kenel), i686, x86_64, ia64, s390, s390x, ppc, or ppc64"
+#    TODO: Multi targets
+#    TODO: URL support
+#    echo ""
+#    echo "As SRPM a url like http://... is acceptable."
+#
+#    TODO: --git
+#          --hg
+#          --tgz
+#          --dira
+#          --dsc
+#  
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+            --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --srpm=*)
+	        TARGET_SRPM=$(echo "$1" | sed 's/--srpm=//')
+		;;
+            --swrf=*)
+                TARGET_SWRF=$(echo "$1" | sed 's/--swrf=//')
+                ;;
+	    --release=*)
+		RELEASE=$(echo "$1" | sed 's/--release=//')
+		SRPMIX_PKG_RELEASE=$RELEASE
+	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
+		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
+	        ;;
+	    --build-requires=*)
+		BUILD_REQUIRES=$(echo "$1" | sed 's/--build-requires=//')
+	        WRAP_OPTS="$WRAP_OPTS --build-requires=$BUILD_REQUIRES"
+	        ;;
+            --enable=*)
+                ENABLE=$(echo "$1" | sed 's/--enable=//')
+                WRAP_OPTS="$WRAP_OPTS --enable=$ENABLE"
+                ;;
+            --disable=*)
+                DISABLE=$(echo "$1" | sed 's/--disable=//')
+                WRAP_OPTS="$WRAP_OPTS --disable=$DISABLE"
+                ;;
+            --plugin-name=*)
+                PLUGIN_NAME=$(echo "$1" | sed 's/--plugin-name=//')
+                WRAP_OPTS="$WRAP_OPTS --plugin-name=$PLUGIN_NAME"
+                ;;
+            --type=*)
+                OPT_TYPE=$(echo "$1" | sed 's/--type=//')
+                WRAP_OPTS="$WRAP_OPTS --type=$OPT_TYPE"
+                ;;
+	    --ignore-error)
+	        export SRPMIX_IGNORE_ERROR=yes
+		;;
+	    --multi-targets)
+	        export SRPMIX_MULTI_TARGETS=yes
+		;;
+            --keep-original)
+	        export SRPMIX_KEEP_ORIGINAL=yes
+		;;
+	    --output-dir=*)
+	        OUTPUT_DIR=$(echo "$1" | sed 's/--output-dir=//')
+		if test -d "${OUTPUT_DIR}"; then
+		    OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
+		else
+		    srpmix_abort "No such directory: ${OUTPUT_DIR}"
+		fi
+		;;
+	    --output-format=*)
+	        export OUTPUT_FORMAT=$(echo $1 | sed 's/--output-format=//')
+		;;
+	    --target=*)
+	        export SRPMIX_TARGET=$(echo $1 | sed 's/--target=//')
+		;;
+	    --rearrange-spec-command=*)
+	        export SRPMIX_REARRANGE_SPEC_COMMAND=$(echo "$1" | sed 's/--rearrange-spec-command=//')
+		;;
+	     --mock=*)
+	        local mock_dist=${1/--mock=}
+		WRAP_OPTS="$WRAP_OPTS --ix=mock --mock-dist=$mock_dist"
+		;;
+	    --debug)
+                SRPMIX_BUILD_DEBUG=yes
+                WRAP_OPTS="$WRAP_OPTS --debug"
+                ENVELOP_OPTS="$ENVELOP_OPTS --debug"
+                PS4="$PS4[build]"
+                set -x
+		;;
+	    --*)
+	        print_usage 1>&2
+		srpmix_abort "Unknow option: $1"
+		;;
+	    *)
+	       break
+	       ;;
+	 esac
+	 shift
+    done
+    
+    if test "x$1" != "x"; then
+	print_usage 1>&2
+	srpmix_abort "too many arguments"
+    fi
+
+    if test -z "${TARGET_SRPM}" && test -z "${TARGET_SWRF}"; then
+	print_usage 1>&2
+	srpmix_abort "Specify --srpm or --swrf"
+    fi
+
+
+    local plugin_p
+    if test "x$OPT_TYPE" = "xplugin"; then
+          plugin_p=yes  
+    fi
+
+    if test -n "${TARGET_SRPM}"; then
+	if test "x$plugin_p" != x; then
+            srpmix_abort "can't specify --srpm for plugin type"
+        fi
+	srpmix_cp ${TARGET_SRPM} ${MY_TMPDIR}/
+
+        TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
+    fi
+
+    if test -n "${TARGET_SWRF}"; then
+	local archives_swrf=$(srpmix_archives_name ${TARGET_SWRF})
+        srpmix_cp ${TARGET_SWRF} ${MY_TMPDIR}/
+
+	# Plugins like vanilla may require the archives package, too.
+	if test "x$plugin_p" != x; then
+	    srpmix_cp ${archives_swrf} ${MY_TMPDIR}/
+        fi
+        
+        TARGET_SWRF=${MY_TMPDIR}/$(basename ${TARGET_SWRF})
+    fi
+
+    if test -n "${TARGET_SRPM}"; then
+	TARGET_PKGNAME=$($RPM -qp --queryformat %{NAME} "${TARGET_SRPM}")
+    elif test -n "${TARGET_SWRF}"; then
+	TARGET_PKGNAME=$($RPM -qp --queryformat %{NAME} "${TARGET_SWRF}")
+    fi
+
+}
+
+function check_pvr_rpm
+{
+    local pvr=$1
+    local count=
+
+#	if is_memeber "${pvr}" $all; then
+#	    echo "*** Source code for ${pvr} is already installed ***" 1>&2
+#	    exit 0
+#	fi
+
+    count=`$RPM -qa "^${pvr}-srpmix-"'*' | wc -l`
+    if test $count != 0; then
+	echo "*** Source code for ${pvr} is already installed ***" 1>&2
+	exit 0
+    fi    
+}
+
+function check_pvr_output_dir
+{
+    local pvr=$1
+    local p0=
+    local p=
+
+    p0=$(srpmix_srchash $pvr)
+    p=$(echo "${OUTPUT_DIR}/$p0/${pvr}-srpmix-"[0-9]* | head -1)
+    if test -f "$p"; then
+	echo "*** Source code for ${pvr} exists at ${OUTPUT_DIR}/$p0 ***" 1>&2
+	exit 0
+    fi
+}
+
+function envelope_swrf_by_rpm
+{
+    local p
+
+    for swrf in $@; do
+	p=$($SWRFPM -qp --nosignature --queryformat "%{NAME}" $swrf | cut -d' ' -f1)
+	enveloped_name=$(srpmix_build_enveloped_name "$p")
+
+	# TODO: Return status
+	srpmix-envelop $ENVELOP_OPTS --output-dir=${MY_TMPDIR} --package-name=${TARGET_PKGNAME} $swrf
+	p=$(ls ${MY_TMPDIR}/${enveloped_name}-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm | grep -v '\.swrf\.')
+	
+	PS4="${PS4}[rpmbuild]" $RPMBUILD --define "_rpmdir $MY_TMPDIR/RPMS"	\
+	          --define "_srcrpmdir $MY_TMPDIR/SRPMS"			\
+	          --define "_builddir $MY_TMPDIR/BUILD"				\
+	 	  --define "_buildrootdir $MY_TMPDIR/BUILDROOT"			\
+                  --define "_specdir $MY_TMPDIR/SPECS"				\
+	          --define "_sourcedir $MY_TMPDIR/SOURCES"			\
+	          --rebuild -ba $p \
+	    || exit 4
+    done
+}
+
+function envelope_swrf
+{
+    envelope_swrf_by_rpm $@
+}
+
+function main
+{
+#   all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
+
+    MY_TMPDIR=`mktemp -d`
+    trap "/bin/rm -rf $MY_TMPDIR" 0    
+    # srpmix-mock requires read access.
+    chmod a+rx $MY_TMPDIR
+    
+    parse_arguments "$@"
+    if test -n "$SRPMIX_BUILD_DEBUG"; then
+	trap 0
+	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-build"
+    fi
+
+    ( cd $MY_TMPDIR && mkdir -p RPMS SRPMS BUILD BUILDROOT SPECS SOURCES )
+    
+    # srpmix_create_swrf <workdir> <wrap_opts> [<target srpms>...]
+    srpmix_create_swrf "$MY_TMPDIR" "$WRAP_OPTS --output-dir=${MY_TMPDIR}" $TARGET_SRPM $TARGET_SWRF
+
+    if test ! -d ${MY_TMPDIR}/RPMS/noarch; then
+	exit 3
+    fi
+
+    local files=$(find ${MY_TMPDIR}/RPMS/noarch -name '*.swrf')
+    case "$OUTPUT_FORMAT" in
+      rpm)
+        envelope_swrf $files
+        files=$(find ${MY_TMPDIR}/RPMS/noarch -name '*.noarch.rpm')
+      ;;
+    esac
+
+    for p in $files; do
+	p0=$(srpmix_srchash $p)
+	mkdir -p "${OUTPUT_DIR}/${p0}"
+	mv $p "${OUTPUT_DIR}/${p0}/"
+    done
+
+    # Notify again
+    if test -n "$SRPMIX_BUILD_DEBUG"; then
+	echo "*** Using $MY_TMPDIR as temporary directory"
+    fi
+    
+    return 0
+}
+
+{ main "$@" ; } < /dev/null
+exit $?

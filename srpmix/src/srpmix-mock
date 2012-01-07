@@ -1,0 +1,184 @@
+#!/bin/bash
+# srpmix-mock cfg rootdir srpm
+
+DIST=
+ARCH=x86_64
+ROOTDIR=
+SRPM=
+SRPMIX_MOCK_DEBUG=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo ";;; ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
+function print_usage
+{
+    echo "Usage: "
+    echo "	srpmix-mock --help|-h"
+    echo "      srpmix-mock [--debug] --dist=DIST [--arch=ARCH] [--cradle-name=NAME] ROOTDIR SRPM"
+    echo 
+    echo "DIST: epel-4, epel-5..., fedora-12, fedora-13,..."
+    echo "ARCH: ..."
+    echo 
+    echo "environment variables:"
+    echo "SRPMIX_CRADLE_NAME=NAME"
+    echo
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    -h|--help)
+		print_usage
+		exit 0
+		;;
+	    (--dist=*)
+                DIST=${1/--dist=}
+		;;
+	    (--arch=*)
+	        ARCH=${1/--arch=}
+		;;
+	    --debug)
+		SRPMIX_MOCK_DEBUG=yes
+		;;
+	    (--cradle-name=*)
+	        SRPMIX_CRADLE_NAME=${1/--cradle-name=}
+	        ;;
+	     *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if ! [ $# -eq 2 ]; then
+	echo "Wrong number of arguments" 1>&2
+	print_usage 1>&2
+	exit 1
+    fi
+
+    ROOTDIR=$1
+    shift
+    SRPM=$1
+    shift
+
+    if ! [ -r $SRPM ]; then
+	echo "Cannot read $SRPM srpm file" 1>&2
+	exit 1
+    fi
+
+    if [ -d $ROOTDIR ] && ( ! [ $(ls -l $ROOTDIR | wc -l) -eq 1 ] ); then
+	echo "rootdir $ROOTDIR is not empty" 1>&2
+	exit 1
+    fi
+}
+
+function main
+{
+    parse_arguments "$@"
+
+    local cfg=$DIST-$ARCH
+    local rootdir=$ROOTDIR
+    local srpm=$SRPM
+    local MY_TMPDIR
+    local USER=$SRPMIX_MOCK_USER
+    local MOCK=mock
+    local prefix
+    local suffix
+    local body
+    local clean
+
+    MY_TMPDIR=`mktemp -d`
+    if [ -z "$SRPMIX_MOCK_DEBUG" ]; then
+	trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0
+    else
+	clean=--no-cleanup-after
+    fi
+
+    
+    body="$MOCK $clean --resultdir=$MY_TMPDIR --enable-plugin=source_rescue -r $cfg --rebuild $srpm"
+    if [ $(whoami) = root ]; then
+	chown $USER.mock $MY_TMPDIR
+	prefix="su --command "
+	suffix=" - $USER"
+	if ! $prefix "$body" $suffix; then
+	  echo "Failed in mock command" 1>&2
+	    exit 1
+	fi  
+    else
+	if ! $body ; then
+	    echo "Failed in mock command" 1>&2
+	    exit 1
+	fi
+    fi
+
+    local d
+
+
+    d=$MY_TMPDIR/srpmix/SOURCES
+    if ! [ -d $d ]; then
+	echo "Cannot find SOURCES directory" 1>&2
+	exit 1
+    fi
+
+    mkdir -p $rootdir
+
+    if ! mv $MY_TMPDIR/srpmix/SOURCES ${rootdir}/archives; then
+	echo "Cannot move SOURCES directory" 1>&2
+	exit 1
+    fi
+
+    d=$MY_TMPDIR/srpmix/BUILD
+    if ! [ -d $d ]; then
+	echo "Cannot find BUILD directory" 1>&2
+	return 1
+    fi
+    if ! mv $MY_TMPDIR/srpmix/BUILD ${rootdir}/pre-build; then
+	echo "Cannot move BUILD directory" 1>&2
+	return 1
+    fi
+
+
+    d=$MY_TMPDIR/srpmix/SPECS
+    if ! [ -d $d ]; then
+	echo "Cannot find SPECS directory" 1>&2
+	exit 1
+    fi
+    mkdir ${rootdir}/SPECS
+    mkdir ${rootdir}/srpmix-SPECS
+    cp $MY_TMPDIR/srpmix/SPECS/*spec ${rootdir}/SPECS/
+    cp $MY_TMPDIR/srpmix/SPECS/*spec ${rootdir}/srpmix-SPECS/
+    cp $MY_TMPDIR/srpmix/SPECS/*spec ${rootdir}/
+
+    echo "${SRPMIX_PKG_VERSION}" > ${rootdir}/SRPMIX
+    echo "#; metadata" >> ${rootdir}/SRPMIX
+    echo "srpmix-version: ${SRPMIX_PKG_VERSION}" >> ${rootdir}/SRPMIX
+    echo "srpmix-expander: srpmix-mock" >> ${rootdir}/SRPMIX
+    echo "#; qip" >> ${rootdir}/SRPMIX
+    rpm -qip $srpm >> ${rootdir}/SRPMIX
+
+    echo 0 > ${rootdir}/STATUS
+
+    if [ -z "${SRPMIX_CRADLE_NAME}" ]; then
+	SRPMIX_CRADLE_NAME=unknown
+    fi
+    echo ${SRPMIX_CRADLE_NAME} > "${rootdir}/CRADLE"
+    
+    chmod -R og-w ${rootdir}
+
+    local id=$(whoami)
+    chown -R ${id}.${id} ${rootdir}
+
+    return 0
+}
+
+time main "$@"

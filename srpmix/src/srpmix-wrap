@@ -1,0 +1,542 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-wrap: Wrap a target src.rpm to build srpmixed package
+#
+# Copyright (C) 2008 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+
+OUTPUTDIR=
+MY_TMPDIR=
+JUST_PRINT=
+DUMP_SPEC=
+# BUILD_REQUIRES="srpmix, rsync"
+# Don't require srpmix here because make check run from make rpm of srpmix itself is failed; 
+# srpmix installed via rpm is required to build srpmix.rpm.
+BUILD_REQUIRES="rsync"
+OPT_TYPE=core
+OPT_PLUGIN_NAME=plugins
+
+SRPMIX_WRAP_DEBUG=
+
+OPT_IX=ix
+OPT_MOCK_DIST=
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-wrap [--help|-h]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--dump-spec|--just-print] [--type=core] [--ix=mock --mock-dist=DIST] [SRPMS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--output-dir=OUTPUTDIR] [--release=RELEASE] [--type=core] [--ix=mock --mock-dist=DIST] [SRPMS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--dump-spec|--just-print] [--type=plugin] [SWRFS...]"
+    echo "  srpmix-wrap [<OPTIONS>...] [--output-dir=OUTPUTDIR] [--release=RELEASE] --type=plugin [--plugin-name=<name>] [--enable=<plugins>...] [--disable=<plugins>...] [SWRFS...]"
+    echo ""
+    echo "Options:"
+    echo "  --build-requires <requirements>"
+    echo "  --debug"
+    echo ""
+    echo "  If SRPMS is not given, standard input is"
+    echo "  used for the list of source packages."
+    echo 
+}
+
+function cleanup
+{
+    if test -d "$MY_TMPDIR"; then
+        rm -rf $MY_TMPDIR || true
+    fi
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --output-dir=*)
+	        OUTPUTDIR=$(echo $1 | sed 's/--output-dir=//')
+		;;
+            --release=*)
+	        SRPMIX_PKG_RELEASE=$(echo $1 | sed 's/--release=//')
+		;;
+            --build-requires=*)
+	        arg=$(echo $1 | sed 's/--build-requires=//')
+		BUILD_REQUIRES="${BUILD_REQUIRES}, $arg"
+		;;
+	    --dump-spec)
+	        DUMP_SPEC=1
+		;;
+	    --just-print)
+	        JUST_PRINT=1
+		;;
+            --type=*)
+	        OPT_TYPE=$(echo $1 | sed 's/--type=//')
+		;;
+            --enable=*)
+	        ENABLE=${1/--enable=}
+		;;
+            --disable=*)
+	        DISABLE=${1/--disable=}
+		;;
+            --plugin-name=*)
+	        OPT_PLUGIN_NAME=$(echo $1 | sed 's/--plugin-name=//')
+		;;
+	    --debug)
+	        SRPMIX_WRAP_DEBUG=yes
+                PS4="${PS4}[wrap]"
+	        set -x
+		;;
+            --ix=*)
+	        OPT_IX=${1/--ix=}
+		;;
+	    --mock-dist=*)
+	        OPT_MOCK_DIST=${1/--mock-dist=}
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test "x$1" = "x"; then
+        while read tmp; do
+	  srpms="${srpms} ${tmp}"
+	done
+    else
+	srpms=$@	
+    fi
+
+    if test "x${JUST_PRINT}" != "x" \
+       -a "x${DUMP_SPEC}" != "x"; then
+       print_usage 1>&2
+       srpmix_abort "Specify either --just-print or --dump-spec"
+    fi
+
+    if test "x$OUTPUTDIR" = "x"; then
+	OUTPUTDIR=.
+    fi
+    if test ! -d "${OUTPUTDIR}"; then
+	srpmix_abort "No such directory: ${OUTPUTDIR}"
+    fi
+
+    if [ "$OPT_IX" = ix ]; then
+	:
+    elif [ "$OPT_IX" = mock ]; then
+	BUILD_REQUIRES="${BUILD_REQUIRES} mock"
+	if [ -z "$OPT_MOCK_DIST" ]; then
+	    srpmix_abort "--mock-dist= is not given"
+	fi
+    else
+	srpmix_abort "Unknown IX: $OPT_IX"
+    fi
+}
+
+function create_core_spec
+{
+    local target_srpm=$1
+    local ix=$2
+    local mock_dist=$3
+
+    local wrapped_name=
+    local es_name=
+
+    pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_srpm \
+	 | tr "\n" " " )
+    package=$(echo $pvrd | cut -d' ' -f1)
+    version=$(echo $pvrd | cut -d' ' -f2)
+    release=$(echo $pvrd | cut -d' ' -f3)
+    description=$(echo "$pvrd" | cut -d' ' -f4-)
+    wrapped_name=$(srpmix_build_wrapped_name "$package" "$version" "$release")
+    if test "x$package" = "x"; then
+        echo "warning: failed to parse $target_srpm: ignored" 1>&2
+        return
+    fi
+    
+    group=$($RPM -qp --nosignature --queryformat "%{Group}" $target_srpm)
+    license=$($RPM -qp --nosignature --queryformat "%{License}" $target_srpm)
+#    changelog=$(LANG=C $RPM -qp --nosignature --changelog $target_srpm | sed 's/%/%%/g')
+#    if test "x$changelog" = "x(none)"; then
+#        changelog=""
+#    fi
+    buildarch=$($RPM -qp --nosignature --queryformat "%{BUILDARCHS}" $target_srpm)
+    if test "x$buildarch" = "x(none)"; then
+        buildarch="noarch"
+    fi
+
+    installdir=$(srpmix_installdir $package $version $release)
+
+    # These variables are used to put broken symbolic link to %files
+    local rinstalldir=$(srpmix_rinstalldir $package $version $release)
+    
+    cat <<EOF
+Summary: Source Information for package $package ($version-$release)
+Name: ${wrapped_name}
+Version: $SRPMIX_PKG_VERSION
+Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
+Source0: $(basename $target_srpm)
+Autoreq: 0
+Autoprov: 0
+BuildRequires: $BUILD_REQUIRES
+Buildarch: $buildarch
+
+Buildroot: %{_tmppath}/%{name}-root
+Group: $group
+License: $license
+Prefix: /
+
+%define __os_install_post true
+
+%description
+$description
+
+%package archives
+Group: $group
+Summary: Source Archives for package $package ($version-$release)
+Prefix: /
+
+%description archives
+$description
+
+%prep
+if test -d %{_builddir}/%{name}; then 
+  chmod -R u+w  %{_builddir}/%{name}
+  rm -rf %{_builddir}/%{name}
+fi
+
+%build
+EOF
+
+
+if [ "$ix" = "ix" ]; then
+    cat <<EOF
+srpmix-ix -f -v %{_srpmix_ix_option}      \
+    %{_builddir}/%{name}                  \
+    %{SOURCE0}
+EOF
+elif [ "$ix" = "mock" ]; then
+    cat <<EOF
+srpmix-mock --dist=$mock_dist             \
+  %{_builddir}/%{name}                    \
+  %{SOURCE0}
+EOF
+fi
+
+cat <<EOF
+srpmix-plugin --disable=ALL --enable=%{_srpmix_core_plugins} \
+    %{_srpmix_plugin_option}                                 \
+    %{_builddir}/%{name}
+
+%install
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$installdir
+mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins
+
+from=%{_builddir}/%{name}
+to=\$RPM_BUILD_ROOT/$installdir
+transfer_cmd=
+if test \$(stat --format="%D" \$from) = \$(stat --format="%D" \$to); then
+   transfer_cmd="cp -a -l"
+else
+   transfer_cmd="rsync -a"
+fi
+\$transfer_cmd \$(/bin/ls -d \$from/* | grep -v LOG | grep -v SPECS\$) \$to
+find \$to -name '*-log.es' | xargs rm -f
+
+if test \$RPM_BUILD_ROOT/$installdir/*.spec != \$RPM_BUILD_ROOT/$installdir/specs.spec; then
+	mv \$RPM_BUILD_ROOT/$installdir/*.spec \$RPM_BUILD_ROOT/$installdir/specs.spec
+fi
+ln -s plugins/vanilla \$RPM_BUILD_ROOT/$installdir/vanilla
+
+%clean
+chmod -R u+w \$RPM_BUILD_ROOT
+rm -rf \$RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%dir /${SRPMIX_SOURCES_RDIR}/*/*/*/
+/${SRPMIX_SOURCES_RDIR}/*/*/*/SRPMIX
+/${SRPMIX_SOURCES_RDIR}/*/*/*/STATUS
+/${SRPMIX_SOURCES_RDIR}/*/*/*/CRADLE
+/${SRPMIX_SOURCES_RDIR}/*/*/*/pre-build
+/${SRPMIX_SOURCES_RDIR}/*/*/*/plugins
+# rinstalldir is need to make a broken symlink %files member
+# See http://www.asahi-net.or.jp/~kw3m-nki/moomoo/diary/diary0412.html#21-02
+/${SRPMIX_SOURCES_RDIR}/${rinstalldir}/vanilla
+/${SRPMIX_SOURCES_RDIR}/*/*/*/specs.spec
+
+%files archives
+%defattr(-,root,root)
+/${SRPMIX_SOURCES_RDIR}/*/*/*/archives
+
+%changelog
+* Sat Jun  2 2007 SRPMIX WRAP <consulting-jp@redhat.com> $package-$version-$release
+- Automatically generated.
+
+EOF
+
+}
+
+function create_plugin_spec
+{
+    target_swrf=$1
+    plugins_name=$2
+
+    pvrd=$($RPM -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target_swrf \
+	| tr "\n" " " )
+    package=$(echo $pvrd | cut -d' ' -f1)
+    version=$(echo $pvrd | cut -d' ' -f2)
+    release=$(echo $pvrd | cut -d' ' -f3)
+    description=$(echo "$pvrd" | cut -d' ' -f4-)
+    installdir=$($RPM -qpl "$target_swrf"  | head -1)
+
+    if test "x$package" = "x"; then
+        echo "warning: failed to parse $target_swrf: ignored" 1>&2
+        return
+    fi
+
+    plugin_package_name="$package"-$plugins_name
+
+    group=$($RPM -qp --nosignature --queryformat "%{Group}" $target_swrf)
+    license=$($RPM -qp --nosignature --queryformat "%{License}" $target_swrf)
+    arch=$($RPM -qp --nosignature --queryformat "%{ARCH}" $target_swrf)
+    if test "x$buildarch" = "x(none)"; then
+        buildarch="noarch"
+    fi
+
+    cat <<EOF
+Summary: $plugins_name information for package $package
+Name: ${plugin_package_name}
+Version: $SRPMIX_PKG_VERSION
+Release: $SRPMIX_PKG_RELEASE%{?dist}.swrf
+Source0: $(basename $target_swrf)
+Source1: $(srpmix_archives_name $(basename $target_swrf))
+Autoreq: 0
+Autoprov: 0
+BuildRequires: $BUILD_REQUIRES
+Buildarch: $arch
+
+Buildroot: %{_tmppath}/%{name}-root
+Group: $group
+License: $license
+Prefix: /
+
+%define __os_install_post true
+
+%description
+$description
+
+%prep
+if test -d %{_builddir}/%{name}; then 
+  chmod -R u+w  %{_builddir}/%{name}
+  rm -rf %{_builddir}/%{name}
+fi
+mkdir -p %{_builddir}/%{name}
+srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --ignoresize -i %{SOURCE0}
+srpmix-db %{_srpmix_db_option} --root=%{_builddir}/%{name}/$SRPMIX_VAR_DIR --ignoresize -i %{SOURCE1}
+
+%build
+touch %{_builddir}/%{name}/.run-plugin
+sleep 1
+srpmix-plugin --enable=$ENABLE --disable=$DISABLE \
+    %{_srpmix_plugin_option} \
+    %{_builddir}/%{name}/$SRPMIX_VAR_DIR/$installdir
+
+%install
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$installdir
+mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins
+
+# If no plugin is enabled, the plugins dir becomes empty; 
+# and globing in %files fails. Put dummy to avoid it.
+mkdir -p \$RPM_BUILD_ROOT/$installdir/plugins/dummy
+
+from=%{_builddir}/%{name}/$SRPMIX_VAR_DIR
+to=\$RPM_BUILD_ROOT
+transfer_cmd=
+if test \$(stat --format="%D" \$from) = \$(stat --format="%D" \$to); then
+   transfer_cmd="cp -l"
+else
+   transfer_cmd="cp"
+fi
+# See deco-archive src.rpm package why read needs -r option.
+( cd \$from; find . -newer %{_builddir}/%{name}/.run-plugin -not -type d | 
+while read -r f; do
+  d=\$(dirname "\$f")
+  install -d "\$to/\$d"
+  if test -L "\$f"; then
+    ln -s \$(readlink "\$f") \$to/"\$f"
+  else
+    \$transfer_cmd "\$f" \$to/"\$f"
+  fi
+done )
+
+rm -rf \$to/db
+find \$to -name '*-log.es' | xargs rm -f
+
+%clean
+chmod -R u+w \$RPM_BUILD_ROOT
+rm -rf \$RPM_BUILD_ROOT
+
+%files
+/${SRPMIX_SOURCES_RDIR}/*/*/*/plugins/*
+
+%changelog
+* Sat Jun  2 2007 SRPMIX WRAP <consulting-jp@redhat.com> $package-$version-$release
+- Automatically generated.
+
+EOF
+
+}
+
+
+# A src.rpm is.
+# => src.rpm for Foo is wrapped to srpmixed src.rpm by this function.
+# ==> srpmixed rpm is created from srpmixed src.rpm by rpmbuild.
+# ===> By Installing srpmixed rpm source files of Foo are deployed as if src.rpm for Foo is deployed 
+#      by srpmix command.
+#
+# wrap_srpm srpm-file
+#
+function wrap_srpm
+{
+    local target=$1
+    local spec=
+    local wrapped_name=
+    local es_name=
+
+    local pvrd=$(rpm -qp --nosignature --queryformat "%{NAME} %{VERSION} %{RELEASE} %{Description}" $target \
+	| tr "\n" " " )
+    local package=$(echo $pvrd | cut -d' ' -f1)
+    local version=$(echo $pvrd | cut -d' ' -f2)
+    local release=$(echo $pvrd | cut -d' ' -f3)
+    local description=$(echo "$pvrd" | cut -d' ' -f4-)
+
+
+    case "$OPT_TYPE" in
+        core)
+            wrapped_name=$(srpmix_build_wrapped_name "$package" "$version" "$release")
+            ;;
+        plugin)
+            wrapped_name="$package"-"$OPT_PLUGIN_NAME"
+            ;;
+    esac
+
+    es_name=$(es_print srpmix-wrap name\
+	--target-srpm="\"$(basename $target)\"" \
+	--package="\"${package}\"" \
+	--version="\"${version}\"" \
+	--release="\"${release}\"" \
+	--wrapped-name="\"${wrapped_name}\"" )
+    if test "x${JUST_PRINT}" != "x"; then
+       echo "$es_name"
+       return	
+    fi
+
+    if test "x${DUMP_SPEC}" = "x"; then
+	spec="$MY_TMPDIR/SPECS/${wrapped_name}.spec"
+    else
+	spec="/dev/stdout"
+	if test ! -w "${spec}"; then
+	    # ???
+	    spec="/dev/tty"
+	fi
+    fi
+
+    case "$OPT_TYPE" in
+        core)
+	    create_core_spec "$target" "$OPT_IX" "$OPT_MOCK_DIST" > "$spec"
+            ;;
+        plugin)
+	    create_plugin_spec "$target" "$OPT_PLUGIN_NAME" > "$spec"
+            ;;
+    esac
+
+    if test "x${DUMP_SPEC}" != "x"; then
+	printf "# "
+	echo "$es_name"
+	return
+    fi
+
+    srpmix_cp $target $MY_TMPDIR/SOURCES/
+    if test x"$OPT_TYPE" = xplugin; then
+	srpmix_cp $(srpmix_archives_name $target) $MY_TMPDIR/SOURCES/
+    fi
+    
+    $RPMBUILD --quiet --define "_topdir $MY_TMPDIR" -bs "$spec" > /dev/null
+    wrapped_srpm=$(/bin/ls $MY_TMPDIR/SRPMS/*-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.swrf.src.rpm)
+    mv "${wrapped_srpm}" "${OUTPUTDIR}"
+
+    rm -f $MY_TMPDIR/SOURCES/`basename $target`
+    if test x"$OPT_TYPE" = xplugin; then
+	rm -f $MY_TMPDIR/SOURCES/$(basename $(srpmix_archives_name $target))
+    fi
+    echo "$es_name"
+
+    es_print srpmix-wrap done \
+	--file="\"$(ls ${OUTPUTDIR}/$(basename ${wrapped_srpm}))\""
+}
+
+function main
+{
+    srpmix_verify_commands "${RPMBUILD}"
+    parse_arguments "$@"
+
+    if test "x${JUST_PRINT}" = "x" \
+	-a "x${DUMP_SPEC}" = "x"; then
+	MY_TMPDIR=`mktemp -d`
+
+	if test "x${SRPMIX_WRAP_DEBUG}" = x; then
+	    trap cleanup 0
+	fi
+	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+    fi
+
+    for srpm in $srpms
+    do
+        if test -f "$srpm"; then
+	    wrap_srpm "$srpm"
+        else
+            srpmix_abort "No such file: $srpm"
+        fi
+    done
+}
+
+RUN=
+if test "x${DUMP_SPEC}" = "x"; then
+    RUN=es_time
+fi
+${RUN} main "$@"
+
+exit $?

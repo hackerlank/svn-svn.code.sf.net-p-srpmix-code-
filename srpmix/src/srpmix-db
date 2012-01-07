@@ -1,0 +1,308 @@
+#!/bin/bash
+#
+# srpmix-db --- Install SWRF, source codes wrapped in RPM Format 
+#
+RPM_PACKAGES=
+COMMAND=
+QUIET=
+SRPMIX_DB_DEBUG=
+SWRFPM_OPTS=
+IGNORESIZE=
+LIBSRPMIX=libsrpmix.sh
+SRPMIX_DO_HARDLINK=${SRPMIX_DO_HARDLINK:-no}
+PURGE_SWRF=${SRPMIX_PURGE_SWRF:-no}
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-db -h|--help"
+    echo "  srpmix-db [--debug] [--hardlink] [--root=ROOT] [--quite|-q] [--purge-swrf] [--ignoresize] -i|--install SWRF..."
+    echo "  srpmix-db [--debug] [--root=ROOT] [--quite|-q] -e|--erase SWRF..."
+    echo "  srpmix-db [--debug] [--root=ROOT] -V|--verify SWRF"
+    echo "  srpmix-db [--debug] -l|--list"
+    echo
+    echo "environment variables:"
+    echo "SRPMIX_PURGE_SWRF=yes|no"
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    -h|--help)
+		print_usage
+		exit 0
+		;;
+	    --root=*)
+                srpmix_reset_var_dir ${1/--root=}
+		shift 1
+		;;
+	    -q|--quiet)
+		QUIET=yes
+		shift 1
+		;;
+	    -i|--install)
+		if test -z "$COMMAND"; then
+		    COMMAND=install
+		else
+		    echo "COMMAND $COMMAND is already set" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		shift 1
+		;;
+	    -l|--list)
+		if test -z "$COMMAND"; then
+		    COMMAND=list
+		else
+		    echo "COMMAND $COMMAND is already set" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		shift 1
+		;;
+            -e|--erase)
+		if test -z "$COMMAND"; then
+		    COMMAND=erase
+		else
+		    echo "COMMAND $COMMAND is already set" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		shift 1
+		;;
+	    -V|--verify)
+	        if [ -z "$COMMAND" ]; then
+		    COMMAND=verify
+		else
+		    echo "COMMAND $COMMAND is already set" 1>&2
+		    print_usage 1>&2
+		    exit 1
+		fi
+		shift 1
+		;;
+	    --hardlink)
+	        SRPMIX_DO_HARDLINK=yes
+		shift 1
+		;;
+            --ignoresize)
+	        IGNORESIZE=--ignoresize
+		shift 1
+		;;
+	    --purge-swrf)
+	       PURGE_SWRF=yes
+	       ;;
+	    --debug)
+	        SRPMIX_DB_DEBUG=yes
+		SWRFPM_OPTS=vv
+		PS4="${PS4}[db]"
+		set -x
+		shift 1
+		;;
+	    *)
+		break
+		;;
+	esac
+    done
+
+    if test -z "$COMMAND"; then
+	echo "no command is given" 1>&2
+	print_usage 1>&2
+	exit 1
+    elif test x"$COMMAND" = xinstall; then
+	RPM_PACKAGES="$@"
+    elif test x"$COMMAND" = xerase; then
+	RPM_PACKAGES="$@"
+    elif [ "$COMMAND" = "verify" ]; then
+	if [ $# = 1 ]; then
+	    RPM_PACKAGES="$@"
+	else
+	    echo "Specify only one package" 1>&2
+	    print_usage 1>&2
+	    exit 1
+	fi
+    elif test x"$COMMAND" = xlist; then
+	:
+    else
+	:
+    fi
+}
+
+function srpmix_db
+{
+    local package
+    local name
+    local hash
+
+    if test ! -d "${SRPMIX_DB_RDIR}"; then
+	:
+    fi
+
+    package=$1
+
+    if test -f "$package"; then
+	name=$($SWRFPM -qp --queryformat '%{NAME}' "$package")
+    else
+	name=$package
+    fi
+    hash=$(srpmix_srchash "$name")
+    echo "${SRPMIX_DB_RDIR}/$hash/$name"
+}
+
+function do_install
+{
+    local db
+    local count
+    local max
+    local pkgdir
+    local status
+
+    if test "x${SRPMIX_DO_HARDLINK}" = xyes; then
+	srpmix_verify_commands ${HARDLINK}
+    fi
+
+
+    count=0
+    RPM_PACKAGES=$(echo "$RPM_PACKAGES" | tr ' ' '\n')
+    max=$(echo "$RPM_PACKAGES" | wc -l)
+
+
+    echo "$RPM_PACKAGES" | while read package; do
+	db=$(srpmix_db $package)
+	if test x"$QUIET" != xyes; then
+	    echo "($count/$max) Installing...$(basename $package)"
+	fi
+
+	#
+	# Dirty but for minimizing the maintenance cost.
+	#
+	rm -f ${SRPMIX_VAR_DIR}/${db}/__db*
+	
+	#
+	# Till fedora 10 --prefix did't work but 
+	# --relocate /="$SRPMIX_VAR_DIR" worked fine.
+	# But in feodra 11 --relocate /="$SRPMIX_VAR_DIR" doesn't
+	# work but --prefix works fine.
+	#
+	# On fedora 11 "rpm --version" tells RPM version 4.7.0.
+	# Compatibility efforts are needed?
+	#
+	$SWRFPM -Uv${SWRFPM_OPTS} \
+	    --nodeps \
+	    --dbpath "$SRPMIX_VAR_DIR"/"$db" \
+	    --prefix "$SRPMIX_VAR_DIR" \
+	    $IGNORESIZE \
+	    "$package"
+	status=$?
+	if [ $status = 0 ]; then
+	    rm -f ${SRPMIX_VAR_DIR}/${db}/__db*
+	fi
+	#
+	# About some of plugins packages for kernel
+	# rpm crashes frequently on F13.
+	#
+	# Capture it here for debugging
+	#
+	if [ "$SRPMIX_DB_DEBUG" = yes -a $status != 0 ]; then
+	    cp "$package" /tmp
+	    echo $SWRFPM -Uv${SWRFPM_OPTS} \
+	    --nodeps \
+	    --dbpath "$SRPMIX_VAR_DIR"/"$db" \
+	    --prefix "$SRPMIX_VAR_DIR" \
+	    $IGNORESIZE \
+	    "$package" > /tmp/crush-with-$(basename "$package")
+	fi
+	
+	pkgdir=${SRPMIX_VAR_DIR}$(dirname $($SWRFPM -qpl "$package"  | head -1))
+
+        if [ "$PURGE_SWRF" = "yes" ]; then
+	    truncate --size=0 "$package"
+	fi
+
+        # TODO move to hardlink plugin
+	if test "x$pkgdir" != "x"; then
+	    if test "x${SRPMIX_DO_HARDLINK}" = xyes; then
+		if test x"$QUIET" != xyes; then
+		    echo "($count/$max) Hardlink...$pkgdir/.."
+		fi
+		${HARDLINK} $pkgdir/..
+	    fi
+	fi
+
+	count=$(expr $count + 1)
+    done
+    
+}
+
+function do_list
+{
+    for d in ${SRPMIX_DB_DIR}/[a-zA-Z0-9]; do
+	echo ${d}
+	for x in ${d}/*; do
+	    if test -d ${x}; then
+		echo "	$(basename ${x})"
+	    fi
+	done
+	echo
+    done
+}
+
+function do_erase
+{
+    local db
+    local count
+    local max
+    
+    count=0
+    RPM_PACKAGES=$(echo "$RPM_PACKAGES" | tr ' ' '\n')
+    max=$(echo "$RPM_PACKAGES" | wc -l)
+    
+    echo "$RPM_PACKAGES" | while read package; do
+	db=$(srpmix_db $package)
+	if test x"$QUIET" != xyes; then
+	    echo "($count/$max) Deleting...$package"
+	fi
+	#
+
+	if $SWRFPM --nodeps -e -dbpath "$SRPMIX_VAR_DIR"/"$db" "$package"; then
+	    rm -rf "$SRPMIX_VAR_DIR/$db"
+	else
+	    :
+	fi
+	count=$(expr $count + 1)
+    done
+}
+
+function do_verify
+{
+    local db
+    local max
+    
+    RPM_PACKAGES=$(echo "$RPM_PACKAGES" | tr ' ' '\n')
+    
+    echo "$RPM_PACKAGES" | while read package; do
+	db=$(srpmix_db $package)
+	$SWRFPM --nodeps -V -dbpath "$SRPMIX_VAR_DIR"/"$db" "$package"
+	return $?
+    done
+}
+
+function main
+{
+    parse_arguments "$@"
+    do_$COMMAND
+    return $?
+}
+
+main "$@"
+exit $?

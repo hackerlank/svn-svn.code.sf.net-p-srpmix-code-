@@ -1,0 +1,1821 @@
+2012-01-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (parse_arguments): Added option --run-plugin.
+
+	* src/libsrpmix.sh.in (srpmix_root_user_p): New function.
+
+	* src/srpmix (parse_arguments): Use srpmix_root_user_p.
+
+2012-01-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-plugin (__list_plugins): when running find, use -xtype
+	option instead -type to track symlinks.
+
+	* src/srpmix (opt_rules): Ditto.
+
+2012-01-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla: use vanillax.
+	The vanilla function was moved to vanillax package at github.
+
+	* src/libsrpmix.sh.in (FASTJAR): Removed.
+
+	* misc/m4/progs.m4: Don't check fastjar, gem, and xz.
+
+
+2012-01-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (vanilla): New function.
+	(run_vanilla): use `vanilla'.
+
+2011-10-21  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/50srpmix-coreutils (run_cmd): Don't
+	follow symlinks in find.
+
+	* src/plugins/_60srpmix-hyperestraier (list_files): Ditto.
+
+	* src/plugins/50srpmix-file (run_file_cmd): Ditto.
+
+2011-10-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-etags (main): Use etags.emacs
+	if existing.
+
+2011-08-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Put
+	dummy directory under pluins dir to avoid globbing
+	in %files failing.
+
+2011-08-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.120.2.
+
+	* src/srpmix (main): Record status after 
+	core_build is done.
+
+	* src/*: Set Autoprov to 0 in all generated spec
+	files. This can prevent rpmbuild inspecting files
+	in a package.
+
+2011-07-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (WGET_OPTS): Do set -e only if the script is run
+	by non root user.
+
+2011-07-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-alias (create_alias_weakview): Use -f
+	optoin when making symbolic links.
+
+2011-07-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.120.1.
+
+	* src/srpmix-weakview-alias: New file.
+
+	* misc/specs/srpmix.spec.in (%files): Added srpmix-weakview-alias.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Ditto.
+
+2011-07-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in: Introduce dir-base subpackage.
+
+	* misc/specs/Makefile.am: Merge srpmix-dir-base.SPEC
+	into srpmix.spec.
+
+	* configure.ac: Version 3.119.5.
+
+2011-06-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.119.4.
+
+	* src/srpmix-db (do_verify, parse_arguments): Added
+	-V option.
+
+2011-05-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.119.3.
+
+	* src/srpmix-db (do_install): Remove __db file after
+	the installation is done successfully.
+
+2011-05-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.119.2.
+
+	* src/srpmix-db (do_install): Remove __db file before
+	installation. Copy the package only if installing it with swrfpm
+	is failed and srpmix-db runs in debug mode.
+
+2011-05-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Insert newline after
+	doing cat the original dist mapping.
+
+2011-05-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.119.1.
+
+	* src/plugins/60srpmix-ctags (IGNORE_KINDEX): New option.
+	(parse_arguments): Split the args passed to ctags with ",".
+
+	* src/plugins/_60srpmix-nctags (main): Use "," as separator
+	for arguments passed to ctags plugin. Passing --ignore-kindex to ctags
+	plugin.
+
+2011-05-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.119.0.
+
+	* src/srpmix-wrap (create_core_spec): make plugins dir.
+
+	* src/plugins/50srpmix-coreutils (LIBSRPMIX): Ignore vanilla and specs.spec.
+
+	* src/plugins/50srpmix-file (LIBSRPMIX): Ditto.
+
+	* src/macros.srpmix (_srpmix_core_plugins): Use plugin names, not
+	plugin files.
+
+	* misc/specs/srpmix-dir-base.SPEC.in (License): Set GPLv3 explicitly.
+
+	* src/srpmix-wrap (create_core_spec): Disable ALL plugins first then
+	enable necessary ones.
+
+	* src/srpmix-db (do_install): Copy swrf file to /tmp when rpm -Uvh
+	is failed.
+
+	* src/srpmix-plugin (list_plugins): Don't call __list_enabled_plugins
+	in loop.
+
+2011-05-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (verify_rootdir): Refer only the first line
+	of SRPMIX file.
+	(create_rootdir): Record the name of expander into SRPMIX file.
+	(srpm_deploy): Record the -qip of target srpm file into SRPMIX file.
+
+	* src/srpmix-mock (main): Record the name of expander into SRPMIX file.
+	Record the -qip of target srpm file into SRPMIX file.
+
+2011-05-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.118.1.
+
+	* src/srpmix-wrap (create_core_spec): Fix a typo.
+	`test' is missed in if condition.
+
+2011-05-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.118.0.
+
+	* src/plugins/_60srpmix-nctags (main): Added --fields option.
+
+2011-05-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.117.5.
+
+	* src/srpmix-wrap (create_core_spec): Handle the when the spec
+	in the target package is named specs.spec. This is happend when
+	deploying source code of a package generated by twig.
+
+2011-04-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.117.4.
+
+	* src/plugins/_60srpmix-nctags (main): Passing --extra=+f+g
+	to ctags.
+
+2011-04-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.117.3.
+
+	* src/plugins/60srpmix-kindex (main): Don't use 'sed -i' when
+	creating tags file.
+
+2011-04-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-plugin: Report the status of plugin when
+	listing.
+
+2011-03-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-plugin (list_enabled_plugins): Resolve the name of plugin
+	before checking whether it is enabled or disabled.
+
+2011-03-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.117.2.
+
+	* tests/00srpmix-plugin.sh (PATH): Added nctags.
+
+	* src/srpmix-package-attach (SRPMIX_PLUGIN_OPTS): New option
+	to pass parameters to a plugin.
+
+	* src/plugins/Makefile.am: Added nctags.
+
+	* src/plugins/60srpmix-ctags: Rename --args to --ctags-args.
+
+	* misc/specs/srpmix.spec.in: Added nctags.
+
+	* src/srpmix-package-attach (print_usage): Fix a typo
+	in help messages.
+
+2011-03-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-db: Rename SHRINK_SWRF to PURGE_SWRF.
+	Rename --shrink-swrf option to --purge-swrf.
+
+2011-03-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/Makefile.am (dist_check_SCRIPTS): 00srpmix-plugin.sh.
+
+	* tests/00srpmix-plugin.sh: Added a new test case.
+
+	* src/srpmix-wrap (create_plugin_spec): Don't choose plugins here.
+
+	* src/srpmix-plugin: Enable --disable option.
+
+	* src/srpmix-build (parse_arguments): Don't set SRPMIX_ENABLE_PLUGIN
+	and SRPMIX_DISABLE_PLUGIN.
+
+	* src/libsrpmix.sh.in (SRPMIX_ENABLE_PLUGIN): Removed.
+	(SRPMIX_DISABLE_PLUGIN): Removed.
+	(is_enabled_plugin): Ditto.
+	(list_plugin_candidates): Ditto.
+	(srpmix_list_plugins): Ditto.
+
+	* src/plugins/_60srpmix-hyperestraier (FORCE): Initialize.
+
+	* src/srpmix.cf: Remove SRPMIX_EXTRA_PLUGINS.
+
+	* src/srpmix-wrap (create_plugin_spec): Don't record PLUGINS file.
+	The file has not been used.
+
+2011-03-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/*: Added --name option.
+
+2011-03-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-ctags (ARGS): New variable.
+	(parse_arguments): Handle --args=.
+	(run_ctags): use ARGS.
+	(main): Passing ARGS.
+
+2011-03-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.117.1.
+
+	* src/plugins/60srpmix-ctags (run_ctags): Remove -n option.
+	This should be handled in another plugin.
+
+	* src/plugins/60srpmix-kindex (main): Fix a typo.
+	The existence of TAGS file is checkd when creating tags file.
+
+2011-03-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.117.0.
+
+	* src/srpmix-wrap (create_core_spec): Added CRADLE to %files.
+
+	* src/srpmix-mock (print_usage): Added CRADLE file.
+
+	* src/srpmix-ix (srpm_build): Added CRADLE file.
+
+	* src/plugins/50srpmix-file (run_file_cmd): Ignore CRADLE.
+
+	* src/plugins/50srpmix-coreutils (run_cmd): Ignore CRADLE.
+
+	* src/plugins/60srpmix-ctags (run_ctags): Added -n when
+	invoking ctags.
+
+2010-12-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (parse_arguments): Added --wget option.
+
+2010-11-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-db (SRPMIX_DO_HARDLINK): Initialize to no.
+
+2010-11-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.115.9.
+
+	* src/srpmix-db (do_install): Truncate swrf file to 0 size
+	if SHRINK_SWRF is yes.
+
+2010-11-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-dir-pkg (main): Install ^plugins dir.
+
+2010-10-17  Masatake YAMATO  <yamato@localhost.localdomain>
+
+	* autogen.sh (--bootstrap): Fix a typo. 
+
+2010-10-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.115.8.
+
+	* src/helpers/98mock.scm ("--mock=epel-6"): Added.
+
+2010-09-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/98mock.scm ("--mock=epel-4"): Fix typos.
+
+2010-09-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: 3.115.7.
+
+	* src/helpers/98mock.scm: Added more rules.
+
+2010-09-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-mock (LIBSRPMIX): Added --debug to help doc.
+
+2010-09-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/Makefile.am (dist_optrules_DATA): Added 98mock.scm.
+
+	* misc/specs/srpmix.spec.in (srpmixdir): Added 98mock.scm.
+
+2010-09-21  Masatake YAMATO  <yamato@redhat.com>
+
+        * configure.ac: Version 3.115.6.
+
+2010-09-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-build (main): Make the temporary directory readable and
+	listable.
+
+2010-09-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-mock (main): Use su instead of sudo.
+
+	* src/libsrpmix.sh.in (SRPMIX_MOCK_USER): Addes new confvar.
+
+2010-09-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in (srpmixdir): Don't delete srpmix
+	group. Don't specify login shell. Make srpmix normal user, not
+	system user(home directory is needed to run mock in sudo).
+
+2010-09-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.115.3.
+
+	* src/srpmix-mock (main): Use sudo only when srpmix-mock
+	runs in the root privilege.
+
+2010-09-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.115.2.
+
+	* misc/specs/srpmix.spec.in (srpmixdir): Create srpmix
+	user.
+
+	* src/srpmix-mock (main): Run mock under sudo.
+
+2010-09-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.115.1.
+
+	* misc/specs/srpmix.spec.in (BuildRequires): Added mock and srescure.
+
+	* src/srpmix-build (OPT_TYPE): Added --mock.
+
+	* src/srpmix-wrap: Added srpmix-mock support.
+
+2010-09-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_core_spec): Remove unsed variable `spec'.
+
+	* src/srpmix-mock: New file.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-mock.
+
+	* misc/specs/srpmix.spec.in (%files): Added srpmix-mock.
+
+2010-09-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Use `^' as prefix
+	for alias name and file.
+
+2010-09-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.115.0.
+
+	* misc/specs/srpmix.spec.in (Requires): Specify the version of 
+	srpmix-dir-base package.
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Added missing `fi'.
+	(create_dist_weakview): Use `>>' instead of `>'.
+	Use /srv/sources/dists as the place where altdir is placed.
+	(create_dist_weakview): Put one more \ to $1 in generated %postun. 
+
+2010-09-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Implment --alias with
+	alternatives command.
+
+	* misc/specs/srpmix-dir-base.SPEC.in (wvdistsdir): Added .alternatives.
+
+2010-08-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm (#/kernel-2\.6\.3[0-9].*/): Don't
+	include i386 binary.
+
+2010-07-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Turn off alias
+	link to avoid trouble when updating sources.
+
+	* src/srpmix-weakview-packages (create_packages_weakview):
+	Ditto.
+
+2010-07-12  Masatake YAMATO  <yamato@redhat.com>
+	
+	* configure.ac: Version 3.115.0.
+
+	* src/srpmix-wrap (create_plugin_spec): Remove double quotes from right 
+	side operand of =~.
+
+	* src/helpers/99default.scm (#/kernel-2\.6\.3[0-9].*/): Added
+	new rule.
+
+	* src/plugins/10srpmix-vanilla (run_vanilla): Added gem, xz and
+	tar.xz supports.
+
+	* misc/specs/srpmix.spec.in (plugin-vanilla::Requires): Require 
+	rubygems and xz.
+
+	* misc/m4/progs.m4: Check gem and xz.
+
+2010-07-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.114.0.
+
+	* src/plugins/60srpmix-kindex (MY_TMPDIR): Dont mkdir 
+	srpmix-plugins. 
+
+	* src/plugins/10srpmix-vanilla (MY_TMPDIR): Ditto.
+
+	* src/srpmix-weakview-packages (create_packages_weakview): Implment
+	alias links.
+
+	* src/plugins/60srpmix-kindex (main): Don't run etags, 
+	ctags and cscope only if TAGS, tags and cscope.out files exist. 
+	Useless directory level checking is removed.
+
+2010-07-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist (create_dist_weakview): implment
+	alias link.
+
+2010-07-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist: Added new option --alias.
+
+	* src/srpmix-weakview-packages: Ditto.
+
+2010-02-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-kindex (main): Don't use spec file name
+	to detect 2.4 kernel. Use kversion definition in the spec file
+	instead.
+
+2010-02-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/libsrpmix.sh.in (srpmix_chmod): Don't refer
+	{rootdir}/${SOURCEDIR}/${srpm_name}. Just use $1.
+
+2010-01-29  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.113.0.
+
+	* src/srpmix-plugin (list_plugin_candidates): List all plugins if
+	ENABLE_PLUGIN is not specified.
+
+	* src/srpmix-db (print_usage): Added --ignoresize option.
+
+	* src/srpmix-wrap (parse_arguments): Fix a typo
+	about SRPMIX_DISABLE_PLUGIN.
+
+2010-01-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/_60srpmix-hyperestraier (list_files): Addes specs.spec.
+
+
+2010-01-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.112.0.
+
+	* src/srpmix-plugin: Remove --disable= option.
+
+	* src/srpmix-wrap (create_plugin_spec): Added missing `;'.
+
+2010-01-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Apply basename before
+	checking the name of plugins starting "_".
+
+2010-01-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix.daily: Use exit instead of return.
+
+2010-01-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist-attach (parse_arguments): Added --var-dir
+	option.
+	(parse_arguments): Make plugins under dist-plugins usable from 
+	srpmix-weakview-dist-attach command.
+
+	* src/libsrpmix.sh.in (SRPMIX_DIST_PLUGIN_DIR): Added new const.
+
+	* src/dist-plugins/hyperestraier: Implemented.
+
+2010-01-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Added dist-plugins.
+
+	* src/srpmix-weakview-dist-attach: If ATTACHMENT is an executable,
+	it is invoked to create attachment data before packaging.
+
+	* src/srpmix-package-attach (parse_arguments): Added missing option
+	--pkg-release.
+
+2009-12-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-package-attach (parse_arguments): Introduce an option
+	--srpmix-var-dir.
+
+	* src/srpmix-envelop (envelop_swrf): Taking summary from swrf.
+
+2009-12-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/libsrpmix.sh.in (SRPMIX_OUTPUT_FORMAT): Define SRPMIX_OUTPUT_FORMAT.
+	Introduce SRPMIX_ROOT_USER.
+
+	* src/srpmix-package-attach: Replave $OUTPUT_FORMAT with $SRPMIX_OUTPUT_FORMAT.
+
+	* src/srpmix: Ditto.
+
+	* src/srpmix-wrap (create_plugin_spec): Don't enable plugin which
+	name has _ as prefix.
+
+	* misc/specs/srpmix.spec.in (hyperestraier): Reactivate.
+
+	* src/plugins/Makefile.am: Added _ as prefix for
+	60srpmix-hyperestraier.
+
+	* src/srpmix-wrap (create_plugin_spec): Use srpmix_list_plugins.
+
+	* src/libsrpmix.sh.in (srpmix_list_plugins): Renaemd from list_plugins.
+	Added shell bang.
+
+2009-11-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix.daily: Print warning message to stderr.
+
+2009-11-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-kindex (main): Pass "kernel{?variant}" pattern
+	to grep.
+
+	* src/plugins/60srpmix-ctags (main): Ditto.
+
+	* src/plugins/60srpmix-cscope (main): Ditto.
+
+	* src/plugins/60srpmix-etags (main): Ditto.
+
+2009-10-29  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.111.0.
+
+	* src/plugins/60srpmix-kindex (parse_arguments): Don't create kindex
+	directory here. It is created in main function.
+
+2009-10-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* autogen.sh: Run yum if --bootstrap is given.
+
+2009-10-21  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-plugin (is_enabled_plugin): Use an argument as default return value.
+	(list_plugin_candidates): Tune the condition to choose the plugins.
+
+2009-10-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.110.0.
+
+	* src/plugins/60srpmix-kindex (main): Check whether $SPEC
+	is available. Added necessary ! before test.
+
+2009-10-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.109.1.
+
+	* src/srpmix.daily: Use rpm to check sop existence.
+
+2009-10-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* autogen.sh: Instsall require packages.
+
+2009-10-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-plugin (parse_arguments): Print the usage to stderr.
+
+2009-10-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm (#/amanda-2.5.*/): New rule.
+
+2009-09-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-opt-rules (dont-run-autotools-and-configure-and-bootstrap):
+	New alias.
+	(bootstrap): New part.
+	(configure, %configre, autotools): Use echo instead of cat.
+
+	* src/helpers/99default.scm (#/mysql-.*/): Use dont-run-autotools.
+	(#/mysqlclient.*/): Remove the last `-'.
+
+2009-09-29  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap: Use MY_TMPDIR instead of TMPDIR.
+
+	* src/srpmix-envelop: Ditto.
+
+	* src/plugins/60srpmix-kindex: Ditto.
+
+	* src/plugins/10srpmix-vanilla: Ditto.
+
+	* src/srpmix-weakview-dist: Ditto.
+
+	* src/srpmix-weakview-packages: Ditto.
+
+2009-09-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in (plugin-kindex): Replace
+	gcc with cscope in Requires field.
+
+2009-09-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in (plugin-vanilla): Added Group field.
+
+2009-09-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.109.0.
+
+	* src/plugins/60srpmix-kindex (main): Put a space betwen ! and grep.
+
+2009-09-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (dirpkg_created_p): Dont' use basename.
+	(main): Ditto.
+
+	* src/srpmix-build (main): Don't use basename.
+
+	* src/libsrpmix.sh.in (srpmix_srchash): Use basename.
+
+2009-09-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix: Don't create dir-pkg/srchash directory in this command.
+
+	* src/srpmix-dir-pkg: Create dir-pkg/srchash directory in this command.
+
+	* src/libsrpmix.sh.in (srpmix_archives_name): Renamed from archives_name.
+
+	* src/srpmix-build: Ditto.
+
+	* src/srpmix-wrap: Ditto.
+
+2009-09-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix.daily: Return if sop is installed.
+
+2009-09-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-opt-rules (handle-alias): Added function to
+	handle symbols in rules specially.
+
+	* src/srpmix-ix (guess_target): Use src.rpm file instead of spec file
+	to guess the target architecture.
+
+	* src/helpers/99default.scm (#/mysqlclient-.*/): New rule.
+	(#/nss_ldap-.*/): Added more rules.
+
+2009-09-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (TMPDIR): Use default value.
+
+	* src/plugins/60srpmix-kindex (TMPDIR): Use default value.
+
+	* src/helpers/99default.scm: Added missing backslash before bars(|).
+
+2009-09-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm (#/nss_ldap-.*/): Fix a typo.
+
+2009-09-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm: Added more rules.
+
+	* src/helpers/build-spec-rearrange (spec_file_hack): Handle patch: line.
+
+	* src/srpmix-rootdir-attach: New file.
+
+	* src/srpmix-package-attach: Renamed from srpmix-attach.
+
+	* misc/specs/srpmix-dir-base.SPEC.in (pluginsdir): Added new directory plugins.
+
+2009-09-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-cscope (run_cscope): Handle the case when file-i
+	is not available.
+
+	* src/srpmix-plugin (path_for): Added new option --path-for=PLUGIN.
+
+	* src/srpmix-attach (parse_arguments): Improve error message.
+	(prepare_tarball): Added double quotes around the argument for test -n.
+	Added missing `=' between --plugin-dir option.
+	Implemented the case PLUGIN_NAME is given.
+	Prepare the output file for tar command in this function.
+	(create_swrf): Don't redirect the output of tar in this function.
+
+2009-09-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_core_spec): Remove log files when building a package.
+
+	* src/srpmix-plugin (parse_arguments): Fix a syntax error in `case' statment.
+	(list_plugin_candidates): Added backslashs before &&.
+
+2009-09-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/*srpmix-*: Added --plugin-dir=,
+	--log-file=, and --force dir options.
+
+	* src/srpmix-plugin: Use shorter plugin names.
+
+2009-09-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/*srpmix-*: Added --name option.
+	Very external command after parsing arguments.
+
+	* src/srpmix-plugin (ROOTDIR): Use --name.
+
+2009-09-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-attach: Run a plugin directly.
+
+2009-09-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-etags: Added command option --plugin-dir,
+	--log-file, and --force.
+
+	* src/plugins/60srpmix-ctags: Ditto.
+
+	* src/plugins/60srpmix-cscope: Ditto.
+
+2009-09-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-attach (create_swrf): Escape $ of $RPM_BUILD_ROOT.
+
+	* src/srpmix-weakview-dist-attach: New file.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-weakview-dist-attach.
+	* misc/specs/srpmix.spec(%files): Ditto.
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Introduce new directory
+	"plugins" under the per-dist directory.
+
+2009-09-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.108.0.
+
+2009-09-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (core_build): Added -t to mapfile to trailing line.
+	(dir_pkg_build): Always return 0.
+
+2009-09-03  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-envelop (envelop_swrf): Remove newlines from %{Description}
+	returned from rpm -q.
+
+	* src/srpmix-wrap (wrap_srpm):  Ditto.
+	(create_plugin_spec): Ditto.
+	(create_core_spec): Ditto.
+
+2009-09-03  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-cscope (main): Handle kernel-2.4.spec.
+
+	* src/plugins/60srpmix-ctags (main): Handle kernel-2.4.spec.
+
+	* src/plugins/60srpmix-etags (main): Handle kernel-2.4.spec.
+
+	* src/plugins/60srpmix-kindex (main): Don't handle kernel-2.4.spec.
+
+2009-09-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.107.2.
+
+	* src/srpmix-attach (main): Support to install swrf package to home directory.
+	Not tested yet.
+	(SRPMIX_DB_OPTS): New option.
+
+2009-09-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-cscope (SPEC): Added new variable.
+
+	* src/libsrpmix.sh.in (srpmix_dirpkg_name): Suppress the output
+	from grep.
+
+2009-08-31  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-cscope (run_cscope): store -k and -q
+	options of cscope to cscope.files.
+	Use bash as interpreter.
+	(main): Don't run cscope if the target package is kernel.
+
+	* src/plugins/60srpmix-kindex (main): Added cscope handler.
+
+2009-08-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-build: Don't use double quotes around process substitution at
+	the right value of assignment. e.g.  x=$(ls "$dir") instead of x="$(ls $dir)".
+
+	* src/srpmix-db: Ditto.
+
+	* src/srpmix-envelop: Ditto.
+
+	* src/srpmix-ix: Ditto.
+
+	* src/srpmix-plugin: Ditto.
+
+	* src/srpmix-weakview-packages: Ditto.
+
+	* src/srpmix-wrap: Ditto.
+
+	* src/srpmix: Ditto.
+
+2009-08-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Added -r option to read command.
+
+2009-08-26  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix-dir-base.SPEC.in (%install): Added prefix $RPM_BUILD_ROOT$ to
+	${sourcesdir} and ${wvpkgsdir}.
+
+2009-08-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix-dir-base.SPEC.in (%install): Make
+	directories for weakviews.
+
+2009-08-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (odirpkg_created_p): Fix a typo.
+
+	* src/plugins/60srpmix-etags (main): Fix a typo.
+
+2009-08-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-dist: Added new option --make-rpm.
+	(create_dist_weakview): Don't quote $SRPMIX_VAR_DIR with backslash.
+
+	* src/srpmix-weakview-packages: Ditto.
+
+2009-08-23  root  <yamato@redhat.com>
+
+	* src/srpmix (dirpkg_created_p): run ls if test -f is failed.
+
+2009-08-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-weakview-packages (create_packages_weakview): OUTPUT_DIR -> OUTPUTDIR.
+
+	* src/srpmix-weakview-dist (create_dist_weakview): Ditto.
+
+	* src/helpers/build-spec-rearrange (spec_file_hack): Handle pattern ^%patch$.
+
+	* src/srpmix-ix (srpm_deploy): Use sed to cut down the lines after %changelog.
+
+2009-08-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (transfer_cmd): Use temporary variable to quote
+	an argument passed to install command.
+
+	* src/plugins/60srpmix-kindex (main): Handler newer Makefile
+	of kernel.
+
+	* src/plugins/60srpmix-etags (main): Ditto.
+
+	* src/plugins/60srpmix-ctags (main): Ditto.
+
+2009-08-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in (Requires): Remove gettext.
+
+	* misc/m4/progs.m4(SRPM_PROGS): Put [] around error message.
+
+	* src/srpmix-wrap (create_plugin_spec): Quote file names when transfering.
+
+2009-08-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (srpm_deploy): Don't use cat to provide file
+	contents to sed.
+
+2009-08-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-xgettext: Use /dev/null for stderr of xgettext 
+	running.
+
+	* misc/m4/progs.m4: Improve the error message for fastjar.
+
+2009-08-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (srpm_deploy): Drop the lines after
+	%changelog to shrink the error log.
+
+2009-08-03  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla: Put all files to plugins/vanilla directory.
+
+	* src/srpmix-wrap (create_core_spec): Create a symbol for vanilla
+	directory.
+	(create_plugin_spec): Use plugins as top directory in %files section.
+
+	* src/libsrpmix.sh.in (srpmix_rinstalldir): New function.
+
+2009-08-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 3.107.0.
+
+	* src/srpmix (dir_pkg_build): Store the generated dir-pkg package to
+	OUTPUT_DIR/dir-pkg/srchash.
+
+	* src/srpmix-weakview-dist(create_dist_weakview): Store the generated file to
+	OUTPUT_DIR/weakview.
+
+	* src/srpmix-weakview-packages (create_dist_weakview): Ditto.
+
+	* src/srpmix-attach: Store the generated file to OUTPUT_DIR/$srchash.
+
+	* misc/specs/srpmix.spec.in (%files): Added srpmix-attach
+
+	* configure.ac: Give default test src.rpm from configure to
+	tests/Makefile.am
+
+	* tests/Makefile.am (TEST_SRPMS): Remove test-srpmix-0-0.fc11.src.rpm.
+
+	* tests/test-srpmix.SPEC: Copy SOURCE0 to BUILD dir.
+
+	* tests/test-srpmix-0-0.fc11.src.rpm: Updated based on new spec file.
+
+2009-08-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_core_spec): Remove srcdir variable.
+
+	* src/srpmix-envelop (envelop_swrf): Handle the input
+	package named *-srpmix-plugin-*, which is the name
+	of packages generated by srpmix-attach.
+	Check --package-name option here.
+
+	* src/srpmix-attach: Implemented.
+
+	* src/libsrpmix.sh.in (srpmix_srcdir):
+	(srpmix_installdir): if $release is omitted, use the 2nd
+	argument as version-release string.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-attach.
+
+2009-07-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (guess_target): Use i386 if %{ix86} is specified
+	in ExclusiveArch field.
+
+2009-07-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_core_spec): Added %dir mark
+	to /${SRPMIX_SOURCES_RDIR}/*/*/*/.
+	(transfer_cmd): Don't use dirname to calculate the value
+	for $installdir.
+
+	* src/srpmix-envelop (envelop_swrf): Make srpmix archive package
+	depend to its srpmix package.
+
+2009-07-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-envelop (envelop_swrf): Improve the pattern
+	to detect a plugin package.
+
+	* src/libsrpmix.sh.in (SRPMIX_PKG_PATTERN): New constant.
+	(archives_name): Use SRPMIX_PKG_PATTERN.
+
+2009-07-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): use srpmix-dir-pkg.
+
+	* src/srpmix-dir-pkg: Implemented.
+
+	* src/srpmix-build (main): Added command name in debug message.
+
+	* src/libsrpmix.sh.in (srpmix_pkg_name, srpmix_dirpkg_name): New functions.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-dir-pkg.
+
+	* misc/specs/srpmix.spec.in (files): Added srpmix-dir-pkg.
+
+2009-07-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): Unify srpmix-build invocation even if
+	opt_rules returns something or not.
+
+2009-07-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Added -f option
+	to rm to handle the case that no plugin package is installed.
+
+2009-07-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/00distmap.sh: Remove newline in srpmix_distmap_to_pvr
+	process substitution.
+
+	* misc/specs/srpmix.spec.in (%files): Added /usr/share/srpmix and
+	/usr/share/srpmix/plugins explicitly.
+
+2009-07-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/Makefile.am: Prepare abs_top_srcdir as an environment variable.
+
+	* tests/01srpmix-ix.sh: Use abs_top_srcdir instead top_srcdir.
+
+	* tests/00srpmix.sh: Ditto.
+
+	* tests/00srpmix-wrap.sh: Ditto.
+
+	* tests/00srpmix-ix.sh: Ditto.
+
+	* tests/00distmap.sh: DO "make install" before doing source libsrpmix.sh.
+
+	* src/libsrpmix.sh.in (SRPMIX_VERSION): Don't call. srpmix_reset_var_dir twice.
+
+2009-07-26  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/Makefile.am (dist_check_SCRIPTS): Added 00distmap.sh.
+
+	* tests/00distmap.sh (LIBSRPMIX): New file.
+
+	* src/srpmix-weakview-dist (main): Check gosh.
+
+	* src/srpmix-weakview-packages (main): Ditto.
+
+	* src/libsrpmix.sh.in: Use only gosh.
+
+	* misc/specs/srpmix.spec.in: Don't require guile.
+
+	* misc/m4/progs.m4: Don't check guile.
+
+2009-07-26  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (wrap_srpm): Use -f option for rm command.
+
+	* src/srpmix-ix: Targets only single src.rpm.
+
+	* src/plugins/10srpmix-vanilla (run_vanilla): Use $FASTJAR.
+
+	* src/libsrpmix.sh.in (FASTJAR): New variable.
+
+	* misc/m4/progs.m4: Check fastjar.
+
+2009-07-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/*.sh (DEBUG): Set --debug if something string is set to DEBUG variable.
+
+	* tests/Makefile.am (DEBUG): New environment variable passed to test cases.
+
+	* src/libsrpmix.sh.in (archives_name): Use $SRPMIX_VERSION as a pattern to make
+	the name of srpmix-archives package.
+
+2009-07-24  Masatake YAMATO  <jet@f11.localdomain>
+
+	* tests/Makefile.am (TESTS_ENVIRONMENT): Set top_srcdir.
+
+	* tests/01srpmix-ix.sh: Copy macros.srpmix under home directory.
+
+	* tests/01srpmix-ix.sh: Ditto.
+
+	* tests/00srpmix-wrap.sh: Ditto.
+
+	* tests/00srpmix.sh: Ditto.
+
+	* src/srpmix-wrap(RPMBUILD): Don't set.
+
+	* src/libsrpmix.sh.in (RPMBUILD, SWRFBUILD): Use the values in environment
+	variables if available.
+
+	* configure.ac: Improve the way to get absolute path for
+	test srpms.
+
+2009-07-22  Masatake YAMATO  <jet@f11.localdomain>
+
+	* src/srpmix-wrap (BUILD_REQUIRES): Don't require srpmix.
+	(transfer_cmd): Don't remote temporary file if in debug mode.
+
+	* tests/Makefile.am (TEST_SRPMS): Added $(srcdir) as prefix for the
+	default tess src.rpm.
+
+	* configure.ac: Convert relative paths for test src.rpms to absolute.
+
+2009-07-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* Makefile.am(XSPECS): Specify srpmix-dir-base.SPEC as extra spec file.
+
+	* misc/specs/srpmix.spec.in: Remove duplicated elements in
+	%files.
+	(srpmixdir): Mark %config(noreplace).
+
+	* misc/specs/srpmix-dir-base.SPEC.in: Ditto.
+
+	* misc/specs/Makefile.am: Use xspecs.mk and svn_release.mk.
+
+	* misc/makefiles/Makefile.am (EXTRA_DIST): Added xspecs.mk and
+	svn_release.mk.
+
+	* misc/makefiles/xspecs.mk: New file.
+
+	* misc/makefiles/svn_release.mk: New file.
+
+	* tests/*.sh: Added DEBUG flag.
+
+	* tests/test-srpmix*: Added src.rpm as default test data.
+
+	* tests/01srpmix-ix.sh (TEST_SRPMS, EXTRA_DIST): Ditto.
+
+2009-07-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/makefiles/rpm.mk: Build srpmix-dir-base.rpm.
+
+	* misc/specs/srpmix.spec.in: Turn off hyperestraier.
+
+2009-07-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (wrap_srpm): Delete --noplugin option.
+
+	* src/srpmix (main): Ditto.
+
+	* src/srpmix-envelop: Use package name in Requires field.
+
+	* src/srpmix-build (parse_arguments, envelope_swrf_by_rpm): Pass the
+	target package name to srpmix-envelop.
+
+	* misc/specs/srpmix.spec.in: Make /usr/share/srpmix/swrfs/* directories.
+
+	* misc/specs/srpmix-dir-base.SPEC.in: Use _sharedstatedir.
+
+	* src/srpmix-dir-pkg: Stub.
+
+	* src/srpmix-weakview-packages (create_packages_weakview): Added dependency
+	to srpmix-dir-base. Make paths for %files not from /.
+	* src/srpmix-weakview-dist (create_dist_weakview): Ditto.
+
+	* src/srpmix(main): Use array to store multiple options.
+
+	* src/helpers/build-opt-rules: Print multiple options
+	separated by newline.
+
+	* misc/specs/srpmix.spec.in (Requires): Added dependency
+	to srpmix-dir-base.
+
+	* misc/specs/Makefile.am (DISTCLEANFILES): Added srpmix-dir-base.SPEC.in.
+	Generate srpmix-dir-base.SPEC.
+
+	* misc/specs/srpmix-dir-base.SPEC.in: New file.
+
+2009-07-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-db (do_install): Don't run srpmix-plugin
+	after installing.
+
+2009-07-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_plugin_spec): Use ln instead
+	of transfer_cmd if a symbol link is given.
+
+	* src/srpmix (main): Use SRPMIX_BUILD_OPTS and
+	SRPMIX_DB_OPTS enthronement variables.
+
+2009-06-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-kindex (main): Handle
+	the package name of rt kernel.
+	* src/plugins/60srpmix-etags (main): Ditto.
+	* src/plugins/60srpmix-ctags (main): Ditto.
+
+	* src/plugins/60srpmix-kindex (main): Convert absolute
+	paths to relative paths in *.tags and *.TAGS.
+
+2009-06-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (main): Fix wrong logical condition
+	used to decided whether temporary directory should be
+	created or not.
+
+2009-06-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.105.0.
+
+2009-06-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (run_vanilla): Use stdout to run bunzip2.
+
+	* src/plugins/60srpmix-kindex (main): Handle rhel4 kernel.
+
+	* src/plugins/60srpmix-etags (main): Send grep output to /dev/null.
+
+	* src/plugins/60srpmix-ctags (main): Send grep output to /dev/null.
+
+	* src/helpers/99default.scm: Kill gcc_update line.
+
+	* src/srpmix-ix (REARRANGE_SPEC_COMMAND): Quote the value to
+	be assigned.
+	(parse_arguments): Quote $1 before passing to
+	sed.
+
+	* src/srpmix-build (parse_arguments): Quote $1 before passing to
+	sed.
+
+	* src/plugins/60srpmix-etags (run_etags): Check the existence
+	of */ before running find.
+
+	* src/plugins/60srpmix-ctags (run_ctags): Check the existence
+	of */ before running find.
+
+	* src/plugins/60srpmix-cscope (REGEX): Added cpp and py.
+	(run_cscope): Run cscope if scope.files is not empty.
+
+	* src/plugins/60srpmix-xgettext (REGEX): Added cpp and py.
+
+2009-06-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm: Added a rule for pam-0.99.6*.
+
+2009-06-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* utils/diff-mode+srpmix-guess.el: Initial implementetation.
+
+2009-06-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/macros.srpmix: Define _binaries_in_noarch_packages_terminate_build to 0.
+
+	* utils/rpm-spec-mode+srpmix-jump.el: Initial implementetation.
+
+2009-05-29  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (parse_arguments): Pass YUM_OPTS to yumdownloader, too.
+
+2009-05-26  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): Added --yum.
+
+	* src/srpmix-db (do_install): Specify --prefix. Don't use --relocate.
+
+	* src/srpmix-wrap (create_core_spec): use Prefix tag.
+	(create_plugin_spec): Ditto.
+
+	* src/srpmix-db (SWRFPM_OPTS): New option.
+
+	* src/macros.srpmix: Fix a typo.
+
+	* src/srpmix-db (parse_arguments): Fix a typo.
+
+	* src/srpmix (parse_arguments): Rename SRPMIXBUILD_OPTIONS
+	to SRPMIX_BUILD_OPTS. Introduce SRPMIX_DB_OPTS.
+
+	* src/srpmix-envelop: Passing %{_srpmix_db_option} to srpmix-db.
+
+	* src/srpmix-wrap: Ditto.
+
+	* src/srpmix-db: Added new option --debug.
+
+	* src/macros.srpmix (_srpmix_db_debug_option, _srpmix_db_option):
+	Added new macros.
+
+2009-05-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (main): Use srpmix_chmod.
+
+	* src/srpmix-ix (srpm_build, srpm_install): Use srpmix_chmod.
+
+	* src/libsrpmix.sh.in (srpmix_chmod): New function.
+
+2009-05-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-attach: Added stub.
+
+2009-05-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): Improve the pattern to extract swrf
+	file name.
+
+2009-05-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/m4/Makefile.am (EXTRA_DIST): Added m4 files.
+
+	* src/plugins/10srpmix-vanilla (run_vanilla): Use
+	stdin for gz. Pass --keep to bunzip2.
+
+2009-05-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/10srpmix-vanilla (run_vanilla): Added m to tar
+	to update file modification time.
+
+	* src/plugins/60srpmix-xgettext: Added new plugin.
+
+	* misc/specs/srpmix.spec.in: Ditto.
+
+	* misc/m4/plugins.m4: Ditto.
+
+	* configure.ac: Ditto.
+
+2009-05-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (create_core_spec): Use _srpmix_plugin_option
+	macro.
+
+	* src/srpmix-plugin (main): Pass --debug flag to plugins.
+	* src/srpmix.daily: Ditto.
+
+	* src/plugins/50srpmix-coreutils (run_cmd): Don't use
+	-print0 and --null flags for find and xargs. Instead pass
+	-d newline option to xargs.
+	* src/plugins/50srpmix-file (run_cmd): Ditto.
+
+	* src/plugins/*: Define debug flag.
+
+	* src/macros.srpmix (_srpmix_core_plugins): New macro.
+
+	* src/srpmix (parse_arguments): Use srpmix_cp. Use local.
+
+	* src/srpmix-wrap (create_core_spec): Use rpm macro to represent
+	sources0.
+	(create_plugin_spec): Ditto.
+	(transfer_cmd): Copy archives if the type is plugin. Use local.
+	Use srpmix_cp.
+
+	* src/srpmix-build (main): Don't use read to iterate files.
+	(*): Use local.
+	(OPT_TYPE): Do cp or ln archives if the type is plugin.
+	Plugins like vanilla may requires the archives.
+	(parse_arguments): Use srpmix_cp.
+
+	* src/libsrpmix.sh.in (archives_name):
+	(srpmix_cp): New function.
+
+2009-05-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/*: Improve debug facilities.
+
+2009-05-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (guess_target): Pick only the line
+	started from ExclusiveArch.
+
+2009-04-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (main): Don't pass an empty string as an argument
+	to srpmix-build.
+
+2009-04-24  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-opt-rules (help): Fix a typo in help message.
+
+2009-04-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm (#/util-linux-2\.13-0\.44\.el5/): Added
+	a rule for util-linux-2.13-0.44.el5.
+
+	* src/srpmix (main): Pass $(opt_rules $srpm) directly to
+	srpmix-build.
+
+	* src/srpmix-ix (srpm_deploy): Dump spec file when aborting.
+	(srpm_build): Added _default_patch_flags --verbose.
+	(srpm_build): Added __patch --verbose.
+
+	* src/plugins/10srpmix-vanilla (run_vanilla): Fix a typo
+	in the option passed to gunzip.
+
+2009-04-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix.daily: Use -print0 in find and --null in xargs.
+
+2009-04-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/50srpmix-file: Use find -print0 and xargs -0 to handle
+	white spaces in a file name.
+
+	* src/plugins/50srpmix-coreutils (run_cmd): Ditto.
+
+	* misc/specs/Makefile.am (dist-hook): Use `R' as a temporary variable
+	to avoid potential variable name conflicts.
+
+	* configure.ac (SRPMIX_MICRO_VERSION): Re-enable AC_RPM_RELEASE.
+
+2009-04-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/99default.scm: Added rules for s390utils-1.5.3-17.el5.
+
+	* utils/etags+srpmix-guess.el (etags+srpmix-guess-search-tags-file): Check
+	kindex.
+
+2009-03-25  Masato Taruishi  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-hyperestraier:
+	* misc/m4/plugins.m4:
+	* misc/specs/srpmix.spec.in:
+	new plugin
+
+2009-03-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-spec-rearrange (use_old_autoconf_p): New function.
+	(spec_file_hack): Use use_old_autoconf_p.
+
+	* src/srpmix-build (parse_arguments:--rearrange-spec-command):
+	New option.
+
+	* tests/01srpmix-ix.sh: New test case.
+
+	* src/srpmix-ix (default_target): Make regexp pattern
+	more specific.
+
+	* src/helpers/build-spec-rearrange (main): Use
+	the passed command line, EXTRA_COMMAND as the filter.
+
+	* Remove unnecessary white spaces.
+
+	* src/srpmix-ix (REARRANGE_SPEC_COMMAND): New variable.
+	(print_usage:--rearrange-spec-command): New option.
+	(srpm_rearrange_spec): Pass `REARRANGE_SPEC_COMMAND' to
+	build-spec-rearrange.
+
+2009-03-20  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-spec-rearrange (use_old_autoreconf_p): New function.
+	(spec_file_hack): Use use_old_autoreconf_p.
+
+2009-03-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (guess_target): Use $line
+	for input to sed.
+	(srpmix_deply): Pass ${rootdir}/${SPECDIR}/${xspec_file}
+	 to guess_target.
+
+2009-03-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (guess_target): New function.
+
+	* src/srpmix (print_usage): Added s390x.
+
+	* src/srpmix-ix (print_usage, default_multi_targets)
+	(verify_target): Added s390x.
+
+	* src/srpmix-build (print_usage): Added s390x.
+
+	* src/srpmix-ix (srpm_rearrange_spec): Use
+	build-spec-rearrange.
+
+2009-03-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-spec-rearrange: New helper program.
+
+2009-03-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (print_usage): Added ppc and s390.
+
+	* src/srpmix-ix (print_usage, default_multi_targets)
+	(verify_target): Added ppc and s390.
+
+	* src/srpmix-build (print_usage): Added ppc and s390.
+
+2009-03-18  Masato Taruishi <taruishi@redhat.com>
+
+	* misc/specs/srpmix.spec.in (%configre):
+	enable some plugins.
+	(BuildRequires): Added cscope, ctags, and emacs-common.
+	(plugin-doxygen::%files): Temporary make the list empty.
+
+2009-03-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-opt-rules (main): Reverse
+	the rules list.
+
+	* src/helpers/99default.scm: Renamed from default.scm.
+	Added comments.
+
+	* src/srpmix (SRPMIXBUILD_OPTS): Sort the
+	rules before reading.
+
+	* misc/specs/srpmix.spec.in (99default.scm):
+	Mark %config(noreplace).
+
+2009-03-18  Masato Taruishi <taruishi@redhat.com>
+
+	* src/srpmix: fix broekn glob use such as 'srpmix --name=yum-*'
+	* configure.ac:
+	* misc/m4/plugins.m4:
+	add --enable-plugin-* options.
+	* misc/m4/progs.m4:
+	separate program check codes from configure.ac
+	* src/srpmix:
+	create plugin data based on plugin package.
+
+2009-03-17  Masato Taruishi <taruishi@redhat.com>
+
+	* src/srpmix-wrap:
+	* src/srpmix-build: add --build-requires option.
+
+2009-03-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-opt-rules (main): Return 0
+	even if no rule is matched.
+
+2009-03-16  Masatake YAMATO  <yamato@redhat.com>
+
+	Introduce helpers directory and srpmix own
+	config directory. opt-rules uses them.
+
+	* tests/Makefile.am (TESTS_ENVIRONMENT): Added
+	SRPMIX_SYSCONF_DIR.
+
+	* src/srpmix (opt_rules): Handle multi rules.
+
+	* src/srpmix-wrap (wrap_srpm): Reimplement
+	just-print.
+
+	* src/srpmix-ix (srpm_build): Use /dev/null
+	as output. See the comment about this modification.
+
+	* src/libsrpmix.sh.in (SRPMIX_SYSCONF_DIR): Set
+	/etc/srpmix as default value.
+	(SRPMIX_BUILD_OPT_RULES_DIR): New constant.
+	(SRPMIX_VAR_DIR): use @PACKAGE@.
+
+	* src/helpers/default.scm: New file.
+
+	* src/Makefile.am (dist_srpmixconf_DATA): Install
+	srpmix.cf to /etc/srpmix.
+
+	* src/helpers:
+	* configure.ac (AC_OUTPUT[src/helpers/Makefile]):
+	* misc/specs/srpmix.spec.in (%files/helpers): New directory.
+
+2009-03-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/Makefile.am (dist_check_SCRIPTS): Added
+	00build-opt-rules.
+	(TESTS_ENVIRONMENT): Added SRPMIX_USR_DIR.
+
+	* tests/00build-opt-rules: New test.
+
+	* src/srpmix (opt_rules): Use build-opt-rules.
+
+	* src/Makefile.am (helpersdir): New directory.
+	(dist_helpers_SCRIPTS): New primary.
+
+	* src/build-opt-rules: New helper script which
+	was called opt-rules.
+
+	* src/libsrpmix.sh.in (SRPMIX_HELPER_DIR, GOSH):
+	New constants.
+
+2009-03-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-wrap (main): Don't create TMPDIR
+	if JUST_PRINT is specified.
+
+2009-03-16  Masato Taruishi <taruishi@redhat.com>
+
+	* sramix-wrap:
+	* srpmix-envelop:
+	* srpmix-build:
+	plugin package support
+	* src/:
+	use #!/bin/bash instead of #!/bin/sh
+
+2009-03-16  Masatake YAMATO <yamato@redhat.com>
+
+	* src/srpmix-ix (spec_file_hack):  Added an extra
+	rewrite rule to handle duplicate source46 in kernel.
+
+2009-03-15  Masato Taruishi <taruishi@redhat.com>
+
+	* configure.ac(with_test_srpms): fix absolute path handling
+
+2009-03-14  Masato Taruishi <taruishi@redhat.com>
+
+	* tests/: Rerutrn 77 for all tests.
+	* src/libsrpmix.sh.in:
+	* src/srpmix: support userland installation.
+	non-root 'srpmix --name=yum' installs trees under $HOME/srpmix/
+	* src/srpmix-build: separate build code from srpmix
+	* src/plugins/60srpmix-cscope: handle all text files
+
+2009-03-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/00srpmix.sh: Return 77 if no TEST_SRPMS is given.
+
+	* configure.ac (with_test_srpms): Convert relative paths
+	to absolute paths.
+
+2009-03-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-kindex (main): Copy
+	tags and TAGS if they exist.
+
+	* src/srpmix-ix (srpm_deploy): Don't set
+	target for kernel statically. Use opt-rules.
+	(srpm_deploy): Use "," for seperator to separate
+	targets.
+
+2009-03-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/60srpmix-ctags (main): Don't run
+	if tags target is defined in Makefile.
+	* src/plugins/60srpmix-etags (main): Don't run
+	if TAGS target is defined in Makefile.
+
+	* src/srpmix-ix (srpm_deploy): Use only ia64 as
+	the target when build source code of 2.4 kernle.
+
+2009-03-13  Masato Taruishi <taruishi@redhat.com>
+
+	* tests/: simple testing framework.
+	* configure.ac: add --with-test-srpms.
+	* src/plugins/60srpmix-cscope: handle only for pre-build.
+
+2009-03-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (dont_keep_original): Withdraw
+	"--without-ibcs" hack.
+
+2009-03-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-ix (spec_file_hack): Added an extra
+	rewrite rule to handle duplicated source29 in kernel.
+	(dont_keep_original): Call rpmbuild with "--without-ibcs"
+	option to build kernel-2.4.18-e.12.
+	(dont_keep_original): Added kernel-2.4.spec.
+
+2009-03-13  Masato Taruishi <taruishi@redhat.com>
+
+	* src/srpmix-ix: don't remove writable flag for owner.
+	* src/srpmix-plugin: fix broken srpmix-plugin by list_plugins change
+	* src/srpmix: put creation of swrf package to libsrpmix.sh.
+	add --output-format option.
+
+2009-03-13  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in (plugin-vanilla::Requires): Added
+	lzma.
+
+	* src/plugins/10srpmix-vanilla (main): Remove ${d}
+	related code. Its value was not defiend.
+	(run_vanilla): Added support for .lzma and tar.lzma.
+	make relative symlinks.
+
+	* src/srpmix-plugin (parse_arguments): Use --list
+	instead of --list-plugins. Added more help documents.
+	(list_plugins): Change the output format.
+
+2009-03-12  Masato Taruishi <taruishi@redhat.com>
+
+	* src/plugin/60srpmix-doxygen: Initial implementetation.
+
+2009-03-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/50srpmix-coreutils: Fix a typo in comment.
+
+2009-03-12  Masato Taruishi <taruishi@redhat.com>
+
+	* src/plugins/: renumbering plugins
+	* src/plugin/50srpmix-coreutils: Implemented
+
+2009-03-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix (--target): New option.
+
+	* src/srpmix-ix (SRPMIX_TARGET): New environment variable.
+
+	* srpmix-ix (get_current_target): Use _target_cpu
+	again. Don't use _host_cpu.
+
+2009-03-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/11srpmix-kindex: Implemented.
+
+	* src/plugins/10srpmix-ctags: New file.
+
+	* src/srpmix-ix (srpm_deploy): Build only kernel.i686 and
+	kernel.x86_64.
+
+	* src/plugins/5srpmix-vanilla (TMPDIR): Use `basename' when
+	making a temporary directory.
+
+	* src/plugins/91srpmix-cscope (REGEX): Fix a typo in a log message.
+
+2009-03-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* misc/specs/srpmix.spec.in (plugin-cscope): Added `Group'
+	field. rpmbuild of centos5 requires this field.
+
+	* src/srpmix-ix (MULTI_KERNEL): Experimental feature
+	to build soruce code for multiple architectures.
+
+	* src/libsrpmix.sh.in (SRPMIX_USR_DIR, SRPMIX_SWRFS_DIR)
+	(SRPMIX_PLUGIN_DIR): Give values only if values are not
+	given yet.
+
+2009-03-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.104.0.
+
+	* src/srpmix-ix (patch_on_backup_p): New function.
+	(spec_file_hack): Use `patch_on_backup_p'.
+
+	* configure.ac (AC_RPM_RELEASE): add --with-rpm-release=R
+	option.
+
+	* misc/m4/rpm.m4: New file.
+
+2009-03-08  Masato Taruishi  <taruishi@redhat.com>
+
+	* src/srpmix-plugin: add --enable|--disable option.
+	add SRPMIX_EXTRA_PLUGINS configuration.
+	run all the each source root directory by default.
+
+	* src/srpmix-db: invoke srpmix-plugin for each development.
+
+	* src/plugins/91srpmix-cscope: add cscope plugin.
+
+2009-03-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins: new directory.
+
+	* src/srpmix (parse_arguments): Fix a typo
+	SRPMIX_MULTIE_TARGETS => SRPMIX_MULTI_TARGETS.
+
+2009-03-06  Masatake YAMATO  <yamato@redhat.com>
+
+	* srpmix-ix (get_current_target): Use _host_cpu
+	instead of _target_cpu.
+
+2009-03-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.103.0.
+
+	* src/srpmix: Avoid duplicated building when
+	running rpmbuild after srpmix-envelop.
+
+	* src/srpmix-ix (dont_keep_original): Handle -P in %patch
+	of spec file.
+
+	* src/srpmix-weakview-dist (create_dist_weakview%build):
+	Include dist-mapping.es.
+
+2009-03-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.102.6.
+	* src/srpmix: Added --keep-original.
+	* src/srpmix-ix: Added a new spec rewrite-rule
+	patch -> patch0.
+
+2009-02-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.102.2.
+
+	* src/srpmix:
+	* src/srpmix-in: New option --current-target-only.
+
+	* src/srpmix-ix:
+	* src/srpmix-wrap:
+	* src/srpmix-envelop:
+	* src/libsrpmix.in: Separate SRPMIX_VERSION and SRPMIX_PKG_VERSION.
+	SRPMIX_VERSION is for this software itself. SRPMIX_PKG_VERSION
+	is for the generated rpm packages.
+
+
+	* src/srpmix (OUTPUT_DIR): Convert to absolute path.
+
+	* src/srpmix-envelop(%preun, %post, %pre): fix a bug: all files were
+	removed when updating with -U.
+
+	* src/srpmix: Reflect --relase argument to SRPMIX_RELEASE variable.
+
+	* srpmix-envelop, srpmix-ix: Added --ignore-error option.
+
+2008-08-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* srpmix-plugin (PLUGINDIR): Added --list-plugins
+	but not tested yet.

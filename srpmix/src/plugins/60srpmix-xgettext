@@ -1,0 +1,164 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-xgettext: Create Xgettext Index
+#
+# Copyright (C) 2009 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+NAME=xgettext
+
+
+ROOTDIR=
+XGETTEXT=xgettext
+
+BUILDDIR=
+LOGFILE=
+PLUGINDIR=
+
+SRPMIX_XGETTEXT_DEBUG=
+
+FORCE=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  $0 [--help|-h]"
+    echo "  $0 --name"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] [--name=NAME] ROOTDIR"
+    echo
+}
+
+function parse_arguments
+{
+    local status=
+
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name)
+		echo $NAME
+		exit 0
+		;;
+	    --name=*)
+                NAME=${1/--name=}
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[${NAME}]"
+		SRPMIX_XGETTEXT_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
+		;;
+	    
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test $# -ne 1; then
+	echo "wrong number of argument" 1>&2
+	print_usage 1>&2
+	srpmix_abort
+    fi
+
+    ROOTDIR=$(cd $1;pwd)
+    shift
+
+    BUILDDIR=${ROOTDIR}/pre-build
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
+
+    if ! test -d "${BUILDDIR}"; then
+	exit 0
+    fi
+
+    if ! test -d "$PLUGINDIR"; then
+        mkdir -p $PLUGINDIR
+    fi
+}
+
+# TODO
+REGEX='\(\.c++\|\.cxx\|\.cpp\|\.[ch]\|\.py\)\(\.in\)\?:'
+
+function run_xgettext
+{
+    local d=$1
+    local o=$2
+    local l=$3
+    local s
+
+    es_print "xgettext-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    cp /dev/null $o
+
+    grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 > "${PLUGINDIR}/xgettext.files"
+    (cd $d && test -s "${PLUGINDIR}/xgettext.files" && \
+	cat "${PLUGINDIR}/xgettext.files" \
+	| ${XGETTEXT} --omit-header       \
+	              --sort-output       \
+	              --extract-all       \
+	              --from-code=utf-8   \
+                      --output=-          \
+	              --files-from=-      \
+                      --no-wrap           \
+	> $o 2> /dev/null)
+    s=$?
+    
+    es_print "xgettext-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+    return $s
+}
+
+function main
+{
+    parse_arguments "$@"
+    srpmix_verify_commands "${XGETTEXT}"
+
+    if ( ! test -e "${PLUGINDIR}/output.xgettext" ) ||
+	( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/xgettext.out" ) ||
+	( test "$FORCE" = yes ); then
+        run_xgettext "${ROOTDIR}" "${PLUGINDIR}/xgettext.out" $LOGFILE
+    fi
+}
+
+es_time main "$@"
+exit $?

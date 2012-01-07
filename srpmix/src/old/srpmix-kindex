@@ -1,0 +1,189 @@
+#!/bin/sh -
+#
+########################################################################
+#
+# srpmix-kindex: Make index files with using Makefile of linux
+#
+# Copyright (C) 2007 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+ROOTDIR=
+KINDEXDIR=
+KSRCDIR=
+KMAKEFILE=
+LOGDIR=
+LOGFILE=
+LIBSRPMIX=libsrpmix.sh
+TMPDIR=/tmp/srpmix-kindex-$$
+
+ARCHS="alpha arm arm26 cris h8300 i386
+       ia64 m32r m68k m68knommu mips 
+       parisc ppc ppc64 s390 sh sh64 
+       sparc sparc64 um v850 x86_64"
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-kindex [--help|-h]"
+    echo "  srpmix-kindex ROOTDIR"
+    echo
+    echo "e.g. "
+    echo "	$  srpmix-kindex /srv/sources/src-deployed/EL4U3"
+    echo 
+}
+
+function abort
+{
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+
+
+function parse_arguments
+{
+    status=
+
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test $# -ne 1; then
+	echo "wrong number of argument" 1>&2
+	print_usage 1>&2
+	abort
+    fi
+
+    ROOTDIR=$(cd $1;pwd)
+    shift
+    
+    case "${ROOTDIR}" in
+	*EL[45]*)
+	break
+	;;
+	*F*)
+	break
+	;;
+	*)
+	cat 1>&2 <<EOF
+specifying the output directory is not supported 
+in the kernel of ${ROOTDIR}
+EOF
+        abort
+        ;;
+    esac
+    
+    KINDEXDIR=${ROOTDIR}/kindex-INDEX
+    BUILDDIR=${ROOTDIR}/srpmix-BUILD
+    KSRCDIR=${BUILDDIR}/kernel-2.*
+    LOGDIR=${ROOTDIR}/srpmix-LOG
+    LOGFILE=${ROOTDIR}/srpmix-LOG/kindex-log.es
+
+    if test ! -d ${KSRCDIR}; then
+	echo "cannot find kernel directory in " ${BUILDDIR} 1>&2
+	abort
+    fi
+    KMAKEFILE=${KSRCDIR}/*/linux*/Makefile
+
+    if test ! -f ${KMAKEFILE}; then
+	echo "cannot find Makefile under " ${KSRCDIR} 1>&2
+	abort
+    fi
+
+    KMAKEFILE=`echo ${KMAKEFILE}`
+    KSRCDIR=`dirname ${KMAKEFILE}`
+
+    if test ! -d ${KINDEXDIR}; then
+	sudo mkdir ${KINDEXDIR}
+    fi
+}
+
+
+function run_make
+{
+    d=$1
+    o=$2
+    a=$3
+    t=$4
+
+    make -C $d O=$o ARCH=$a $t 2>&1 > /dev/null
+}
+
+function do_TAGS
+{
+    a=$1
+
+    es_print make-TAGS-start --timestamp=\"`LANG=C date`\" --architecture=\"$a\"
+    run_make ${KSRCDIR} ${TMPDIR} $a TAGS
+    sudo mv ${TMPDIR}/TAGS ${KINDEXDIR}/$A.TAGS
+    es_print make-TAGS-done --timestamp=\"`LANG=C date`\" --architecture=\"$a\"
+}
+
+function do_tags
+{
+    a=$1
+
+    es_print make-tags-start --timestamp=\"`LANG=C date`\" --architecture=\"$a\"
+    run_make ${KSRCDIR} ${TMPDIR} $a tags
+    sudo mv ${TMPDIR}/tags ${KINDEXDIR}/$A.tags
+    es_print make-tags-done --timestamp=\"`LANG=C date`\" --architecture=\"$a\"
+}
+
+function main
+{
+    parse_arguments "$@"
+
+    if test -d ${TMPDIR}; then
+	echo "our working directory \"${TMPDIR}\" already exists"  1>&2
+	abort
+    else
+	mkdir ${TMPDIR}
+	if test $? != 0; then
+	    echo "failed to create working directory \"${TMPDIR}\""  1>&2
+	    abort
+	fi
+    fi
+
+    for A in $ARCHS; do
+	do_TAGS ${A}
+	do_tags ${A}
+    done
+}
+
+try_source ${LIBSRPMIX}
+es_time main "$@"
+exit $?

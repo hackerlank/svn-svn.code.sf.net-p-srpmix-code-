@@ -1,0 +1,64 @@
+# -*- rpm-spec -*-
+Summary: Base directories for source code archives deployed by srpmix
+Name: srpmix-dir-base
+Version: #PACKAGE_VERSION#
+Release: #RPM_RELEASE#
+License: GPLv3
+Group: Development/Tools
+URL: http://srpmix.org
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildArchitectures: noarch
+
+%description
+Base directories for source code archives deployed by srpmix.
+
+%prep
+rm -rf $RPM_BUILD_ROOT
+
+%build
+
+%install
+# TODO: Use libsrpmix.
+rootdir=%{_sharedstatedir}/srpmix
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT${rootdir}
+
+cs=
+cs="${cs} a b c d e f g h i j k l m n o p q r s t u v w x y z"
+cs="${cs} A B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+cs="${cs} `seq 0 9`"
+
+
+sourcesdir=${rootdir}/sources
+mkdir -p $RPM_BUILD_ROOT${sourcesdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${sourcesdir}/${c}; done
+
+
+wvdistsdir=${rootdir}/dists
+mkdir -p $RPM_BUILD_ROOT${wvdistsdir}
+mkdir -p $RPM_BUILD_ROOT${wvdistsdir}/.alternatives
+
+wvpkgsdir=${rootdir}/packages
+mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}/${c}; done
+# for each common directories
+
+pluginsdir=${rootdir}/plugins
+mkdir -p $RPM_BUILD_ROOT${pluginsdir}
+
+dbdir=${rootdir}/db
+mkdir -p $RPM_BUILD_ROOT${dbdir}
+for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${dbdir}/${c}; done
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%files
+%defattr(-,root,root,-)
+%{_sharedstatedir}/srpmix
+
+%changelog
+* Fri Jul 17 2009 Masatake YAMATO <yamato@redhat.com>
+- Initial build.
+

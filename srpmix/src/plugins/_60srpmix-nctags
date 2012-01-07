@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-nctags: Run ctags with --excmd=number option for files under srpmix dir
+#
+# Copyright (C) 2011 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+NAME=nctags
+SRPMIX_NCTAGS_DEBUG=
+LIBSRPMIX=libsrpmix.sh
+
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  $0 [--help|-h]"
+    echo "  $0 --name"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] [--name=NAME] ROOTDIR"
+    echo 
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name)
+	        echo $NAME
+		exit 0
+		;;
+	    --name=*)
+                NAME=${1/--name=}
+		;;
+	     --debug)
+	        set -x
+		PS4="${PS4}[${NAME}]"
+		SRPMIX_NCTAGS_DEBUG=yes
+		;;
+	esac
+	shift
+    done
+}
+
+function main
+{
+    local ctags_plugin
+    local ctags_args
+
+    parse_arguments "$@"
+    ctags_plugin=`srpmix-plugin --path-for=ctags`
+    if [ $? != 0 ] ; then
+	return 0
+    fi
+
+    ctags_args="--name=$NAME --ignore-kindex --ctags-args=--excmd=number,--fields=+afiklmnsSzt,--extra=+f+q"
+    for a in "$@"; do
+	case $a in
+	    (--name=*)
+                ;;
+            (*)
+	        ctags_args="$ctags_args $a"
+		;;
+	esac
+    done
+
+    ${ctags_plugin} ${ctags_args}
+    return $?
+}
+
+es_time main "$@"
+exit $?

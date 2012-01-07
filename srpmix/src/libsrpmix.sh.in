@@ -1,0 +1,605 @@
+#!/bin/bash
+########################################################################
+#
+# libsrpmix.sh: support shell functions for srpmix
+#
+# Copyright (C) 2007 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+#variable
+prefix="@prefix@"
+datarootdir="@datarootdir@"
+SRPMIX_USR_DIR=${SRPMIX_USR_DIR:-"@datadir@/@PACKAGE@"}
+SRPMIX_SWRFS_DIR=${SRPMIX_SWRFS_DIR:-"${SRPMIX_USR_DIR}/swrfs"}
+SRPMIX_PLUGIN_DIR=${SRPMIX_PLUGIN_DIR:-"${SRPMIX_USR_DIR}/plugins"}
+SRPMIX_WEAKVIEW_DIST_PLUGIN_DIR=${SRPMIX_WEAKVIEW_DIST_PLUGIN_DIR:-"${SRPMIX_USR_DIR}/weakview-dist-plugins"}
+SRPMIX_HELPER_DIR=${SRPMIX_HELPER_DIR:-"${SRPMIX_USR_DIR}/helpers"}
+SRPMIX_SYSCONF_DIR=${SRPMIX_SYSCONF_DIR:-"@sysconfdir@/srpmix"}
+SRPMIX_BUILD_OPT_RULES_DIR=${SRPMIX_BUILD_OPT_RULES_DIR:-"${SRPMIX_SYSCONF_DIR}/build-opt-rules.d"}
+
+function srpmix_root_user_p
+{
+    [[ "`whoami`" = "root" ]] || [[ "`whoami`" = "$SRPMIX_ROOT_USER" ]]
+    return $?
+}
+
+if srpmix_root_user_p; then
+    SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"@localstatedir@/lib/@PACKAGE@"}
+    SRPMIX_OUTPUT_FORMAT=rpm
+else
+    SRPMIX_VAR_DIR=${SRPMIX_VAR_DIR:-"$HOME/srpmix"}
+    SRPMIX_OUTPUT_FORMAT=swrf
+fi
+
+SRPMIX_SOURCES_DIR=
+SRPMIX_SOURCES_RDIR=sources
+SRPMIX_DB_DIR=
+SRPMIX_DB_RDIR=db
+function srpmix_reset_var_dir
+{
+    SRPMIX_VAR_DIR=$1
+    SRPMIX_SOURCES_DIR="${SRPMIX_VAR_DIR}/${SRPMIX_SOURCES_RDIR}"
+    SRPMIX_DB_DIR="${SRPMIX_VAR_DIR}/${SRPMIX_DB_RDIR}"
+}
+
+SRPMIX_VERSION=@VERSION@
+SRPMIX_MAJOR_VERSION=@SRPMIX_MAJOR_VERSION@
+SRPMIX_MINOR_VERSION=@SRPMIX_MINOR_VERSION@
+SRPMIX_MICRO_VERSION=@SRPMIX_MICRO_VERSION@
+
+SRPMIX_PKG_MAJOR_VERSION=${SRPMIX_MAJOR_VERSION}
+SRPMIX_PKG_MINOR_VERSION=${SRPMIX_MINOR_VERSION}
+SRPMIX_PKG_MICRO_VERSION=0
+
+SRPMIX_PKG_VERSION=${SRPMIX_PKG_MAJOR_VERSION}.${SRPMIX_PKG_MINOR_VERSION}.${SRPMIX_PKG_MICRO_VERSION}
+SRPMIX_PKG_RELEASE=0
+SRPMIX_PKG_PATTERN=$(echo $SRPMIX_PKG_VERSION | sed -e 's/\./\\./g')
+
+SRPMIX_SYSCONF="$SRPMIX_SYSCONF_DIR/srpmix.cf"
+
+if test -f "$SRPMIX_SYSCONF"; then
+  . "$SRPMIX_SYSCONF"
+fi
+srpmix_reset_var_dir "$SRPMIX_VAR_DIR"
+
+SRPMIX_MOCK_USER=${SRPMIX_MOCK_USER:-srpmix}
+
+
+HARDLINK=@HARDLINK@
+RPM2CPIO=@RPM2CPIO@
+CPIO=@CPIO@
+RPM=@RPM@
+RPMBUILD="${RPMBUILD:-@RPMBUILD@}"
+SWRFPM=@SWRFPM@
+SWRFBUILD="${SWRFBUILD:-@SWRFBUILD@}"
+GOSH=@GOSH@
+
+
+function srpmix_abort
+{
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+function srpmix_verify_commands
+{
+    while [ $# -gt 0 ]; do
+	if which $1 > /dev/null 2>&1; then
+	    :
+	else
+	    echo "cannot find $1" 1>&2
+	    srpmix_abort
+	fi
+	shift 
+    done
+}
+
+function srpmix_build_enveloped_name
+{
+    echo $@
+}
+
+function srpmix_build_wrapped_name
+{
+    local package=$1
+    local version=$2
+    local release=$3
+
+    wrapped_name="$package-$version-$release-srpmix"
+    echo ${wrapped_name}
+}
+
+# srpmix_srcdir package version release
+# srpmix_srcdir prints the source directory for (package, version, release)
+function srpmix_srcdir
+{
+    local package=$1
+    local version=$2
+    local release=$3
+
+    local pkg_hash=$(srpmix_srchash ${package})
+    local pkg_root="${SRPMIX_SOURCES_DIR}"/"${pkg_hash}"/"$package"
+
+    if test -n "$release"; then
+	echo "${pkg_root}"/"$version-$release"
+    else
+	echo "${pkg_root}"/"$version"
+    fi
+}
+
+# Relative installdir
+function srpmix_rinstalldir
+{
+    local package=$1
+    local version=$2
+    local release=$3
+
+    local pkg_hash=$(srpmix_srchash ${package})
+    local pkg_root="${pkg_hash}"/"$package"
+    
+    if test -n "$release"; then
+	echo "${pkg_root}"/"$version-$release"
+    else
+	echo "${pkg_root}"/"$version"
+    fi
+}
+
+# Absolute installdir
+function srpmix_installdir
+{
+    local package=$1
+    local version=$2
+    local release=$3
+
+    local pkg_hash=$(srpmix_srchash ${package})
+    local pkg_root=${SRPMIX_SOURCES_RDIR}/"${pkg_hash}"/"$package"
+    
+    if test -n "$release"; then
+	echo "${pkg_root}"/"$version-$release"
+    else
+	echo "${pkg_root}"/"$version"
+    fi
+}
+
+function srpmix_swrfdir
+{
+    local file=$1
+
+    echo "${SRPMIX_SWRFS_DIR}/$(srpmix_srchash `basename $file`)"
+}
+
+function srpmix_srchash
+{
+    local p=$1
+    local b=$(basename "$p")
+    echo ${b:0:1}
+#    echo $1 | sed -e 's/\([a-zA-Z0-9]\).*/\1/'
+}
+
+srpmix_distmap_to_pvr_script='
+(letrec ((kget (lambda (kl ky)
+		 (cond ((null? kl) #f)
+		       ((eq? (car kl) ky) (cadr kl))
+		       (else (kget (cdr kl) ky))))
+	       ))
+  (let loop ((r (read)))
+    (if (eof-object? r)
+	#f
+	(begin
+	  (if (and (list? r)
+		 (eq? (car r) `srpmix-wrap)
+		 (not (null? (cdr r)))
+		 (eq? (cadr r) `name))
+	    (format #t "~a ~a ~a\n" 
+		    (kget r :package)
+		    (kget r :version)
+		    (kget r :release))
+	    #f)
+	  (loop (read))))))'
+
+srpmix_distmap_to_json_script='
+(letrec ((kget (lambda (kl ky)
+		 (cond ((null? kl) #f)
+		       ((eq? (car kl) ky) (cadr kl))
+		       (else (kget (cdr kl) ky))))
+	       ))
+  (display "[")
+  (let loop ((r (read)))
+    (if (eof-object? r)
+	#f
+	(begin
+	  (if (and (list? r)
+		 (eq? (car r) `srpmix-wrap)
+		 (not (null? (cdr r)))
+		 (eq? (cadr r) `name))
+	    (format #t "{\"target-srpm\": ~s, \"package\": ~s, \"version\": ~s, \"release\": ~s, \"wrapped-name\": ~s}," 
+                    (kget r :target-srpm)
+		    (kget r :package)
+		    (kget r :version)
+		    (kget r :release)
+                    (kget r :wrapped-name))
+	    #f)
+	  (loop (read)))))
+  (display "]"))'
+
+# Print :package, :version, and :release field of dist-mapping es espression.
+# Example Input:
+# (srpmix-wrap name :target-srpm "ElectricFence-2.2.2-20.2.src.rpm" 
+#                   :package "ElectricFence" 
+#                   :version "2.2.2" 
+#                   :release "20.2" 
+#                   :wrapped-name "ElectricFence-2.2.2-20.2-srpmix")
+# Expected Output:
+# ElectricFence 2.2.2 20.2
+#
+function srpmix_distmap_to_pvr
+{
+    ${GOSH} -e "${srpmix_distmap_to_pvr_script}"
+}
+
+function srpmix_distmap_to_json
+{
+    ${GOSH} -e "${srpmix_distmap_to_json_script}"
+}
+
+
+function srpmix_cp
+{
+    local from=$1
+    local to=$2
+    local cmd
+
+    cmd=cp
+    if test $(stat --format="%D" $from) = $(stat --format="%D" $to); then
+	cmd=ln
+    fi
+    $cmd $from $to
+}
+
+function srpmix_chmod
+{
+    local d=$1
+    if test -e "$d"; then
+	chmod -R a+r $d
+	find $d -type d -print0 | xargs -0 -e chmod a+x
+	chmod -R u+w $d
+    fi
+}
+
+function srpmix_pkg_name
+{
+    $RPM -qp --queryformat %{NAME} "$1"
+}
+
+function srpmix_dirpkg_name
+{
+    local pkg_name
+    if echo $1 | grep -e '.*\.src\.rpm' > /dev/null 2>&1; then
+	pkg_name=$(srpmix_pkg_name $1)
+    else
+	pkg_name=$1
+    fi
+    echo srpmix-dir-pkg-${pkg_name}
+}
+
+########################################################################
+#
+# es_time
+#
+function es_time
+{
+    TIMEFORMAT=$'(es-time :real %R :user %U :sys %S)' 
+    time "$@"
+    return $?
+}
+#
+########################################################################
+
+#!/bin/bash
+#
+########################################################################
+#
+# es-lang-sh-print: Es printer for sh
+#
+# Author: Masatake YAMATO <jet@gyve.org>
+#
+# Copyright (C) 2007 Masatake YAMATO
+#
+#
+# Permission to use, copy, modify, distribute, and sell this software and its
+# documentation for any purpose is hereby granted without fee, provided that
+# the above copyright notice appear in all copies and that both that
+# copyright notice and this permission notice appear in supporting
+# documentation.
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+# AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+# Except as contained in this notice, the name of the author shall not be
+# used in advertising or otherwise to promote the sale, use or other dealings
+# in this Software without prior written authorization from the author.
+#
+########################################################################
+
+#
+# To use this code in your script as a shell function,
+# Do like:
+#
+# source `which es-lang-sh-print` > /dev/null
+#
+function es_print
+{
+    local xtrace_p
+
+    if set | grep SHELLOPTS | grep xtrace 2>&1 > /dev/null; then
+	xtrace_p=yes
+	set +x
+    fi
+
+    es_print_sans_newline "$@"
+    printf "\n"
+
+    if test "x${xtrace_p}" = xyes; then
+	set -x
+    fi
+}
+
+function __es_print_tail_p
+{
+    if [ "x$1" = "x" ]; then
+	return 0
+    fi
+
+    case "$1" in
+	-s=*)
+            return 1
+	    ;;
+	-S=*)
+            return 1
+	    ;;
+	-[tf])
+	    return 1
+	    ;;
+	-[)
+	    return 1
+	    ;;
+	-])
+	    return 0
+	    ;;
+	-\\[\\])
+	    return 0
+	    ;;
+	-*)
+	    if [ "$2" = yes ]; then
+		return 0
+	    else
+		return 1
+	    fi
+	    ;;
+	*)
+	    return 1
+	    ;;
+    esac
+}
+
+function es_print_sans_newline
+{
+    es_print_value=no
+
+
+    printf "("
+
+    while [ $# -gt 0 ]; do
+	case "$1" in 
+	    --*=*)
+                if [ ${es_print_value} = yes ]; then
+		    printf ") "
+		fi
+
+		__es_echo_n :"`echo $1 | sed -e 's/^--\([^=]*\)=.*$/\1/'`"
+		printf " "
+		__es_echo_n "`echo $1 | sed -e 's/^[^=]*=\(.*\)$/\1/'`"
+		es_print_value=no
+
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
+			printf " "
+		fi
+
+		shift
+		;;
+	    --*)
+		if [ ${es_print_value} = yes ]; then
+		    printf ") "
+		    es_print_value=no
+		fi
+		
+		printf "%s" ":${1/--/}"
+		es_print_value=yes
+		printf " ("
+
+		shift
+		;;
+	    -[])
+	        printf "()"
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
+		shift
+		;;
+	    -[)
+	        printf "("
+		shift
+		;;
+            -])
+	        printf ")"
+                if ! __es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
+		shift
+		;;
+	    -S=*)
+	    # symbol
+                __es_echo_n \|${1/-s=/}\|
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
+		shift
+		;;
+	    -s=*)
+	    # string
+                __es_echo_n \"${1/-s=/}\"
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
+		shift
+		;;
+	    -[tf])
+	        printf "%s" "#${1:1}"
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
+		shift
+		;;
+	    *)
+		__es_echo_n "$1"
+		if ! __es_print_tail_p "$2" "${es_print_value}"; then
+		    printf " "
+		fi
+		shift
+		;;
+	    esac
+    done
+    
+    if [ ${es_print_value} = yes ]; then
+		    printf ")"
+		    es_print_value=no
+    fi
+
+    printf ")"
+}
+
+function __es_echo_n
+{
+    local i
+    local c
+    local str
+    local len
+
+
+    len=${#1}
+    if (( $len == 0 )); then
+	return
+    fi
+
+
+    if (( $len == 1 )); then
+	printf "%s" "$1"
+	return
+    fi
+
+    
+    if [[ ${1:0:1} == '"' && ${1:$(($len - 1)):1} == '"' ]]; then
+	str=${1:1:$(($len - 2))}
+	printf "\""
+	for ((i = 0; i < ${#str}; i++)); do
+	    c=${str:i:1}
+	    if [[ $c == '"' || $c == '\' ]]; then
+		printf "\\"
+	    fi
+	    printf "%s" $c
+	done
+	printf "\""
+    else
+	printf "%s" $1
+    fi
+	
+}
+
+# srpmix_create_swrf <workdir> <wrap_opts> [<target srpms>...]
+function srpmix_create_swrf
+{
+    local workdir=$1
+    shift
+    local wrap_opts=$1
+    shift
+
+    local ix_debug="_srpmix_ix_debug_option %{nil}"
+    local plugin_debug="_srpmix_plugin_debug_option %{nil}"
+    for x in $wrap_opts; do
+	if test "x$x" = x"--debug"; then
+	    ix_debug="_srpmix_ix_debug_option --debug"
+	    plugin_debug="_srpmix_plugin_debug_option --debug"
+
+	fi
+    done
+
+    for srpm in $@; do
+	pvr=$($RPM -qp --queryformat %{NAME}-%{VERSION}-%{RELEASE} $srpm)
+
+	# TEMPORARY code: true --- srpmix1 requires this.
+	#if test -z "${OUTPUT_DIR}"; then
+	#	check_pvr_rpm "${pvr}"
+	#else
+	#	check_pvr_output_dir "${pvr}"
+	#fi
+	
+	wrap_log=$(srpmix-wrap $wrap_opts $srpm)
+        if test "$?" != "0"; then exit 1; fi
+        file=$(echo $wrap_log | tail -1 | sed 's/.*:file "\(.*\)".*/\1/')
+
+        PS4="${PS4}[swrfbuild]"                           \
+	$SWRFBUILD --define "_rpmdir $workdir/RPMS"       \
+	           --define "_srcrpmdir $workdir/SRPMS"   \
+	           --define "_builddir $workdir/BUILD"    \
+	  	   --define "_buildrootdir $workdir/BUILDROOT" \
+                   --define "_specdir $workdir/SPECS"     \
+	           --define "_sourcedir $workdir/SOURCES" \
+	           --define "$ix_debug"                   \
+	           --define "$plugin_debug"               \
+	           --rebuild -ba ${file} \
+            || exit 2
+    done
+
+    for rpm in `find $workdir/RPMS -name '*.noarch.rpm'`; do
+        mv $rpm $(dirname $rpm)/$(basename $rpm .noarch.rpm)
+    done
+
+}
+
+function srpmix_archives_name
+{
+    echo $1 | sed -e "s/-srpmix-${SRPMIX_PKG_PATTERN}/-srpmix-archives-${SRPMIX_PKG_VERSION}/"
+}
+
+#
+# (Test
+#
+#   $ ./es-lang-sh-print  a b c --d --e f -t -f --g h i --z f --j=a --f=f a b c -f a b c --z
+#    (a b c :d () :e (f #t #f) :g (h i) :z (f) :j a :f f a b c #f a b c :z ())
+#
+# )
+#
+: libsrpmix.sh ends here

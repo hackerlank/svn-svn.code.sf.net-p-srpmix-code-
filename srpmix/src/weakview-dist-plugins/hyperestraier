@@ -1,0 +1,110 @@
+#!/bin/bash
+DIST=$1
+DIR=$2
+VAR_DIR=$3
+
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+if [ -n $VAR_DIR ]; then
+    srpmix_reset_var_dir "$VAR_DIR"
+fi
+
+function verify_arguments
+{
+    if [ -z "$DIST" ]; then
+	return 1
+    fi
+    
+    if ! [ -d "$DIR" ]; then
+	return 1
+    else
+	DIR=$(cd $DIR; pwd)
+    fi
+    
+    if ! [ -d "${SRPMIX_VAR_DIR}/dists/$DIST" ]; then
+	return 1
+    fi
+
+    return 0
+}
+
+function verify_idx_dirs
+{
+    local d
+    for d in ${SRPMIX_VAR_DIR}/dists/$DIST/packages/*/*/plugins/hyperestraier/idx; do
+	if ! [  -d $d ]; then
+	    return 1
+	fi
+    done
+
+    return 0
+}
+
+function create_idx
+{
+    local idx_dir=$1
+
+
+    mkdir -p $idx_dir && estcmd create -xh3 $idx_dir
+
+    return $?
+}
+
+function merge
+{
+    local idx_dir=$1    
+    local d
+    
+
+    for d in ${SRPMIX_VAR_DIR}/dists/$DIST/packages/*/*/plugins/hyperestraier/idx; do
+	if [ -d $d ]; then
+	    if ! estcmd merge $idx_dir $d; then
+		{ 
+		    echo '*** ' 
+		    echo '*** IDX MERGE FAILURE: ' estcmd merge $idx_dir $d
+		    echo '*** '
+		} 1>&2
+		return 1
+	    fi
+	fi
+    done
+
+    return 0
+}
+function main
+{
+    local idx_dir
+
+
+    if ! verify_arguments; then
+	return 1
+    fi
+
+    if ! verify_idx_dirs; then
+	return 1
+    fi
+
+    idx_dir=$DIR/idx
+    if ! create_idx $idx_dir; then
+	return 1
+    fi
+
+    if ! merge $idx_dir; then
+	return 1
+    fi
+    
+    return 0
+}
+
+time main
+exit $?
+

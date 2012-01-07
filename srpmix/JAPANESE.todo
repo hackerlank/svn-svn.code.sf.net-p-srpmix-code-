@@ -1,0 +1,565 @@
+* lcopy用のdists<done>
+
+* lcopyのgrouping
+
+* nvreを保存するようにすること
+
+* 'grep -nH -e 'error: Package already exists: %package debuginfo' *'
+
+* rhel3のvanilla
+
+* 別名が与えれること。
+
+* binariesからdist mappingの元を得る。
+
+ls | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'  | sed  -e 's/\(.*\)-[0-9].*/\1/'   | less | while read X; do echo "$(ls | grep $X | wc -l): $X" ; done | sort -n | uniq 
+10: jbossts
+11: gnupg
+11: net-snmp
+12: jboss-seam
+12: kdelibs
+12: kdenetwork
+12: openmpi
+13: ghostscript
+14: jboss-cache
+15: GFS
+15: openoffice.org
+16: kdegraphics
+16: openoffice
+22: mysql
+31: rpmdb-redhat
+35: jbossas
+87: comps
+
+** grep BuildRequires * | sed -e 's/.*BuildRequires://' | tr ',' ' ' |sed 's/>\?= *[^ \t]\+//g' | while read; do echo $REPLY; done | tr ' ' "\n" | sort | uniq -c | sort -nr |less
+
+    165 ant
+    151 jpackage-utils
+    122 junit
+    102 ant-nodeps
+     93 log4j
+     89 xerces-j2
+     78 jboss-common
+     74 dom4j
+     67 jgroups
+     67 concurrent
+     66 jakarta-commons-logging
+     66 jakarta-commons-collections
+     65 jfreechart
+     65 jcommon
+     63 jakarta-commons-beanutils
+     62 antlr
+     61 zlib-devel
+     61 xml-commons-resolver
+     61 jakarta-commons-digester
+     59 xalan-j2
+     57 jboss-aop
+     57 avalon-framework
+     56 javassist
+     54 jbossweb
+     51 glassfish-jaf
+     51 bsf
+     51 ant-junit
+     50 jbossas
+     50 jakarta-commons-fileupload
+     50 hibernate3-ejb-persistence-3.0-api
+     50 hibernate3
+     50 cglib
+     49 qdox
+     49 jakarta-commons-codec
+     49 jacorb
+     49 hsqldb
+     49 avalon-logkit
+     47 zip
+     47 jbossxb
+     47 jakarta-commons-lang
+     47 hibernate3-entitymanager
+     47 hibernate3-annotations
+     46 xjavadoc
+     46 jboss-serialization
+     45 xml-commons-jaxp-1.3-apis
+     45 XFree86-devel
+     45 wstx
+     44 xdoclet
+     44 jboss-cache
+     44 java-devel
+     44 jakarta-commons-discovery
+     43 xml-commons-repolib
+     43 xerces-j2-repolib
+     43 xdoclet-repolib
+     43 xalan-j2-repolib
+     43 snmptrapappender-repolib
+     43 quartz-repolib
+     43 qdox-repolib
+     43 log4j-repolib
+     43 junit-repolib
+     43 jboss-profiler-jvmti-repolib
+     43 javassist-repolib
+     43 jakarta-slide-webdavclient-repolib
+     43 jakarta-commons-httpclient-repolib
+     43 jakarta-commons-codec-repolib
+     43 gnu-trove-repolib
+     43 findutils
+     43 dtdparser-repolib
+     43 dom4j-repolib
+     43 concurrent-repolib
+     41 sed
+     41 glassfish-jstl
+     41 glassfish-jsf
+     41 asm
+     40 gnu-trove
+     40 bcel
+     39 xml-security
+     39 quartz
+     39 gnu-getopt
+     38 libtool
+     38 flex
+     38 bsh
+     37 jakarta-commons-httpclient
+     37 dtdparser
+     36 xjavadoc-repolib
+     36 java-1.5.0-bea-devel
+     36 java-1.5.0-bea
+     36 hibernate3-commons-annotations
+     35 xml-security-repolib
+     35 wstx-repolib
+     35 velocity-jboss-repolib
+     35 velocity-jboss
+     35 snmptrapappender
+     35 servletapi6-repolib
+     35 servletapi6
+     35 odmg-repolib
+     35 odmg
+     35 juddi-repolib
+     35 joesnmp-repolib
+     35 joesnmp
+     35 jgroups-repolib
+     35 jbossxb-repolib
+     35 jbossts-repolib
+     35 jbossts
+     35 jboss-common-repolib
+     35 jaxen-repolib
+     35 jaxen
+     35 jakarta-slide-webdavclient
+     35 jakarta-commons-fileupload-repolib
+     35 jakarta-commons-discovery-repolib
+     35 jakarta-commons-digester-repolib
+     35 jakarta-commons-collections-repolib
+     35 jakarta-commons-beanutils-repolib
+     35 jacorb-repolib
+     35 hibernate3-repolib
+     35 gnu-getopt-repolib
+     35 gawk
+     35 cglib-repolib
+     35 bsh-repolib
+     35 bsf-repolib
+     35 bcel-repolib
+     35 avalon-logkit-repolib
+     35 avalon-framework-repolib
+     35 ant-trax
+     35 antlr-repolib
+     33 libpng-devel
+     33 libjpeg-devel
+     33 jboss-aop-repolib
+     33 hibernate3-validator
+     33 glassfish-jaxws
+     33 glassfish-javamail
+     33 bison
+     32 jbossweb-repolib
+     32 jboss-serialization-repolib
+     32 jboss-remoting-repolib
+     32 jboss-remoting
+     32 jboss-cache-repolib
+     32 javacc3-repolib
+     32 jakarta-commons-lang-repolib
+     32 hibernate3-entitymanager-repolib
+     32 hibernate3-annotations-repolib
+     32 autoconf
+     30 xml-commons-apis
+     30 wsdl4j
+     30 mx4j
+     30 jboss-jbpm-jpdl
+     30 gcc-c++
+     29 qt-devel
+     29 kdelibs-devel
+     29 jbossws-spi
+     29 jbossws-repolib
+     29 jbossws
+     29 jboss-messaging-repolib
+     29 jboss-messaging
+     29 jboss-jbpm-jpdl-repolib
+     29 jboss-jbpm-bpel-repolib
+     29 jboss-jbpm-bpel
+     29 hsqldb-repolib
+     29 glassfish-jstl-repolib
+     29 glassfish-jsf-repolib
+     29 glassfish-javamail-repolib
+     29 glassfish-jaf-repolib
+     27 jfreechart-repolib
+     27 jcommon-repolib
+     27 jboss-microcontainer
+     27 glassfish-jaxb
+     26 gtk2-devel
+     25 automake
+     25 asm-repolib
+     24 monolog
+     24 javacc
+     23 objectweb-anttask
+     23 jbossws-common
+     23 glibc-devel
+     21 ws-commons-policy-repolib
+     21 ws-commons-policy
+     21 unzip
+     21 kdebase-devel
+     21 jboss-jaxr-repolib
+     21 jboss-jaxr
+     19 wsdl4j-repolib
+     19 servletapi5
+     19 jta
+     19 java
+     18 desktop-file-utils
+     18 axis
+     17 velocity
+     17 saxon-scripts
+     17 sane-backends-devel
+     17 maven
+     17 juddi
+     17 jbossws-spi-repolib
+     17 jbossws-native42-repolib
+     17 jbossws-native42
+     17 jbossws-framework-repolib
+     17 jbossws-framework
+     17 jbossws-common-repolib
+     16 wsdl4j16-repolib
+     16 wsdl4j16
+     16 libtiff-devel
+     16 java-javadoc
+     16 j2ee-connector
+     16 ant-javamail
+     16 ant-antlr
+     15 rsync
+     15 kernel-source
+     15 jboss-microcontainer-repolib
+     15 glib2-devel
+     15 gettext
+     15 bsh2
+     14 saaj
+     14 jdbm
+     14 jboss-jrunit
+     14 jaxrpc
+     14 java-1.5.0-devel
+     14 java-1.4.2-devel
+     14 imlib-devel
+     14 gphoto2-devel
+     14 gnu.trove
+     14 derby
+     14 cups-devel
+     14 berkeleydb
+     14 ant-xslp
+     14 ant-apache-bcel
+     13 zlib
+     13 VFlib2-devel
+     13 perl
+     13 patchutils
+     13 libpng
+     13 glib-devel
+     13 glassfish-jaxws-repolib
+     13 glassfish-jaxb-repolib
+     12 libxml-devel
+     12 jbossws-wsconsume-impl-repolib
+     12 jbossws-wsconsume-impl
+     12 jbossws-jboss42-repolib
+     12 jbossws-jboss42
+     12 jaf
+     12 gcc
+     12 coreutils
+     11 struts
+     11 python-devel
+     11 medor-expression
+     11 libexif-devel
+     11 fribidi-devel
+     11 freeglut-devel
+     11 fractal
+     10 ws-scout0-repolib
+     10 ws-scout0
+     10 tomcat5-servlet-2.4-api
+     10 tanukiwrapper
+     10 stax-api
+     10 saxon
+     10 python
+     10 picocontainer
+     10 perseus-persistence
+     10 perseus-dependency
+     10 perseus-cache
+     10 jorm-rdb-adapter
+     10 jboss-vfs-repolib
+     10 jboss-vfs
+     10 java-gcj-compat-devel
+     10 javacc3
+     10 jakarta-commons-logging-jboss-repolib
+     10 hibernate3-validator-repolib
+     10 hibernate3-commons-annotations-repolib
+      9 xmlbeans
+      9 maven-plugins-base
+      9 libstdc++-devel
+      9 gnome-libs-devel
+      8 ws-jaxme
+      8 pkgconfig
+      8 perseus-concurrency
+      8 medor
+      8 make
+      8 libxml2-devel
+      8 libvorbis-devel
+      8 libieee1284-devel
+      8 libgnomeui-devel
+      8 jboss4-buildmagic-tasks
+      8 java-1.5.0-sun-devel
+      8 java-1.5.0-sun
+      8 java-1.4.2-bea-devel
+      8 java-1.4.2-bea
+      8 db4-devel
+      8 automake14
+      7 ws-scout
+      7 tomcat5
+      7 perseus-pool
+      7 openjade
+      7 mockobjects
+      7 maven-plugin-xdoc
+      7 maven-plugin-test
+      7 maven-plugin-license
+      7 lucene23
+      7 kdelibs-sound-devel
+      7 jms
+      7 javamail
+      7 jakarta-commons-modeler
+      7 jakarta-commons-logging-jboss
+      7 gtk+-devel
+      7 gimp-print-devel
+      ...
+
+** gc for blacklist.d
+
+** Do yum install some build/required packages in autogen.sh.: --bootstrap
+** adduser brewbuilder, mockbuild
+** --make-rpm
+
+* brewweb
+
+* live media ##
+** mummify/slice ##
+** repoをわける。--groupオプション?
+   group-name,group-source-dir,group-output-dir,group-hooks
+
+* srpmix.org
+** 全文検索 #
+** ウェブインターフェイス
+
+* plugin for lcopy <done>
+
+** compsの生成 <need check>
+** root権限がない場合のattachは？ <need check>
+** gc-repo.scmでのattachmentの扱い <need check>
+** attachデータをpluginから作れるようにする。<need check>
+
+For version 4
+========================================================================
+
+* ビルド率
+** 環境変数をつかえるようにする。
+
+* External bug
+** rpmがクラッシュする。
+** createrepoがおかしい。
+** etagsが一度クラッシュしている。
+   php-5.3.0-6.fc12-srpmixの処理中であるが、再現しない。
+* ctags crashed at
+   5  0x0000000000412dc9 in createTagsForEntry \
+   (entryName=0x97e2c0 "gcc-2.96-20000731/libstdc++/config/dec-osf.ml") at main.c:303
+
+
+* pluginのAPIを強化する。
+** pluginを個別パッケージにさらに分解する。#
+*** パッケージ削除の順序によって/var/lib/srpmix/sources/a/avahi/0.6.25-3.fc11が残る。@
+  sudo rpm -e  avahi-0.6.25-3.fc11-srpmix avahi-0.6.25-3.fc11-srpmix-plugins   avahi-0.6.25-3.fc11-srpmix-archives 
+
+* %kouji tracking
+** db, swrfのディレクトリを一階層深くする。
+* weakviewはmakeで作らせる。
+* # TODO: Parallel dir-pkg building  may conflicts
+
+* その他
+** .specを拡張子に持たないspecファイルの処理
+** repoファイルでgpgcheck=0としていても--gpgnocheckの指定を必要とするパッケージがある。
+** srpmixでdownloadしたsrc.rpmをキャッシュする。
+
+
+** weakviewのsrc.rpmを作るときにrootかそうでないかで動作が違う。これは期待通りか？ 
+   --- 期待通りだか混乱のもととなるので仕様を見直す。
+** /usr/localに入れた場合でも正しく動作するように編成する。
+
+* primary.xml.gzの中のなぞのfile entry
+<package type="rpm">
+  <name>srpmix-weakview-packages-kojipkgs-fedoraproject-org-20090825</name>
+  <arch>noarch</arch>
+  <version epoch="0" ver="3.107.0" rel="0.fc11"/>
+  <checksum type="sha256" pkgid="YES">3b41261817f942abe5cc8bd6cb1c9f0bb257db565db5e24bcb4185155faae9b9</checksum>
+  <summary>Srpmix weakview kojipkgs-fedoraproject-org-20090825 label to specfied version of packages</summary>
+  <description>Srpmix weakview from packages to kojipkgs-fedoraproject-org-20090825</description>
+  <packager/>
+  <url/>
+  <time file="1251242497" build="1251239823"/>
+  <size package="2262219" installed="0" archive="1921436"/>
+<location href="weakview/.backup/srpmix-weakview-packages-kojipkgs-fedoraproject-org-20090825-3.107.0-0.fc11.noarch.rpm"/>
+  <format>
+    <rpm:license>Unknown</rpm:license>
+    <rpm:vendor/>
+    <rpm:group>System/Daemon</rpm:group>
+    <rpm:buildhost>sbuild.localdomain</rpm:buildhost>
+    <rpm:sourcerpm>srpmix-weakview-packages-kojipkgs-fedoraproject-org-20090825-3.107.0-0.fc11.src.rpm</rpm:sourcerpm>
+    <rpm:header-range start="280" end="2079384"/>
+    <rpm:provides>
+      <rpm:entry name="srpmix-weakview-packages-kojipkgs-fedoraproject-org-20090825" flags="EQ" epoch="0" ver="3.107.0" rel="0.fc11"/>
+    </rpm:provides>
+    <rpm:requires>
+      <rpm:entry name="srpmix-dir-base"/>
+    </rpm:requires>    <file>/var/lib/srpmix/packages/f/flamerobin/kojipkgs-fedoraproject-org-20090825</file>
+    <file>/var/lib/srpmix/packages/p/polyxmass-bin/kojipkgs-fedoraproject-org-20090825</file>
+    <file>/var/lib/srpmix/packages/p/pastebin/kojipkgs-fedoraproject-org-20090825</file>
+
+  </format>
+</package>
+
+*** use <<<here-string
+*** pfor
+
+* yum method
+** iso method
+** GCを汎用化する。gc_method and download_method
+
+done
+-------------------------------------------------------------------------------------
+* ビルドの過程でsession idをふりなおす。これがないとgccをビルドできない。
+** ひっかかる行をspecファイルから消すようにして潰した。<done>
+
+* kindexがそもそも起動していない場合がある。<done>
+
+* subversionのrevによってrelease番号を指定する現状の機構では、
+  release番号をあげるのにsvn commitが必要になる。release番号だけmakeかconfigure
+  経由で変更したい。<done>
+
+* kindexのパスが絶対パスになってるのを直す。*/pre-buildの部分を ../../pre-buildに書きかえる。 <done>
+
+
+** 配列を使って複数のrulesオプションを渡せるようにする。<not-tested>
+** インストールシステム上でのpluginsの実行をつぶす。<done>
+
+* Use gauche only, don't use guile. <done>
+
+** rpm -eでよりきれい消えるようにする。<done>
+
+** srpmix-hashdir*-, srpmix-pkgdir-foo- <done>
+
+* defaultのテストをoffにする。<done>
+
+* testのsrc.rpmの*.cをBUILDにに入れる。<done>
+
+* srpmix-attach <done>
+** attachによるパッケージをhashed dirに入れる。 <done>
+
+** vanillaの生成位置を調整する。<done>
+
+** -confオプションの追加 <done>
+* errorログ中のspecダンプから%changelogを削る。<done>
+
+* Generate Maekfile in sbuild <done>
+
+** cscopeがクラッシュする。 <done>
+** deco-archive -> read -r <may ok>
+
+* sopのdeployに対するハードリンクがない。<done>
+** gen repo file from name <done>
+** installer<done>
+** logを空にする、あるいはgzipする。<done>
+** kindexでのcscopeのサポート <maybe done>
+
+** jpackage cradle: http://www.jpackage.org/yum.php <done>
+**  rpmfusion cradle: http://rpmfusion.org/   <done>
+
+*** weakviewのattachment <done>
+
+** recommendation package <done>
+    #                                                                                                              
+    # libtool autoconf autoconf213 automake automake14 automake15 automake16 automake17                            
+    # gettext-devel                                                                                                
+    # glib-devel glib2-devel gtk2-devel gtk+-devel                                                                 
+    # * Extra langauge                                                                                             
+    # mono-devel ruby-devel perl-devel python-devel php-devel                                                      
+    # * Java                                                                                                       
+    # libgcj-devel jpackage-utils maven2                                                                           
+    # java-1.6.0-openjdk-devel                                                                                     
+    # eclipse
+
+* top level plugin <done>
+
+* mirrorスクリプトだけ独立させる<done>
+* srpmix-request -> sop/requestへ<done>
+* tarball<done>
+
+* alternativeを駆使して変動するdists名へのsymbolic linkをで作る。 <done>
+
+* 10srpmix-vanilla --- xz の対応 <done>
+
+
+After version 4
+========================================================================
+Generice Directory Structure Rendering Framework
+Improve spec arrange stage, and mock <done>
+real package management
+extra backend for lcopy, deb, tar.gz...
+** swrfの拡張子を確立する。???
+
+
+
+
+26338/32570 - i/ipsec-tools-0.2.5-0.7.rhel3.5-srpmix-3.108.0-0.fc11.noarch.rpm  Traceback (most recent call last):
+  File "/usr/share/createrepo/genpkgmetadata.py", line 233, in <module>
+    main(sys.argv[1:])
+  File "/usr/share/createrepo/genpkgmetadata.py", line 207, in main
+    mdgen.doPkgMetadata()
+  File "/usr/lib/python2.6/site-packages/createrepo/__init__.py", line 364, in doPkgMetadata
+    self.writeMetadataDocs(packages)
+  File "/usr/lib/python2.6/site-packages/createrepo/__init__.py", line 527, in writeMetadataDocs
+    self.primaryfile.write(po.xml_dump_primary_metadata())
+  File "/usr/lib64/python2.6/gzip.py", line 197, in write
+    self.fileobj.write( self.compress.compress(data) )
+IOError: [Errno 5] Input/output error
+make: *** [repodata/primary.xml.gz] Error 1
+make: Leaving directory `/srv/sources/attic/cradles/ftp.redhat.com/repo'
++ for cradle in '${SOP_CRADLES_DIR}/*'
++ cf=/srv/sources/attic/cradles/jpackage-generic/cf
+++ basename /srv/sources/attic/cradles/jpackage-generic
++ name=jpackage-generic
++ test -z ftp.redhat.com
++ test ftp.redhat.com = jpackage-generic
++ for cradle in '${SOP_CRADLES_DIR}/*'
++ cf=/srv/sources/attic/cradles/kojipkgs.fedoraproject.org/cf
+++ basename /srv/sources/attic/cradles/kojipkgs.fedoraproject.org
++ name=kojipkgs.fedoraproject.org
++ test -z ftp.redhat.com
++ test ftp.redhat.com = kojipkgs.fedoraproject.org
++ for cradle in '${SOP_CRADLES_DIR}/*'
++ cf=/srv/sources/attic/cradles/rpmfusion-free-rawhide-source/cf
+++ basename /srv/sources/attic/cradles/rpmfusion-free-rawhide-source
++ name=rpmfusion-free-rawhide-source
++ test -z ftp.redhat.com
++ test ftp.redhat.com = rpmfusion-free-rawhide-source
++ for cradle in '${SOP_CRADLES_DIR}/*'
++ cf=/srv/sources/attic/cradles/user/cf
+++ basename /srv/sources/attic/cradles/user
++ name=user
++ test -z ftp.redhat.com
++ test ftp.redhat.com = user
+
+real    2648m25.477s
+user    5493m36.020s
+sys     4035m31.155s

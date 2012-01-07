@@ -1,0 +1,14 @@
+%_srpmix_ix_debug_option         %{nil}
+%_srpmix_ix_option               %{_srpmix_ix_debug_option}
+
+%_srpmix_plugin_debug_option     %{nil}
+%_srpmix_plugin_option           %{_srpmix_plugin_debug_option}
+
+%_srpmix_core_plugins            coreutils,file,etags
+# %_srpmix_core_plugins            ${nil}
+
+%_srpmix_db_debug_option         %{nil}
+%_srpmix_db_option               %{_srpmix_db_debug_option}
+
+# See processBinaryFiles() in rpm-4.7.0/build/files.c
+%_binaries_in_noarch_packages_terminate_build 0

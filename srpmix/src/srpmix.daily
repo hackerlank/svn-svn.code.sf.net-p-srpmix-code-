@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix.daily --- Run hardlink on deployed source codes
+#
+# Copyright (C) 2008 Masato Taruishi
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# This code is drived from srpmix.daily in srpmix.
+#
+#
+########################################################################
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+
+if rpm -qi sop > /dev/null 2>&1; then
+    echo "*** sop's cron job will do the same task" 1>&2
+    exit 0
+fi
+
+if test "x$FIND_OPTIONS" = "x"; then
+  FIND_OPTIONS='-mtime 0'
+fi
+
+source libsrpmix.sh
+find $SRPMIX_SOURCES_DIR/*/*/ -maxdepth 1 $FIND_OPTIONS	\
+    | grep -v "/\$"					\
+    | xargs -d '\n' -n1 dirname				\
+    | sort						\
+    | uniq						\
+    | xargs -d '\n' -n1 --verbose $HARDLINK 
+

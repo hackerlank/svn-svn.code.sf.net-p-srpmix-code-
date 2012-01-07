@@ -1,0 +1,335 @@
+#!/bin/bash
+
+TARGET_NAME=
+TARGET_SRPM=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+MY_TMPDIR=
+WRAP_OPTS=""
+RELEASE=
+OUTPUT_DIR=
+
+SRPMIX_DEBUG=""
+SRPMIX_BUILD_OPTS="${SRPMIX_BUILD_OPTS}"
+SRPMIX_DB_OPTS="${SRPMIX_DB_OPTS}"
+SRPMIX_DIR_PKG_OPTS=
+YUM_OPTS=
+WGET_OPTS=
+
+RUN_PLUGINS=
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix [--hardlink]"
+    echo "         [--output-dir=DIR]"
+    echo "         [--output-format=<rpm|swrf>]"
+    echo "         [--release=RELEASE]"
+    echo "         [--debug]"
+    echo "         [--ignore-error]"
+    echo "         [--target=ARCH]"
+    echo "         [--multi-targets]"
+    echo "         [--keep-original]"
+    echo "         [--yum=YUM_OPTIONS]"
+    echo "         [--wget=WGET_OPTIONS]"
+    echo "         [--run-plugins]"
+    echo "          --name=PACKAGE|--srpm=SRPM"
+    echo ""
+    echo "  srpmix --help"
+    echo ""
+    echo "ARCH: i386(not for kenel), i686, x86_64, ia64, s390, s390x, ppc, or ppc64"
+    echo ""
+    echo "Environment variables:"
+    echo "  SRPMIX_BUILD_OPTS"
+    echo "  SRPMIX_DB_OPTS"
+    echo ""
+#    TODO: Multi targets
+#    TODO: URL support
+#    echo ""
+#    echo "As SRPM a url like http://... is acceptable."
+#
+#    TODO: --git
+#          --hg
+#          --tgz
+#          --dir
+#  
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+            --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name=*)
+                TARGET_NAME=$(echo "$1" | sed 's/--name=//')
+                ;;
+	    --srpm=*)
+	        TARGET_SRPM=$(echo "$1" | sed 's/--srpm=//')
+		;;
+	    --release=*)
+		RELEASE=$(echo "$1" | sed 's/--release=//')
+		SRPMIX_PKG_RELEASE=$RELEASE
+	        WRAP_OPTS="$WRAP_OPTS --release=$RELEASE"
+		ENVELOP_OPTS="$ENVELOP_OPTS --release=$RELEASE"
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
+	        ;;
+	    --hardlink)
+	        export SRPMIX_DO_HARDLINK=yes
+	        ;;
+	    --ignore-error)
+	        export SRPMIX_IGNORE_ERROR=yes
+		;;
+	    --multi-targets)
+	        export SRPMIX_MULTI_TARGETS=yes
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
+		;;
+            --keep-original)
+	        export SRPMIX_KEEP_ORIGINAL=yes
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
+		;;
+	    --output-dir=*)
+	        OUTPUT_DIR=$(echo "$1" | sed 's/--output-dir=//')
+		if test -d "${OUTPUT_DIR}"; then
+		    OUTPUT_DIR=$(cd $OUTPUT_DIR; pwd)
+		else
+		    srpmix_abort "No such directory: ${OUTPUT_DIR}"
+		fi
+		;;
+	    --output-format=*)
+	        export SRPMIX_OUTPUT_FORMAT=$(echo $1 | sed 's/--output-format=//')
+		;;
+	    --target=*)
+	        export SRPMIX_TARGET=$(echo $1 | sed 's/--target=//')
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
+		;;
+	    --debug)
+	        SRPMIX_DEBUG=yes
+		SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS $1"
+		SRPMIX_DB_OPTS="--debug ${SRPMIX_DB_OPTS}"
+		SRPMIX_DIR_PKG_OPTS="--debug"
+		set -x
+		PS4="${PS4}[]"
+		;;
+	    --yum=*)
+	        YUM_OPTS=$(echo $1 | sed 's/--yum=//')
+		;;
+	    --wget=*)
+	        WGET_OPTS=$(echo $1 | sed 's/--wget=//')
+		;;
+	    --run-plugins)
+	        RUN_PLUGINS=1
+		;;
+	    --*)
+	        print_usage 1>&2
+		srpmix_abort "Unknow option: $1"
+		;;
+	    *)
+	       break
+	       ;;
+	 esac
+	 shift
+    done
+    
+    if test "x$1" != "x"; then
+	print_usage 1>&2
+	srpmix_abort "too many arguments"
+    fi
+
+    if test -z "${OUTPUT_DIR}" && test "x${SRPMIX_OUTPUT_FORMAT}" = "xrpm"; then
+	if ! srpmix_root_user_p; then
+	    srpmix_abort "You must be root to run this program"
+	fi
+    fi
+
+    if test -z "${TARGET_NAME}" -a -z "${TARGET_SRPM}"; then
+	print_usage 1>&2
+	srpmix_abort "Specify either --name or --srpm"
+    fi
+
+    if test -n "${TARGET_NAME}" -a -n "${TARGET_SRPM}"; then
+	print_usage 1>&2
+	srpmix_abort "Specify either --name or --srpm"
+    fi
+
+    if test -n "${TARGET_SRPM}"; then
+	if test ! -f "${TARGET_SRPM}"; then
+	    case "${TARGET_SRPM}" in
+		http://*|ftp://*)
+		    wget ${WGET_OPTS} -O ${MY_TMPDIR}/$(basename ${TARGET_SRPM}) ${TARGET_SRPM}
+		    if test $? = 0; then
+			TARGET_SRPM="${MY_TMPDIR}/$(basename ${TARGET_SRPM})"
+		    else
+			srpmix_abort "Failed in download ${TARGET_SRPM}" 
+		    fi
+		    ;;
+		*)
+		    srpmix_abort "No way to retrieve ${TARGET_SRPM}"
+		    ;;
+	    esac
+	else
+	    srpmix_cp ${TARGET_SRPM} ${MY_TMPDIR}/
+	    TARGET_SRPM=${MY_TMPDIR}/$(basename ${TARGET_SRPM})
+	fi
+    fi
+
+    if test -n "${TARGET_NAME}"; then
+	yumdownloader ${YUM_OPTS} --destdir=${MY_TMPDIR} --source "${TARGET_NAME}"
+	TARGET_SRPM=$(/bin/ls ${MY_TMPDIR}/*.src.rpm)
+    fi
+
+    SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS --output-format=$SRPMIX_OUTPUT_FORMAT"
+    SRPMIX_BUILD_OPTS="$SRPMIX_BUILD_OPTS --output-dir=$MY_TMPDIR"
+    
+    SRPMIX_BUILD_OPTS=" $SRPMIX_BUILD_OPTS"
+}
+
+function opt_rules
+{
+    find ${SRPMIX_BUILD_OPT_RULES_DIR} -xtype f -name '*.scm' -perm -u=r \
+	| sort -n   \
+	| xargs cat \
+	| $GOSH ${SRPMIX_HELPER_DIR}/build-opt-rules "$(basename $1)"
+}
+
+function dirpkg_installed_p
+{
+    local srpm=$1
+    local dirpkg=$(srpmix_dirpkg_name $srpm)
+
+    rpm -qi $dirpkg >/dev/null 2>&1
+    return $?
+}
+
+function dirpkg_created_p
+{
+    local srpm=$1
+    local output_dir=$2
+    local p=$(srpmix_srchash $srpm)
+    local f=${output_dir}/dir-pkg/$p/$(srpmix_dirpkg_name $srpm)-${SRPMIX_PKG_MAJOR_VERSION}*.rpm
+
+    local r
+    test -f $f
+    r=$?
+    if test $r = 2; then
+       echo "test -f meets multiple arguments: " 1>&2
+       ls $f 1>&2
+       echo 1>&2
+       echo 1>&2
+    fi
+    return $r
+}
+
+function core_build
+{
+    local xopt
+    mapfile -t xopt < <(opt_rules $TARGET_SRPM)
+    srpmix-build "${xopt[@]}" $SRPMIX_BUILD_OPTS --srpm=$TARGET_SRPM
+    return $?
+}
+
+function dir_pkg_build
+{
+    local pkg_name=$(srpmix_pkg_name $TARGET_SRPM)
+    local p=$(srpmix_srchash $pkg_name)
+    if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+	if ! dirpkg_installed_p $TARGET_SRPM; then
+	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR
+	fi
+    else
+	if ! dirpkg_created_p $TARGET_SRPM $OUTPUT_DIR; then
+	    srpmix-dir-pkg $SRPMIX_DIR_PKG_OPTS ${pkg_name} $OUTPUT_DIR
+	fi
+    fi
+    return 0
+}
+
+function plugin_build
+{
+    local pattern="-srpmix-${SRPMIX_PKG_MAJOR_VERSION}\|-srpmix-archives-${SRPMIX_PKG_MAJOR_VERSION}"
+    local rpms
+    if test "x$SRPMIX_OUTPUT_FORMAT" = "xrpm"; then
+        rpms=$(find ${MY_TMPDIR} -name '*.noarch.rpm' | grep -e "$pattern")
+        for rpm in $rpms; do
+            (cd $MY_TMPDIR; rpm2cpio $rpm | cpio -i --make-directories)
+        done
+	
+    fi
+    local swrfs=$(find ${MY_TMPDIR} -name '*.swrf' | grep -e "-srpmix-${SRPMIX_PKG_MAJOR_VERSION}")
+    for swrf in $swrfs; do
+        srpmix-build --type=plugin $SRPMIX_BUILD_OPTS --swrf=$swrf
+    done
+}
+
+function main
+{
+#   all=`srpmix-db --list | grep -e '-srpmix$' | sed -e 's/-srpmix$//'`
+    local status
+
+    MY_TMPDIR=`mktemp -d`
+    trap "chmod -R u+w $MY_TMPDIR; /bin/rm -rf $MY_TMPDIR" 0    
+    OUTPUT_DIR=${MY_TMPDIR}
+    
+    parse_arguments "$@"
+    if test -n "$SRPMIX_DEBUG"; then
+	trap 0
+	echo "*** Using $MY_TMPDIR as temporary directory"
+    fi
+
+    if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+	set -e
+    fi
+    core_build
+    status=$?
+
+    dir_pkg_build
+    if [[ -n "${RUN_PLUGINS}" ]]; then
+	plugin_build
+    fi
+
+    local outputs
+    case "$SRPMIX_OUTPUT_FORMAT" in
+      rpm)
+        outputs=$(find ${MY_TMPDIR} -name '*.noarch.rpm')
+        if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+	    echo $outputs | xargs yum ${YUM_OPTS} localinstall -y --nogpgcheck
+        fi
+      ;;
+      swrf)
+        outputs=$(find ${MY_TMPDIR} -name '*.swrf')
+        if test "x$OUTPUT_DIR" = "x$MY_TMPDIR"; then
+            echo $outputs | xargs srpmix-db $SRPMIX_DB_OPTS -i
+        fi
+      ;;
+    esac
+    if test "x$OUTPUT_DIR" != "x$MY_TMPDIR"; then
+        for p in $outputs; do
+            p0=$(srpmix_srchash $p)
+            mkdir -p "${OUTPUT_DIR}/${p0}"
+	    # TODO: Parallel dir-pkg building  may conflicts
+            mv $p "${OUTPUT_DIR}/${p0}/"
+        done
+    fi
+
+    # Notify again
+    if test -n "$SRPMIX_DEBUG"; then
+	echo "*** Using $MY_TMPDIR as temporary directory"
+    fi
+    
+    return $status
+}
+
+{ main "$@" ; } < /dev/null
+exit $?

@@ -1,0 +1,260 @@
+#!/bin/bash -e
+#
+########################################################################
+#
+# srpmix-plugin: Run plugin scripts
+#
+# Copyright (C) 2008 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+LIBSRPMIX=libsrpmix.sh
+
+SRPMIX_PLUGIN_DEBUG=
+
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        abort "cannot find $1"
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+ROOTDIRS=
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-plugin --help|-h"
+    echo "  srpmix-plugin --list|-L"
+    echo "  srpmix-plugin --path-for=PLUGIN"
+    echo "  srpmix-plugin [--debug] [--enable=<plugins>] [--disable=<plugins>] [<ROOTDIR> ...]"
+    echo 
+    echo "<plugins> := <plugin0>[,<plugin1>...] | ALL"
+    echo 
+}
+
+function abort
+{
+    echo "*** ABORT..." "$@" 1>&2
+    exit 1
+}
+
+function list_source_dirs
+{
+    find $SRPMIX_SOURCES_DIR/*/*/ -maxdepth 1 | grep -v "/$"
+}
+
+function parse_arguments
+{
+    local status=
+    local list_plugins
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+            (--enable=*)
+                arg=$(echo "$1" | sed 's/--enable=//' | tr , ' ')
+                ENABLE_PLUGINS="$arg"
+		;;
+            (--disable=*)
+                arg=$(echo "$1" | sed 's/--disable=//' | tr , ' ')
+                DISABLE_PLUGINS="$arg"
+		;;
+            --list|-L)
+		list_plugins=yes
+		;;
+	    (--path-for=*)
+	        path_for ${1/--path-for=}
+		exit $?
+		;;
+            # TODO: --freeze-into-rpm-package=DIR
+	    --debug)
+	         SRPMIX_PLUGIN_DEBUG=yes
+		 PS4="${PS4}[plugin]"
+                 set -x
+		 ;;
+	    (--*)
+	        echo "No such option: $1" 1>&2
+		print_usage 1>&2
+		exit 1
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if [ "$list_plugins" = yes ]; then
+	list_plugins
+	exit 0
+    fi
+
+    ROOTDIRS="$@"
+    if test "x$ROOTDIRS" = "x"; then
+        ROOTDIRS=$(list_source_dirs)
+    fi
+}
+
+function __list_plugins
+{
+    local p
+    local n
+
+    find $SRPMIX_PLUGIN_DIR -perm +0100 -xtype f | sort -n | while read plugin; do
+		n=$($plugin --name)
+		
+		echo ${n}  $plugin
+    done
+}
+
+function path_for
+{
+    local expect=$1
+    local path=$(
+	__list_plugins | while read name plugin; do
+	    if test "$expect" = "$name"; then
+		echo "${plugin}"
+		exit 0
+	    fi
+	done
+    )
+
+    if test -f "$path"; then
+	echo $path
+	return 0
+    else
+	return 1
+    fi
+}
+
+function list_plugins
+{
+    local name
+    local plugin
+    local status
+    local list
+
+    list=$(__list_enabled_plugins)
+    __list_plugins | sort -n | while read name plugin; do
+	if member_p ${plugin} ${list}; then
+	    status=+
+	else
+	    status=-
+	fi
+	echo ${status} ${name} "=>" ${plugin}
+    done
+}
+
+function member_p
+{
+    local elt=$1
+    shift
+    for x in "$@"; do
+	if [ "$elt" = "$x" ]; then
+	    return 0
+	fi
+    done
+    return 1
+}
+
+function delete
+{
+    local elt=$1
+    shift
+    for x in "$@"; do
+	if [ "$elt" != "$x" ]; then
+	    echo $x
+	fi
+    done
+}
+
+function resolve_plugin
+{
+    local name=$1
+
+    __list_plugins | grep "^$name " | while read n plugin; do
+	echo $plugin
+    done
+}
+
+
+function __list_enabled_plugins
+{
+    local all=$(__list_plugins | while read name plugin; do echo $name; done)
+    local current=$(for p in $all; do (! [[ $(basename $(resolve_plugin "$p")) =~ ^_.* ]]) && echo $p; done)
+
+    if [ "${DISABLE_PLUGINS}" = "ALL" ]; then
+	current=
+    elif [ -n "${DISABLE_PLUGINS}" ]; then
+	for dp in ${DISABLE_PLUGINS}; do
+	    current=$(delete $dp $current)
+	done
+    fi
+
+    if [ "${ENABLE_PLUGINS}" = "ALL" ]; then
+	current=$all
+    elif [ -n "${ENABLE_PLUGINS}" ]; then
+	for ep in ${ENABLE_PLUGINS}; do
+	    if ( member_p $ep $all ) && ( ! member_p $ep $current ); then
+		current="$ep $current"
+	    fi
+	done
+    fi
+ 
+    for p in $current DUMMY; do
+	if [ $p = DUMMY ]; then
+	    continue
+	fi
+
+	echo $(resolve_plugin $p)
+    done
+}
+
+function main
+{
+    local debug_opt
+    parse_arguments "$@"
+
+
+    if test x$SRPMIX_PLUGIN_DEBUG != x; then
+	debug_opt=--debug
+    fi
+
+    for plugin in $(__list_enabled_plugins) DUMMY; do
+	if [ $plugin = DUMMY ]; then
+	    continue
+	fi
+
+        # TODO: Support multi cores.
+	for d in $ROOTDIRS; do
+	    $plugin $debug_opt $d || true
+        done
+    done
+# TODO: return status, see srpmix-wrap
+}
+
+
+es_time main "$@"
+exit $?

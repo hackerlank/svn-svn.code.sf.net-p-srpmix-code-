@@ -1,0 +1,193 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-cscope: Create CScope Index
+#
+# Copyright (C) 2009 Masato Taruishi
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+NAME=cscope
+
+
+ROOTDIR=
+CSCOPE=cscope
+
+BUILDDIR=
+LOGFILE=
+PLUGINDIR=
+
+SPEC=
+
+SRPMIX_CSCOPE_DEBUG=
+
+FORCE=
+
+MY_TMPDIR=
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+	echo "*** ABORT...cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+function print_usage
+{
+    echo "Usage: "
+    echo "  $0 [--help|-h]"
+    echo "  $0 --name"
+    echo "  $0 [--debug] [--plugin-dir=DIR] [--log-file=LOGFILE] [--force] [--name=NAME] ROOTDIR"
+    echo 
+}
+
+function parse_arguments
+{
+    local status=
+
+
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage 
+		exit 0
+		;;
+	    --name)
+	        echo $NAME
+		exit 0
+		;;
+	    --name=*)
+                NAME=${1/--name=}
+		;;
+	    --debug)
+		set -x
+		PS4="${PS4}[${NAME}]"
+		SRPMIX_CSCOPE_DEBUG=yes
+		;;
+	    (--plugin-dir=*)
+	        PLUGINDIR=${1/--plugin-dir=}
+	        ;;
+	    (--log-file=*)
+	        LOGFILE=${1/--log-file=}
+		;;
+	    --force)
+	        FORCE=yes
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test $# -ne 1; then
+	echo "wrong number of argument" 1>&2
+	print_usage 1>&2
+	srpmix_abort
+    fi
+
+    ROOTDIR=$(cd $1;pwd)
+    shift
+
+    SPEC=${ROOTDIR}/*.spec
+    BUILDDIR=${ROOTDIR}/pre-build
+    PLUGINDIR=${PLUGINDIR:-${ROOTDIR}/plugins/${NAME}}
+    LOGFILE=${LOGFILE:-${PLUGINDIR}/${NAME}-log.es}
+
+    if ! test -d "${BUILDDIR}"; then 
+	exit 0
+    fi
+
+    if ! test -d "$PLUGINDIR"; then
+        mkdir -p "$PLUGINDIR"
+    fi
+}
+
+REGEX='\(\.c++\|\.cxx\|\.cpp\|\.[ylch]\)\(\.in\)\?:\|text/'
+
+function run_cscope
+{
+    local d=$1
+    local o=$2
+    local l=$3
+    local size
+    local file_i
+
+    es_print "cscope-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    cp /dev/null $o
+    echo \-k >  ${PLUGINDIR}/cscope.files
+    echo \-q >> ${PLUGINDIR}/cscope.files
+
+    if test -f ${PLUGINDIR}/../file/file-i; then
+	file_i=${PLUGINDIR}/../file/file-i
+    else
+	local file_plugin_exec=$(srpmix-plugin --path-for=file)
+	local log_file=/dev/null
+
+	MY_TMPDIR=`mktemp -d`
+	trap "/bin/rm -rf ${MY_TMPDIR}" 0 
+
+	if test "$SRPMIX_CSCOPE_DEBUG" = yes; then
+	    log_file=/dev/stdout
+	fi
+	    
+	${file_plugin_exec} --plugin-dir=${MY_TMPDIR} --log-file=${log_file} $d
+	file_i=${MY_TMPDIR}/file-i
+	
+    fi
+
+    grep $REGEX ${file_i} | grep pre-build | cut -d: -f1 >> ${PLUGINDIR}/cscope.files
+
+    size=$(wc -c < ${PLUGINDIR}/cscope.files)
+    
+    (cd $d && (( size > 6 )) && \
+	${CSCOPE} -b -i "${PLUGINDIR}/cscope.files" -f $o )
+    es_print "cscope-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+}
+
+function main
+{
+    parse_arguments "$@"
+    srpmix_verify_commands "${CSCOPE}"
+
+    if grep '^Name: *\(\(kernel\(%.*\)\?\)\|%{kernel}-%{realtime}.*\|kernel%{\?variant}\)$' \
+	$SPEC > /dev/null 2>&1 \
+	&& test $(basename $SPEC) != "kernel-2.4.spec"; then
+	for x in ${BUILDDIR}/*/linux*/Makefile; do
+	    if test -f $x; then
+		if grep '\(^cscope:\)\|\( cscope \)' $x > /dev/null 2>&1; then
+	        # srpmix-kindex will make indexes.
+		    return 0
+		fi
+	    fi
+	done
+    fi
+
+    if ( ! test -e "${PLUGINDIR}/cscope.out" ) ||
+       ( test "${ROOTDIR}/STATUS" -nt "${PLUGINDIR}/cscope.out" ) ||
+       ( test "$FORCE" = yes ); then
+        run_cscope "${ROOTDIR}" "${PLUGINDIR}/cscope.out" $LOGFILE
+    fi
+}
+
+es_time main "$@"
+exit $?
