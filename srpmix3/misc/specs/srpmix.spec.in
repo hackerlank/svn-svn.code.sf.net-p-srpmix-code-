@@ -9,7 +9,7 @@ Requires: srpmix-dir-base >= %{version}
 Buildarch: noarch
 BuildRequires: hardlink cscope ctags emacs-common gettext gauche
 BuildRequires: hyperestraier mock srescure
-BuildRequires: libgcj rubygems xz rpm-build rpm
+BuildRequires: vanillax rpm-build rpm
 
 Buildroot: %{_tmppath}/%{name}-root
 License: GPLv3

@@ -112,91 +112,6 @@ function parse_arguments
     fi
 }
 
-function vanilla
-{
-    local expanded=1
-    local f=$1
-    local report_to=${2:-/dev/null}
-    local r
-
-    case "$f" in
-	*.tar.bz2|*.tbz|*.tbz2)
-	    tar jxvfm $f 2>&1 > ${report_to}
-	    echo tar $?
-	    ;;
-	*.tar.gz|*.tgz|*.tar.Z)
-	    tar zxvfm $f 2>&1 > ${report_to}
-	    echo gunzip+tar $?
-	    ;;
-	    # TODO: Is -X needed to update the file modification time?
-	*.zip)
-	    unzip -o $f 2>&1 > ${report_to}
-	    echo unzip $?
-	    ;;
-  	*.jar)
-	    "${FASTJAR}" xf $f 2>&1 > ${report_to}
-	    echo jar $?
-	    ;;
-#	    *.shar.gz)
-#               # shar.gz => GZIP=--best gunzip -c srpmix-3.104.0.shar.gz | unshar
-#		;;
-  	*.gz|*.Z)
-	    local suffix
-	    case "$f" in
-		*.gz)
-		    suffix=.gz
-		    ;;
-		*.Z)
-		    suffix=.Z
-		    ;;
-	    esac
-	    # --force is needed to decompress a file specified by a soft link.
-	    cat $f | gunzip --force - > $(basename $f $suffix) 2>${report_to}
-	    echo gunzip $?
-	    ;;
-  	*.bz2)
-	    # --force is needed to decompress a file specified by a soft link.
-	    bunzip2 --keep --stdout --force $f > $(basename $f .bz2) 2>${report_to}
-	    echo bz $?
-	    ;;
-	*.tar.lzma)
-	    unlzma --force --stdout $f > $(basename $f .lzma) && tar xfm $(basename $f .lzma)
-	    r=$?
-	    rm $(basename $f .lzma)
-	    echo unlzma+tar $r
-	    ;;
-	*.lzma)
-	    # --force is needed to decompress a file specified by a soft link.
-	    unlzma --force --stdout $f > $(basename $f .lzma)
-	    echo unlzma $?
-	    ;;
-	*.gem)
-	    gem unpack $f
-	    echo gem $?
-	    ;;
-	*.tar.xz)
-	    unxz --force --stdout $f > $(basename $f .xz) && tar xfm $(basename $f .xz)
-	    r=$?
-	    rm $(basename $f .xz)
-	    echo unxz+tar $r
-	    ;;
-	*.xz)
-	    # --force is needed to decompress a file specified by a soft link.
-	    unxz --force --stdout $f > $(basename $f .xz)
-	    echo unxz $?
-	    ;;
-	*)
-	    expanded=
-	    ;;
-    esac
-
-    if [[ -n "${expanded}" ]]; then
-	return 0
-    else
-	return 1
-    fi
-}
-
 function run_vanilla
 {
     local d=$1
@@ -210,11 +125,11 @@ function run_vanilla
     es_print vanilla-start --timestamp=\"`LANG=C date`\" --input=\"$d\" --output=\"$o\" | tee -a $l
     count=0
     for f in `find ${d} -type f`; do
-	cmd=$(cd $o; vanilla "$f" "${report_to}")
+	cmd=$(vanillax "$f" "$o" "${report_to}")
 	r=$?
 	if [[ "$r" = 0 ]]; then
 	    es_print vanilla-expand --command=\"$(cut -f 1 -d ' ' <<<"$cmd")\" --input=\"$f\" --status=\"$(cut -f 2 -d ' ' <<<"$cmd")\" | tee -a "$l"
-	    ln -s ../../archives/$(basename $f) "$o/`basename $f`"
+	    ln -s ../../archives/$(basename "$f") "$o/`basename $f`"
 	    count=`expr $count + 1`
 	fi  
     done
