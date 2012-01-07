@@ -192,7 +192,7 @@ function parse_arguments
 
 function opt_rules
 {
-    find ${SRPMIX_BUILD_OPT_RULES_DIR} -type f -name '*.scm' -perm -u=r \
+    find ${SRPMIX_BUILD_OPT_RULES_DIR} -xtype f -name '*.scm' -perm -u=r \
 	| sort -n   \
 	| xargs cat \
 	| $GOSH ${SRPMIX_HELPER_DIR}/build-opt-rules "$(basename $1)"

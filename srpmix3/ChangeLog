@@ -1,5 +1,12 @@
 2012-01-07  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-plugin (__list_plugins): when running find, use -xtype
+	option instead -type to track symlinks.
+
+	* src/srpmix (opt_rules): Ditto.
+
+2012-01-07  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/plugins/10srpmix-vanilla: use vanillax.
 	The vanilla function was moved to vanillax package at github.
 
