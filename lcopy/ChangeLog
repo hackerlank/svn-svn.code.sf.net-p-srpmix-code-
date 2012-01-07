@@ -1,5 +1,11 @@
 2012-01-07  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/hook.d: New directory.
+
+	* src/hook.d/50srpmix-plugin: New helper command.
+
+2012-01-07  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/liblcopy.sh.in (lcopy_run_hook): Renamed from
 	lcopy_srpmix_plugin. Added new argument ACTION.
 

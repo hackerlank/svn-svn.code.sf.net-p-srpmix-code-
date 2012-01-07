@@ -39,6 +39,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/liblcopy_backends.sh
 %dir %{_libexecdir}/lcopy
 %dir %{_libexecdir}/lcopy/backends
+%dir %{_libexecdir}/lcopy/hook.d
 %dir %{_sysconfdir}/lcopy
 %dir %{_sysconfdir}/lcopy/conf.d
 
@@ -178,6 +179,19 @@ lcopy conf files for Android related software
 %dir %{_sysconfdir}/lcopy/conf.d/android
 
 @CONFPACKGES@
+
+#
+# Hooks
+#
+%package hook-srpmix-plugin
+Summary: A hook command running srpmix plugins on a lcopy dir
+Group: Development/Tools
+Requires: lcopy
+Requires: srpmix
+%description hook-srpmix-plugin
+A hook command running srpmix plugins on a lcopy dir
+%files hook-srpmix-plugin
+%dir %{_libexecdir}/lcopy/hook.d/50srpmix-plugin
 
 %changelog
 

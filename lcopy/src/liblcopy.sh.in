@@ -30,15 +30,16 @@ libexecdir=@libexecdir@
 
 LCOPY_LIBEXECDIR=${LCOPY_LIBEXECDIR:-"${libexecdir}/lcopy"}
 LCOPY_BACKENDDIR=${LCOPY_BACKENDDIR:-"${LCOPY_LIBEXECDIR}/backends"}
+LCOPY_HOOKDIR=${LCOPY_HOOKDIR:-"${LCOPY_LIBEXECDIR}/hook.d"}
 
 function lcopy_backends_list
 {
     local backend
-    [ -d ${LCOPY_BACKENDDIR} ] && \
-	find ${LCOPY_BACKENDDIR} -perm +0100 -type f \
+    [ -d "${LCOPY_BACKENDDIR}" ] && \
+	find "${LCOPY_BACKENDDIR}" -perm +0100 -xtype f \
 	| sort \
 	| grep -v '~$' \
-	| while read backend; do basename $backend; done
+	| while read backend; do basename "$backend"; done
 }	
     
 
@@ -155,32 +156,14 @@ function lcopy_run_hook
 {
     local action=$1
     local base_dir=$2
-    local disable_args=$3
-    local enable_args=$4
     
-    local disable=vanilla
-    local enable=
-
-    if ! [[ "$disable_args" =~ nctags ]]; then
-	enable=nctags
-    fi
-
-    if [ -n "$disable_args" ]; then
-	disable="${disable},${disable_args}"
-    fi
-
-    if [ -n "$enable_args" ]; then
-	enable="${enable},${enable_args}"
-    fi
-
-    if [[ "$action" = "noupdate" ]]; then
-	# TODO: run only new plugins
-	return
-    fi
-
-    # TODO: Check the existence of plugins specified with $enable 
-    if which srpmix-plugin > /dev/null 2>&1; then
-	srpmix-plugin --disable="${disable}" --enable="${enable}" ${base_dir}
+    if [ -d "${LCOPY_HOOKDIR}" ]; then
+	find "${LCOPY_BACKENDDIR}" -perm +0100 -xtype f \
+	    | sort -n      \
+	    | grep -v '~$' \
+	    | while read hook; do 
+	        "$hook" "$action" "$base_dir"
+	done
     fi
 }
 

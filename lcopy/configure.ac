@@ -93,4 +93,5 @@ AC_OUTPUT([
     	   src/conf.d/Makefile
     	   src/conf.d/sys/Makefile
     	   src/conf.d/android/Makefile
+	   src/hook.d/Makefile
           ])

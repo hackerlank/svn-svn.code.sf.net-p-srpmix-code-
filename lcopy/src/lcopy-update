@@ -150,11 +150,7 @@ function update
 	hook_action=update
     fi
 
-    lcopy_run_hook               \
-	${hook_action}           \
-	"${base_dir}"            \
-	"$LCOPY_DISABLE_PLUGINS" \
-	"$LCOPY_ENABLE_PLUGINS"
+    lcopy_run_hook "${hook_action}" "${base_dir}"            
     
     return $status
 }
