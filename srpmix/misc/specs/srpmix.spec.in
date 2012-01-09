@@ -3,13 +3,19 @@ Name: srpmix
 Version: #PACKAGE_VERSION#
 Release: #RPM_RELEASE#
 Source: srpmix-#PACKAGE_VERSION#.tar.bz2
-Requires: hardlink cpio rpm coreutils emacs-common file gauche
+
 Requires: srpmix-dir-base >= %{version}
+Requires: mock mock-source-rescue-plugin
+
+
+Requires: hardlink cpio rpm coreutils emacs-common file gauche
 # Requires: gettext gettext-devel autoconf* automake* libtool jcommon
 Buildarch: noarch
 BuildRequires: hardlink cscope ctags emacs-common gettext gauche
-BuildRequires: hyperestraier mock srescure
+BuildRequires: hyperestraier 
 BuildRequires: vanillax rpm-build rpm
+
+
 
 Buildroot: %{_tmppath}/%{name}-root
 License: GPLv3

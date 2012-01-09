@@ -1,3 +1,8 @@
+2012-01-10  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/srpmix-mock (main): Use source_rescue_with_spec_wash plugin
+	as the first trial.
+
 2012-01-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix (parse_arguments): Added option --run-plugin.

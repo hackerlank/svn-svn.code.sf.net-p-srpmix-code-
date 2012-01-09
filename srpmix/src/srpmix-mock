@@ -95,6 +95,8 @@ function main
     local prefix
     local suffix
     local body
+    local body_with_spec_wash
+    local sig
     local clean
 
     MY_TMPDIR=`mktemp -d`
@@ -104,20 +106,33 @@ function main
 	clean=--no-cleanup-after
     fi
 
-    
+
+    body_with_spec_wash="$MOCK $clean --resultdir=$MY_TMPDIR --enable-plugin=source_rescue_with_spec_wash -r $cfg --rebuild $srpm"    
     body="$MOCK $clean --resultdir=$MY_TMPDIR --enable-plugin=source_rescue -r $cfg --rebuild $srpm"
     if [ $(whoami) = root ]; then
 	chown $USER.mock $MY_TMPDIR
 	prefix="su --command "
 	suffix=" - $USER"
-	if ! $prefix "$body" $suffix; then
-	  echo "Failed in mock command" 1>&2
-	    exit 1
-	fi  
+	if ! $prefix "$body_with_spec_wash" $suffix; then
+	    if ! $prefix "$body" $suffix; then
+		echo "Failed in mock command" 1>&2
+		exit 1
+	    else
+		sig=source_rescue
+	    fi  
+	else
+	    sig=source_rescue_with_spec_wash
+	fi
     else
-	if ! $body ; then
-	    echo "Failed in mock command" 1>&2
-	    exit 1
+	if ! $body_with_spec_wash ; then
+	    if ! $body ; then
+		echo "Failed in mock command" 1>&2
+		exit 1
+	    else
+		sig=source_rescue
+	    fi
+	else
+	    sig=source_rescue_with_spec_wash
 	fi
     fi
 
@@ -162,7 +177,7 @@ function main
     echo "${SRPMIX_PKG_VERSION}" > ${rootdir}/SRPMIX
     echo "#; metadata" >> ${rootdir}/SRPMIX
     echo "srpmix-version: ${SRPMIX_PKG_VERSION}" >> ${rootdir}/SRPMIX
-    echo "srpmix-expander: srpmix-mock" >> ${rootdir}/SRPMIX
+    echo "srpmix-expander: srpmix-mock+${sig}" >> ${rootdir}/SRPMIX
     echo "#; qip" >> ${rootdir}/SRPMIX
     rpm -qip $srpm >> ${rootdir}/SRPMIX
 
