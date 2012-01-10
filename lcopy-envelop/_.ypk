@@ -1,0 +1,7 @@
+;; -*- scheme -*-
+(ypack-version "0.0.0")
+(ypack-require "lcopy")
+(ypack-require "srpmix")
+(ypack-require "rpm-build")
+(ypack-name  "lcopy-envelop")
+(ypack-entry "lcopy-envelop"  "/usr/bin/lcopy-envelop")
