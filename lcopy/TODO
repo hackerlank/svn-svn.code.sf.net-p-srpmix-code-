@@ -1,8 +1,6 @@
 - existence checking
 - ping
 - plugin rerunning
--  Don't invoke srpmix-plugin directly
-   hook mechanisms are needed.
 
 cman
 procps-
