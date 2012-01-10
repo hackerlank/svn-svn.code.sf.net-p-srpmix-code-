@@ -1,0 +1,61 @@
+#!/bin/bash
+########################################################################
+#
+# 50srpmix-plugin: Run srpmix plugins at a lcopy dir
+#
+# Copyright (C) 2009 Masatake YAMATO
+#
+# Author: Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+function main
+{
+    local action=$1
+    local base_dir=$2
+    mkdir -p ${base_dir}/plugins
+    
+    source ${base_dir}/checkout.lcopy
+    local disable_args=$LCOPY_DISABLE_PLUGINS
+    local enable_args=$LCOPY_ENABLE_PLUGINS
+    
+    local disable=vanilla
+    local enable=
+
+    if ! [[ "$disable_args" =~ nctags ]]; then
+	enable=nctags
+    fi
+
+    if [ -n "$disable_args" ]; then
+	disable="${disable},${disable_args}"
+    fi
+
+    if [ -n "$enable_args" ]; then
+	enable="${enable},${enable_args}"
+    fi
+
+    if [[ "$action" = "noupdate" ]]; then
+	# TODO: run only new plugins
+	return
+    fi
+
+    # TODO: Check the existence of plugins specified with $enable 
+    if which srpmix-plugin > /dev/null 2>&1; then
+	srpmix-plugin --disable="${disable}" --enable="${enable}" ${base_dir}
+    fi
+}
+
+main "$@"

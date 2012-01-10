@@ -1,0 +1,6 @@
+;; -*- scheme -*-
+(ypack-version "0.0.0")
+(ypack-require "srpmix")
+(ypack-require "lcopy")
+(ypack-name  "lcopy-hook-srpmix-plugin")
+(ypack-entry "50srpmix-plugin"  "/usr/libexec/lcopy/hook.d/50srpmix-plugin")
