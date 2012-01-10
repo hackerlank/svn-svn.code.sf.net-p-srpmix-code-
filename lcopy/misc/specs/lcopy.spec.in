@@ -170,19 +170,6 @@ lcopy conf files for Android related software
 
 @CONFPACKGES@
 
-#
-# Hooks
-#
-%package hook-srpmix-plugin
-Summary: A hook command running srpmix plugins on a lcopy dir
-Group: Development/Tools
-Requires: lcopy
-Requires: srpmix
-%description hook-srpmix-plugin
-A hook command running srpmix plugins on a lcopy dir
-%files hook-srpmix-plugin
-%dir %{_libexecdir}/lcopy/hook.d/50srpmix-plugin
-
 %changelog
 
 * Mon Aug 27 2007 Masatake YAMATO <yamato@redhat.com> - 0.1.0-0
