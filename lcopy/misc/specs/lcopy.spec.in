@@ -43,16 +43,6 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_sysconfdir}/lcopy
 %dir %{_sysconfdir}/lcopy/conf.d
 
-%package envelop
-Summary: A tool enveloping a symlink to given lcopy dir into swrf/rpm
-Group: Development/Tools
-Requires: lcopy
-Requires: srpmix
-%description envelop
-A tool enveloping a symlink to given lcopy dir into swrf/rpm
-%files envelop
-%{_bindir}/lcopy-envelop
-
 # 
 # Backends
 # 
