@@ -1,1 +1,0 @@
-SUBDIRS = mock cmds
