@@ -3,7 +3,7 @@
 #
 # 50srpmix-plugin: Run srpmix plugins at a lcopy dir
 #
-# Copyright (C) 2009 Masatake YAMATO
+# Copyright (C) 2009, 2012 Masatake YAMATO
 #
 # Author: Masatake YAMATO <yamato@redhat.com>
 #
@@ -26,9 +26,9 @@ function main
 {
     local action=$1
     local base_dir=$2
-    mkdir -p ${base_dir}/plugins
+    mkdir -p "${base_dir}/plugins"
     
-    source ${base_dir}/checkout.lcopy
+    source "${base_dir}/checkout.lcopy"
     local disable_args=$LCOPY_DISABLE_PLUGINS
     local enable_args=$LCOPY_ENABLE_PLUGINS
     
@@ -47,14 +47,12 @@ function main
 	enable="${enable},${enable_args}"
     fi
 
-    if [[ "$action" = "noupdate" ]]; then
-	# TODO: run only new plugins
-	return
-    fi
-
+    # TODO: run only new plugins
     # TODO: Check the existence of plugins specified with $enable 
-    if which srpmix-plugin > /dev/null 2>&1; then
-	srpmix-plugin --disable="${disable}" --enable="${enable}" ${base_dir}
+    if [[ "$action" = "post-checkout" ]] || [[ "$action" = "post-update" ]] ; then
+	if which srpmix-plugin > /dev/null 2>&1; then
+	    srpmix-plugin --disable="${disable}" --enable="${enable}" "${base_dir}"
+	fi
     fi
 }
 
