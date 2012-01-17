@@ -7,7 +7,7 @@ Group: Development/Tools
 Buildarch: noarch
 Source0: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-Requires: gauche curl g2ebuild
+Requires: gauche curl g2ebuild lftp
 BuildRequires: gauche curl
 
 %description

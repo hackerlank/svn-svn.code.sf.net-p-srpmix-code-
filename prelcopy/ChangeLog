@@ -6,6 +6,8 @@
 
 	* src/classes/ftp (main): New file.
 
+	* misc/specs/prelcopy.spec.in: requires lftp.
+
 2011-08-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.0.1.
