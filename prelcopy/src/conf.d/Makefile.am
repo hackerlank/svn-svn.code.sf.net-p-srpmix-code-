@@ -4,5 +4,6 @@ dist_confd_DATA = \
 	jbossas.prelcopy     \
 	mod_cluster.prelcopy \
 	gentoo-x86.prelcopy  \
+	rhev3.prelcopy \
 	\
 	$(NULL)
