@@ -1,3 +1,13 @@
+2012-01-19  Masatake YAMATO  <jet@living.shokupan>
+
+	* src/conf.d/jbossas-github.prelcopy (GITHUB_OWNER): New file.
+
+	* src/classes/Makefile.am (dist_classes_SCRIPTS): Added github.
+
+	* src/classes/github: New file.
+
+	* src/conf.d/Makefile.am (dist_confd_DATA): Added jbossas-github.prelcopy.
+
 2012-01-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.0.4.
