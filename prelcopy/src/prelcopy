@@ -52,6 +52,12 @@ function parse_arguments
     fi
 
     CF=$1
+    if ! [[ -f "$CF" ]]; then
+	echo "$CF: No such file" 1>&2
+    fi
+    if ! [[ -r "$CF" ]]; then
+	echo "$CF: Cannot read" 1>&2
+    fi
     shift 1
 
     if ! [ -z "$1" ]; then
@@ -72,12 +78,15 @@ function parse_arguments
 
 function main
 {
+    local class
     local classfile
 
 
     parse_arguments "$@"
   
-    if ! source $CF; then
+
+    if ! eval $(grep '^PRELCOPY_CLASS=.*' < $CF); then
+	echo "Failed in parse PRELCOPY_CLASS lin in $CF" 1>&2
 	exit 1
     elif [ -z "$PRELCOPY_CLASS" ]; then
 	echo "No PRELCOPY_CLASS" 1>&2
@@ -85,8 +94,11 @@ function main
     fi
 
     classfile="$CLASSES_DIR/$PRELCOPY_CLASS"    
-    if ! [ -x "$classfile" ]; then
-	echo "No such class: $classfile" 1>&2
+    if ! [[ -f "$classfile" ]]; then
+	echo "No such classfile: $classfile" 1>&2
+	exit 1
+    elif ! [[ -x "$classfile" ]]; then
+	echo "Not executable: $classfile" 1>&2
 	exit 1
     fi
 

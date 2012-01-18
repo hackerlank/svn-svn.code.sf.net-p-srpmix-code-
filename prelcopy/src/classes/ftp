@@ -41,7 +41,7 @@ function emit
     cat  <<EOF
 (prelcopy :package "$p"
           :branch  "$b"
-          :command-line wgetx "$url"
+          :command-line "wgetx $url"
           :update #f
           :generated-by "${0##*/}+$conf")
 EOF
@@ -86,12 +86,14 @@ function main
 		    # echo "$entry" -- "$regx"
 		
 		    branch="${FTP_BRANCH_MAP[$regx]}"
-		    if [[ -n "${BASH_REMATCH[2]}" ]]; then
-			branch="${branch}-${BASH_REMATCH[2]}"
-			if [[ -n "${BASH_REMATCH[3]}" ]]; then
-			    branch="${branch}-${BASH_REMATCH[3]}"
-			fi
-		    fi
+
+#		    if [[ -n "${BASH_REMATCH[2]}" ]]; then
+#			branch="${branch}-${BASH_REMATCH[2]}"
+#			if [[ -n "${BASH_REMATCH[3]}" ]]; then
+#			    branch="${branch}-${BASH_REMATCH[3]}"
+#			fi
+#		    fi
+
 		    emit "${BASH_REMATCH[1]}" "${branch}" "${entry}" "${conf}"
 		    break
 		fi

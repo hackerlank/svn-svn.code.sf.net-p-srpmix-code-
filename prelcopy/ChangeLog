@@ -1,3 +1,14 @@
+2012-01-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: Version 0.0.3.
+
+	* src/prelcopy (main): Extract PRELCOPY_CLASS line and
+	eval it instead of using source built-in.
+	
+	* src/classes/ftp (main): Simplify branch name. lcopy
+	rejects complex branch name.
+	(emit): Fix a typo in :command-line arg.
+
 2012-01-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.0.2.
