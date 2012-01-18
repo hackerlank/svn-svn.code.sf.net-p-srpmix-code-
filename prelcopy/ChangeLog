@@ -1,6 +1,13 @@
 2012-01-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: Version 0.0.4.
+
+	* src/classes/ftp (main): Replace . with _ in package name.
+
 	* src/conf.d/rhev3.prelcopy: Handle the broken behavior of bash parser.
+
+
+2012-01-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: Version 0.0.3.
 
