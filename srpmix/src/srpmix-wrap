@@ -193,6 +193,9 @@ function create_core_spec
     buildarch=$($RPM -qp --nosignature --queryformat "%{BUILDARCHS}" $target_srpm)
     if test "x$buildarch" = "x(none)"; then
         buildarch="noarch"
+    else
+	echo "warning: buildarch($buildarch) is hacked(noarch)" 1>&2
+	buildarch="noarch"
     fi
 
     installdir=$(srpmix_installdir $package $version $release)
@@ -333,6 +336,9 @@ function create_plugin_spec
     arch=$($RPM -qp --nosignature --queryformat "%{ARCH}" $target_swrf)
     if test "x$buildarch" = "x(none)"; then
         buildarch="noarch"
+    else
+	echo "warning: buildarch($buildarch) is hacked(noarch)" 1>&2
+	buildarch="noarch"
     fi
 
     cat <<EOF
