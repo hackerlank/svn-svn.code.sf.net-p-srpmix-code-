@@ -4,6 +4,9 @@ PRELCOPY_CLASS=ftp
 FTP_URLS=(
     ftp://ftp.redhat.com/redhat/linux/enterprise/6Server/en/RHEV/src-zips
 )
-FTP_BRANCH_MAP=(
-    [ftp://ftp.redhat.com/redhat/linux/enterprise/6Server/en/RHEV/src-zips/(.*)-([^-]*)-([^-]*)-sources.zip]="released"
-)
+
+FTP_BRANCH_MAP[ftp://ftp.redhat.com/redhat/linux/enterprise/6Server/en/RHEV/src-zips/(.*)-([^-]*)-([^-]*)-sources.zip]="released"
+ 
+#FTP_BRANCH_MAP=(
+#    [ftp://ftp.redhat.com/redhat/linux/enterprise/6Server/en/RHEV/src-zips/(.*)-([^-]*)-([^-]*)-sources.zip]="released"
+#)

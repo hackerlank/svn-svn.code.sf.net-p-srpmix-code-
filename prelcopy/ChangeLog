@@ -1,5 +1,7 @@
 2012-01-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/conf.d/rhev3.prelcopy: Handle the broken behavior of bash parser.
+
 	* configure.ac: Version 0.0.3.
 
 	* src/prelcopy (main): Extract PRELCOPY_CLASS line and
