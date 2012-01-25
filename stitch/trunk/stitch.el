@@ -2230,11 +2230,12 @@
 			      mailing-address
 			      parent-keywords)
     (stitch-register-keyword keyword
-			      subject
-			      date
-			      full-name
-			      mailing-address
-			      parent-keywords)))
+			     subject
+			     date
+			     full-name
+			     mailing-address
+			     parent-keywords
+			     nil)))
 
 (defun stitch-edit-meta-new (commit-func commit-args mode etype)
   (stitch-edit-annotation-new-0 (format "*Meta Annotation: %S*"
