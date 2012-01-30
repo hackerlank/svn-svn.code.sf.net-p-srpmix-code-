@@ -500,12 +500,15 @@
                          (or (null? ns)
 			     (set! ns (cons ":" ns)))
                          (if os
-                             (let1 nns (%htmlprag:gosc os)
-			       ;; Force accept any namespace --- Masatake
-			       (set! acceptable-name-space
-				     (cons (string-downcase nns)
-					   (cons (string-upcase nns)
-						 acceptable-name-space)))
+			     ;; Force accept any namespace --- Masatake
+                             (let* ((nns (%htmlprag:gosc os))
+				    (dns (string-downcase nns))
+				    (uns (string-upcase nns)))
+			       (unless (member dns acceptable-name-space)
+				 (set! acceptable-name-space
+				       (cons dns
+					     (cons uns
+						   acceptable-name-space))))
                                (set! ns (cons nns
                                               ns))
                                (set! os #f)))
