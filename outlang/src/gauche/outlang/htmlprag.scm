@@ -1,5 +1,7 @@
 ;; define-module/select-module/provide for gauche 
 ;; is done by Masatake YAMATO <yamato@redhat.com>
+;; extra name spaces are introduced by
+;; Masatake YAMATO <yamato@redhat.com>
 (define-module outlang.htmlprag
   (export html->shtml))
 (select-module outlang.htmlprag)
@@ -298,6 +300,16 @@
 ;;; (next) @result{} ()
 ;;; @end lisp
 
+(define (string-upcase n)
+  (apply string
+	 (map char-upcase
+	      (string->list n))))
+(define (string-downcase n)
+  (apply string
+	 (map char-downcase
+	      (string->list n))))
+(define acceptable-name-space (let1 ns '("xml" "xmlns")
+				(append (map string-upcase ns) ns)))
 (define make-html-tokenizer
   ;; TODO: Have the tokenizer replace contiguous whitespace within individual
   ;; text tokens with single space characters (except for when in `pre' and
@@ -486,10 +498,15 @@
                          (unread-c))
                         ((c-colon?)
                          (or (null? ns)
-                             (set! ns (cons ":" ns)))
+			     (set! ns (cons ":" ns)))
                          (if os
-                             (begin
-                               (set! ns (cons (%htmlprag:gosc os)
+                             (let1 nns (%htmlprag:gosc os)
+			       ;; Force accept any namespace --- Masatake
+			       (set! acceptable-name-space
+				     (cons (string-downcase nns)
+					   (cons (string-upcase nns)
+						 acceptable-name-space)))
+                               (set! ns (cons nns
                                               ns))
                                (set! os #f)))
                          (loop))
@@ -528,8 +545,7 @@
                       ;; case-sensitive.
                       (if local
                           (if ns
-                              (if (or (string=? ns "xml")
-                                      (string=? ns "xmlns"))
+                              (if (member ns acceptable-name-space)
                                   (string->symbol (string-append ns ":" local))
                                   (cons ns
                                         (string->symbol
@@ -2388,7 +2404,7 @@
 ;;; @end table
 (provide "outlang/htmlprag")
 ; .e.g.
-;(select-module user)
-;(define (main args)
-;  (use syntax.htmlprag)
-;  (write (html->shtml (current-input-port))))
+(select-module user)
+(define (main args)
+  (use outlang.htmlprag)
+  (write (html->shtml (current-input-port))))
