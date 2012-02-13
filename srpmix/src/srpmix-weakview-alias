@@ -184,6 +184,7 @@ EOF
 	local hash=$(srpmix_srchash $package)
 	echo "${sourcesdir}/${hash}/${package}/${link}" >> $spec
     done
+    rm "$distmap"
 
     cat >> $spec <<EOF
 
