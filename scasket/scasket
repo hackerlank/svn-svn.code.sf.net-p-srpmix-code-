@@ -55,6 +55,9 @@ function member
 function parse_arguments
 {
     local p
+    local p0
+
+
     while [ $# -gt 0 ]; do
 	case "$1" in
 	    (--help|-h)
@@ -176,7 +179,11 @@ function parse_arguments
 
 
     for p in "$@"; do
-	if [[ "${p:0:1}" = "@" ]]; then
+	p0=${p:0:1}
+	if [[ "$p0" = "-" ]]; then
+	    echo "Don't pass an option after the package or package group specification" 1>&2
+	    exit 1
+	elif [[ "$p0" = "@" ]]; then
 	    PKG_GROUPS="${PKG_GROUPS} $p"
 	else
 	    PKGS="${PKGS} $p"

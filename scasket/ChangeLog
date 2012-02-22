@@ -1,0 +1,6 @@
+2012-02-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* scasket (parse_arguments): Abort if an option is
+	given after package or package group specifications.
+
+
