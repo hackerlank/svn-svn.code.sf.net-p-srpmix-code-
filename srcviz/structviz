@@ -1,0 +1,11 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -- $0 "$@"
+
+(struct "STRUCT")
+(field "STRUCT" "TYPE" "FIELD")
+(vtable "STRUCT" "METHOD" ...)
+(subsystem "NAME" 
+	   ...)
+
+
