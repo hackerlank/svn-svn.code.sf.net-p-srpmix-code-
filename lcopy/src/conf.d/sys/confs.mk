@@ -1,5 +1,5 @@
-confs = \
-        \
+cons = \
+       \
 	ConsoleKit,trunk.lcopy \
 	Kahua,trunk.lcopy \
 	NetworkManager,trunk.lcopy \
@@ -15,6 +15,7 @@ confs = \
 	biwascheme,trunk.lcopy \
 	cairo,trunk.lcopy \
 	cc-mode,trunk.lcopy \
+	cloudstack,trunk.lcopy \
 	cluster,stable31.lcopy \
 	cluster,trunk.lcopy \
 	coreutils,trunk.lcopy \
@@ -46,7 +47,6 @@ confs = \
 	glib2,trunk.lcopy \
 	glibc,ports.lcopy \
 	glibc,trunk.lcopy \
-	glucsterfs,trunk.lcopy \
 	gnash,trunk.lcopy \
 	gonzui,trunk.lcopy \
 	goocanvas,trunk.lcopy \
