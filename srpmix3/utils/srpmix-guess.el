@@ -95,6 +95,16 @@
 					   t)
 			(rpm-jump-to-patch-file)
 		      nil)))
+		 ((and (looking-at "- \\[\\([^]]*\\)\\] \\(.*\\) ([^)]+) \\[[0-9]+\\]")
+		       (let* ((pat (concat "^Patch[0-9]+:\\s-*\\(.*"
+					   (regexp-quote (concat
+							  (match-string 1)
+							  "-" 
+							  (replace-regexp-in-string "[ \t]" "-" (match-string 2))))
+					   ".*\\)"))
+			      (p (re-search-backward pat nil t)))
+			 p))
+		  (match-string 1))
 		 (t
 		  nil)))))
     (if file
