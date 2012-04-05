@@ -852,6 +852,8 @@
 	  (or buffer-file-read-only
 	      buffer-read-only
 	      (eq major-mode 'dired-mode)
+	      ;;
+	      t
 	      ))
       (let ((region 
 	     (cond 
@@ -899,7 +901,7 @@
 		      (eq major-mode 'dired-mode)
 		      ;;
 		      (eq major-mode 'diff-mode)
-		      ;; t
+		      t
 		      ))
 	    (mapc
 	     (lambda (entry) 

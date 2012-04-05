@@ -97,3 +97,102 @@ merge送信(gatherのことか)")) :date "Fri May 27 03:27:55 2011" :full-name "
 " "" "		send_transition_msg(last_memb_count, first_trans);
 		last_memb_count = member_list_entries;") :which-func ("cman_confchg_fn"))) :annotation-list ((annotation :type text :data "この先、quorumの再計算でクラスターメッセージを送信する。
 そのメッセージの先でfencingか？")) :date "Thu Jun  9 03:45:39 2011" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-cluster))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-220.el6/pre-build/kernel-2.6.32-220.el6/linux-2.6.32-220.el6.x86_64/net/ipv4/tcp_input.c" :point 46386 :coding-system undecided-unix :line 1430 :surround ("
+" "" "	tcp_unlink_write_queue(skb, sk);
+	sk_wmem_free_skb(sk, skb);") :which-func "tcp_shifted_skb")) :annotation-list ((annotation :type text :data "ackを受けてここにきてwmemを広げる。")) :date "Fri Mar  2 01:27:08 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisc))
+
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/^alias-rhel5su7/pre-build/multipath-tools-0.4.7.rhel5.30/libmultipath/configure.c" :point 1626 :coding-system undecided-unix :line 81 :surround ("	}
+" "" "	if (mpp->pgpolicyfn && mpp->pgpolicyfn(mpp))
+		return 1;") :which-func "setup_map")) :annotation-list ((annotation :type text :data "ここでpgpolicyfnを呼び出している。")) :date "Fri Mar 16 08:51:34 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/g/graphviz/2.26.0-7.el6/pre-build/graphviz-2.26.0/lib/common/shapes.c" :point 59984 :coding-system undecided-unix :line 2340 :surround ("
+" "" "static void gen_fields(GVJ_t * job, node_t * n, field_t * f)
+{") :which-func "gen_fields")) :annotation-list ((annotation :type text :data "ここでフィールドを書き出している。")) :date "Wed Mar 21 11:12:53 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (hacking-graphviz-record-field-tooltips))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/g/graphviz/2.26.0-7.el6/pre-build/graphviz-2.26.0/lib/common/shapes.c" :point 60586 :coding-system undecided-unix :line 2365 :surround ("	    AF[1] = add_pointf(AF[1], coord);
+" "" "	    gvrender_polyline(job, AF, 2);
+	}") :which-func "gen_fields")) :annotation-list ((annotation :type text :data "ここでレンダーしているのでまわりにアンカーを張れれば良い。")) :date "Wed Mar 21 11:13:29 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (hacking-graphviz-record-field-tooltips))
+(define-keyword hacking-graphviz-record-field-tooltips :version 0 :keywords hacking-graphviz-record-field-tooltips :subject "recordにフィールドにtooltips/urlを定義できるようにする。
+
+	record:field[...];
+
+で定義できれば良い。" :date "Wed Mar 21 11:16:05 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/g/graphviz/2.26.0-7.el6/pre-build/graphviz-2.26.0/lib/common/shapes.c" :point 6263 :coding-system undecided-unix :line 167 :surround ("
+" "" "static shape_desc Shapes[] = {	/* first entry is default for no such shape */
+    {\"box\", &poly_fns, &p_box},"))) :annotation-list ((annotation :type text :data "形(shape)毎のハンドラ一覧。")) :date "Wed Mar 21 11:19:30 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (hacking-graphviz-record-field-tooltips))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/graphviz/lib/agraph/agraph.h" :point 9451 :coding-system undecided-unix :line 267 :surround ("    extern Agnode_t *agfstnode(Agraph_t * g);
+" "" "    extern Agnode_t *agnxtnode(Agnode_t * n);
+") :which-func "NIL")) :annotation-list ((annotation :type text :data "nextノード")) :date "Fri Mar 23 10:36:43 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (hacking-graphviz-record-field-tooltips))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/graphviz/lib/agraph/agraph.h" :point 9405 :coding-system undecided-unix :line 266 :surround ("    extern Agnode_t *agsubnode(Agraph_t * g, Agnode_t * n, int createflag);
+" "" "    extern Agnode_t *agfstnode(Agraph_t * g);
+    extern Agnode_t *agnxtnode(Agnode_t * n);") :which-func "NIL")) :annotation-list ((annotation :type text :data "firstノード")) :date "Fri Mar 23 10:37:49 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (hacking-graphviz-record-field-tooltips))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/graphviz/lib/agraph/agraph.h" :point 10736 :coding-system undecided-unix :line 298 :surround ("    extern int aghtmlstr(char *);
+" "" "    extern char *agstrbind(Agraph_t * g, char *);
+    extern int agstrfree(Agraph_t *, char *);") :which-func "NIL")) :annotation-list ((annotation :type text :data "== intern")) :date "Fri Mar 23 10:39:02 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (hacking-graphviz-record-field-tooltips))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/graphviz/lib/agraph/agraph.h" :point 11113 :coding-system undecided-unix :line 307 :surround ("	Dict_t *dict;		/* shared dict to interpret attr field */
+" "" "	char **str;		/* the attribute string values */
+    };") :which-func "NIL")) :annotation-list ((annotation :type text :data "indexでアクセスする。")) :date "Fri Mar 23 10:40:38 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (hacking-graphviz-record-field-tooltips))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/g/graphviz/2.26.0-7.el6/pre-build/graphviz-2.26.0/lib/cgraph/id.c" :point 2138 :coding-system undecided-unix :line 91 :surround ("
+" "" "int agmapnametoid(Agraph_t * g, int objtype, char *str,
+		  unsigned long *result, int createflag)") :which-func "agmapnametoid")) :annotation-list ((annotation :type text :data "ここでidを作る。")) :date "Fri Mar 23 13:39:01 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (hacking-graphviz-record-field-tooltips))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/libvirt/0.9.4-23.el6/pre-build/libvirt-0.9.4/src/qemu/qemu_monitor.c" :point 16721 :coding-system undecided-unix :line 635 :surround ("
+" "" "        /* Make sure anyone waiting wakes up now */
+        virCondSignal(&mon->notify);") :which-func "qemuMonitorIO")) :annotation-list ((annotation :type text :data "ここでqemuとのソケット切れを処理している。")) :date "Mon Mar 26 12:26:01 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-libvirt))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/libvirt/0.9.4-23.el6/pre-build/libvirt-0.9.4/src/qemu/qemu_process.c" :point 106565 :coding-system undecided-unix :line 3424 :surround ("        /* we can't stop the operation even if the script raised an error */
+" "" "        virHookCall(VIR_HOOK_DRIVER_QEMU, vm->def->name,
+                    VIR_HOOK_QEMU_OP_RELEASE, VIR_HOOK_SUBOP_END, NULL, xml);") :which-func "qemuProcessStop")) :annotation-list ((annotation :type text :data "コマンドを呼べる。")) :date "Mon Mar 26 12:32:36 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-libvirt))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/libvirt/0.9.4-23.el6/pre-build/libvirt-0.9.4/src/qemu/qemu_monitor.c" :point 15231 :coding-system undecided-unix :line 592 :surround ("                            _(\"Invalid file descriptor while waiting for monitor\"));
+" "" "            eof = 1;
+            events &= ~VIR_EVENT_HANDLE_ERROR;") :which-func "qemuMonitorIO")) :annotation-list ((annotation :type text :data "ここれはtrueとすべき。")) :date "Mon Mar 26 12:35:39 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-libvirt patch-queue))
+
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/libvirt/0.9.4-23.el6/pre-build/libvirt-0.9.4/src/qemu/qemu_monitor.c" :point 17333 :coding-system undecided-unix :line 651 :surround ("        VIR_DEBUG(\"Triggering error callback\");
+" "" "        (errorNotify)(mon, vm);
+    } else {") :which-func "qemuMonitorIO")) :annotation-list ((annotation :type text :data "???")) :date "Mon Mar 26 12:37:03 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-libvirt))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/libvirt/0.9.4-23.el6/pre-build/libvirt-0.9.4/src/qemu/qemu_monitor.c" :point 16931 :coding-system undecided-unix :line 640 :surround ("        VIR_DEBUG(\"Triggering EOF callback\");
+" "" "        (eofNotify)(mon, vm);
+    } else if (error) {") :which-func "qemuMonitorIO")) :annotation-list ((annotation :type text :data "=> qemuProcessHandleMonitorEOF")) :date "Mon Mar 26 12:37:32 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-libvirt))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/q/qemu-kvm/0.12.1.2-2.209.el6/pre-build/qemu-kvm-0.12.1.2/hw/wdt_i6300esb.c" :point 6042 :coding-system undecided-unix :line 181 :surround ("        /* What to do at the end of stage 1? */
+" "" "        switch (d->int_type) {
+        case INT_TYPE_IRQ:") :which-func "i6300esb_timer_expired")) :annotation-list ((annotation :type text :data "ウォッチドッグにひっかかった場合ここでstderrに記録する。
+stderrは誰が回収してくれるのか？")) :date "Fri Mar 30 18:04:33 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/q/qemu-kvm/0.12.1.2-2.209.el6/pre-build/qemu-kvm-0.12.1.2/qemu-options.hx" :point 69457 :coding-system undecided-unix :line 1948 :surround ("
+" "" "DEF(\"watchdog-action\", HAS_ARG, QEMU_OPTION_watchdog_action, \\
+    \"-watchdog-action reset|shutdown|poweroff|pause|debug|none\\n\" \\"))) :annotation-list ((annotation :type text :data "qemuの起動オプションに-watchdog ...をつけるとwatchdogタイムアウト時の挙動を
+指定できる。")) :date "Tue Apr  3 14:16:17 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/q/qemu-kvm/0.12.1.2-2.209.el6/pre-build/qemu-kvm-0.12.1.2/hw/wdt_i6300esb.c" :point 6602 :coding-system undecided-unix :line 196 :surround ("            d->previous_reboot_flag = 1;
+" "" "            watchdog_perform_action(); /* This reboots, exits, etc */
+            i6300esb_reset(&d->dev.qdev);") :which-func "i6300esb_timer_expired")) :annotation-list ((annotation :type text :data "ここからスタート")) :date "Tue Apr  3 14:52:21 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-220.el6/pre-build/kernel-2.6.32-220.el6/linux-2.6.32-220.el6.x86_64/net/core/sock.c" :point 11214 :coding-system undecided-unix :line 293 :surround ("	 */
+" "" "	if (atomic_read(&sk->sk_rmem_alloc) + skb->truesize >=
+	    (unsigned)sk->sk_rcvbuf) {") :which-func "sock_queue_rcv_skb")) :annotation-list ((annotation :type text :data "sk_rmem_allocはskb_set_owner_rで更新する。
+すなわち受信用にskを受け入れると増加する。")) :date "Tue Apr  3 23:05:42 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-udp))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-220.el6/pre-build/kernel-2.6.32-220.el6/linux-2.6.32-220.el6.x86_64/net/core/sock.c" :point 11214 :coding-system undecided-unix :line 293 :surround ("	 */
+" "" "	if (atomic_read(&sk->sk_rmem_alloc) + skb->truesize >=
+	    (unsigned)sk->sk_rcvbuf) {") :which-func "sock_queue_rcv_skb")) :annotation-list ((annotation :type text :data "sk->sk_rcvbufはSO_RCVBUFによって設定できるソケット毎のリード用
+メモリの上限。")) :date "Tue Apr  3 23:10:38 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-udp))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-220.el6/pre-build/kernel-2.6.32-220.el6/linux-2.6.32-220.el6.x86_64/net/core/sock.c" :point 41519 :coding-system undecided-unix :line 1624 :surround ("	sk->sk_forward_alloc += amt * SK_MEM_QUANTUM;
+" "" "	allocated = atomic_add_return(amt, prot->memory_allocated);
+") :which-func "__sk_mem_schedule")) :annotation-list ((annotation :type text :data "プロトコル単位のメモリ使用量")) :date "Tue Apr  3 23:13:03 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-udp))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-220.el6/pre-build/kernel-2.6.32-220.el6/linux-2.6.32-220.el6.x86_64/net/core/sock.c" :point 41767 :coding-system undecided-unix :line 1634 :surround ("	/* Under pressure. */
+" "" "	if (allocated > prot->sysctl_mem[1])
+		if (prot->enter_memory_pressure)") :which-func "__sk_mem_schedule")) :annotation-list ((annotation :type text :data "/proc/sys/net/ipv4/udp_memの2番目")) :date "Tue Apr  3 23:14:24 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-udp))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-220.el6/pre-build/kernel-2.6.32-220.el6/linux-2.6.32-220.el6.x86_64/net/core/sock.c" :point 41901 :coding-system undecided-unix :line 1639 :surround ("	/* Over hard limit. */
+" "" "	if (allocated > prot->sysctl_mem[2])
+		goto suppress_allocation;") :which-func "__sk_mem_schedule")) :annotation-list ((annotation :type text :data "/proc/sys/net/ipv4/udp_memの3番目")) :date "Tue Apr  3 23:14:41 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-udp))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-220.el6/pre-build/kernel-2.6.32-220.el6/linux-2.6.32-220.el6.x86_64/net/core/sock.c" :point 42048 :coding-system undecided-unix :line 1644 :surround ("	if (kind == SK_MEM_RECV) {
+" "" "		if (atomic_read(&sk->sk_rmem_alloc) < prot->sysctl_rmem[0])
+			return 1;") :which-func "__sk_mem_schedule")) :annotation-list ((annotation :type text :data "ソケット単位の受信のメモリ使用量とプロトコル毎に与える「ソケット単位の受信のメモリ使用」下限の比較")) :date "Tue Apr  3 23:24:16 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-udp))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/libvirt/0.9.4-23.el6/pre-build/libvirt-0.9.4/src/qemu/qemu_process.c" :point 89499 :coding-system undecided-unix :line 2908 :surround ("    VIR_DEBUG(\"Creating domain log file\");
+" "" "    if ((logfile = qemuDomainCreateLog(driver, vm, false)) < 0)
+        goto cleanup;") :which-func "qemuProcessStart")) :annotation-list ((annotation :type text :data "ここでログファイル名を決めている。")) :date "Thu Apr  5 15:00:33 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/libvirt/0.9.4-23.el6/pre-build/libvirt-0.9.4/src/qemu/qemu_process.c" :point 93226 :coding-system undecided-unix :line 3024 :surround ("
+" "" "    if ((pos = lseek(logfile, 0, SEEK_END)) < 0)
+        VIR_WARN(\"Unable to seek to end of logfile: %s\",") :which-func "qemuProcessStart")) :annotation-list ((annotation :type text :data "ログファイル末尾にシークして")) :date "Thu Apr  5 15:00:53 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/libvirt/0.9.4-23.el6/pre-build/libvirt-0.9.4/src/util/command.c" :point 12635 :coding-system undecided-unix :line 452 :surround ("    }
+" "" "    if (childerr > 0 && prepareStdFd(childerr, STDERR_FILENO) < 0) {
+        virReportSystemError(errno,") :which-func "virExecWithHook")) :annotation-list ((annotation :type text :data "標準エラー出力を差し替えている=>ログファイルへ。")) :date "Thu Apr  5 15:05:21 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/q/qemu-kvm/0.12.1.2-2.209.el6/pre-build/qemu-kvm-0.12.1.2/hw/wdt_i6300esb.c" :point 6042 :coding-system undecided-unix :line 181 :surround ("        /* What to do at the end of stage 1? */
+" "" "        switch (d->int_type) {
+        case INT_TYPE_IRQ:") :which-func "i6300esb_timer_expired")) :annotation-list ((annotation :type text :data "libvirtがqemuをexecveする前にstderrの配管工事をしているため
+ログファイル(/var/log/libvirt/qemu/ゲストの名前.log)へ記載される。")) :date "Thu Apr  5 15:06:37 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/q/qemu-kvm/0.12.1.2-2.209.el6/pre-build/qemu-kvm-0.12.1.2/hw/watchdog.c" :point 2568 :coding-system undecided-unix :line 85 :surround ("{
+" "" "    if (strcasecmp(p, \"reset\") == 0)
+        watchdog_action = WDT_RESET;") :which-func "select_watchdog_action")) :annotation-list ((annotation :type text :data "watchdog_actionはqemuの引数-watchdog-actionで与える。(man qemu)")) :date "Thu Apr  5 15:09:04 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
