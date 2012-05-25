@@ -196,3 +196,29 @@ stderrは誰が回収してくれるのか？")) :date "Fri Mar 30 18:04:33 2012
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/q/qemu-kvm/0.12.1.2-2.209.el6/pre-build/qemu-kvm-0.12.1.2/hw/watchdog.c" :point 2568 :coding-system undecided-unix :line 85 :surround ("{
 " "" "    if (strcasecmp(p, \"reset\") == 0)
         watchdog_action = WDT_RESET;") :which-func "select_watchdog_action")) :annotation-list ((annotation :type text :data "watchdog_actionはqemuの引数-watchdog-actionで与える。(man qemu)")) :date "Thu Apr  5 15:09:04 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-watchdog))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-220.el6/pre-build/kernel-2.6.32-220.el6/linux-2.6.32-220.el6.x86_64/net/core/dev.c" :point 72999 :coding-system undecided-unix :line 2777 :surround ("#ifdef CONFIG_NET_CLS_ACT
+" "" "	skb = handle_ing(skb, &pt_prev, &ret, orig_dev);
+	if (!skb)") :which-func "__netif_receive_skb")) :annotation-list ((annotation :type text :data "CPU毎のinput_pkt_queue 
+-> ソケット単位のsk_receive_queue
+あるいは
+-> handle_ingの先のqdisc")) :date "Fri Apr  6 01:36:57 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-udp))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su8/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/drivers/md/dm-mpath.c" :point 30803 :coding-system undecided-unix :line 1377 :surround ("
+" "" "	if (hwh->type && hwh->type->error)
+		err_flags = hwh->type->error(hwh, bio);") :which-func "do_end_io")) :annotation-list ((annotation :type text :data "hardwareハンドラにエラーかどうか再解釈の余地を与えている。")) :date "Wed May 16 00:41:40 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su8/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/drivers/md/dm-mpath.c" :point 34501 :coding-system undecided-unix :line 1508 :surround ("
+" "" "	if (hwh->type && hwh->type->status)
+		sz += hwh->type->status(hwh, type, result + sz, maxlen - sz);") :which-func "multipath_status")) :annotation-list ((annotation :type text :data "ハードウェアハンドラ特有の情報を載せる余地を与える。")) :date "Wed May 16 00:42:40 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/s/squid/3.1.10-1.el6_2.2/pre-build/squid-3.1.10/src/peer_digest.cc" :point 17671 :coding-system undecided-unix :line 594 :surround ("            /* some kind of a bug */
+" "" "            peerDigestFetchAbort(fetch, buf, httpStatusLineReason(&reply->sline));
+            return -1;		/* XXX -1 will abort stuff in ReadReply! */") :which-func "peerDigestFetchReply")) :annotation-list ((annotation :type text :data "ここからエラーメッセージへ")) :date "Fri May 18 19:02:19 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-squid3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/drivers/scsi/scsi_error.c" :point 8165 :coding-system undecided-unix :line 309 :surround (" **/
+" "" "static int scsi_check_sense(struct scsi_cmnd *scmd)
+{") :which-func "scsi_check_sense")) :annotation-list ((annotation :type text :data "sense == error code
+http://en.wikipedia.org/wiki/SCSI_Request_Sense_Command")) :date "Wed May 23 13:54:34 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/drivers/scsi/scsi_error.c" :point 8543 :coding-system undecided-unix :line 321 :surround ("
+" "" "	if (scsi_dh_data && scsi_dh_data->scsi_dh &&
+			scsi_dh_data->scsi_dh->check_sense) {") :which-func "scsi_check_sense")) :annotation-list ((annotation :type text :data "scsi device handlerがあれば、そこで
+
+      sense -> linuxのscsi層で定義されたエラーコード
+
+への変換を行う。なければ汎用のコードでがんばる。")) :date "Wed May 23 13:55:07 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
