@@ -1,5 +1,12 @@
 2012-06-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 3.120.7.
+
+	* src/srpmix-ix(srpm_build): Store the --define
+	extra arguments for rpmbuild to SRPMIX file.
+
+2012-06-11  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: version 3.120.6.
 
 	* src/srpmix-ix (srpm_deploy): Use SRPMIX_CRADLE_NAME

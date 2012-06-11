@@ -831,8 +831,9 @@ function srpm_build
 	mkdir "${rootdir}/${BUILDDIR}/${build_name}"
     fi
 
+    echo "#; rpmbuild-extra-args"  >> "${rootdir}/${PROFILE}"
+    echo "rpmbuild-extra-args: $@" >> "${rootdir}/${PROFILE}"    
 
-    
     LANG=C $RPMBUILD                                                    \
 	--define "_default_patch_fuzz 2"                                \
         --define "_default_patch_flags --verbose"                       \
