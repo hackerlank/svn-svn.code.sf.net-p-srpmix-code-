@@ -425,7 +425,7 @@ function verify_rootdir
 
     if test -d "${rootdir}"; then
         if test -f "${rootdir}/${PROFILE}"; then
-            if test `head -1 "${rootdir}/${PROFILE}"` = ${SRPMIX_PKG_VERSION}; then
+            if test "`head -1 "${rootdir}/${PROFILE}"`" = ${SRPMIX_PKG_VERSION}; then
                 verbose use-rootdir "\"${rootdir}\"" `head -1 "${rootdir}/${PROFILE}"`
             else
                 echo "directory version mismatch" 1>&2
@@ -611,6 +611,9 @@ function srpm_deploy
 
     local kernel_p=
 
+    local dist_args
+
+
     srpm_name=`basename ${srpm_file} .src.rpm`
 
     spec_file=`spec_file_get ${srpm_file}`
@@ -668,10 +671,19 @@ function srpm_deploy
     fi
 
     targets=$(echo "${TARGET}" | tr "," " " )
+    if [[ "${srpm_file}" =~ .*\.el([0-9]+)[_.].* ]]; then
+	dist_args="--define \"dist .el${BASH_REMATCH[1]}\" --define \"el${BASH_REMATCH[1]} 1\" --define \"rhel ${BASH_REMATCH[1]}\""
+	logger -t srpmix-ix "srpm: ${srpm_file}, args: ${dist_args}"
+    elif [[ "${srpm_file}" =~ .*\.fc([0-9]+)\..* ]]; then
+	dist_args="--define \"dist .fc${BASH_REMATCH[1]}\" --define \"fc${BASH_REMATCH[1]} 1\" --define \"fedora ${BASH_REMATCH[1]}\""
+	logger -t srpmix-ix "srpm: ${srpm_file}, args: ${dist_args}"
+    else
+	logger -t srpmix-ix "srpm: ${srpm_file}, DO NOTHING"
+    fi
 
     for arch in ${targets}; do
         message build-start --target=${arch} --spec-file=\""${xspec_file}\""
-        srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}"
+        eval srpm_build "${rootdir}" "${xspec_file}" "${build_name}" "${arch}" "${dist_args}"
         status=$?
         message build-end --target=${arch} --spec-file=\""${xspec_file}\"" \
             --status="${status}"
@@ -795,6 +807,8 @@ function srpm_build
     local spec_file=$2
     local build_name=$3
     local arch=$4
+    shift 4
+
     local status=
 
     verbose rpmbuild-bp                                         \
@@ -815,10 +829,12 @@ function srpm_build
     fi
 
 
+    
     LANG=C $RPMBUILD                                                    \
 	--define "_default_patch_fuzz 2"                                \
         --define "_default_patch_flags --verbose"                       \
         --define "__patch /usr/bin/patch --verbose"                     \
+	"$@"                                                            \
 	--target=${arch}                                                \
 	-bp                                                             \
 	--nodeps "${rootdir}/${SPECDIR}/${spec_file}"                   \

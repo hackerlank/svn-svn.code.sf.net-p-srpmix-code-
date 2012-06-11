@@ -196,6 +196,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_sysconfdir}/srpmix/build-opt-rules.d
 %config(noreplace) %{_sysconfdir}/srpmix/build-opt-rules.d/99default.scm
 %config(noreplace) %{_sysconfdir}/srpmix/build-opt-rules.d/98mock.scm
+%config(noreplace) %{_sysconfdir}/srpmix/build-opt-rules.d/97ix.scm
 
 %{_sysconfdir}/cron.daily/srpmix.daily
 
