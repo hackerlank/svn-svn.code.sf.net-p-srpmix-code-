@@ -671,7 +671,7 @@ function srpm_deploy
     fi
 
     targets=$(echo "${TARGET}" | tr "," " " )
-    if [[ "${srpm_file}" =~ .*\.el([0-9]+)[_.].* ]]; then
+    if [[ "${srpm_file}" =~ .*\.el([0-9]+)[^0-9].* ]]; then
 	dist_args="--define \"dist .el${BASH_REMATCH[1]}\" --define \"el${BASH_REMATCH[1]} 1\" --define \"rhel ${BASH_REMATCH[1]}\""
 	logger -t srpmix-ix "srpm: ${srpm_file}, args: ${dist_args}"
     elif [[ "${srpm_file}" =~ .*\.fc([0-9]+)\..* ]]; then

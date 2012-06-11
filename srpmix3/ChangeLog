@@ -1,5 +1,12 @@
 2012-06-11  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 3.120.5.
+
+	* src/srpmix-ix (srpm_deploy): Accept srpmix file
+	name like something.el6sat.src.rpm.
+
+2012-06-11  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: version 3.120.4.
 
 	* misc/specs/srpmix.spec.in (%files): Added 97ix.scm.
