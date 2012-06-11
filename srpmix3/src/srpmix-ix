@@ -677,6 +677,9 @@ function srpm_deploy
     elif [[ "${srpm_file}" =~ .*\.fc([0-9]+)\..* ]]; then
 	dist_args="--define \"dist .fc${BASH_REMATCH[1]}\" --define \"fc${BASH_REMATCH[1]} 1\" --define \"fedora ${BASH_REMATCH[1]}\""
 	logger -t srpmix-ix "srpm: ${srpm_file}, args: ${dist_args}"
+    elif [[ "${SRPMIX_CRADLE_NAME}" = ftp.redhat.com ]]; then
+	dist_args="--define \"dist .el4\" --define \"el4 1\" --define \"rhel 4\""
+	logger -t srpmix-ix "(cradle)srpm: ${srpm_file}, args: ${dist_args}"
     else
 	logger -t srpmix-ix "srpm: ${srpm_file}, DO NOTHING"
     fi
