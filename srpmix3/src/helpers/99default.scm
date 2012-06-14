@@ -55,6 +55,8 @@
 (#/openmpi.*/          dont-run-configure )
 (#/opensm-.*/          dont-run-configure )
 
+(#/usermode-.*/        dont-run-autotools)
+(#/gnorpm-.*/          dont-run-autotools)
 (#/amanda-2.5.*/       dont-run-autotools)
 ;; TEST
 ;; (#/SRPMIX-TEST/ "a" "b")
