@@ -1,5 +1,9 @@
 2012-06-14  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/98mock.scm: Remove rules for epel-4.
+
+2012-06-14  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: version 3.121.1.
 	
 	* src/helpers/96gem.scm: Added new file.
