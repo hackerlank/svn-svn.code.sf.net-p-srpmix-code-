@@ -1,0 +1,8 @@
+(ypack-name "logma")
+(ypack-version "0.0.0")
+(ypack-license "GPLv2+")
+(ypack-url "https://srpmix.svn.sourceforge.net/svnroot/srpmix/logma")
+(ypack-require "gauche")
+(ypack-entry "logma" "/usr/bin/logma")
+
+

@@ -22,6 +22,10 @@
 ;;  Free Software Foundation, Inc.,  675 Mass Ave, Cambridge,
 ;;  MA 02139, USA.
 ;;
+;; TODO
+;; #?=l
+;; #?-    "Jun 12 23:02:31 HOST kernel:"
+
 (use srfi-19)
 (use srfi-1)
 
