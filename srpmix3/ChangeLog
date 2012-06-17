@@ -1,5 +1,9 @@
 2012-06-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/srpmix-wrap (create_core_spec): Use ${package}.spec
+	instead of *.spec to capture specs.spec. rhev-agent src.rpm
+	holds two spec files.
+
 	* src/helpers/97ix.scm: Updated.
 
 2012-06-14  Masatake YAMATO  <yamato@redhat.com>

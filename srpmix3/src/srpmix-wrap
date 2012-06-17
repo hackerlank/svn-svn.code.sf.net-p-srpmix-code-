@@ -277,8 +277,12 @@ fi
 \$transfer_cmd \$(/bin/ls -d \$from/* | grep -v LOG | grep -v SPECS\$) \$to
 find \$to -name '*-log.es' | xargs rm -f
 
-if test \$RPM_BUILD_ROOT/$installdir/*.spec != \$RPM_BUILD_ROOT/$installdir/specs.spec; then
+if ! test -f \$RPM_BUILD_ROOT/$installdir/specs.spec; then
+   if test -f \$RPM_BUILD_ROOT/$installdir/${package}.spec; then
+	mv \$RPM_BUILD_ROOT/$installdir/${package}.spec \$RPM_BUILD_ROOT/$installdir/specs.spec
+   else 
 	mv \$RPM_BUILD_ROOT/$installdir/*.spec \$RPM_BUILD_ROOT/$installdir/specs.spec
+   fi
 fi
 ln -s plugins/vanilla \$RPM_BUILD_ROOT/$installdir/vanilla
 
