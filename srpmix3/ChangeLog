@@ -1,5 +1,11 @@
 2012-06-18  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/helpers/99default.scm (rhev-agent-.*): Don't use rpmbuild.
+
+	* src/helpers/96gem.scm (rubygem-.*): Fix a typo.
+
+2012-06-18  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/srpmix-wrap (create_core_spec): Use ${package}.spec
 	instead of *.spec to capture specs.spec. rhev-agent src.rpm
 	holds two spec files.

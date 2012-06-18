@@ -630,7 +630,6 @@
 (#/katello-headpin-0.1.145-1.el6/ "--rearrange-spec-command=cat")
 (#/kernel-2.6.23.15-80.fc7.cb.4/ "--rearrange-spec-command=cat")
 (#/python-httplib2-0.4.0-4.el5/ "--rearrange-spec-command=cat")
-(#/rhev-agent-2.3.16-6.el6_2/ "--rearrange-spec-command=cat")
 (#/rubygem-actionpack-3.0.10-3.1.el6/ "--rearrange-spec-command=cat")
 (#/rubygem-activerecord-3.0.10-3.el6/ "--rearrange-spec-command=cat")
 (#/rubygem-activesupport-3.0.10-3.el6/ "--rearrange-spec-command=cat")
