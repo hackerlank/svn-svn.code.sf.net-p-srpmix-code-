@@ -24,14 +24,14 @@
 			(eq? (car t) 'table)))
 (define (make-table ftable rtable dtable objpath)
   (list 'table ftable rtable dtable objpath))
-(define (ref-ftable table)
-  (ref table 1))
-(define (ref-rtable table)
-  (ref table 2))
-(define (ref-dtable table)
-  (ref table 3))
-(define (ref-objpath table)
-  (ref table 4))
+(define (ref-ftable objfile)
+  (ref objfile 1))
+(define (ref-rtable objfile)
+  (ref objfile 2))
+(define (ref-dtable objfile)
+  (ref objfile 3))
+(define (ref-objpath objfile)
+  (ref objfile 4))
 
 (define (list-objfiles . args)
   (if (kref args :loaded-only)
@@ -163,16 +163,16 @@
 	       ((and (eq? (car es) 'objdump-dcall)
 		     (eq? (cadr es) 'entry))
 		(wash! es)
-		  (for-each
-		   (lambda (entry)
-		     (hash-table-push! rtable entry es))
-		   (delete-duplicates
-		    (map
-		     (cute ref <> 2)
-		     (cadr (memq :connections es)))))
-		  (when (acceptable? (ref es 3))
-			(hash-table-push! ftable (ref es 3) es))
-		  (loop (read) ftable rtable dtable so))
+		(for-each
+		 (lambda (entry)
+		   (hash-table-push! rtable entry es))
+		 (delete-duplicates
+		  (map
+		   (cute ref <> 2)
+		   (cadr (memq :connections es)))))
+		(when (acceptable? (ref es 3))
+		  (hash-table-push! ftable (ref es 3) es))
+		(loop (read) ftable rtable dtable so))
 	       ((eq? (car es) 'readelf-so)
 		(loop (read) ftable rtable dtable (append (cdr es) so)))
 	       ;;
@@ -252,13 +252,46 @@
 (define (backward-reachable? from to ftable)
   (list #f))
 
+(define (resolve-plt name table)
+  (rxmatch-if (#/^(.*)@plt/ name)
+      (#f first-name)
+    (or (call/cc (lambda (return)
+		   (for-each (lambda (objfile)
+			       (let1 ftable (ref-ftable objfile)
+				 (if-let1 es (ref ftable first-name #f)
+					  (return #`",|first-name|@,(sys-basename (ref-objpath objfile))"))
+			       (let1 dtable (ref-dtable objfile)
+				 (if-let1 es (ref dtable first-name #f)
+					  (return #`",|first-name|@,(sys-basename (ref-objpath objfile))")))))
+			     (remove (lambda (objfile) 
+				       (memq table objfile))
+				     (map (cute ref objfiles <> #f) 
+					  (map cadr 
+					       (list-objfiles :loaded-only #t)))))
+		   #f))
+	name)
+    name))
+
 (define (decorate name table interactive?)
-  (if interactive?
-      #`",(if (variable? name table) '= '|| ),|name|,(if (variable? name table) '|| '() )"
-      name))
+  (let1 resolved-name (resolve-plt name table)
+    (if interactive?
+	(if (equal? name resolved-name)
+	    #`",(if (variable? name table) '= '|| ),|name|,(if (variable? name table) '|| '() )"
+	    resolved-name)
+	resolved-name)))
 (define (undecorate name)
   (regexp-replace #/^=/ (regexp-replace #/\(\)$/ name "") ""))
 
+
+(define (excludes? elt excludes)
+  (any (lambda (ex)
+	 (cond
+	  ((equal? elt ex) #t)
+	  ((string? ex) (or (equal? (undecorate ex) (undecorate elt))
+			    (equal? (drop-plt ex) (drop-plt elt))))
+	  ((regexp? ex) (ex elt))
+	  (else #f)))
+       excludes))
 
 (define (callers* name rtable interactive? depth excludes)
   (hash-table-map
@@ -272,7 +305,7 @@
 	       (and (integer? depth) (< 0 depth)))
        (for-each
 	(lambda (caller)
-	  (unless (member caller (map undecorate excludes))
+	  (unless (excludes? caller excludes)
 	    (unless (member caller path)
 	      (let* ((xpath (cons caller path))
 		     (v (hash-table-get total-callers caller #f)))
@@ -308,7 +341,7 @@
 	       (and (integer? depth) (< 0 depth)))
        (for-each
 	(lambda (callee)
-	  (unless (member callee (map undecorate excludes))
+	  (unless (excludes? callee excludes)
 	    (unless (member callee path)
 	      (let* ((xpath (cons callee path))
 		     (v (hash-table-get total-callees callee #f)))
