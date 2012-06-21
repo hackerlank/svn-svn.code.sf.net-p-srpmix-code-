@@ -1,3 +1,8 @@
+2012-06-21  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-spec-rearrange (spec_file_hack::dont_keep_original): 
+	Ignore command line like -b ... --suffix XXX or -b ... -z XXX.
+
 2012-06-18  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/99default.scm (rhev-agent-.*): Don't use rpmbuild.
