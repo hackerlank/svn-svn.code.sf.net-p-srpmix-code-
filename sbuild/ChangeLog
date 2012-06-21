@@ -1,3 +1,10 @@
+2012-06-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 0.2.8.
+
+	* src/srpmix.mk (%.log): Added --run-plugins option
+	to srpmix invocation.
+
 2012-01-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/sbuild.spec.in (Requires): Require lcopy-envelop.

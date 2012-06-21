@@ -26,8 +26,8 @@ dummy:
 	+if ! test -f $(BLACKLISTDIR)/$@; then \
 	        echo "$$(basename $<)"; \
 		SRPMIX_OPTIONS="$(SRPMIX_OPTIONS)"; \
-		echo TMPDIR=$(TMPDIR) srpmix --srpm=$< $$SRPMIX_OPTIONS; \
-		if TMPDIR=$(TMPDIR) srpmix --srpm=$< $$SRPMIX_OPTIONS > .$@ 2>&1; then \
+		echo TMPDIR=$(TMPDIR) srpmix --run-plugins --srpm=$< $$SRPMIX_OPTIONS; \
+		if TMPDIR=$(TMPDIR) srpmix --run-plugins  --srpm=$< $$SRPMIX_OPTIONS > .$@ 2>&1; then \
 			touch --reference=.$@ $@; rm -f .$@; \
 		else \
 			mv .$@ $(BLACKLISTDIR)/$@; \
