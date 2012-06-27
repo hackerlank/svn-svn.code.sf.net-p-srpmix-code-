@@ -1,3 +1,11 @@
+2012-06-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA): Added rhel6u3.
+
+	* src/dist-mapping/ftp.redhat.com/rhel6u3+optional.es: New file.
+
+	* src/dist-mapping/ftp.redhat.com/rhel6u3: New file.
+
 2012-06-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/sop-garbages (parse_arguments): Handle unknown option.
