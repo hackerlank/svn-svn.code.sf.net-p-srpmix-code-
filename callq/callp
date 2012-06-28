@@ -23,7 +23,9 @@ function main
     local input
     local output
     local debug
-    
+    local use_cache
+
+
     while [[ $# -gt 0 ]]; do
 	case "$1" in
 	    --help|-h)
@@ -68,13 +70,14 @@ function main
 	sha1sum=$(sha1sum < "${input}" | cut -f 1 -d ' ')
 	output=~/.callq"${input},${sha1sum}".es
 	mkdir -p $(dirname "${output}")
+	use_cache=1
     fi
 	
     if [[ -n "$debug" ]]; then
 	debug="${output}"
     fi
 
-    if [[ ! -e "${output}" ]] || [[ -n "$debug" ]]; then
+    if [[ -z "${use_cache}" ]] || [[ ! -e "${output}" ]] || [[ -n "$debug" ]]; then
 	run "$debug" "objdump -D -l" "${input}" > /dev/null
 	run "$debug" es-src-readelf-so "${input}" > "${output}"
 	run "$debug" es-src-objdump-dcall "${input}"                \
@@ -82,9 +85,7 @@ function main
 	    | run "$debug" es-filter-readelf-rela "${input}"        \
 	    | run "$debug" es-filter-libdwarves-fileline "${input}" \
 	    >> "${output}"
-	if [[ -n "$debug" ]]; then
-	    run "$debug" es-src-libdwarves "${input}" > /dev/null
-	fi
+	run "$debug" es-src-libdwarves "${input}" >> "${output}"
     fi
     echo "${output}"
     return 0

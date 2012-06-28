@@ -11,17 +11,104 @@
 (use file.util)
 (use gauche.parseopt)
 (use gauche.sequence)
+(use slib)
+(require 'pretty-print)
 
 (debug-print-width #f)
 
 (define (kref es k)
-  (cadr (or (memq k es)
-	    (list k #f))))
+  (if es
+      (cadr (or (memq k es)
+		(list k #f)))
+      es))
+  
 
 (define objfiles (make-hash-table 'equal?))
 (define (table? t) (and (list? t)
 			(not (null? t))
 			(eq? (car t) 'table)))
+
+(define-class <libdwarves-table> ()
+  ((current-compile-unit :init-value #f)
+   (id->es :init-form (make-hash-table 'eq?))
+   (compile-unit->es :init-form (make-hash-table 'equal?))
+   (compile-unit->ids :init-form (make-hash-table 'equal?))
+   (name->ids :init-form (make-hash-table 'equal?))
+   (subprogram-name->ids :init-form (make-hash-table 'equal?))
+   (variable-name->ids :init-form (make-hash-table 'equal?))
+   (structure_type-name->ids :init-form (make-hash-table 'equal?))
+   (typedef-name->ids :init-form (make-hash-table 'equal?))
+   (base_type-name->ids :init-form (make-hash-table 'equal?))
+   (enumeration_type-name->ids :init-form (make-hash-table 'equal?))
+   (pointer_type-name->ids :init-form (make-hash-table 'equal?))
+   ))
+
+(define-method enter-compile-unit! ((dtable <libdwarves-table>)
+				    compile-unit-es)
+  (let1 name (kref compile-unit-es :name)
+    (set! (~ dtable 'current-compile-unit) name)
+    (set! (~ dtable 'compile-unit->es name) compile-unit-es)))
+
+(define-syntax when-let1
+  (syntax-rules ()
+    [(when-let1 var exp . body)
+     (let ((var exp)) (when var . body))]))
+
+
+(define-method add ((dtable <libdwarves-table>)
+		    es)
+  (let1 id (kref es :id)
+    (set! (~ dtable 'id->es id) es)
+    (hash-table-push! (ref dtable 'compile-unit->ids)
+		      (ref dtable 'current-compile-unit) id)
+    (when-let1 name (kref es :name)
+      (hash-table-push! (ref dtable 'name->ids) name id)
+      (case (cadr es)
+	('subprogram
+	 (hash-table-push! (ref dtable 'subprogram-name->ids) name id))
+	('variable
+	 (hash-table-push! (ref dtable 'variable-name->ids) name id))
+	('typedef
+	 (hash-table-push! (ref dtable 'typedef-name->ids) name id))
+	('structure_type
+	 (hash-table-push! (ref dtable 'structure_type-name->ids) name id))
+	('base_type
+	 (hash-table-push! (ref dtable 'base_type-name->ids) name id))
+	('enumeration_type
+	 (hash-table-push! (ref dtable 'enumeration_type-name->ids) name id))
+	('pointer_type
+	 (hash-table-push! (ref dtable 'pointer_type-name->ids) name id))
+	)
+      )))
+
+(define-method compile-unit->es ((dtable <libdwarves-table>)
+				 (compile-unit <string>))
+  (~ dtable 'compile-unit->es compile-unit))
+
+(define-method compile-units ((dtable <libdwarves-table>))
+  (hash-table-keys (~ dtable 'compile-unit->es)))
+
+(define-method id->es ((dtable <libdwarves-table>)
+		       (id <symbol>))
+  (~ dtable 'id->es id))
+
+(define-method structure_type-name->ids ((dtable <libdwarves-table>)
+					 (struct <string>))
+  (ref (ref dtable 'structure_type-name->ids) struct (list)))
+(define-method typedef-name->ids ((dtable <libdwarves-table>)
+				  (typedef <string>))
+  (ref (ref dtable 'typedef-name->ids) typedef (list)))
+(define-method base_type-name->ids ((dtable <libdwarves-table>)
+				    (base_type <string>))
+  (ref (ref dtable 'base_type-name->ids) base_type (list)))
+(define-method enumeration_type-name->ids ((dtable <libdwarves-table>)
+					   (enum_type <string>))
+  (ref (ref dtable 'enumeration_type-name->ids) enum_type (list)))
+(define-method pointer_type-name->ids ((dtable <libdwarves-table>)
+				       (pointer_type <string>))
+  (ref (ref dtable 'pointer_type-name->ids) pointer_type (list)))
+
+;; dtable: dwarf id and/or dwarf name -> libdwarves es.
 (define (make-table ftable rtable dtable objpath)
   (list 'table ftable rtable dtable objpath))
 (define (ref-ftable objfile)
@@ -70,32 +157,32 @@
       (list))
      (else
       (error "Not loaded yet: " name)))))
-	
+
 
 (define (load-objfile0 file)
-	(let* ((m (#/\/srv\/debugs\/dists\/([^\/]+)/ file))
-	       (d (if m (m 1) #f))
-	       (inventory (if d 
-			      (file->list 
-			       read
-			       #`"/srv/debugs/dists/,|d|/plugins/O0g3/INVENTORY.es")
-			      #f)))
-	  (call-with-input-process `(callp ,file)
-	    (lambda (input)
-	      (receive (ftable rtable dtable so)
-		  (load-entries (read-line input))
-		(set! (ref objfiles (sys-basename file))
-		      (make-table ftable rtable dtable file))
-		(switch-objfile (sys-basename file))
-		(for-each
-		 (lambda (s) 
-		   (unless (ref objfiles s #f)
-		     (set! (ref objfiles s) 
-			   (or (and-let* (inventory (l (assoc-ref inventory s #f)))
-				 `(LOADABLE ,#`"/srv/debugs/dists/,|d|/plugins/O0g3/root,l"))
-			       'UNSOLVED))))
-		 so))
-	      (list)))))
+  (let* ((m (#/\/srv\/debugs\/dists\/([^\/]+)/ file))
+	 (d (if m (m 1) #f))
+	 (inventory (if d 
+			(file->list 
+			 read
+			 #`"/srv/debugs/dists/,|d|/plugins/O0g3/INVENTORY.es")
+			#f)))
+    (call-with-input-process `(callp ,file)
+      (lambda (input)
+	(receive (ftable rtable dtable so)
+	    (load-entries (read-line input))
+	  (set! (ref objfiles (sys-basename file))
+		(make-table ftable rtable dtable file))
+	  (switch-objfile (sys-basename file))
+	  (for-each
+	   (lambda (s) 
+	     (unless (ref objfiles s #f)
+	       (set! (ref objfiles s) 
+		     (or (and-let* (inventory (l (assoc-ref inventory s #f)))
+			   `(LOADABLE ,#`"/srv/debugs/dists/,|d|/plugins/O0g3/root,l"))
+			 'UNSOLVED))))
+	   so))
+	(list)))))
 
 (define (load-objfile file)
   (if (equal? (sys-basename file) file)
@@ -105,7 +192,7 @@
 				(eq? (car l) 'LOADABLE))
 			   (cadr l)
 			   file)))
-		     
+      
       (load-objfile0 file)
       ))
 
@@ -119,7 +206,7 @@
 			      (cons (cadr l) kdr)
 			      kdr))
 			(list))))
-			
+
 
 (define (in-blacklist? name)
   (any (lambda (r) (r name))
@@ -155,44 +242,39 @@
       (let loop ((es (read))
 		 (ftable (make-hash-table 'equal?))
 		 (rtable (make-hash-table 'equal?))
-		 (dtable (make-hash-table 'equal?))
+		 (dtable (make <libdwarves-table>))
 		 (so (list)))
-	  (if (eof-object? es)
-	      (values ftable rtable dtable so)
-	      (cond
-	       ((and (eq? (car es) 'objdump-dcall)
-		     (eq? (cadr es) 'entry))
-		(wash! es)
-		(for-each
-		 (lambda (entry)
-		   (hash-table-push! rtable entry es))
-		 (delete-duplicates
-		  (map
-		   (cute ref <> 2)
-		   (cadr (memq :connections es)))))
-		(when (acceptable? (ref es 3))
-		  (hash-table-push! ftable (ref es 3) es))
-		(loop (read) ftable rtable dtable so))
-	       ((eq? (car es) 'readelf-so)
-		(loop (read) ftable rtable dtable (append (cdr es) so)))
-	       ;;
-	       ((eq? (car es) 'libdwarves)
-		(case (cadr es)
-		  ('compile_unit
-		   (loop (read) ftable rtable dtable so))
-		  (else
-		   (set! (ref dtable (kref es :id)) (list es))
-		   (if-let1 name (kref es :name)
-			    (begin
-			      (unless (ref dtable name #f)
-				(set! (ref dtable name) (list)))
-			      (unless (member es (ref dtable name))
-				(push! (ref dtable name) es))))
-		   (loop (read) ftable rtable dtable so)
-		   )))
-	       ;;
-	       (else
-		(loop (read) ftable rtable dtable so))))))))
+	;;(write es)(newline)
+	(if (eof-object? es)
+	    (values ftable rtable dtable so)
+	    (cond
+	     ((and (eq? (car es) 'objdump-dcall)
+		   (eq? (cadr es) 'entry))
+	      (wash! es)
+	      (for-each
+	       (lambda (entry)
+		 (hash-table-push! rtable entry es))
+	       (delete-duplicates
+		(map
+		 (cute ref <> 2)
+		 (cadr (memq :connections es)))))
+	      (when (acceptable? (ref es 3))
+		(hash-table-push! ftable (ref es 3) es))
+	      (loop (read) ftable rtable dtable so))
+	     ((eq? (car es) 'readelf-so)
+	      (loop (read) ftable rtable dtable (append (cdr es) so)))
+	     ;;
+	     ((eq? (car es) 'libdwarves)
+	      (case (cadr es)
+		('compile_unit
+		 (enter-compile-unit! dtable es)
+		 (loop (read) ftable rtable dtable so))
+		(else
+		 (add dtable es)
+		 (loop (read) ftable rtable dtable so))))
+	     ;;
+	     (else
+	      (loop (read) ftable rtable dtable so))))))))
 
 (define (find-callers sym table)
   (define (build kar l)
@@ -224,32 +306,32 @@
 (define (find-callees sym table)
   (if-let1 ess (or (ref table sym #f)
 		   (ref table (drop-plt sym) #f))
-	   (append-map
-	    (lambda (es)
-	      (let1 connections (cadr (memq :connections es))
-		(map (lambda (name)
-		       (if-let1 callee-ess (ref table name #f)
-				(append-map
-				 (lambda (callee-es)
-				   `(,(if (cadr (memq :variable? callee-es))
-					  'v
-					  'f) 
-				     ,(ref callee-es 3)
-				     :file ,(cadr (memq :file callee-es))
-				     :line ,(cadr (memq :line callee-es))
-				     #;:caller #;(,(ref es 2) 
-					      :file ,(cadr (memq :file es))
-					      :line ,(cadr (memq :line es))))
-				   )
-				 callee-ess)
-				`(x ,name)))
-		     (map (cute ref <> 2) connections))))
-	    ess)
-	   (list)))
+    (append-map
+     (lambda (es)
+       (let1 connections (cadr (memq :connections es))
+	 (map (lambda (name)
+		(if-let1 callee-ess (ref table name #f)
+		  (append-map
+		   (lambda (callee-es)
+		     `(,(if (cadr (memq :variable? callee-es))
+			    'v
+			    'f) 
+		       ,(ref callee-es 3)
+		       :file ,(cadr (memq :file callee-es))
+		       :line ,(cadr (memq :line callee-es))
+		       #;:caller #;(,(ref es 2) 
+		       :file ,(cadr (memq :file es))
+		       :line ,(cadr (memq :line es))))
+		     )
+		   callee-ess)
+		  `(x ,name)))
+	      (map (cute ref <> 2) connections))))
+     ess)
+    (list)))
 
-(define (forward-reachable? from to ftable)
+(define (forward-chained? from to ftable)
   (list #f))
-(define (backward-reachable? from to ftable)
+(define (backward-chained? from to ftable)
   (list #f))
 
 (define (resolve-plt name table)
@@ -364,24 +446,24 @@
 		   x))
 	    (map reverse b))))))
 
-(define (reachable? from to rtable interactive? depth)
+(define (chained? from to rtable interactive? depth)
   (delete-duplicates 
    (or (let1 callers-from (callers* from rtable #f depth (list))
-	     (if-let1 found (assoc-ref  callers-from to #f)
-		      (map
-		       (lambda (f)
-			 (map (cute decorate <> rtable interactive?)
-			      f))
-		       found)
-		      #f))
+	 (if-let1 found (assoc-ref  callers-from to #f)
+	   (map
+	    (lambda (f)
+	      (map (cute decorate <> rtable interactive?)
+		   f))
+	    found)
+	   #f))
        (let1 callers-to (callers* to rtable #f depth (list))
-	     (if-let1 found (assoc-ref  callers-to from #f)
-		      (map
-		       (lambda (f)
-			 (map (cute decorate <> rtable interactive?)
-			      f))
-		       found)
-		      #f))
+	 (if-let1 found (assoc-ref  callers-to from #f)
+	   (map
+	    (lambda (f)
+	      (map (cute decorate <> rtable interactive?)
+		   f))
+	    found)
+	   #f))
        (list #f))))
 
 (define (transit from to ftable rtable interactive? depth)
@@ -389,49 +471,49 @@
     (map (lambda (t) (map (cute decorate <> rtable interactive?) t)) 
 	 tree))
   (delete-duplicates
-   (let1 r (reachable? from to rtable #f depth)
-	 (if (equal? r (list #f))
-	     (let1 commons (append 
-			    (let* ((callers-from (callers* from rtable #f depth (list)))
-				   (callers-to (callers* to rtable #f depth (list)))
-				   (common-callers (lset-intersection equal? 
-								      (map car callers-from)
-								      (map car callers-to))))
-			      (if (null? common-callers)
-				  (list)
-				  (map
-				   (lambda (common-caller)
-				     `(common-caller ,common-caller
-						     :from ,(decorate*
-							     (delete-duplicates 
-							      (assoc-ref callers-from common-caller)))
-						     :to ,(decorate*
-							   (delete-duplicates
-							    (assoc-ref callers-to common-caller))))
-				     )
-				   common-callers)))
-			    (let* ((callees-from (callees* from ftable #f depth (list)))
-				   (callees-to (callees* to ftable #f depth (list)))
-				   (common-callees (lset-intersection equal? 
-								      (map car callees-from)
-								      (map car callees-to))))
-			      (if (null? common-callees)
-				  (list)
-				  (map
-				   (lambda (common-callee)
-				     `(common-callee ,common-callee
-						     :from ,(decorate*
-							     (delete-duplicates
-							      (assoc-ref callees-from common-callee)))
-						     :to ,(decorate* 
-							   (delete-duplicates
-							    (assoc-ref callees-to common-callee))))
-				     )
-				   common-callees))))
-		   (if (null? commons)
-		       (list #f)
-		       commons))
-	     r))))
+   (let1 r (chained? from to rtable #f depth)
+     (if (equal? r (list #f))
+	 (let1 commons (append 
+			(let* ((callers-from (callers* from rtable #f depth))
+			       (callers-to (callers* to rtable #f depth))
+			       (common-callers (lset-intersection equal? 
+								  (map car callers-from)
+								  (map car callers-to))))
+			  (if (null? common-callers)
+			      (list)
+			      (map
+			       (lambda (common-caller)
+				 `(common-caller ,common-caller
+						 :from ,(decorate*
+							 (delete-duplicates 
+							  (assoc-ref callers-from common-caller)))
+						 :to ,(decorate*
+						       (delete-duplicates
+							(assoc-ref callers-to common-caller))))
+				 )
+			       common-callers)))
+			(let* ((callees-from (callees* from ftable #f depth))
+			       (callees-to (callees* to ftable #f depth))
+			       (common-callees (lset-intersection equal? 
+								  (map car callees-from)
+								  (map car callees-to))))
+			  (if (null? common-callees)
+			      (list)
+			      (map
+			       (lambda (common-callee)
+				 `(common-callee ,common-callee
+						 :from ,(decorate*
+							 (delete-duplicates
+							  (assoc-ref callees-from common-callee)))
+						 :to ,(decorate* 
+						       (delete-duplicates
+							(assoc-ref callees-to common-callee))))
+				 )
+			       common-callees))))
+	   (if (null? commons)
+	       (list #f)
+	       commons))
+	 r))))
 
 (define (variable? name table)
   (let1 entry (ref table name #f)
@@ -446,16 +528,16 @@
   (define (file-line00 current-path table file line)
     (rxmatch-cond
       ((#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/ 
-			current-path)
+	current-path)
        (#f m)
        `(,#`"/srv/sources,|m|/pre-build/,|file|" ,#`",|line|"))
       ((#/^\/srv\/debugs\/dists\/([^\/]+)\/plugins\/O0g3\/root\/.*/ 
-				 current-path)
+	current-path)
        (#f d)
        (file-line00 (sys-readlink current-path) table file line)
        )))
   (file-line00 (current-path) table file line))
-    
+
 
 
 (define (file-line name ftable)
@@ -478,13 +560,13 @@
 		 (e (car e))
 		 (conn (kref e :connections))
 		 (ee (any (lambda (ee) 
-			     (let1 ee-name (ref ee 2)
-			       (if (or (equal? ee-name callee)
-				       (equal? (car (string-split ee-name #/@|\./))
-					       (car (string-split callee #/@|\./))))
-				   ee
-				   #f)))
-			   conn))
+			    (let1 ee-name (ref ee 2)
+			      (if (or (equal? ee-name callee)
+				      (equal? (car (string-split ee-name #/@|\./))
+					      (car (string-split callee #/@|\./))))
+				  ee
+				  #f)))
+			  conn))
 		 (e (cdddr e))
 		 (file (kref e :file))
 		 (line (or (kref ee :line)
@@ -498,10 +580,10 @@
 (define (preview generator viewer)
   (list 
    (if-let1 f (let1 r (generator) (if (null? r) #f (car r)))
-	    (if (null? f)
-		#f
-		(viewer  (car f) (cadr f)))
-	    #f)))
+     (if (null? f)
+	 #f
+	 (viewer  (car f) (cadr f)))
+     #f)))
 (define (firefox0 file line)
   (let ((b (regexp-replace #/^\/srv\/sources/ file "http://sources/ysh"))
 	(l line))
@@ -519,8 +601,8 @@
     (for-each-with-index
      (lambda (index line)
        (print/prefix #`";,(+ l index):	" line))
-     (take (drop lines l) range))
-    (list)))
+  (take (drop lines l) range))
+(list)))
 
 (define (inline name ftable range)
   (preview (pa$ file-line name ftable) (cute inline0 <> <> range)))
@@ -555,17 +637,17 @@
       (map
        (cute decorate <> ftable interactive?)
        (hash-table-fold ftable (lambda (k v kdr)
-				(let1 file (any (lambda (x)
-						  (and (kref x :entry-point)
-						       (kref x :file))
-						  ) v)
-				  (cond
-				   ((not file) kdr)
-				   ((or (equal? file name)
-					(equal? (sys-basename name) (sys-basename file)))
-				    (cons k kdr))
-				   (else
-				    kdr))))
+				 (let1 file (any (lambda (x)
+						   (and (kref x :entry-point)
+							(kref x :file))
+						   ) v)
+				   (cond
+				    ((not file) kdr)
+				    ((or (equal? file name)
+					 (equal? (sys-basename name) (sys-basename file)))
+				     (cons k kdr))
+				    (else
+				     kdr))))
 			(list)))
       (map
        (cute decorate <> ftable interactive?)
@@ -603,28 +685,198 @@
    (file->sexp-list file))
   (list))
 
-(define (dwarf id dtable interactive?)
-  (ref dtable id #f))
+;;
+;;
+;;
+(define (dwarf-raw id dtable interactive?)
+  (list (id->es dtable id)))
+(define (dwarf-name name dtable interactive?)
+  (~ dtable 'name->ids name))
+  
+;;
+(define-method dwarf-type ((name <string>) dtable depth interactive?)
+  (list 
+   (cons 'forest
+	 (map (cute dwarf-type <> dtable depth (list) interactive?)
+	      (append-map (cute <> dtable name) `(,typedef-name->ids
+						  ,structure_type-name->ids
+						  ,base_type-name->ids
+						  ,enumeration_type-name->ids))))))
+
+(define-method dwarf-type ((id <symbol>) dtable depth handled interactive?)
+  (let1 es (id->es dtable id)
+    (if (memq id handled)
+	(list id (kref es :name))
+	(case (cadr es)
+	  ('typedef
+	   (dwarf-typedef id dtable depth handled interactive?))
+	  ('structure_type
+	   (dwarf-struct id dtable depth handled interactive?))
+	  ('base_type
+	   (dwarf-base-type id dtable depth handled interactive?))
+	  ('enumeration_type
+	   (dwarf-enum-type id dtable depth handled interactive?))
+	  ('pointer_type
+	   (dwarf-pointer-type id dtable depth handled interactive?))
+	  ('array_type
+	   (dwarf-array-type id dtable depth handled interactive?))
+	  (else
+	   (cadr es)
+	   (cadr es))
+	  ))))
+
+(define-method dwarf-array-type ((id <symbol>) dtable depth handled interactive?)
+  (dwarf-array-type (id->es dtable id) dtable depth (cons id handled) interactive?))
+(define-method dwarf-array-type ((es <list>) dtable depth handled interactive?)
+  (if (< 0 depth)
+      (if-let1 bid (kref (kref es :base) :ref)
+	(list 'array (kref es :name) (dwarf-type bid dtable (- depth 1) handled interactive?))
+	(kref es :name))
+      (kref es :name)))
+
+(define-method dwarf-pointer-type ((id <symbol>) dtable depth handled interactive?)
+  (dwarf-pointer-type (id->es dtable id) dtable depth (cons id handled) interactive?))
+(define-method dwarf-pointer-type ((es <list>) dtable depth handled interactive?)
+  (if (< 0 depth)
+      (if-let1 id (kref (kref es :base) :ref)
+	(list 'pointer (kref es :name) (dwarf-type id dtable (- depth 1) handled interactive?))
+	(kref es :name))
+      (kref es :name)))
+
+(define (zip/padding padding . all)
+  (if (every null? all)
+      (list)
+      (cons
+       (map (^ (lst)
+	       (if (null? lst)
+		   padding
+		   (car lst)))
+	    all)
+       (apply zip/padding padding (map (^ (lst)
+					  (if (null? lst)
+					      lst
+					      (cdr lst)))
+				       all)))))
+
+(define (same eq lst)
+  (if (null? lst)
+      #t
+      (if (null? (cdr lst))
+	  #t
+	  (and (eq? (car lst) (cadr lst))
+	       (same eq (cdr lst))))))
+
+(define (common-prefix strlist)
+  (list->string 
+   (map car
+	(reverse 
+	 (fold
+	  (^ (kar kdr)
+	     (if (every char? kar)
+		 (if (same eq? kar)
+		     (cons kar kdr)
+		     kdr)
+		 kdr))
+	  (list)
+	  (apply zip/padding #f (map string->list strlist))
+	  )))))
+
+(define (drop-prefix len strlist)
+  (map (cute string-drop <> len) strlist))
+
+(define-method dwarf-enum-type ((id <symbol>) dtable depth handled interactive?)
+  (dwarf-enum-type (id->es dtable id) dtable depth (cons id handled) interactive?))
+(define-method dwarf-enum-type ((es <list>) dtable depth handled interactive?)
+  (cons* 'enum (kref es :name)
+	 (if (< 0 depth)
+	     (if-let1 enumerators (map (^ (x) (kref x :ref))  (kref es :enumerators))
+	       (let1 name+value (map
+				 (^ (enum)
+				    (let1 es (id->es dtable enum)
+				      (list (kref es :name)
+					    (kref es :value))))
+				 enumerators)
+		 (let1 names (map car name+value)
+		   (let1 prefix (common-prefix names)
+		     (list (let1 short-names (drop-prefix (string-length prefix) names)
+			     (zip short-names (values-ref (unzip2 name+value) 1)))
+			   :prefix prefix))))
+	       (list))
+	     (list))))
+
+(define-method dwarf-base-type ((id <symbol>) dtable depth handled interactive?)
+  (dwarf-base-type (id->es dtable id) dtable depth (cons id handled) interactive?))
+(define-method dwarf-base-type ((es <list>) dtable depth handled interactive?)
+  (if (< 0 depth)
+      (if-let1 id (kref (kref es :base) :ref)
+	(list 'basetype (kref es :name) (dwarf-type id dtable (- depth 1) handled interactive?))
+	(kref es :name))
+      (kref es :name)))
+
+(define-method dwarf-typedef ((id <symbol>) dtable depth handled interactive?)
+  (dwarf-typedef (id->es dtable id) dtable depth (cons id handled) interactive?))
+(define-method dwarf-typedef ((es <list>) dtable depth handled interactive?)
+  (if (< 0 depth)
+      (list 'typedef 
+	    (kref es :name) 
+	    (if-let1 id (kref (kref es :base) :ref)
+	      (dwarf-type id dtable (- depth 1) handled interactive?)
+	      #f))
+      (kref es :name)))
+
+(define-method dwarf-struct ((id <symbol>) dtable depth handled interactive?)
+  (dwarf-struct (id->es dtable id) dtable depth (cons id handled) interactive?))
+
+(define-method dwarf-struct ((es <list>) dtable depth handled interactive?)
+  (let1 r (map (^ (m)
+		  (match m
+			 (`(indirect member :ref ,mid) 
+			  (let1 mes (id->es dtable mid)
+			    (let1 tid (kref (kref mes :type) :ref)
+			      (list ;'member 
+			       (kref mes :name)
+			       (dwarf-type tid dtable (- depth 1) handled interactive?)))))
+			 
+			 (else
+			  #f)))
+	       (kref es :members))
+    (if (< 0 depth)
+	(list 'struct (kref es :name) r)
+	(kref es :name))))
+
+
+
+
+;;
+(define-method dwarf-struct ((name <string>) dtable depth interactive?)
+  (let1 ids (structure_type-name->ids dtable name)
+    (map (^ (id)  (dwarf-struct id dtable depth interactive?))
+	 ids)))
+;;
+
+(define (dwarf-list-compile-units dtable interactive?)
+  (compile-units dtable))
+;;
 (define (rtable-dump table)
-  (apply append (hash-table-map table (lambda (k v)
-					(map
-					 (lambda (v0) 
-					   `(=> ,k ,(ref v0 3)))
-					 (delete-duplicates v))
-					))))
+  (apply append (hash-table-map table (^ (k v)
+					 (map
+					  (^ (v0) 
+					     `(=> ,k ,(ref v0 3)))
+					  (delete-duplicates v))
+					 ))))
 
 (define command-handlers (list))
 
 (define-macro (define-command name pattern action . help)
   `(set! command-handlers (cons
-		   (list ',name 
-			 :pattern ',pattern
-			 :handler (match-lambda 
-				      (,pattern ,action)
-				    (else 'next))
-			 :help ,(if (null? help) #f (car help))
-			 )
-		   command-handlers)))
+			   (list ',name 
+				 :pattern ',pattern
+				 :handler (match-lambda 
+					   (,pattern ,action)
+					   (else 'next))
+				 :help ,(if (null? help) #f (car help))
+				 )
+			   command-handlers)))
 
 ;; (handler es)
 ;; => next
@@ -675,13 +927,13 @@
 (define-command file-line 
   ('file-line (? string? caller) (? string? callee)) 
   (file-line-call (undecorate caller)
-	      (undecorate callee)
-	      (current-ftable)))
+		  (undecorate callee)
+		  (current-ftable)))
 (define-command file-line 
   (': (? string? caller) (? string? callee)) 
   (file-line-call (undecorate caller)
-	      (undecorate callee)
-	      (current-ftable)))
+		  (undecorate callee)
+		  (current-ftable)))
 
 
 (define-command inline ('inline (? string? name))
@@ -771,16 +1023,16 @@
   (callees* (undecorate name) (current-ftable) #t depth excludes))
 
 
-(define-command reachable? ('reachable? from to) (reachable? (undecorate from)
+(define-command chained? ('chained? from to) (chained? (undecorate from)
 						     (undecorate to)
 						     (current-rtable) #t 1))
-(define-command reachable? ('reachable? from to  depth) (reachable? (undecorate from)
+(define-command chained? ('chained? from to  depth) (chained? (undecorate from)
 							    (undecorate to)
 							    (current-rtable) #t depth))
-(define-command reachable? ('<> from to) (reachable? (undecorate from)
+(define-command chained? ('<> from to) (chained? (undecorate from)
 					     (undecorate to)
 					     (current-rtable) #t 1))
-(define-command reachable? ('<> from to  depth) (reachable? (undecorate from)
+(define-command chained? ('<> from to  depth) (chained? (undecorate from)
 						    (undecorate to)
 						    (current-rtable) #t depth))
 
@@ -793,11 +1045,11 @@
 	   (undecorate to)
 	   (current-ftable) (current-rtable) #t depth))
 (define-command transit ('<*> from to) (transit (undecorate from)
-					(undecorate to)
-					(current-ftable) (current-rtable) #t #t))
+						(undecorate to)
+						(current-ftable) (current-rtable) #t #t))
 (define-command transit ('<*> from to  depth) (transit (undecorate from)
-					       (undecorate to)
-					       (current-ftable) (current-rtable) #t depth))
+						       (undecorate to)
+						       (current-ftable) (current-rtable) #t depth))
 
 (define-command entry-points ('entry-points) (entry-points #f (current-ftable) #t))
 (define-command entry-points ('$) (entry-points #f (current-ftable) #t))
@@ -805,8 +1057,15 @@
 (define-command externs ('$ (? string? name)) (entry-points name (current-ftable) #t))
 
 
-(define-command dwarf ('dwarf id) (dwarf id (current-dtable) #t))
-(define-command dwarf ('d id) (dwarf id (current-dtable) #t))
+(define-command dwarf ('dwarf (? symbol? id)) (dwarf-raw id (current-dtable) #t))
+(define-command dwarf ('dwarf (? string? name)) (dwarf-name name (current-dtable) #t))
+
+(define-command type ('type name) (dwarf-type name (current-dtable) 1 #t))
+(define-command type ('type name (? integer? depth)) (dwarf-type name (current-dtable) depth #t))
+
+(define-command list-compile-units ('list-compile-units) (dwarf-list-compile-units (current-dtable) #t))
+;;(define-command freachable ('type name) (dwarf-type name (current-dtable) 1 #t))
+;;(define-command treachable ('type name (? integer? depth)) (dwarf-type name (current-dtable) depth #t))
 
 (define (set-quiet s) (quiet s) '())
 (define-command quiet ('quiet) (set-quiet #t))
@@ -859,6 +1118,37 @@
   (lambda (interactive? kar kdr)
     (format #t #`",(kref kdr :pattern); ,(kref kdr :help)")
     ))
+
+(define (callq-pretty-print obj . opt)
+  (apply pretty-print 
+	 (let loop ((obj obj))
+	   (cond
+	    ((keyword? obj)
+	     (string->symbol (format "~s" obj)))
+	    ((symbol? obj)
+	     (let1 str (x->string obj)
+	       (if (#/^0x.*/ str)
+		   (string->symbol (format "~s" obj))
+		   obj)))
+	    ((pair? obj)
+	     (cons (loop (car obj)) (loop (cdr obj))))
+	    (else
+	     obj)))
+	 opt))
+
+
+(define-printer forest
+  (lambda (interactive? kar kdr)
+    (let1 len (length kdr)
+      (for-each-with-index 
+       (^ (index tree)
+	  (format #t #`";; ,(+ index 1)/,|len|\n")
+	  (callq-pretty-print tree))
+       kdr))))
+(define-printer tree
+  (lambda (interactive? kar kdr)
+    (callq-pretty-print kdr)))
+
 (define-printer objfile
   (lambda (interactive? kar kdr)
     (if (list? (cadr kdr))
