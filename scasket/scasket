@@ -243,7 +243,7 @@ failovermethod=priority
 
 [local]
 name=local
-baseurl=http://kojipkgs.fedoraproject.org/repos/dist-f@RELEASE@-build/latest/@ARCH@/
+baseurl=http://kojipkgs.fedoraproject.org/repos/f@RELEASE@-build/latest/@ARCH@/
 cost=2000
 enabled=0
 
