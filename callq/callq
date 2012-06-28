@@ -11,6 +11,7 @@
 (use file.util)
 (use gauche.parseopt)
 (use gauche.sequence)
+(use gauche.collection)
 (use slib)
 (require 'pretty-print)
 
@@ -706,7 +707,8 @@
 (define-method dwarf-type ((id <symbol>) dtable depth handled interactive?)
   (let1 es (id->es dtable id)
     (if (memq id handled)
-	(list id (kref es :name))
+	(values (list id (kref es :name))
+		handled)
 	(case (cadr es)
 	  ('typedef
 	   (dwarf-typedef id dtable depth handled interactive?))
@@ -721,8 +723,10 @@
 	  ('array_type
 	   (dwarf-array-type id dtable depth handled interactive?))
 	  (else
-	   (cadr es)
-	   (cadr es))
+	   #?=(cadr es)
+	   (values
+	    (cadr es)
+	    handled))
 	  ))))
 
 (define-method dwarf-array-type ((id <symbol>) dtable depth handled interactive?)
@@ -730,18 +734,24 @@
 (define-method dwarf-array-type ((es <list>) dtable depth handled interactive?)
   (if (< 0 depth)
       (if-let1 bid (kref (kref es :base) :ref)
-	(list 'array (kref es :name) (dwarf-type bid dtable (- depth 1) handled interactive?))
-	(kref es :name))
-      (kref es :name)))
+	(receive (r h) (dwarf-type bid dtable (- depth 1) handled interactive?)
+	  (values
+	   (list 'array (kref es :name) r)
+	   h))
+	(values (kref es :name) handled))
+      (values (kref es :name) handled)))
 
 (define-method dwarf-pointer-type ((id <symbol>) dtable depth handled interactive?)
   (dwarf-pointer-type (id->es dtable id) dtable depth (cons id handled) interactive?))
 (define-method dwarf-pointer-type ((es <list>) dtable depth handled interactive?)
   (if (< 0 depth)
       (if-let1 id (kref (kref es :base) :ref)
-	(list 'pointer (kref es :name) (dwarf-type id dtable (- depth 1) handled interactive?))
-	(kref es :name))
-      (kref es :name)))
+	(receive (r h) (dwarf-type id dtable (- depth 1) handled interactive?)
+	  (values 
+	   (list 'pointer (kref es :name) r)
+	   h))
+	(values (kref es :name) handled))
+      (values (kref es :name) handled)))
 
 (define (zip/padding padding . all)
   (if (every null? all)
@@ -787,73 +797,74 @@
 (define-method dwarf-enum-type ((id <symbol>) dtable depth handled interactive?)
   (dwarf-enum-type (id->es dtable id) dtable depth (cons id handled) interactive?))
 (define-method dwarf-enum-type ((es <list>) dtable depth handled interactive?)
-  (cons* 'enum (kref es :name)
-	 (if (< 0 depth)
-	     (if-let1 enumerators (map (^ (x) (kref x :ref))  (kref es :enumerators))
-	       (let1 name+value (map
-				 (^ (enum)
-				    (let1 es (id->es dtable enum)
-				      (list (kref es :name)
-					    (kref es :value))))
-				 enumerators)
-		 (let1 names (map car name+value)
-		   (let1 prefix (common-prefix names)
-		     (list (let1 short-names (drop-prefix (string-length prefix) names)
-			     (zip short-names (values-ref (unzip2 name+value) 1)))
-			   :prefix prefix))))
-	       (list))
-	     (list))))
+  (values
+   (cons* 'enum (kref es :name)
+	  (if (< 0 depth)
+	      (if-let1 enumerators (map (^ (x) (kref x :ref))  (kref es :enumerators))
+		(let1 name+value (map
+				  (^ (enum)
+				     (let1 es (id->es dtable enum)
+				       (list (kref es :name)
+					     (kref es :value))))
+				  enumerators)
+		  (let1 names (map car name+value)
+		    (let1 prefix (common-prefix names)
+		      (list (let1 short-names (drop-prefix (string-length prefix) names)
+			      (zip short-names (values-ref (unzip2 name+value) 1)))
+			    :prefix prefix))))
+		(list))
+	      (list)))
+   handled))
 
 (define-method dwarf-base-type ((id <symbol>) dtable depth handled interactive?)
   (dwarf-base-type (id->es dtable id) dtable depth (cons id handled) interactive?))
 (define-method dwarf-base-type ((es <list>) dtable depth handled interactive?)
   (if (< 0 depth)
-      (if-let1 id (kref (kref es :base) :ref)
-	(list 'basetype (kref es :name) (dwarf-type id dtable (- depth 1) handled interactive?))
-	(kref es :name))
-      (kref es :name)))
+      (values 
+       (list 'basetype (kref es :name) :size (kref es :size))
+       handled)
+      (values (kref es :name) handled)))
 
 (define-method dwarf-typedef ((id <symbol>) dtable depth handled interactive?)
   (dwarf-typedef (id->es dtable id) dtable depth (cons id handled) interactive?))
 (define-method dwarf-typedef ((es <list>) dtable depth handled interactive?)
   (if (< 0 depth)
-      (list 'typedef 
-	    (kref es :name) 
-	    (if-let1 id (kref (kref es :base) :ref)
-	      (dwarf-type id dtable (- depth 1) handled interactive?)
-	      #f))
-      (kref es :name)))
+      (receive (r h) (if-let1 id (kref (kref es :base) :ref)
+		       (dwarf-type id dtable (- depth 1) handled interactive?)
+		       (values #f handled))
+	(values (list 'typedef (kref es :name) r)
+		h))
+      (values
+       (kref es :name)
+       handled)))
 
 (define-method dwarf-struct ((id <symbol>) dtable depth handled interactive?)
   (dwarf-struct (id->es dtable id) dtable depth (cons id handled) interactive?))
 
 (define-method dwarf-struct ((es <list>) dtable depth handled interactive?)
-  (let1 r (map (^ (m)
-		  (match m
-			 (`(indirect member :ref ,mid) 
-			  (let1 mes (id->es dtable mid)
-			    (let1 tid (kref (kref mes :type) :ref)
-			      (list ;'member 
-			       (kref mes :name)
-			       (dwarf-type tid dtable (- depth 1) handled interactive?)))))
-			 
-			 (else
-			  #f)))
-	       (kref es :members))
-    (if (< 0 depth)
-	(list 'struct (kref es :name) r)
-	(kref es :name))))
-
-
-
+  (receive (r h)
+      (fold2 (^ (m r h)
+		(match m
+		       (`(indirect member :ref ,mid) 
+			(let1 mes (id->es dtable mid)
+			  (let1 tid (kref (kref mes :type) :ref)
+			    (receive (r0 h0) 
+				(dwarf-type tid dtable (- depth 1) h interactive?)
+			      (values
+			       (cons (list (kref mes :name) r0) r)
+			       h0)))))
+		       (else
+			(values (cons #f r) h))))
+	     (list)
+	     handled
+	     (kref es :members))
+    (values
+     (if (< 0 depth)
+	 (list 'struct (kref es :name) (reverse r))
+	 (kref es :name))
+     h)))
 
 ;;
-(define-method dwarf-struct ((name <string>) dtable depth interactive?)
-  (let1 ids (structure_type-name->ids dtable name)
-    (map (^ (id)  (dwarf-struct id dtable depth interactive?))
-	 ids)))
-;;
-
 (define (dwarf-list-compile-units dtable interactive?)
   (compile-units dtable))
 ;;
