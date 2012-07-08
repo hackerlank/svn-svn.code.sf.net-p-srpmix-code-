@@ -2,6 +2,16 @@
 #| -*- scheme -*- |#
 :; exec gosh -- $0 "$@"
 
+;; variable->function
+;; type->function
+;; functions->type
+;; variable->type
+;; type->variable
+;; function->variable
+;; member->struct
+
+;; reachable?
+;;
 (use srfi-1)
 (use srfi-13)
 (use util.match)
@@ -38,6 +48,7 @@
    (subprogram-name->ids :init-form (make-hash-table 'equal?))
    (variable-name->ids :init-form (make-hash-table 'equal?))
    (structure_type-name->ids :init-form (make-hash-table 'equal?))
+   (union_type-name->ids :init-form (make-hash-table 'equal?))
    (typedef-name->ids :init-form (make-hash-table 'equal?))
    (base_type-name->ids :init-form (make-hash-table 'equal?))
    (enumeration_type-name->ids :init-form (make-hash-table 'equal?))
@@ -73,6 +84,8 @@
 	 (hash-table-push! (ref dtable 'typedef-name->ids) name id))
 	('structure_type
 	 (hash-table-push! (ref dtable 'structure_type-name->ids) name id))
+	('union_type
+	 (hash-table-push! (ref dtable 'union_type-name->ids) name id))
 	('base_type
 	 (hash-table-push! (ref dtable 'base_type-name->ids) name id))
 	('enumeration_type
@@ -82,6 +95,23 @@
 	)
       )))
 
+(define-method all-ids ((dtable <libdwarves-table>))
+  (hash-table-keys (ref dtable 'id->es)))
+
+(define-method all-ids-in-compile-unit ((dtable <libdwarves-table>)
+					(cu-name <string>))
+  (ref (ref dtable 'compile-unit->ids) cu-name))
+       
+(define-method compile-unit-of ((dtable <libdwarves-table>)
+				(id <symbol>))
+  (let loop ((cu (compile-units dtable)))
+    (if (null? cu)
+	#f
+	(if (memq id 
+		  (all-ids-in-compile-unit dtable (car cu)))
+	      (car cu)
+	      (loop (cdr cu))))))
+	      
 (define-method compile-unit->es ((dtable <libdwarves-table>)
 				 (compile-unit <string>))
   (~ dtable 'compile-unit->es compile-unit))
@@ -91,11 +121,14 @@
 
 (define-method id->es ((dtable <libdwarves-table>)
 		       (id <symbol>))
-  (~ dtable 'id->es id))
+  (ref (ref dtable 'id->es) id #f))
 
 (define-method structure_type-name->ids ((dtable <libdwarves-table>)
 					 (struct <string>))
   (ref (ref dtable 'structure_type-name->ids) struct (list)))
+(define-method union_type-name->ids ((dtable <libdwarves-table>)
+				     (union <string>))
+  (ref (ref dtable 'union_type-name->ids) union (list)))
 (define-method typedef-name->ids ((dtable <libdwarves-table>)
 				  (typedef <string>))
   (ref (ref dtable 'typedef-name->ids) typedef (list)))
@@ -180,7 +213,7 @@
 	     (unless (ref objfiles s #f)
 	       (set! (ref objfiles s) 
 		     (or (and-let* (inventory (l (assoc-ref inventory s #f)))
-			   `(LOADABLE ,#`"/srv/debugs/dists/,|d|/plugins/O0g3/root,l"))
+			   `(LOADABLE ,#`"/srv/debugs/dists/,|d|/plugins/O0g3/root,|l|"))
 			 'UNSOLVED))))
 	   so))
 	(list)))))
@@ -475,8 +508,8 @@
    (let1 r (chained? from to rtable #f depth)
      (if (equal? r (list #f))
 	 (let1 commons (append 
-			(let* ((callers-from (callers* from rtable #f depth))
-			       (callers-to (callers* to rtable #f depth))
+			(let* ((callers-from (callers* from rtable #f depth (list)))
+			       (callers-to (callers* to rtable #f depth (list)))
 			       (common-callers (lset-intersection equal? 
 								  (map car callers-from)
 								  (map car callers-to))))
@@ -493,8 +526,8 @@
 							(assoc-ref callers-to common-caller))))
 				 )
 			       common-callers)))
-			(let* ((callees-from (callees* from ftable #f depth))
-			       (callees-to (callees* to ftable #f depth))
+			(let* ((callees-from (callees* from ftable #f depth (list)))
+			       (callees-to (callees* to ftable #f depth (list)))
 			       (common-callees (lset-intersection equal? 
 								  (map car callees-from)
 								  (map car callees-to))))
@@ -690,44 +723,80 @@
 ;;
 ;;
 (define (dwarf-raw id dtable interactive?)
-  (list (id->es dtable id)))
+  (let1 r (id->es dtable id)
+    (if interactive?
+	(list (cons 'tree r))
+	r)))
+	
 (define (dwarf-name name dtable interactive?)
-  (~ dtable 'name->ids name))
+  (list (cons 'forest
+	      (map (cute dwarf-raw <> dtable #f)
+		   (~ dtable 'name->ids name)))))
   
-;;
+;; list-vars, list-procs
+(define-method list-dwarf-types (dtable interactive?)
+  (apply 
+    append-map (^ (category-name category-slot) 
+		  (map (cute list category-name <>) 
+		       (hash-table-keys (~ dtable category-slot))))
+    (values->list (unzip2 '((typedef typedef-name->ids)
+			    (struct  structure_type-name->ids)
+			    (union   union_type-name->ids)
+			    (enum    enumeration_type-name->ids)
+			    )))))
+
 (define-method dwarf-type ((name <string>) dtable depth interactive?)
   (list 
    (cons 'forest
-	 (map (cute dwarf-type <> dtable depth (list) interactive?)
+	 (map (lambda (id)
+		(let ((cu (compile-unit-of dtable id))
+		      (type (dwarf-type id dtable depth (list) interactive?)))
+		  (if (and (string? cu) 
+			   (list? type)
+			   (not (null? type))
+			   (not (null? (cdr type)))
+			   (string? (cadr type)))
+		      (let1 k #`",(cadr type)@,|cu|"
+			(cons* (car type)
+			       k
+			       (cddr type)))
+		      type)))
 	      (append-map (cute <> dtable name) `(,typedef-name->ids
 						  ,structure_type-name->ids
+						  ,union_type-name->ids
 						  ,base_type-name->ids
 						  ,enumeration_type-name->ids))))))
 
 (define-method dwarf-type ((id <symbol>) dtable depth handled interactive?)
   (let1 es (id->es dtable id)
     (if (memq id handled)
-	(values (list id (kref es :name))
+	(values (list id (and es (kref es :name)))
 		handled)
-	(case (cadr es)
-	  ('typedef
-	   (dwarf-typedef id dtable depth handled interactive?))
-	  ('structure_type
-	   (dwarf-struct id dtable depth handled interactive?))
-	  ('base_type
-	   (dwarf-base-type id dtable depth handled interactive?))
-	  ('enumeration_type
-	   (dwarf-enum-type id dtable depth handled interactive?))
-	  ('pointer_type
-	   (dwarf-pointer-type id dtable depth handled interactive?))
-	  ('array_type
-	   (dwarf-array-type id dtable depth handled interactive?))
-	  (else
-	   #?=(cadr es)
-	   (values
-	    (cadr es)
-	    handled))
-	  ))))
+	(if es
+	    (case (cadr es)
+	      ('typedef
+	       (dwarf-typedef id dtable depth handled interactive?))
+	      ('structure_type
+	       (dwarf-struct id dtable depth handled interactive?))
+	      ('union_type
+	       (dwarf-union id dtable depth handled interactive?))
+	      ('base_type
+	       (dwarf-base-type id dtable depth handled interactive?))
+	      ('enumeration_type
+	       (dwarf-enum-type id dtable depth handled interactive?))
+	      ('pointer_type
+	       (dwarf-pointer-type id dtable depth handled interactive?))
+	      ('array_type
+	       (dwarf-array-type id dtable depth handled interactive?))
+	      (else
+	       #?=(cadr es)
+	       (values
+		(cadr es)
+		handled))
+	      )
+	    (values es
+		    handled)
+	    ))))
 
 (define-method dwarf-array-type ((id <symbol>) dtable depth handled interactive?)
   (dwarf-array-type (id->es dtable id) dtable depth (cons id handled) interactive?))
@@ -861,6 +930,32 @@
     (values
      (if (< 0 depth)
 	 (list 'struct (kref es :name) (reverse r))
+	 (kref es :name))
+     h)))
+;;
+(define-method dwarf-union ((id <symbol>) dtable depth handled interactive?)
+  (dwarf-union (id->es dtable id) dtable depth (cons id handled) interactive?))
+
+(define-method dwarf-union ((es <list>) dtable depth handled interactive?)
+  (receive (r h)
+      (fold2 (^ (m r h)
+		(match m
+		       (`(indirect member :ref ,mid) 
+			(let1 mes (id->es dtable mid)
+			  (let1 tid (kref (kref mes :type) :ref)
+			    (receive (r0 h0) 
+				(dwarf-type tid dtable (- depth 1) h interactive?)
+			      (values
+			       (cons (list (kref mes :name) r0) r)
+			       h0)))))
+		       (else
+			(values (cons #f r) h))))
+	     (list)
+	     handled
+	     (kref es :members))
+    (values
+     (if (< 0 depth)
+	 (list 'union (kref es :name) (reverse r))
 	 (kref es :name))
      h)))
 
@@ -1071,8 +1166,11 @@
 (define-command dwarf ('dwarf (? symbol? id)) (dwarf-raw id (current-dtable) #t))
 (define-command dwarf ('dwarf (? string? name)) (dwarf-name name (current-dtable) #t))
 
-(define-command type ('type name) (dwarf-type name (current-dtable) 1 #t))
-(define-command type ('type name (? integer? depth)) (dwarf-type name (current-dtable) depth #t))
+(define-command list-types ('list-types) (list-dwarf-types (current-dtable) #t))
+(define-command type ('type #t) (list-dwarf-types (current-dtable) #t))
+(define-command type ('type) (list-dwarf-types (current-dtable) #t))
+(define-command type ('type (? string? name)) (dwarf-type name (current-dtable) 1 #t))
+(define-command type ('type (? string? name) (? integer? depth)) (dwarf-type name (current-dtable) depth #t))
 
 (define-command list-compile-units ('list-compile-units) (dwarf-list-compile-units (current-dtable) #t))
 ;;(define-command freachable ('type name) (dwarf-type name (current-dtable) 1 #t))
@@ -1179,6 +1277,13 @@
   (print #`"	,|name| [--batch] [-s|--script|--source SCRIPT]...")
   (print #`"	,|name| [-s|--script|--source SCRIPT]... [-l|--load BINARY]...")
   (exit status))
+
+(define (expected-length lst len)
+  (if (null? lst)
+      (if (< 0 len)
+	  #f
+	  #t)
+      (expected-length (cdr lst) (- len 1))))
 
 (define (repl batch)
   (read-eval-print-loop callq-read

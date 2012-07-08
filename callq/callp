@@ -1,9 +1,10 @@
 #!/bin/bash
+LANG=c
 
 function print_usage
 {
     echo "$0 --help|-h"
-    echo "$0 [--debug] [--output OUTPUT.es] INPUT.elf"
+    echo "$0 [--quiet][--debug] [--output OUTPUT.es] INPUT.elf"
 }
 
 function run
@@ -11,20 +12,37 @@ function run
     local debug_output=$1
     local cmd=$2
     local input=$3
+    local s
 
     if [[ -n "$debug_output" ]]; then
 	${cmd} "${input}" | tee "${debug_output}:${cmd}"
     else
 	${cmd} "${input}"
+	s=$?
+	if [[ $s != 0 ]]; then
+	   exit $s
+	fi 
     fi
 }
+
+function cache_at_home
+{
+    local input=$1
+    local sha1sum
+    local output
+
+    sha1sum=$(sha1sum < "${input}" | cut -f 1 -d ' ')
+    echo ~/.callq"${input},${sha1sum}".es
+    return 0
+}
+
 function main
 {
     local input
     local output
     local debug
     local use_cache
-
+    local quiet
 
     while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -45,6 +63,10 @@ function main
                 output=${1/--output=}
 		shift
                 ;;
+	    --quiet)
+		quiet=1
+		shift
+		;;
 	    *)
 	        break
 	    ;;
@@ -67,27 +89,39 @@ function main
     fi
 
     if [[ -z "${output}" ]]; then
-	sha1sum=$(sha1sum < "${input}" | cut -f 1 -d ' ')
-	output=~/.callq"${input},${sha1sum}".es
-	mkdir -p $(dirname "${output}")
-	use_cache=1
+	if tmp_output=$(cache_at_home  "${input}"); then
+	    output=${tmp_output}
+	    mkdir -p $(dirname "${output}")
+	    use_cache=1
+	fi
     fi
 	
     if [[ -n "$debug" ]]; then
 	debug="${output}"
     fi
 
-    if [[ -z "${use_cache}" ]] || [[ ! -e "${output}" ]] || [[ -n "$debug" ]]; then
-	run "$debug" "objdump -D -l" "${input}" > /dev/null
-	run "$debug" es-src-readelf-so "${input}" > "${output}"
-	run "$debug" es-src-objdump-dcall "${input}"                \
-	    | run "$debug" es-filter-objcopy-data "${input}"   \
-	    | run "$debug" es-filter-readelf-rela "${input}"        \
-	    | run "$debug" es-filter-libdwarves-fileline "${input}" \
+    if [[ -z "${use_cache}" ]] \
+    || [[ ! -e "${output}"  ]] \
+    || [[ -n "$debug"       ]] \
+    || ( [[ -n "${use_cache}" ]] && [[ "${input}" -nt "${output}" ]] ); then
+        echo '(callp-begin :version 0 :input "'"${input}"'" :date "'$(date)'")' \
+	    > ${output}
+	run "$debug" es-src-readelf-so "${input}" \
+	    >> "${output}"
+	run "$debug" es-src-objdump-dcall "${input}"			\
+	    | run "$debug" es-filter-objcopy-data "${input}"		\
+	    | run "$debug" es-filter-readelf-rela "${input}"		\
+	    | run "$debug" es-filter-libdwarves-fileline "${input}"     \
 	    >> "${output}"
 	run "$debug" es-src-libdwarves "${input}" >> "${output}"
+        echo '(callp-end :date "'$(date)'")' >> ${output}
+    else 
+	:
     fi
-    echo "${output}"
+    
+    if [[ -z "${quiet}" ]]; then
+       echo "${output}"
+    fi
     return 0
 }
 
