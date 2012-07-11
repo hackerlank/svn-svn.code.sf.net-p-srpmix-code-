@@ -377,7 +377,7 @@
 				 (if-let1 es (ref ftable first-name #f)
 					  (return #`",|first-name|@,(sys-basename (ref-objpath objfile))"))
 			       (let1 dtable (ref-dtable objfile)
-				 (if-let1 es (ref dtable first-name #f)
+				 (if-let1 es (ref (~ dtable 'name->ids) first-name #f)
 					  (return #`",|first-name|@,(sys-basename (ref-objpath objfile))")))))
 			     (remove (lambda (objfile) 
 				       (memq table objfile))
