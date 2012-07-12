@@ -222,3 +222,152 @@ http://en.wikipedia.org/wiki/SCSI_Request_Sense_Command")) :date "Wed May 23 13:
       sense -> linuxのscsi層で定義されたエラーコード
 
 への変換を行う。なければ汎用のコードでがんばる。")) :date "Wed May 23 13:55:07 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/buffer.c" :point 38271 :coding-system undecided-unix :line 1391 :surround ("	if (!test_set_buffer_dirty(bh))
+" "" "		__set_page_dirty_nobuffers(bh->b_page);
+}") :which-func "mark_buffer_dirty")) :annotation-list ((annotation :type text :data "buffer_headがdirtyになれば、それにぶらさがるページもdirtyにする。")) :date "Mon May 28 22:30:30 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/jbd/transaction.c" :point 35845 :coding-system undecided-unix :line 1161 :surround ("
+" "" "	set_buffer_jbddirty(bh);
+") :which-func "journal_dirty_metadata")) :annotation-list ((annotation :type text :data "mark_buffer_dirtyと同じように別のカーネルスレッドで
+処理されるようマークを打っているのでは？")) :date "Mon May 28 22:58:14 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/jbd/commit.c" :point 18623 :coding-system undecided-unix :line 646 :surround ("				bh->b_end_io = journal_end_buffer_io_sync;
+" "" "				submit_bh(WRITE, bh);
+			}") :which-func "journal_commit_transaction")) :annotation-list ((annotation :type text :data "mark_buffer_dirtyとして(ページキャッシュ側の仕掛けである)pdflushに
+書き込みを委託するのではなく、自分でsubmit_bh、すなわちbioへのbhのフラッシュ
+の依頼をしている。")) :date "Tue May 29 00:22:04 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/ext3/super.c" :point 59609 :coding-system undecided-unix :line 2058 :surround ("
+" "" "	if (journal_inum) {
+		if (!(journal = ext3_get_journal(sb, journal_inum)))") :which-func "ext3_load_journal")) :annotation-list ((annotation :type text :data "journalファイルかデバイスによって分岐")) :date "Tue May 29 02:44:08 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/jbd/commit.c" :point 19439 :coding-system undecided-unix :line 674 :surround ("	 */
+" "" "wait_for_iobuf:
+	while (commit_transaction->t_iobuf_list != NULL) {") :which-func "journal_commit_transaction")) :annotation-list ((annotation :type text :data "journal_write_metadata_buffer経由でt_iobuf_listにつながれる。")) :date "Tue May 29 03:15:44 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/jbd/commit.c" :point 21285 :coding-system undecided-unix :line 735 :surround ("	/* Here we wait for the revoke record and descriptor record buffers */
+" "" " wait_for_ctlbuf:
+	while (commit_transaction->t_log_list != NULL) {") :which-func "journal_commit_transaction")) :annotation-list ((annotation :type text :data "journal_write_revoke_records経由でt_log_listにつながれる。")) :date "Tue May 29 03:17:05 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/jbd/commit.c" :point 21941 :coding-system undecided-unix :line 764 :surround ("
+" "" "	if (journal_write_commit_record(journal, commit_transaction))
+		err = -EIO;") :which-func "journal_commit_transaction")) :annotation-list ((annotation :type text :data "journalが書けたこと、すなわちcommitが完了したことをディスクに同期書き込みする。")) :date "Tue May 29 03:20:17 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/jbd/commit.c" :point 24920 :coding-system undecided-unix :line 851 :surround ("			JBUFFER_TRACE(jh, \"add to new checkpointing trans\");
+" "" "			__journal_insert_checkpoint(jh, commit_transaction);
+			if (is_journal_aborted(journal))") :which-func "journal_commit_transaction")) :annotation-list ((annotation :type text :data "ジャーナルをコミットしたので、次に通常の書き出しを行うためにcheckpointリストににつなぐ。")) :date "Tue May 29 03:37:58 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/jbd/commit.c" :point 25100 :coding-system undecided-unix :line 855 :surround ("			JBUFFER_TRACE(jh, \"refile for checkpoint writeback\");
+" "" "			__journal_refile_buffer(jh);
+			jbd_unlock_bh_state(bh);") :which-func "journal_commit_transaction")) :annotation-list ((annotation :type text :data "ここでt_reserved_listへ連結される。")) :date "Tue May 29 03:39:50 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/fs/jbd/checkpoint.c" :point 13253 :coding-system undecided-unix :line 475 :surround ("
+" "" "	journal->j_free += freed;
+	journal->j_tail_sequence = first_tid;") :which-func "cleanup_journal_tail")) :annotation-list ((annotation :type text :data "チェックポイントの書き出しまで完了したら、journal系の状態をディスクに書き出す?")) :date "Tue May 29 04:01:58 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ext3-journal))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/^alias-rhel5su6/pre-build/cman-2.0.115/cman/qdisk/main.c" :point 20288 :coding-system undecided-unix :line 852 :surround ("	FD_SET(fd, &rfds);
+" "" "	if (select(fd + 1, &rfds, NULL, NULL, &tv) == 1) {
+		if (cman_dispatch(ch, CMAN_DISPATCH_ALL) < 0) {") :which-func "cman_alive")) :annotation-list ((annotation :type text :data "タイムアウトした場合0")) :date "Fri Jun  1 12:46:17 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisk))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/^alias-rhel5su6/pre-build/cman-2.0.115/cman/qdisk/main.c" :point 13981 :coding-system undecided-unix :line 576 :surround (" */
+" "" "void
+check_cman(qd_ctx *ctx, memb_mask_t mask, memb_mask_t master_mask)") :which-func "do_vote")) :annotation-list ((annotation :type text :data "maskは定期的にqdiskを読んで得られた各ノードの死活に関する自ノードのビュー。
+master_maskはそれと自ノードで動くcmanから得られた死活の情報の積。")) :date "Fri Jun  1 12:50:51 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisk))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/^alias-rhel5su6/pre-build/cman-2.0.115/cman/qdisk/main.c" :point 25729 :coding-system undecided-unix :line 1053 :surround ("			   online.  If we are, tell CMAN so. */
+" "" "			if (is_bit_set(
+			      ni[ctx->qc_master-1].ni_status.ps_master_mask,") :which-func "quorum_loop")) :annotation-list ((annotation :type text :data "masterがqdiskから読んで対象ノードが生きているか、master上のcmanが対象ノードが生きていると言っているか
+両方みたしていることが読めたらvoteを維持。ただし!maser_winsの場合。")) :date "Fri Jun  1 12:52:58 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisk))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/^alias-rhel5su6/pre-build/cman-2.0.115/cman/qdisk/main.c" :point 21544 :coding-system undecided-unix :line 902 :surround ("
+" "" "		/* Check for node transitions */
+		check_transitions(ctx, ni, max, mask);") :which-func "quorum_loop")) :annotation-list ((annotation :type text :data "応答のないノードはここでkillする。")) :date "Fri Jun  1 12:55:38 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisk))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/^alias-rhel5su6/pre-build/cman-2.0.115/cman/qdisk/main.c" :point 28817 :coding-system undecided-unix :line 1151 :surround ("
+" "" "		if (errors && ctx->qc_max_error_cycles) {
+			++error_cycles;") :which-func "quorum_loop")) :annotation-list ((annotation :type text :data "書き込みに失敗してかつ/cluster/quorumd/@max_error_cyclesが設定されて
+いる場合、exit。")) :date "Fri Jun  1 13:05:31 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisk))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/^alias-rhel5su6/pre-build/cman-2.0.115/cman/qdisk/main.c" :point 20464 :coding-system undecided-unix :line 863 :surround ("
+" "" "int
+quorum_loop(qd_ctx *ctx, node_info_t *ni, int max)") :which-func "cman_alive")) :annotation-list ((annotation :type text :data "概要:
+1. read_node_blocks: 読み込み、自分がEVICTEDであればリブート
+2. check_transitions: 読み込んだデータを見て活動が止っていればevict & fence
+3. score処理
+4. master_exists: masterの存在確認
+4.1 不在の場合: 入札
+4.1.1 自分が若いノード番号を持てば、入札開始(M_BID)、masterへ立候補
+4.1.2 自分が立候補しない場合、立候補したノードに同意(M_ACK)
+4.2 存在する場合： voteの更新
+4.2.1 cman_poll_quorum_device: 自分がmasterであればvoteを更新
+4.2.2 (MASTER_WINSの場合)自分がmasterでなければ何もしない。
+5. 書き込み")) :date "Fri Jun  1 12:56:13 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisk))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cman/^alias-rhel5su6/pre-build/cman-2.0.115/cman/qdisk/disk.h" :point 1653 :coding-system undecided-unix :line 53 :surround ("
+" "" "typedef enum {
+	M_NONE  = 0x0,"))) :annotation-list ((annotation :type text :data "入札用のメッセージ
+qdisk上で交換する。")) :date "Fri Jun  1 13:10:07 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisk))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/libmultipath/discovery.c" :point 1987 :coding-system undecided-unix :line 99 :surround ("
+" "" "static int
+path_discover (vector pathvec, struct config * conf, char * devname, int flag)") :which-func "device_ok_to_add")) :annotation-list ((annotation :type text :data "/sys/block/*/deviceをさがす。")) :date "Tue Jun  5 11:38:52 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/lvm2/2.02.84-6.el5/pre-build/LVM2.2.02.84/libdm/libdevmapper.h" :point 2221 :coding-system undecided-unix :line 76 :surround ("int dm_log_is_non_default(void);
+" "" "
+enum {") :which-func "\"C\"")) :annotation-list ((annotation :type text :data "ioctl/libdm-iface.c対応するioctl命令がある。")) :date "Tue Jun  5 22:00:17 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/^alias-rhel5su8/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 26443 :coding-system undecided-unix :line 1232 :surround ("	}
+" "" "	if (map_discovery(vecs))
+		return 1;") :which-func "configure")) :annotation-list ((annotation :type text :data "libdmを使ってカーネルに問合せてすでに構成されているmultipathデバイスがあればその情報を得る。")) :date "Tue Jun  5 22:07:37 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/^alias-rhel5su8/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 26546 :coding-system undecided-unix :line 1238 :surround ("	 */
+" "" "	if (coalesce_paths(vecs, mpvec, NULL))
+		return 1;") :which-func "configure")) :annotation-list ((annotation :type text :data "新規のmultipahデバイスを登録する？")) :date "Tue Jun  5 22:09:02 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/libmultipath/uevent.c" :point 1609 :coding-system undecided-unix :line 50 :surround ("pthread_cond_t  uev_cond,  *uev_condp  = &uev_cond;
+" "" "uev_trigger *my_uev_trigger;
+void * my_trigger_data;"))) :annotation-list ((annotation :type text :data "なぜ大域変数なのか？")) :date "Tue Jun 12 03:29:44 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cluster/3.0.12-41.el6/pre-build/cluster-3.0.12/group/gfs_controld/util.c" :point 3359 :coding-system undecided-unix :line 173 :surround ("		else
+" "" "			send_withdraw(mg);
+	}") :which-func "dmsetup_suspend_done")) :annotation-list ((annotation :type text :data "異常が検出されるとueventが飛ぶ。
+gfs_controldはそれを受信して
+
+	dmsetup suspend
+
+する。それが成功すると同じ mountgroup に参加する
+他のgfs_controldにそのことを通知する。")) :date "Sat Jun 16 00:41:19 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gfs2-withdrawn))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cluster/3.0.12-41.el6/pre-build/cluster-3.0.12/group/gfs_controld/cpg-new.c" :point 67607 :coding-system undecided-unix :line 2605 :surround ("				/* no one remaining to send us an ack */
+" "" "				set_sysfs(mg, \"withdraw\", 1);
+				free_mg(mg);") :which-func "confchg_cb")) :annotation-list ((annotation :type text :data "   . C gets OOB message and set /sys/fs/gfs/foo/withdraw to 1")) :date "Sat Jun 16 04:37:59 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gfs2-withdrawn))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/c/cluster/3.0.12-41.el6/pre-build/cluster-3.0.12/group/gfs_controld/cpg-new.c" :point 21074 :coding-system undecided-unix :line 892 :surround ("
+" "" "	stop_kernel(mg);
+") :which-func "wait_conditions_done")) :annotation-list ((annotation :type text :data "   . A,B stop kernel foo")) :date "Sat Jun 16 04:54:21 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gfs2-withdrawn))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 5305 :coding-system undecided-unix :line 257 :surround ("	
+" "" "	map_present = dm_map_present(alias);
+") :which-func "ev_add_map")) :annotation-list ((annotation :type text :data "kernelが知っているか。")) :date "Wed Jun 20 22:01:44 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 5482 :coding-system undecided-unix :line 265 :surround ("
+" "" "	mpp = find_mp_by_alias(vecs->mpvec, alias);
+") :which-func "ev_add_map")) :annotation-list ((annotation :type text :data "自分(multipathd)は知っているか。")) :date "Wed Jun 20 22:02:21 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-308.el5/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/include/net/tcp.h" :point 3582 :coding-system undecided-unix :line 126 :surround ("#define TCP_RTO_MAX	((unsigned)(120*HZ))
+" "" "#define TCP_RTO_MIN	((unsigned)(HZ/5))
+#define TCP_TIMEOUT_INIT ((unsigned)(3*HZ))	/* RFC 1122 initial RTO value	*/") :which-func "TCP_RTO_MIN")) :annotation-list ((annotation :type text :data "connectのとき200msで再送することはある。")) :date "Fri Jun 29 09:15:12 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-tcp-rto))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-194.el5/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/drivers/md/dm.c" :point 14219 :coding-system undecided-unix :line 697 :surround ("
+" "" "	ti = dm_table_find_target(ci->map, ci->sector);
+	if (!dm_target_is_valid(ti))") :which-func "__clone_and_map")) :annotation-list ((annotation :type text :data "sectorが決まったところで(pvに対応する)tiも決まる。")) :date "Tue Jul  3 10:39:10 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lvm))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-194.el5/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/drivers/md/dm.c" :point 14219 :coding-system undecided-unix :line 697 :surround ("
+" "" "	ti = dm_table_find_target(ci->map, ci->sector);
+	if (!dm_target_is_valid(ti))") :which-func "__clone_and_map")) :annotation-list ((annotation :type text :data "lvcreateした時に与えられるブロックデバイスとそのレンジから
+mapping(sectorからブロックデバイスへの対応関係は決まる？)")) :date "Tue Jul  3 10:41:48 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lvm))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/l/lvm2/2.02.88-7.el5/pre-build/LVM2.2.02.88/tools/lvresize.c" :point 19316 :coding-system undecided-unix :line 736 :surround ("
+" "" "	if (!suspend_lv(cmd, lock_lv)) {
+		log_error(\"Failed to suspend %s\", lp->lv_name);") :which-func "_lvresize")) :annotation-list ((annotation :type text :data "ここで カーネル内でfsfreeze相当の処理が実施された後
+
+       struct mapped_device *md;
+       md->suspended_bdev = xxx
+       
+が設定される。この後の処理で、ブロックデバイスのサイズの読み直しが発生する。
+md->suspended_bdevがnon-zeroであることが読み直しできる条件。")) :date "Wed Jul  4 03:05:57 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lvm))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper/1.02.67-2.el5/pre-build/device-mapper.1.02.67/LVM2.2.02.88/libdm/ioctl/libdm-iface.c" :point 40124 :coding-system undecided-unix :line 1753 :surround ("
+" "" "	switch (dmt->type) {
+	case DM_DEVICE_CREATE:") :which-func "dm_task_run")) :annotation-list ((annotation :type text :data "自分でmknodしてる。")) :date "Thu Jul 12 03:35:27 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 9681 :coding-system undecided-unix :line 469 :surround ("	}
+" "" "	dm_lib_release();
+") :which-func "ev_add_path")) :annotation-list ((annotation :type text :data "やりかけのノードノード群、作成、消去作業があれば実行する？")) :date "Thu Jul 12 03:38:53 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 9300 :coding-system undecided-unix :line 453 :surround ("	 */
+" "" "	if (domap(mpp) <= 0) {
+		condlog(0, \"%s: failed in domap for addition of new \"") :which-func "ev_add_path")) :annotation-list ((annotation :type text :data "すなわちdm_task_run")) :date "Thu Jul 12 03:43:02 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 3440 :coding-system undecided-unix :line 177 :surround ("				continue;
+" "" "			if ((pp->dmstate == PSTATE_FAILED ||
+			     pp->dmstate == PSTATE_UNDEF) &&") :which-func "sync_map_state")) :annotation-list ((annotation :type text :data "state: checker
+dmstate: dm.ko")) :date "Thu Jul 12 03:46:10 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 9774 :coding-system undecided-unix :line 474 :surround ("	 */
+" "" "	if (setup_multipath(vecs, mpp))
+		goto out;") :which-func "ev_add_path")) :annotation-list ((annotation :type text :data "カーネルからカーネル側の状態を読み出す？")) :date "Thu Jul 12 03:56:07 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 9820 :coding-system undecided-unix :line 477 :surround ("
+" "" "	sync_map_state(mpp);
+") :which-func "ev_add_path")) :annotation-list ((annotation :type text :data "mapは存在するとして、enable, disable.")) :date "Thu Jul 12 04:32:26 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su4/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/net/ipv6/ndisc.c" :point 30276 :coding-system undecided-unix :line 1196 :surround ("
+" "" "static void ndisc_router_discovery(struct sk_buff *skb)
+{") :which-func "ndisc_router_discovery")) :annotation-list ((annotation :type text :data "RAの受信処理")) :date "Thu Jul 12 12:13:30 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ipv6-ra))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su4/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/net/ipv6/addrconf.c" :point 10320 :coding-system undecided-unix :line 373 :surround ("	ndev->dev = dev;
+" "" "	memcpy(&ndev->cnf, &ipv6_devconf_dflt, sizeof(ndev->cnf));
+	if (ext != NULL) {") :which-func "ipv6_add_dev")) :annotation-list ((annotation :type text :data "\"default\"は追加になったデバイスの初期値に使う。")) :date "Thu Jul 12 12:19:45 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-ipv6-ra))
