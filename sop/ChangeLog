@@ -1,3 +1,9 @@
+2012-07-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/mirror-lcopy-sys (ncpus): Use nproc.
+
+	* misc/specs/sop.spec.in (Requires): Add coreutils.
+
 2012-06-27  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA): Added rhel6u3.
