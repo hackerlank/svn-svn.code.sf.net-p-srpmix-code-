@@ -143,9 +143,9 @@
 
 (defface stitch-annotation-base
   '((((background light)) 
-     (:background "gray80"))
+     (:background "gray95"))
     (((background dark)) 
-     (:background "gray20")))
+     (:background "gray5")))
   "Base face used to highlight anntations in source code."
   :group 'stitch)
 
@@ -159,9 +159,9 @@
 
 (defface stitch-annotation-fuzzy
   '((((background light)) 
-     (:background "gray70" :italic t))
+     (:background "gray90" :italic t))
     (((background dark)) 
-     (:background "gray30" :italic t)))
+     (:background "gray10" :italic t)))
   "Similar to stitch-annotation-base but used in fuzzy matched anntations."
   :group 'stitch)
 
@@ -2285,11 +2285,15 @@
 		      (stitch-klist-value e :full-name)
 		      (stitch-klist-value e :mailing-address)
 		      nil)))
-	   (let ((p (point)))
-	     (insert "\n")
-	     (insert (or (stitch-klist-value e :subject) "<stub>"))
-	     (insert "\n")
-	     (insert "\n")
+	   (let ((p (point))
+		 (subject (stitch-klist-value e :subject)))
+	     (if subject
+		 (progn
+		   (insert "\n")
+		   (insert subject)
+		   (insert "\n")
+		   (insert "\n"))
+	       (insert " --- NO SUBJECT GIVEN --- \n"))
 	     (put-text-property p (point) 'face 'stitch-annotation-summary-title)
 	     ;(put-text-property p (point) 'mouse-face 'highlight)
 	     ))
