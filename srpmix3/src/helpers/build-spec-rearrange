@@ -83,6 +83,7 @@ function spec_file_hack
         \
 	-e 's/^Copyright:/License:/'		   \
 	-e 's/^Serial:.*//'			   \
+	-e 's/^ExclusiveArch:.*//'		   \	
 	\
 	"${use_old_autoconf}"                      \
 	\

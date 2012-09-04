@@ -1,3 +1,8 @@
+2012-09-04  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/helpers/build-spec-rearrange (spec_file_hack): Strip
+	ExclusiveArch lines.
+
 2012-06-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/97ix.scm (#/ibutils-1.*/): Don't run configure.
