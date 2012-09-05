@@ -22,6 +22,7 @@
 ;;  Free Software Foundation, Inc.,  675 Mass Ave, Cambridge,
 ;;  MA 02139, USA.
 ;;
+(debug-print-width #f)
 
 (use srfi-19)
 (use srfi-1)
@@ -67,13 +68,13 @@
 		  delta))))
 
 (define var-log-message-line-regex
-  #/^([A-Z][a-z][a-z] [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) ([^\[\]\/]+)(\[[0-9]+\])?: (.*)$/)
+  #/^([A-Z][a-z][a-z]+ [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) ([^\[\]]+)(\[[0-9]+\])?: (.*)$/)
 (define var-log-empty-message-line-regex
-  #/^([A-Z][a-z][a-z] [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) ([^\[\]\/]+)(\[[0-9]+\])?:$/)
+  #/^([A-Z][a-z][a-z]+ [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) ([^\[\]]+)(\[[0-9]+\])?:$/)
 (define var-log-message-repeated-line-regex
-  #/^([A-Z][a-z][a-z] [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) (last message repeated [0-9]+ times)$/)
+  #/^([A-Z][a-z][a-z]+ [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) (last message repeated [0-9]+ times)$/)
 (define var-log-message-signal-line-regex
-  #/^([A-Z][a-z][a-z] [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) (exiting on signal [0-9]+)$/)
+  #/^([A-Z][a-z][a-z]+ [0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) (exiting on signal [0-9]+)$/)
 
 (define (emit-log-line stream date host cmd pid msg)
   (format stream

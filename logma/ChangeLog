@@ -1,0 +1,16 @@
+2012-09-05  Masatake YAMATO  <yamato@redhat.com>
+
+	* _.ypk: version 0.0.1.
+
+	* logma (var-log-message-signal-line-regex)
+	(var-log-message-repeated-line-regex)
+	(var-log-empty-message-line-regex, var-log-message-line-regex): Accept
+	multiple whitespace after "month" fields.
+
+2012-07-21  Masatake YAMATO  <yamato@redhat.com>
+
+	* logma (var-log-message-line-regex): Accept / in
+	program name.
+	(var-log-empty-message-line-regex): Ditto.
+
+
