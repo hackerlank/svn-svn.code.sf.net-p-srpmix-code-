@@ -1,3 +1,10 @@
+2012-09-14  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: versoin 3.123.0.
+
+	* src/macros.srpmix(_srpmix_plugin_option): Added
+	kindex.
+
 2012-09-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/helpers/build-spec-rearrange (spec_file_hack): Strip
