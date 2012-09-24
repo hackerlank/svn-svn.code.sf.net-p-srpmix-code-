@@ -570,9 +570,12 @@
        (#f d)
        (file-line00 (sys-readlink current-path) table file line)
        )))
-  (file-line00 (current-path) table file line))
-
-
+  (let* ((debug-root-dir "/usr/src/debug/")
+	 (debug-root-dir-len (string-length debug-root-dir)))
+    (file-line00 (current-path) table (if (string-prefix? debug-root-dir  file)
+					  (string-drop file debug-root-dir-len)
+					  file) 
+		 line)))
 
 (define (file-line name ftable)
   (or (and-let* ((e (or (ref ftable name #f)
