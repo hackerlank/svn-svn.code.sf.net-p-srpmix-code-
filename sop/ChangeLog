@@ -1,3 +1,9 @@
+2012-09-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA): Added rhs2u0.
+
+	* src/dist-mapping/ftp.redhat.com/rhs2u0.
+
 2012-07-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/mirror-lcopy-sys (ncpus): Use nproc.
