@@ -1,3 +1,8 @@
+2012-10-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/twig (twig_addlog): Don't use C for LANG.
+	Use en instead.
+
 2011-06-30  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.0.4.
