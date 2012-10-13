@@ -5,7 +5,7 @@ dnl If the source code of srpmix is changed but the directory structure is not c
 dnl just increment micro version.
 
 m4_define([pkg_major_version],[3])
-m4_define([pkg_minor_version],[123])
+m4_define([pkg_minor_version],[124])
 m4_define([pkg_micro_version],[0])
 m4_define([pkg_name],    [srpmix])
 m4_define([pkg_version], pkg_major_version.pkg_minor_version.pkg_micro_version)

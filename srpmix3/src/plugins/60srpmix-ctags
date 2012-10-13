@@ -141,7 +141,6 @@ function run_ctags
     es_print ctags-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
     (cd $d && stat */ >/dev/null 2>&1 && find */ -type f \
-	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
 	| grep -v .bz2           \
 	| grep -v .gz            \
 	| ${CTAGS} "$@" -o $o -L - )
