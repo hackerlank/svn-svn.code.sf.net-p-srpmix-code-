@@ -1,6 +1,6 @@
 2012-10-13  Masatake YAMATO  <yamato@redhat.com>
 
-	* configure.ac: versoin 3.124.0.
+	* configure.ac: versoin 3.126.0.
 
 	* src/helpers/build-spec-rearrange (spec_file_hack): Added
 	--backup-if-mismatch to %patch line.
@@ -10,7 +10,13 @@
 
 	* src/plugins/60srpmix-ctags (run_ctags): Ditto.
 
+2012-09-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.125.0.
+
 2012-09-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.124.0.
 
 	* src/helpers/build-spec-rearrange (spec_file_hack): 
 	Remove unessary whitespace in sed command line.

@@ -2,7 +2,7 @@
 #
 ########################################################################
 #
-# srpmix-etags: Create MIME mapping cache for files under srpmix dir
+# srpmix-file: Create MIME mapping cache for files under srpmix dir
 #
 # Copyright (C) 2009 Masato Taruishi
 #
