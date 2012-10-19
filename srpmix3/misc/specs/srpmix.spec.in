@@ -217,7 +217,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/srpmix/plugins/60srpmix-ctags
 
 %files plugin-nctags
-%{_datadir}/srpmix/plugins/_60srpmix-nctags
+%{_datadir}/srpmix/plugins/60srpmix-nctags
 
 %files plugin-hyperestraier
 %{_datadir}/srpmix/plugins/_60srpmix-hyperestraier

@@ -20,7 +20,7 @@ endif
 
 if SRPMIX_ENABLE_PLUGIN_ctags
 plugin_SCRIPTS += 60srpmix-ctags
-plugin_SCRIPTS += _60srpmix-nctags
+plugin_SCRIPTS += 60srpmix-nctags
 endif
 
 if SRPMIX_ENABLE_PLUGIN_cscope

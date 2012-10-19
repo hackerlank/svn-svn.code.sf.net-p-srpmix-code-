@@ -14,7 +14,7 @@ diff <(srpmix-plugin --list | while read status name arrow file; do echo $status
 + file
 - hyperestraier
 + kindex
-- nctags
++ nctags
 + vanilla
 + xgettext
 EOF
