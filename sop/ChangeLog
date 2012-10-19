@@ -1,3 +1,7 @@
+2012-10-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/dist-mapping/ftp.redhat.com/rhel6u3*.es: Updated.
+
 2012-09-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/Makefile.am (dist_dmapping_DATA): Added rhs2u0.
