@@ -1,3 +1,15 @@
+2012-10-19  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: versoin 3.127.0.
+	
+	* src/helpers/build-spec-rearrange (spec_file_hack):
+	Revert the last change.
+
+	* src/srpmix-ix (srpm_build): Added --no-backup-if-mismatch
+	to __patch definition.
+
+	* src/srpmix (--no-opt-rules): Added new option.
+
 2012-10-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: versoin 3.126.0.

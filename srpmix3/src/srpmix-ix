@@ -837,7 +837,7 @@ function srpm_build
     LANG=C $RPMBUILD                                                    \
 	--define "_default_patch_fuzz 2"                                \
         --define "_default_patch_flags --verbose"                       \
-        --define "__patch /usr/bin/patch --verbose"                     \
+        --define "__patch /usr/bin/patch --verbose --no-backup-if-mismatch" \
 	"$@"                                                            \
 	--target=${arch}                                                \
 	-bp                                                             \

@@ -28,6 +28,8 @@ WGET_OPTS=
 
 RUN_PLUGINS=
 
+NO_OPT_RULES=
+
 function print_usage
 {
     echo "Usage: "
@@ -43,6 +45,7 @@ function print_usage
     echo "         [--yum=YUM_OPTIONS]"
     echo "         [--wget=WGET_OPTIONS]"
     echo "         [--run-plugins]"
+    echo "         [--no-opt-rules]"
     echo "          --name=PACKAGE|--srpm=SRPM"
     echo ""
     echo "  srpmix --help"
@@ -132,6 +135,9 @@ function parse_arguments
 	    --run-plugins)
 	        RUN_PLUGINS=1
 		;;
+	    --no-opt-rules)
+	        NO_OPT_RULES=1
+		;;
 	    --*)
 	        print_usage 1>&2
 		srpmix_abort "Unknow option: $1"
@@ -198,10 +204,14 @@ function parse_arguments
 
 function opt_rules
 {
-    find ${SRPMIX_BUILD_OPT_RULES_DIR} -xtype f -name '*.scm' -perm -u=r \
-	| sort -n   \
-	| xargs cat \
-	| $GOSH ${SRPMIX_HELPER_DIR}/build-opt-rules "$(basename $1)"
+    if [[ -z "$NO_OPT_RULES" ]]; then
+	find ${SRPMIX_BUILD_OPT_RULES_DIR} -xtype f -name '*.scm' -perm -u=r \
+	    | sort -n   \
+	    | xargs cat \
+	    | $GOSH ${SRPMIX_HELPER_DIR}/build-opt-rules "$(basename $1)"
+    else
+	:
+    fi
 }
 
 function dirpkg_installed_p

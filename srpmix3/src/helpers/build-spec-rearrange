@@ -39,7 +39,7 @@ function spec_file_hack
     # rhel5su2 kernel needs this.
     #
     local no_hack__p_xen='\.p\.xen$'
-    local dont_keep_original="-e /^%patch/s/-b \+\([^- ][^ ]\+\)/--backup-if-mismatch/"
+    local dont_keep_original="-e /^%patch/s/-b \+\([^- ][^ ]\+\)//"
 
 
     use_old_autoconf="-e s/a/a/"
