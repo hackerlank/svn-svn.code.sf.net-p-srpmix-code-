@@ -6,8 +6,8 @@ EXTRA_DIST = \
 	60srpmix-cscope				\
 	60srpmix-doxygen			\
 	60srpmix-xgettext                       \
+	60srpmix-nctags				\
 	\
-	_60srpmix-nctags			\
 	_60srpmix-hyperestraier                 \
 	\
 	$(NULL)

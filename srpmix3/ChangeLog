@@ -1,7 +1,14 @@
 2012-10-19  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 3.128.0.
+
+	* src/plugins/Makefile.am (EXTRA_DIST): Enable
+	60srpmix-nctags by default.
+
+2012-10-19  Masatake YAMATO  <yamato@redhat.com>
+
 	* configure.ac: versoin 3.127.0.
-	
+
 	* src/helpers/build-spec-rearrange (spec_file_hack):
 	Revert the last change.
 
