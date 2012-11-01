@@ -85,6 +85,11 @@ function spec_file_hack
 	-e 's/^Serial:.*//'			   \
 	-e 's/^ExclusiveArch:.*//'		   \
 	\
+	-e 's/^Prereq:.*//I'                       \
+	-e 's/^BuildPrereq:.*//I'                  \
+	\
+	-e 's/%{PACKAGE_VERSION}/%{version}/g'     \
+	\
 	"${use_old_autoconf}"                      \
 	\
 	${NULL} 

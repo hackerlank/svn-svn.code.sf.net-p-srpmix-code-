@@ -1,3 +1,11 @@
+2012-11-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.129.0.
+
+	* src/helpers/build-spec-rearrange: Strip prereq
+	and buildprereq. Replace PACKAGE_VERSION, an obsolte macro
+	with version.
+
 2012-10-19  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 3.128.0.
