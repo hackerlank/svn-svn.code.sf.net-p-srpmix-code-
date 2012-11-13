@@ -678,3 +678,130 @@
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-42.el5/pre-build/multipath-tools-0.4.7.rhel5.28/multipathd/main.c" :point 22185 :coding-system undecided-unix :line 1047 :surround ("\n" "" "\t\t\tif (check_sysfs_state(pp, &newstate) == 0) {\n\t\t\t\tif (!conf->checker_timeout)") :which-func ("checkerloop"))) :annotation-list ((annotation :type text :data "sysfsからpendingの報告があれば != 0")) :date "Fri Jun 22 15:58:31 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-42.el5/pre-build/multipath-tools-0.4.7.rhel5.28/multipathd/main.c" :point 24990 :coding-system undecided-unix :line 1159 :surround ("\t\t\t\t\t\t-FAILBACK_IMMEDIATE)\n" "" "\t\t\t\t\tswitch_pathgroup(pp->mpp);\n\t\t\t}") :which-func ("checkerloop"))) :annotation-list ((annotation :type text :data "パス(pp)が所属するmultipath(pp->mpp)から探す。")) :date "Fri Jun 22 17:20:55 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
 (stitch-annotation :version 0 :target-list ((target :type file :file "/net/sources.nrt.redhat.com/srv/sources/sources/l/lvm2/2.02.74-5.el5/pre-build/LVM2.2.02.74/tools/lvresize.c" :point 16762 :coding-system undecided-unix :line 648 :surround ("\n" "" "\tif (!suspend_lv(cmd, lock_lv)) {\n\t\tlog_error(\"Failed to suspend %s\", lp->lv_name);") :which-func ("_lvresize"))) :annotation-list ((annotation :type text :data "この先lock_volのcase LCK_LV_SUSPENDに流れる。")) :date "Wed Jul  4 15:48:16 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-lvm))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/libmultipath/structs_vec.c" :point 5795 :coding-system undecided-unix :line 302 :surround ("
+" "" "extern struct multipath *
+add_map_without_path (struct vectors * vecs,") :which-func "setup_multipath")) :annotation-list ((annotation :type text :data "map一つにつき一つwaiterスレッドを起動する。")) :date "Sat Jul 21 06:23:25 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/^alias-rhel5su8/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 9106 :coding-system undecided-unix :line 445 :surround ("	 */
+" "" "	if (setup_map(mpp)) {
+		condlog(0, \"%s: failed to setup map for addition of new \"") :which-func "ev_add_path")) :annotation-list ((annotation :type text :data "データ構造作るだけ。")) :date "Sat Jul 21 12:28:53 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/libmultipath/structs_vec.c" :point 8042 :coding-system undecided-unix :line 424 :surround ("
+" "" "	if (setup_multipath(vecs, mpp))
+		return 1; /* mpp freed in setup_multipath */") :which-func "update_multipath")) :annotation-list ((annotation :type text :data "ここでカーネル側の状態を読み込む。")) :date "Sat Jul 21 12:29:12 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/libmultipath/structs_vec.c" :point 8312 :coding-system undecided-unix :line 435 :surround ("
+" "" "			if (pp->state != PATH_DOWN) {
+				int oldstate = pp->state;") :which-func "update_multipath")) :annotation-list ((annotation :type text :data "パスの状態の変更はデバイスの追加ではないのでudevで受けとれない？")) :date "Sat Jul 21 12:31:13 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/libmultipath/structs_vec.c" :point 8312 :coding-system undecided-unix :line 435 :surround ("
+" "" "			if (pp->state != PATH_DOWN) {
+				int oldstate = pp->state;") :which-func "update_multipath")) :annotation-list ((annotation :type text :data "送信はしているようであるが、受信してない？")) :date "Sat Jul 21 12:33:39 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su8/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/drivers/md/dm-uevent.c" :point 1038 :coding-system undecided-unix :line 31 :surround ("
+" "" "static const struct {
+	enum dm_uevent_type type;") :which-func "struct")) :annotation-list ((annotation :type text :data "PATHにあったFAILEDとREINSTATEDについて、ここで\"change\"という
+ueventに変換している。rhel5.8ではこれをioctl経由のwaitコマンド
+とそのあたのstatusの取り出しで処理していて、uevent系の経路では
+処理していない。")) :date "Sat Jul 21 12:40:25 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 15520 :coding-system undecided-unix :line 741 :surround ("	}
+" "" "
+out:") :which-func "uev_trigger")) :annotation-list ((annotation :type text :data "pathの\"change\"はここでは扱っていない。wait threadの方でioctlから見ている。")) :date "Sat Jul 21 12:42:14 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/0.4.7-48.el5/pre-build/multipath-tools-0.4.7.rhel5.32/libmultipath/waiter.c" :point 2972 :coding-system undecided-unix :line 137 :surround ("
+" "" "	dm_task_destroy(waiter->dmt);
+	waiter->dmt = NULL;") :which-func "waiteventloop")) :annotation-list ((annotation :type text :data "eventの内容は見ないのか？")) :date "Sat Jul 21 12:43:53 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su8/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/drivers/md/dm.c" :point 24125 :coding-system undecided-unix :line 1166 :surround ("
+" "" "	dm_send_uevents(&uevents, &md->disk->kobj);
+") :which-func "event_callback")) :annotation-list ((annotation :type text :data "event自体はここで送信したたら、どんどん破棄してしまう。
+wake_upの対向でwaitしている人には個別のeventの内容は伝わら
+ない。その時点での状態をioctlの引数に渡されたバッファに詰め込んで
+返すだけ。")) :date "Sat Jul 21 12:51:03 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/drivers/scsi/be2iscsi/be_main.c" :point 55490 :coding-system undecided-unix :line 1903 :surround ("			SE_DEBUG(DBG_LVL_1, \"CQ Error %d, reset\"
+" "" "				\"received/sent on CID 0x%x...\\n\",
+				 sol->dw[offsetof(struct amap_sol_cqe, code) /") :which-func "beiscsi_process_cq")) :annotation-list ((annotation :type text :data "スペース入れろ。")) :date "Wed Jul 25 10:35:42 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-iscsi need-report))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/drivers/scsi/libiscsi.c" :point 14915 :coding-system undecided-unix :line 523 :surround ("	if (sc) {
+" "" "		task->sc = NULL;
+		/* SCSI eh reuses commands to verify us */") :which-func "iscsi_free_task")) :annotation-list ((annotation :type text :data "なぜtask->scにNULLを設定し直すのか？")) :date "Thu Jul 26 23:05:54 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-iscsi need-report))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/^alias-rhel5su8/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 15520 :coding-system undecided-unix :line 741 :surround ("	}
+" "" "
+out:") :which-func "uev_trigger")) :annotation-list ((annotation :type text :data "pathがフェイルしてもpathに対するchnageはこないようである。
+mapに対するchnageがくる。ただしこの関数、およびuev_add_mapでは、
+mapに対するchnageが来ても、そのmapが既知のものかどうかを検査して、
+未知の場合にmapを追加する、という処理に特化している。failやreinstate
+が来た場合、そのmapは既知であれば、何もしない。かわりにwait threadの
+方で対処する。
+
+dm-uevent.txtからの改変、抜粋:
+1.) Path failure.
+UEVENT[1192521009.711215] change@/block/dm-3
+ACTION=change
+DEVPATH=/block/dm-3
+DM_ACTION=PATH_FAILED
+...
+2.) Path reinstate.
+UEVENT[1192521132.989927] change@/block/dm-3
+ACTION=change
+DEVPATH=/block/dm-3
+DM_TARGET=multipath
+DM_ACTION=PATH_REINSTATED
+...")) :date "Sun Jul 29 05:47:23 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/^alias-rhel5su8/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 14760 :coding-system undecided-unix :line 706 :surround ("
+" "" "	/*
+	 * device map event") :which-func "uev_trigger")) :annotation-list ((annotation :type text :data "map形成の過程でgendiskするとaddが飛ぶが、まだmapは十分に完成
+していない。udevのruleを見ると完成を待っているのがわかる。")) :date "Sun Jul 29 05:52:36 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su8/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/drivers/md/dm-mpath.c" :point 17885 :coding-system undecided-unix :line 787 :surround ("
+" "" "	hwht = dm_get_hw_handler(m->hw_handler_name);
+	if (!hwht) {") :which-func "parse_hw_handler")) :annotation-list ((annotation :type text :data "hw_handler_nameに対してscsi device handlerがみつかれば、
+ここにこない。")) :date "Sun Jul 29 07:21:43 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su8/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/drivers/md/dm-mpath.c" :point 24937 :coding-system undecided-unix :line 1124 :surround ("
+" "" "	schedule_work(&m->trigger_event);
+}") :which-func "bypass_pg")) :annotation-list ((annotation :type text :data "eventは無いけどwakeupがかかる？")) :date "Wed Aug  1 04:20:11 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/^alias-rhel5su8/pre-build/multipath-tools-0.4.7.rhel5.32/multipath/multipath.rules" :point 479 :coding-system undecided-unix :line 10 :surround ("RESULT!=\"?*\", GOTO=\"end_mpath\"
+" "" "NAME=\"%k\", SYMLINK=\"mpath/%c\"
+ACTION!=\"change\", GOTO=\"skip_kpartx\""))) :annotation-list ((annotation :type text :data "dmsetup info...の出力で%cが置き換えられる。")) :date "Mon Aug  6 22:07:20 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/d/device-mapper-multipath/^alias-rhel5su8/pre-build/multipath-tools-0.4.7.rhel5.32/multipathd/main.c" :point 10637 :coding-system undecided-unix :line 521 :surround ("		 */
+" "" "		if (pathcount(mpp, PATH_WILD) > 1) {
+			vector rpvec = vector_alloc();") :which-func "ev_remove_path")) :annotation-list ((annotation :type text :data "WILD->wildcard")) :date "Wed Aug  8 09:49:28 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-multipath))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/socket.c" :point 9042 :coding-system undecided-unix :line 309 :surround ("{
+" "" "	return dynamic_dname(dentry, buffer, buflen, \"socket:[%lu]\",
+				dentry->d_inode->i_ino);") :which-func "sockfs_dname")) :annotation-list ((annotation :type text :data "ここで名前を調整できる。")) :date "Mon Aug 13 01:38:10 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-sockfs))
+
+
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/h/httpd/^alias-rhel5su6/pre-build/httpd-2.2.3/modules/proxy/mod_proxy.c" :point 13353 :coding-system undecided-unix :line 389 :surround ("    /* Check last alias path component matched all the way */
+" "" "    if (aliasp[-1] != '/' && *urip != '\\0' && *urip != '/')
+        return 0;") :which-func "alias_match")) :annotation-list ((annotation :type text :data "ここでひっかかって0を返す。")) :date "Tue Aug 21 22:34:10 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-mod_proxy))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su8/pre-build/kernel-2.6.18/linux-2.6.18-308.el5.x86_64/arch/i386/kernel/tsc.c" :point 2915 :coding-system undecided-unix :line 125 :surround ("	 */
+" "" "#ifndef CONFIG_NUMA
+	if (!cpu_khz || check_tsc_unstable())") :which-func "sched_clock")) :annotation-list ((annotation :type text :data "i386の場合NUMA設定無し。")) :date "Tue Aug 28 17:59:38 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-tsc))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/r/rgmanager/2.0.52-9.el5_6.1/pre-build/rgmanager-2.0.52/src/resources/fs.sh" :point 24491 :coding-system undecided-unix :line 1104 :surround ("					\"Dropping node-wide NFS locks\"
+" "" "				    pkill -KILL -x lockd
+	          		    mkdir -p $mp/.clumanager/statd") :which-func "stopFilesystem")) :annotation-list ((annotation :type text :data "ロックリカバリーを受け入れるタイマーをリセットする？")) :date "Thu Oct 11 17:38:53 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-nfs))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su5/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/fs/nfs/client.c" :point 8478 :coding-system undecided-unix :line 367 :surround ("		if (!to->to_initval)
+" "" "			to->to_initval = 60 * HZ;
+		if (to->to_initval > NFS_MAX_TCP_TIMEOUT)") :which-func "nfs_init_timeout_values")) :annotation-list ((annotation :type text :data "mount時にtimeoを指定しないと0となり、このデフォルト60秒が使われる。")) :date "Tue Oct 30 21:16:42 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-nfs))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su5/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/fs/nfs/client.c" :point 8395 :coding-system undecided-unix :line 362 :surround ("	if (!to->to_retries)
+" "" "		to->to_retries = 2;
+") :which-func "nfs_init_timeout_values")) :annotation-list ((annotation :type text :data "\"retrans\"を指定しない場合0なので、ここで2に設定される。")) :date "Tue Oct 30 21:19:53 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-nfs))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su5/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/fs/nfs/client.c" :point 8629 :coding-system undecided-unix :line 371 :surround ("		to->to_increment = to->to_initval;
+" "" "		to->to_maxval = to->to_initval + (to->to_increment * to->to_retries);
+		to->to_exponential = 0;") :which-func "nfs_init_timeout_values")) :annotation-list ((annotation :type text :data "to_maxval = 180秒")) :date "Tue Oct 30 21:21:28 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-nfs))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/fs/nfsd/vfs.c" :point 29483 :coding-system undecided-unix :line 1197 :surround ("		if (file->f_op && file->f_op->fsync) {
+" "" "			err = nfserrno(vfs_fsync(file, file->f_path.dentry, 0));
+		} else {") :which-func "nfsd_commit")) :annotation-list ((annotation :type text :data "commitを受けとるとsyncする。")) :date "Tue Oct 30 22:14:24 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-nfs))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su5/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/include/linux/sunrpc/xprt.h" :point 1243 :coding-system undecided-unix :line 52 :surround ("	unsigned int		to_retries;		/* max # of retries */
+" "" "	unsigned char		to_exponential;
+};") :which-func "rpc_timeout")) :annotation-list ((annotation :type text :data "tcpの場合0、udpの場合1")) :date "Wed Oct 31 15:40:52 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-nfs))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-194.el5/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/include/linux/nfs_fs.h" :point 14163 :coding-system undecided-unix :line 474 :surround ("{
+" "" "	int error = nfs_sync_inode_wait(inode, 0, 0, 0);
+	return (error < 0) ? error : 0;") :which-func "nfs_wb_all")) :annotation-list ((annotation :type text :data "howが0なので、stable_howがUNSTABLEとなる。
+NFSバイブルの187ページを参照。")) :date "Wed Oct 31 17:01:54 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-nfs))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel5su5/pre-build/kernel-2.6.18/linux-2.6.18.x86_64/fs/nfs/client.c" :point 8592 :coding-system undecided-unix :line 370 :surround ("			to->to_initval = NFS_MAX_TCP_TIMEOUT;
+" "" "		to->to_increment = to->to_initval;
+		to->to_maxval = to->to_initval + (to->to_increment * to->to_retries);") :which-func "nfs_init_timeout_values")) :annotation-list ((annotation :type text :data "等差")) :date "Wed Oct 31 17:30:03 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-nfs))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/netfilter/nf_defrag_ipv4.c" :point 1978 :coding-system undecided-unix :line 77 :surround ("	{
+" "" "		.hook		= ipv4_conntrack_defrag,
+		.owner		= THIS_MODULE,") :which-func "ipv4_conntrack_defrag")) :annotation-list ((annotation :type text :data "defragしてる。")) :date "Thu Nov  8 09:40:49 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-net))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/r/rgmanager/3.0.12.1-5.el6/pre-build/rgmanager-3.0.12.1/rgmanager/src/daemons/main.c" :point 2714 :coding-system undecided-unix :line 126 :surround ("		rg_lockall(L_SYS);
+" "" "		rg_doall(RG_INIT, 1, \"Emergency stop of %s\\n\");
+#ifndef USE_OPENAIS") :which-func "membership_update")) :annotation-list ((annotation :type text :data "なんでstopしたいのinit?")) :date "Thu Nov  8 19:58:22 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-rgmanager))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/p/perl/^alias-rhel5su8/pre-build/perl-5.8.8/ext/Cwd/Cwd.xs" :point 3044 :coding-system undecided-unix :line 87 :surround ("
+" "" "	if ((fd = open(\".\", O_RDONLY)) < 0) {
+		(void)strcpy(resolved, \".\");") :which-func "bsd_realpath")) :annotation-list ((annotation :type text :data "permissionが無い場合ここへ")) :date "Sat Nov 10 02:20:33 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-perl-cwd))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/p/perl/^alias-rhel5su8/pre-build/perl-5.8.8/ext/Cwd/Cwd.xs" :point 9480 :coding-system undecided-unix :line 429 :surround ("    else
+" "" "        sv_setsv(TARG, &PL_sv_undef);
+") :which-func "abs_path")) :annotation-list ((annotation :type text :data "bsd_realpathがNULLを消すとundefをセットする？")) :date "Sat Nov 10 02:24:56 2012" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-perl-cwd))

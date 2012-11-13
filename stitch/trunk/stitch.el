@@ -2001,12 +2001,16 @@
     (when target-file
       (stitch-list-annotation-with-filter
        (format "*List Annotations: %s*" (buffer-name))
-       (lambda (k e) (or (string= 
-			  k 
-			  target-file)
-			 (string= 
-			  (file-name-nondirectory k)
-			  target-file-non-directory)))
+       (lambda (k e) 
+	 (or (string= 
+	      k 
+	      target-file)
+	     (and (string= 
+		   (file-name-nondirectory k)
+		   target-file-non-directory)
+		  (not (string= target-file-non-directory ""))
+		  )
+	     ))
        t
        t))))
 
