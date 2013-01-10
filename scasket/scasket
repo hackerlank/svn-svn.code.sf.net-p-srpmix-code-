@@ -206,6 +206,12 @@ function make_sourecs_repo
 
 function make_config
 {
+    local rprefix
+
+    if [[ $__RELEASE -lt 16 ]]; then
+	rprefix=dist-
+    fi
+
     {
 	sed  -e "/^#SOURCES_REPO#\$/r $1" \
 	    -e "/^#SOURCES_REPO#\$/d" <<'EOF'
@@ -243,7 +249,7 @@ failovermethod=priority
 
 [local]
 name=local
-baseurl=http://kojipkgs.fedoraproject.org/repos/f@RELEASE@-build/latest/@ARCH@/
+baseurl=http://kojipkgs.fedoraproject.org/repos/@RPREFIX@f@RELEASE@-build/latest/@ARCH@/
 cost=2000
 enabled=0
 
@@ -258,6 +264,7 @@ EOF
     } \
 	    | sed -e "s/@ARCH@/$__ARCH/g"			\
 	-e "s/@RELEASE@/$__RELEASE/g"			        \
+	-e "s/@RPREFIX@/$rprefix/g"			        \
 	-e "s/@CASKET_NAME@/$CASKET_NAME/g"			\
 	-e "/^#SRPMIX_TOOLS_REPO#\$/r $SRPMIX_TOOLS_REPO_FILE"	\
 	-e "/^#SRPMIX_TOOLS_REPO#\$/d"				\
