@@ -14,6 +14,7 @@ rhel5su5.es  \
 rhel5su6.es  \
 rhel5su7.es  \
 rhel5su8.es  \
+rhel5su9.es  \
 rhcmsys8.es  \
 rhcmsys7u2.es \
 rhcmsys7u3.es \
