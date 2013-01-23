@@ -68,13 +68,16 @@
 		  delta))))
 
 (define var-log-message-line-regex
-  #/^([A-Z][a-z][a-z] +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) ([^\[\]]+)(\[[0-9]+\])?: (.*)$/)
+  #/^([A-Z][a-z][a-z] +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-zA-Z0-9]+) ([^\[\]]+)?(\[[0-9]+\])?: (.*)$/)
+(define var-log-message-line-regex-slashed
+  #/^([0-9]{4})\/([0-9]{2})\/([0-9]{2}) +([0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-zA-Z0-9]+) ([^\[\]]+)?(\[[0-9]+\])?: (.*)$/)
+
 (define var-log-empty-message-line-regex
-  #/^([A-Z][a-z][a-z] +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) ([^\[\]]+)(\[[0-9]+\])?:$/)
+  #/^([A-Z][a-z][a-z] +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-zA-Z0-9]+) ([^\[\]]+)(\[[0-9]+\])?:$/)
 (define var-log-message-repeated-line-regex
-  #/^([A-Z][a-z][a-z] +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) (last message repeated [0-9]+ times)$/)
+  #/^([A-Z][a-z][a-z] +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-zA-Z0-9]+) (last message repeated [0-9]+ times)$/)
 (define var-log-message-signal-line-regex
-  #/^([A-Z][a-z][a-z] +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-z0-9]+) (exiting on signal [0-9]+)$/)
+  #/^([A-Z][a-z][a-z] +[0-9]+ [0-9]{2}:[0-9]{2}:[0-9]{2}) ([-a-zA-Z0-9]+) (exiting on signal [0-9]+)$/)
 
 (define (emit-log-line stream date host cmd pid msg)
   (format stream
@@ -87,39 +90,64 @@
 	  (if (or pid cmd) " " "")
 	  msg))
 
+(define (normalize-date year month date time)
+  (let1 month (string->number month)
+    (format "~a ~a ~a"
+	    (ref (hash-table 'eq?
+			     '(1 . "Jan")
+			     '(2 . "Feb")
+			     '(3 . "Mar")
+			     '(4 . "Apr")
+			     '(5 . "May")
+			     '(6 . "Jun")
+			     '(7 . "Jul")
+			     '(8 . "Aug")
+			     '(9 . "Sep")
+			     '(10 . "Nov")
+			     '(11 . "Oct")
+			     '(12 . "Dec")) month)
+	    date time)))
+
 (define (distribute l date-distributor)
   (rxmatch-cond
-   ((var-log-message-line-regex l)
-    (#f date host cmd pid msg)
-    (list (date-distributor date) 
-	  host 
-	  cmd
-	  (or pid "")
-	  msg))
-   ((var-log-message-repeated-line-regex l)
-    (#f date host msg)
-    (list (date-distributor date) 
-	  host 
-	  #f
-	  #f
-	  msg))
-   ((var-log-message-signal-line-regex l)
-    (#f date host msg)
-    (list (date-distributor date) 
-	  host 
-	  #f
-	  #f
-	  msg))
-   ((var-log-empty-message-line-regex l)
-    (#f date host cmd pid)
-    (list (date-distributor date) 
-	  host 
-	  cmd
-	  (or pid "")
-	  ""))
-   (else
-    #?=l
-    #f)))
+    ((var-log-message-line-regex l)
+     (#f date host cmd pid msg)
+     (list (date-distributor date) 
+	   host 
+	   cmd
+	   (or pid "")
+	   msg))
+    ((var-log-message-line-regex-slashed l)
+     (#f year month day time host cmd pid msg)
+     (list (date-distributor (normalize-date year month day time))
+	   host 
+	   cmd
+	   (or pid "")
+	   msg))
+    ((var-log-message-repeated-line-regex l)
+     (#f date host msg)
+     (list (date-distributor date) 
+	   host 
+	   #f
+	   #f
+	   msg))
+    ((var-log-message-signal-line-regex l)
+     (#f date host msg)
+     (list (date-distributor date) 
+	   host 
+	   #f
+	   #f
+	   msg))
+    ((var-log-empty-message-line-regex l)
+     (#f date host cmd pid)
+     (list (date-distributor date) 
+	   host 
+	   cmd
+	   (or pid "")
+	   ""))
+    (else
+     #?=l
+     #f)))
   
 (define (do-adjust args)
   (let* ((delta (let1 d (string->number (cadr args))

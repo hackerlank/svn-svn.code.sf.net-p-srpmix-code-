@@ -1,3 +1,13 @@
+2013-01-23  Masatake YAMATO  <yamato@redhat.com>
+
+	* _.ypk: version 0.0.3.
+
+	* logma (var-log-message-line-regex-slashed)
+	(var-log-message-line-regex, var-log-empty-message-line-regex)
+	(var-log-message-repeated-line-regex)
+	(var-log-message-signal-line-regex): Handle the case that the host
+	name includes an upper case letter.
+
 2012-09-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* _.ypk: version 0.0.1.
