@@ -1,3 +1,7 @@
+2013-01-27  Masatake YAMATO  <yamato@redhat.com>
+
+	* stitch.el: Introduce tour functions.
+
 2012-11-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* stitch.el (stitch-list-annotation-about-current-file): Filter
