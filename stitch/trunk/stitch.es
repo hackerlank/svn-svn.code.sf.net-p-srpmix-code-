@@ -859,3 +859,316 @@ syncdevしたあとunlockしている。")) :date "Fri Nov 30 11:17:12 2012" :fu
 " "" "		if (page_mapped(page)) {
 			if (!reclaim_mapped ||") :which-func "shrink_active_list")) :annotation-list ((annotation :type text :data "マッピングされているものだけを対象としている。")) :date "Sat Jan 12 00:47:01 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-swappiness))
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/dists/rhel5su6/packages/m/mcelog/pre-build/mcelog-0.9pre/mcelog-0.9pre/mcelog.c" :point 8033 :coding-system undecided-unix :line 369 :surround ("\n" "" "\tWprintf(\"HARDWARE ERROR. This is *NOT* a software problem!\\n\");\n\tWprintf(\"Please contact your hardware vendor\\n\");") :which-func "dump_mce")) :annotation-list ((annotation :type text :data "CPUが対応していない場合でもどっかに何かでる。\n(オプションによっては)syslogあるはstdoutに行く。")) :date "Wed Aug 24 15:50:45 2011" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-mce))
+
+;;
+;;
+;;
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/glibc-2.15-a316c1f/misc/mkstemp.c" :point 1185 :coding-system undecided-unix :line 30 :surround ("   Then open the file and return a fd. */
+" "" "int
+mkstemp (template)") :which-func "mkstemp")) :annotation-list ((annotation :type text :data "glibcのソースコードツリートップで
+
+	find . -type f -exec grep -nH -e '^mkstemp *(' {} +
+
+を実行して、このベースポイントに到達した。")) :date "Mon Jan 28 19:50:36 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/glibc-2.15-a316c1f/sysdeps/posix/tempname.c" :point 5965 :coding-system undecided-unix :line 226 :surround ("int
+" "" "__gen_tempname (char *tmpl, int suffixlen, int flags, int kind)
+{") :which-func "__gen_tempname")) :annotation-list ((annotation :type text :data "制御フローを順方向に追跡してここに辿りついた。")) :date "Mon Jan 28 19:51:58 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/glibc-2.15-a316c1f/sysdeps/posix/tempname.c" :point 7959 :coding-system undecided-unix :line 299 :surround ("	case __GT_FILE:
+" "" "	  fd = __open (tmpl,
+		       (flags & ~O_ACCMODE)") :which-func "__gen_tempname")) :annotation-list ((annotation :type text :data "ここで__openを呼び出してファイルを作成(O_CREAT)している。")) :date "Mon Jan 28 19:52:42 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/touch.c" :point 5921 :coding-system undecided-unix :line 195 :surround ("             I think it's not worth trying to distinguish them.  */
+" "" "          error (0, open_errno, _(\"cannot touch %s\"), quote (file));
+        }") :which-func "touch")) :annotation-list ((annotation :type text :data "cannot touchで検索するとここに到達した。(ベースポイント)")) :date "Mon Jan 28 19:55:21 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/lib/error.c" :point 5140 :coding-system undecided-unix :line 183 :surround ("#else
+" "" "  s = strerror (errnum);
+#endif") :which-func "print_errno_message")) :annotation-list ((annotation :type text :data "error -> error_tail -> print_errno_message と 制御フローを順
+方向に辿ると、strerrorでerrnum引数の値に対するメッセージを取り出して
+printfしていることがわかった。")) :date "Mon Jan 28 19:57:23 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/touch.c" :point 5921 :coding-system undecided-unix :line 195 :surround ("             I think it's not worth trying to distinguish them.  */
+" "" "          error (0, open_errno, _(\"cannot touch %s\"), quote (file));
+        }") :which-func "touch")) :annotation-list ((annotation :type text :data "open_errnoはどこから来たのか？ 逆方向にデータフローをたどる。")) :date "Mon Jan 28 19:58:56 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/touch.c" :point 4054 :coding-system undecided-unix :line 137 :surround ("        S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+" "" "      fd = fd_reopen (STDIN_FILENO, file,
+                      O_WRONLY | O_CREAT | O_NONBLOCK | O_NOCTTY,") :which-func "touch")) :annotation-list ((annotation :type text :data "fd_reopenが失敗したときにerrnoが設定される。
+open_errnoはそれを引き継いている。")) :date "Mon Jan 28 20:00:17 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/lib/fd-reopen.c" :point 1135 :coding-system undecided-unix :line 34 :surround ("{
+" "" "  int fd = open (file, flags, mode);
+") :which-func "fd_reopen")) :annotation-list ((annotation :type text :data "内部でopenシステムコールを呼んでいた。")) :date "Mon Jan 28 20:01:06 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/util-linux-2.21.2/misc-utils/logger.c" :point 5515 :coding-system iso-latin-1-unix :line 164 :surround ("int
+" "" "main(int argc, char **argv) {
+	int ch, logflags, pri;") :which-func "main")) :annotation-list ((annotation :type text :data "これがloggerのmain関数である。")) :date "Mon Jan 28 20:05:08 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/util-linux-2.21.2/misc-utils/logger.c" :point 4314 :coding-system iso-latin-1-unix :line 130 :surround ("
+" "" "               if (write(fd, buf, strlen(buf)+1) < 0)
+                       return; /* error */") :which-func "mysyslog")) :annotation-list ((annotation :type text :data "writeしているのはここだけである。")) :date "Mon Jan 28 20:06:09 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/util-linux-2.21.2/misc-utils/logger.c" :point 4214 :coding-system iso-latin-1-unix :line 127 :surround ("
+" "" "               snprintf(buf, sizeof(buf), \"<%d>%.15s %.200s%s: %.400s\",
+			pri, tp, cp, pid, msg);") :which-func "mysyslog")) :annotation-list ((annotation :type text :data "tpに時刻の文字列が入っているようである。")) :date "Mon Jan 28 20:06:57 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/util-linux-2.21.2/misc-utils/logger.c" :point 4152 :coding-system iso-latin-1-unix :line 124 :surround ("	       }
+" "" "               (void)time(&now);
+	       tp = ctime(&now)+4;") :which-func "mysyslog")) :annotation-list ((annotation :type text :data "timeシステムコールを呼び出して現在時刻をnowに正数で得る。
+ctimeでnowを文字列に変換する。4ずらして曜日の情報を切り落している。")) :date "Mon Jan 28 20:11:03 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/pwd.c" :point 10395 :coding-system undecided-unix :line 375 :surround ("
+" "" "  wd = xgetcwd ();
+  if (wd != NULL)") :which-func "main")) :annotation-list ((annotation :type text :data "ここから読み始めてみる。")) :date "Mon Jan 28 20:16:30 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/lib/xgetcwd.c" :point 1089 :coding-system undecided-unix :line 34 :surround ("
+" "" "char *
+xgetcwd (void)") :which-func "xgetcwd")) :annotation-list ((annotation :type text :data "xgetcwdの定義がここにある。内部ではgetcwdを呼び出している。
+errnoをチェックしているのでシステムコール呼び出しなのだろう。")) :date "Mon Jan 28 20:17:22 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/glibc-2.15-a316c1f/io/getcwd.c" :point 1301 :coding-system undecided-unix :line 30 :surround ("   big as necessary.  */
+" "" "char *
+__getcwd (char *buf, size_t size)") :which-func "__getcwd")) :annotation-list ((annotation :type text :data "それらしい記述があったが何もやってない。
+ターゲット固有の実装が別にあるのだろう。")) :date "Mon Jan 28 20:20:12 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/glibc-2.15-a316c1f/sysdeps/unix/sysv/linux/getcwd.c" :point 2596 :coding-system undecided-unix :line 70 :surround ("
+" "" "char *
+__getcwd (char *buf, size_t size)") :which-func "generic_getcwd")) :annotation-list ((annotation :type text :data "これがターゲット(linux)固有の実装っぽい。")) :date "Mon Jan 28 20:21:34 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/glibc-2.15-a316c1f/sysdeps/unix/sysv/linux/getcwd.c" :point 3238 :coding-system undecided-unix :line 110 :surround ("
+" "" "      retval = INLINE_SYSCALL (getcwd, 2, CHECK_STRING (path), alloc_size);
+      if (retval >= 0)") :which-func "__getcwd")) :annotation-list ((annotation :type text :data "ごちゃごちゃしているけど、これがシステムコール呼び出し箇所であろう。")) :date "Mon Jan 28 20:22:56 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/glibc-2.15-a316c1f/sysdeps/unix/sysv/linux/x86_64/sysdep.h" :point 5812 :coding-system undecided-unix :line 197 :surround ("# undef INLINE_SYSCALL
+" "" "# define INLINE_SYSCALL(name, nr, args...) \\
+  ({									      \\") :which-func "INLINE_SYSCALL")) :annotation-list ((annotation :type text :data "x86_64の場合のシステムコール呼び出しの定義")) :date "Mon Jan 28 20:23:58 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/glibc-2.15-a316c1f/sysdeps/unix/sysv/linux/x86_64/sysdep.h" :point 6307 :coding-system undecided-unix :line 210 :surround ("
+" "" "# define INTERNAL_SYSCALL_NCS(name, err, nr, args...) \\
+  ({									      \\") :which-func "INTERNAL_SYSCALL_NCS")) :annotation-list ((annotation :type text :data "INLINE_SYSCALL -> INTERNAL_SYSCALL -> INTERNAL_SYSCALL_NCS を経由して
+ここに来る。asmとあるのでインラインアセンブリ言語で記述されている。
+syscallという命令がある。
+
+実際getcwdの定義を逆アセンブルするとそれらしい記述が出てくる。
+
+$ objdump -D /usr/lib64/libc.so.6 | grep -A 40 '<getcwd>:'
+00000038930e5180 <getcwd>:
+  38930e5180:	48 89 5c 24 d0       	mov    %rbx,-0x30(%rsp)
+  ...
+  38930e5203:	b8 4f 00 00 00       	mov    $0x4f,%eax
+  38930e5208:	0f 05                	syscall 
+  ...")) :date "Mon Jan 28 20:25:28 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmdtab.c" :point 7346 :coding-system undecided-unix :line 138 :surround ("	{ \"form\",	formhelp,	0, 1, 1, NULL, setform, NULL },
+" "" "	{ \"get\",	receivehelp,	1, 1, 1, get, NULL, NULL },
+	{ \"glob\",	globhelp,	0, 0, 0, NULL, setglob, NULL },") :which-func "get")) :annotation-list ((annotation :type text :data "痕跡文字列\"get\"からこのコードポイントがみつかる。")) :date "Mon Jan 28 20:32:57 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmdtab.c" :point 8753 :coding-system undecided-unix :line 164 :surround ("	{ \"sendport\",	porthelp,	0, 0, 0, NULL, setport, NULL },
+" "" "	{ \"put\",	sendhelp,	1, 1, 1, put, NULL, NULL },
+	{ \"pwd\",	pwdhelp,	0, 1, 1, NULL, pwd, NULL },") :which-func "get")) :annotation-list ((annotation :type text :data "痕跡文字列\"put\"からこのコードポイントが特定される。")) :date "Mon Jan 28 20:33:20 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp_var.h" :point 5569 :coding-system undecided-unix :line 125 :surround (" */
+" "" "struct cmd {
+	const char *c_name;	/* name of command */") :which-func "cmd")) :annotation-list ((annotation :type text :data "痕跡文字列を含んでいた構造体の定義。
+c_handler_vという関数ポインタのフィールドが重要に見える。")) :date "Mon Jan 28 20:35:54 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmdtab.c" :point 7346 :coding-system undecided-unix :line 138 :surround ("	{ \"form\",	formhelp,	0, 1, 1, NULL, setform, NULL },
+" "" "	{ \"get\",	receivehelp,	1, 1, 1, get, NULL, NULL },
+	{ \"glob\",	globhelp,	0, 0, 0, NULL, setglob, NULL },") :which-func "get")) :annotation-list ((annotation :type text :data "c_handler_vフィールドにはget関数が割り当てられる。")) :date "Mon Jan 28 20:37:12 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmdtab.c" :point 8753 :coding-system undecided-unix :line 164 :surround ("	{ \"sendport\",	porthelp,	0, 0, 0, NULL, setport, NULL },
+" "" "	{ \"put\",	sendhelp,	1, 1, 1, put, NULL, NULL },
+	{ \"pwd\",	pwdhelp,	0, 1, 1, NULL, pwd, NULL },") :which-func "get")) :annotation-list ((annotation :type text :data "c_handler_vフィールドにはput関数が割り当てられる。")) :date "Mon Jan 28 20:37:54 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmds.c" :point 14089 :coding-system undecided-unix :line 635 :surround ("
+" "" "void
+get(int argc, char *argv[])") :which-func "reget")) :annotation-list ((annotation :type text :data "ユーザからのget行に指定された引数を、main関数のようにargc, argvで受け
+とるようである。")) :date "Mon Jan 28 20:40:38 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 7143 :coding-system undecided-unix :line 221 :surround ("			fprintf(stdout, \"Trying %s...\\n\", hbuf);
+" "" "		s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		if (s < 0) {") :which-func "hookup")) :annotation-list ((annotation :type text :data "ここでソケットを用意して")) :date "Mon Jan 28 21:22:05 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 7267 :coding-system undecided-unix :line 226 :surround ("		}
+" "" "		while ((error = connect(s, res->ai_addr, res->ai_addrlen)) < 0
+				&& errno == EINTR) {") :which-func "hookup")) :annotation-list ((annotation :type text :data "ここでサーバに接続")) :date "Mon Jan 28 21:22:15 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 5238 :coding-system undecided-unix :line 149 :surround ("
+" "" "FILE *cin, *cout;
+static FILE *dataconn(const char *);"))) :annotation-list ((annotation :type text :data "cin, cout => control-in, control-outは大域変数
+")) :date "Mon Jan 28 21:23:01 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmds.c" :point 15304 :coding-system undecided-unix :line 701 :surround ("		argv[2] = domap(argv[2]);
+" "" "	if (restartit) {
+		struct stat stbuf;") :which-func "getit")) :annotation-list ((annotation :type text :data "restartit == 0と仮定してこのブロックを無視する。")) :date "Mon Jan 28 21:27:52 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmds.c" :point 14454 :coding-system undecided-unix :line 656 :surround ("		 */
+" "" "		argv[2] = pipeprotect(argv[1]);
+		if (!argv[2]) {") :which-func "getit")) :annotation-list ((annotation :type text :data "local-file(argv[2])が与えられていない場合、
+remote-file(argv[1])の名前からlocal-fileを作る。
+")) :date "Mon Jan 28 21:30:53 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmds.c" :point 3568 :coding-system undecided-unix :line 113 :surround ("	}
+" "" "	strcpy(nu, \".\");
+	if (*name != '/') strcat(nu, \"/\");") :which-func "pipeprotect")) :annotation-list ((annotation :type text :data "nameから相対パスを作る。")) :date "Mon Jan 28 21:32:49 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmds.c" :point 14454 :coding-system undecided-unix :line 656 :surround ("		 */
+" "" "		argv[2] = pipeprotect(argv[1]);
+		if (!argv[2]) {") :which-func "getit")) :annotation-list ((annotation :type text :data "ところで、このなかでmallocしたバッファがリークしているように見える。")) :date "Mon Jan 28 21:33:57 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmds.c" :point 14215 :coding-system undecided-unix :line 644 :surround (" */
+" "" "static int
+getit(int argc, char *argv[], int restartit, const char *modestr)") :which-func "get")) :annotation-list ((annotation :type text :data "getから呼び出されるgetit関数")) :date "Tue Jan 29 01:11:32 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmds.c" :point 16819 :coding-system undecided-unix :line 765 :surround ("
+" "" "	recvrequest(\"RETR\", argv[2], argv[1], modestr,
+		    argv[1] != oldargv1 || argv[2] != oldargv2);") :which-func "getit")) :annotation-list ((annotation :type text :data "RETRはftpプロトコルにあらわれる文字列。
+サーバ側からファイルを送信するよう依頼する。
+argv[2]: local-file
+argv[1]: remote-file")) :date "Tue Jan 29 01:14:02 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/rfc959.txt" :point 69282 :coding-system undecided-unix :line 1664 :surround ("
+" "" "         RETRIEVE (RETR)
+"))) :annotation-list ((annotation :type text :data "RETRのRFC中での定義箇所")) :date "Tue Jan 29 01:16:13 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 21560 :coding-system undecided-unix :line 888 :surround ("
+" "" "void
+recvrequest(const char *cmd, ") :which-func "abortrecv")) :annotation-list ((annotation :type text :data "cmd == \"RETR\" このプロトコルに由来する値は送信されているはずである。
+また送信して欲しいファイル名が記載されたremoteの値も送信されるはずである。")) :date "Tue Jan 29 01:20:02 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 24218 :coding-system undecided-unix :line 1003 :surround ("	if (remote) {
+" "" "		if (command(\"%s %s\", cmd, remote) != PRELIM) {
+			(void) signal(SIGINT, oldintr);") :which-func "recvrequest")) :annotation-list ((annotation :type text :data "ここでcommandにcmdとremoteが渡されている。")) :date "Tue Jan 29 01:23:24 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 11174 :coding-system undecided-unix :line 426 :surround ("	va_start(ap, fmt);
+" "" "	vfprintf(cout, fmt, ap);
+	va_end(ap);") :which-func "command")) :annotation-list ((annotation :type text :data "引数をそのままcoutに書き込んでいるようである。")) :date "Tue Jan 29 01:24:22 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 8171 :coding-system undecided-unix :line 268 :surround ("	cin = fdopen(s, \"r\");
+" "" "	cout = fdopen(s, \"w\");
+	if (cin == NULL || cout == NULL) {") :which-func "hookup")) :annotation-list ((annotation :type text :data "coutはsに由来している。sは？")) :date "Tue Jan 29 01:25:58 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 8171 :coding-system undecided-unix :line 268 :surround ("	cin = fdopen(s, \"r\");
+" "" "	cout = fdopen(s, \"w\");
+	if (cin == NULL || cout == NULL) {") :which-func "hookup")) :annotation-list ((annotation :type text :data "fdopenでソケット記述子(int)をFILEに変換。
+標準Cライブラリ付属のストリームルーチン群が使いたいようである。")) :date "Tue Jan 29 01:30:29 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 24420 :coding-system undecided-unix :line 1014 :surround ("	}
+" "" "	din = dataconn(\"r\");
+	if (din == NULL)") :which-func "recvrequest")) :annotation-list ((annotation :type text :data "どこと繋っているのか確認していないが、データはdinからやって来るようである。
+dinを追う。")) :date "Tue Jan 29 01:35:31 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 21679 :coding-system undecided-unix :line 893 :surround ("{
+" "" "	FILE *volatile fout, *volatile din = 0;
+	int (*volatile closefunc)(FILE *);") :which-func "recvrequest")) :annotation-list ((annotation :type text :data "dinはローカル変数である。")) :date "Tue Jan 29 01:36:19 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 25516 :coding-system undecided-unix :line 1064 :surround ("		errno = d = 0;
+" "" "		while ((c = read(fileno(din), buf, bufsize)) > 0) {
+			if ((d = write(fileno(fout), buf, c)) != c)") :which-func "recvrequest")) :annotation-list ((annotation :type text :data "dinからファイル記述子を取り出して、readしている。
+readの結果はbufに格納される。
+一方foutなる変数があり、そこからファイル記述子を取り出して、
+bufの内容を書き込んでいる。
+
+ネットワーク経由のデータをdinで受けとり、ローカルのファイルに
+つながるfoutに書き込んでいるのであろう。
+")) :date "Tue Jan 29 01:41:39 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 21679 :coding-system undecided-unix :line 893 :surround ("{
+" "" "	FILE *volatile fout, *volatile din = 0;
+	int (*volatile closefunc)(FILE *);") :which-func "recvrequest")) :annotation-list ((annotation :type text :data "foutもローカル変数である。")) :date "Tue Jan 29 01:45:16 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 24713 :coding-system undecided-unix :line 1029 :surround ("	else {
+" "" "		fout = fopen(local, lmode);
+		if (fout == NULL) {") :which-func "recvrequest")) :annotation-list ((annotation :type text :data "やはりfoutには、localで指定されたファイルをオープンした結果得られるFILE*が
+代入されていた。")) :date "Tue Jan 29 01:45:50 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 37524 :coding-system undecided-unix :line 1570 :surround ("
+" "" "static FILE *
+dataconn(const char *lmode)") :which-func "initconn")) :annotation-list ((annotation :type text :data "dinはこの関数の返り値に由来する。")) :date "Tue Jan 29 01:48:43 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 37640 :coding-system undecided-unix :line 1577 :surround ("
+" "" "        if (passivemode)
+            return (fdopen(data, lmode));") :which-func "dataconn")) :annotation-list ((annotation :type text :data "passivemodeがnon-zeroの場合、パッシブモードで動作する。
+	サーバが指定してきたポートに、クライアントが接続に行く。
+passivemodeがzeroの場合、アクティブモードで動作する。
+	クライアントが指定したポートに、サーバが接続に来る。
+
+いずれの場合もdataなる変数が使われている。")) :date "Tue Jan 29 01:49:03 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 4462 :coding-system undecided-unix :line 121 :surround ("
+" "" "int data = -1;
+off_t restart_point = 0;"))) :annotation-list ((annotation :type text :data "dataも大域変数だった。
+dataの出自を調べる。")) :date "Tue Jan 29 01:55:11 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 29980 :coding-system undecided-unix :line 1265 :surround ("		data_addr = hisctladdr;
+" "" "		data = socket(data_addr.su_family, SOCK_STREAM, 0);
+		if (data < 0) {") :which-func "initconn")) :annotation-list ((annotation :type text :data "パッシブモードにおけるdataの初期化箇所")) :date "Tue Jan 29 01:57:25 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 35537 :coding-system undecided-unix :line 1489 :surround ("		}
+" "" "	if (bind(data, (struct sockaddr *)&data_addr, sizeof (data_addr)) < 0) {
+		perror(\"ftp: bind\");") :which-func "initconn")) :annotation-list ((annotation :type text :data "ここでサーバからの着信を待ち受けるべくbindシステムコールを呼び出している。
+どのアドレス、どのポートで待ち受けるのかはdata_addrによって与えらえる。")) :date "Tue Jan 29 02:03:31 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 30928 :coding-system undecided-unix :line 1297 :surround ("				try_epsv = 0;
+" "" "				result = command(pasvcmd = \"PASV\");
+			}") :which-func "initconn")) :annotation-list ((annotation :type text :data "PASVコマンドを送信して、サーバが接続を待つポートを教えてもらう。")) :date "Tue Jan 29 02:08:53 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/rfc959.txt" :point 96565 :coding-system undecided-unix :line 2262 :surround ("         426 Connection closed; transfer aborted.
+" "" "         227 Entering Passive Mode (h1,h2,h3,h4,p1,p2).
+          "))) :annotation-list ((annotation :type text :data "PASVの結果は227で始まる文字列が帰ってくるようである。")) :date "Tue Jan 29 02:13:44 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 11271 :coding-system undecided-unix :line 431 :surround ("	cpend = 1;
+" "" "	r = getreply(!strcmp(fmt, \"QUIT\"));
+	if (abrtflag && oldintr != SIG_IGN)") :which-func "command")) :annotation-list ((annotation :type text :data "command関数の中でgetreplyなる関数が呼び出されているが、")) :date "Tue Jan 29 02:14:29 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 12882 :coding-system undecided-unix :line 506 :surround ("				code = code * 10 + (c - '0');
+" "" "			if (!pflag && (code == 227 || code == 228))
+				pflag = 1;") :which-func "getreply")) :annotation-list ((annotation :type text :data "このgetreplyの中で227かどうかチェックしている。")) :date "Tue Jan 29 02:14:58 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 11806 :coding-system undecided-unix :line 458 :surround ("		cp = reply_string;
+" "" "		while ((c = getc(cin)) != '\\n') {
+			if (c == IAC) {     /* handle telnet commands */") :which-func "getreply")) :annotation-list ((annotation :type text :data "このgetreplyのなかでサーバからの返答を受けとるようである。")) :date "Tue Jan 29 02:15:37 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 13109 :coding-system undecided-unix :line 514 :surround ("				if (c != '\\r' && c != ')') {
+" "" "					if (px < psize-1) pasv[px++] = c;
+				}") :which-func "getreply")) :annotation-list ((annotation :type text :data "どうやらpasvなる配列に結果を格納している。")) :date "Tue Jan 29 02:16:35 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 32067 :coding-system undecided-unix :line 1347 :surround ("			}
+" "" "			if (sscanf(pasv, \"%u,%u,%u,%u,%u,%u\",
+					&ad[0], &ad[1], &ad[2], &ad[3],") :which-func "initconn")) :annotation-list ((annotation :type text :data "ここでpasvをスキャンしてdata_addrを初期化している。")) :date "Tue Jan 29 02:33:21 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 34648 :coding-system undecided-unix :line 1453 :surround ("
+" "" "		if (connect(data, (struct sockaddr *) &data_addr,
+			    (data_addr.su_family == AF_INET ?") :which-func "initconn")) :annotation-list ((annotation :type text :data "ここでdata_addrを指定してconnectシステムコールを呼びサーバに
+接続している。ということでパッシブモードにおけるdinの由来がわかった。")) :date "Tue Jan 29 02:33:51 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 37708 :coding-system undecided-unix :line 1580 :surround ("
+" "" "	s = accept(data, (struct sockaddr *) &from, &fromlen);
+	if (s < 0) {") :which-func "dataconn")) :annotation-list ((annotation :type text :data "data経由でサーバからの着信を受け付けてその通信チャンネルを
+dataとしている。")) :date "Tue Jan 29 02:41:06 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 35234 :coding-system undecided-unix :line 1477 :surround ("		(void) close(data);
+" "" "	data = socket(data_addr.su_family, SOCK_STREAM, 0);
+	if (data < 0) {") :which-func "initconn")) :annotation-list ((annotation :type text :data "アクティブモードの場合はここでソケットを作って")) :date "Tue Jan 29 02:42:17 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 35104 :coding-system undecided-unix :line 1472 :surround ("noport:
+" "" "	data_addr = myctladdr;
+	if (sendport)") :which-func "initconn")) :annotation-list ((annotation :type text :data "myctladdrから来ている。")) :date "Tue Jan 29 02:44:07 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 7824 :coding-system undecided-unix :line 254 :surround ("	freeaddrinfo(res0);
+" "" "	if (getsockname(s, (struct sockaddr *)&myctladdr, &len) < 0) {
+		perror(\"ftp: getsockname\");") :which-func "hookup")) :annotation-list ((annotation :type text :data "cin/cout制御用のソケットから通信先のアドレスを得てmyctladdrに格納している。")) :date "Tue Jan 29 02:52:03 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 35143 :coding-system undecided-unix :line 1474 :surround ("	if (sendport)
+" "" "		data_addr.su_port = 0;	/* let system pick one */ 
+	if (data != -1)") :which-func "initconn")) :annotation-list ((annotation :type text :data "ここでサーバからの着信を待つportを0として、カーネルにポートを選択
+させている。")) :date "Tue Jan 29 02:54:45 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 35817 :coding-system undecided-unix :line 1497 :surround ("	len = sizeof (data_addr);
+" "" "	if (getsockname(data, (struct sockaddr *)&data_addr, &len) < 0) {
+		perror(\"ftp: getsockname\");") :which-func "initconn")) :annotation-list ((annotation :type text :data "カーネルが適当に選出したポートがいくつだったのか、getsocknameシステムコールで
+問合せてdata_addrに取り出している。")) :date "Tue Jan 29 02:56:21 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 35929 :coding-system undecided-unix :line 1501 :surround ("	}
+" "" "	if (listen(data, 1) < 0)
+		perror(\"ftp: listen\");") :which-func "initconn")) :annotation-list ((annotation :type text :data "listenシステムコールを呼び出してdata経由で
+サーバからの着信を受けつけるようカーネルに依頼している。")) :date "Tue Jan 29 02:57:12 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 36604 :coding-system undecided-unix :line 1527 :surround ("			a = (u_char *)&data_addr.su_sin.sin_addr;
+" "" "			result = command(\"PORT %u,%u,%u,%u,%u,%u\",
+				a[0], a[1], a[2], a[3], p[0], p[1]);") :which-func "initconn")) :annotation-list ((annotation :type text :data "クライアント側で待ち受けるポートをサーバに伝えている。
+ここでPORTはrfcに定義されたプロトコル上のコマンドである。")) :date "Tue Jan 29 02:58:29 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/rfc959.txt" :point 64537 :coding-system undecided-unix :line 1546 :surround ("
+" "" "         DATA PORT (PORT)
+"))) :annotation-list ((annotation :type text :data "PORTコマンドの定義")) :date "Tue Jan 29 02:59:36 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+;;
+;;
+;;
+
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 1461 :coding-system undecided-unix :line 46 :surround ("
+" "" "#include \"system.h\"
+#include \"quote.h\""))) :annotation-list ((annotation :type text :data "ところでtest.cのここでsystem.hをインクルードしている。")) :date "Mon Jan 28 19:08:58 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/system.h" :point 4919 :coding-system undecided-unix :line 184 :surround ("
+" "" "#define STREQ(a, b) (strcmp (a, b) == 0)
+#define STREQ_LEN(a, b, n) (strncmp (a, b, n) == 0)") :which-func "select_plural")) :annotation-list ((annotation :type text :data "strcmpの結果が0となるかどうかを検査している。(プルーフポイント)")) :date "Mon Jan 28 19:10:26 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 9959 :coding-system undecided-unix :line 370 :surround ("
+" "" "  if (argv[op][0] == '=' && (!argv[op][1] ||
+       ((argv[op][1] == '=') && !argv[op][2])))") :which-func "binary_operator")) :annotation-list ((annotation :type text :data "grep -n \"'='\" test.c からみつけたこの場所をベースポイントとした。")) :date "Mon Jan 28 19:13:25 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 10058 :coding-system undecided-unix :line 373 :surround ("    {
+" "" "      bool value = STREQ (argv[pos], argv[pos + 2]);
+      pos += 3;") :which-func "binary_operator")) :annotation-list ((annotation :type text :data "=演算子の左右のオペランドを引数にSTREQを呼び出している。")) :date "Mon Jan 28 19:15:55 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 5362 :coding-system undecided-unix :line 214 :surround ("  /* Deal with leading `not's.  */
+" "" "  while (pos < argc && argv[pos][0] == '!' && argv[pos][1] == '\\0')
+    {") :which-func "term")) :annotation-list ((annotation :type text :data "grep -n \"'!'\" test.cでみつけたこの行をベースポイントとする。
+argv[pos]は演算子の文字列を指し示すようである。")) :date "Mon Jan 28 19:38:00 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 5436 :coding-system undecided-unix :line 216 :surround ("    {
+" "" "      advance (true);
+      negated = !negated;") :which-func "term")) :annotation-list ((annotation :type text :data "posは演算子文字列中の何番目の文字を検査しているか保持しているようである。
+advanceでposをインクリメントする。")) :date "Mon Jan 28 19:39:20 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 2973 :coding-system undecided-unix :line 103 :surround ("{
+" "" "  ++pos;
+") :which-func "advance")) :annotation-list ((annotation :type text :data "検査対象の文字を一文字進めている。")) :date "Mon Jan 28 19:40:55 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 5458 :coding-system undecided-unix :line 217 :surround ("      advance (true);
+" "" "      negated = !negated;
+    }") :which-func "term")) :annotation-list ((annotation :type text :data "演算結果を反転する変数の値を反転している。はじめて!に遭遇した
+場合、trueとなる。")) :date "Mon Jan 28 19:41:42 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 5302 :coding-system undecided-unix :line 211 :surround ("  bool value;
+" "" "  bool negated = false;
+") :which-func "term")) :annotation-list ((annotation :type text :data "falseで初期化される。")) :date "Mon Jan 28 19:42:17 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 6378 :coding-system undecided-unix :line 252 :surround ("  else if (3 <= argc - pos && binop (argv[pos + 1]))
+" "" "    value = binary_operator (false);
+") :which-func "term")) :annotation-list ((annotation :type text :data "こちらの経路で
+
+	a = b
+
+の結果を得る。")) :date "Mon Jan 28 19:43:36 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/coreutils-8.15/src/test.c" :point 6777 :coding-system undecided-unix :line 267 :surround ("    }
+" "" "
+  return negated ^ value;") :which-func "term")) :annotation-list ((annotation :type text :data "binary_operatorの結果とnegatedの値をまとめる。
+
+negated | value | return value
+--------+-------+---------
+true    ^ true  => false
+true    ^ false => true
+false   ^ true  => true
+false   ^ false => false
+")) :date "Mon Jan 28 19:44:38 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))

@@ -677,7 +677,7 @@
 
 ;; (id (sha1 (prin1-to-string `(,annotation ,date ,full-name ,mailing-address))))
 (defun stitch-entry-calc-id (entry)
-  (sha1 (prin1-to-string entry)))
+  (sha1 (prin1-to-string `(,target ,annotation ,date ,full-name ,mailing-address))))
 (defun stitch-register-annotation (target annotation date full-name mailing-address keywords
 					  annotation-home)
   (let* ((entries (mapcar
@@ -794,7 +794,10 @@
     result))
 
 (defun stitch-jump-to-id (id)
-  (interactive "sID: ")
+  (interactive (list (let ((d  (thing-at-point 'symbol)))
+		       (let ((r (read-from-minibuffer (format "ID(%s): " d)
+						      nil nil nil nil d)))
+			 (if (equal r "") d r)))))
   (let ((entry (gethash id stitch-ids nil)))
     (when entry
       (let* ((target (stitch-klist-value entry :target))
@@ -807,13 +810,19 @@
     (kill-new id)
   (message "ID: %s is saved" id)))
 
+(defun stitch-action-jump-to-home (entry)
+  (let ((home (stitch-klist-value entry :annotation-home)))
+    (stitch-home-jump home)))
+
 (defun stitch-annotation-popup-menu (event)
   (interactive "e")
   (let ((entry (overlay-get (stitch-annotation-for-event event)
  			     'stitch-entry)))
     (let ((f (x-popup-menu event `(,(stitch-klist-value entry :id)
 				   ("" 
-				    ("Copy ID" . stitch-action-copy-id-to-kill-ring))))))
+				    ("Copy ID" . stitch-action-copy-id-to-kill-ring)
+				    ("Jump to Home" . stitch-action-jump-to-home)
+				    )))))
 			   (when f
 			     (funcall f entry)
 			   ))))
@@ -1779,6 +1788,8 @@
 	      (propertize
 	       (stitch-klist-value annotation :data)
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-body))
+	      (propertize "\n" 
+			  'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))
 	      (propertize " " 
 			  'face 'stitch-annotation-base
 			  'display `(space :align-to (- right 40)))
@@ -2128,7 +2139,7 @@
 	     ))
        t
        t
-       nil))))
+       t))))
 
 (defun stitch-list-annotation-about-keyword (keywords buffer-or-name need-erasing)
   (let ((or-set nil))
@@ -2146,7 +2157,7 @@
 					    t))
 					need-erasing
 					(if (eq (length keywords) 1) nil t)
-					nil)))
+					t)))
 
 
 (defun stitch-list-annotation (keywords)
@@ -2473,6 +2484,9 @@
 (define-key ctl-x-map    "At"  'stitch-toggle-annotation)
 (define-key ctl-x-map    "A*"  'stitch-list-revert-window-config)
 
+(define-key ctl-x-map    "Aj"  'stitch-jump-to-id)
+(define-key ctl-x-map    "A."  'stitch-jump-to-id)
+
 ;;
 (defvar stitch-menu (make-sparse-keymap "Stitch"))
 (define-key-after global-map [menu-bar stitch] (cons "Stitch" stitch-menu))
@@ -2561,10 +2575,13 @@
   (get (intern-soft tour) 'tour-doc))
 
 (defun tour-read ()
-  (completing-read "Tour: "
+  (completing-read (format "Tour(%s): " (thing-at-point 'symbol))
 		   tour-table
 		   nil
-		   t))
+		   t
+		   nil
+		   nil
+		   (thing-at-point 'symbol)))
 (defun tour (tour)
   (interactive (list (tour-read)))
   (setq tour-current-name tour)
@@ -2583,7 +2600,8 @@
 (defun tour-goto-current ()
   (interactive)
   (stitch-jump-to-id 
-   (nth tour-current-offset tour-current-tour)))
+   (nth tour-current-offset tour-current-tour))
+  (recenter 1))
 
 (defun tour-goto-beginning ()
   (interactive)
@@ -2595,8 +2613,7 @@
 (defun tour-goto-prev ()
   (interactive)
     (if (< 0 tour-current-offset)
-	(progn (tour-set-and-go (1- tour-current-offset))
-	       (recenter 1))
+	(tour-set-and-go (1- tour-current-offset))
       (error "beginning of tour")))
 
 (defun tour-goto-next ()
@@ -2615,6 +2632,10 @@
 
 (define-key-after stitch-menu [tour]
   '(menu-item "Start Tour..." tour))
+
+(define-key-after stitch-menu [list-tours]
+  '(menu-item "List Tours" tour-list-tours))
+
 
 (define-key global-map [(f9) (next)] 'tour-goto-next)
 (define-key global-map [(f9) ?\ ] 'tour-goto-next)
@@ -2700,13 +2721,13 @@
 					      nil
 					      t))))))
 
-(deftour naist-test
-  (
-   16200dcc1ad6eac343b5b68b0ffc6a3e90b0db13
-   76ad367c131edb512f3e66bbc5f20ea0a4b09a3b
-   bf7acdccee46f610a0c8bc67f090d8d9fffa82d2
-   )
-  "ツアー機能を追加したので、その試しである。
-など。")
+;; (deftour test
+;;   (
+;;    16200dcc1ad6eac343b5b68b0ffc6a3e90b0db13
+;;    76ad367c131edb512f3e66bbc5f20ea0a4b09a3b
+;;    bf7acdccee46f610a0c8bc67f090d8d9fffa82d2
+;;    )
+;;   "ツアー機能を追加したので、その試しである。
+;; など。")
    
 (provide 'stitch)
