@@ -1,3 +1,8 @@
+2013-02-01  Masatake YAMATO  <yamato@redhat.com>
+
+	* stitch.el (stitch-save-annotation): Prepare an uuid
+	to each annotation.
+
 2013-01-27  Masatake YAMATO  <yamato@redhat.com>
 
 	* stitch.el: Introduce tour functions.

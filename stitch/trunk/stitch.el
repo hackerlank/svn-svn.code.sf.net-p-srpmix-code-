@@ -725,6 +725,9 @@
 	))
     i))
 
+(defun stitch-generate-uuid ()
+  (shell-command-to-string "uuidgen"))
+
 (defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
   (stitch-with-current-file stitch-annotation-file
     (goto-char (point-max))
@@ -738,7 +741,9 @@
 						:date date
 						:full-name full-name
 						:mailing-address mailing-address
-						:keywords keywords)))
+						:keywords keywords
+						:uuid (stitch-generate-uuid)
+						)))
 		   (save-buffer)
 		   (stitch-count-record))))
       (list stitch-annotation-file
@@ -2359,6 +2364,7 @@
 				 :date date
 				 :full-name full-name
 				 :mailing-address mailing-address
+				 :uuid (stitch-generate-uuid)
 				 )))
     (save-buffer)
     ))
@@ -2560,6 +2566,11 @@
   :group 'stitch
   :lighter " Stitch")
 
+
+;;
+;; TOUR
+;;
+
 (defvar tour-table (make-hash-table :test 'equal))
 (defvar tour-current-name nil)
 (defvar tour-current-tour nil)
@@ -2672,16 +2683,16 @@
        (lambda (tn)
 	 (let* ((v (gethash tn tour-table))
 		(subject (tour-doc tn)))
-	   (insert (format "%s(%d) --- %s\n" 
+	   (insert (format "%s(%d): %s\n" 
 			   (propertize tn 
 				       'face 'stitch-keyword
 				       'mouse-face 'highlight
 				       'tour tn)
 			   (length (gethash tn tour-table))
 			   (propertize  (car (split-string subject "\n"))
-					  'face 'stitch-annotation-base
-					  'help-echo subject
-					  )
+					;;'face 'stitch-annotation-base
+					'help-echo subject
+					)
 			   ))
 	   ))
        l))

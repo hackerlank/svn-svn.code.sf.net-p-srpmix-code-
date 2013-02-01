@@ -1171,4 +1171,59 @@ true    ^ true  => false
 true    ^ false => true
 false   ^ true  => true
 false   ^ false => false
-")) :date "Mon Jan 28 19:44:38 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))
+")) :date "Mon Jan 28 19:44:38 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab3))(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/main.c" :point 7359 :coding-system undecided-unix :line 340 :surround ("		}
+" "" "		c = getcmd(margv[0]);
+		if (c == (struct cmd *)-1) {") :which-func "cmdscanner")) :annotation-list ((annotation :type text :data "ここで入力コマンドに対するcmdを取り出している。")) :date "Tue Jan 29 10:27:23 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/cmdtab.c" :point 6249 :coding-system undecided-unix :line 117 :surround ("
+" "" "struct cmd cmdtab[] = {
+	{ \"!\",		shellhelp,	0, 0, 0, NULL, NULL, shell },") :which-func "get")) :annotation-list ((annotation :type text :data "痕跡文字列を含むこの構造体の配列はどんな風に使われているのか？")) :date "Tue Jan 29 16:08:53 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/main.c" :point 8046 :coding-system undecided-unix :line 375 :surround ("	found = 0;
+" "" "	for (c = cmdtab; (p = c->c_name) != NULL; c++) {
+		for (q = name; *q == *p++; q++)") :which-func "getcmd")) :annotation-list ((annotation :type text :data "ここgetcmd関数でcmdtabの要素を巡回してcmdtabのエントリーを
+返却している。誰が受けとっているのか？")) :date "Tue Jan 29 16:10:30 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/main.c" :point 7616 :coding-system undecided-unix :line 353 :surround ("		}
+" "" "		if (c->c_handler_v) c->c_handler_v(margc, margv);
+		else if (c->c_handler_0) c->c_handler_0();") :which-func "cmdscanner")) :annotation-list ((annotation :type text :data "取り出したc中を経由してコールバック関数を呼び出している。
+getはc_handler_vに刺さっていた。")) :date "Tue Jan 29 16:13:16 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/main.c" :point 7616 :coding-system undecided-unix :line 353 :surround ("		}
+" "" "		if (c->c_handler_v) c->c_handler_v(margc, margv);
+		else if (c->c_handler_0) c->c_handler_0();") :which-func "cmdscanner")) :annotation-list ((annotation :type text :data "margvはどこから来る？")) :date "Tue Jan 29 16:14:51 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/main.c" :point 7287 :coding-system undecided-unix :line 336 :surround ("		} /* else it was a line without a newline */
+" "" "		margv = makeargv(&margc, &marg);
+		if (margc == 0) {") :which-func "cmdscanner")) :annotation-list ((annotation :type text :data "getに渡されるmargvの値はmakeargvが生産している。")) :date "Tue Jan 29 16:15:09 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/main.c" :point 8611 :coding-system undecided-unix :line 407 :surround ("	argp = rargv;
+" "" "	stringbase = line;		/* scan from first of buffer */
+	argbase = argbuf;		/* store from first of buffer */") :which-func "makeargv")) :annotation-list ((annotation :type text :data "なんかlineから来てるな。")) :date "Tue Jan 29 16:16:31 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/main.c" :point 6907 :coding-system undecided-unix :line 319 :surround ("	for (;;) {
+" "" "		if (!get_input_line(line, sizeof(line))) {
+			quit();") :which-func "cmdscanner")) :annotation-list ((annotation :type text :data "lineの値はget_input_lineに由来するようである。")) :date "Tue Jan 29 16:16:58 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/main.c" :point 6621 :coding-system undecided-unix :line 296 :surround ("#endif
+" "" "	if (fromatty) {
+		printf(\"ftp> \");") :which-func "get_input_line")) :annotation-list ((annotation :type text :data "ftp>っていうプロンプト出してstdinからfgetsしている。")) :date "Tue Jan 29 16:17:31 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 36559 :coding-system undecided-unix :line 1526 :surround ("		case AF_INET:
+" "" "			a = (u_char *)&data_addr.su_sin.sin_addr;
+			result = command(\"PORT %u,%u,%u,%u,%u,%u\",") :which-func "initconn")) :annotation-list ((annotation :type text :data "aのはdata_addrのsin_addrに由来している。")) :date "Tue Jan 29 19:02:17 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/trac-svn/gps/naist-code-reading/usources/fedora/netkit-ftp-0.17/ftp/ftp.c" :point 36474 :coding-system undecided-unix :line 1523 :surround ("
+" "" "		p = (u_char *)&data_addr.su_port;
+		switch (data_addr.su_family) {") :which-func "initconn")) :annotation-list ((annotation :type text :data "pはdata_addrに由来している。")) :date "Tue Jan 29 19:03:24 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (lab0))
+(define-keyword reading-tcp-state-introspection :version 0 :keywords reading-tcp-state-introspection :subject "tcpソケットの内部状態を外部から観察する方法をさぐる。" :date "Thu Jan 31 10:29:57 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/n/net-tools/^alias-rhel6u3+optional/pre-build/net-tools-1.60/netstat.c" :point 29465 :coding-system undecided-unix :line 1054 :surround ("
+" "" "	if (flag_opt)
+	    switch (timer_run) {") :which-func "tcp_do_one")) :annotation-list ((annotation :type text :data "netstatの出力からtcpソケットで起動しているタイマーの種類と
+残り時間がわかる。")) :date "Thu Jan 31 10:30:42 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-tcp-state-introspection))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/tcp_ipv4.c" :point 60267 :coding-system undecided-unix :line 2350 :surround ("
+" "" "	switch (st->state) {
+	case TCP_SEQ_STATE_LISTENING:") :which-func "tcp4_seq_show")) :annotation-list ((annotation :type text :data "netstatで見れるtcpソケットのタイマーの情報の出所。")) :date "Thu Jan 31 10:32:29 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-tcp-state-introspection))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/tcp_ipv4.c" :point 58292 :coding-system undecided-unix :line 2277 :surround ("
+" "" "	if (icsk->icsk_pending == ICSK_TIME_RETRANS) {
+		timer_active	= 1;") :which-func "get_tcp4_sock")) :annotation-list ((annotation :type text :data "icsk_pendingの値がそのまま出力しているわけではないことに注意する。")) :date "Thu Jan 31 10:32:43 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-tcp-state-introspection))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/tcp_ipv4.c" :point 58398 :coding-system undecided-unix :line 2280 :surround ("		timer_expires	= icsk->icsk_timeout;
+" "" "	} else if (icsk->icsk_pending == ICSK_TIME_PROBE0) {
+		timer_active	= 4;") :which-func "get_tcp4_sock")) :annotation-list ((annotation :type text :data "ICSK_TIME_PROBE0 == 3
+[sources:///sources/k/kernel/2.6.32-279.el6?etags=ICSK_TIME_PROBE0]")) :date "Thu Jan 31 10:33:55 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-tcp-state-introspection))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/route.c" :point 17064 :coding-system undecided-unix :line 652 :surround ("	ret = 0;
+" "" "	if ((age <= tmo1 && !rt_fast_clean(rth)) ||
+	    (age <= tmo2 && rt_valuable(rth)))") :which-func "rt_may_expire")) :annotation-list ((annotation :type text :data "tmo1の値が小さくなって行くとret = 1されやすくなる。")) :date "Thu Jan 31 19:16:46 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-routing-cache))
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/route.c" :point 26115 :coding-system undecided-unix :line 1011 :surround ("					!rt_may_expire(rth, tmo, expire)) {
+" "" "					tmo >>= 1;
+					rthp = &rth->u.dst.rt_next;") :which-func "rt_garbage_collect")) :annotation-list ((annotation :type text :data "tmoの値をだんだんと小さくして行く。")) :date "Thu Jan 31 19:17:39 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-routing-cache))
