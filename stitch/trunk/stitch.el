@@ -709,9 +709,11 @@
 				    (cons entry (gethash base-name stitch-annotations-fuzzy ()))
 				    stitch-annotations-fuzzy)
 			   )))
+		       ;;
 		       (let ((id (stitch-entry-calc-id entry)))
 			 (stitch-entry-bind entry :id id)
 			 (puthash id entry stitch-ids))
+		       ;;
 		       entry))
 		   (stitch-target-get-files target))))
     entries))
@@ -726,7 +728,7 @@
     i))
 
 (defun stitch-generate-uuid ()
-  (shell-command-to-string "uuidgen"))
+  (replace-regexp-in-string "\n$" "" (shell-command-to-string "uuidgen")))
 
 (defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
   (stitch-with-current-file stitch-annotation-file
