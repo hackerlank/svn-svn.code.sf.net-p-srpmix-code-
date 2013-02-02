@@ -165,14 +165,14 @@
   "Similar to stitch-annotation-base but used in fuzzy matched anntations."
   :group 'stitch)
 
-(defface stitch-annotation-id
+(defface stitch-annotation-uuid
   '((t (:inherit (;;font-lock-constant
 		  stitch-annotation-base)
         :underline t
 	:width ultra-condensed
 	:weight ultra-light
 	)))
-  "Face used to highlight id in anntations."
+  "Face used to highlight uuid in anntations."
   :group 'stitch)
 
 (defface stitch-annotation-date
@@ -373,7 +373,7 @@
 	(equal (stitch-klist-value e1 :full-name)
 	       (stitch-get-user-full-name))))))))
 
-(defvar stitch-ids (make-hash-table :test 'equal))
+(defvar stitch-uuids (make-hash-table :test 'equal))
 (defvar stitch-annotations (make-hash-table :test 'equal))
 (defvar stitch-annotations-fuzzy (make-hash-table :test 'equal))
 (defvar stitch-keywords    (make-hash-table :test 'eq))
@@ -479,12 +479,12 @@
 					date 
 					full-name
 					mailing-address
-					id
+					uuid
 					fuzzy?)
   (stitch-annotation-invoke-method annotation :inline-format
 				   overlay
 				   date full-name mailing-address
-				   id
+				   uuid
 				   fuzzy?))
 
 (defun stitch-annotation-list-format (annotation)
@@ -657,17 +657,22 @@
 				 date full-name mailing-address
 				 buffers regions
 				 keywords)
-  (let ((home-r (stitch-save-annotation
-		 (mapcar 'stitch-target-save-form target-list)
-		 annotation date full-name mailing-address keywords)))
+  (let* ((uuid (stitch-generate-uuid))
+	 (home-r (stitch-save-annotation
+		  (mapcar 'stitch-target-save-form target-list)
+		  annotation date full-name mailing-address 
+		  uuid
+		  keywords)))
     (mapcar*
      (lambda (target b r)
        (let* ((entries (stitch-register-annotation target annotation
-						   date full-name mailing-address keywords
+						   date full-name mailing-address 
+						   uuid
+						   keywords
 						   home-r))
 	      (o (stitch-insert-annotation0   b r
 					      annotation date full-name mailing-address keywords 
-					      (stitch-klist-value (car entries) :id)
+					      uuid
 					      nil)))
 	 ;; TODO: use all files in the returned list.
 	 (stitch-entry-bind (car entries) :overlay o)
@@ -676,10 +681,10 @@
 
 
 ;; (id (sha1 (prin1-to-string `(,annotation ,date ,full-name ,mailing-address))))
-(defun stitch-entry-calc-id (entry)
-  (sha1 (prin1-to-string `(,target ,annotation ,date ,full-name ,mailing-address))))
-(defun stitch-register-annotation (target annotation date full-name mailing-address keywords
-					  annotation-home)
+;;(defun stitch-entry-calc-id (entry)
+;;  (sha1 (prin1-to-string `(,target ,annotation ,date ,full-name ,mailing-address))))
+(defun stitch-register-annotation (target annotation date full-name mailing-address 
+					  uuid keywords annotation-home)
   (let* ((entries (mapcar
 		   (lambda (file)
 		     (let ((entry (list :registered-as file
@@ -690,7 +695,7 @@
 					:mailing-address mailing-address
 					:keywords keywords
 					:annotation-home annotation-home
-					:id nil
+					:uuid uuid
 					:overwritten nil
 					:overlay nil)))
 		       (puthash file 
@@ -710,9 +715,7 @@
 				    stitch-annotations-fuzzy)
 			   )))
 		       ;;
-		       (let ((id (stitch-entry-calc-id entry)))
-			 (stitch-entry-bind entry :id id)
-			 (puthash id entry stitch-ids))
+		       (puthash uuid entry stitch-uuids)
 		       ;;
 		       entry))
 		   (stitch-target-get-files target))))
@@ -730,7 +733,7 @@
 (defun stitch-generate-uuid ()
   (replace-regexp-in-string "\n$" "" (shell-command-to-string "uuidgen")))
 
-(defun stitch-save-annotation (target-list annotation date full-name mailing-address keywords)
+(defun stitch-save-annotation (target-list annotation date full-name mailing-address uuid keywords)
   (stitch-with-current-file stitch-annotation-file
     (goto-char (point-max))
     (let ((start (point))
@@ -744,7 +747,7 @@
 						:full-name full-name
 						:mailing-address mailing-address
 						:keywords keywords
-						:uuid (stitch-generate-uuid)
+						:uuid uuid
 						)))
 		   (save-buffer)
 		   (stitch-count-record))))
@@ -800,22 +803,22 @@
 		result ov))))
     result))
 
-(defun stitch-jump-to-id (id)
+(defun stitch-jump-to-uuid (uuid)
   (interactive (list (let ((d  (thing-at-point 'symbol)))
-		       (let ((r (read-from-minibuffer (format "ID(%s): " d)
+		       (let ((r (read-from-minibuffer (format "UUID(%s): " d)
 						      nil nil nil nil d)))
 			 (if (equal r "") d r)))))
-  (let ((entry (gethash id stitch-ids nil)))
+  (let ((entry (gethash uuid stitch-uuids nil)))
     (when entry
       (let* ((target (stitch-klist-value entry :target))
 	    (file  (car (stitch-target-get-files target))))
 	(stitch-target-jump target file)
 	))))
 
-(defun stitch-action-copy-id-to-kill-ring (entry)
-  (let ((id (stitch-klist-value entry :id)))
-    (kill-new id)
-  (message "ID: %s is saved" id)))
+(defun stitch-action-copy-uuid-to-kill-ring (entry)
+  (let ((uuid (stitch-klist-value entry :uuid)))
+    (kill-new uuid)
+  (message "UUID: %s is saved" uuid)))
 
 (defun stitch-action-jump-to-home (entry)
   (let ((home (stitch-klist-value entry :annotation-home)))
@@ -825,16 +828,16 @@
   (interactive "e")
   (let ((entry (overlay-get (stitch-annotation-for-event event)
  			     'stitch-entry)))
-    (let ((f (x-popup-menu event `(,(stitch-klist-value entry :id)
+    (let ((f (x-popup-menu event `(,(stitch-klist-value entry :uuid)
 				   ("" 
-				    ("Copy ID" . stitch-action-copy-id-to-kill-ring)
+				    ("Copy UUID" . stitch-action-copy-uuid-to-kill-ring)
 				    ("Jump to Home" . stitch-action-jump-to-home)
 				    )))))
 			   (when f
 			     (funcall f entry)
 			   ))))
 
-(defun stitch-insert-point-annotation (buffer pos annotation date full-name mailing-address keywords id fuzzy?)
+(defun stitch-insert-point-annotation (buffer pos annotation date full-name mailing-address keywords uuid fuzzy?)
   (with-current-buffer buffer
     (when (<= pos (point-max))
       (let* ((o (make-overlay pos pos buffer))
@@ -843,7 +846,7 @@
 						  date
 						  full-name
 						  mailing-address
-						  id
+						  uuid
 						  fuzzy?)))
 	;; FILTER the SI length here.
 	;; (set-window-margins (selected-window) (car (window-margins (selected-window))) 1)
@@ -901,8 +904,8 @@
 					 ))
 	      (setq overlays nil))))))))
 
-;; TODO: USE id
-(defun stitch-insert-region-annotation (buffer start end face annotation date full-name mailing-address keywords id fuzzy?)
+;; TODO: USE uuid
+(defun stitch-insert-region-annotation (buffer start end face annotation date full-name mailing-address keywords uuid fuzzy?)
   (with-current-buffer buffer
     (when (<= end (point-max))
       (let* ((o (make-overlay start end buffer))
@@ -911,7 +914,7 @@
 						  date
 						  full-name
 						  mailing-address
-						  id
+						  uuid
 						  fuzzy?)))
 	;; FILTER the SI length here.
 	(overlay-put o 'help-echo-string si)
@@ -950,7 +953,7 @@
 		(stitch-klist-value entry :full-name)
 		(stitch-klist-value entry :mailing-address)
 		(stitch-klist-value entry :keywords)
-		(stitch-klist-value entry :id)
+		(stitch-klist-value entry :uuid)
 		nil)))
 	(stitch-entry-bind entry :overlay o)
 	o))))
@@ -987,21 +990,21 @@
 		    (stitch-klist-value entry :full-name)
 		    (stitch-klist-value entry :mailing-address)
 		    (stitch-klist-value entry :keywords)
-		    (stitch-klist-value entry :id)
+		    (stitch-klist-value entry :uuid)
 		    (stitch-klist-value entry :registered-as))))
 	    (stitch-entry-bind entry :overlay o)
 	    o))))))
 
-(defun stitch-insert-annotation0 (buffer region annotation date full-name mailing-address keywords id fuzzy?)
+(defun stitch-insert-annotation0 (buffer region annotation date full-name mailing-address keywords uuid fuzzy?)
   (if (eq (car region) (cadr region))
       (stitch-insert-point-annotation buffer 
 				      (car region)
-				      annotation date full-name mailing-address keywords id fuzzy?)
+				      annotation date full-name mailing-address keywords uuid fuzzy?)
     (stitch-insert-region-annotation buffer
 				     (car region)
 				     (cadr region)
 				     (caddr region)
-				     annotation date full-name mailing-address keywords id fuzzy?)))
+				     annotation date full-name mailing-address keywords uuid fuzzy?)))
 
 (defun stitch-insert-annotations-strict (buffer)
   (with-current-buffer buffer
@@ -1231,7 +1234,7 @@
     (setq stitch-annotations (make-hash-table :test 'equal))
     (setq stitch-annotations-fuzzy (make-hash-table :test 'equal))
     (setq stitch-keywords (make-hash-table :test 'eq))
-    (setq stitch-ids (make-hash-table :test 'equal))
+    (setq stitch-uuids (make-hash-table :test 'equal))
     (stitch-load-annotations))
   (mapcar
    'stitch-insert-annotations
@@ -1253,7 +1256,8 @@
 	    (date (stitch-klist-value r :date))
 	    (full-name (stitch-klist-value r :full-name))
 	    (mailing-list (stitch-klist-value r :mailing-address))
-	    (keywords (stitch-klist-value r :keywords)))
+	    (keywords (stitch-klist-value r :keywords))
+	    (uuid (stitch-klist-value r :uuid)))
 	
 	(mapc
 	 (lambda (target)
@@ -1263,6 +1267,7 @@
 					  annotation
 					  date full-name
 					  mailing-list
+					  uuid
 					  keywords
 					  (list file-name start end)))
 	    annotation-list))
@@ -1655,7 +1660,7 @@
 (defun stitch-oneline-annotation-inline-format (annotation
 						overlay
 						date full-name mailing-address
-						id
+						uuid
 						fuzzy?)
   (let ((pos (overlay-start overlay)))
     (let* ((b (char-before pos)))
@@ -1781,7 +1786,7 @@
 (defun stitch-text-annotation-inline-format (annotation
 					     overlay
 					     date full-name mailing-address
-					     id
+					     uuid
 					     fuzzy?)
   (let ((pos (overlay-start overlay)))
     (let* ((b (char-before pos))
@@ -1795,13 +1800,14 @@
 	      (propertize
 	       (stitch-klist-value annotation :data)
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-body))
-	      (propertize "\n" 
-			  'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))
-	      (propertize " " 
-			  'face 'stitch-annotation-base
-			  'display `(space :align-to (- right 40)))
-	      (propertize (concat id)
-			  'face 'stitch-annotation-id)
+	      (when nil
+		(propertize "\n" 
+			    'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-base))
+		(propertize " " 
+			    'face 'stitch-annotation-base
+			    'display `(space :align-to (- right 40)))
+		(propertize (concat uuid)
+			    'face 'stitch-annotation-uuid))
 	      (propertize
 	       (concat
 		(if (eq major-mode 'dired-mode) "" "\n")
@@ -1828,7 +1834,7 @@
 						      footer
 						      overlay
 						      date full-name mailing-address
-						      id
+						      uuid
 						      fuzzy?)
   (let ((pos (overlay-start overlay)))
     (let* ((b (char-before pos))
@@ -1863,7 +1869,7 @@
 						 annotation
 						 overlay
 						 date full-name mailing-address
-						 id
+						 uuid
 						 fuzzy?)
   (let ((image (stitch-graphviz-create-image (stitch-klist-value annotation :data)
 					     cmd)))
@@ -1873,7 +1879,7 @@
 						   date
 						   full-name
 						   mailing-address
-						   id
+						   uuid
 						   fuzzy?)))
 
 (defun stitch-graphviz-annotation-list-format (annotation cmd)
@@ -1928,13 +1934,13 @@
      (defun ,(intern (format "stitch-%S-annotation-inline-format" cmd)) (annotation
 									 overlay
 									 date full-name mailing-address
-									 id
+									 uuid
 									 fuzzy?)
        (stitch-graphviz-annotation-inline-format ,(symbol-name cmd)
 						 annotation
 						 overlay
 						 date full-name mailing-address
-						 id
+						 uuid
 						 fuzzy?))
      (defun ,(intern (format "stitch-%S-annotation-list-format" cmd)) (annotation)
        (stitch-graphviz-annotation-list-format annotation ,(symbol-name cmd)))
@@ -1964,14 +1970,14 @@
 (defun stitch-mscgen-annotation-inline-format (annotation
 					       overlay
 					       date full-name mailing-address
-					       id
+					       uuid
 					       fuzzy?)
   (stitch-graphviz-annotation-inline-format
    'stitch-mscgen-make-command-line
    annotation
    overlay
    date full-name mailing-address
-   id
+   uuid
    fuzzy?))
 
 (defun stitch-mscgen-annotation-list-format (annotation)
@@ -2040,7 +2046,7 @@
 (defun stitch-webimage-annotation-inline-format (annotation
 						 overlay
 						 date full-name mailing-address
-						 id
+						 uuid
 						 fuzzy?)
   (let ((i (stitch-webimage-create-image annotation)))
     (when i
@@ -2050,7 +2056,7 @@
 						     date
 						     full-name
 						     mailing-address
-						     id
+						     uuid
 						     fuzzy?))))
 
 (defun stitch-webimage-annotation-list-format (annotation)
@@ -2099,14 +2105,14 @@
 (defun stitch-groff-annotation-inline-format (annotation
 					      overlay
 					      date full-name mailing-address
-					      id
+					      uuid
 					      fuzzy?)
   (stitch-graphviz-annotation-inline-format
    'stitch-groff-make-command-line
    annotation
    overlay
    date full-name mailing-address
-   id
+   uuid
    fuzzy?))
 
 (defun stitch-groff-annotation-list-format (annotation)
@@ -2224,7 +2230,7 @@
 					      (format "Keywords: %S\n"
 						      (stitch-klist-value e :keywords))
 					    "")
-					  (format "ID: %s\n" (stitch-klist-value e :id))
+					  (format "UUID: %s\n" (stitch-klist-value e :uuid))
 					  )
 					'face 'stitch-annotation-base
 					'mouse-face 'highlight
@@ -2492,8 +2498,8 @@
 (define-key ctl-x-map    "At"  'stitch-toggle-annotation)
 (define-key ctl-x-map    "A*"  'stitch-list-revert-window-config)
 
-(define-key ctl-x-map    "Aj"  'stitch-jump-to-id)
-(define-key ctl-x-map    "A."  'stitch-jump-to-id)
+(define-key ctl-x-map    "Aj"  'stitch-jump-to-uuid)
+(define-key ctl-x-map    "A."  'stitch-jump-to-uuid)
 
 ;;
 (defvar stitch-menu (make-sparse-keymap "Stitch"))
@@ -2578,6 +2584,11 @@
 (defvar tour-current-tour nil)
 (defvar tour-current-offset 0)
 
+(defun tour-reset ()
+  (setq tour-current-name nil
+	tour-current-tour nil
+	tour-current-offset 0))
+
 (defmacro deftour (name body &optional doc)
   `(progn
      (put ',name 'tour-doc ,doc)
@@ -2588,15 +2599,21 @@
   (get (intern-soft tour) 'tour-doc))
 
 (defun tour-read ()
-  (completing-read (format "Tour(%s): " (thing-at-point 'symbol))
+  (completing-read (let ((d (thing-at-point 'symbol)))
+		     (if d 
+			 (format "Tour(%s): " d)
+		       "Tour: "))
 		   tour-table
 		   nil
 		   t
 		   nil
 		   nil
 		   (thing-at-point 'symbol)))
-(defun tour (tour)
-  (interactive (list (tour-read)))
+(defun tour (tour rehearsal?)
+  (interactive (list (tour-read)
+		     current-prefix-arg))
+  (unless rehearsal?
+    (tour-mode))
   (setq tour-current-name tour)
   (tour-start (gethash tour tour-table)))
 
@@ -2612,7 +2629,7 @@
 
 (defun tour-goto-current ()
   (interactive)
-  (stitch-jump-to-id 
+  (stitch-jump-to-uuid 
    (nth tour-current-offset tour-current-tour))
   (recenter 1))
 
@@ -2636,12 +2653,14 @@
 	(tour-set-and-go (1+ tour-current-offset))
       (error "end of tour"))))
 
+(defun tour-format-pos ()
+  (format "%s: %s/%s" 
+	  tour-current-name
+	  (1+ tour-current-offset)
+	  (length tour-current-tour)))
 (defun tour-show-pos ()
   (interactive)
-  (message "%s: %s/%s" 
-	   tour-current-name
-	   (1+ tour-current-offset)
-	   (length tour-current-tour)))
+  (message "%s" (tour-format-pos)))
 
 (define-key-after stitch-menu [tour]
   '(menu-item "Start Tour..." tour))
@@ -2649,6 +2668,41 @@
 (define-key-after stitch-menu [list-tours]
   '(menu-item "List Tours" tour-list-tours))
 
+(defvar tour-mode-map 
+  (let ((map (make-sparse-keymap "Tour")))
+    (define-key map " " 'tour-goto-next)
+    (define-key map [backspace] 'tour-goto-prev)
+    (define-key map "<" 'tour-goto-beginning)
+    (define-key map ">" 'tour-goto-end)
+    (define-key map "." 'tour-goto-current)
+    (define-key map "@" 'tour-show-pos)
+    (define-key map "?" 'tour-schedule)
+    (define-key map "q" 'tour-quit)
+    map))
+
+(defun tour-quit ()
+  (interactive)
+  (when tour-mode
+    (tour-reset)
+    (tour-mode 'toggle)))
+
+(defvar tour-mode-last-window-configuration nil) 
+(define-minor-mode tour-mode
+  "Welcome to the source code tour."
+  :lighter (:eval (if tour-current-name 
+		      (propertize (format " @%s" (tour-format-pos))
+				  'face
+				  'bold)
+		    ""))
+  :global t
+  :keymap tour-mode-map
+  :group 'stitch
+  (if tour-mode-last-window-configuration
+      (set-window-configuration
+       tour-mode-last-window-configuration)
+       (setq tour-mode-last-window-configuration 
+	     (current-window-configuration))
+       ))
 
 (define-key global-map [(f9) (next)] 'tour-goto-next)
 (define-key global-map [(f9) ?\ ] 'tour-goto-next)
@@ -2714,7 +2768,7 @@
 		  (tour-read)
 		tour-current-name)))
     (let* ((b (get-buffer-create (format "*Schedule: %s*" tour)))
-	   (ids (gethash tour tour-table)))
+	   (uuids (gethash tour tour-table)))
       (with-current-buffer b
 	(let ((buffer-read-only nil))
 	  (erase-buffer)
@@ -2728,8 +2782,8 @@
 	      (insert "\n\n")))
 	  (stitch-list-annotation-with-filter b
 					      (lambda (k e)
-						(let ((id (stitch-klist-value e :id)))
-						  (member id ids)))
+						(let ((uuid (stitch-klist-value e :uuid)))
+						  (member uuid uuids)))
 					      nil
 					      nil
 					      t))))))
@@ -2742,5 +2796,18 @@
 ;;    )
 ;;   "ツアー機能を追加したので、その試しである。
 ;; など。")
-   
+
+;; (define-key global-map [f8] 'conv-id)
+;; (defun conv-id ()
+;;   (interactive)
+;;   (save-excursion
+;;     (let* ((b (progn (backward-sexp 1) (point)))
+;; 	   (e (progn (forward-sexp 1) (point)))
+;; 	   (id (buffer-substring b e))
+;; 	   (uuid (let ((entry (gethash id stitch-ids nil)   ))
+;; 		   (stitch-klist-value entry :uuid))))
+;;       (goto-char b)
+;;       (insert uuid)
+;;       (insert " ; "))))
+
 (provide 'stitch)
