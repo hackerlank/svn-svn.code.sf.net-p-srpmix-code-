@@ -821,3 +821,70 @@
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/tcp_ipv4.c" :point 58398 :coding-system undecided-unix :line 2280 :surround ("\t\ttimer_expires\t= icsk->icsk_timeout;\n" "" "\t} else if (icsk->icsk_pending == ICSK_TIME_PROBE0) {\n\t\ttimer_active\t= 4;") :which-func "get_tcp4_sock")) :annotation-list ((annotation :type text :data "ICSK_TIME_PROBE0 == 3\n[sources:///sources/k/kernel/2.6.32-279.el6?etags=ICSK_TIME_PROBE0]")) :date "Thu Jan 31 10:33:55 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-tcp-state-introspection) :uuid "104f85fb-e659-4f1a-927c-96b71f62de35")
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/route.c" :point 17064 :coding-system undecided-unix :line 652 :surround ("\tret = 0;\n" "" "\tif ((age <= tmo1 && !rt_fast_clean(rth)) ||\n\t    (age <= tmo2 && rt_valuable(rth)))") :which-func "rt_may_expire")) :annotation-list ((annotation :type text :data "tmo1の値が小さくなって行くとret = 1されやすくなる。")) :date "Thu Jan 31 19:16:46 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-routing-cache) :uuid "32149ab8-4847-4857-9fed-9ba827712e5a")
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/route.c" :point 26115 :coding-system undecided-unix :line 1011 :surround ("\t\t\t\t\t!rt_may_expire(rth, tmo, expire)) {\n" "" "\t\t\t\t\ttmo >>= 1;\n\t\t\t\t\trthp = &rth->u.dst.rt_next;") :which-func "rt_garbage_collect")) :annotation-list ((annotation :type text :data "tmoの値をだんだんと小さくして行く。")) :date "Thu Jan 31 19:17:39 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-routing-cache) :uuid "893996f4-1f2b-4101-afc7-13a217d0ac70")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/include/linux/mm.h" :point 15781 :coding-system undecided-unix :line 487 :surround (" */
+" "" "static inline void reset_page_mapcount(struct page *page)
+{") :which-func "reset_page_mapcount")) :annotation-list ((annotation :type text :data "_mapcountを-1で初期化している。
+参照が発生したとき、atomic_inc_and_testが呼び出される。")) :date "Wed Feb  6 10:24:06 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "42caf43a-0e01-4d57-9e28-f0b25d3ddda2")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/mm/rmap.c" :point 12191 :coding-system undecided-unix :line 464 :surround ("
+" "" "	if (atomic_inc_and_test(&page->_mapcount))
+		inc_page_state(nr_mapped);") :which-func "page_add_file_rmap")) :annotation-list ((annotation :type text :data "このページが始めてマップされたとき
+
+	page->_mapcount == -1
+
+のときだけ計上する。
+atomic_inc_and_testはincrementして0だった1を返す。")) :date "Wed Feb  6 10:42:07 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "7568632e-3b27-46e2-9c27-d87feb63b334")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/include/linux/mm.h" :point 27352 :coding-system undecided-unix :line 787 :surround ("
+" "" "static inline void vm_stat_account(struct vm_area_struct *vma)
+{") :which-func "vm_stat_account")) :annotation-list ((annotation :type text :data "Commited_AS で表示されるカウンターの値がここで操作される。")) :date "Wed Feb  6 11:05:20 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "78b4cd17-0baa-49e4-8a26-88aeb4af838d")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel4u4/pre-build/kernel-2.6.9/linux-2.6.9/security/selinux/hooks.c" :point 37662 :coding-system undecided-unix :line 1540 :surround ("
+" "" "	vm_acct_memory(pages);
+") :which-func "selinux_vm_enough_memory")) :annotation-list ((annotation :type text :data "ここでCommited_ASに計上している。")) :date "Wed Feb  6 11:08:10 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "ff536c5a-e93a-429b-a9dd-426a01831d1b")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/fs/exec.c" :point 9101 :coding-system undecided-unix :line 417 :surround ("
+" "" "	if (security_vm_enough_memory(arg_size >> PAGE_SHIFT)) {
+		kmem_cache_free(vm_area_cachep, mpnt);") :which-func "setup_arg_pages")) :annotation-list ((annotation :type text :data "argv用のスペースについてCommited_AS の計上と overcommit のチェックをしている。")) :date "Wed Feb  6 11:10:41 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "012b28a2-1fac-4955-bf98-156e7f22059c")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/mm/mmap.c" :point 25701 :coding-system undecided-unix :line 931 :surround ("		} else if (vm_flags & VM_WRITE) {
+" "" "			/*
+			 * Private writable mapping: check memory availability") :which-func "do_mmap_pgoff")) :annotation-list ((annotation :type text :data "anonymousかfileかによらず private-writable については 
+
+   security_vm_enough_memory
+
+にお伺いをたてる。")) :date "Wed Feb  6 11:20:41 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "38541604-c875-479d-9e05-7efcb6c96b3a")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/mm/mmap.c" :point 38961 :coding-system undecided-unix :line 1460 :surround ("	/* Overcommit.. */
+" "" "	if (security_vm_enough_memory(grow)) {
+		anon_vma_unlock(vma);") :which-func "expand_stack")) :annotation-list ((annotation :type text :data "スタックはprivate-writableだから計上する。")) :date "Wed Feb  6 11:23:02 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "c37e8fbb-881f-452e-a07d-542a5e78640e")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/mm/mmap.c" :point 40858 :coding-system undecided-unix :line 1534 :surround ("	/* Overcommit.. */
+" "" "	if (security_vm_enough_memory(grow)) {
+		anon_vma_unlock(vma);") :which-func "expand_stack")) :annotation-list ((annotation :type text :data "スタックはprivate-writableだから計上する。")) :date "Wed Feb  6 11:23:28 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "2a081130-9516-4d80-832d-d557a9423f2c")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/mm/mmap.c" :point 50669 :coding-system undecided-unix :line 1923 :surround ("
+" "" "	if (security_vm_enough_memory(len >> PAGE_SHIFT))
+		return -ENOMEM;") :which-func "do_brk")) :annotation-list ((annotation :type text :data "brkはanonymous-private-writableとして扱う。")) :date "Wed Feb  6 11:24:19 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "db467d01-6b96-4a70-b132-60f0bc3413fd")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/mm/mprotect.c" :point 3291 :coding-system undecided-unix :line 140 :surround ("			charged = (end - start) >> PAGE_SHIFT;
+" "" "			if (security_vm_enough_memory(charged))
+				return -ENOMEM;") :which-func "mprotect_fixup")) :annotation-list ((annotation :type text :data "コメントの通り writableでprivateでしかも今まで計上して
+いなかったら計上する。")) :date "Wed Feb  6 11:26:41 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "2736d2bc-41d6-4ffa-9950-62806fe18e4b")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/mm/memory.c" :point 31654 :coding-system undecided-unix :line 1222 :surround ("		lru_cache_add_active(new_page);
+" "" "		page_add_anon_rmap(new_page, vma, address);
+") :which-func "do_wp_page")) :annotation-list ((annotation :type text :data "ここのように、フォルトのハンドラでrmapを張る。
+=> Mappedに計上される。")) :date "Wed Feb  6 13:26:16 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "f9b1ca19-6441-4913-8035-d3f4c7697042")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/drivers/net/tg3.c" :point 174707 :coding-system undecided-unix :line 6677 :surround ("
+" "" "	segs = skb_gso_segment(skb, tp->dev->features & ~NETIF_F_TSO);
+	if (IS_ERR(segs))") :which-func "tg3_tso_bug")) :annotation-list ((annotation :type text :data "ハードウェアでtsoできないならソフトウェアでやる。")) :date "Fri Feb  8 16:41:52 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "3e542478-f784-4d0e-a108-154a812dcd40")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/core/dev.c" :point 44966 :coding-system undecided-unix :line 1690 :surround (" */
+" "" "struct sk_buff *skb_gso_segment(struct sk_buff *skb, int features)
+{") :which-func "skb_gso_segment")) :annotation-list ((annotation :type text :data "tsoやらのソフトウェア実装")) :date "Fri Feb  8 16:42:16 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "1855b4f0-c95b-4eed-a9f6-bca7b546a63b")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/core/dev.c" :point 46256 :coding-system undecided-unix :line 1731 :surround ("			}
+" "" "			segs = ptype->gso_segment(skb, features);
+			break;") :which-func "skb_gso_segment")) :annotation-list ((annotation :type text :data "ethの上例えばIPのgso_segmentハンドラを呼ぶ。")) :date "Fri Feb  8 16:42:33 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "915192c9-5e94-489a-ba41-74cc38a1b2a7")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/af_inet.c" :point 30761 :coding-system undecided-unix :line 1258 :surround ("	rcu_read_lock();
+" "" "	ops = rcu_dereference(inet_protos[proto]);
+	if (likely(ops && ops->gso_segment))") :which-func "inet_gso_segment")) :annotation-list ((annotation :type text :data "ipの上のgso_segmentを呼ぶ。")) :date "Fri Feb  8 16:43:21 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "bcc022e3-777e-4a09-9b71-879c5b462445")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/udp.c" :point 48521 :coding-system undecided-unix :line 1910 :surround ("
+" "" "struct sk_buff *udp4_ufo_fragment(struct sk_buff *skb, int features)
+{") :which-func "udp4_ufo_fragment")) :annotation-list ((annotation :type text :data "ipから呼ばれるudpのgso_segmentハンドラ")) :date "Fri Feb  8 16:49:26 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "43e2d08f-f797-4b19-9dac-1e4b9b3a2fc5")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/core/dev.c" :point 46067 :coding-system undecided-unix :line 1724 :surround ("			if (unlikely(skb->ip_summed != CHECKSUM_PARTIAL)) {
+" "" "				err = ptype->gso_send_check(skb);
+				segs = ERR_PTR(err);") :which-func "skb_gso_segment")) :annotation-list ((annotation :type text :data "チェックサムはここでやる。")) :date "Fri Feb  8 18:08:48 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "22c6ad77-abb0-41e5-8b75-0ce5be67de3a")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/af_inet.c" :point 29784 :coding-system undecided-unix :line 1210 :surround ("	ops = rcu_dereference(inet_protos[proto]);
+" "" "	if (likely(ops && ops->gso_send_check))
+		err = ops->gso_send_check(skb);") :which-func "inet_gso_send_check")) :annotation-list ((annotation :type text :data "udp(上位のプロトコルの)のチェックサムの計算")) :date "Fri Feb  8 18:09:17 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "3bfa5ab0-eabd-455a-b6c7-6f280dcdae7d")
+
