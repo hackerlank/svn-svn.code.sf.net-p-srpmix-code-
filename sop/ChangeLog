@@ -1,3 +1,7 @@
+2013-01-18  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/sop-garbages (report): Fix a typo in comment.
+
 2013-01-10  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/rhel5su9.es: Added.

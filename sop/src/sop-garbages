@@ -54,7 +54,7 @@ function report
     local rpm_e
 
     #
-    # SRPM LEEVL GARBAGES
+    # SRPM LEVEL GARBAGES
     # ---------------------
     # Broken src.rpm in mirrros. rm command is enough 
     # to remove the garbages of this class.
@@ -144,6 +144,14 @@ function report
     # garbages. As noted in SWRF LEVEL GARBAGES, the dependency must
     # be considered when removing.
     #
+    # WITHDRAW THIS RULE.
+    # If making a srpmix'ed rpm is failed, there will be gap between
+    # the version of the srpmix'ed rpm installed the last time and
+    # a src.rpm mirror from somewhere. The srpmix'ed rpm installed 
+    # the last time should not be removed. Even if it is not the 
+    # latest one, people may wanto to read it.
+    return
+
     print_section_begin "RPM level garbages" "rpm"
     diff -ruN $mirror $swrfs | grep ^+[0-9a-zA-Z] | while read; do
 	rpm="${REPLY:1}"
