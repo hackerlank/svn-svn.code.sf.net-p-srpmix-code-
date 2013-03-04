@@ -128,7 +128,7 @@ function parse_arguments
 		fi
 		if ! [[ -r "${CASKET_ES}" ]]; then
 		    echo "Cannot read ${CASKET_ES}" 1>&2
-		    print_usage 1>&12
+		    print_usage 1>&2
 		    exit 1
 		fi
 		;;
@@ -137,7 +137,7 @@ function parse_arguments
 	        ;;
 	    (--*|-*)
 		echo "Unknown option: $1" 1>&2
-		print_usage 1>&12
+		print_usage 1>&2
 		exit 1
 		;;
 	    (*)
@@ -154,7 +154,7 @@ function parse_arguments
     fi
     if ! [[ -r "${SRPMIX_TOOLS_REPO_FILE}" ]]; then
 	echo "Cannot read ${SRPMIX_TOOLS_REPO_FILE}" 1>&2
-	print_usage 1>&12
+	print_usage 1>&2
 	exit 1
     fi
 		
