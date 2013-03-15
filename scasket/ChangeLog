@@ -1,3 +1,7 @@
+2013-03-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* scasket (__DATE): Set LC_TIME instead of LANG.
+
 2013-03-04  Masatake YAMATO  <yamato@redhat.com>
 
 	* scasket (parse_arguments): Don't use wrong fd(12).

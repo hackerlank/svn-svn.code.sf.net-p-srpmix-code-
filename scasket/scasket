@@ -16,7 +16,7 @@ COPY_OUT=
 
 __ARCH=$(arch)
 __RELEASE=$(sed -e 's/^Fedora release \([0-9]*\) .*/\1/g' < /etc/redhat-release )
-__DATE=$(LANG=C date +%Y%m%d)
+__DATE=$(LC_TIME=C date +%Y%m%d)
 __CONFIG_NAME=
 __OUTPUT_NAME=
 __REQUIRES="srpmix srpmix-dir-base squashfs-tools yum"
