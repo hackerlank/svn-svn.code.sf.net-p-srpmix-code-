@@ -125,7 +125,7 @@ function run_file_cmd
     local cmd=$4
 
 
-    es_print "$cmd-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    es_print "$cmd-start" --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
     (cd $d && find . -not -type d \
 	| grep -v ^./STATUS \
@@ -140,7 +140,7 @@ function run_file_cmd
 	| grep -v ^./SPECS \
 	| grep -v ^./specs.spec \
 	| xargs -d '\n' -n 1 $cmd >> $o )
-    es_print "$cmd-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+    es_print "$cmd-end" --status=$? --timestamp=\"`LC_TIME=C LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
 function run_file_i

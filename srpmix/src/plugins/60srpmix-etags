@@ -130,7 +130,7 @@ function run_etags
     local l=$3
 
 
-    es_print etags-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    es_print etags-start --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
     (cd $d && stat */ >/dev/null 2>&1 && find */ -type f \
 	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
@@ -138,7 +138,7 @@ function run_etags
 	| grep -v .gz            \
 	| grep -v "${BLACKLIST}" \
 	| ${ETAGS} -o $o - )
-    es_print etags-end --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+    es_print etags-end --status=$? --timestamp=\"`LC_TIME=C LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
 

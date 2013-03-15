@@ -122,7 +122,7 @@ function run_vanilla
     local cmd
     local r
 
-    es_print vanilla-start --timestamp=\"`LANG=C date`\" --input=\"$d\" --output=\"$o\" | tee -a $l
+    es_print vanilla-start --timestamp=\"`LC_TIME=C LANG=C date`\" --input=\"$d\" --output=\"$o\" | tee -a $l
     count=0
     for f in `find ${d} -type f`; do
 	cmd=$(vanillax "$f" "$o" "${report_to}")
@@ -133,7 +133,7 @@ function run_vanilla
 	    count=`expr $count + 1`
 	fi  
     done
-    es_print vanilla-end --count=${count} --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+    es_print vanilla-end --count=${count} --timestamp=\"`LC_TIME=C LANG=C date`\" --output=\"$o\" | tee -a $l
 
     return 0
 }

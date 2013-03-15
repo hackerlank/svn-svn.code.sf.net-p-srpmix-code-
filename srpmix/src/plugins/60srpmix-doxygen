@@ -123,7 +123,7 @@ function run_doxygen
     local o=$2
     local l=$3
 
-    es_print "doxygen-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    es_print "doxygen-start" --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     (cd $d &&
       ${DOXYGEN} -g - | 
         sed -e 's!^INPUT .*!INPUT=pre-build!' \
@@ -135,7 +135,7 @@ function run_doxygen
             -e "s!VERBATIM_HEADERS .*!VERBATIM_HEADERS=NO!" \
             -e 's!^RECURSIVE .*!RECURSIVE=YES!' |
       ${DOXYGEN} - 2>&1 ) | tee -a $l
-    es_print "doxygen-end" --status=$? --timestamp=\"`LANG=C date`\" | tee -a $l
+    es_print "doxygen-end" --status=$? --timestamp=\"`LC_TIME LANG=C date`\" | tee -a $l
 }
 
 function main

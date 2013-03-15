@@ -138,14 +138,14 @@ function run_ctags
     local l=$3
     shift 3
 
-    es_print ctags-start --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    es_print ctags-start --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
     (cd $d && stat */ >/dev/null 2>&1 && find */ -type f \
 	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
 	| grep -v .bz2           \
 	| grep -v .gz            \
 	| ${CTAGS} "$@" -o $o -L - )
-    es_print ctags-end --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+    es_print ctags-end --status=$? --timestamp=\"`LC_TIME=C LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
 function main

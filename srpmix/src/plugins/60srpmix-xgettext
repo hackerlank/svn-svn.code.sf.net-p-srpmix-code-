@@ -128,7 +128,7 @@ function run_xgettext
     local l=$3
     local s
 
-    es_print "xgettext-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    es_print "xgettext-start" --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
 
     grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 > "${PLUGINDIR}/xgettext.files"
@@ -144,7 +144,7 @@ function run_xgettext
 	> $o 2> /dev/null)
     s=$?
     
-    es_print "xgettext-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+    es_print "xgettext-end" --status=$? --timestamp=\"`LC_TIME=C LANG=C date`\" --output=\"$o\" | tee -a $l
     return $s
 }
 

@@ -1,3 +1,7 @@
+2013-03-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/*: Set LC_TIME.
+
 2012-02-13  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/srpmix-weakview-alias (create_alias_weakview): 

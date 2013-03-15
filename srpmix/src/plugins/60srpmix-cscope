@@ -132,7 +132,7 @@ function run_cscope
     local size
     local file_i
 
-    es_print "cscope-start" --timestamp=\"`LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
+    es_print "cscope-start" --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
     cp /dev/null $o
     echo \-k >  ${PLUGINDIR}/cscope.files
     echo \-q >> ${PLUGINDIR}/cscope.files
@@ -161,7 +161,7 @@ function run_cscope
     
     (cd $d && (( size > 6 )) && \
 	${CSCOPE} -b -i "${PLUGINDIR}/cscope.files" -f $o )
-    es_print "cscope-end" --status=$? --timestamp=\"`LANG=C date`\" --output=\"$o\" | tee -a $l
+    es_print "cscope-end" --status=$? --timestamp=\"`LC_TIME=C LANG=C date`\" --output=\"$o\" | tee -a $l
 }
 
 function main
