@@ -1,3 +1,7 @@
+2013-04-03  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cradle-confs/kojipkgs.fedoraproject.org (KOJI_DIST): Refer rawhide.
+
 2013-03-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/rhel6u4.es: Added.
