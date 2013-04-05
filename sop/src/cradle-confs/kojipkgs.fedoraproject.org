@@ -11,4 +11,4 @@ INSTALL=no
 CREATEREPO_OPTS=
 
 KOJI_HOST=kojipkgs.fedoraproject.org
-KOJI_DIST=dist-rawhide
+KOJI_DIST=rawhide
