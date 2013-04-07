@@ -888,3 +888,60 @@ atomic_inc_and_testはincrementして0だった1を返す。")) :date "Wed Feb  
 " "" "	if (likely(ops && ops->gso_send_check))
 		err = ops->gso_send_check(skb);") :which-func "inet_gso_send_check")) :annotation-list ((annotation :type text :data "udp(上位のプロトコルの)のチェックサムの計算")) :date "Fri Feb  8 18:09:17 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "3bfa5ab0-eabd-455a-b6c7-6f280dcdae7d")
 
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/include/linux/netdevice.h" :point 69885 :coding-system undecided-unix :line 2311 :surround ("{
+" "" "	return skb_is_gso(skb) &&
+	       (!skb_gso_ok(skb, dev->features) ||") :which-func "netif_needs_gso")) :annotation-list ((annotation :type text :data "skb_gso_okでない場合: ハードウェアによる支援が無い場合")) :date "Mon Mar  4 12:14:50 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "db38b640-e965-4be8-a77b-a91aec342375")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/core/dev.c" :point 48585 :coding-system undecided-unix :line 1841 :surround ("
+" "" "		if (netif_needs_gso(dev, skb)) {
+			if (unlikely(dev_gso_segment(skb)))") :which-func "dev_hard_start_xmit")) :annotation-list ((annotation :type text :data "ここで汎用のgsoを実行")) :date "Mon Mar  4 12:15:17 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "ccb02e48-5b17-4583-9d62-3f699c844015")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.32-279.el6/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/include/net/tcp.h" :point 40362 :coding-system undecided-unix :line 1351 :surround ("
+" "" "static inline void __tcp_add_write_queue_tail(struct sock *sk, struct sk_buff *skb)
+{") :which-func "__tcp_add_write_queue_tail")) :annotation-list ((annotation :type text :data "ここで書き出しキューに追加している。")) :date "Wed Mar  6 03:03:48 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-sk_write_queue) :uuid "7cacd000-9094-42c2-9a69-4eded49b1f6e")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/ipv4/tcp.c" :point 17617 :coding-system undecided-unix :line 531 :surround ("	skb_header_release(skb);
+" "" "	tcp_add_write_queue_tail(sk, skb);
+	sk->sk_wmem_queued += skb->truesize;") :which-func "skb_entail")) :annotation-list ((annotation :type text :data "キューイングして、その量をwmem_queuedにチャージしている。")) :date "Wed Mar  6 03:05:56 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-sk_write_queue) :uuid "9342fc3d-d3fe-47ee-9b1c-8566b8c4bb33")
+
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.18-348.el5/pre-build/kernel-2.6.18/linux-2.6.18-348.el5.x86_64/net/ipv4/route.c" :point 53874 :coding-system undecided-unix :line 2116 :surround ("
+" "" "	if (!IN_DEV_FORWARD(in_dev))
+		goto e_hostunreach;") :which-func "ip_route_input_slow")) :annotation-list ((annotation :type text :data "LOCALでなくて、しかもFORWARDが許されていなければ行き先無し。")) :date "Thu Mar  7 17:52:36 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-routing) :uuid "d787a960-3a24-4230-b310-0d5aee9c9a92")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u3+optional/pre-build/kernel-2.6.32-279.el6/linux-2.6.32-279.el6.x86_64/net/core/dev.c" :point 48551 :coding-system undecided-unix :line 1839 :surround ("		if (!list_empty(&ptype_all))
+" "" "			dev_queue_xmit_nit(skb, dev);
+") :which-func "dev_hard_start_xmit")) :annotation-list ((annotation :type text :data "このなかでキャプチャ")) :date "Fri Mar  8 10:49:44 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-gso) :uuid "2d8b5f92-b2b9-4e62-b372-257d2ca55130")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/ipv4/af_inet.c" :point 12958 :coding-system undecided-unix :line 510 :surround ("	 */
+" "" "	err = -EADDRNOTAVAIL;
+	if (!sysctl_ip_nonlocal_bind &&") :which-func "inet_bind")) :annotation-list ((annotation :type text :data "ここでloに割り当てた127.0.0.1以外のアドレス、例えば127.0.2、へのbindを許
+している。")) :date "Sat Mar  9 13:34:52 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-sys-bind) :uuid "ddb48035-bb4b-4692-88ca-fab569e2584b")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/ipv4/af_inet.c" :point 12981 :coding-system undecided-unix :line 511 :surround ("	err = -EADDRNOTAVAIL;
+" "" "	if (!sysctl_ip_nonlocal_bind &&
+	    !(inet->freebind || inet->transparent) &&") :which-func "inet_bind")) :annotation-list ((annotation :type text :data "nonlocalという「拡張」を有効にしていない場合、以下の
+「厳しい」条件を検査してリジェクトする。")) :date "Sat Mar  9 13:38:49 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-sys-bind) :uuid "058d701d-b1ec-461a-960a-a149cb52ffbe")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/ipv4/devinet.c" :point 11976 :coding-system undecided-unix :line 469 :surround ("	rtmsg_ifa(RTM_NEWADDR, ifa, nlh, portid);
+" "" "	blocking_notifier_call_chain(&inetaddr_chain, NETDEV_UP, ifa);
+") :which-func "__inet_insert_ifa")) :annotation-list ((annotation :type text :data "fib_inetaddr_eventがこの通知を拾ってroutingのproto kernelを更新する。")) :date "Sat Mar  9 15:27:18 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-routing) :uuid "35daa7b1-7a44-4f11-8172-0700bb744abf")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/core/dev.c" :point 66414 :coding-system undecided-unix :line 2535 :surround ("
+" "" "static inline int __dev_xmit_skb(struct sk_buff *skb, struct Qdisc *q,
+				 struct net_device *dev,") :which-func "__dev_xmit_skb")) :annotation-list ((annotation :type text :data "bondingのmasterがslaveのskbを渡すときここを通りdeviceのキューに入る。")) :date "Sat Mar  9 19:23:51 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-bonding) :uuid "4789cf6e-a91a-4a91-b1a4-d8fe8be15da5")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/core/dev.c" :point 88024 :coding-system undecided-unix :line 3383 :surround ("
+" "" "	list_for_each_entry_rcu(ptype, &ptype_all, list) {
+		if (!ptype->dev || ptype->dev == skb->dev) {") :which-func "__netif_receive_skb")) :annotation-list ((annotation :type text :data "デバイスの着信キューに入る前にキャプチャしている")) :date "Sat Mar  9 19:28:39 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisc) :uuid "fedbca9c-67e6-41ac-a0f7-74ad933b31c8")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u4/pre-build/kernel-2.6.32-358.el6/linux-2.6.32-358.el6.x86_64/net/core/dev.c" :point 58913 :coding-system undecided-unix :line 2215 :surround ("	if (q->enqueue) {
+" "" "		rc = __dev_xmit_skb(skb, q, dev, txq);
+		goto out;") :which-func "dev_queue_xmit")) :annotation-list ((annotation :type text :data "noqueue qdiscの場合enqueueメソッドがNULLなのでここにこない。")) :date "Sun Mar 10 15:03:34 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisc) :uuid "c31229c0-c11a-41b2-8c27-94e0cc3e69ed")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/ipv4/udp.c" :point 26631 :coding-system undecided-unix :line 1001 :surround ("	up->len += ulen;
+" "" "	err = ip_append_data(sk, fl4, getfrag, msg->msg_iov, ulen,
+			     sizeof(struct udphdr), &ipc, &rt,") :which-func "udp_sendmsg")) :annotation-list ((annotation :type text :data "ここでfragmentationの処理があるとsk_write_queueが長くなる。")) :date "Tue Mar 12 03:58:49 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisc) :uuid "923654cc-1043-4678-897c-6c9fd9a7ccad")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/^alias-rhel6u4/pre-build/kernel-2.6.32-358.el6/linux-2.6.32-358.el6.x86_64/net/sched/sch_blackhole.c" :point 536 :coding-system undecided-unix :line 20 :surround ("
+" "" "static int blackhole_enqueue(struct sk_buff *skb, struct Qdisc *sch)
+{") :which-func "blackhole_enqueue")) :annotation-list ((annotation :type text :data "ドロップするような送信をもって成功とする。")) :date "Wed Mar 13 21:51:16 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisc) :uuid "9a9996ca-93ee-4b39-b4c6-ce9ecdc9fcf5")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/core/dev.c" :point 52228 :coding-system undecided-unix :line 1968 :surround ("		sd->completion_queue = skb;
+" "" "		raise_softirq_irqoff(NET_TX_SOFTIRQ);
+		local_irq_restore(flags);") :which-func "dev_kfree_skb_irq")) :annotation-list ((annotation :type text :data "解放処理をsoftirqで遅延している。")) :date "Tue Mar 19 11:13:20 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-qdisc) :uuid "62d9f239-a099-4159-8c11-c8d7bc433211")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/net/core/dev.c" :point 88659 :coding-system undecided-unix :line 3414 :surround ("
+" "" "	rx_handler = rcu_dereference(skb->dev->rx_handler);
+	if (rx_handler) {") :which-func "__netif_receive_skb")) :annotation-list ((annotation :type text :data "ブリッジはここで")) :date "Sat Mar 23 17:16:28 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-bridge) :uuid "00e93c4a-a623-4318-865e-a23f236329d1")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/home/yamato/var/linux/mm/swapfile.c" :point 51793 :coding-system undecided-unix :line 2006 :surround ("	 */
+" "" "	if (!mapping->a_ops->readpage) {
+		error = -EINVAL;") :which-func "SYSCALL_DEFINE2")) :annotation-list ((annotation :type text :data "tmpfsにはreadpageな無いのでtmpfs上にswapfileは作れない。")) :date "Tue Mar 26 22:17:37 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-tmpfs) :uuid "3795ba78-36cc-412f-9884-16d19269b2a5")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/P/PackageKit/^alias-rhel6u4/pre-build/PackageKit-0.5.8/backends/yum/pk-backend-yum.c" :point 5616 :coding-system undecided-unix :line 216 :surround ("	/* setup a file monitor on the repos directory */
+" "" "	file = g_file_new_for_path (YUM_REPOS_DIRECTORY);
+	monitor = g_file_monitor_directory (file, G_FILE_MONITOR_NONE, NULL, &error);") :which-func "backend_initialize")) :annotation-list ((annotation :type text :data "ここでたぶんinotify")) :date "Thu Apr  4 01:43:38 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-packagetkit) :uuid "3a1e4e84-8313-4cc1-b95d-f9ceba6e64a6")
