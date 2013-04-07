@@ -2184,6 +2184,94 @@
 					  t)))
 
 (defvar stitch-list-annotation-window-config nil)
+
+(defun stitch-get-annotation-by-uuid (uuid)
+  (gethash uuid stitch-uuids nil))
+(defun stitch-filter-annotations (filter)
+  (let ((filtered-annotations (list)))
+    (maphash (lambda (k v)
+	       (mapc
+		(lambda (e)
+		  (when (funcall filter k e)
+		    (setq filtered-annotations
+			  (cons (list k e) filtered-annotations))))
+		v))
+	     stitch-annotations)
+    filtered-annotations))
+(defun stitch-sort-annotations (annotations)
+  (sort (copy-list annotations)
+	(lambda (a1 a2)
+	  (stitch-annotation-compare (nth 1 a1)
+				     (nth 1 a2)))))
+
+(defvar stitch-list-mode-map
+  (let ((map (make-sparse-keymap "StitchList")))
+    (define-key map [return]  'stitch-list-jump-to-target)
+    (define-key map [(shift return)]  'stitch-list-jump-to-home)
+    (define-key map [mouse-2] 'stitch-list-jump-to-target-with-mouse)
+    map))
+
+(define-minor-mode stitch-list-mode
+  "Mode for listing stitch annotations."
+  :lighter " StitchList"
+  :keymap stitch-list-mode-map
+  :group 'stitch
+  )
+
+(defun stitch-list-render-header (target entry show-keyword)
+  (concat 
+   (stitch-make-annotation-header
+    (stitch-klist-value entry :date)
+    (stitch-klist-value entry :full-name)
+    (stitch-klist-value entry  :mailing-address)
+    nil)
+   (let ((file (file-name-nondirectory target)))
+     (propertize (concat
+		  (if (equal "" file)
+		      ""
+		    (concat "File: " (file-name-nondirectory target) "\n"))
+		  "Directory: " (file-name-directory target) "\n"
+		  (stitch-target-get-label
+		   (stitch-klist-value entry :target)
+		   target) "\n"
+		   (format "Home: %S\n" (stitch-klist-value entry :annotation-home))
+		   (if show-keyword
+		       (format "Keywords: %S\n"
+			       (stitch-klist-value entry :keywords))
+		     "")
+		   (format "UUID: %s\n" (stitch-klist-value entry :uuid))
+		   )
+		 ;;'face 'stitch-annotation-base
+		 'mouse-face 'highlight
+		 'stitch-file   target
+		 'stitch-target (stitch-klist-value e :target)
+		 'stitch-home   (stitch-klist-value e :annotation-home)))))
+(defun stitch-list-render-annotation (target entry)
+  (concat (propertize (stitch-annotation-list-format
+		       (stitch-klist-value entry :annotation))
+		      'stitch-file   target
+		      'stitch-target (stitch-klist-value entry :target)
+		      'stitch-home   (stitch-klist-value entry :annotation-home)
+		      'face 'stitch-annotation-base
+		      )
+	  ;;
+	  "\n\n"))
+(defun stitch-list-render-context (target entry lines- lines+ marker render-fdecl)
+  (let ((context (stitch-list-show-context target (stitch-klist-value entry :target) lines- lines+ 
+					   marker
+					   render-fdecl)))
+    (if context
+	(propertize 
+	 context
+	 'stitch-file   target
+	 'stitch-target (stitch-klist-value entry :target)
+	 'stitch-home   (stitch-klist-value entry :annotation-home))
+      ;; TODO FACE
+      (propertize
+       "--- FILE OR DIRECTORY NOT FOUND ---"
+       'face 'warning)
+       )))
+
 (defun stitch-list-annotation-with-filter (buffer-or-name filter need-erasing show-keyword show-header)
   (let ((b (if (bufferp buffer-or-name)
 	       buffer-or-name
@@ -2192,106 +2280,69 @@
       (setq buffer-read-only t)
       (set (make-variable-buffer-local
 	    'stitch-list-annotation-window-config) (current-window-configuration))
-      (let ((filter-annotations (list))
-	    (buffer-read-only nil))
+      (let ((buffer-read-only nil))
 	(when need-erasing
 	  (erase-buffer))
-	(maphash (lambda (k v)
-		   (mapc
-		    (lambda (e)
-		      (when (funcall filter k e)
-			(setq filter-annotations
-			      (cons (list k e) filter-annotations))))
-		    v))
-		 stitch-annotations)
-	(mapcar
+	(mapc
 	 (lambda (l)
 	   (let ((k (nth 0 l))
 		 (e (nth 1 l)))
-	     (if show-header
-		 (insert
-		  "\n"
-		  (concat (stitch-make-annotation-header
-			   (stitch-klist-value e :date)
-			   (stitch-klist-value e :full-name)
-			   (stitch-klist-value e :mailing-address)
-			   nil)
-			  (let ((file (file-name-nondirectory k)))
-			    (propertize (concat
-					 (if (equal "" file)
-					     ""
-					   (concat "File: " (file-name-nondirectory k) "\n"))
-					 "Directory: " (file-name-directory k) "\n"
-					 (stitch-target-get-label
-					  (stitch-klist-value e :target)
-					  k) "\n"
-					  (format "Home: %S\n" (stitch-klist-value e :annotation-home))
-					  (if show-keyword
-					      (format "Keywords: %S\n"
-						      (stitch-klist-value e :keywords))
-					    "")
-					  (format "UUID: %s\n" (stitch-klist-value e :uuid))
-					  )
-					'face 'stitch-annotation-base
-					'mouse-face 'highlight
-					'stitch-file   k
-					'stitch-target (stitch-klist-value e :target)
-					'stitch-home   (stitch-klist-value e :annotation-home)))
-			  ))
-	       (insert "\n\n"
-		       (propertize 
-			"---------------------------------------------\n"
-		       'face 'stitch-annotation-base)
-		       "\n")
-	       )
-	     ;;
-	     (insert (propertize (stitch-annotation-list-format
-				  (stitch-klist-value e :annotation))
-				 'stitch-file   k
-				 'stitch-target (stitch-klist-value e :target)
-				 'stitch-home   (stitch-klist-value e :annotation-home)
-				 ;; 'face 'stitch-annotation-base
-				 ))
-	     (insert "\n\n::\n\n")
-	     ;;
-	     (let ((context (stitch-list-show-context k (stitch-klist-value e :target) 3)))
-	       (if context
-		   (insert (propertize 
-			    context
-			    'stitch-file   k
-			    'stitch-target (stitch-klist-value e :target)
-			    'stitch-home   (stitch-klist-value e :annotation-home)
-			    ))
-		 ;; TODO FACE
-		   (insert "--- FILE OR DIRECTORY NOT FOUND ---")))
-	     (insert "\n")
+	     (insert
+	      "\n"
+	      (if show-header
+		  (stitch-list-render-header k e show-keyword)
+		(concat 
+		 (propertize 
+		  "---------------------------------------------"
+		  'face 'stitch-annotation-base)
+		 )))
+	     (insert  "\n")
+	     (insert (stitch-list-render-annotation k e))
+	     (insert  "\n")
+	     (insert (stitch-list-render-context k e -3 5
+						 (propertize " "
+							     'display '(left-fringe right-arrow))
+						 t))
 	     (insert "\n")
 	     ))
-	 (sort (copy-list filter-annotations) (lambda (a1 a2)
-						(stitch-annotation-compare (nth 1 a1)
-									   (nth 1 a2)))))
-
-	(local-set-key [return]  'stitch-list-jump-to-target)
-	(local-set-key [(shift return)]  'stitch-list-jump-to-home)
-	(local-set-key [mouse-2] 'stitch-list-jump-to-target-with-mouse)
+	 (stitch-sort-annotations (stitch-filter-annotations filter)))
+	(stitch-list-mode 1)
 	(goto-char (point-min))))
     (pop-to-buffer b)))
 
-					;(defun stitch-list-help-echo (window buf pos) 
-					;  (with-current-buffer buf
-					;    (let ((file   (get-text-property pos 'stitch-file))
-					;	  (target (get-text-property pos 'stitch-target)))
-					;      (stitch-list-show-context file target)
-					;      )))
-(defun stitch-list-show-context (file target lines)
+(defun stitch-list-show-context (file target lines- lines+ marker render-fdecl)
   (let ((p (stitch-target-get-point target file)))
     (stitch-with-current-file file
       (save-excursion
 	(goto-char p)
-	(buffer-substring
-	 (line-beginning-position)
-	 (progn (forward-line lines)
-		(line-end-position)))))))
+	(let ((h (save-excursion
+		   (beginning-of-defun)
+		   (cons (line-beginning-position)
+			 (line-end-position))))
+	      (b (save-excursion (forward-line lines-)
+				 (line-beginning-position)))
+	      (e (save-excursion (forward-line lines+)
+				 (line-end-position))))
+	  (let ((buffer-read-only nil))
+	    (unless noninteractive
+	      (font-lock-fontify-region b e)
+	      (not-modified)))
+	  (concat 
+	   (if render-fdecl
+	       (if (save-excursion
+		   (beginning-of-line)
+		   (condition-case nil
+		       (up-list)
+		     (error t)))
+		 ""
+	       (concat (buffer-substring (car h) (cdr h))
+	       "\n...\n"))
+	     "")
+	   (buffer-substring b p)
+	   marker
+	   (buffer-substring p e)
+	   ;; "\n...\n"
+	   ))))))
 
 (defun stitch-list-jump-to-target ()
   (interactive)

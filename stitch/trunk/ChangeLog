@@ -1,3 +1,18 @@
+2013-04-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* stitch.el (stitch-get-annotation-by-uuid): New function.
+	(stitch-filter-annotations): New function.
+	(stitch-sort-annotations): New function.
+	(stitch-list-mode-map): New variable.
+	(stitch-list-mode): New mode.
+	(stitch-list-render-header): New function.
+	(stitch-list-render-context): New function.
+	(stitch-list-annotation-with-filter): Simplified
+	with using `stitch-list-render-header' and
+	`stitch-list-render-context'.
+	(stitch-list-show-context): Show lines before
+	and after the annotation.
+
 2013-02-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* stitch.el (stitch-save-annotation): Prepare an uuid
