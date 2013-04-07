@@ -3,12 +3,12 @@
   "/proc/meminfo中のMappedの値の出所について"
   (
    "/proc/meminfo中のMappedの値の出所について
--------------------------------------------
+============================================
 * 複数箇所にマップされていても、重複分は計上されない[mapcount-init][inc-nr_mapped]。
 * mmapしたときではなくページフォルトが発生した後の処理で計上する[do-account]。
 "
    (A "42caf43a-0e01-4d57-9e28-f0b25d3ddda2" :label "mapcount-init")
-   (A "7568632e-3b27-46e2-9c27-d87feb63b334" :label "inc-nr_mapped")
+   (A "7568632e-3b27-46e2-9c27-d87feb63b334" :label "inc-nr_mapped" :range (-3 5))
    (A "f9b1ca19-6441-4913-8035-d3f4c7697042" :label "do-account")
    ))
 
