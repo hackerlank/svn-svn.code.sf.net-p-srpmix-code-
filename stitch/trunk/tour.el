@@ -1,4 +1,4 @@
-;;; tour.el --- 
+;;; tour.el --- Source code tour
 
 ;; Copyright (C) 2013 Red Hat, Inc.
 ;; Copyright (C) 2013 Masatake YAMATO
@@ -29,13 +29,15 @@
 	tour-current-offset 0))
 
 (defun tour-gather-labels (lst)
-  (let ((labels (list)))
+  (let ((labels (list))
+	(i 0))
     (while lst
       (when (listp (car lst))
 	(let ((label (memq :label (car lst))))
 	  (when label
-	    (setq labels (cons (cadr label) labels)))))
-      (setq lst (cdr lst)))
+	    (setq labels (cons (cons (cadr label) i) labels)))))
+      (setq lst (cdr lst)
+	    i (1+ i)))
     labels))
 	       
 (defmacro deftour (name doc body &rest spec)
@@ -137,7 +139,7 @@
 
 (defvar tour-mode-map 
   (let ((map (make-sparse-keymap "Tour")))
-    ;(define-key map " " 'tour-goto-next)
+    (define-key map " " 'tour-goto-next)
     (define-key map [backspace] 'tour-goto-prev)
     (define-key map "<" 'tour-goto-beginning)
     (define-key map ">" 'tour-goto-end)
@@ -229,13 +231,29 @@
   (interactive "P")
   (tour (get-text-property (point) 'tour) rehearsal?))
 
+(defun tour-filter-uuid (tour-elt)
+  (tour-get-apply-method nil 0 tour-elt 'filter-uuid))
+(defun tour-filter-uuids (tour-def)
+  (delete nil (mapcar #'tour-filter-uuid
+		      tour-def)))
+
+(defun tour-render-in-rst (tour-elt offset)
+  (tour-get-apply-method tour-current-name offset tour-elt 'render-in-rst))
+
+(defun tour-get-context-range (tour-elt)
+  (let ((range (memq :context tour-elt)))
+    (if range
+	(cadr range)
+      '(0 7))))
+
 (defun tour-schedule (read-tour?)
   (interactive "P")
-  (let ((tour (if read-tour?
+  (let ((tour (if (or read-tour? (not tour-current-name))
 		  (tour-read)
 		tour-current-name)))
     (let* ((b (get-buffer-create (format "*Schedule: %s*" tour)))
-	   (uuids (gethash tour tour-table)))
+	   (uuids (tour-filter-uuids (gethash tour tour-table)))
+	   )
       (with-current-buffer b
 	(let ((buffer-read-only nil))
 	  (erase-buffer)
@@ -254,6 +272,49 @@
 					      nil
 					      nil
 					      t))))))
+
+;; batch
+;; hyper linnk
+;; cite/reference
+;; index
+(defun tour-rst (read-tour?)
+  (interactive "P")
+  (let ((tour (if (or read-tour? (not tour-current-name))
+		  (tour-read)
+		tour-current-name)))
+    (let* ((b (get-buffer-create (format "*Rst: %s*" tour)))
+	   (tour-def (gethash tour tour-table)))
+      (with-current-buffer b
+	(let ((buffer-read-only nil))
+	  (erase-buffer)
+	  (insert "=============================================\n")
+	  (insert (tour-doc tour))
+	  (insert "\n")
+	  (insert "=============================================\n\n")
+	  (mapc (lambda (text)
+		  (when text
+		    (insert text)
+		    ))
+		(let ((i 0))
+		  (mapcar  (lambda (tour-elt)
+			     (let ((r (tour-render-in-rst tour-elt i)))
+			       (setq i (1+ i))
+			       (if (eq i 1)
+				   r
+				 (concat "\n\n----\n\n" r))))
+			   tour-def))))
+	(rst-mode)
+	(goto-char (point-min))
+	(pop-to-buffer b)
+	b))))
+
+(defun tour-rst-batch (name output-file)
+  (tour name nil)
+  (with-current-buffer (tour-rst nil)
+    (write-file output-file)
+    (kill-emacs 0)
+    ))
+  
 
 ;;
 ;; HANDLERS
@@ -280,28 +341,118 @@
 (defun tour-annotation-leave (name offset k rest)
   )
 
+(defun tour-annotation-filter-uuid (name offset k rest)
+  (nth 0 rest))
+
+(defun tour-build-string (tree)
+  (apply #'concat
+	 (mapcar
+	  (lambda (elt)
+	    (if (stringp elt)
+		elt
+	      (tour-build-string elt)))
+	  tree)))
+
+(defun tour-rst-lang-for-file (file)
+  (let ((ext (file-name-extension file)))
+    (cond
+     ((equal ext "h") "c")
+     (t ext))))
+
+(defun tour-annotation-render-in-rst (name offset k rest)
+  (let* ((elt rest)
+	 (uuid (tour-annotation-filter-uuid name offset k elt)))
+    (let* ((context-range (tour-get-context-range elt))
+	   (line- (car context-range))
+	   (line+ (cadr context-range))
+	   (entry (stitch-get-annotation-by-uuid uuid))
+	   (target (stitch-klist-value entry :target))
+	   (file  (car (stitch-target-get-files target)))
+	   (lang (tour-rst-lang-for-file file))
+	   (line (stitch-klist-value target :line))
+	   (a (stitch-list-render-annotation file entry))
+	   (c (stitch-list-render-context file entry
+					  line- line+
+					  ""
+					  nil)))
+      ;;
+      (tour-build-string
+       (list 
+	a
+	"\n"
+	(if lang
+	    (list
+	     (format ".. code-block:: %s\n" lang)
+	     ;; "	:linenos:\n"
+	     ;;(format "	:linenostart: %d\n" line)
+	     )
+	  "::")
+	"\n         \n"
+	(mapcar 
+	 (lambda (s) 
+	   (list "        "
+		 s
+		 "\n"))
+	 (split-string c "\n"))
+	"\n"
+	(let ((file-short (cond
+			   ((string-match "^/srv/sources/sources/[0-9a-zA-Z]/\\(.*\\)" 
+					  file)
+			    (match-string 1 file))
+			   (t
+			    file)))
+	      (func (stitch-klist-value target :which-func)))
+	   (list 
+	    "Function\n	" func
+	    "\n"
+	    "File\n	" file-short
+	    "\n"
+	    "Line\n	" (format "%d" line)
+	    "\n"
+ 	   ;;(format "*%s@%s:%d*:\n\n" func file line)
+ 	   )
+	  ))))))
+
+
 (defconst tour-annotation-handler '((enter . tour-annotation-enter)
-				    (leave . tour-annotation-leave)))
+				    (leave . tour-annotation-leave)
+				    (filter-uuid . tour-annotation-filter-uuid)
+				    (render-in-rst . tour-annotation-render-in-rst)
+				    ))
 
 ;;
 ;; Coverpage
 ;;
 (defvar tour-coverpage-buffer nil)
+(defun tour-coverpage-render-labels (labels)
+  (while labels
+    (save-excursion
+      (replace-string (concat "[" (car (car labels)) "]")
+		      (concat "[" (format "%d" (cdr (car labels))) "]"))
+      (setq labels (cdr labels)))))
 (defun tour-coverpage-enter (name offset k rest)
   (setq tour-coverpage-buffer (get-buffer-create "*Tour Coverpage*"))
   (with-current-buffer tour-coverpage-buffer
+    (setq buffer-read-only t)
     (let ((buffer-read-only nil))
       (erase-buffer)
       (insert (car rest))
       (goto-char (point-min))
-      ))
+      (tour-coverpage-render-labels
+       (get (intern-soft name) 'tour-labels))))
   (switch-to-buffer tour-coverpage-buffer))
 
 (defun tour-coverpage-leave (name offset k rest)
+  (car rest)
   )
   
+(defun tour-converpage-render-in-rst (name offset k rest)
+  (car rest)
+  )
+
 (defconst tour-coverpage-handler '((enter . tour-coverpage-enter)
-				   (leave . tour-coverpage-leave)))
+				   (leave . tour-coverpage-leave)
+				   (render-in-rst . tour-converpage-render-in-rst)))
 
   
 (tour-register-handler 'annotation  tour-annotation-handler)
