@@ -20,26 +20,6 @@
   (map print '("  </packagelist>"
 	       " </group>")))
 
-(define (print-group name desc)
-  (map print   `(" <group>"
-		 ;; TODO: groupreq
-		 ,(format "  <id>srpmix-group-~a</id>" name)
-		 ,(format "  <name>srpmix-group-~a</name>" name)
-		 ;; langonly?
-		 ,(format "  <description>~a</description>"
-			  (if desc 
-			      desc 
-			      (format 
-			       "Source code for ~a  with canonical directory layout"
-			       name)))
-		 "  <default>true</default>"
-		 "  <uservisible>true</uservisible>"
-		 "  <packagelist>"
-		 ,(format "   <packagereq type=\"mandatory\">srpmix-weakview-dist-~a</packagereq>" name)
-		 ,(format "   <packagereq type=\"mandatory\">srpmix-weakview-packages-~a</packagereq>" name)
-		 ,(format "   <packagereq type=\"mandatory\">srpmix-weakview-alias-~a</packagereq>" name)
-		 )))
-
 (define (print-category all-groups)
   (map print `(" <category>"
 	       "  <id>srpmix</id>"
@@ -48,18 +28,67 @@
 	       "  <display_order>99</display_order>"
 	       "  <grouplist>"
 	       ,@(map (cute format "   <groupid>srpmix-group-~a</groupid>" <>)
-		      all-groups)
+		      (reverse all-groups))
 	       "  </grouplist>"
 	       " </category>")))
 
-(define (close-group group)
+(define (print-group name desc extra)
+  (for-each print `(" <group>"
+		 ;; TODO: groupreq
+		 ,(format "  <id>srpmix-group-~a</id>" name)
+		 ,(format "  <name>srpmix-group-~a</name>" name)
+		 ;; langonly?
+		 ,(format "  <description>~a</description>" desc
+			  )
+		 "  <default>true</default>"
+		 "  <uservisible>true</uservisible>"
+		 "  <packagelist>"
+		 ,@(map (cute string-append "   <packagereq type=\"mandatory\">" <> "</packagereq>")
+			extra))))
+
+(define (close-group group all-groups)
+  (define (full-name p)
+    (cadr (memq :wrapped-name p)))
+  (define (base-name p)
+    (cadr (memq :package p)))
+  (define (srpmix-dir-pkg- p)
+    (format "srpmix-dir-pkg-~a" (base-name p)))
   (let* ((group (reverse group))
 	 (name (car group))
-	 (desc (cadr group))
+	 (archives-name #`",|name|-archives")
+	 (plugins-name #`",|name|-plugins")
+	 (desc-not-used-now (cadr group))
 	 (packages (cddr group)))
-    (print-group name desc)
-    (for-each print-packages packages)
-    (print-group-closing)))
+    (print-group name
+		 #`"Source code for ,|name|  with canonical directory layout"
+		 (list
+		  #`"srpmix-weakview-dist-,|name|"
+		  #`"srpmix-weakview-packages-,|name|"
+		  #`"srpmix-weakview-alias-,|name|"
+		 ))
+    (for-each (^ (p) (print-packages (full-name p)
+				     (list (srpmix-dir-pkg- p))))
+		 packages)
+    (print-group-closing)
+    ;;
+    (print-group archives-name
+		 #`"orignal source code and patches for ,|name|"
+		 (list))
+    (for-each (^ (p) (print-packages #`",(full-name p)-archives"
+				     (list)))
+		 packages)
+    (print-group-closing)
+    ;;
+    (print-group plugins-name
+		 #`"plugins data for ,|name|"
+		 (list))
+    (for-each (^ (p) (print-packages #`",(full-name p)-plugins"
+				     (list)))
+		 packages)
+    (print-group-closing)
+    ;;
+    (cons* plugins-name archives-name all-groups)
+    ))
 
 (define (open-group name desc)
   (list desc name))
@@ -67,17 +96,12 @@
 (define (add-package p group)
   (cons p group))
 
-(define (print-packages plist)
+(define (print-packages full-name extra)
   (define (packagereq type name)
     (format "   <packagereq type=\"~a\">~a</packagereq>" type name))
-  (let ((full-name (cadr (memq :wrapped-name plist)))
-	(base-name (cadr (memq :package      plist))))
-    (map print `(
-		 ,(packagereq 'mandatory (format "srpmix-dir-pkg-~a" base-name))
-		 ,(packagereq 'mandatory full-name)
-		 ,(packagereq 'default (format "~a-archives" full-name))
-		 ,(packagereq 'optional (format "~a-plugins" full-name))
-		 ))))
+  (map print `(,@(map (^ (e0) (packagereq 'mandatory e0)) extra)
+	       ,(packagereq 'mandatory full-name)
+	       )))
 
 (define (print-footer)
   (print "</comps>"))
@@ -94,19 +118,19 @@
 					       all-groups))
 			   ;;
 			   ((('srpmix-group name desc) current-group all-groups)
-			    (unless (null? all-groups)
-			      (close-group current-group))
 			    (values (open-group name desc)
-				    (cons name all-groups)))
+				    (cons name (if (null? all-groups)
+						   all-groups
+						   (close-group current-group all-groups)))))
 			   ;;
 			   ((#t)
 			    (print-header)
 			    (values #f (list))
 			    )
 			   ((#f current-group all-groups)
-			    (unless (null? all-groups)
-			      (close-group current-group))
-			    (print-category all-groups)
+			    (print-category (if (null? all-groups)
+						all-groups
+						(close-group current-group all-groups)))
 			    (print-footer)
 			    )))
 

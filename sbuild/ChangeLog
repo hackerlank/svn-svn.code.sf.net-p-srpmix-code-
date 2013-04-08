@@ -1,5 +1,10 @@
 2013-04-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/create-comps.scm: Make plugins and archives first class 
+	group.
+
+2013-04-09  Masatake YAMATO  <yamato@redhat.com>
+
 	* src/create-comps.scm: Rearranged.
 
 2012-06-22  Masatake YAMATO  <yamato@redhat.com>
