@@ -1,5 +1,7 @@
 2013-04-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.2.9.
+
 	* src/create-comps.scm: Make plugins and archives first class 
 	group.
 
