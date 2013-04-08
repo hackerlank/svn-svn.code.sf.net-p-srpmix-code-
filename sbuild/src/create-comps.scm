@@ -7,7 +7,7 @@
 ;;  (srpmix-group name [desc])
 
 (use util.match)
-
+(use srfi-11)
 
 (define (print-header)
   (map print 
@@ -19,6 +19,7 @@
 (define (print-group-closing)
   (map print '("  </packagelist>"
 	       " </group>")))
+
 (define (print-group name desc)
   (map print   `(" <group>"
 		 ;; TODO: groupreq
@@ -51,8 +52,20 @@
 	       "  </grouplist>"
 	       " </category>")))
 
+(define (close-group group)
+  (let* ((group (reverse group))
+	 (name (car group))
+	 (desc (cadr group))
+	 (packages (cddr group)))
+    (print-group name desc)
+    (for-each print-packages packages)
+    (print-group-closing)))
 
+(define (open-group name desc)
+  (list desc name))
 
+(define (add-package p group)
+  (cons p group))
 
 (define (print-packages plist)
   (define (packagereq type name)
@@ -70,35 +83,41 @@
   (print "</comps>"))
 
 (define es-dest-comps-xml (match-lambda*
-			   ((('srpmix-wrap 'name . plist) unused)
-			    (print-packages plist)
-			    unused)
-			   ((('srpmix-group group) all-groups) 
+			   ((('srpmix-wrap 'name . plist) current-group all-groups)
+			    (values (add-package plist current-group) all-groups))
+			   ;;
+			   ((('srpmix-group group) current-group all-groups) 
 			    (es-dest-comps-xml `(srpmix-group 
 						 ,group ,
 						 #f)
+					       current-group
 					       all-groups))
-			   ((('srpmix-group name desc) all-groups)
+			   ;;
+			   ((('srpmix-group name desc) current-group all-groups)
 			    (unless (null? all-groups)
-			      (print-group-closing))
-			    (print-group name desc)
-			    (cons name all-groups)
-			    )
+			      (close-group current-group))
+			    (values (open-group name desc)
+				    (cons name all-groups)))
+			   ;;
 			   ((#t)
 			    (print-header)
-			    (list)
+			    (values #f (list))
 			    )
-			   ((#f all-groups)
+			   ((#f current-group all-groups)
 			    (unless (null? all-groups)
-			      (print-group-closing))
+			      (close-group current-group))
 			    (print-category all-groups)
 			    (print-footer)
 			    )))
+
 (define (main args)
-  (let1 token (es-dest-comps-xml #t)
+  (let-values (((current-group all-groups) (es-dest-comps-xml #t)))
     (let loop ((r (read))
-	       (token token))
+	       (current-group current-group)
+	       (all-groups all-groups))
       (if (eof-object? r)
-	  (es-dest-comps-xml #f token)
-	  (let1 token (es-dest-comps-xml r token)
-	    (loop (read) token))))))
+	  (es-dest-comps-xml #f current-group all-groups)
+	  (let-values (((current-group all-groups) (es-dest-comps-xml r 
+								      current-group
+								      all-groups)))
+	    (loop (read) current-group all-groups))))))

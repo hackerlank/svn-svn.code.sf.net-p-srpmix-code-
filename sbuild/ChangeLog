@@ -1,3 +1,7 @@
+2013-04-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/create-comps.scm: Rearranged.
+
 2012-06-22  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 0.2.8.
