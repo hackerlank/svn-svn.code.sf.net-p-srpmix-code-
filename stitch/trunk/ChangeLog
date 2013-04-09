@@ -1,3 +1,11 @@
+2013-04-09  Masatake YAMATO  <yamato@redhat.com>
+
+	* stitch.el (stitch-jump-to-home-by-uuid): New function.
+
+2013-04-08  Masatake YAMATO  <yamato@redhat.com>
+
+	* stitch.el (stitch-jump-to-home-by-uuid): New function.
+
 2013-04-08  Masatake YAMATO  <yamato@redhat.com>
 
 	* stitch.el (stitch-get-annotation-by-uuid): New function.

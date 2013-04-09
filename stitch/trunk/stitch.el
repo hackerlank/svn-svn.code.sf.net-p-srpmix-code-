@@ -803,6 +803,15 @@
 		result ov))))
     result))
 
+(defun stitch-jump-to-home-by-uuid (uuid)
+  (interactive (list (let ((d  (thing-at-point 'symbol)))
+		       (let ((r (read-from-minibuffer (format "UUID(%s): " d)
+						      nil nil nil nil d)))
+			 (if (equal r "") d r)))))
+  (let ((entry (gethash uuid stitch-uuids nil)))
+    (if entry
+	(stitch-action-jump-to-home entry)
+      (error "cannot find home for " uuid))))
 (defun stitch-jump-to-uuid (uuid)
   (interactive (list (let ((d  (thing-at-point 'symbol)))
 		       (let ((r (read-from-minibuffer (format "UUID(%s): " d)
