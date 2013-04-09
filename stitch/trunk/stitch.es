@@ -824,7 +824,7 @@
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/include/linux/mm.h" :point 15781 :coding-system undecided-unix :line 487 :surround (" */
 " "" "static inline void reset_page_mapcount(struct page *page)
 {") :which-func "reset_page_mapcount")) :annotation-list ((annotation :type text :data "_mapcountを-1で初期化している。
-参照が発生したとき、atomic_inc_and_testが呼び出される。")) :date "Wed Feb  6 10:24:06 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "42caf43a-0e01-4d57-9e28-f0b25d3ddda2")
+参照が発生したとき、atomic_inc_and_testが呼び出して値を更新する。")) :date "Wed Feb  6 10:24:06 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "42caf43a-0e01-4d57-9e28-f0b25d3ddda2")
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/mm/rmap.c" :point 12191 :coding-system undecided-unix :line 464 :surround ("
 " "" "	if (atomic_inc_and_test(&page->_mapcount))
 		inc_page_state(nr_mapped);") :which-func "page_add_file_rmap")) :annotation-list ((annotation :type text :data "このページが始めてマップされたとき
@@ -945,3 +945,8 @@ atomic_inc_and_testはincrementして0だった1を返す。")) :date "Wed Feb  
 (stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/P/PackageKit/^alias-rhel6u4/pre-build/PackageKit-0.5.8/backends/yum/pk-backend-yum.c" :point 5616 :coding-system undecided-unix :line 216 :surround ("	/* setup a file monitor on the repos directory */
 " "" "	file = g_file_new_for_path (YUM_REPOS_DIRECTORY);
 	monitor = g_file_monitor_directory (file, G_FILE_MONITOR_NONE, NULL, &error);") :which-func "backend_initialize")) :annotation-list ((annotation :type text :data "ここでたぶんinotify")) :date "Thu Apr  4 01:43:38 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-packagetkit) :uuid "3a1e4e84-8313-4cc1-b95d-f9ceba6e64a6")
+(stitch-annotation :version 0 :target-list ((target :type file :file "/srv/sources/sources/k/kernel/2.6.9-42.EL/pre-build/kernel-2.6.9/linux-2.6.9/include/linux/mm.h" :point 15881 :coding-system undecided-unix :line 492 :surround ("
+" "" "static inline int page_mapcount(struct page *page)
+{") :which-func "page_mapcount")) :annotation-list ((annotation :type text :data "自分が現在何回マップされているか、という情報はページ自身が_mapcountという
+フィールドで保守している。フィールドの値を直接使うのではなく+1して使うこと
+に注意する。")) :date "Mon Apr  8 01:59:00 2013" :full-name "Masatake YAMATO" :mailing-address "yamato@redhat.com" :keywords (reading-meminfo) :uuid "52b1233a-95ab-40d4-9e52-0dee037b52d2")

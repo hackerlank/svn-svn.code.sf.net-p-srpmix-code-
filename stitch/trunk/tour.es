@@ -2,13 +2,18 @@
 (deftour Mapped-in-meminfo
   "/proc/meminfo中のMappedの値の出所について"
   (
-   "/proc/meminfo中のMappedの値の出所について
-============================================
-* 複数箇所にマップされていても、重複分は計上されない[mapcount-init][inc-nr_mapped]。
-* mmapしたときではなくページフォルトが発生した後の処理で計上する[do-account]。
-"
-   (A "42caf43a-0e01-4d57-9e28-f0b25d3ddda2" :label "mapcount-init")
-   (A "7568632e-3b27-46e2-9c27-d87feb63b334" :label "inc-nr_mapped" :range (-3 5))
+   (C "* page毎にマップされた回数を保持するフィールド_mapcountを持つ[_mapcount]。
+  同じページが複数箇所にマップされればその数は増える。
+* マップされているページフレームの合計はnr_mappedなる変数で数えている[inc-nr_mapped]。
+* あるページが複数箇所にマップされていても、nr_mappedに重複分は計上されない[mapcount-init][inc-nr_mapped]。
+  言いかえると、マップされている箇所の数ではなく、マップされているページフレームを数える。
+* mmapしたときではなくページフォルトが発生した後の処理で計上する[do-account]。" :subject "概要")
+   (A "52b1233a-95ab-40d4-9e52-0dee037b52d2" :label "_mapcount" 
+      :subject "参照を保持するフィールド" :context (0 4))
+   (A "42caf43a-0e01-4d57-9e28-f0b25d3ddda2" :label "mapcount-init" 
+      :subject "初期化" :context (0 4))
+   (A "7568632e-3b27-46e2-9c27-d87feb63b334" :label "inc-nr_mapped" :context (0 3)
+      :subject "->_mapcountの値に基づくnr_mappedの計算")
    (A "f9b1ca19-6441-4913-8035-d3f4c7697042" :label "do-account")
    ))
 
