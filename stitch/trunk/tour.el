@@ -30,7 +30,7 @@
 
 (defun tour-gather-labels (lst)
   (let ((labels (list))
-	(i 0))
+	(i 1))
     (while lst
       (when (listp (car lst))
 	(let ((label (memq :label (car lst))))
@@ -237,14 +237,17 @@
   (delete nil (mapcar #'tour-filter-uuid
 		      tour-def)))
 
-(defun tour-render-in-rst (tour-elt offset)
-  (tour-get-apply-method tour-current-name offset tour-elt 'render-in-rst))
+(defun tour-render-in-rst (tour-name tour-elt offset)
+  (tour-get-apply-method tour-name offset tour-elt 'render-in-rst))
 
 (defun tour-get-context-range (tour-elt)
-  (let ((range (memq :context tour-elt)))
+  (let ((range (stitch-klist-value tour-elt :context)))
     (if range
-	(cadr range)
+	range
       '(0 7))))
+
+(defun tour-get-overwrite (tour-elt)
+  (stitch-klist-value tour-elt :overwrite))
 
 (defun tour-schedule (read-tour?)
   (interactive "P")
@@ -291,28 +294,45 @@
 	  (insert (tour-doc tour))
 	  (insert "\n")
 	  (insert "=============================================\n\n")
+	  (let ((i 1))
+	    (mapcar  (lambda (tour-elt)
+		       (insert (format "%d. %s\n" i 
+				       (stitch-klist-value tour-elt :subject)))
+		       (setq i (1+ i))
+		       )
+		     tour-def))
+	  
 	  (mapc (lambda (text)
 		  (when text
 		    (insert text)
 		    ))
 		(let ((i 0))
 		  (mapcar  (lambda (tour-elt)
-			     (let ((r (tour-render-in-rst tour-elt i)))
+			     (let ((r (tour-render-in-rst tour tour-elt i)))
 			       (setq i (1+ i))
-			       (if (eq i 1)
-				   r
-				 (concat "\n\n----\n\n" r))))
+			       (concat "\n\n"
+				       (let ((subject (stitch-klist-value tour-elt :subject)))
+					 (cond
+					  ((stringp subject)
+					   (format "%s `[%d/%d]`\n" subject
+						   i (length tour-def)))
+					  (t
+					   (format "`[%d/%d]`\n"
+						   i (length tour-def)))))
+					 "------------------------------------"
+					 "\n\n" r)))
 			   tour-def))))
 	(rst-mode)
 	(goto-char (point-min))
 	(pop-to-buffer b)
 	b))))
 
-(defun tour-rst-batch (name output-file)
+(defun tour-rst-batch (name output-file kill-emacs-after-writing?)
   (tour name nil)
   (with-current-buffer (tour-rst nil)
     (write-file output-file)
-    (kill-emacs 0)
+    (when kill-emacs-after-writing?
+      (kill-emacs 0))
     ))
   
 
@@ -370,7 +390,8 @@
 	   (file  (car (stitch-target-get-files target)))
 	   (lang (tour-rst-lang-for-file file))
 	   (line (stitch-klist-value target :line))
-	   (a (stitch-list-render-annotation file entry))
+	   (a (or (tour-get-overwrite elt)
+		  (stitch-list-render-annotation file entry)))
 	   (c (stitch-list-render-context file entry
 					  line- line+
 					  ""
@@ -424,9 +445,18 @@
 ;; Coverpage
 ;;
 (defvar tour-coverpage-buffer nil)
+(defun tour-coverpage-build-text (name rest)
+  (with-temp-buffer
+    (insert (car rest))
+    (goto-char (point-min))
+    (tour-coverpage-render-labels
+     (get (intern-soft name) 'tour-labels))
+    (buffer-string)))
+     
 (defun tour-coverpage-render-labels (labels)
   (while labels
     (save-excursion
+      (goto-char (point-min))
       (replace-string (concat "[" (car (car labels)) "]")
 		      (concat "[" (format "%d" (cdr (car labels))) "]"))
       (setq labels (cdr labels)))))
@@ -436,18 +466,15 @@
     (setq buffer-read-only t)
     (let ((buffer-read-only nil))
       (erase-buffer)
-      (insert (car rest))
-      (goto-char (point-min))
-      (tour-coverpage-render-labels
-       (get (intern-soft name) 'tour-labels))))
+      (insert (tour-coverpage-build-text name rest))
+      ))
   (switch-to-buffer tour-coverpage-buffer))
 
 (defun tour-coverpage-leave (name offset k rest)
-  (car rest)
   )
   
 (defun tour-converpage-render-in-rst (name offset k rest)
-  (car rest)
+  (tour-coverpage-build-text name rest)
   )
 
 (defconst tour-coverpage-handler '((enter . tour-coverpage-enter)
@@ -482,9 +509,11 @@
 ;;       (insert uuid)
 ;;       (insert " ; "))))
 
-(define-derived-mode tour-edit-mode scheme-mode "Tour-Edit"
+(define-derived-mode tour-edit-mode emacs-lisp-mode "Tour-Edit"
   "Major mode for editing a tour."
   (define-key tour-edit-mode-map "\M-." 'stitch-jump-to-uuid)
+  (define-key tour-edit-mode-map "\C-c\C-f" 'stitch-jump-to-home-by-uuid)
+  (define-key tour-edit-mode-map "\C-\M-x" 'eval-defun)
   (set (make-variable-buffer-local 'file-of-tag-function)
        'tour-file-of-tag)
   (add-hook 'find-tag-hook
