@@ -1,5 +1,9 @@
 2013-04-09  Masatake YAMATO  <yamato@redhat.com>
 
+	* edit-string.el: New file.
+
+	* tour-rst-batch.sh: New file.
+
 	* stitch.el (stitch-jump-to-home-by-uuid): New function.
 
 2013-04-08  Masatake YAMATO  <yamato@redhat.com>
