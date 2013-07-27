@@ -26,7 +26,10 @@ TESTS_ENVIRONMENT =							\
         SRPMIX_USR_DIR=`pwd`/$(TESTDIR)/${datadir}/@PACKAGE@		\
         SRPMIX_SYSCONF_DIR=`pwd`/$(TESTDIR)/${sysconfdir}/@PACKAGE@     \
 	bindir=$(bindir)                                                \
-	bash -x
+	$(NULL)
+
+LOG_COMPILER = bash
+
 TESTS = $(dist_check_SCRIPTS)
 
 clean-local:

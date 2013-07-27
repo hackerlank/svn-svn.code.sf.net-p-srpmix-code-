@@ -122,7 +122,7 @@ function __list_plugins
     local p
     local n
 
-    find $SRPMIX_PLUGIN_DIR -perm +0100 -xtype f | sort -n | while read plugin; do
+    find $SRPMIX_PLUGIN_DIR -perm /0100 -xtype f | sort -n | while read plugin; do
 		n=$($plugin --name)
 		
 		echo ${n}  $plugin

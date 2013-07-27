@@ -1,3 +1,11 @@
+2013-07-28  Masatake YAMATO  <yamato@redhat.com>
+
+	* tests/Makefile.am (LOG_COMPILER): Set bash. 
+	(TESTS_ENVIRONMENT): Don't specify bash as interpreter for test here.
+
+	* src/srpmix-plugin (__list_plugins): Don't use +0100. use /0100 as
+	argument for option -perm of find.
+
 2013-03-15  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/*: Set LC_TIME.
