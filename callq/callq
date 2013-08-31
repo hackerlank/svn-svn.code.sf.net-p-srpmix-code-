@@ -263,10 +263,22 @@
   (define (wash! es)
     (let1 connections (fold-right 
 		       (lambda (entry0 kdr)
-			 (let1 entry (ref entry0 2)
-			   (if (acceptable? entry)
-			       (cons entry0 kdr)
-			       kdr)))
+			 (cond
+			  ((memq (ref entry0 0) '(call ref 
+						       ;; ???
+						       lref
+						       ))
+			   (let1 entry (ref entry0 2)
+			     (if (acceptable? entry)
+				 (cons entry0 kdr)
+				 kdr)))
+			  ;; TODO: See objdump-dcall.scm.
+			  ((memq (ref entry0 0) '(call-reg))
+			   kdr
+			   )
+			  (else
+			   #?=(ref entry0 0)
+			   kdr)))
 		       (list)
 		       (delete-duplicates 
 			(cadr (memq :connections es))))
@@ -747,7 +759,61 @@
 			    (struct  structure_type-name->ids)
 			    (union   union_type-name->ids)
 			    (enum    enumeration_type-name->ids)
+			    ;;
+			    (pointer pointer_type-name->ids)
 			    )))))
+
+(define (field-name-of field-name dtable interactive?)
+  (fold (^ (kar kdr)
+	   (let* ((struct-name (cadr kar))
+		  (all-members (caddr kar))
+		  (fitered-members (filter (^ (elt) 
+					      (equal? (car elt) field-name)) 
+					   all-members)))
+	     (if (null? fitered-members)
+		 kdr
+		 (cons struct-name kdr))))
+	(list)
+	(append-map (^ (elt)
+		       (cdar (dwarf-type elt dtable 1 #f)))
+		    (map cadr (filter (^ (elt) (memq (car elt) '(struct union)))
+				      (list-dwarf-types dtable #f))))))
+
+(define (drop-file-name name)
+  ((or (#/(.*)@.*/ name)
+       (^ (_) name))
+       1))
+
+(define (field-type-of field-type dtable interactive?)
+  (let1  field-type (drop-file-name field-type)
+    (fold (^ (kar kdr)
+	     (case (car kar)
+	       ('pointer 
+		(if (equal? (ref kar 2) field-type)
+		    (let1 base-type (drop-file-name (ref kar 1))
+		      (field-type-of base-type dtable #f))
+		    kdr
+		    ))
+	       ((struct union)
+		(let* ((struct-name (cadr kar))
+		       (all-members (caddr kar))
+		       (fitered-members (filter (^ (elt) 
+						   (equal? (cadr elt) field-type)) 
+						all-members)))
+		  (cond
+		   ((null? fitered-members) kdr)
+		   ((member struct-name kdr) kdr)
+		   (else
+		    (cons struct-name kdr)))))))
+	  (list)
+	  (append-map (^ (elt)
+			 (cdar (dwarf-type elt dtable 1 #f)))
+		      (map cadr (filter (^ (elt) #t)
+					(list-dwarf-types dtable #f)))))))
+
+(define (type-connection name0 name1 dtable depth interactive?)
+  ;; TODO
+  )
 
 (define-method dwarf-type ((name <string>) dtable depth interactive?)
   (list 
@@ -769,7 +835,10 @@
 						  ,structure_type-name->ids
 						  ,union_type-name->ids
 						  ,base_type-name->ids
-						  ,enumeration_type-name->ids))))))
+						  ,enumeration_type-name->ids
+						  ;;
+						  ,pointer_type-name->ids
+						  ))))))
 
 (define-method dwarf-type ((id <symbol>) dtable depth handled interactive?)
   (let1 es (id->es dtable id)
@@ -1175,8 +1244,16 @@
 (define-command type ('type) (list-dwarf-types (current-dtable) #t))
 (define-command type ('type (? string? name)) (dwarf-type name (current-dtable) 1 #t))
 (define-command type ('type (? string? name) (? integer? depth)) (dwarf-type name (current-dtable) depth #t))
+(define-command type ('type (? string? name0) (? string? name1) (? integer? depth)) 
+  (type-connection name0 name1 (current-dtable) depth #t))
+
+(define-command field-name-of ('field-name-of (? string? field-name))
+  (field-name-of field-name (current-dtable) #t))
+(define-command field-type-of ('field-type-of (? string? field-type))
+  (field-type-of field-type (current-dtable) #t))
 
 (define-command list-compile-units ('list-compile-units) (dwarf-list-compile-units (current-dtable) #t))
+(define-command list-compile-units ('list-srcfiles) (dwarf-list-compile-units (current-dtable) #t))
 ;;(define-command freachable ('type name) (dwarf-type name (current-dtable) 1 #t))
 ;;(define-command treachable ('type name (? integer? depth)) (dwarf-type name (current-dtable) depth #t))
 
