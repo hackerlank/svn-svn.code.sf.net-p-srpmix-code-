@@ -1,0 +1,3 @@
+(common-caller "f" :from (("f()" "g()")) :to (("f()" "h()")))
+(common-caller "main" :from (("main()" "f()" "g()")) :to (("main()" "f()" "h()")))
+(common-caller "_start" :from (("_start()" "main()" "f()" "g()")) :to (("_start()" "main()" "f()" "h()")))

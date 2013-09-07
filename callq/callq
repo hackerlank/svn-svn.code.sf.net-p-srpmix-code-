@@ -193,7 +193,7 @@
       (error "Not loaded yet: " name)))))
 
 
-(define (load-objfile0 file)
+(define (load-objfile0 file rebuild-cache)
   (let* ((m (#/\/srv\/debugs\/dists\/([^\/]+)/ file))
 	 (d (if m (m 1) #f))
 	 (inventory (if d 
@@ -201,7 +201,9 @@
 			 read
 			 #`"/srv/debugs/dists/,|d|/plugins/O0g3/INVENTORY.es")
 			#f)))
-    (call-with-input-process `(callp ,file)
+    (call-with-input-process (if rebuild-cache 
+				 `(callp --rebuild-cache ,file)
+				 `(callp ,file))
       (lambda (input)
 	(receive (ftable rtable dtable so)
 	    (load-entries (read-line input))
@@ -218,20 +220,21 @@
 	   so))
 	(list)))))
 
-(define (load-objfile file)
+(define (load-objfile file rebuild-cache)
   (if (equal? (sys-basename file) file)
       (load-objfile0 (let1 l (ref objfiles file #f)
 		       (if (and (list? l)
 				(not (null? l))
 				(eq? (car l) 'LOADABLE))
 			   (cadr l)
-			   file)))
+			   file))
+		     rebuild-cache)
       
-      (load-objfile0 file)
+      (load-objfile0 file rebuild-cache)
       ))
 
-(define (load-objfile-all)
-  (map load-objfile
+(define (load-objfile-all rebuild-cache)
+  (map (cute load-objfile <> rebuild-cache)
        (hash-table-fold objfiles
 			(lambda (k l kdr)
 			  (if (and (list? l)
@@ -258,31 +261,71 @@
 	)))
 
 (define (load-entries file)
+  (define (kdrop es key)
+    (let loop ((es es)
+	       (result (list)))
+      (if (null? es)
+	  (reverse result)
+	  (if (eq? (car es) key)
+	      (loop (cdr (cdr es)) result)
+	      (loop (cdr es) (cons (car es) result))))))
   (define (acceptable? entry)
     (not (in-blacklist? entry)))
-  (define (wash! es)
-    (let1 connections (fold-right 
-		       (lambda (entry0 kdr)
-			 (cond
-			  ((memq (ref entry0 0) '(call ref 
-						       ;; ???
-						       lref
-						       ))
-			   (let1 entry (ref entry0 2)
-			     (if (acceptable? entry)
-				 (cons entry0 kdr)
-				 kdr)))
-			  ;; TODO: See objdump-dcall.scm.
-			  ((memq (ref entry0 0) '(call-reg))
-			   kdr
+  (define (rearrange! es)
+    (let1 extra-entries (list)
+      (let1 connections (fold-right 
+			 (lambda (entry0 kdr)
+			   (case (ref entry0 0)
+			     ('ref
+			      (let1 entry (ref entry0 2)
+				(if (acceptable? entry)
+				    (cons entry0 kdr)
+				    kdr))
+			      )
+			     ('lref
+			      (let1 entry (ref entry0 2)
+				(if (acceptable? entry)
+				    (cons entry0 kdr)
+				    kdr))
+			      )
+			     ('call
+			      (let1 entry (ref entry0 2)
+				(if (acceptable? entry)
+				    (cons entry0 kdr)
+				    kdr))
+			      )
+			     ('assign
+			      (let1 entry (ref entry0 2)
+				(if (acceptable? entry)
+				    (let1 r (cons (cons 'lref (cdr entry0)) kdr)
+				      (if-let1 v (memq :value entry0)
+					(begin
+					  (set! extra-entries
+						(cons 
+						 `(objdump-dcall entry 
+								 ,(cadr entry0)
+								 ,(caddr entry0)
+								 ,@(kdrop (cdr (cdr (cdr (cdr es)))) :connections)
+								 :connections ((ref ,@(cadr v)))
+								 )
+						 extra-entries))
+					  (cons 
+					   (append (cons 'ref (cadr v))
+						   (cdr (cdr (cdr entry0))))
+					   r))
+					r))
+				    kdr))
+			      )
+			     (else
+			      #?=entry0
+			      kdr
+			      ))
 			   )
-			  (else
-			   #?=(ref entry0 0)
-			   kdr)))
-		       (list)
-		       (delete-duplicates 
-			(cadr (memq :connections es))))
-      (set! (cadr (memq :connections es)) connections)))
+			 (list)
+			 (delete-duplicates 
+			  (cadr (memq :connections es))))
+	(set! (cadr (memq :connections es)) connections))
+      (reverse extra-entries)))
   (with-input-from-file file
     (lambda ()
       (let loop ((es (read))
@@ -296,17 +339,21 @@
 	    (cond
 	     ((and (eq? (car es) 'objdump-dcall)
 		   (eq? (cadr es) 'entry))
-	      (wash! es)
-	      (for-each
-	       (lambda (entry)
-		 (hash-table-push! rtable entry es))
-	       (delete-duplicates
-		(map
-		 (cute ref <> 2)
-		 (cadr (memq :connections es)))))
-	      (when (acceptable? (ref es 3))
-		(hash-table-push! ftable (ref es 3) es))
-	      (loop (read) ftable rtable dtable so))
+	      (let1 extra-entries (rearrange! es)
+		(for-each
+		 (lambda (entry)
+		   (hash-table-push! rtable entry es))
+		 (delete-duplicates
+		  (map
+		   (cute ref <> 2)
+		   (cadr (memq :connections es)))))
+		(when (acceptable? (ref es 3))
+		  (hash-table-push! ftable (ref es 3) es))
+		;;
+		(for-each (cut loop <> ftable rtable dtable so)
+			  extra-entries)
+		;;
+		(loop (read) ftable rtable dtable so)))
 	     ((eq? (car es) 'readelf-so)
 	      (loop (read) ftable rtable dtable (append (cdr es) so)))
 	     ;;
@@ -1085,8 +1132,11 @@
 (define-command help ('help) (help #f) "List all commands")
 (define-command help ('help (? symbol? s)) (help s) "Show syntax of commands")
 (define-command source ('source (? string? file)) (source file))
-(define-command load ('load (? string? file)) (load-objfile file))
-(define-command load ('load 'all) (load-objfile-all))
+(define-command load ('load (? string? file)) (load-objfile file #f))
+(define-command load ('load 'all) (load-objfile-all #f))
+(define-command load ('load (? string? file) (? boolean? rebuilding)) (load-objfile file rebuilding))
+(define-command load ('load 'all (? boolean? rebuilding)) (load-objfile-all rebuilding))
+
 (define-command switch ('switch (? string? file)) (switch-objfile file))
 (define-command with ('with file code) (let1 old-file (current-file)
 					 (switch-objfile file)
@@ -1356,7 +1406,7 @@
   (print "Usage: ")
   (print #`"	,|name| -h|--help")
   (print #`"	,|name| [--batch] [-s|--script|--source SCRIPT]...")
-  (print #`"	,|name| [-s|--script|--source SCRIPT]... [-l|--load BINARY]...")
+  (print #`"	,|name| [-s|--script|--source SCRIPT]... [-l|--load BINARY]...[-L|--load-with-rebuilding BINARY]")
   (exit status))
 
 (define (expected-length lst len)
@@ -1379,11 +1429,12 @@
   (let-args (cdr args)
       ((help   "h|help" => (pa$ print-usage (car args) 0))
        (script "s|script|source=s" => (pa$ source))
-       (load   "l|load=s" => (pa$ load-objfile))
+       (load   "l|load=s" => (cute load-objfile <> #f))
+       (load-with-rebuilding "L|load-with-rebuilding=s" => (cute load-objfile <> #t))
        (batch  "b|batch")
        . rest)
     (when batch
       (exit 0))
-    (for-each load-objfile rest)
+    (for-each (cute load-objfile <> #f) rest)
     (repl batch)
     (newline)))

@@ -4,7 +4,7 @@ LANG=c
 function print_usage
 {
     echo "$0 --help|-h"
-    echo "$0 [--quiet][--debug] [--output OUTPUT.es] INPUT.elf"
+    echo "$0 [--quiet][--debug][--rebuild-cache][--output OUTPUT.es] INPUT.elf"
 }
 
 function run
@@ -43,6 +43,7 @@ function main
     local debug
     local use_cache
     local quiet
+    local rebuild_cache
 
     while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -65,6 +66,10 @@ function main
                 ;;
 	    --quiet)
 		quiet=1
+		shift
+		;;
+	    --rebuild-cache)
+		rebuild_cache=1
 		shift
 		;;
 	    *)
@@ -101,9 +106,10 @@ function main
     fi
 
     if [[ -z "${use_cache}" ]] \
-    || [[ ! -e "${output}"  ]] \
-    || [[ -n "$debug"       ]] \
-    || ( [[ -n "${use_cache}" ]] && [[ "${input}" -nt "${output}" ]] ); then
+	|| [[ ! -e "${output}"  ]] \
+	|| [[ -n "$debug"       ]] \
+	|| [[ -n "$rebuild_cache" ]] \
+	|| ( [[ -n "${use_cache}" ]] && [[ "${input}" -nt "${output}" ]] ); then
         echo '(callp-begin :version 0 :input "'"${input}"'" :date "'$(date)'")' \
 	    > ${output}
 	run "$debug" es-src-readelf-so "${input}" \
