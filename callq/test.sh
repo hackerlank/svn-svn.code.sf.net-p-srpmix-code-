@@ -10,7 +10,7 @@ for t in tests/*.d; do
 	else
 	    make -f $h/tests/build.mk > /dev/null
 	fi
-	gosh $h/callq --batch --script input.es 2>/dev/null | {
+	gosh $h/callq --script input.es  | {
 	    if [[ $(cat filter)  = "read/write" ]]; then
 		gosh -b -e '(let loop ((r (read))) (if (eof-object? r) (exit 0) (begin (write r) (newline) (loop (read)))))' 
 	    else

@@ -1,0 +1,8 @@
+2013-09-07  Masatake YAMATO  <yamato@redhat.com>
+
+	* callq (main): Added --load-with-rebuilding option.
+	(load): Added REBUILDING argument.
+	(load-entries): Handle assign connection.
+
+	* callp (print_usage): Added --rebuild-cache option.
+
