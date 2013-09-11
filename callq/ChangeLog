@@ -1,3 +1,7 @@
+2013-09-12  Masatake YAMATO  <yamato@redhat.com>
+
+	* callq (load-entries): Added stub for call-reg.
+
 2013-09-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* callq (load-entries): Added code to track initializations

@@ -295,6 +295,9 @@
 				    (cons entry0 kdr)
 				    kdr))
 			      )
+			     ('call-reg
+			      ;; TODO
+			      kdr)
 			     ('init
 			      (let1 entry (ref entry0 2)
 				(if (acceptable? entry)
