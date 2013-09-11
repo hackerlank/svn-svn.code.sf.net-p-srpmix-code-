@@ -1,6 +1,8 @@
 2013-09-11  Masatake YAMATO  <yamato@redhat.com>
 
 	* callq (load-entries::acceptable?): Reject NULL pointer.
+	(load-entries): Reject NULL pointer in generated connections.
+	(file-line0): Handle files not under sources.
 
 2013-09-07  Masatake YAMATO  <yamato@redhat.com>
 

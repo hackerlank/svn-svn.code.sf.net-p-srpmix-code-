@@ -301,19 +301,22 @@
 				    (let1 r (cons (cons 'lref (cdr entry0)) kdr)
 				      (if-let1 v (memq :value entry0)
 					(begin
-					  (set! extra-entries
-						(cons 
-						 `(objdump-dcall entry 
-								 ,(cadr entry0)
-								 ,(caddr entry0)
-								 ,@(kdrop (cdr (cdr (cdr (cdr es)))) :connections)
-								 :connections ((ref ,@(cadr v)))
-								 )
-						 extra-entries))
-					  (cons 
-					   (append (cons 'ref (cadr v))
-						   (cdr (cdr (cdr entry0))))
-					   r))
+					  ;; (:value ("0" #f))
+					  (when (acceptable? (cadr (cadr v)))
+					    (set! extra-entries
+						  (cons 
+						   `(objdump-dcall entry 
+								   ,(cadr entry0)
+								   ,(caddr entry0)
+								   ,@(kdrop (cdr (cdr (cdr (cdr es)))) :connections)
+								   :connections ((ref ,@(cadr v)))
+								   )
+						   extra-entries)))
+					  (if (acceptable? (cadr (cadr v)))
+					      (cons 
+					       (append (cons 'ref (cadr v))
+						       (cdr (cdr (cdr entry0)))) r)
+					      r))
 					r))
 				    kdr))
 			      )
@@ -629,7 +632,10 @@
 	current-path)
        (#f d)
        (file-line00 (sys-readlink current-path) table file line)
-       )))
+       )
+      (else
+       (list file #`",|line|"))
+      ))
   (let* ((debug-root-dir "/usr/src/debug/")
 	 (debug-root-dir-len (string-length debug-root-dir)))
     (file-line00 (current-path) table (if (string-prefix? debug-root-dir  file)
