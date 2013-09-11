@@ -1,3 +1,7 @@
+2013-09-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* callq (load-entries::acceptable?): Reject NULL pointer.
+
 2013-09-07  Masatake YAMATO  <yamato@redhat.com>
 
 	* callq (main): Added --load-with-rebuilding option.

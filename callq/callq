@@ -270,7 +270,8 @@
 	      (loop (cdr (cdr es)) result)
 	      (loop (cdr es) (cons (car es) result))))))
   (define (acceptable? entry)
-    (not (in-blacklist? entry)))
+    (and entry
+	 (not (in-blacklist? entry))))
   (define (rearrange! es)
     (let1 extra-entries (list)
       (let1 connections (fold-right 
