@@ -295,6 +295,11 @@
 				    (cons entry0 kdr)
 				    kdr))
 			      )
+			     ('init
+			      (let1 entry (ref entry0 2)
+				(if (acceptable? entry)
+				    (cons entry0 kdr)
+				    kdr)))
 			     ('assign
 			      (let1 entry (ref entry0 2)
 				(if (acceptable? entry)

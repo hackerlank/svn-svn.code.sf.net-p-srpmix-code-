@@ -1,6 +1,11 @@
 2013-09-11  Masatake YAMATO  <yamato@redhat.com>
 
-	* callq (source): Do source from 
+	* callq (load-entries): Added code to track initializations
+	of sturct fields.
+
+2013-09-11  Masatake YAMATO  <yamato@redhat.com>
+
+	* callq (source): Do source from
 	the current input port.
 
 2013-09-11  Masatake YAMATO  <yamato@redhat.com>
