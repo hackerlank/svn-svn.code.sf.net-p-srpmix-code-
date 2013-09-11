@@ -784,9 +784,10 @@
        (display ";; expression: ")
        (write es)
        (newline))
-     (writeln* (callq-eval es #f))
-     )
-   (file->sexp-list file))
+     (writeln* (callq-eval es #f)))
+   (if (equal? file "-")
+       (port->sexp-list (current-input-port))
+       (file->sexp-list file)))
   (list))
 
 ;;
@@ -1412,7 +1413,7 @@
 (define (print-usage name status)
   (print "Usage: ")
   (print #`"	,|name| -h|--help")
-  (print #`"	,|name| [--batch] [-s|--script|--source SCRIPT]...")
+  (print #`"	,|name| [--batch] [-s|--script|--source SCRIPT|-]...")
   (print #`"	,|name| [-s|--script|--source SCRIPT]... [-l|--load BINARY]...[-L|--load-with-rebuilding BINARY]")
   (exit status))
 
