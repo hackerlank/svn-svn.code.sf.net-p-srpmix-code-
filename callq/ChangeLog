@@ -1,3 +1,8 @@
+2013-09-17  Masatake YAMATO  <yamato@redhat.com>
+
+	* callp (main): use /dev/stdout if - is specified as optarg
+	for --output.
+
 2013-09-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* callq (load-entries): Added stub for call-reg.

@@ -4,7 +4,7 @@ LANG=c
 function print_usage
 {
     echo "$0 --help|-h"
-    echo "$0 [--quiet][--debug][--rebuild-cache][--output OUTPUT.es] INPUT.elf"
+    echo "$0 [--quiet][--debug][--rebuild-cache][--output OUTPUT.es|-] INPUT.elf"
 }
 
 function run
@@ -99,6 +99,8 @@ function main
 	    mkdir -p $(dirname "${output}")
 	    use_cache=1
 	fi
+    elif [[ "${output}" = "-" ]]; then
+	output=/dev/stdout
     fi
 	
     if [[ -n "$debug" ]]; then
