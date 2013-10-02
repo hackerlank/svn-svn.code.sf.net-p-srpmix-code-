@@ -24,7 +24,7 @@ dist_bin_SCRIPTS =           \
 	srpmix-weakview-alias		        \
 	\
 	srpmix-plugin                           \
-	srpmix-package-attach                   \
+	srpmix-nvr-attach                       \
 	\
 	srpmix-weakview-dist-attach             \
 	\

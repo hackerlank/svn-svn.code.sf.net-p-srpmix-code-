@@ -2,7 +2,7 @@
 #
 ########################################################################
 #
-# srpmix-package-attach: Make a package level attachment swrf package
+# srpmix-nvr-attach: Make a package level attachment swrf package
 #
 # Copyright (C) 2009 Masatake YAMATO
 #
@@ -56,8 +56,8 @@ try_source ${LIBSRPMIX}
 function print_usage
 {
     echo "Usage: "
-    echo "  srpmix-package-attach [--help|-h]"
-    echo "  srpmix-package-attach [--debug] \\ "
+    echo "  srpmix-nvr-attach [--help|-h]"
+    echo "  srpmix-nvr-attach [--debug] \\ "
     echo "                [--pkg-name=NAME] [--pkg-version=VER] [--pkg-release=REL] \\ "
     echo "                [--output-dir=DIR [--output-format=swrf|rpm]] [--yum=YUMOPT] \\ "
     echo "                [--srpmix-var-dir=DIR] \\ "
@@ -74,7 +74,7 @@ function print_usage
     echo "  SRPMIX_ROOT_USER"
     echo ""
     echo "Example:"
-    echo "	SRPMIX_ROOT_USER=yamato srpmix-package-attach --srpmix-var-dir=/srv/sources --output-dir=/tmp zsh 4.2.6-3.el5 hyperestraier"
+    echo "	SRPMIX_ROOT_USER=yamato srpmix-nvr-attach --srpmix-var-dir=/srv/sources --output-dir=/tmp zsh 4.2.6-3.el5 hyperestraier"
 }
 
 function parse_arguments
@@ -307,7 +307,7 @@ function main
     parse_arguments "$@"
     if test -n "$SRPMIX_ATTACH_DEBUG"; then
 	trap 0
-	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-package-attach"
+	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-nvr-attach"
     fi
     local srchash=$(srpmix_srchash $TARGET_PACKAGE)
 

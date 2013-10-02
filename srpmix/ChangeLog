@@ -1,3 +1,12 @@
+2013-10-02  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: version 3.120.3.
+
+	* src/srpmix-nvr-attach: Renamed src/srpmix-package-attach.
+	* misc/specs/srpmix.spec.in (dbdir): Rename srpmix-plugin-attach
+	to srpmix-nvr-attach.
+	* src/Makefile.am (dist_bin_SCRIPTS): Ditto.
+
 2013-07-28  Masatake YAMATO  <yamato@redhat.com>
 
 	* tests/Makefile.am (LOG_COMPILER): Set bash. 
