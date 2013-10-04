@@ -5,7 +5,7 @@ Release: #RPM_RELEASE#
 Source: srpmix-#PACKAGE_VERSION#.tar.bz2
 
 Requires: srpmix-dir-base >= %{version}
-Requires: rpm-build mock mock-source-rescue-plugin
+Requires: rsync rpm-build mock mock-source-rescue-plugin
 
 
 Requires: hardlink cpio rpm coreutils emacs-common file gauche

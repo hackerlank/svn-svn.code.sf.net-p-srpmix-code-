@@ -1,6 +1,7 @@
 2013-10-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in (Requires): Added rpm-build.
+	(Requires): Added rsync.
 
 2013-10-02  Masatake YAMATO  <yamato@redhat.com>
 
