@@ -1,0 +1,11 @@
+#!/bin/bash
+# Just install O2g plugin packages.
+METHOD=nop
+ENABLE=no
+# ??? ftp.redhat.com handles automatically, I hope.
+GC=no
+BACKUP=yes
+BUILD=no
+BUILDERS=nop
+DIST_MAPPING=no
+INSTALL=yes

@@ -1,3 +1,10 @@
+2013-10-22  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/cradle-confs/Makefile.am (dist_cradleconf_DATA): Added
+	rhel-plugin-02g.
+
+	* src/cradle-confs/rhel-plugin-02g: New file.
+
 2013-10-10  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/rhel5u10.es: Added.
