@@ -205,7 +205,7 @@ function main
 	echo "*** Using $MY_TMPDIR as temporary directory for srpmix-rootdir-attach"
     fi
 
-    pkg_full_name=srpmix-rootdir-${PKG_NAME}
+    pkg_full_name=srpmix-rootdir-plugin-${PKG_NAME}
 
     mkdir -p ${MY_TMPDIR}/SPECS
     spec_file=${MY_TMPDIR}/SPECS/${pkg_full_name}.spec

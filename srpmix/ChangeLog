@@ -1,3 +1,13 @@
+2013-10-30  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: versoin 3.120.4.
+
+	* src/srpmix-rootdir-attach (main::pkg_full_name): embed
+	-plugin- to the package name.
+
+	* src/srpmix-weakview-dist-attach (main::pkg_full_name): embed
+	-plugin- to the package name.
+
 2013-10-05  Masatake YAMATO  <yamato@redhat.com>
 
 	* misc/specs/srpmix.spec.in (Requires): Added rpm-build.

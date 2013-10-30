@@ -267,7 +267,7 @@ function main
     fi
 
     target_dist_full_name=srpmix-weakview-dist-${TARGET_DIST}
-    pkg_full_name=${target_dist_full_name}-${PKG_NAME}
+    pkg_full_name=${target_dist_full_name}-plugin-${PKG_NAME}
 
     mkdir -p ${MY_TMPDIR}/SPECS
     spec_file=${MY_TMPDIR}/SPECS/${pkg_full_name}.spec
