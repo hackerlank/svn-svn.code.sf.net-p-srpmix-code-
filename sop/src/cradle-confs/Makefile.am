@@ -20,7 +20,7 @@ dist_cradleconf_DATA =				\
 	hyperestraier.pkg			\
 	hyperestraier.weakview-dist		\
 	\
-	rhel-plugin-02g				\
+	static-plugin-data			\
 	\
 	placeholder				\
 	\
