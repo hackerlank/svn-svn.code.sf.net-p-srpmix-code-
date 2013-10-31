@@ -209,6 +209,7 @@ rm -rf \$RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
+%dir ${pluginsdir}
 ${pluginsdir}/${PKG_NAME}
 
 %changelog
