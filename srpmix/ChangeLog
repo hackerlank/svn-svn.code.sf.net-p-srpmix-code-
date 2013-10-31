@@ -3,7 +3,7 @@
 	* configure.ac: versoin 3.120.5.
 
 	* src/srpmix-weakview-dist-attach (create_spec): Added
-	${pluginsdir} to %files list.
+	${pluginsdir}/${PKG_NAME} as a directory to %files list.
 
 	* src/srpmix-rootdir-attach (create_spec): Ditto.
 
