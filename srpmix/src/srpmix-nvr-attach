@@ -258,7 +258,8 @@ rm -rf \$RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-/${SRPMIX_SOURCES_RDIR}/*/*/*/plugins/$PKG_NAME
+%dir /${SRPMIX_SOURCES_RDIR}/*/*/*/plugins/$PKG_NAME
+/${SRPMIX_SOURCES_RDIR}/*/*/*/plugins/$PKG_NAME/*
 
 %changelog
 * Sat Aug  1 2009 SRPMIX WRAP <consulting-jp@redhat.com> ${PKG_NAME}-${PKG_VERSION}-${PKG_RELEASE}

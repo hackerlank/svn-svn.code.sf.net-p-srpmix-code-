@@ -7,6 +7,8 @@
 
 	* src/srpmix-rootdir-attach (create_spec): Ditto.
 
+	* src/srpmix-nvr-attach (create_swrf): Ditto.
+
 2013-10-30  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: versoin 3.120.4.
