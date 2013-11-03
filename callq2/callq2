@@ -1,0 +1,74 @@
+#!/bin/sh
+#| -*- scheme -*- |#
+:; exec gosh -I ~/var/srpmix/callq/src/ -- $0 "$@"
+(use callq.core)
+(use callq.util)
+(use gauche.parseopt)
+
+(define (smap-source-map source-file)
+  (map2 (^ (a b)
+	   (list (car a)
+		 (car b)
+		 (kref a :name)
+		 (kref a :external #f)
+		 (cadr a)
+		 ))
+	(tree-map->alist (ref source-file 'lines))
+	(^ (elt) 
+	   (cons (+ (car elt) 1) (cdr elt)))))
+
+(define (normalize0 lines max rinternal rexternal)
+  (if (null? lines)
+      lines
+      (let1 flen (cadr (last lines))
+	(map (^ (elt)
+		(list (inexact (/ (* (~ elt 0) max) flen))
+		      (inexact (/ (* (~ elt 1) max) flen))
+		      (~ elt 2)
+		      (if (~ elt 3) rexternal rinternal)
+		      (~ elt 4)
+		      ))
+	     lines))))
+
+(define (normalize1 files)
+  (let1 maxline (fold
+		 (^ (elt maxline) 
+		    (let1 l (list-ref elt 2)
+		      (if (< maxline l)
+			  l
+			  maxline)))
+		 0
+		 files)
+    (map (^ (elt)
+	    (cons*
+	     (list-ref elt 0)
+	     (list-ref elt 1)
+	     (inexact (* 100 (/ (list-ref elt 2) maxline)))
+	     (list-tail elt 3)))
+	 files)))
+
+(define (show-help prog port estatus)
+  (format  port "Usage:\n")
+  (format  port "\t~a --help|-h\n" prog)
+  (format  port "\t~a INPUT-FILE\n" prog)
+  (newline port)
+  (sys-exit estatus))
+
+
+(define (main args)
+  (let-args (cdr args)
+      ((help "h|help" => (cut show-help (car args) (current-output-port) 0))
+       . restargs)
+    (load (if (null? restargs)
+	      "/dev/stdin"
+	      (cadr restargs)))
+    (map writeln (normalize1 
+		  (map (lambda (s) (let1 lines (smap-source-map s)
+				     (list 'file
+					   (ref s 'file-name)
+					   (if (null? lines) 0 (cadr (last lines)))
+					   (normalize0
+					    lines 
+					    360 #f #t))))
+		       (hash-table-values (~ (current-binary-file (current-table)) 'source-files)))))))
+     
