@@ -1,3 +1,8 @@
+2013-11-25  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/twig (twig_hack_patch_decl): Handle 0 prefixed patch number.
+	(twig_hack_patch_apply): Ditto.
+
 2012-10-12  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/twig (twig_addlog): Don't use C for LANG.
