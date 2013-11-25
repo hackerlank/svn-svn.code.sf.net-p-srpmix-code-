@@ -1,5 +1,7 @@
 2013-11-25  Masatake YAMATO  <yamato@redhat.com>
 
+	* configure.ac: version 0.0.5.
+
 	* src/twig (twig_hack_patch_decl): Handle 0 prefixed patch number.
 	(twig_hack_patch_apply): Ditto.
 

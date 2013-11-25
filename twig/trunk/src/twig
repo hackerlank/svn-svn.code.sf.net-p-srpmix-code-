@@ -214,19 +214,20 @@ function twig_hack_patch_decl
     local patch_decl
     local patch_line
     local patch_num
-    local original_last_patch_num
 
     local source_decl
     local source_line
+
+    local original_last_patch_num
 
     patch_decl=$(grep -E -n -e "^Patch[0-9]+:" "${spec}" | tail -1)
     if test -n "${patch_decl}"; then
 	patch_line=$(echo $patch_decl | sed -e 's/:Patch.*//')
 	original_last_patch_num=$(echo $patch_decl | sed -e 's/.*:Patch\([0-9]*\).*/\1/')
-	patch_num=$(sed -e 's/^0*//' <<< $original_last_patch_line)
+	patch_num=$(sed -e 's/^0*//' <<< $original_last_patch_num)
 
 	head -${patch_line} ${spec}
-	echo Patch$(( ${patch_num} + 1 )): twig-${name}.patch
+	echo Patch$(printf "%0${#original_last_patch_num}d" $((${patch_num} + 1))): twig-${name}.patch
 	tail -n +$(( ${patch_line} + 1 )) ${spec}
 	return 0
     fi
@@ -261,7 +262,7 @@ function twig_hack_patch_apply
     patch_decl=$(grep -E -n -e "^Patch[0-9]+:" "${spec}" | tail -1)
     if test -n "${patch_decl}"; then
 	original_last_patch_num=$(echo $patch_decl | sed -e 's/.*:Patch\([0-9]*\).*/\1/')
-	patch_num=$(( $original_last_patch_line - 1 ))
+	patch_num=$(( $original_last_patch_num - 1 ))
 
 	if [ "${patch_num}" = -1 ]; then
 	    local setup
@@ -282,19 +283,22 @@ function twig_hack_patch_apply
 	else
 	    local patch_line
 	    local patch_apply
-
-	    patch_num=$(sed -e 's/^0*//' <<< $original_last_patch_line)
-	    patch_apply=$(grep -E -n -e "%patch${original_last_patch_line}.*" "${spec}")
+	    local patch_pattern
+	    patch_num=$(sed -e 's/^0*//' <<< $original_last_patch_num)
+	    patch_pattern=$(printf "%0${#original_last_patch_num}d" $(( $patch_num - 1 )))
+	    patch_apply=$(grep -E -n -e "%patch${patch_pattern}.*" "${spec}")
+	    
 	    if test -z "${patch_apply}"; then
 		echo "Cannot find patch apply line: %patch${patch_num}" 1>&2
 		return 1
 	    fi
+
 	    patch_line=$(echo $patch_apply | sed -e 's/:%patch.*//')
-	    
+	    patch_num=$(printf "%0${#original_last_patch_num}d" $patch_num)
 	    head -${patch_line} ${spec}
 	    
 
-	    echo %patch$(( ${patch_num} + 1 )) -p3 -b .${name}
+	    echo %patch${patch_num} -p3 -b .${name}
 	    
 	    tail -n +$(( ${patch_line} + 1 )) ${spec}
 	    return 0
