@@ -27,6 +27,7 @@ rhel6u1.es \
 rhel6u2.es \
 rhel6u3.es \
 rhel6u4.es \
+rhel6u5.es \
 rhel6u0+optional.es \
 rhel6u1+optional.es \
 rhel6u2+optional.es \
