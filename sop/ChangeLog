@@ -2,6 +2,10 @@
 
 	* src/dist-mapping/ftp.redhat.com/rhel7b1.es: Added a new file.
 
+	* src/dist-mapping/ftp.redhat.com/rhos3u0.es: Added a new file.
+
+	* src/dist-mapping/ftp.redhat.com/rhos4u0.es: Added a new file.
+
 2013-11-29  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/dist-mapping/ftp.redhat.com/rhel6u5.es: Added a new file.
