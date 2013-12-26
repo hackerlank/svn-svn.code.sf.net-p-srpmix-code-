@@ -1,5 +1,8 @@
 2013-12-26  Masatake YAMATO  <yamato@redhat.com>
 
+	* src/plugins/60srpmix-ctags (LIBSRPMIX): overwrite
+	the output file.
+
 	* src/plugins/*: Don't cp /dev/null to truncate the
 	output file.
 
