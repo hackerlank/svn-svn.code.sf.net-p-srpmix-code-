@@ -139,7 +139,7 @@ function run_ctags
     shift 3
 
     es_print ctags-start --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
-    cp /dev/null $o
+    echo > $o
     (cd $d && stat */ >/dev/null 2>&1 && find */ -type f \
 	| egrep -v '/[^/]+\.[^/]+\.[^/]+$' \
 	| grep -v .bz2           \

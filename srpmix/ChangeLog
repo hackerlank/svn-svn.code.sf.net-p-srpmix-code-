@@ -1,3 +1,8 @@
+2013-12-26  Masatake YAMATO  <yamato@redhat.com>
+
+	* src/plugins/*: Don't cp /dev/null to truncate the
+	output file.
+
 2013-10-31  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: versoin 3.120.5.

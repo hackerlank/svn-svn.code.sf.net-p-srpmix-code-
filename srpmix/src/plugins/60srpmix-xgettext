@@ -129,7 +129,7 @@ function run_xgettext
     local s
 
     es_print "xgettext-start" --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
-    cp /dev/null $o
+    echo > $o
 
     grep $REGEX ${PLUGINDIR}/../file/file-i | grep pre-build | cut -d: -f1 > "${PLUGINDIR}/xgettext.files"
     (cd $d && test -s "${PLUGINDIR}/xgettext.files" && \

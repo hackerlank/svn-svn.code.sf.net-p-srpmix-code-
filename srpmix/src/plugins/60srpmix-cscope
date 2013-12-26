@@ -133,7 +133,7 @@ function run_cscope
     local file_i
 
     es_print "cscope-start" --timestamp=\"`LC_TIME=C LANG=C date`\" --directory=\"$d\" --output=\"$o\" | tee -a $l
-    cp /dev/null $o
+    echo > $o
     echo \-k >  ${PLUGINDIR}/cscope.files
     echo \-q >> ${PLUGINDIR}/cscope.files
 
