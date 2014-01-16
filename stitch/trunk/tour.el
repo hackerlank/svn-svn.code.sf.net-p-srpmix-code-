@@ -286,18 +286,19 @@
 		  (tour-read)
 		tour-current-name)))
     (let* ((b (get-buffer-create (format "*Rst: %s*" tour)))
-	   (tour-def (gethash tour tour-table)))
+	   (tour-def (gethash tour tour-table))
+	   (title (tour-doc tour)))
       (with-current-buffer b
 	(let ((buffer-read-only nil))
 	  (erase-buffer)
-	  (insert "=============================================\n")
-	  (insert (tour-doc tour))
+	  (insert "==========================================================================================\n")
+	  (insert title)
 	  (insert "\n")
-	  (insert "=============================================\n\n")
+	  (insert "==========================================================================================\n\n")
 	  (let ((i 1))
 	    (mapcar  (lambda (tour-elt)
 		       (insert (format "%d. %s\n" i 
-				       (stitch-klist-value tour-elt :subject)))
+				       (or (stitch-klist-value tour-elt :subject) "")))
 		       (setq i (1+ i))
 		       )
 		     tour-def))
@@ -311,16 +312,18 @@
 			     (let ((r (tour-render-in-rst tour tour-elt i)))
 			       (setq i (1+ i))
 			       (concat "\n\n"
-				       (let ((subject (stitch-klist-value tour-elt :subject)))
-					 (cond
-					  ((stringp subject)
-					   (format "%s `[%d/%d]`\n" subject
-						   i (length tour-def)))
-					  (t
-					   (format "`[%d/%d]`\n"
-						   i (length tour-def)))))
-					 "------------------------------------"
-					 "\n\n" r)))
+				       (let* ((subject (or (stitch-klist-value tour-elt :subject) "")))
+					 (concat 
+					  title  "\n"
+					  (make-string ;(* 3 (length title))
+					   72
+					   ?=) "\n"
+					   (format "`[%d/%d]` " i (length tour-def))
+					  subject "\n"
+					  (make-string ;(* 3 (length subject))
+					   72
+					   ?-)))
+				       "\n\n" r)))
 			   tour-def))))
 	(rst-mode)
 	(goto-char (point-min))
@@ -379,6 +382,15 @@
      ((equal ext "h") "c")
      (t ext))))
 
+(defun tour-fill-string (a)
+  (with-temp-buffer
+    (rst-mode)
+    (insert a)
+    (set-fill-column 50)
+    (fill-region (point-min) (point-max))
+    (buffer-string)
+    ))
+
 (defun tour-annotation-render-in-rst (name offset k rest)
   (let* ((elt rest)
 	 (uuid (tour-annotation-filter-uuid name offset k elt)))
@@ -399,13 +411,30 @@
       ;;
       (tour-build-string
        (list 
-	a
+	(tour-fill-string a)
 	"\n"
+	(let ((file-short (cond
+			   ((string-match "^/srv/sources/sources/[0-9a-zA-Z]/\\(.*\\)" 
+					  file)
+			    (match-string 1 file))
+			   (t
+			    file)))
+	      (func (stitch-klist-value target :which-func)))
+	  (list 
+	    "Function\n	" func
+	    "\n"
+	    "File\n	" file-short
+	    "\n"
+	    ;; "Line\n	" (format "%d" line)
+ 	   ;;(format "*%s@%s:%d*:\n\n" func file line)
+	    "\n"
+ 	   )
+	  )
 	(if lang
 	    (list
 	     (format ".. code-block:: %s\n" lang)
-	     ;; "	:linenos:\n"
-	     ;;(format "	:linenostart: %d\n" line)
+	     "	:linenos:\n"
+	     (format "	:linenos_offset: %d\n" (- line 1))
 	     )
 	  "::")
 	"\n         \n"
@@ -416,23 +445,7 @@
 		 "\n"))
 	 (split-string c "\n"))
 	"\n"
-	(let ((file-short (cond
-			   ((string-match "^/srv/sources/sources/[0-9a-zA-Z]/\\(.*\\)" 
-					  file)
-			    (match-string 1 file))
-			   (t
-			    file)))
-	      (func (stitch-klist-value target :which-func)))
-	   (list 
-	    "Function\n	" func
-	    "\n"
-	    "File\n	" file-short
-	    "\n"
-	    "Line\n	" (format "%d" line)
-	    "\n"
- 	   ;;(format "*%s@%s:%d*:\n\n" func file line)
- 	   )
-	  ))))))
+	)))))
 
 
 (defconst tour-annotation-handler '((enter . tour-annotation-enter)
@@ -474,7 +487,7 @@
   )
   
 (defun tour-converpage-render-in-rst (name offset k rest)
-  (tour-coverpage-build-text name rest)
+  (tour-fill-string (tour-coverpage-build-text name rest))
   )
 
 (defconst tour-coverpage-handler '((enter . tour-coverpage-enter)

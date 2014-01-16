@@ -1,3 +1,8 @@
+2014-01-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* stitch.el (stitch-edit-annotation-new): Use buffer-file-name
+	to show File field.
+
 2013-04-09  Masatake YAMATO  <yamato@redhat.com>
 
 	* edit-string.el: New file.

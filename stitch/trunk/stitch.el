@@ -779,12 +779,13 @@
 (defun stitch-stitch (buffer pos si-proc keywords)
   (with-current-buffer buffer
     (when (<= pos (point-max))
-      (let* ((o (make-overlay pos pos buffer))
+      (let* ((o (let ((o (make-overlay pos pos buffer)))
+		  (overlay-put o 'stitch-keywords keywords)
+		  o))
 	     (si (funcall si-proc o)))
 	(overlay-put o 'after-string si)
 	(overlay-put o 'stitch-annotation t)
 	(overlay-put o 'stitch-master-string si)
-	(overlay-put o 'stitch-keywords keywords)
 	o))))
 
 (defun stitch-annotation-for-event (event)
@@ -800,7 +801,8 @@
 	(when (and (overlay-get ov 'stitch-annotation)
 		   (eq (overlay-get ov 'after-string) str))
 	  (setq ovls nil
-		result ov))))
+		result ov))
+	))
     result))
 
 (defun stitch-jump-to-home-by-uuid (uuid)
@@ -836,20 +838,23 @@
 (defun stitch-annotation-popup-menu (event)
   (interactive "e")
   (let ((entry (overlay-get (stitch-annotation-for-event event)
- 			     'stitch-entry)))
-    (let ((f (x-popup-menu event `(,(stitch-klist-value entry :uuid)
-				   ("" 
-				    ("Copy UUID" . stitch-action-copy-uuid-to-kill-ring)
-				    ("Jump to Home" . stitch-action-jump-to-home)
-				    )))))
-			   (when f
-			     (funcall f entry)
-			   ))))
+			    'stitch-entry)))
+    (let ((uuid (stitch-klist-value entry :uuid)))
+      (let ((f (x-popup-menu event `(,uuid
+				     ("" 
+				      ("Copy UUID" . stitch-action-copy-uuid-to-kill-ring)
+				      ("Jump to Home" . stitch-action-jump-to-home)
+				      )))))
+	(when f
+	  (funcall f entry)
+	  )))))
 
 (defun stitch-insert-point-annotation (buffer pos annotation date full-name mailing-address keywords uuid fuzzy?)
   (with-current-buffer buffer
     (when (<= pos (point-max))
-      (let* ((o (make-overlay pos pos buffer))
+      (let* ((o (let ((o (make-overlay pos pos buffer)))
+		  (overlay-put o 'stitch-keywords keywords)
+		  o))
 	     (si (stitch-annotation-inline-format annotation
 						  o
 						  date
@@ -880,7 +885,6 @@
 	(overlay-put o 'after-string si)
 	(overlay-put o 'stitch-annotation t)
 	(overlay-put o 'stitch-master-string si)
-	(overlay-put o 'stitch-keywords keywords)
 	o))))
 
 ;;
@@ -917,7 +921,9 @@
 (defun stitch-insert-region-annotation (buffer start end face annotation date full-name mailing-address keywords uuid fuzzy?)
   (with-current-buffer buffer
     (when (<= end (point-max))
-      (let* ((o (make-overlay start end buffer))
+      (let* ((o (let ((o (make-overlay start end buffer)))
+		  (overlay-put o 'stitch-keywords keywords)
+		  o))
 	     (si (stitch-annotation-inline-format annotation
 						  o
 						  date
@@ -946,7 +952,6 @@
 	  )
 	;;      (overlay-put o 'display `((margin left-margin) "XXX"))
 	(overlay-put o 'stitch-annotation t)
-	(overlay-put o 'stitch-keywords keywords)
 	o))))
 
 (defun stitch-insert-annotation-strict (file entry)
@@ -1758,6 +1763,7 @@
 
 (defun stitch-edit-annotation-new (commit-func commit-args mode etype)
   (let* ((buf  (stitch-klist-value commit-args :buffer))
+	 (fname (buffer-file-name buf))
 	 (bname (buffer-name buf))
 	 (dirp (with-current-buffer buf (eq major-mode 'dired-mode)))
 	 (elt (if dirp 
@@ -1775,8 +1781,8 @@
 				   (propertize
 				    (format (if dirp
 						"Directory: %s\nItem: %s\nKeywords: \n"
-					      "File: %s\nPoint: %d\nKeywords: \n")
-					    bname
+					      "File: %s(%s)\nPoint: %d\nKeywords: \n")
+					    bname fname
 					    elt
 					    )
 				    'face 'stitch-annotation-edit-header
@@ -1808,6 +1814,9 @@
 	      (stitch-make-annotation-header date full-name mailing-address fuzzy?)
 	      (propertize
 	       (stitch-klist-value annotation :data)
+	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-body))
+	      (propertize
+	       (concat "\n(" (mapconcat 'symbol-name (overlay-get o 'stitch-keywords) " ") ")")
 	       'face (if fuzzy? 'stitch-annotation-fuzzy 'stitch-annotation-body))
 	      (when nil
 		(propertize "\n" 

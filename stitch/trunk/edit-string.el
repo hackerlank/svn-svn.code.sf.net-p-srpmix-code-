@@ -22,7 +22,7 @@
 	 (read-from-string
 	  (buffer-substring b e)))))
 
-(defun edit-string ()
+(defun edit-string (&optional no-popup?)
   (interactive)
   (let ((p (syntax-ppss)))
     (if (nth 3 p)
@@ -34,12 +34,13 @@
 	       (s (edit-string-pick b e)))
 	  (edit-string0 (current-buffer)
 			s
-			b e))
+			b e
+			no-popup?))
       (error "point is not in a string literal"))))
 
 (defvar edit-string-target nil)
 
-(defun edit-string0 (target-buffer string begin end)
+(defun edit-string0 (target-buffer string begin end &optional no-popup?)
   (let ((edit-buffer (get-buffer-create (format "[%d %d] @ %s"
 						begin
 						end
@@ -48,23 +49,29 @@
       (edit-string-mode)
       (buffer-disable-undo)
       (save-excursion (insert string))
+      (set-buffer-modified-p nil)
       (buffer-enable-undo)
       (set (make-local-variable 'edit-string-target)
 	   (list target-buffer string begin end))
-      (pop-to-buffer edit-buffer))))
+      (if no-popup?
+	  (switch-to-buffer edit-buffer)
+	(pop-to-buffer edit-buffer)))))
 
 (define-derived-mode edit-string-mode rst-mode "\"a\""
   "Major mode for edting elisp string literal."
   (let ((m edit-string-mode-map))
     (define-key m "\C-c\C-c" 'edit-string-commit)
+    (define-key m "\C-x\C-s" 'edit-string-commit)
     (define-key m "\C-c\C-j" 'edit-string-jump)
     (define-key m "\C-c\C-y" 'edit-string-insert-original)))
 
-(defun edit-string-jump ()
-  (interactive)
+(defun edit-string-jump (&optional no-popup?)
+  (interactive "P")
   (let ((buffer (nth 0 edit-string-target))
 	(point (nth 2 edit-string-target)))
-    (pop-to-buffer buffer)
+    (if no-popup?
+	(set-buffer buffer)
+      (pop-to-buffer buffer))
     (goto-char point)
     (recenter)))
 
@@ -78,9 +85,10 @@
     (delete-region b e)
     (prin1 (substring-no-properties s) buf)))
 
-(defun edit-string-commit ()
-  (interactive)
-  (let* ((tgt edit-string-target)
+(defun edit-string-commit (&optional popup?)
+  (interactive "P")
+  (let* ((p (point))
+	 (tgt edit-string-target)
 	 (b (nth 2 tgt))
 	 (e (nth 3 tgt))
 	 (target-buffer (nth 0 tgt))
@@ -95,10 +103,11 @@
 			       b
 			       e
 			       target-buffer)
-	  (edit-string-jump)
-	  (when (y-or-n-p (format "kill the edit buffer: %s" 
-				  (buffer-name edit-buffer)))
-	    (kill-buffer edit-buffer)))
+	  (edit-string-jump (not popup?))
+	  (kill-buffer edit-buffer)
+	  (forward-char 1)
+	  (with-current-buffer (edit-string (not popup?))
+	    (goto-char p)))
       (edit-string-jump)
       (error "The target buffer is changed"))))
   
