@@ -631,6 +631,7 @@
 
 (define (file-line0 table file line)
   (define (file-line00 current-path table file line)
+    #?=current-path
     (rxmatch-cond
       ((#/^\/srv\/debugs(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/ 
 	current-path)
@@ -640,6 +641,15 @@
 	current-path)
        (#f d)
        (file-line00 (sys-readlink current-path) table file line)
+       )
+      ((#/^\/srv\/sources(\/sources\/[a-zA-Z0-9]\/[^\/]+\/[^\/]+).*/ 
+	current-path)
+       (#f m)
+       `(,#`"/srv/sources,|m|/pre-build/,|file|" ,#`",|line|"))
+      ((#/^\/srv\/sources\/dists\/([^\/]+\/packages\/.\/[^\/]+)\/plugins\/O2g-.*\/.*/ 
+	current-path)
+       (#f d)
+       (file-line00 (sys-realpath current-path) table file line)
        )
       (else
        (list file #`",|line|"))
@@ -781,6 +791,13 @@
 			 (list))
 	(lambda (a b) (string< (sys-basename (car a))
 			       (sys-basename (car b))))))
+(define (etags output ftable)
+  (let1 files (map car
+		   (map (cute file-line0 ftable <> 0)
+			(map cdr (list-source-files ftable))))
+    (if (every string? files)
+	(run-process `(etags -o ,output ,@files))
+	(error "unexpected input file lists" files))))
 
 (define (source file)
   (for-each
@@ -1163,6 +1180,9 @@
 (define-command list-objfiles ('list-objfiles :loaded-only loaded-only) 
   (list-objfiles :loaded-only loaded-only))
 (define-command source-files ('source-files) (list-source-files (current-ftable)))
+
+(define-command etags ('etags (? string? output)) (etags output (current-ftable)))
+(define-command etags ('etags) (etags "/tmp/TAGS" (current-ftable)))
 
 (define-command desc ('desc (? string? name)) (desc (undecorate name) (current-ftable)))
 (define-command desc ('? (? string? name)) (desc (undecorate name) (current-ftable)))

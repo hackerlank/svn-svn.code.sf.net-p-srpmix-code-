@@ -121,6 +121,7 @@ function main
 	    | run "$debug" es-filter-readelf-rela "${input}"		\
 	    | run "$debug" es-filter-libdwarves-fileline "${input}"     \
 	    >> "${output}"
+	# TODO: check PIPESTATUS
 	run "$debug" es-src-libdwarves "${input}" >> "${output}"
         echo '(callp-end :date "'$(date)'")' >> ${output}
     else 

@@ -1,3 +1,7 @@
+2014-01-16  Masatake YAMATO  <yamato@redhat.com>
+
+	* callq (etags): Added etags command.
+
 2013-09-17  Masatake YAMATO  <yamato@redhat.com>
 
 	* callp (main): use /dev/stdout if - is specified as optarg
