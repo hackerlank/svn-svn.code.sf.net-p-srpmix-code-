@@ -1,3 +1,21 @@
+2014-05-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: versoin 3.130.0.
+
+	* misc/makefiles/rpm.mk (rpm): Use temporary spec file.
+
+2014-05-15  Masatake YAMATO  <yamato@redhat.com>
+
+	Added repo weakview facility.
+
+	* misc/specs/srpmix.spec.in (%files): Added srpmix-weakview-repo.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-weakview-repo.
+
+	* misc/specs/srpmix-dir-base.SPEC.in (wvreposdir): New variable.
+
+	* src/srpmix-weakview-repo: New file.
+
 2012-11-01  Masatake YAMATO  <yamato@redhat.com>
 
 	* configure.ac: version 3.129.0.
