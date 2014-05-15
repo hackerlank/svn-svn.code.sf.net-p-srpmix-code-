@@ -1,3 +1,21 @@
+2014-05-15  Masatake YAMATO  <yamato@redhat.com>
+
+	* configure.ac: versoin 3.121.1.
+
+	* misc/makefiles/rpm.mk (rpm): Use temporary spec file.
+
+2014-05-15  Masatake YAMATO  <yamato@redhat.com>
+
+	Added channel weakview facility.
+
+	* misc/specs/srpmix.spec.in (%files): Added srpmix-weakview-channel.
+
+	* src/Makefile.am (dist_bin_SCRIPTS): Added srpmix-weakview-channel.
+
+	* misc/specs/srpmix-dir-base.SPEC.in (wvchannelsdir): New variable.
+
+	* src/srpmix-weakview-channel: New file.
+
 2013-12-26  Masatake YAMATO  <yamato@redhat.com>
 
 	* src/plugins/60srpmix-ctags (LIBSRPMIX): overwrite

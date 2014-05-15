@@ -38,6 +38,10 @@ wvdistsdir=${rootdir}/dists
 mkdir -p $RPM_BUILD_ROOT${wvdistsdir}
 mkdir -p $RPM_BUILD_ROOT${wvdistsdir}/.alternatives
 
+wvchannelsdir=${rootdir}/channels
+mkdir -p $RPM_BUILD_ROOT${wvchannelsdir}
+mkdir -p $RPM_BUILD_ROOT${wvchannelsdir}/.alternatives
+
 wvpkgsdir=${rootdir}/packages
 mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}
 for c in ${cs}; do mkdir -p $RPM_BUILD_ROOT${wvpkgsdir}/${c}; done
