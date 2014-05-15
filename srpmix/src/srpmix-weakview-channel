@@ -1,0 +1,287 @@
+#!/bin/bash
+#
+########################################################################
+#
+# srpmix-weakview-channel: Make channel weak view
+#
+# Copyright (C) 2008 Masato Taruishi
+# Copyright (C) 2014 Masatake YAMATO
+#
+# Author: Masato Taruishi <taruishi@redhat.com>
+#         Masatake YAMATO <yamato@redhat.com>
+#
+# program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################
+
+LIBSRPMIX=libsrpmix.sh
+function try_source
+{
+    source $1
+    if test $? != 0; then
+        echo "*** ABORT..." "cannot find $1" 1>&2
+	exit 1
+    fi
+}
+try_source ${LIBSRPMIX}
+
+NAME=
+ALIAS=
+OUTPUTDIR=
+MY_TMPDIR=
+DUMP_SPEC=
+
+# TODO: --srpm
+function print_usage
+{
+    echo "Usage: "
+    echo "  srpmix-weakview-channel [--help|-h]"
+    echo "  srpmix-weakview-channel --name=NAME [--dump-spec] [--alias=ALIAS]"
+    echo "  srpmix-weakview-channel --name=NAME [--output-dir=OUTPUTDIR] [--release=RELEASE] [--make-rpm] [--alias=ALIAS]"
+    echo 
+}
+
+function cleanup
+{
+    if test -d "$MY_TMPDIR"; then
+        rm -rf $MY_TMPDIR || true
+    fi
+}
+
+function parse_arguments
+{
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    --help|-h)
+		print_usage
+		exit 0
+		;;
+	    --name=*)
+                NAME=$(echo $1 | sed 's/--name=//')
+		;;
+	    --output-dir=*)
+	        OUTPUTDIR=$(echo $1 | sed 's/--output-dir=//')
+		;;
+	    --make-rpm)
+	        MAKE_RPM=yes
+		;;
+            --release=*)
+	        SRPMIX_PKG_RELEASE=$(echo $1 | sed 's/--release=//')
+		;;
+	    --dump-spec)
+	        DUMP_SPEC=1
+		;;
+	    (--alias=*)
+	    	ALIAS=$(echo $1 | sed 's/--alias=//')
+		;;
+	    *)
+		break
+		;;
+	esac
+	shift
+    done
+
+    if test "x$NAME" = "x"; then
+	print_usage 1>&2
+	srpmix_abort "No name for the weakview"
+    fi
+
+    if test "x$1" != "x"; then
+	print_usage 1>&2
+	srpmix_abort "Too many arguments"
+    fi
+
+    if test "x$OUTPUTDIR" = "x"; then
+	OUTPUTDIR=.
+    fi
+    if test ! -d "${OUTPUTDIR}"; then
+	srpmix_abort "No such directory: ${OUTPUTDIR}"
+    fi
+}
+
+function create_channel_weakview
+{
+    local name=$1
+    local alias=$2
+    local priority
+
+    local spec=$MY_TMPDIR/SPECS/srpmix-weakview-channel-$name.spec
+    if test "x${DUMP_SPEC}" != "x"; then
+	spec="/dev/stdout"
+	if test ! -w "${spec}"; then
+	    # ???
+	    spec="/dev/tty"
+	fi
+    fi
+
+    local rootdir=${SRPMIX_VAR_DIR}
+    local channeldir=${rootdir}/channels
+    local buildchanneldir_body="srpmix-weakview-channel-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE/$channeldir/$name"
+
+    if [ -n "$alias" ]; then
+	priority=${name/${alias}-}
+    fi
+
+    cat > $spec <<EOF
+Summary: Srpmix weakview for $name channel
+Name: srpmix-weakview-channel-$name
+Version: $SRPMIX_PKG_VERSION
+Release: $SRPMIX_PKG_RELEASE%{?dist}
+Autoreq: 0
+Autoprov: 0
+BuildRequires: srpmix
+Buildarch: noarch
+Requires: srpmix-dir-base
+EOF
+    if [ -n "$alias" ]; then
+	cat >> $spec <<EOF
+Requires(post):   %{_sbindir}/alternatives
+Requires(postun): %{_sbindir}/alternatives
+EOF
+    fi
+
+    cat >> $spec <<EOF
+Buildroot: %{_tmppath}/%{name}-root
+Group: System/Daemon
+License: Unknown
+
+%define __os_install_post true
+
+%description
+Srpmix weakview for $name channel.
+
+%prep
+buildchanneldir=%{_builddir}/$buildchanneldir_body
+rm -rf \$buildchanneldir
+
+%build
+buildchanneldir=%{_builddir}/$buildchanneldir_body
+
+mkdir -p \$buildchanneldir/^plugins
+
+EOF
+
+# in %build
+    CHANNELMAP=`mktemp`
+    tee "$CHANNELMAP" | srpmix_distmap_to_pvr | while read package version release; do
+  # Make link relative
+	seed=$(srpmix_srcdir $package $version $release)
+	d="../../../../..${seed/$rootdir/}"
+	p=$(srpmix_srchash "$package")
+	echo "mkdir -p \$buildchanneldir/$p/$package"
+	echo "ln -sf $d \$buildchanneldir/$p/$package/$version-$release"
+    done >> $spec
+
+    {
+	echo
+	echo
+	echo "cat > \$buildchanneldir/^mapping.es <<\"EOF\""
+	echo ';; -*- scheme -*-'
+	cat  "$CHANNELMAP"
+	# Next line is needed to handle the case that the file "$CHANNELMAP" is not ended with newline.
+	echo
+	echo "EOF"
+	echo
+	echo
+    } >> $spec
+    rm "$CHANNELMAP"
+
+    cat >> $spec <<EOF
+%install
+buildchanneldir=%{_builddir}/$buildchanneldir_body
+
+rm -rf \$RPM_BUILD_ROOT
+mkdir -p \$RPM_BUILD_ROOT/$channeldir/$name
+
+rsync -va \$buildchanneldir \$RPM_BUILD_ROOT/$channeldir
+
+EOF
+
+
+    if [ -n "$alias" ]; then
+# alternatives --altdir /var/lib/srpmix/channels/.alternatives 
+#              --install /var/lib/srpmix/channels/kojipkgs-fedoraproject-org kojipkgs-fedoraproject-org 
+#               /srv/sources/channels/kojipkgs-fedoraproject-org-20100527 20100527
+# alternatives --altdir /var/lib/srpmix/channels/.alternatives 
+#              --remove kojipkgs-fedoraproject-org /srv/sources/channels/kojipkgs-fedoraproject-org-20100527
+#
+#
+# TODO: /srv/sources/channels should not be emended here.
+#
+	cat >> $spec <<EOF
+%post
+alternatives \\
+	--altdir /srv/sources/channels/.alternatives \\
+	--install $channeldir/"^$alias" "^$alias" /srv/sources/channels/$name $priority
+
+%postun
+if [ \$1 -eq 0 ]; then
+	alternatives --altdir /srv/sources/channels/.alternatives \\
+		     --remove "^$alias" /srv/sources/channels/$name
+fi
+
+EOF
+    fi
+
+    cat >> $spec <<EOF
+%files
+%defattr(-,root,root)
+$SRPMIX_VAR_DIR/channels/*
+
+%changelog
+
+EOF
+    if test "x${DUMP_SPEC}" != "x"; then
+	return
+    fi
+
+    local build_flag=-bs
+    if test "${MAKE_RPM}" = yes; then
+	build_flag=-ba
+    fi
+    $RPMBUILD --nodeps --quiet --define "_topdir $MY_TMPDIR" ${build_flag} $spec > /dev/null
+#    rm -rf %{_builddir}/%{_builddir}/srpmix-weakview-dist-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*
+    mkdir -p $OUTPUTDIR/weakview
+
+    local file=$MY_TMPDIR/SRPMS/srpmix-weakview-channel-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.src.rpm
+    if test "${MAKE_RPM}" = yes; then
+	find $MY_TMPDIR
+	file=$MY_TMPDIR/RPMS/noarch/srpmix-weakview-channel-$name-$SRPMIX_PKG_VERSION-$SRPMIX_PKG_RELEASE*.noarch.rpm
+    fi
+    mv ${file} "${OUTPUTDIR}"/weakview
+
+}
+
+
+function main
+{
+    srpmix_verify_commands "${RPMBUILD}" "${GOSH}"
+    parse_arguments "$@"
+
+    if test "x${DUMP_SPEC}" = "x"; then
+	MY_TMPDIR=`mktemp -d`
+	trap cleanup 0
+	install -d $MY_TMPDIR/{SPECS,BUILD,SOURCES,SRPMS}
+    fi
+
+    create_channel_weakview $NAME $ALIAS
+}
+
+RUN=
+if test "x${DUMP_SPEC}" = "x"; then
+    RUN=es_time
+fi
+${RUN} main "$@"
+
+exit $?
