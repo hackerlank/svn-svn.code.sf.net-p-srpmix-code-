@@ -177,7 +177,7 @@ EOF
     tee "$REPOMAP" | srpmix_distmap_to_pvr | while read package version release; do
   # Make link relative
 	seed=$(srpmix_srcdir $package $version $release)
-	d="../../../../..${seed/$rootdir/}"
+	d="../../../..${seed/$rootdir/}"
 	p=$(srpmix_srchash "$package")
 	echo "mkdir -p \$buildrepodir/$p/$package"
 	echo "ln -sf $d \$buildrepodir/$p/$package/$version-$release"
