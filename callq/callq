@@ -246,7 +246,11 @@
 
 
 (define (in-blacklist? name)
-  (any (lambda (r) (r name))
+  (any (lambda (r) (or 
+		    (eq? name '__bss_start)
+		    (eq? name #t)
+		    (r name)
+		    ))
        (list
 	#/^__dso_handle.*/			;???
 	#/^__FUNCTION__\..*/
@@ -739,18 +743,30 @@
 (define (web-call caller callee ftable)
   (preview (pa$ file-line-call caller callee ftable) firefox0))
 
+(define-method search (key)
+  (let1 used (current-file)
+    (let1 r (append-map (^ (o)
+			   (let1 fname (~ o 1)
+			     (switch-objfile fname)
+			     (search key (current-ftable) #`"@,|fname|")))
+			(list-objfiles :loaded-only #t))
+      (switch-objfile used)
+      r)))
 
 (define-method search ((name <string>) ftable)
-  (hash-table-fold ftable (lambda (k v kdr)
-			    (if (string-scan k name)
-				(cons k kdr)
-				kdr))
-		   (list)))
+  (search name ftable ""))
+(define-method search ((name <string>) ftable (suffix <string>))
+  (search (cut strng-scan <> name) ftable suffix))
 
 (define-method search ((regexp <regexp>) ftable)
+  (search regexp ftable ""))
+(define-method search ((regexp <regexp>) ftable (suffix <string>))
+  (next-method))
+
+(define-method search (proc ftable (suffix <string>))
   (hash-table-fold ftable (lambda (k v kdr)
-			    (if (regexp k)
-				(cons k kdr)
+			    (if (proc k)
+				(cons (string-append k suffix) kdr)
 				kdr))
 		   (list)))
 
@@ -1175,6 +1191,11 @@
 					 (switch-objfile file)
 					 (begin0 (callq-eval code #f)
 						 (switch-objfile old-file))))
+
+(define-command ldd ('ldd) 
+  (list-objfiles :loaded-only #f))
+(define-command maps ('maps) 
+  (list-objfiles :loaded-only #t))
 (define-command list-objfiles ('list-objfiles) 
   (list-objfiles :loaded-only #f))
 (define-command list-objfiles ('list-objfiles :loaded-only loaded-only) 
@@ -1244,8 +1265,8 @@
 
 (define-command search ('search (? string? name)) (search (undecorate name) (current-ftable)))
 (define-command search ('search (? regexp? name)) (search name (current-ftable)))
-(define-command search ('* (? string? name)) (search (undecorate name) (current-ftable)))
-(define-command search ('* (? regexp? name)) (search name (current-ftable)))
+(define-command search ('* (? string? name)) (search (undecorate name)))
+(define-command search ('* (? regexp? name)) (search name))
 
 (define-command dump ('dump) (rtable-dump (current-rtable)))
 
