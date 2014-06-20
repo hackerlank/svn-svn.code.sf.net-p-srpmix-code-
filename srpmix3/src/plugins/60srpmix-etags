@@ -50,7 +50,7 @@ function try_source
 try_source ${LIBSRPMIX}
 
 
-BLACKLIST='.*\.bib$\|unic-005\.tex$\|.*\.srpmix$'
+BLACKLIST='.*\.bib$\|unic-005\.tex$\|.*\.srpmix$\|.*\.adb$'
 
 function print_usage
 {
