@@ -34,6 +34,7 @@ rhel6u2+optional.es \
 rhel6u3+optional.es \
 \
 rhel7b1.es \
+rhel7u0.es \
 \
 ds7.es   \
 ds8u0.es \
